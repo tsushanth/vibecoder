@@ -13,6 +13,8 @@ interface ProjectState {
   isDirty: boolean;
   chatMessages: ChatMessage[];
   versions: ProjectVersion[];
+  activeVersionSha: string | null;
+  isReverting: boolean;
   isLoadingProject: boolean;
 
   setProject: (project: ProjectDetail) => void;
@@ -24,7 +26,10 @@ interface ProjectState {
   setPreviewUrl: (url: string | null) => void;
   setDirty: (dirty: boolean) => void;
   addChatMessage: (message: ChatMessage) => void;
+  setChatMessages: (messages: ChatMessage[]) => void;
   setVersions: (versions: ProjectVersion[]) => void;
+  setActiveVersion: (sha: string | null) => void;
+  setReverting: (reverting: boolean) => void;
   setLoading: (loading: boolean) => void;
   reset: () => void;
 }
@@ -40,6 +45,8 @@ const initialState = {
   isDirty: false,
   chatMessages: [] as ChatMessage[],
   versions: [] as ProjectVersion[],
+  activeVersionSha: null as string | null,
+  isReverting: false,
   isLoadingProject: false,
 };
 
@@ -91,7 +98,10 @@ export const useProjectStore = create<ProjectState>((set) => ({
       chatMessages: [...state.chatMessages, message],
     })),
 
+  setChatMessages: (messages) => set({ chatMessages: messages }),
   setVersions: (versions) => set({ versions }),
+  setActiveVersion: (sha) => set({ activeVersionSha: sha }),
+  setReverting: (reverting) => set({ isReverting: reverting }),
   setLoading: (loading) => set({ isLoadingProject: loading }),
   reset: () => set(initialState),
 }));

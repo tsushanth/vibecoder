@@ -23,9 +23,75 @@ import { PreviewPane } from '@/components/builder/PreviewPane';
 import { ChatPanel } from '@/components/builder/ChatPanel';
 import type {
   ProjectDetailResponse,
+  ProjectVersion,
   VersionsResponse,
-  DeploymentInfoResponse,
+  RevertResponse,
 } from '@/types/api';
+import type { ChatMessage } from '@/types/project';
+
+function buildChatFromVersions(
+  versions: ProjectVersion[],
+  initialPrompt: string | null
+): { messages: ChatMessage[]; latestSha: string | null } {
+  if (versions.length === 0) {
+    if (initialPrompt) {
+      return {
+        messages: [
+          {
+            id: 'initial-prompt',
+            role: 'user',
+            content: initialPrompt,
+            timestamp: Date.now(),
+          },
+        ],
+        latestSha: null,
+      };
+    }
+    return { messages: [], latestSha: null };
+  }
+
+  const sorted = [...versions].reverse(); // oldest first
+  const messages: ChatMessage[] = [];
+
+  sorted.forEach((version, index) => {
+    const versionNum = index + 1;
+    const isFirst = index === 0;
+    const ts = new Date(version.date).getTime();
+
+    // User message
+    if (isFirst && initialPrompt) {
+      messages.push({
+        id: `user-${version.sha}`,
+        role: 'user',
+        content: initialPrompt,
+        timestamp: ts,
+      });
+    } else {
+      const desc = version.message.replace(/^Tweak:\s*/i, '');
+      messages.push({
+        id: `user-${version.sha}`,
+        role: 'user',
+        content: desc,
+        timestamp: ts,
+      });
+    }
+
+    // Assistant version card
+    messages.push({
+      id: `version-${version.sha}`,
+      role: 'assistant',
+      content: isFirst ? 'Initial generation' : 'Changes applied',
+      timestamp: ts,
+      versionSha: version.sha,
+      versionNumber: versionNum,
+    });
+  });
+
+  return {
+    messages,
+    latestSha: sorted[sorted.length - 1]?.sha ?? null,
+  };
+}
 
 export default function ProjectBuilderPage() {
   const { id } = useParams<{ id: string }>();
@@ -35,7 +101,6 @@ export default function ProjectBuilderPage() {
   const genStore = useGenerationStore();
   const abortRef = useRef<AbortController | null>(null);
 
-  // Load project on mount
   useEffect(() => {
     if (!id || !user) return;
     loadProject();
@@ -62,13 +127,31 @@ export default function ProjectBuilderPage() {
         store.setPreviewUrl(url);
       }
 
-      // Load versions in background
-      api
-        .get<VersionsResponse>(
-          `/api/projects/${id}/versions?limit=20`
-        )
-        .then((v) => store.setVersions(v.versions))
-        .catch(() => {});
+      // Load versions and reconstruct chat
+      try {
+        const v = await api.get<VersionsResponse>(
+          `/api/projects/${id}/versions?limit=50`
+        );
+        store.setVersions(v.versions);
+        const { messages, latestSha } = buildChatFromVersions(
+          v.versions,
+          data.project.initialPrompt
+        );
+        store.setChatMessages(messages);
+        store.setActiveVersion(latestSha);
+      } catch {
+        // No versions — still show initial prompt in chat
+        if (data.project.initialPrompt) {
+          store.setChatMessages([
+            {
+              id: 'initial-prompt',
+              role: 'user',
+              content: data.project.initialPrompt,
+              timestamp: new Date(data.project.createdAt).getTime(),
+            },
+          ]);
+        }
+      }
     } catch (err) {
       console.error('Failed to load project:', err);
     } finally {
@@ -124,24 +207,35 @@ export default function ProjectBuilderPage() {
             store.setExtractedFiles(files, tree);
             store.setBundle(event.bundle);
 
-            // Revoke old URL before creating new one
             if (store.previewUrl) {
               URL.revokeObjectURL(store.previewUrl);
             }
             const url = createPreviewUrl(files);
             store.setPreviewUrl(url);
 
+            // Determine new version number
+            const currentVersionCount = useProjectStore.getState().chatMessages
+              .filter((m) => m.versionSha)
+              .length;
+            const newVersionNum = currentVersionCount + 1;
+
             store.addChatMessage({
-              id: `assistant-${Date.now()}`,
+              id: `version-${event.commitSha || Date.now()}`,
               role: 'assistant',
-              content: `Changes applied successfully (${event.generationTime || '?'}s)`,
+              content: `Changes applied${event.generationTime ? ` in ${event.generationTime}s` : ''}`,
               timestamp: Date.now(),
+              versionSha: event.commitSha,
+              versionNumber: newVersionNum,
             });
 
-            // Refresh versions
+            if (event.commitSha) {
+              store.setActiveVersion(event.commitSha);
+            }
+
+            // Refresh version list
             api
               .get<VersionsResponse>(
-                `/api/projects/${id}/versions?limit=20`
+                `/api/projects/${id}/versions?limit=50`
               )
               .then((v) => store.setVersions(v.versions))
               .catch(() => {});
@@ -170,6 +264,37 @@ export default function ProjectBuilderPage() {
       }
     },
     [user, id, store, genStore]
+  );
+
+  const handleLoadVersion = useCallback(
+    async (sha: string) => {
+      if (!user || !id) return;
+
+      store.setReverting(true);
+      try {
+        const result = await api.post<RevertResponse>(
+          `/api/projects/${id}/revert/${sha}`,
+          { userId: user.id }
+        );
+
+        const files = await extractBundle(result.bundle);
+        const tree = buildFileTree(files);
+        store.setExtractedFiles(files, tree);
+        store.setBundle(result.bundle);
+
+        if (store.previewUrl) {
+          URL.revokeObjectURL(store.previewUrl);
+        }
+        const url = createPreviewUrl(files);
+        store.setPreviewUrl(url);
+        store.setActiveVersion(sha);
+      } catch (err) {
+        console.error('Failed to load version:', err);
+      } finally {
+        store.setReverting(false);
+      }
+    },
+    [user, id, store]
   );
 
   const isOwner = store.project?.creatorId === user?.id;
@@ -213,6 +338,11 @@ export default function ProjectBuilderPage() {
           )}
         </div>
         <div className="flex items-center gap-2">
+          {store.activeVersionSha && (
+            <span className="text-[10px] text-subtle font-mono">
+              {store.activeVersionSha.slice(0, 7)}
+            </span>
+          )}
           {store.project.publishedUrl && (
             <a
               href={store.project.publishedUrl}
@@ -231,7 +361,6 @@ export default function ProjectBuilderPage() {
         <Group orientation="vertical">
           <Panel defaultSize={70} minSize={30}>
             <Group orientation="horizontal">
-              {/* File tree */}
               <Panel defaultSize={15} minSize={10} maxSize={25}>
                 <div className="h-full border-r border-border bg-card overflow-auto">
                   <FileTree />
@@ -240,14 +369,12 @@ export default function ProjectBuilderPage() {
 
               <Separator className="w-1 bg-border hover:bg-accent transition" />
 
-              {/* Code editor */}
               <Panel defaultSize={42} minSize={20}>
                 <CodeEditor />
               </Panel>
 
               <Separator className="w-1 bg-border hover:bg-accent transition" />
 
-              {/* Preview */}
               <Panel defaultSize={43} minSize={20}>
                 <PreviewPane />
               </Panel>
@@ -256,10 +383,10 @@ export default function ProjectBuilderPage() {
 
           <Separator className="h-1 bg-border hover:bg-accent transition" />
 
-          {/* Chat panel */}
           <Panel defaultSize={30} minSize={15} maxSize={50}>
             <ChatPanel
               onTweak={handleTweak}
+              onLoadVersion={handleLoadVersion}
               disabled={!isOwner}
             />
           </Panel>
