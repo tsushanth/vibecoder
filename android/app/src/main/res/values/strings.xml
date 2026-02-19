@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VibeBuild</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="tab_apps">Apps</string>
+    <string name="tab_create">Create</string>
+    <string name="tab_account">Account</string>
+    <string name="no_apps_yet">No apps yet</string>
+    <string name="create_first_app">Create your first app with AI</string>
+    <string name="start_generating">Start</string>
+    <string name="save_project">Save</string>
+    <string name="delete_project">Delete</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="upgrade_to_pro">Upgrade to Pro</string>
+    <string name="generation_limit_reached">Daily generation limit reached</string>
+</resources>

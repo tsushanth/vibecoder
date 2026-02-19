@@ -1,0 +1,610 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A001 /* VibeCoderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001 /* VibeCoderApp.swift */; };
+		A002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B002 /* ContentView.swift */; };
+		A003 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B003 /* AuthManager.swift */; };
+		A004 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B004 /* SignInView.swift */; };
+		A005 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B005 /* ProfileView.swift */; };
+		A006 /* BrowseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B006 /* BrowseView.swift */; };
+		A007 /* ProjectGenerationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B007 /* ProjectGenerationManager.swift */; };
+		A008 /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = B008 /* Project.swift */; };
+		A009 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = B009 /* User.swift */; };
+		A011 /* LivePreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B011 /* LivePreviewView.swift */; };
+		A012 /* ProjectListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B012 /* ProjectListView.swift */; };
+		A013 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B013 /* NetworkManager.swift */; };
+		A014 /* ZipExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B014 /* ZipExtractor.swift */; };
+		A015 /* SSEStreamReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B015 /* SSEStreamReader.swift */; };
+		A016 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = P001 /* FirebaseAuth */; };
+		A017 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = P002 /* FirebaseFirestore */; };
+		A018 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = P003 /* FirebaseStorage */; };
+		A019 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = P004 /* GoogleSignIn */; };
+		A020 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = P005 /* GoogleSignInSwift */; };
+		A021 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C002 /* GoogleService-Info.plist */; };
+		A022 /* CreateProjectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B016 /* CreateProjectView.swift */; };
+		A023 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B017 /* SubscriptionManager.swift */; };
+		A024 /* SubscriptionPlansView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B018 /* SubscriptionPlansView.swift */; };
+		A025 /* ReplitStyleCreateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B019 /* ReplitStyleCreateView.swift */; };
+		A026 /* ReplitStyleAppsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B020 /* ReplitStyleAppsView.swift */; };
+		A027 /* ReplitStyleAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B021 /* ReplitStyleAccountView.swift */; };
+		A028 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B022 /* Assets.xcassets */; };
+		A029 /* SpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B023 /* SpeechRecognizer.swift */; };
+		A030 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = P006 /* ZIPFoundation */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		88B736A52F43CBF3007E4B75 /* VibeCoder.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VibeCoder.entitlements; sourceTree = "<group>"; };
+		B001 /* VibeCoderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VibeCoderApp.swift; sourceTree = "<group>"; };
+		B002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B003 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
+		B004 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
+		B005 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		B006 /* BrowseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowseView.swift; sourceTree = "<group>"; };
+		B007 /* ProjectGenerationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectGenerationManager.swift; sourceTree = "<group>"; };
+		B008 /* Project.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Project.swift; sourceTree = "<group>"; };
+		B009 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		B011 /* LivePreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivePreviewView.swift; sourceTree = "<group>"; };
+		B012 /* ProjectListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectListView.swift; sourceTree = "<group>"; };
+		B013 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
+		B014 /* ZipExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZipExtractor.swift; sourceTree = "<group>"; };
+		B015 /* SSEStreamReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSEStreamReader.swift; sourceTree = "<group>"; };
+		B016 /* CreateProjectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateProjectView.swift; sourceTree = "<group>"; };
+		B017 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
+		B018 /* SubscriptionPlansView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionPlansView.swift; sourceTree = "<group>"; };
+		B019 /* ReplitStyleCreateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplitStyleCreateView.swift; sourceTree = "<group>"; };
+		B020 /* ReplitStyleAppsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplitStyleAppsView.swift; sourceTree = "<group>"; };
+		B021 /* ReplitStyleAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplitStyleAccountView.swift; sourceTree = "<group>"; };
+		B022 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B023 /* SpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognizer.swift; sourceTree = "<group>"; };
+		C001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C002 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		C003 /* VibeBuild.storekit */ = {isa = PBXFileReference; lastKnownFileType = com.apple.storekit.configuration; path = "VibeBuild.storekit"; sourceTree = "<group>"; };
+		D001 /* VibeCoder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VibeCoder.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A016 /* FirebaseAuth in Frameworks */,
+				A017 /* FirebaseFirestore in Frameworks */,
+				A018 /* FirebaseStorage in Frameworks */,
+				A019 /* GoogleSignIn in Frameworks */,
+				A020 /* GoogleSignInSwift in Frameworks */,
+				A030 /* ZIPFoundation in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F001 = {
+			isa = PBXGroup;
+			children = (
+				F002 /* VibeCoder */,
+				F003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F002 /* VibeCoder */ = {
+			isa = PBXGroup;
+			children = (
+				88B736A52F43CBF3007E4B75 /* VibeCoder.entitlements */,
+				C001 /* Info.plist */,
+				C002 /* GoogleService-Info.plist */,
+				C003 /* VibeBuild.storekit */,
+				F004 /* App */,
+				F005 /* Auth */,
+				F006 /* Browse */,
+				F007 /* Chat */,
+				F008 /* Create */,
+				F009 /* Editor */,
+				F010 /* Models */,
+				F011 /* Monetization */,
+				F012 /* Preview */,
+				F013 /* Projects */,
+				F014 /* Resources */,
+				F015 /* Shared */,
+			);
+			path = VibeCoder;
+			sourceTree = "<group>";
+		};
+		F003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D001 /* VibeCoder.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F004 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				B001 /* VibeCoderApp.swift */,
+				B002 /* ContentView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		F005 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				B003 /* AuthManager.swift */,
+				B004 /* SignInView.swift */,
+				B005 /* ProfileView.swift */,
+				B021 /* ReplitStyleAccountView.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		F006 /* Browse */ = {
+			isa = PBXGroup;
+			children = (
+				B006 /* BrowseView.swift */,
+			);
+			path = Browse;
+			sourceTree = "<group>";
+		};
+		F007 /* Chat */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Chat;
+			sourceTree = "<group>";
+		};
+		F008 /* Create */ = {
+			isa = PBXGroup;
+			children = (
+				B007 /* ProjectGenerationManager.swift */,
+				B016 /* CreateProjectView.swift */,
+				B019 /* ReplitStyleCreateView.swift */,
+			);
+			path = Create;
+			sourceTree = "<group>";
+		};
+		F009 /* Editor */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Editor;
+			sourceTree = "<group>";
+		};
+		F010 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				B008 /* Project.swift */,
+				B009 /* User.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		F011 /* Monetization */ = {
+			isa = PBXGroup;
+			children = (
+				B017 /* SubscriptionManager.swift */,
+				B018 /* SubscriptionPlansView.swift */,
+			);
+			path = Monetization;
+			sourceTree = "<group>";
+		};
+		F012 /* Preview */ = {
+			isa = PBXGroup;
+			children = (
+				B011 /* LivePreviewView.swift */,
+			);
+			path = Preview;
+			sourceTree = "<group>";
+		};
+		F013 /* Projects */ = {
+			isa = PBXGroup;
+			children = (
+				B012 /* ProjectListView.swift */,
+				B020 /* ReplitStyleAppsView.swift */,
+			);
+			path = Projects;
+			sourceTree = "<group>";
+		};
+		F014 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B022 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		F015 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				B013 /* NetworkManager.swift */,
+				B014 /* ZipExtractor.swift */,
+				B015 /* SSEStreamReader.swift */,
+				B023 /* SpeechRecognizer.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		G001 /* VibeCoder */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = H001 /* Build configuration list for PBXNativeTarget "VibeCoder" */;
+			buildPhases = (
+				I001 /* Sources */,
+				E001 /* Frameworks */,
+				J001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VibeCoder;
+			packageProductDependencies = (
+				P001 /* FirebaseAuth */,
+				P002 /* FirebaseFirestore */,
+				P003 /* FirebaseStorage */,
+				P004 /* GoogleSignIn */,
+				P005 /* GoogleSignInSwift */,
+				P006 /* ZIPFoundation */,
+			);
+			productName = VibeCoder;
+			productReference = D001 /* VibeCoder.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		K001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					G001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = H002 /* Build configuration list for PBXProject "VibeCoder" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = F001;
+			packageReferences = (
+				M001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				M002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				M003 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+			);
+			productRefGroup = F003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				G001 /* VibeCoder */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		J001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A021 /* GoogleService-Info.plist in Resources */,
+				A028 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		I001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A001 /* VibeCoderApp.swift in Sources */,
+				A002 /* ContentView.swift in Sources */,
+				A003 /* AuthManager.swift in Sources */,
+				A004 /* SignInView.swift in Sources */,
+				A005 /* ProfileView.swift in Sources */,
+				A006 /* BrowseView.swift in Sources */,
+				A007 /* ProjectGenerationManager.swift in Sources */,
+				A008 /* Project.swift in Sources */,
+				A009 /* User.swift in Sources */,
+				A011 /* LivePreviewView.swift in Sources */,
+				A012 /* ProjectListView.swift in Sources */,
+				A013 /* NetworkManager.swift in Sources */,
+				A014 /* ZipExtractor.swift in Sources */,
+				A015 /* SSEStreamReader.swift in Sources */,
+				A022 /* CreateProjectView.swift in Sources */,
+				A023 /* SubscriptionManager.swift in Sources */,
+				A024 /* SubscriptionPlansView.swift in Sources */,
+				A025 /* ReplitStyleCreateView.swift in Sources */,
+				A026 /* ReplitStyleAppsView.swift in Sources */,
+				A027 /* ReplitStyleAccountView.swift in Sources */,
+				A029 /* SpeechRecognizer.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		L001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		L002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		L003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = VibeCoder/VibeCoder.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 7RS696YC75;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = VibeCoder/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.vibercoder;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		L004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = VibeCoder/VibeCoder.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 7RS696YC75;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = VibeCoder/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.vibercoder;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		H001 /* Build configuration list for PBXNativeTarget "VibeCoder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				L003 /* Debug */,
+				L004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		H002 /* Build configuration list for PBXProject "VibeCoder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				L001 /* Debug */,
+				L002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		M001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 10.0.0;
+			};
+		};
+		M002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.0.0;
+			};
+		};
+		M003 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		P001 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = M001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		P002 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = M001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		P003 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = M001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+		P004 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = M002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		P005 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = M002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+		P006 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = M003 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = K001 /* Project object */;
+}

@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+web/.next/
+web/out/
+*.tsbuildinfo
+
+# iOS build artifacts
+ios/build/
+ios/DerivedData/
+ios/*.xcuserdata/
+ios/**/*.xcuserdata/
+
+# Android build artifacts
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+
+# Environment files
+.env
+.env.local
+.env*.local
+backend/.env
+web/.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Misc
+.claude/
