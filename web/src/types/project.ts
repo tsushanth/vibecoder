@@ -18,4 +18,6 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: number;
+  versionSha?: string;
+  versionNumber?: number;
 }
