@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   Panel,
@@ -21,6 +21,7 @@ import { FileTree } from '@/components/builder/FileTree';
 import { CodeEditor } from '@/components/builder/CodeEditor';
 import { PreviewPane } from '@/components/builder/PreviewPane';
 import { ChatPanel } from '@/components/builder/ChatPanel';
+import { PublishDialog } from '@/components/builder/PublishDialog';
 import type {
   ProjectDetailResponse,
   ProjectVersion,
@@ -297,6 +298,8 @@ export default function ProjectBuilderPage() {
     [user, id, store]
   );
 
+  const [showPublish, setShowPublish] = useState(false);
+
   const isOwner = store.project?.creatorId === user?.id;
 
   if (store.isLoadingProject) {
@@ -353,6 +356,17 @@ export default function ProjectBuilderPage() {
               View Live
             </a>
           )}
+          {isOwner && (
+            <button
+              onClick={() => setShowPublish(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-accent hover:bg-accent-hover text-white rounded-lg transition"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              {store.project.publishedUrl ? 'Manage' : 'Publish'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -392,6 +406,19 @@ export default function ProjectBuilderPage() {
           </Panel>
         </Group>
       </div>
+
+      {showPublish && user && (
+        <PublishDialog
+          projectId={id}
+          userId={user.id}
+          onClose={() => setShowPublish(false)}
+          onPublished={(url) => {
+            if (store.project) {
+              store.setProject({ ...store.project, publishedUrl: url || null });
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
