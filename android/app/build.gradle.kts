@@ -4,6 +4,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.dagger.hilt.android")
     id("org.jetbrains.kotlin.plugin.serialization")
+    id("com.google.gms.google-services")
     kotlin("kapt")
 }
 
@@ -129,6 +130,10 @@ dependencies {
 
     // WebView
     implementation("androidx.webkit:webkit:1.12.1")
+
+    // Firebase Analytics
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-analytics")
 }
 
 kapt {
