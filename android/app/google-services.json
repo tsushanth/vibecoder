@@ -1,0 +1,34 @@
+{
+  "project_info": {
+    "project_number": "917362189743",
+    "project_id": "vibebuild-app",
+    "storage_bucket": "vibebuild-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:917362189743:android:placeholder",
+        "android_client_info": {
+          "package_name": "com.kreativekoala.vibecoder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "917362189743-2tgjn2l4m09ht423l9ogsm74aiotbjgv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "PLACEHOLDER_API_KEY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

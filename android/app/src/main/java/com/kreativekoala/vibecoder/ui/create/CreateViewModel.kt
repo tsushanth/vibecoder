@@ -10,6 +10,7 @@ import com.kreativekoala.vibecoder.data.model.Suggestion
 import com.kreativekoala.vibecoder.data.repository.AuthRepository
 import com.kreativekoala.vibecoder.data.repository.ProjectRepository
 import com.kreativekoala.vibecoder.data.repository.SubscriptionRepository
+import com.kreativekoala.vibecoder.util.AnalyticsHelper
 import com.kreativekoala.vibecoder.util.NotificationHelper
 import com.kreativekoala.vibecoder.util.ZipExtractor
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,7 +46,8 @@ class CreateViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
     private val projectRepository: ProjectRepository,
     private val authRepository: AuthRepository,
-    private val subscriptionRepository: SubscriptionRepository
+    private val subscriptionRepository: SubscriptionRepository,
+    private val analyticsHelper: AnalyticsHelper
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CreateUiState())
@@ -128,6 +130,8 @@ class CreateViewModel @Inject constructor(
                 )
             }
 
+            analyticsHelper.logGenerationStart()
+
             generationJob = viewModelScope.launch {
                 try {
                     projectRepository.generate(
@@ -151,6 +155,7 @@ class CreateViewModel @Inject constructor(
                                 handleGenerationResult(event)
                             }
                             is SseEvent.Error -> {
+                                analyticsHelper.logGenerationError(event.error)
                                 _uiState.update {
                                     it.copy(
                                         isGenerating = false,
@@ -161,6 +166,7 @@ class CreateViewModel @Inject constructor(
                         }
                     }
                 } catch (e: Exception) {
+                    analyticsHelper.logGenerationError(e.message)
                     _uiState.update {
                         it.copy(
                             isGenerating = false,
@@ -189,6 +195,8 @@ class CreateViewModel @Inject constructor(
                     showPreview = true
                 )
             }
+
+            analyticsHelper.logGenerationComplete()
 
             // Notify user that generation is complete
             NotificationHelper.showGenerationComplete(appContext)
@@ -250,6 +258,7 @@ class CreateViewModel @Inject constructor(
                         savedProjectId = projectId
                     )
                 }
+                analyticsHelper.logProjectSave(projectId)
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
