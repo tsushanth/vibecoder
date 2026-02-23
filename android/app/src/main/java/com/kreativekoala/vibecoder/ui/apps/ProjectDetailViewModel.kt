@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kreativekoala.vibecoder.data.model.Project
 import com.kreativekoala.vibecoder.data.repository.ProjectRepository
+import com.kreativekoala.vibecoder.util.AnalyticsHelper
 import com.kreativekoala.vibecoder.util.ZipExtractor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -31,7 +32,8 @@ data class ProjectDetailUiState(
 @HiltViewModel
 class ProjectDetailViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
-    private val projectRepository: ProjectRepository
+    private val projectRepository: ProjectRepository,
+    private val analyticsHelper: AnalyticsHelper
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProjectDetailUiState())
@@ -45,6 +47,7 @@ class ProjectDetailViewModel @Inject constructor(
                 val project = projectRepository.getProject(projectId)
                 Log.d("ProjectDetail", "Loaded project: ${project?.title}, bundle present: ${project?.bundle != null}, bundle length: ${project?.bundle?.length ?: 0}")
                 _uiState.update { it.copy(project = project, isLoading = false) }
+                analyticsHelper.logProjectView(projectId)
             } catch (e: Exception) {
                 Log.e("ProjectDetail", "Failed to load project: ${e.message}", e)
                 _uiState.update {

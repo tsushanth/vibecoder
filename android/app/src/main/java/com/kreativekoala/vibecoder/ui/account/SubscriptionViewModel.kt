@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.android.billingclient.api.*
 import com.kreativekoala.vibecoder.data.repository.AuthRepository
 import com.kreativekoala.vibecoder.data.repository.SubscriptionRepository
+import com.kreativekoala.vibecoder.util.AnalyticsHelper
 import com.kreativekoala.vibecoder.util.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +29,8 @@ data class SubscriptionUiState(
 class SubscriptionViewModel @Inject constructor(
     private val billingClient: BillingClient,
     private val authRepository: AuthRepository,
-    private val subscriptionRepository: SubscriptionRepository
+    private val subscriptionRepository: SubscriptionRepository,
+    private val analyticsHelper: AnalyticsHelper
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SubscriptionUiState())
@@ -37,6 +39,7 @@ class SubscriptionViewModel @Inject constructor(
     init {
         connectBilling()
         loadCurrentTier()
+        analyticsHelper.logViewSubscriptionPlans()
     }
 
     private fun loadCurrentTier() {
@@ -45,6 +48,7 @@ class SubscriptionViewModel @Inject constructor(
             try {
                 val status = subscriptionRepository.getSubscriptionStatus(userId)
                 _uiState.update { it.copy(currentTier = status.tier) }
+                analyticsHelper.setSubscriptionTier(status.tier)
             } catch (_: Exception) {}
         }
     }
@@ -102,6 +106,7 @@ class SubscriptionViewModel @Inject constructor(
             .build()
 
         _uiState.update { it.copy(isPurchasing = true) }
+        analyticsHelper.logPurchaseStart(productDetails.productId)
         billingClient.launchBillingFlow(activity, billingFlowParams)
     }
 
@@ -133,6 +138,11 @@ class SubscriptionViewModel @Inject constructor(
                                 currentTier = "pro"
                             )
                         }
+                        analyticsHelper.logPurchaseComplete(
+                            productId = purchase.products.firstOrNull() ?: "unknown",
+                            tier = "pro"
+                        )
+                        analyticsHelper.setSubscriptionTier("pro")
                     } catch (e: Exception) {
                         _uiState.update {
                             it.copy(

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.kreativekoala.vibecoder.data.local.UserPreferences
 import com.kreativekoala.vibecoder.data.model.User
 import com.kreativekoala.vibecoder.data.repository.AuthRepository
+import com.kreativekoala.vibecoder.util.AnalyticsHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +17,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val analyticsHelper: AnalyticsHelper
 ) : ViewModel() {
 
     private val _isAuthenticated = MutableStateFlow(authRepository.currentUser != null)
@@ -40,6 +42,7 @@ class AuthViewModel @Inject constructor(
                         val user = authRepository.fetchUserProfile(authUser.uid)
                         _currentUser.value = user
                         userPreferences.saveUser(user.userId, user.displayName)
+                        analyticsHelper.setUserId(user.userId)
                     } catch (_: Exception) {
                         // Profile fetch may fail on first launch before registration
                     }
@@ -56,6 +59,8 @@ class AuthViewModel @Inject constructor(
                 val user = authRepository.signInWithGoogle(context)
                 _currentUser.value = user
                 userPreferences.saveUser(user.userId, user.displayName)
+                analyticsHelper.setUserId(user.userId)
+                analyticsHelper.logLogin("google")
             } catch (e: Exception) {
                 _errorMessage.value = e.message ?: "Sign in failed"
             } finally {
@@ -72,6 +77,8 @@ class AuthViewModel @Inject constructor(
                 val user = authRepository.signInWithEmail(email, password)
                 _currentUser.value = user
                 userPreferences.saveUser(user.userId, user.displayName)
+                analyticsHelper.setUserId(user.userId)
+                analyticsHelper.logLogin("email")
             } catch (e: Exception) {
                 _errorMessage.value = e.message ?: "Sign in failed"
             } finally {
@@ -88,6 +95,8 @@ class AuthViewModel @Inject constructor(
                 val user = authRepository.signUpWithEmail(email, password, displayName)
                 _currentUser.value = user
                 userPreferences.saveUser(user.userId, user.displayName)
+                analyticsHelper.setUserId(user.userId)
+                analyticsHelper.logSignUp("email")
             } catch (e: Exception) {
                 _errorMessage.value = e.message ?: "Sign up failed"
             } finally {
@@ -101,6 +110,7 @@ class AuthViewModel @Inject constructor(
             authRepository.signOut()
             _currentUser.value = null
             userPreferences.clearUser()
+            analyticsHelper.setUserId(null)
         }
     }
 
