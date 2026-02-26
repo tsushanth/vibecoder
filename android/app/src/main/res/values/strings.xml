@@ -13,4 +13,8 @@
     <string name="sign_out">Sign Out</string>
     <string name="upgrade_to_pro">Upgrade to Pro</string>
     <string name="generation_limit_reached">Daily generation limit reached</string>
+
+    <!-- Facebook SDK Configuration (Replace with your actual values from Meta Developer Console) -->
+    <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
+    <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
 </resources>

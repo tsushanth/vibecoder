@@ -129,6 +129,9 @@ dependencies {
 
     // WebView
     implementation("androidx.webkit:webkit:1.12.1")
+
+    // Facebook SDK (for Meta Ads attribution and CAPI)
+    implementation("com.facebook.android:facebook-android-sdk:17.0.2")
 }
 
 kapt {
