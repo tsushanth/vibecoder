@@ -104,9 +104,15 @@ fun SubscriptionPlansScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Pro Monthly
+            val monthlyPackage = uiState.packages.firstOrNull {
+                it.identifier.contains("monthly", ignoreCase = true) ||
+                    it.product.id.contains("monthly", ignoreCase = true)
+            }
+            val monthlyPrice = monthlyPackage?.product?.price?.formatted ?: "$9.99"
+
             PlanCard(
                 name = "Pro Monthly",
-                price = "$9.99",
+                price = monthlyPrice,
                 period = "/month",
                 features = listOf(
                     "Unlimited AI generations",
@@ -117,12 +123,10 @@ fun SubscriptionPlansScreen(
                 ),
                 isCurrentPlan = uiState.currentTier == "pro",
                 isPro = true,
+                isLoading = uiState.isPurchasing,
                 onSubscribe = {
-                    val product = uiState.products.firstOrNull {
-                        it.productId.contains("monthly")
-                    }
-                    if (product != null) {
-                        viewModel.purchase(product, context as Activity)
+                    monthlyPackage?.let { pkg ->
+                        viewModel.purchase(pkg, context as Activity)
                     }
                 }
             )
@@ -130,9 +134,16 @@ fun SubscriptionPlansScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Pro Yearly
+            val yearlyPackage = uiState.packages.firstOrNull {
+                it.identifier.contains("yearly", ignoreCase = true) ||
+                    it.identifier.contains("annual", ignoreCase = true) ||
+                    it.product.id.contains("yearly", ignoreCase = true)
+            }
+            val yearlyPrice = yearlyPackage?.product?.price?.formatted ?: "$99.99"
+
             PlanCard(
                 name = "Pro Yearly",
-                price = "$99.99",
+                price = yearlyPrice,
                 period = "/year",
                 features = listOf(
                     "Everything in Pro Monthly",
@@ -142,15 +153,23 @@ fun SubscriptionPlansScreen(
                 isCurrentPlan = false,
                 isPro = true,
                 badge = "Best Value",
+                isLoading = uiState.isPurchasing,
                 onSubscribe = {
-                    val product = uiState.products.firstOrNull {
-                        it.productId.contains("yearly")
-                    }
-                    if (product != null) {
-                        viewModel.purchase(product, context as Activity)
+                    yearlyPackage?.let { pkg ->
+                        viewModel.purchase(pkg, context as Activity)
                     }
                 }
             )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Restore purchases
+            TextButton(onClick = { viewModel.restorePurchases() }) {
+                Text(
+                    text = "Restore Purchases",
+                    color = TextSecondary
+                )
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
         }
@@ -166,6 +185,7 @@ private fun PlanCard(
     isCurrentPlan: Boolean,
     isPro: Boolean,
     badge: String? = null,
+    isLoading: Boolean = false,
     onSubscribe: () -> Unit
 ) {
     Card(
@@ -259,9 +279,18 @@ private fun PlanCard(
                     onClick = onSubscribe,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = VibePurple)
+                    colors = ButtonDefaults.buttonColors(containerColor = VibePurple),
+                    enabled = !isLoading
                 ) {
-                    Text("Subscribe", fontWeight = FontWeight.SemiBold)
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("Subscribe", fontWeight = FontWeight.SemiBold)
+                    }
                 }
             }
         }

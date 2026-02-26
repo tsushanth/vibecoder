@@ -56,6 +56,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     packaging {
@@ -113,6 +114,9 @@ dependencies {
 
     // Google Play Billing
     implementation("com.android.billingclient:billing-ktx:7.1.1")
+
+    // RevenueCat (subscription tracking & LTV attribution)
+    implementation("com.revenuecat.purchases:purchases:8.10.7")
 
     // Image loading
     implementation("io.coil-kt:coil-compose:2.7.0")
