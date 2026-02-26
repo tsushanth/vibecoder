@@ -16,6 +16,9 @@ object Constants {
     const val PRODUCT_PRO_YEARLY = "com.kreativekoala.vibebuild.pro.yearly"
     const val PRODUCT_TEAM_MONTHLY = "com.kreativekoala.vibebuild.team.monthly"
 
+    // RevenueCat
+    const val REVENUECAT_API_KEY = "YOUR_REVENUECAT_ANDROID_API_KEY" // TODO: Replace with actual RevenueCat Android API key
+
     // Free tier limits
     const val FREE_DAILY_GENERATION_LIMIT = 3
     const val FREE_TWEAKS_PER_PROJECT = 3

@@ -3,6 +3,7 @@ package com.kreativekoala.vibecoder.di
 import android.content.Context
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.PurchasesUpdatedListener
+import com.revenuecat.purchases.Purchases
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -32,5 +33,10 @@ object BillingModule {
             .setListener(listener)
             .enablePendingPurchases()
             .build()
+    }
+
+    @Provides
+    fun provideRevenueCatPurchases(): Purchases {
+        return Purchases.sharedInstance
     }
 }

@@ -3,10 +3,17 @@ package com.kreativekoala.vibecoder.ui.account
 import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.android.billingclient.api.*
 import com.kreativekoala.vibecoder.data.repository.AuthRepository
 import com.kreativekoala.vibecoder.data.repository.SubscriptionRepository
-import com.kreativekoala.vibecoder.util.Constants
+import com.revenuecat.purchases.CustomerInfo
+import com.revenuecat.purchases.Package
+import com.revenuecat.purchases.PurchaseParams
+import com.revenuecat.purchases.Purchases
+import com.revenuecat.purchases.PurchasesError
+import com.revenuecat.purchases.getOfferingsWith
+import com.revenuecat.purchases.interfaces.LogInCallback
+import com.revenuecat.purchases.interfaces.PurchaseCallback
+import com.revenuecat.purchases.models.StoreTransaction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +23,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class SubscriptionUiState(
-    val products: List<ProductDetails> = emptyList(),
+    val packages: List<Package> = emptyList(),
     val currentTier: String = "free",
     val isPurchasing: Boolean = false,
     val isLoading: Boolean = false,
@@ -26,7 +33,7 @@ data class SubscriptionUiState(
 
 @HiltViewModel
 class SubscriptionViewModel @Inject constructor(
-    private val billingClient: BillingClient,
+    private val purchases: Purchases,
     private val authRepository: AuthRepository,
     private val subscriptionRepository: SubscriptionRepository
 ) : ViewModel() {
@@ -35,8 +42,22 @@ class SubscriptionViewModel @Inject constructor(
     val uiState: StateFlow<SubscriptionUiState> = _uiState.asStateFlow()
 
     init {
-        connectBilling()
+        loginToRevenueCat()
+        loadOfferings()
         loadCurrentTier()
+    }
+
+    private fun loginToRevenueCat() {
+        val userId = authRepository.currentUser?.uid ?: return
+        purchases.logIn(userId, object : LogInCallback {
+            override fun onReceived(customerInfo: CustomerInfo, created: Boolean) {
+                updateTierFromCustomerInfo(customerInfo)
+            }
+
+            override fun onError(error: PurchasesError) {
+                // Silently fail - RevenueCat will use anonymous ID
+            }
+        })
     }
 
     private fun loadCurrentTier() {
@@ -49,100 +70,107 @@ class SubscriptionViewModel @Inject constructor(
         }
     }
 
-    private fun connectBilling() {
-        billingClient.startConnection(object : BillingClientStateListener {
-            override fun onBillingSetupFinished(billingResult: BillingResult) {
-                if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                    queryProducts()
+    private fun loadOfferings() {
+        _uiState.update { it.copy(isLoading = true) }
+        purchases.getOfferingsWith(
+            onError = { error ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Failed to load offerings: ${error.message}"
+                    )
+                }
+            },
+            onSuccess = { offerings ->
+                val currentOffering = offerings.current
+                val packages = currentOffering?.availablePackages ?: emptyList()
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        packages = packages
+                    )
+                }
+            }
+        )
+    }
+
+    fun purchase(pkg: Package, activity: Activity) {
+        _uiState.update { it.copy(isPurchasing = true, errorMessage = null) }
+
+        val purchaseParams = PurchaseParams.Builder(activity, pkg).build()
+        purchases.purchase(purchaseParams, object : PurchaseCallback {
+            override fun onCompleted(storeTransaction: StoreTransaction, customerInfo: CustomerInfo) {
+                val userId = authRepository.currentUser?.uid
+                viewModelScope.launch {
+                    // Notify backend about the purchase for server-side verification
+                    if (userId != null) {
+                        try {
+                            subscriptionRepository.verifyReceipt(
+                                userId = userId,
+                                purchaseToken = storeTransaction.purchaseToken
+                            )
+                        } catch (_: Exception) {
+                            // RevenueCat handles the purchase, backend sync can retry
+                        }
+                    }
+
+                    updateTierFromCustomerInfo(customerInfo)
+                    _uiState.update {
+                        it.copy(
+                            isPurchasing = false,
+                            purchaseSuccess = true
+                        )
+                    }
                 }
             }
 
-            override fun onBillingServiceDisconnected() {
-                // Retry connection
+            override fun onError(error: PurchasesError, userCancelled: Boolean) {
+                _uiState.update {
+                    it.copy(
+                        isPurchasing = false,
+                        errorMessage = if (userCancelled) null else "Purchase failed: ${error.message}"
+                    )
+                }
             }
         })
     }
 
-    private fun queryProducts() {
-        val productList = listOf(
-            QueryProductDetailsParams.Product.newBuilder()
-                .setProductId(Constants.PRODUCT_PRO_MONTHLY)
-                .setProductType(BillingClient.ProductType.SUBS)
-                .build(),
-            QueryProductDetailsParams.Product.newBuilder()
-                .setProductId(Constants.PRODUCT_PRO_YEARLY)
-                .setProductType(BillingClient.ProductType.SUBS)
-                .build()
-        )
-
-        val params = QueryProductDetailsParams.newBuilder()
-            .setProductList(productList)
-            .build()
-
-        billingClient.queryProductDetailsAsync(params) { billingResult, productDetailsList ->
-            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                _uiState.update { it.copy(products = productDetailsList) }
-            }
+    private fun updateTierFromCustomerInfo(customerInfo: CustomerInfo) {
+        val tier = when {
+            customerInfo.entitlements["pro"]?.isActive == true -> "pro"
+            customerInfo.entitlements["team"]?.isActive == true -> "team"
+            customerInfo.entitlements["enterprise"]?.isActive == true -> "enterprise"
+            else -> "free"
         }
+        _uiState.update { it.copy(currentTier = tier) }
     }
 
-    fun purchase(productDetails: ProductDetails, activity: Activity) {
-        val offerToken = productDetails.subscriptionOfferDetails
-            ?.firstOrNull()?.offerToken ?: return
+    fun restorePurchases() {
+        _uiState.update { it.copy(isLoading = true) }
+        purchases.restorePurchases(
+            callback = object : com.revenuecat.purchases.interfaces.ReceiveCustomerInfoCallback {
+                override fun onReceived(customerInfo: CustomerInfo) {
+                    updateTierFromCustomerInfo(customerInfo)
+                    _uiState.update { it.copy(isLoading = false) }
+                }
 
-        val billingFlowParams = BillingFlowParams.newBuilder()
-            .setProductDetailsParamsList(
-                listOf(
-                    BillingFlowParams.ProductDetailsParams.newBuilder()
-                        .setProductDetails(productDetails)
-                        .setOfferToken(offerToken)
-                        .build()
-                )
-            )
-            .build()
-
-        _uiState.update { it.copy(isPurchasing = true) }
-        billingClient.launchBillingFlow(activity, billingFlowParams)
-    }
-
-    fun handlePurchaseResult(purchases: List<Purchase>?) {
-        val userId = authRepository.currentUser?.uid ?: return
-
-        purchases?.forEach { purchase ->
-            if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
-                viewModelScope.launch {
-                    try {
-                        // Verify with backend
-                        subscriptionRepository.verifyReceipt(
-                            userId = userId,
-                            purchaseToken = purchase.purchaseToken
+                override fun onError(error: PurchasesError) {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Restore failed: ${error.message}"
                         )
-
-                        // Acknowledge purchase
-                        if (!purchase.isAcknowledged) {
-                            val ackParams = AcknowledgePurchaseParams.newBuilder()
-                                .setPurchaseToken(purchase.purchaseToken)
-                                .build()
-                            billingClient.acknowledgePurchase(ackParams) { }
-                        }
-
-                        _uiState.update {
-                            it.copy(
-                                isPurchasing = false,
-                                purchaseSuccess = true,
-                                currentTier = "pro"
-                            )
-                        }
-                    } catch (e: Exception) {
-                        _uiState.update {
-                            it.copy(
-                                isPurchasing = false,
-                                errorMessage = "Verification failed: ${e.message}"
-                            )
-                        }
                     }
                 }
             }
-        }
+        )
+    }
+
+    fun clearError() {
+        _uiState.update { it.copy(errorMessage = null) }
+    }
+
+    fun clearPurchaseSuccess() {
+        _uiState.update { it.copy(purchaseSuccess = false) }
     }
 }
