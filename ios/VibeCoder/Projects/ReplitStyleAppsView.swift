@@ -20,11 +20,11 @@ struct ReplitStyleAppsView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 0) {
-                    // All Apps header
+                    // All Projects header
                     HStack {
                         Image(systemName: "folder")
                             .foregroundColor(.white.opacity(0.7))
-                        Text("All Apps")
+                        Text("My Projects")
                             .font(.headline)
                             .foregroundColor(.white)
                         Spacer()
@@ -79,7 +79,7 @@ struct ReplitStyleAppsView: View {
                 }
             }
             .background(Color.black.ignoresSafeArea())
-            .navigationTitle("Apps")
+            .navigationTitle("Projects")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -221,16 +221,16 @@ struct ReplitStyleAppsView: View {
         VStack(spacing: 20) {
             Spacer()
 
-            Image(systemName: "app.badge")
+            Image(systemName: "chevron.left.forwardslash.chevron.right")
                 .font(.system(size: 60))
                 .foregroundColor(.white.opacity(0.3))
 
-            Text("No apps yet")
+            Text("No projects yet")
                 .font(.title2)
                 .fontWeight(.semibold)
                 .foregroundColor(.white)
 
-            Text("Create your first app to see it here")
+            Text("Build your first web project to see it here")
                 .font(.subheadline)
                 .foregroundColor(.white.opacity(0.6))
 

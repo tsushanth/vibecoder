@@ -9,20 +9,20 @@ struct ContentView: View {
         Group {
             if authManager.isAuthenticated {
                 TabView(selection: $selectedTab) {
-                    // Apps tab (Projects)
+                    // Projects tab
                     ReplitStyleAppsView()
                         .tabItem {
-                            Label("Apps", systemImage: "folder")
+                            Label("Projects", systemImage: "folder")
                         }
                         .tag(0)
                         .onChange(of: selectedTab) { newValue in
                             generationManager.isOnCreateTab = (newValue == 1)
                         }
 
-                    // Create tab (centered, middle position like Replit)
+                    // Build tab (centered, middle position like Replit)
                     ReplitStyleCreateView()
                         .tabItem {
-                            Label("Create", systemImage: "plus")
+                            Label("Build", systemImage: "hammer")
                         }
                         .tag(1)
 

@@ -1,12 +1,24 @@
 import SwiftUI
 import WebKit
 
+enum PreviewTab: String, CaseIterable {
+    case preview = "Preview"
+    case code = "Source Code"
+
+    var icon: String {
+        switch self {
+        case .preview: return "eye"
+        case .code: return "chevron.left.forwardslash.chevron.right"
+        }
+    }
+}
+
 struct LivePreviewView: View {
     let bundleDir: URL
-    var bundleBase64: String? = nil   // use original bundle if available
+    var bundleBase64: String? = nil
     var projectTitle: String = "My Project"
     var initialPrompt: String = ""
-    var isExistingProject: Bool = false  // true when opened from Apps tab (no save button)
+    var isExistingProject: Bool = false
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var generationManager: ProjectGenerationManager
     @EnvironmentObject var authManager: AuthManager
@@ -14,13 +26,23 @@ struct LivePreviewView: View {
     @State private var showSaveSuccess = false
     @State private var isSaving = false
     @State private var saveError: String?
+    @State private var selectedTab: PreviewTab = .preview
 
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                WebViewRepresentable(bundleDir: bundleDir, reloadTrigger: reloadTrigger)
+                // Preview / Source Code tab switcher
+                tabSwitcher
+
+                // Content
+                switch selectedTab {
+                case .preview:
+                    WebViewRepresentable(bundleDir: bundleDir, reloadTrigger: reloadTrigger)
+                case .code:
+                    SourceCodeView(bundleDir: bundleDir)
+                }
             }
-            .navigationTitle("Preview")
+            .navigationTitle(selectedTab == .preview ? "Preview" : "Source Code")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -31,10 +53,12 @@ struct LivePreviewView: View {
 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 12) {
-                        Button(action: {
-                            reloadTrigger.toggle()
-                        }) {
-                            Image(systemName: "arrow.clockwise")
+                        if selectedTab == .preview {
+                            Button(action: {
+                                reloadTrigger.toggle()
+                            }) {
+                                Image(systemName: "arrow.clockwise")
+                            }
                         }
 
                         if !isExistingProject {
@@ -65,13 +89,55 @@ struct LivePreviewView: View {
         }
     }
 
+    // MARK: - Tab Switcher
+
+    private var tabSwitcher: some View {
+        HStack(spacing: 0) {
+            ForEach(PreviewTab.allCases, id: \.self) { tab in
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        selectedTab = tab
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: tab.icon)
+                            .font(.caption2)
+                        Text(tab.rawValue)
+                            .font(.subheadline.weight(.medium))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(
+                        selectedTab == tab
+                            ? Color.blue.opacity(0.2)
+                            : Color.clear
+                    )
+                    .foregroundColor(selectedTab == tab ? .blue : .secondary)
+                }
+            }
+        }
+        .background(Color.black.opacity(0.3))
+        .overlay(alignment: .bottom) {
+            // Bottom indicator line
+            GeometryReader { geo in
+                Rectangle()
+                    .fill(Color.blue)
+                    .frame(width: geo.size.width / 2, height: 2)
+                    .offset(x: selectedTab == .preview ? 0 : geo.size.width / 2)
+                    .animation(.easeInOut(duration: 0.2), value: selectedTab)
+            }
+            .frame(height: 2)
+        }
+    }
+
+    // MARK: - Save
+
     private func saveProject() {
         guard !isSaving else { return }
         isSaving = true
 
         Task {
             do {
-                // Use original bundle base64 if available; fall back to re-zipping the directory
                 let base64Bundle: String
                 if let original = bundleBase64 {
                     base64Bundle = original
@@ -83,7 +149,6 @@ struct LivePreviewView: View {
                     NSLog("[Save] Re-zip complete (%d chars)", base64Bundle.count)
                 }
 
-                // Derive a short title from the first sentence/words of the prompt
                 let shortTitle: String = {
                     let words = initialPrompt.components(separatedBy: .whitespaces).prefix(6)
                     let candidate = words.joined(separator: " ")
@@ -94,7 +159,6 @@ struct LivePreviewView: View {
 
                 NSLog("[Save] Saving project: title='%@' creatorId=%@ bundleSize=%d", title, creatorId, base64Bundle.count)
 
-                // Save to backend (120s timeout for large bundles)
                 _ = try await NetworkManager.shared.saveProject(
                     title: title,
                     description: initialPrompt,
@@ -121,6 +185,8 @@ struct LivePreviewView: View {
     }
 }
 
+// MARK: - WebView
+
 struct WebViewRepresentable: UIViewRepresentable {
     let bundleDir: URL
     let reloadTrigger: Bool
@@ -133,8 +199,6 @@ struct WebViewRepresentable: UIViewRepresentable {
         let config = WKWebViewConfiguration()
         let controller = WKUserContentController()
         config.userContentController = controller
-
-        // Allow file access for bundle-based web apps
         config.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
 
         let webView = WKWebView(frame: .zero, configuration: config)
@@ -149,7 +213,6 @@ struct WebViewRepresentable: UIViewRepresentable {
     }
 
     func updateUIView(_ webView: WKWebView, context: Context) {
-        // Reload when reloadTrigger changes
         if context.coordinator.lastReloadTrigger != reloadTrigger {
             context.coordinator.lastReloadTrigger = reloadTrigger
             loadContent(in: webView)
@@ -168,13 +231,11 @@ struct WebViewRepresentable: UIViewRepresentable {
                      decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
             let scheme = navigationAction.request.url?.scheme
 
-            // Allow file:// URLs and navigation within the web app
             if navigationAction.navigationType == .other ||
                navigationAction.navigationType == .reload ||
                scheme == "about" || scheme == "file" {
                 decisionHandler(.allow)
             } else if scheme == "http" || scheme == "https" {
-                // Allow external links (e.g., API calls, CDN resources)
                 decisionHandler(.allow)
             } else {
                 decisionHandler(.cancel)

@@ -254,7 +254,7 @@ struct CustomDomainView: View {
                             .foregroundColor(.white.opacity(0.5))
                         Text(cnameTarget)
                             .font(.caption)
-                            .fontDesign(.monospaced)
+                            .font(.system(.caption, design: .monospaced))
                             .foregroundColor(.blue)
                     }
                     Spacer()
@@ -287,7 +287,7 @@ struct CustomDomainView: View {
                             .foregroundColor(.white.opacity(0.5))
                         Text(token)
                             .font(.caption)
-                            .fontDesign(.monospaced)
+                            .font(.system(.caption, design: .monospaced))
                             .foregroundColor(.blue)
                     }
                     Spacer()
