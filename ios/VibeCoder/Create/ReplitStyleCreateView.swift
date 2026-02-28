@@ -64,7 +64,7 @@ struct ReplitStyleCreateView: View {
                         .font(.title2)
                         .foregroundColor(.white.opacity(0.8))
 
-                    Text("what do you want to make?")
+                    Text("what do you want to build & learn?")
                         .font(.title2)
                         .foregroundColor(.white.opacity(0.8))
                 }
@@ -84,7 +84,7 @@ struct ReplitStyleCreateView: View {
                         .frame(height: 200)
 
                     if prompt.isEmpty {
-                        Text("Build a personal portfolio...")
+                        Text("Describe a web project to build & explore the code...")
                             .foregroundColor(.white.opacity(0.3))
                             .font(.system(size: 17))
                             .padding(16)
@@ -159,7 +159,7 @@ struct ReplitStyleCreateView: View {
 
                 // Bottom info
                 VStack(spacing: 12) {
-                    Text("Start creating for free")
+                    Text("Start learning to code for free")
                         .font(.subheadline)
                         .foregroundColor(.white.opacity(0.5))
 

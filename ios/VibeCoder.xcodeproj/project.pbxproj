@@ -36,6 +36,9 @@
 		A028 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B022 /* Assets.xcassets */; };
 		A029 /* SpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B023 /* SpeechRecognizer.swift */; };
 		A030 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = P006 /* ZIPFoundation */; };
+		A031 /* SourceCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B024 /* SourceCodeView.swift */; };
+		A032 /* CustomDomainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B025 /* CustomDomainView.swift */; };
+		A033 /* CoinManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B026 /* CoinManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -62,6 +65,9 @@
 		B021 /* ReplitStyleAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplitStyleAccountView.swift; sourceTree = "<group>"; };
 		B022 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B023 /* SpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognizer.swift; sourceTree = "<group>"; };
+		B024 /* SourceCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceCodeView.swift; sourceTree = "<group>"; };
+		B025 /* CustomDomainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomDomainView.swift; sourceTree = "<group>"; };
+		B026 /* CoinManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinManager.swift; sourceTree = "<group>"; };
 		C001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C002 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		C003 /* VibeBuild.storekit */ = {isa = PBXFileReference; lastKnownFileType = com.apple.storekit.configuration; path = "VibeBuild.storekit"; sourceTree = "<group>"; };
@@ -172,6 +178,7 @@
 		F009 /* Editor */ = {
 			isa = PBXGroup;
 			children = (
+				B024 /* SourceCodeView.swift */,
 			);
 			path = Editor;
 			sourceTree = "<group>";
@@ -190,6 +197,7 @@
 			children = (
 				B017 /* SubscriptionManager.swift */,
 				B018 /* SubscriptionPlansView.swift */,
+				B026 /* CoinManager.swift */,
 			);
 			path = Monetization;
 			sourceTree = "<group>";
@@ -207,6 +215,7 @@
 			children = (
 				B012 /* ProjectListView.swift */,
 				B020 /* ReplitStyleAppsView.swift */,
+				B025 /* CustomDomainView.swift */,
 			);
 			path = Projects;
 			sourceTree = "<group>";
@@ -334,6 +343,9 @@
 				A026 /* ReplitStyleAppsView.swift in Sources */,
 				A027 /* ReplitStyleAccountView.swift in Sources */,
 				A029 /* SpeechRecognizer.swift in Sources */,
+				A031 /* SourceCodeView.swift in Sources */,
+				A032 /* CustomDomainView.swift in Sources */,
+				A033 /* CoinManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -466,7 +478,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = VibeCoder/VibeCoder.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				ENABLE_PREVIEWS = YES;
@@ -498,7 +510,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = VibeCoder/VibeCoder.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				ENABLE_PREVIEWS = YES;
