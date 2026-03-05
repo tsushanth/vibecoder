@@ -12,6 +12,7 @@ export default function BrowsePage() {
   const { user } = useAuthStore();
   const router = useRouter();
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
+  const [featuredProjects, setFeaturedProjects] = useState<ProjectSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sort, setSort] = useState<'newest' | 'popular'>('newest');
   const [search, setSearch] = useState('');
@@ -20,7 +21,19 @@ export default function BrowsePage() {
 
   useEffect(() => {
     loadProjects(true);
+    loadFeatured();
   }, [sort]);
+
+  async function loadFeatured() {
+    try {
+      const data = await api.get<BrowseResponse>(
+        '/api/projects/browse?limit=6&offset=0&sort=popular'
+      );
+      setFeaturedProjects(data.projects.filter(p => p.published_url));
+    } catch {
+      // Featured is best-effort
+    }
+  }
 
   async function loadProjects(reset = false) {
     setIsLoading(true);
@@ -60,7 +73,30 @@ export default function BrowsePage() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Browse Apps</h1>
+      <h1 className="text-2xl font-bold mb-2">Browse Apps</h1>
+      <p className="text-muted text-sm mb-6">Discover apps built by the community</p>
+
+      {/* Featured section */}
+      {featuredProjects.length > 0 && !search && (
+        <section className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
+            <h2 className="text-sm font-semibold text-accent">Featured Live Apps</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {featuredProjects.slice(0, 3).map((project) => (
+              <ProjectCard
+                key={`featured-${project.id}`}
+                project={project}
+                onClick={() => router.push(`/project/${project.id}`)}
+                onFork={() => handleFork(project.id)}
+                onTryIt={project.published_url ? () => window.open(project.published_url!, '_blank') : undefined}
+                showActions
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Tabs + Search */}
       <div className="flex items-center gap-4 mb-6 flex-wrap">
@@ -107,6 +143,7 @@ export default function BrowsePage() {
                 project={project}
                 onClick={() => router.push(`/project/${project.id}`)}
                 onFork={() => handleFork(project.id)}
+                onTryIt={project.published_url ? () => window.open(project.published_url!, '_blank') : undefined}
                 showActions
               />
             ))}

@@ -5,6 +5,9 @@ struct ReplitStyleAccountView: View {
     @EnvironmentObject var subscriptionManager: SubscriptionManager
     @State private var showSubscriptionSheet = false
     @State private var showSignOutConfirm = false
+    @State private var showDeleteConfirm = false
+    @State private var isDeleting = false
+    @State private var deleteError: String?
 
     var body: some View {
         NavigationView {
@@ -92,9 +95,20 @@ struct ReplitStyleAccountView: View {
                         .background(Color.white.opacity(0.1))
                         .padding(.horizontal)
 
-                    // Sign out
-                    Button(action: { showSignOutConfirm = true }) {
-                        SettingsRow(icon: "rectangle.portrait.and.arrow.right", title: "Sign Out", iconColor: .red)
+                    if authManager.isGuest {
+                        // Guest: show sign in option
+                        Button(action: { authManager.signOut() }) {
+                            SettingsRow(icon: "person.crop.circle.badge.plus", title: "Sign In with Apple", iconColor: .blue)
+                        }
+                    } else {
+                        // Signed in: show sign out and delete
+                        Button(action: { showSignOutConfirm = true }) {
+                            SettingsRow(icon: "rectangle.portrait.and.arrow.right", title: "Sign Out", iconColor: .red)
+                        }
+
+                        Button(action: { showDeleteConfirm = true }) {
+                            SettingsRow(icon: "trash.fill", title: "Delete Account", iconColor: .red)
+                        }
                     }
 
                     Spacer().frame(height: 40)
@@ -114,6 +128,37 @@ struct ReplitStyleAccountView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Are you sure you want to sign out?")
+        }
+        .confirmationDialog("Delete Account", isPresented: $showDeleteConfirm) {
+            Button("Delete Account", role: .destructive) {
+                Task {
+                    isDeleting = true
+                    do {
+                        try await authManager.deleteAccount()
+                    } catch {
+                        deleteError = error.localizedDescription
+                    }
+                    isDeleting = false
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will permanently delete your account and all your projects. This action cannot be undone.")
+        }
+        .alert("Error", isPresented: .constant(deleteError != nil)) {
+            Button("OK") { deleteError = nil }
+        } message: {
+            Text(deleteError ?? "")
+        }
+        .overlay {
+            if isDeleting {
+                Color.black.opacity(0.5).ignoresSafeArea()
+                ProgressView("Deleting account...")
+                    .padding()
+                    .background(Color(white: 0.15))
+                    .cornerRadius(12)
+                    .foregroundColor(.white)
+            }
         }
     }
 

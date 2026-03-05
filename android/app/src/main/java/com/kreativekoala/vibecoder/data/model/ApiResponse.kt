@@ -137,6 +137,60 @@ data class DeployStatusResponse(
     @SerializedName("deployedAt") val deployedAt: String? = null
 )
 
+// --- Coins ---
+data class CoinBalanceResponse(
+    val success: Boolean,
+    val balance: Int = 0,
+    val totalPurchased: Int = 0,
+    val totalSpent: Int = 0,
+    val totalEarned: Int = 0
+)
+
+data class CoinStoreResponse(
+    val success: Boolean,
+    val generationCost: Int = 20,
+    val tweakCost: Int = 10,
+    val forkCost: Int = 10,
+    val creatorSharePercent: Int = 55,
+    val packs: List<CoinPack> = emptyList()
+)
+
+data class CoinPack(
+    val productId: String,
+    val coins: Int,
+    val price: String
+)
+
+data class SpendCoinsRequest(
+    val userId: String,
+    val reason: String,
+    val projectId: String? = null,
+    val creatorId: String? = null,
+    val platform: String = "android"
+)
+
+data class SpendCoinsResponse(
+    val success: Boolean,
+    val coinsSpent: Int = 0,
+    val newBalance: Int = 0,
+    val error: String? = null,
+    val balance: Int = 0
+)
+
+data class PurchaseCoinsRequest(
+    val userId: String,
+    val productId: String,
+    val transactionId: String,
+    val platform: String = "android"
+)
+
+data class PurchaseCoinsResponse(
+    val success: Boolean,
+    val coinsAdded: Int = 0,
+    val newBalance: Int = 0,
+    val message: String? = null
+)
+
 // --- Generation ---
 data class GenerateRequest(
     val prompt: String,

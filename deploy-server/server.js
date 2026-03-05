@@ -10,7 +10,7 @@ import zlib from "zlib";
 
 const PORT = parseInt(process.env.PORT || "4000", 10);
 const DEPLOY_DIR = path.resolve(process.env.DEPLOY_DIR || "./deployments");
-const BASE_DOMAIN = process.env.BASE_DOMAIN || "localhost"; // e.g. "vibecoder.app"
+const BASE_DOMAIN = process.env.BASE_DOMAIN || "vibebuild.cc";
 const MAX_BUNDLE_SIZE = parseInt(
   process.env.MAX_BUNDLE_SIZE || String(50 * 1024 * 1024),
   10,
@@ -627,6 +627,42 @@ app.get("*", (req, res) => {
 
   serveProjectFile(projectDir, req.path, res);
 });
+
+// ---------------------------------------------------------------------------
+// Preview deployment cleanup (preview-* dirs older than 2 hours)
+// ---------------------------------------------------------------------------
+
+function cleanupPreviews() {
+  try {
+    const entries = fs.readdirSync(DEPLOY_DIR);
+    const now = Date.now();
+    const maxAge = 2 * 60 * 60 * 1000; // 2 hours
+    let cleaned = 0;
+
+    for (const name of entries) {
+      if (!name.startsWith("preview-")) continue;
+      const dir = path.join(DEPLOY_DIR, name);
+      try {
+        const stat = fs.statSync(dir);
+        if (stat.isDirectory() && now - stat.mtimeMs > maxAge) {
+          fs.rmSync(dir, { recursive: true, force: true });
+          cleaned++;
+        }
+      } catch {}
+    }
+
+    if (cleaned > 0) {
+      console.log(`Cleaned up ${cleaned} expired preview deployment(s)`);
+    }
+  } catch (err) {
+    console.warn("Preview cleanup error:", err.message);
+  }
+}
+
+// Run cleanup every 30 minutes
+setInterval(cleanupPreviews, 30 * 60 * 1000);
+// Initial cleanup on startup
+cleanupPreviews();
 
 // ---------------------------------------------------------------------------
 // Start

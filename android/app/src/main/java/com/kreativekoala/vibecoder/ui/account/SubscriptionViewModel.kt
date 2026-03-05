@@ -1,12 +1,21 @@
 package com.kreativekoala.vibecoder.ui.account
 
 import android.app.Activity
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.kreativekoala.vibecoder.service.FirebaseAnalyticsHelper
+import com.kreativekoala.vibecoder.service.TikTokHelper
 import androidx.lifecycle.viewModelScope
-import com.android.billingclient.api.*
 import com.kreativekoala.vibecoder.data.repository.AuthRepository
 import com.kreativekoala.vibecoder.data.repository.SubscriptionRepository
-import com.kreativekoala.vibecoder.util.Constants
+import com.revenuecat.purchases.CustomerInfo
+import com.revenuecat.purchases.Offering
+import com.revenuecat.purchases.Package
+import com.revenuecat.purchases.PurchaseParams
+import com.revenuecat.purchases.Purchases
+import com.revenuecat.purchases.purchaseWith
+import com.revenuecat.purchases.getOfferingsWith
+import com.revenuecat.purchases.restorePurchasesWith
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +25,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class SubscriptionUiState(
-    val products: List<ProductDetails> = emptyList(),
+    val offering: Offering? = null,
     val currentTier: String = "free",
     val isPurchasing: Boolean = false,
     val isLoading: Boolean = false,
@@ -26,7 +35,6 @@ data class SubscriptionUiState(
 
 @HiltViewModel
 class SubscriptionViewModel @Inject constructor(
-    private val billingClient: BillingClient,
     private val authRepository: AuthRepository,
     private val subscriptionRepository: SubscriptionRepository
 ) : ViewModel() {
@@ -34,10 +42,43 @@ class SubscriptionViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(SubscriptionUiState())
     val uiState: StateFlow<SubscriptionUiState> = _uiState.asStateFlow()
 
+    companion object {
+        private const val TAG = "SubscriptionVM"
+        private const val ENTITLEMENT_PRO = "pro"
+        private const val ENTITLEMENT_TEAM = "team"
+    }
+
     init {
-        connectBilling()
+        loadOfferings()
         loadCurrentTier()
     }
+
+    // ── Load RevenueCat offerings ─────────────────────────────────────
+
+    private fun loadOfferings() {
+        _uiState.update { it.copy(isLoading = true) }
+        Purchases.sharedInstance.getOfferingsWith(
+            onError = { error ->
+                Log.e(TAG, "Error fetching offerings: ${error.message}")
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Could not load plans: ${error.message}"
+                    )
+                }
+            },
+            onSuccess = { offerings ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        offering = offerings.current
+                    )
+                }
+            }
+        )
+    }
+
+    // ── Sync tier from backend + check RC entitlements ─────────────────
 
     private fun loadCurrentTier() {
         val userId = authRepository.currentUser?.uid ?: return
@@ -47,101 +88,121 @@ class SubscriptionViewModel @Inject constructor(
                 _uiState.update { it.copy(currentTier = status.tier) }
             } catch (_: Exception) {}
         }
+        // Also check RevenueCat entitlements as source of truth
+        checkEntitlements()
     }
 
-    private fun connectBilling() {
-        billingClient.startConnection(object : BillingClientStateListener {
-            override fun onBillingSetupFinished(billingResult: BillingResult) {
-                if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                    queryProducts()
-                }
-            }
-
-            override fun onBillingServiceDisconnected() {
-                // Retry connection
-            }
-        })
-    }
-
-    private fun queryProducts() {
-        val productList = listOf(
-            QueryProductDetailsParams.Product.newBuilder()
-                .setProductId(Constants.PRODUCT_PRO_MONTHLY)
-                .setProductType(BillingClient.ProductType.SUBS)
-                .build(),
-            QueryProductDetailsParams.Product.newBuilder()
-                .setProductId(Constants.PRODUCT_PRO_YEARLY)
-                .setProductType(BillingClient.ProductType.SUBS)
-                .build()
-        )
-
-        val params = QueryProductDetailsParams.newBuilder()
-            .setProductList(productList)
-            .build()
-
-        billingClient.queryProductDetailsAsync(params) { billingResult, productDetailsList ->
-            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                _uiState.update { it.copy(products = productDetailsList) }
-            }
-        }
-    }
-
-    fun purchase(productDetails: ProductDetails, activity: Activity) {
-        val offerToken = productDetails.subscriptionOfferDetails
-            ?.firstOrNull()?.offerToken ?: return
-
-        val billingFlowParams = BillingFlowParams.newBuilder()
-            .setProductDetailsParamsList(
-                listOf(
-                    BillingFlowParams.ProductDetailsParams.newBuilder()
-                        .setProductDetails(productDetails)
-                        .setOfferToken(offerToken)
-                        .build()
-                )
-            )
-            .build()
-
-        _uiState.update { it.copy(isPurchasing = true) }
-        billingClient.launchBillingFlow(activity, billingFlowParams)
-    }
-
-    fun handlePurchaseResult(purchases: List<Purchase>?) {
-        val userId = authRepository.currentUser?.uid ?: return
-
-        purchases?.forEach { purchase ->
-            if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
-                viewModelScope.launch {
-                    try {
-                        // Verify with backend
-                        subscriptionRepository.verifyReceipt(
-                            userId = userId,
-                            purchaseToken = purchase.purchaseToken
-                        )
-
-                        // Acknowledge purchase
-                        if (!purchase.isAcknowledged) {
-                            val ackParams = AcknowledgePurchaseParams.newBuilder()
-                                .setPurchaseToken(purchase.purchaseToken)
-                                .build()
-                            billingClient.acknowledgePurchase(ackParams) { }
-                        }
-
-                        _uiState.update {
-                            it.copy(
-                                isPurchasing = false,
-                                purchaseSuccess = true,
-                                currentTier = "pro"
-                            )
-                        }
-                    } catch (e: Exception) {
-                        _uiState.update {
-                            it.copy(
-                                isPurchasing = false,
-                                errorMessage = "Verification failed: ${e.message}"
-                            )
-                        }
+    private fun checkEntitlements() {
+        Purchases.sharedInstance.getCustomerInfo(
+            callback = object : com.revenuecat.purchases.interfaces.ReceiveCustomerInfoCallback {
+                override fun onReceived(customerInfo: CustomerInfo) {
+                    val tier = when {
+                        customerInfo.entitlements[ENTITLEMENT_TEAM]?.isActive == true -> "team"
+                        customerInfo.entitlements[ENTITLEMENT_PRO]?.isActive == true -> "pro"
+                        else -> "free"
                     }
+                    _uiState.update { it.copy(currentTier = tier) }
                 }
+
+                override fun onError(error: com.revenuecat.purchases.PurchasesError) {
+                    Log.e(TAG, "Error checking entitlements: ${error.message}")
+                }
+            }
+        )
+    }
+
+    // ── Purchase a package ────────────────────────────────────────────
+
+    fun purchase(pkg: Package, activity: Activity) {
+        _uiState.update { it.copy(isPurchasing = true, errorMessage = null) }
+
+        Purchases.sharedInstance.purchaseWith(
+            PurchaseParams.Builder(activity, pkg).build(),
+            onError = { error, userCancelled ->
+                Log.e(TAG, "Purchase error: ${error.message}, cancelled=$userCancelled")
+                _uiState.update {
+                    it.copy(
+                        isPurchasing = false,
+                        errorMessage = if (userCancelled) null else "Purchase failed: ${error.message}"
+                    )
+                }
+            },
+            onSuccess = { _, customerInfo ->
+                val tier = when {
+                    customerInfo.entitlements[ENTITLEMENT_TEAM]?.isActive == true -> "team"
+                    customerInfo.entitlements[ENTITLEMENT_PRO]?.isActive == true -> "pro"
+                    else -> "free"
+                }
+                _uiState.update {
+                    it.copy(
+                        isPurchasing = false,
+                        purchaseSuccess = true,
+                        currentTier = tier
+                    )
+                }
+
+                // Track purchase events for ad attribution
+                val productId = pkg.product.id
+                val price = pkg.product.price.amountMicros / 1_000_000.0
+                FirebaseAnalyticsHelper.logPurchaseCompleted(productId, price)
+                TikTokHelper.trackEvent("purchase_success")
+
+                // Sync the new status to the backend
+                syncSubscriptionToBackend()
+            }
+        )
+    }
+
+    // ── Restore purchases ─────────────────────────────────────────────
+
+    fun restorePurchases() {
+        _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+        Purchases.sharedInstance.restorePurchasesWith(
+            onError = { error ->
+                Log.e(TAG, "Restore error: ${error.message}")
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Restore failed: ${error.message}"
+                    )
+                }
+            },
+            onSuccess = { customerInfo ->
+                val tier = when {
+                    customerInfo.entitlements[ENTITLEMENT_TEAM]?.isActive == true -> "team"
+                    customerInfo.entitlements[ENTITLEMENT_PRO]?.isActive == true -> "pro"
+                    else -> "free"
+                }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        currentTier = tier
+                    )
+                }
+                syncSubscriptionToBackend()
+            }
+        )
+    }
+
+    // ── Dismiss one-shot events ───────────────────────────────────────
+
+    fun clearError() {
+        _uiState.update { it.copy(errorMessage = null) }
+    }
+
+    fun clearPurchaseSuccess() {
+        _uiState.update { it.copy(purchaseSuccess = false) }
+    }
+
+    // ── Backend sync helper ───────────────────────────────────────────
+
+    private fun syncSubscriptionToBackend() {
+        val userId = authRepository.currentUser?.uid ?: return
+        viewModelScope.launch {
+            try {
+                subscriptionRepository.getSubscriptionStatus(userId)
+            } catch (e: Exception) {
+                Log.e(TAG, "Backend sync failed: ${e.message}")
             }
         }
     }

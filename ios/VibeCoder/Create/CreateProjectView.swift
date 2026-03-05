@@ -21,11 +21,11 @@ struct CreateProjectView: View {
                             .font(.system(size: 60))
                             .foregroundColor(.blue)
 
-                        Text("Create Your App")
+                        Text("Create a Coding Project")
                             .font(.title)
                             .fontWeight(.bold)
 
-                        Text("Describe what you want to build and AI will create it for you")
+                        Text("Describe what you want to learn and AI will generate example code")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -80,7 +80,7 @@ struct CreateProjectView: View {
 
                     // Prompt input
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("What do you want to build?")
+                        Text("What do you want to learn?")
                             .font(.headline)
 
                         TextEditor(text: $prompt)
@@ -202,9 +202,9 @@ struct CreateProjectView: View {
 
     private var buttonText: String {
         if subscriptionManager.currentTier == .free {
-            return "Generate App (Free)"
+            return "Generate Code (Free)"
         } else {
-            return "Generate App"
+            return "Generate Code"
         }
     }
 
@@ -232,9 +232,9 @@ struct CreateProjectView: View {
     }
 
     private let examplePrompts = [
-        "Build a todo list app with dark mode and the ability to mark tasks as complete",
-        "Create a calculator with a modern gradient design",
-        "Make a simple weather app that shows temperature and conditions"
+        "Learn to create a todo list with dark mode and task completion",
+        "Explore building a calculator with a modern gradient design",
+        "Study how a weather dashboard shows temperature and conditions"
     ]
 }
 

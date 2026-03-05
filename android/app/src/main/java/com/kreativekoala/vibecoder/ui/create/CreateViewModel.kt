@@ -8,6 +8,7 @@ import com.kreativekoala.vibecoder.data.model.Project
 import com.kreativekoala.vibecoder.data.model.SseEvent
 import com.kreativekoala.vibecoder.data.model.Suggestion
 import com.kreativekoala.vibecoder.data.repository.AuthRepository
+import com.kreativekoala.vibecoder.data.repository.DeployRepository
 import com.kreativekoala.vibecoder.data.repository.ProjectRepository
 import com.kreativekoala.vibecoder.data.repository.SubscriptionRepository
 import com.kreativekoala.vibecoder.util.NotificationHelper
@@ -28,6 +29,8 @@ data class CreateUiState(
     val buildPhase: String = "",
     val buildDetail: String = "",
     val progressPercent: Double = 0.0,
+    val simulatedProgress: Double = 0.0,
+    val notifyEnabled: Boolean = false,
     val estimatedSecondsRemaining: Int = 0,
     val errorMessage: String? = null,
     val bundleDir: File? = null,
@@ -37,7 +40,10 @@ data class CreateUiState(
     val savedProjectId: String? = null,
     val suggestions: List<Suggestion> = emptyList(),
     val prompt: String = "",
-    val referenceImageBase64: String? = null
+    val referenceImageBase64: String? = null,
+    val isDeploying: Boolean = false,
+    val deployedUrl: String? = null,
+    val showDeployDialog: Boolean = false
 )
 
 @HiltViewModel
@@ -45,7 +51,8 @@ class CreateViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
     private val projectRepository: ProjectRepository,
     private val authRepository: AuthRepository,
-    private val subscriptionRepository: SubscriptionRepository
+    private val subscriptionRepository: SubscriptionRepository,
+    private val deployRepository: DeployRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CreateUiState())
@@ -99,24 +106,14 @@ class CreateViewModel @Inject constructor(
         val userId = authRepository.currentUser?.uid ?: return
         val userName = authRepository.currentUser?.displayName ?: "VibeBuild User"
 
-        // Check usage limits
         viewModelScope.launch {
-            try {
-                val usage = subscriptionRepository.recordUsage(userId, "generation")
-                if (!usage.success && usage.remaining != null && usage.remaining <= 0) {
-                    _uiState.update {
-                        it.copy(errorMessage = "Daily generation limit reached. Upgrade to Pro for unlimited generations.")
-                    }
-                    return@launch
-                }
-            } catch (_: Exception) {
-                // Continue even if usage check fails
-            }
-
+            // TODO: Re-enable subscription usage check when backend tables exist
             _uiState.update {
                 it.copy(
                     isGenerating = true,
                     progressPercent = 0.0,
+                    simulatedProgress = 0.0,
+                    notifyEnabled = false,
                     buildPhase = "Connecting...",
                     buildDetail = "",
                     estimatedSecondsRemaining = 0,
@@ -269,12 +266,83 @@ class CreateViewModel @Inject constructor(
                 bundleBase64 = null,
                 prompt = "",
                 referenceImageBase64 = null,
-                savedProjectId = null
+                savedProjectId = null,
+                deployedUrl = null,
+                showDeployDialog = false,
+                isDeploying = false
             )
         }
     }
 
+    fun setNotifyEnabled(enabled: Boolean) {
+        _uiState.update { it.copy(notifyEnabled = enabled) }
+    }
+
+    fun updateSimulatedProgress(progress: Double) {
+        _uiState.update { it.copy(simulatedProgress = progress) }
+    }
+
     fun clearError() {
         _uiState.update { it.copy(errorMessage = null) }
+    }
+
+    fun showDeployDialog() {
+        _uiState.update { it.copy(showDeployDialog = true) }
+    }
+
+    fun dismissDeployDialog() {
+        _uiState.update { it.copy(showDeployDialog = false) }
+    }
+
+    fun publishProject(subdomain: String) {
+        val currentState = _uiState.value
+        val userId = authRepository.currentUser?.uid ?: return
+        val userName = authRepository.currentUser?.displayName ?: "VibeBuild User"
+
+        _uiState.update { it.copy(showDeployDialog = false, isDeploying = true) }
+
+        viewModelScope.launch {
+            try {
+                // Save first if not already saved
+                val projectId = currentState.savedProjectId ?: run {
+                    val bundleBase64 = currentState.bundleBase64 ?: throw Exception("No bundle")
+                    val title = currentState.prompt.trim()
+                        .split("\\s+".toRegex())
+                        .take(6)
+                        .joinToString(" ")
+                        .take(80)
+                        .ifBlank { "My Project" }
+
+                    _uiState.update { it.copy(isSaving = true) }
+                    val id = projectRepository.saveProject(
+                        title = title,
+                        description = currentState.prompt,
+                        bundle = bundleBase64,
+                        creatorId = userId,
+                        creatorName = userName,
+                        initialPrompt = currentState.prompt
+                    ) ?: throw Exception("Failed to save project")
+                    _uiState.update { it.copy(isSaving = false, savedProjectId = id) }
+                    id
+                }
+
+                // Deploy
+                val response = deployRepository.deploy(projectId, userId, subdomain)
+                _uiState.update {
+                    it.copy(
+                        isDeploying = false,
+                        deployedUrl = response.url
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isDeploying = false,
+                        isSaving = false,
+                        errorMessage = "Publish failed: ${e.message}"
+                    )
+                }
+            }
+        }
     }
 }

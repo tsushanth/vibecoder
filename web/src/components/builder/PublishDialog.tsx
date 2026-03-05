@@ -158,6 +158,43 @@ export function PublishDialog({ projectId, userId, onClose, onPublished }: Props
                 )}
               </div>
 
+              {/* Share buttons */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => window.open(liveUrl, '_blank')}
+                  className="flex-1 px-3 py-2 text-xs font-medium bg-surface hover:bg-surface-hover border border-border rounded-lg transition flex items-center justify-center gap-1.5"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Open
+                </button>
+                <button
+                  onClick={handleCopy}
+                  className="flex-1 px-3 py-2 text-xs font-medium bg-surface hover:bg-surface-hover border border-border rounded-lg transition flex items-center justify-center gap-1.5"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  {copied ? 'Copied!' : 'Copy'}
+                </button>
+                <button
+                  onClick={() => {
+                    if (navigator.share) {
+                      navigator.share({ title: 'Check out my app', url: liveUrl });
+                    } else {
+                      handleCopy();
+                    }
+                  }}
+                  className="flex-1 px-3 py-2 text-xs font-medium bg-surface hover:bg-surface-hover border border-border rounded-lg transition flex items-center justify-center gap-1.5"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                  </svg>
+                  Share
+                </button>
+              </div>
+
               {/* Update / Unpublish */}
               <div className="flex gap-2">
                 <button
@@ -196,12 +233,12 @@ export function PublishDialog({ projectId, userId, onClose, onPublished }: Props
                     className="flex-1 min-w-0 px-3 py-2 bg-surface border border-border rounded-l-lg text-sm text-foreground placeholder:text-subtle focus:outline-none focus:border-accent transition"
                   />
                   <div className="flex items-center px-3 py-2 bg-surface border border-l-0 border-border rounded-r-lg text-xs text-subtle">
-                    .vibecoder.app
+                    .vibebuild.cc
                   </div>
                 </div>
                 {subdomain && (
                   <p className="text-[10px] text-subtle mt-1.5">
-                    {subdomain}.vibecoder.app
+                    {subdomain}.vibebuild.cc
                   </p>
                 )}
               </div>

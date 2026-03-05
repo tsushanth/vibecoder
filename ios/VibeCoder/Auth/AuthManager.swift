@@ -39,7 +39,28 @@ class AuthManager: ObservableObject {
             self.userId = session.user.id
             self.email = session.user.email
             self.displayName = session.user.userMetadata?["full_name"] as? String
+        } else if UserDefaults.standard.bool(forKey: "isGuestUser") {
+            // Restore guest session
+            self.userId = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+            self.displayName = "Guest"
+            self.isAuthenticated = true
         }
+    }
+
+    // MARK: - Guest Mode
+
+    func continueAsGuest() {
+        let guestId = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+        DispatchQueue.main.async {
+            self.userId = guestId
+            self.displayName = "Guest"
+            self.isAuthenticated = true
+        }
+        UserDefaults.standard.set(true, forKey: "isGuestUser")
+    }
+
+    var isGuest: Bool {
+        UserDefaults.standard.bool(forKey: "isGuestUser")
     }
 
     // MARK: - Sign In with Apple
@@ -103,6 +124,22 @@ class AuthManager: ObservableObject {
         }
     }
 
+    // Public method for use with SignInWithAppleButton
+    func signInWithIdToken(idToken: String, fullName: String? = nil) async throws {
+        // When called from SignInWithAppleButton, nonce was already set via prepareNonce()
+        guard let nonce = currentNonce else {
+            throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Missing nonce"])
+        }
+        try await signInWithIdToken(provider: "apple", idToken: idToken, nonce: nonce)
+    }
+
+    /// Generate and store a nonce, returning its SHA256 hash for Apple's request
+    func prepareNonce() -> String {
+        let nonce = generateNonce()
+        currentNonce = nonce
+        return sha256(nonce)
+    }
+
     private func signInWithIdToken(provider: String, idToken: String, nonce: String) async throws {
         guard let url = URL(string: "\(supabaseURL)/auth/v1/token?grant_type=id_token") else {
             throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid auth URL"])
@@ -149,6 +186,7 @@ class AuthManager: ObservableObject {
 
     func signOut() {
         UserDefaults.standard.removeObject(forKey: "supabase_session")
+        UserDefaults.standard.removeObject(forKey: "isGuestUser")
 
         DispatchQueue.main.async {
             self.session = nil
@@ -158,6 +196,17 @@ class AuthManager: ObservableObject {
             self.isAuthenticated = false
             self.errorMessage = nil
         }
+    }
+
+    // MARK: - Delete Account
+
+    func deleteAccount() async throws {
+        guard let userId = userId else {
+            throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "No user ID"])
+        }
+
+        try await NetworkManager.shared.deleteAccount(userId: userId)
+        signOut()
     }
 
     // MARK: - Helper Methods

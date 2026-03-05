@@ -3,6 +3,7 @@ package com.kreativekoala.vibecoder.ui.apps
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -82,6 +83,36 @@ fun ProjectCardItem(
                     color = TextPrimary.copy(alpha = 0.5f),
                     fontWeight = FontWeight.Bold
                 )
+
+                // Live badge
+                if (!project.publishedUrl.isNullOrBlank()) {
+                    Surface(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        color = VibeGreen.copy(alpha = 0.9f)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .clip(CircleShape)
+                                    .background(TextPrimary)
+                            )
+                            Text(
+                                "Live",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = TextPrimary,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
             }
 
             // Info section

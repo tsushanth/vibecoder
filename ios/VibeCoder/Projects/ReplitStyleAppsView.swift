@@ -93,7 +93,7 @@ struct ReplitStyleAppsView: View {
                 loadProjects()
             }
         }
-        .alert("Delete App", isPresented: $showDeleteConfirm, presenting: projectToDelete) { item in
+        .alert("Delete Project", isPresented: $showDeleteConfirm, presenting: projectToDelete) { item in
             Button("Delete", role: .destructive) {
                 deleteProject(item)
             }
@@ -230,7 +230,7 @@ struct ReplitStyleAppsView: View {
                 .fontWeight(.semibold)
                 .foregroundColor(.white)
 
-            Text("Build your first web project to see it here")
+            Text("Create your first coding project to see it here")
                 .font(.subheadline)
                 .foregroundColor(.white.opacity(0.6))
 
@@ -310,9 +310,9 @@ struct AppCardItemView: View {
                         .foregroundColor(.green)
                     } else if project.publishedUrl != nil {
                         HStack(spacing: 3) {
-                            Image(systemName: "antenna.radiowaves.left.and.right")
+                            Image(systemName: "link")
                                 .font(.caption2)
-                            Text("Live")
+                            Text("Shared")
                                 .font(.caption2)
                         }
                         .foregroundColor(.blue)
@@ -344,7 +344,7 @@ struct AppCardItem: Identifiable {
 
     static let examples: [AppCardItem] = [
         AppCardItem(id: "1", title: "Memory Match", creatorName: "SushanthTiruvai", isPublic: false, thumbnailURL: nil, icon: "gamecontroller.fill", publishedUrl: nil, customDomain: nil),
-        AppCardItem(id: "2", title: "Weather App", creatorName: "SushanthTiruvai", isPublic: true, thumbnailURL: nil, icon: "cloud.sun.fill", publishedUrl: "https://weather.vibecoder.app", customDomain: nil)
+        AppCardItem(id: "2", title: "Weather App", creatorName: "SushanthTiruvai", isPublic: true, thumbnailURL: nil, icon: "cloud.sun.fill", publishedUrl: "https://weather.vibebuild.cc", customDomain: nil)
     ]
 }
 

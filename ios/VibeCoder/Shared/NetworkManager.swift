@@ -240,6 +240,21 @@ extension NetworkManager {
             throw URLError(.badServerResponse)
         }
     }
+
+    func deleteAccount(userId: String) async throws {
+        guard let url = URL(string: "\(baseURL)/api/auth/account") else {
+            throw URLError(.badURL)
+        }
+        var req = URLRequest(url: url)
+        req.httpMethod = "DELETE"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try JSONEncoder().encode(["userId": userId])
+        let (data, response) = try await URLSession.shared.data(for: req)
+        guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
+            let errorMsg = String(data: data, encoding: .utf8) ?? "Unknown error"
+            throw NSError(domain: "NetworkManager", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMsg])
+        }
+    }
 }
 
 struct SaveProjectResponse: Codable {
@@ -386,4 +401,23 @@ struct DeploymentInfoResponse: Codable {
     let subdomain: String?
     let url: String?
     let deployedAt: String?
+}
+
+// MARK: - Preview Deploy API
+
+extension NetworkManager {
+    /// Upload a bundle to create a temporary server-side preview URL
+    func previewDeploy(bundle: String) async throws -> PreviewDeployResponse {
+        try await request(
+            path: "/api/deploy/preview",
+            method: "POST",
+            body: ["bundle": bundle]
+        )
+    }
+}
+
+struct PreviewDeployResponse: Codable {
+    let success: Bool
+    let url: String
+    let subdomain: String
 }

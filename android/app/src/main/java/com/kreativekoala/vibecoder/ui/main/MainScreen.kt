@@ -4,9 +4,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.AddCircleOutline
+import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.kreativekoala.vibecoder.ui.account.AccountScreen
 import com.kreativekoala.vibecoder.ui.apps.AppsScreen
+import com.kreativekoala.vibecoder.ui.browse.BrowseScreen
 import com.kreativekoala.vibecoder.ui.create.CreateScreen
 import com.kreativekoala.vibecoder.ui.theme.DarkBackground
 import com.kreativekoala.vibecoder.ui.theme.DarkSurface
@@ -29,13 +32,14 @@ data class TabItem(
 @Composable
 fun MainScreen(
     onSignOut: () -> Unit,
-    onNavigateToBrowse: () -> Unit,
     onNavigateToSubscriptions: () -> Unit,
-    onNavigateToProjectDetail: (String) -> Unit
+    onNavigateToProjectDetail: (String) -> Unit,
+    onNavigateToProjectPreview: (String) -> Unit
 ) {
     val tabs = listOf(
         TabItem("Apps", Icons.Filled.Folder, Icons.Outlined.FolderOpen),
         TabItem("Create", Icons.Filled.AddCircle, Icons.Outlined.AddCircleOutline),
+        TabItem("Browse", Icons.Filled.Explore, Icons.Outlined.Explore),
         TabItem("Account", Icons.Filled.AccountCircle, Icons.Outlined.AccountCircle)
     )
 
@@ -76,13 +80,16 @@ fun MainScreen(
         when (selectedTabIndex) {
             0 -> AppsScreen(
                 modifier = Modifier.padding(innerPadding),
-                onProjectClick = onNavigateToProjectDetail,
-                onBrowseClick = onNavigateToBrowse
+                onProjectClick = onNavigateToProjectDetail
             )
             1 -> CreateScreen(
                 modifier = Modifier.padding(innerPadding)
             )
-            2 -> AccountScreen(
+            2 -> BrowseScreen(
+                modifier = Modifier.padding(innerPadding),
+                onProjectClick = onNavigateToProjectPreview
+            )
+            3 -> AccountScreen(
                 modifier = Modifier.padding(innerPadding),
                 onSignOut = onSignOut,
                 onSubscriptionsClick = onNavigateToSubscriptions

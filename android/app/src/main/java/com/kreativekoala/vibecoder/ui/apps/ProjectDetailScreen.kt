@@ -1,5 +1,7 @@
 package com.kreativekoala.vibecoder.ui.apps
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -7,15 +9,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Rocket
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -31,9 +38,56 @@ fun ProjectDetailScreen(
     viewModel: ProjectDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val clipboardManager = LocalClipboardManager.current
+    var subdomainInput by remember { mutableStateOf("") }
 
     LaunchedEffect(projectId) {
         viewModel.loadProject(projectId)
+        viewModel.checkDeployStatus()
+    }
+
+    // Deploy subdomain dialog
+    if (uiState.showDeployDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissDeployDialog() },
+            title = { Text("Deploy App") },
+            text = {
+                Column {
+                    Text(
+                        "Choose a subdomain for your app:",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextSecondary
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = subdomainInput,
+                        onValueChange = { subdomainInput = it.lowercase().replace(Regex("[^a-z0-9-]"), "") },
+                        label = { Text("Subdomain") },
+                        suffix = { Text(".vibebuild.cc", color = TextTertiary) },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = VibePurple,
+                            cursorColor = VibePurple
+                        )
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { viewModel.deployProject(subdomainInput) },
+                    enabled = subdomainInput.length >= 3
+                ) {
+                    Text("Deploy", color = if (subdomainInput.length >= 3) VibePurple else TextTertiary)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.dismissDeployDialog() }) {
+                    Text("Cancel")
+                }
+            },
+            containerColor = DarkSurfaceVariant
+        )
     }
 
     // Error dialog
@@ -57,8 +111,14 @@ fun ProjectDetailScreen(
             bundleDir = uiState.bundleDir!!,
             onClose = { viewModel.hidePreview() },
             onSave = {},
+            onPublish = {},
             isSaving = false,
-            isSaved = true
+            isSaved = true,
+            isDeploying = false,
+            deployedUrl = uiState.deployedUrl ?: uiState.project?.publishedUrl,
+            showDeployDialog = false,
+            onDeployConfirm = {},
+            onDeployDismiss = {}
         )
         return
     }
@@ -179,22 +239,117 @@ fun ProjectDetailScreen(
                         }
                     }
 
-                    // Deploy button
-                    if (project.publishedUrl != null) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        OutlinedButton(
-                            onClick = { /* Deploy logic */ },
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Deploy section
+                    val liveUrl = uiState.deployedUrl ?: project.publishedUrl
+                    if (liveUrl != null) {
+                        // Already deployed — show URL + actions
+                        Card(
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = VibeGreen,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        "Deployed",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = VibeGreen,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = liveUrl,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = VibePurple
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    OutlinedButton(
+                                        onClick = {
+                                            context.startActivity(
+                                                Intent(Intent.ACTION_VIEW, Uri.parse(liveUrl))
+                                            )
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ) {
+                                        Icon(Icons.Default.Rocket, contentDescription = null, tint = VibePurple, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text("Open", color = VibePurple)
+                                    }
+                                    OutlinedButton(
+                                        onClick = {
+                                            clipboardManager.setText(AnnotatedString(liveUrl))
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ) {
+                                        Icon(Icons.Default.ContentCopy, contentDescription = null, tint = VibePurple, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text("Copy", color = VibePurple)
+                                    }
+                                    OutlinedButton(
+                                        onClick = {
+                                            val sendIntent = Intent().apply {
+                                                action = Intent.ACTION_SEND
+                                                putExtra(Intent.EXTRA_TEXT, "Check out my app: $liveUrl")
+                                                type = "text/plain"
+                                            }
+                                            context.startActivity(Intent.createChooser(sendIntent, "Share"))
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ) {
+                                        Icon(Icons.Default.Share, contentDescription = null, tint = VibePurple, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text("Share", color = VibePurple)
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        // Not deployed — show deploy button
+                        Button(
+                            onClick = {
+                                subdomainInput = project.title.lowercase()
+                                    .replace(Regex("[^a-z0-9]+"), "-")
+                                    .trim('-')
+                                    .take(30)
+                                viewModel.showDeployDialog()
+                            },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp),
-                            contentPadding = PaddingValues(vertical = 16.dp)
+                            colors = ButtonDefaults.buttonColors(containerColor = VibeBlue),
+                            contentPadding = PaddingValues(vertical = 16.dp),
+                            enabled = !uiState.isDeploying
                         ) {
-                            Icon(
-                                Icons.Default.Rocket,
-                                contentDescription = null,
-                                tint = VibePurple
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("View Deployment", color = VibePurple)
+                            if (uiState.isDeploying) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    color = TextPrimary,
+                                    strokeWidth = 2.dp
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Deploying...", fontWeight = FontWeight.SemiBold)
+                            } else {
+                                Icon(Icons.Default.Rocket, contentDescription = null)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Deploy to Web", fontWeight = FontWeight.SemiBold)
+                            }
                         }
                     }
 

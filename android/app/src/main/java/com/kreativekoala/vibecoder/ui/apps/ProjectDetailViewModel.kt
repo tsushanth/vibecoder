@@ -5,6 +5,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kreativekoala.vibecoder.data.model.Project
+import com.kreativekoala.vibecoder.data.repository.AuthRepository
+import com.kreativekoala.vibecoder.data.repository.DeployRepository
 import com.kreativekoala.vibecoder.data.repository.ProjectRepository
 import com.kreativekoala.vibecoder.util.ZipExtractor
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,13 +27,18 @@ data class ProjectDetailUiState(
     val isLoadingPreview: Boolean = false,
     val showPreview: Boolean = false,
     val bundleDir: File? = null,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val isDeploying: Boolean = false,
+    val deployedUrl: String? = null,
+    val showDeployDialog: Boolean = false
 )
 
 @HiltViewModel
 class ProjectDetailViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
-    private val projectRepository: ProjectRepository
+    private val projectRepository: ProjectRepository,
+    private val authRepository: AuthRepository,
+    private val deployRepository: DeployRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProjectDetailUiState())
@@ -91,6 +98,71 @@ class ProjectDetailViewModel @Inject constructor(
 
     fun hidePreview() {
         _uiState.update { it.copy(showPreview = false) }
+    }
+
+    fun showDeployDialog() {
+        _uiState.update { it.copy(showDeployDialog = true) }
+    }
+
+    fun dismissDeployDialog() {
+        _uiState.update { it.copy(showDeployDialog = false) }
+    }
+
+    fun deployProject(subdomain: String) {
+        val project = _uiState.value.project ?: return
+        val userId = authRepository.currentUser?.uid ?: return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isDeploying = true, showDeployDialog = false) }
+
+            try {
+                val response = deployRepository.deploy(
+                    projectId = project.id,
+                    userId = userId,
+                    subdomain = subdomain.trim().lowercase()
+                )
+                if (response.success && response.url != null) {
+                    _uiState.update {
+                        it.copy(
+                            isDeploying = false,
+                            deployedUrl = response.url
+                        )
+                    }
+                    // Reload project to get updated publishedUrl
+                    loadProject(project.id)
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            isDeploying = false,
+                            errorMessage = "Deploy failed. Please try again."
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("ProjectDetail", "Deploy failed: ${e.message}", e)
+                _uiState.update {
+                    it.copy(
+                        isDeploying = false,
+                        errorMessage = "Deploy failed: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
+
+    fun checkDeployStatus() {
+        val project = _uiState.value.project ?: return
+
+        viewModelScope.launch {
+            try {
+                val status = deployRepository.getDeployStatus(project.id)
+                if (status.deployed && status.url != null) {
+                    _uiState.update { it.copy(deployedUrl = status.url) }
+                }
+            } catch (e: Exception) {
+                Log.d("ProjectDetail", "Deploy status check failed: ${e.message}")
+            }
+        }
     }
 
     fun clearError() {

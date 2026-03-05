@@ -76,6 +76,27 @@ interface VibeBuildApi {
         @Path("projectId") id: String
     ): DeployStatusResponse
 
+    @HTTP(method = "DELETE", path = "api/deploy/{projectId}/deploy", hasBody = true)
+    suspend fun undeploy(
+        @Path("projectId") id: String,
+        @Body body: DeleteRequest
+    ): SuccessResponse
+
+    // Coins
+    @GET("api/coins/balance")
+    suspend fun getCoinBalance(
+        @Query("userId") userId: String
+    ): CoinBalanceResponse
+
+    @GET("api/coins/store")
+    suspend fun getCoinStore(): CoinStoreResponse
+
+    @POST("api/coins/spend")
+    suspend fun spendCoins(@Body body: SpendCoinsRequest): SpendCoinsResponse
+
+    @POST("api/coins/purchase")
+    suspend fun purchaseCoins(@Body body: PurchaseCoinsRequest): PurchaseCoinsResponse
+
     // Health
     @GET("api/health")
     suspend fun healthCheck(): SuccessResponse

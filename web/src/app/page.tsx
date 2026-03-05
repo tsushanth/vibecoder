@@ -57,7 +57,7 @@ const features = [
   {
     title: 'One-Click Deploy',
     description:
-      'Publish to yourapp.vibecoder.app instantly. Custom domains for Pro users.',
+      'Publish to yourapp.vibebuild.cc instantly. Custom domains for Pro users.',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -91,24 +91,46 @@ const pricingPlans = [
     name: 'Free',
     price: '$0',
     period: 'forever',
-    features: ['3 generations / day', '3 tweaks / project', 'Public projects', 'Community browse'],
+    features: [
+      '3 generations / day',
+      '3 tweaks / project',
+      'Public projects only',
+      'Deploy to yourapp.vibebuild.cc',
+      'Community browse & fork',
+    ],
     cta: 'Start Free',
+    ctaLink: '/signup',
     highlighted: false,
   },
   {
     name: 'Pro',
     price: '$9.99',
     period: '/month',
-    features: ['Unlimited generations', 'Unlimited tweaks', 'Private projects', 'Custom domains', 'Priority queue'],
+    features: [
+      'Unlimited generations',
+      'Unlimited tweaks',
+      'Private projects',
+      'Custom domains',
+      'Priority generation queue',
+      'Deploy with no expiry',
+    ],
     cta: 'Upgrade to Pro',
+    ctaLink: '/signup',
     highlighted: true,
   },
   {
     name: 'Team',
     price: '$29.99',
     period: '/month',
-    features: ['Everything in Pro', 'Team collaboration', 'Shared projects', 'Admin dashboard'],
+    features: [
+      'Everything in Pro',
+      'Team collaboration',
+      'Shared project workspace',
+      'Admin dashboard',
+      'Priority support',
+    ],
     cta: 'Contact Us',
+    ctaLink: '/signup',
     highlighted: false,
   },
 ];

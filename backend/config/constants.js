@@ -17,7 +17,7 @@ export const FREE_GENERATIONS_PER_DAY = 3;
 
 // Rate limits
 export const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour
-export const MAX_GENERATIONS_PER_HOUR = 5;
+export const MAX_GENERATIONS_PER_HOUR = 30;
 
 // Cache
 export const CACHE_REFRESH_INTERVAL = 60 * 1000; // 60 seconds
