@@ -11,10 +11,9 @@ object Constants {
     // Google Sign-In (Web Client ID for Credential Manager -> Supabase)
     const val GOOGLE_WEB_CLIENT_ID = "917362189743-2tgjn2l4m09ht423l9ogsm74aiotbjgv.apps.googleusercontent.com"
 
-    // Google Play product IDs
-    const val PRODUCT_PRO_MONTHLY = "com.kreativekoala.vibebuild.pro.monthly"
-    const val PRODUCT_PRO_YEARLY = "com.kreativekoala.vibebuild.pro.yearly"
-    const val PRODUCT_TEAM_MONTHLY = "com.kreativekoala.vibebuild.team.monthly"
+    // RevenueCat entitlement IDs
+    const val ENTITLEMENT_PRO = "pro"
+    const val ENTITLEMENT_TEAM = "team"
 
     // Free tier limits
     const val FREE_DAILY_GENERATION_LIMIT = 3

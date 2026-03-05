@@ -44,7 +44,7 @@ struct SignInView: View {
                                 .font(.system(size: 42, weight: .bold, design: .rounded))
                                 .foregroundColor(.white)
 
-                            Text("Build apps with AI")
+                            Text("Learn to code with AI")
                                 .font(.system(size: 18, weight: .medium))
                                 .foregroundColor(.white.opacity(0.7))
                         }
@@ -56,6 +56,7 @@ struct SignInView: View {
                             SignInWithAppleButton(
                                 onRequest: { request in
                                     request.requestedScopes = [.fullName, .email]
+                                    request.nonce = authManager.prepareNonce()
                                 },
                                 onCompletion: { result in
                                     handleAppleSignIn(result: result)
@@ -68,24 +69,33 @@ struct SignInView: View {
                         }
                         .padding(.horizontal, 32)
 
+                        // Continue without account
+                        Button {
+                            authManager.continueAsGuest()
+                        } label: {
+                            Text("Continue without an account")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(.white.opacity(0.7))
+                        }
+
                         // Features Section
                         VStack(spacing: 20) {
                             featureRow(
                                 icon: "wand.and.stars",
-                                title: "AI-Powered Generation",
-                                description: "Create full-stack apps with AI"
+                                title: "AI-Powered Learning",
+                                description: "Explore web development with AI guidance"
                             )
 
                             featureRow(
-                                icon: "arrow.down.doc.fill",
-                                title: "Export & Deploy",
-                                description: "Download projects or deploy instantly"
+                                icon: "chevron.left.forwardslash.chevron.right",
+                                title: "Code & Preview",
+                                description: "View, edit, and learn from source code"
                             )
 
                             featureRow(
                                 icon: "sparkles",
                                 title: "Real-time Preview",
-                                description: "See your app come to life"
+                                description: "See your code come to life instantly"
                             )
                         }
                         .padding(.horizontal, 32)
@@ -169,18 +179,38 @@ struct SignInView: View {
     // MARK: - Sign In Handlers
 
     private func handleAppleSignIn(result: Result<ASAuthorization, Error>) {
-        isSigningIn = true
+        switch result {
+        case .success(let authorization):
+            guard let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
+                  let appleIDToken = appleIDCredential.identityToken,
+                  let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
+                authManager.errorMessage = "Invalid Apple credentials"
+                return
+            }
 
-        Task {
-            do {
-                try await authManager.signInWithApple()
-                isSigningIn = false
-            } catch {
-                DispatchQueue.main.async {
-                    authManager.errorMessage = error.localizedDescription
-                    isSigningIn = false
+            let fullName: String? = {
+                if let givenName = appleIDCredential.fullName?.givenName,
+                   let familyName = appleIDCredential.fullName?.familyName {
+                    return "\(givenName) \(familyName)"
+                }
+                return nil
+            }()
+
+            isSigningIn = true
+            Task {
+                do {
+                    try await authManager.signInWithIdToken(idToken: idTokenString, fullName: fullName)
+                    await MainActor.run { isSigningIn = false }
+                } catch {
+                    await MainActor.run {
+                        authManager.errorMessage = error.localizedDescription
+                        isSigningIn = false
+                    }
                 }
             }
+
+        case .failure(let error):
+            authManager.errorMessage = error.localizedDescription
         }
     }
 

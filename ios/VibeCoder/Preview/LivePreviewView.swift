@@ -2,13 +2,13 @@ import SwiftUI
 import WebKit
 
 enum PreviewTab: String, CaseIterable {
-    case preview = "Preview"
     case code = "Source Code"
+    case preview = "Preview"
 
     var icon: String {
         switch self {
-        case .preview: return "eye"
         case .code: return "chevron.left.forwardslash.chevron.right"
+        case .preview: return "eye"
         }
     }
 }
@@ -26,23 +26,33 @@ struct LivePreviewView: View {
     @State private var showSaveSuccess = false
     @State private var isSaving = false
     @State private var saveError: String?
-    @State private var selectedTab: PreviewTab = .preview
+    @State private var selectedTab: PreviewTab = .code
+
+    // Server-side preview state
+    @State private var previewURL: URL? = nil
+    @State private var isUploadingPreview = false
+    @State private var previewError: String? = nil
 
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
+                // URL bar when preview tab is active
+                if selectedTab == .preview {
+                    previewURLBar
+                }
+
                 // Preview / Source Code tab switcher
                 tabSwitcher
 
                 // Content
                 switch selectedTab {
                 case .preview:
-                    WebViewRepresentable(bundleDir: bundleDir, reloadTrigger: reloadTrigger)
+                    previewContent
                 case .code:
                     SourceCodeView(bundleDir: bundleDir)
                 }
             }
-            .navigationTitle(selectedTab == .preview ? "Preview" : "Source Code")
+            .navigationTitle(selectedTab == .code ? "Source Code" : "Web Preview")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -54,9 +64,7 @@ struct LivePreviewView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 12) {
                         if selectedTab == .preview {
-                            Button(action: {
-                                reloadTrigger.toggle()
-                            }) {
+                            Button(action: refreshPreview) {
                                 Image(systemName: "arrow.clockwise")
                             }
                         }
@@ -79,13 +87,107 @@ struct LivePreviewView: View {
             .alert("Saved!", isPresented: $showSaveSuccess) {
                 Button("OK") { dismiss() }
             } message: {
-                Text("Your project has been saved and is now in your Apps tab")
+                Text("Your project has been saved and is now in your Projects tab")
             }
             .alert("Save Error", isPresented: .constant(saveError != nil)) {
                 Button("OK") { saveError = nil }
             } message: {
                 Text(saveError ?? "Unknown error")
             }
+        }
+        .onAppear {
+            uploadPreview()
+        }
+    }
+
+    // MARK: - URL Bar
+
+    private var previewURLBar: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "lock.fill")
+                .font(.caption2)
+                .foregroundColor(.green)
+
+            if let url = previewURL {
+                Text(url.host ?? url.absoluteString)
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.8))
+                    .lineLimit(1)
+            } else if isUploadingPreview {
+                Text("Loading...")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.5))
+            } else {
+                Text("Not available")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.5))
+            }
+
+            Spacer()
+
+            if isUploadingPreview {
+                ProgressView()
+                    .scaleEffect(0.7)
+                    .tint(.white.opacity(0.5))
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(Color(white: 0.15))
+        .cornerRadius(8)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(Color.black.opacity(0.3))
+    }
+
+    // MARK: - Preview Content
+
+    @ViewBuilder
+    private var previewContent: some View {
+        if isUploadingPreview {
+            VStack(spacing: 16) {
+                ProgressView()
+                    .scaleEffect(1.5)
+                    .tint(.blue)
+                Text("Uploading to server...")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                Text("Your code is being deployed to a secure server for preview")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color(.systemBackground))
+        } else if let url = previewURL {
+            ServerWebViewRepresentable(url: url, reloadTrigger: reloadTrigger)
+        } else if let error = previewError {
+            VStack(spacing: 16) {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.system(size: 40))
+                    .foregroundColor(.orange)
+                Text("Preview Unavailable")
+                    .font(.headline)
+                Text(error)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                Button("Retry") {
+                    uploadPreview()
+                }
+                .buttonStyle(.borderedProminent)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color(.systemBackground))
+        } else {
+            VStack(spacing: 16) {
+                ProgressView()
+                Text("Preparing preview...")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color(.systemBackground))
         }
     }
 
@@ -123,10 +225,76 @@ struct LivePreviewView: View {
                 Rectangle()
                     .fill(Color.blue)
                     .frame(width: geo.size.width / 2, height: 2)
-                    .offset(x: selectedTab == .preview ? 0 : geo.size.width / 2)
+                    .offset(x: selectedTab == .code ? 0 : geo.size.width / 2)
                     .animation(.easeInOut(duration: 0.2), value: selectedTab)
             }
             .frame(height: 2)
+        }
+    }
+
+    // MARK: - Preview Upload
+
+    private func uploadPreview() {
+        guard !isUploadingPreview else { return }
+        isUploadingPreview = true
+        previewError = nil
+
+        Task {
+            do {
+                let base64Bundle: String
+                if let original = bundleBase64 {
+                    base64Bundle = original
+                } else {
+                    // Re-zip from disk if no base64 available
+                    let zipData = try ZipExtractor.zipDirectory(bundleDir)
+                    base64Bundle = zipData.base64EncodedString()
+                }
+
+                NSLog("[Preview] Uploading bundle for server-side preview (%d chars)", base64Bundle.count)
+                let response = try await NetworkManager.shared.previewDeploy(bundle: base64Bundle)
+
+                await MainActor.run {
+                    previewURL = URL(string: response.url)
+                    isUploadingPreview = false
+                    NSLog("[Preview] Server preview ready: %@", response.url)
+                }
+            } catch {
+                NSLog("[Preview] Upload error: %@", "\(error)")
+                await MainActor.run {
+                    previewError = error.localizedDescription
+                    isUploadingPreview = false
+                }
+            }
+        }
+    }
+
+    private func refreshPreview() {
+        // Re-zip current files (may include edits) and re-upload
+        previewURL = nil
+        Task {
+            do {
+                let zipData = try ZipExtractor.zipDirectory(bundleDir)
+                let base64Bundle = zipData.base64EncodedString()
+
+                await MainActor.run {
+                    isUploadingPreview = true
+                    previewError = nil
+                }
+
+                NSLog("[Preview] Re-uploading edited bundle (%d chars)", base64Bundle.count)
+                let response = try await NetworkManager.shared.previewDeploy(bundle: base64Bundle)
+
+                await MainActor.run {
+                    previewURL = URL(string: response.url)
+                    isUploadingPreview = false
+                    reloadTrigger.toggle()
+                }
+            } catch {
+                await MainActor.run {
+                    previewError = error.localizedDescription
+                    isUploadingPreview = false
+                }
+            }
         }
     }
 
@@ -185,10 +353,10 @@ struct LivePreviewView: View {
     }
 }
 
-// MARK: - WebView
+// MARK: - Server WebView (loads from URL, not local files)
 
-struct WebViewRepresentable: UIViewRepresentable {
-    let bundleDir: URL
+struct ServerWebViewRepresentable: UIViewRepresentable {
+    let url: URL
     let reloadTrigger: Bool
 
     func makeCoordinator() -> Coordinator {
@@ -197,9 +365,7 @@ struct WebViewRepresentable: UIViewRepresentable {
 
     func makeUIView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
-        let controller = WKUserContentController()
-        config.userContentController = controller
-        config.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
+        // No local file access needed — content is served from our server
 
         let webView = WKWebView(frame: .zero, configuration: config)
         webView.scrollView.isScrollEnabled = true
@@ -208,20 +374,15 @@ struct WebViewRepresentable: UIViewRepresentable {
         webView.backgroundColor = .systemBackground
         webView.navigationDelegate = context.coordinator
 
-        loadContent(in: webView)
+        webView.load(URLRequest(url: url))
         return webView
     }
 
     func updateUIView(_ webView: WKWebView, context: Context) {
         if context.coordinator.lastReloadTrigger != reloadTrigger {
             context.coordinator.lastReloadTrigger = reloadTrigger
-            loadContent(in: webView)
+            webView.load(URLRequest(url: url))
         }
-    }
-
-    private func loadContent(in webView: WKWebView) {
-        let indexPath = bundleDir.appendingPathComponent("index.html")
-        webView.loadFileURL(indexPath, allowingReadAccessTo: bundleDir)
     }
 
     class Coordinator: NSObject, WKNavigationDelegate {
@@ -233,9 +394,7 @@ struct WebViewRepresentable: UIViewRepresentable {
 
             if navigationAction.navigationType == .other ||
                navigationAction.navigationType == .reload ||
-               scheme == "about" || scheme == "file" {
-                decisionHandler(.allow)
-            } else if scheme == "http" || scheme == "https" {
+               scheme == "about" || scheme == "https" || scheme == "http" {
                 decisionHandler(.allow)
             } else {
                 decisionHandler(.cancel)

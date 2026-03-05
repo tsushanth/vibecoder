@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
@@ -21,7 +20,6 @@ import com.kreativekoala.vibecoder.ui.theme.*
 fun AppsScreen(
     modifier: Modifier = Modifier,
     onProjectClick: (String) -> Unit,
-    onBrowseClick: () -> Unit,
     viewModel: AppsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -46,24 +44,12 @@ fun AppsScreen(
                 fontWeight = FontWeight.Bold
             )
 
-            Row {
-                IconButton(onClick = { viewModel.loadProjects() }) {
-                    Icon(
-                        Icons.Default.Refresh,
-                        contentDescription = "Refresh",
-                        tint = TextSecondary
-                    )
-                }
-                TextButton(onClick = onBrowseClick) {
-                    Icon(
-                        Icons.Default.Explore,
-                        contentDescription = null,
-                        tint = VibePurple,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Explore", color = VibePurple)
-                }
+            IconButton(onClick = { viewModel.loadProjects() }) {
+                Icon(
+                    Icons.Default.Refresh,
+                    contentDescription = "Refresh",
+                    tint = TextSecondary
+                )
             }
         }
 

@@ -5,6 +5,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("org.jetbrains.kotlin.plugin.serialization")
     kotlin("kapt")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -15,8 +16,8 @@ android {
         applicationId = "com.kreativekoala.vibecoder"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 20
+        versionName = "1.7.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -56,6 +57,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     packaging {
@@ -111,8 +113,9 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp-sse:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
-    // Google Play Billing
-    implementation("com.android.billingclient:billing-ktx:7.1.1")
+    // RevenueCat (wraps Google Play Billing)
+    implementation("com.revenuecat.purchases:purchases:9.22.2")
+    implementation("com.revenuecat.purchases:purchases-ui:9.22.2")
 
     // Image loading
     implementation("io.coil-kt:coil-compose:2.7.0")
@@ -132,6 +135,13 @@ dependencies {
 
     // Facebook SDK (for Meta Ads attribution and CAPI)
     implementation("com.facebook.android:facebook-android-sdk:17.0.2")
+
+    // Firebase Analytics (for Google Ads conversion tracking)
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-analytics")
+
+    // TikTok Events SDK (install attribution & event tracking)
+    implementation("com.github.tiktok:tiktok-business-android-sdk:1.6.0")
 }
 
 kapt {

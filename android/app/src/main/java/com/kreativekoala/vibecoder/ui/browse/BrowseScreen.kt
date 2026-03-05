@@ -19,8 +19,9 @@ import com.kreativekoala.vibecoder.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BrowseScreen(
-    onBack: () -> Unit,
     onProjectClick: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    onBack: (() -> Unit)? = null,
     viewModel: BrowseViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -32,12 +33,14 @@ fun BrowseScreen(
             TopAppBar(
                 title = { Text("Explore") },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = TextPrimary
-                        )
+                    if (onBack != null) {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                                tint = TextPrimary
+                            )
+                        }
                     }
                 },
                 actions = {

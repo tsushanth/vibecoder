@@ -369,20 +369,8 @@ router.post('/generate', async (req, res) => {
             return res.status(429).json({ error: 'Rate limit exceeded. Try again in an hour.' });
         }
 
-        // Check subscription usage limit for generation
-        if (userId) {
-            const limitCheck = await checkUsageLimit(userId, ACTION_TYPES.generation);
-            if (!limitCheck.allowed) {
-                return res.status(403).json({
-                    error: limitCheck.error,
-                    used: limitCheck.used,
-                    limit: limitCheck.limit,
-                    remaining: limitCheck.remaining,
-                    requiresTier: limitCheck.requiresTier,
-                    currentTier: limitCheck.currentTier
-                });
-            }
-        }
+        // Subscription usage check disabled until tables are created
+        // TODO: Re-enable when user_subscriptions and subscription_usage tables exist
 
         console.log(`[generate] User ${userId}: "${prompt.substring(0, 80)}"${referenceImage ? ' (with reference image)' : ''}`);
 

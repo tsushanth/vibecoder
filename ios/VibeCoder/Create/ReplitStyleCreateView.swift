@@ -64,7 +64,7 @@ struct ReplitStyleCreateView: View {
                         .font(.title2)
                         .foregroundColor(.white.opacity(0.8))
 
-                    Text("what do you want to build & learn?")
+                    Text("what do you want to learn today?")
                         .font(.title2)
                         .foregroundColor(.white.opacity(0.8))
                 }
@@ -84,7 +84,7 @@ struct ReplitStyleCreateView: View {
                         .frame(height: 200)
 
                     if prompt.isEmpty {
-                        Text("Describe a web project to build & explore the code...")
+                        Text("Describe what you want to learn & explore the code...")
                             .foregroundColor(.white.opacity(0.3))
                             .font(.system(size: 17))
                             .padding(16)

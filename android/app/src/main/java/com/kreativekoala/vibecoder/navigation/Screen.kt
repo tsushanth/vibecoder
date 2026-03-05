@@ -2,6 +2,8 @@ package com.kreativekoala.vibecoder.navigation
 
 sealed class Screen(val route: String) {
     data object SignIn : Screen("sign_in")
+    data object Onboarding : Screen("onboarding")
+    data object Paywall : Screen("paywall")
     data object Main : Screen("main")
     data object Apps : Screen("apps")
     data object Create : Screen("create")

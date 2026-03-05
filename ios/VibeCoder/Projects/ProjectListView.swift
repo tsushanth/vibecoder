@@ -46,7 +46,7 @@ struct ProjectListView: View {
                 .font(.title2)
                 .fontWeight(.semibold)
 
-            Text("Create your first app using AI")
+            Text("Create your first web project using AI")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
 

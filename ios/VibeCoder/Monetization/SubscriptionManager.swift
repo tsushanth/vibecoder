@@ -290,7 +290,7 @@ struct SubscriptionPlan: Identifiable {
                 "3 tweaks per project",
                 "Public projects only",
                 "Standard queue",
-                "vibecoder.app subdomain"
+                "vibebuild.cc subdomain"
             ],
             isPopular: false,
             productId: ""

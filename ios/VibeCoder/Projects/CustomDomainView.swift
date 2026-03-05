@@ -57,7 +57,7 @@ struct CustomDomainView: View {
                     .fontWeight(.semibold)
                     .foregroundColor(.white)
 
-                Text("Use your own domain instead of the default vibecoder.app subdomain.")
+                Text("Use your own domain instead of the default vibebuild.cc subdomain.")
                     .font(.subheadline)
                     .foregroundColor(.white.opacity(0.6))
             }

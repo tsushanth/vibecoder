@@ -19,10 +19,10 @@ struct ContentView: View {
                             generationManager.isOnCreateTab = (newValue == 1)
                         }
 
-                    // Build tab (centered, middle position like Replit)
+                    // Create tab (centered, middle position)
                     ReplitStyleCreateView()
                         .tabItem {
-                            Label("Build", systemImage: "hammer")
+                            Label("Create", systemImage: "plus.rectangle.on.folder")
                         }
                         .tag(1)
 

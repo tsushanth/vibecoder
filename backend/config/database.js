@@ -29,4 +29,13 @@ if (!supabaseUrl || !supabaseKey) {
     supabase = createClient(supabaseUrl, supabaseKey);
 }
 
-export { supabase };
+// Admin client for operations requiring service role (e.g., user deletion)
+let supabaseAdmin = null;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (supabaseUrl && supabaseServiceKey) {
+    supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+        auth: { autoRefreshToken: false, persistSession: false }
+    });
+}
+
+export { supabase, supabaseAdmin };

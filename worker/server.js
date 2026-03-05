@@ -157,11 +157,36 @@ assets/             <- Generated assets (SVG, data URIs)
 - Dark mode support where appropriate
 - Accessible: proper contrast ratios, semantic HTML
 
-## CRITICAL: No Placeholder Code
-- Do NOT leave TODO comments, placeholder functions, or stub implementations
-- Every function must be fully implemented
-- Every visual element must be fully designed
-- Every feature must actually work
+## CRITICAL: Fully Functional Code — Zero Shortcuts
+
+### What "fully functional" means:
+- Every button must have a working click handler that does something visible
+- Every form must validate input, process it, and show results
+- Every list must support add, display, and delete operations
+- Every game must have working win/lose conditions and score tracking
+- Every calculator must compute correct results for ALL operations shown
+- Every timer/clock must actually count and update the display
+- Navigation between screens/tabs/pages must all work
+- Data must persist using localStorage where appropriate
+
+### Common mistakes to AVOID:
+- Buttons that look clickable but do nothing
+- Functions that are defined but never called
+- Event listeners that are missing or attached to wrong elements
+- Variables referenced before they are defined
+- Game logic that doesn't track state correctly (scores, turns, game over)
+- Modals/dialogs that can't be closed or don't appear
+- Forms that submit but don't process or display the data
+- CSS animations that reference non-existent keyframes
+- JavaScript that errors silently and breaks the entire app
+
+### Self-verification checklist (mentally walk through BEFORE finishing):
+1. Load the page — does it render without blank areas?
+2. Click EVERY button — does each one produce a visible result?
+3. Fill EVERY form — does it validate and process correctly?
+4. Check ALL interactive elements — do they respond to user input?
+5. Test edge cases — empty input, rapid clicking, screen resize
+6. Verify all state changes — do counters count, toggles toggle, filters filter?
 `;
 
 // ============================================
@@ -782,6 +807,11 @@ IMPORTANT RULES:
 - The application must be COMPLETE and fully functional
 - All assets must be created inline (SVG, CSS art, canvas) — no external resources
 - Make it professional with clean design and smooth interactions
+- Wire up EVERY button, link, and interactive element with working event handlers
+- If the app has game logic, implement the COMPLETE game loop (start, play, score, win/lose, restart)
+- If the app has forms, implement full validation, processing, and result display
+- Use localStorage to persist user data where it makes sense
+- Test your logic mentally: trace through each user action and confirm it works end-to-end
 
 Start building now. Create the files.`;
 
@@ -873,19 +903,25 @@ Fix all these issues now by editing the files directly.`;
 
         // Only do polish pass if no critical issues remain (don't waste turns polishing broken code)
         if (remainingCritical === 0) {
-            const polishPrompt = `Review the web application and make final improvements:
+            const polishPrompt = `Review the web application by reading EVERY file. Your primary job is to ensure the app ACTUALLY WORKS, then polish the design.
 
-1. COMPLETENESS: Walk through every feature. Fix logic gaps, undefined variables, broken flows.
+1. FUNCTIONAL VERIFICATION (most important):
+   - Read all JavaScript code. Trace the logic for every user interaction.
+   - Click mentally through every button — does the handler exist and do something visible?
+   - Check every addEventListener — is it attached to the correct element with the correct selector?
+   - Verify all DOM queries (getElementById, querySelector) reference elements that actually exist in the HTML.
+   - Check for undefined variables, functions called before defined, missing return values.
+   - If there's game logic: verify score tracking, win/lose conditions, and restart all work.
+   - If there's a form: verify validation, submission handling, and result display.
+   - Fix ANY broken functionality you find.
 
-2. DESIGN: Is it visually appealing? Improve typography, spacing, colors, transitions.
+2. DESIGN: Improve typography, spacing, colors, transitions where needed.
 
-3. RESPONSIVENESS: Does it work on small phones and large tablets?
+3. RESPONSIVENESS: Ensure it works on small phones (320px) and tablets.
 
-4. POLISH: Add micro-interactions, hover effects, loading states, empty states.
+4. POLISH: Add micro-interactions, hover/active states, empty states.
 
-5. EDGE CASES: Handle edge cases gracefully.
-
-Make targeted improvements — don't rewrite everything.`;
+Make targeted fixes — don't rewrite everything. Focus on making broken things work.`;
 
             const polishResult = await runClaudeCommand(claudePath, polishPrompt, projectDir, requestId, 8);
 

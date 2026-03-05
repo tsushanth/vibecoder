@@ -1,8 +1,11 @@
 package com.kreativekoala.vibecoder.navigation
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -16,14 +19,27 @@ import com.kreativekoala.vibecoder.ui.auth.SignInScreen
 import com.kreativekoala.vibecoder.ui.browse.BrowseScreen
 import com.kreativekoala.vibecoder.ui.browse.ProjectPreviewScreen
 import com.kreativekoala.vibecoder.ui.main.MainScreen
+import com.kreativekoala.vibecoder.ui.onboarding.OnboardingScreen
+
+private const val PREFS_NAME = "vibebuild_prefs"
+private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
 
 @Composable
 fun VibeBuildNavGraph() {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = hiltViewModel()
     val isAuthenticated by authViewModel.isAuthenticated.collectAsState()
+    val context = LocalContext.current
 
-    val startDestination = if (isAuthenticated) Screen.Main.route else Screen.SignIn.route
+    val startDestination = remember {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val hasCompletedOnboarding = prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false)
+        when {
+            !isAuthenticated -> Screen.SignIn.route
+            !hasCompletedOnboarding -> Screen.Onboarding.route
+            else -> Screen.Main.route
+        }
+    }
 
     NavHost(
         navController = navController,
@@ -32,8 +48,40 @@ fun VibeBuildNavGraph() {
         composable(Screen.SignIn.route) {
             SignInScreen(
                 onSignInSuccess = {
-                    navController.navigate(Screen.Main.route) {
-                        popUpTo(Screen.SignIn.route) { inclusive = true }
+                    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                    val hasCompletedOnboarding = prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false)
+                    if (hasCompletedOnboarding) {
+                        navController.navigate(Screen.Main.route) {
+                            popUpTo(Screen.SignIn.route) { inclusive = true }
+                        }
+                    } else {
+                        navController.navigate(Screen.Onboarding.route) {
+                            popUpTo(Screen.SignIn.route) { inclusive = true }
+                        }
+                    }
+                }
+            )
+        }
+
+        composable(Screen.Onboarding.route) {
+            OnboardingScreen(
+                onComplete = {
+                    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                    prefs.edit().putBoolean(KEY_ONBOARDING_COMPLETED, true).apply()
+                    navController.navigate(Screen.Paywall.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Screen.Paywall.route) {
+            SubscriptionPlansScreen(
+                onBack = {
+                    if (!navController.popBackStack()) {
+                        navController.navigate(Screen.Main.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
                     }
                 }
             )
@@ -46,14 +94,14 @@ fun VibeBuildNavGraph() {
                         popUpTo(0) { inclusive = true }
                     }
                 },
-                onNavigateToBrowse = {
-                    navController.navigate(Screen.Browse.route)
-                },
                 onNavigateToSubscriptions = {
                     navController.navigate(Screen.SubscriptionPlans.route)
                 },
                 onNavigateToProjectDetail = { projectId ->
                     navController.navigate(Screen.ProjectDetail.createRoute(projectId))
+                },
+                onNavigateToProjectPreview = { projectId ->
+                    navController.navigate(Screen.ProjectPreview.createRoute(projectId))
                 }
             )
         }
@@ -71,10 +119,10 @@ fun VibeBuildNavGraph() {
 
         composable(Screen.Browse.route) {
             BrowseScreen(
-                onBack = { navController.popBackStack() },
                 onProjectClick = { projectId ->
                     navController.navigate(Screen.ProjectPreview.createRoute(projectId))
-                }
+                },
+                onBack = { navController.popBackStack() }
             )
         }
 

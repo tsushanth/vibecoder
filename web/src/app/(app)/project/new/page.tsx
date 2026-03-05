@@ -10,7 +10,7 @@ import { GenerationProgress } from '@/components/builder/GenerationProgress';
 import { PreviewPane } from '@/components/builder/PreviewPane';
 import { streamSSE } from '@/lib/sse';
 import { extractBundle, buildFileTree, createPreviewUrl } from '@/lib/zip';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 import type { SaveProjectResponse } from '@/types/api';
 
 export default function NewProjectPage() {
@@ -34,13 +34,31 @@ export default function NewProjectPage() {
   const abortRef = useRef<AbortController | null>(null);
   const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [usageLimitError, setUsageLimitError] = useState<string | null>(null);
 
   const handleGenerate = useCallback(
     async (prompt: string, referenceImage?: string) => {
       if (!user) return;
 
+      // Check usage limits before generating
+      try {
+        await api.post('/api/subscriptions/usage', {
+          userId: user.id,
+          actionType: 'generation',
+        });
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 403) {
+          const data = err.data as { remaining?: number; limit?: number; currentTier?: string };
+          setUsageLimitError(
+            `Daily generation limit reached (${data.limit || 3}/day on ${data.currentTier || 'Free'} plan). Upgrade to Pro for unlimited generations.`
+          );
+          return;
+        }
+      }
+
       setSavedProjectId(null);
       setSaveError(null);
+      setUsageLimitError(null);
       startGeneration();
       abortRef.current = new AbortController();
 
@@ -179,6 +197,33 @@ export default function NewProjectPage() {
 
   return (
     <div className="h-full flex items-center justify-center p-6">
+      {/* Usage limit modal */}
+      {usageLimitError && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => setUsageLimitError(null)}>
+          <div className="bg-card border border-border rounded-2xl p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-2">Limit Reached</h3>
+            <p className="text-sm text-muted mb-6">{usageLimitError}</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setUsageLimitError(null)}
+                className="flex-1 px-4 py-2 border border-border hover:bg-surface rounded-xl text-sm font-medium transition"
+              >
+                OK
+              </button>
+              <button
+                onClick={() => {
+                  setUsageLimitError(null);
+                  router.push('/settings');
+                }}
+                className="flex-1 px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-semibold transition"
+              >
+                Upgrade
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isGenerating ? (
         <div className="w-full max-w-md">
           <GenerationProgress />

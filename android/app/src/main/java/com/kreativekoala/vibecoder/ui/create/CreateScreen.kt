@@ -83,15 +83,21 @@ fun CreateScreen(
                 bundleDir = uiState.bundleDir!!,
                 onClose = { viewModel.dismissPreview() },
                 onSave = { viewModel.saveProject() },
+                onPublish = { viewModel.showDeployDialog() },
                 isSaving = uiState.isSaving,
-                isSaved = uiState.savedProjectId != null
+                isSaved = uiState.savedProjectId != null,
+                isDeploying = uiState.isDeploying,
+                deployedUrl = uiState.deployedUrl,
+                showDeployDialog = uiState.showDeployDialog,
+                onDeployConfirm = { subdomain -> viewModel.publishProject(subdomain) },
+                onDeployDismiss = { viewModel.dismissDeployDialog() }
             )
 
-            if (showSaveSuccess) {
+            if (showSaveSuccess && uiState.deployedUrl == null) {
                 AlertDialog(
                     onDismissRequest = { showSaveSuccess = false },
                     title = { Text("Saved!") },
-                    text = { Text("Your project has been saved and is now in your Apps tab.") },
+                    text = { Text("Your project has been saved. Tap the publish button to make it live!") },
                     confirmButton = {
                         TextButton(onClick = { showSaveSuccess = false }) {
                             Text("OK", color = VibePurple)
@@ -124,9 +130,13 @@ fun CreateScreen(
             // Generation progress view
             GenerationProgressView(
                 progressPercent = uiState.progressPercent,
+                simulatedProgress = uiState.simulatedProgress,
+                notifyEnabled = uiState.notifyEnabled,
                 buildPhase = uiState.buildPhase,
                 buildDetail = uiState.buildDetail,
                 estimatedSecondsRemaining = uiState.estimatedSecondsRemaining,
+                onNotifyEnabledChanged = { viewModel.setNotifyEnabled(it) },
+                onSimulatedProgressChanged = { viewModel.updateSimulatedProgress(it) },
                 onCancel = { viewModel.cancelGeneration() },
                 modifier = Modifier.align(Alignment.Center)
             )
