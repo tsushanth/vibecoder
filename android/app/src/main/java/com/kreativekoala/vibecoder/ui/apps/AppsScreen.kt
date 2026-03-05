@@ -24,6 +24,11 @@ fun AppsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    // Refresh projects whenever this screen becomes visible
+    LaunchedEffect(Unit) {
+        viewModel.loadProjects()
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
