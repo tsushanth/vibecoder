@@ -13,8 +13,6 @@ struct ReplitStyleAppsView: View {
     @State private var loadingProjectId: String?
     @State private var projectToDelete: AppCardItem?
     @State private var showDeleteConfirm = false
-    @State private var domainProjectId: String?
-    @State private var showDomainSheet = false
 
     var body: some View {
         NavigationView {
@@ -56,15 +54,6 @@ struct ReplitStyleAppsView: View {
                                 }
                                 .buttonStyle(.plain)
                                 .contextMenu {
-                                    if project.publishedUrl != nil {
-                                        Button {
-                                            domainProjectId = project.id
-                                            showDomainSheet = true
-                                        } label: {
-                                            Label("Custom Domain", systemImage: "globe")
-                                        }
-                                    }
-
                                     Button(role: .destructive) {
                                         projectToDelete = project
                                         showDeleteConfirm = true
@@ -100,12 +89,6 @@ struct ReplitStyleAppsView: View {
             Button("Cancel", role: .cancel) {}
         } message: { item in
             Text("Are you sure you want to delete \"\(item.title)\"? This cannot be undone.")
-        }
-        .sheet(isPresented: $showDomainSheet) {
-            if let projectId = domainProjectId {
-                CustomDomainView(projectId: projectId)
-                    .environmentObject(authManager)
-            }
         }
         .fullScreenCover(isPresented: $showPreview) {
             if let bundleDir = selectedBundleDir {
@@ -291,33 +274,13 @@ struct AppCardItemView: View {
                     .font(.subheadline)
                     .foregroundColor(.white.opacity(0.6))
 
-                HStack(spacing: 8) {
-                    HStack(spacing: 4) {
-                        Image(systemName: project.isPublic ? "globe" : "lock.fill")
-                            .font(.caption)
-                        Text(project.isPublic ? "Public" : "Private")
-                            .font(.caption)
-                    }
-                    .foregroundColor(.white.opacity(0.5))
-
-                    if let customDomain = project.customDomain {
-                        HStack(spacing: 3) {
-                            Image(systemName: "globe.americas.fill")
-                                .font(.caption2)
-                            Text(customDomain)
-                                .font(.caption2)
-                        }
-                        .foregroundColor(.green)
-                    } else if project.publishedUrl != nil {
-                        HStack(spacing: 3) {
-                            Image(systemName: "link")
-                                .font(.caption2)
-                            Text("Shared")
-                                .font(.caption2)
-                        }
-                        .foregroundColor(.blue)
-                    }
+                HStack(spacing: 4) {
+                    Image(systemName: "chevron.left.forwardslash.chevron.right")
+                        .font(.caption)
+                    Text("Code Project")
+                        .font(.caption)
                 }
+                .foregroundColor(.white.opacity(0.5))
             }
             .padding(12)
             .background(Color(white: 0.08))

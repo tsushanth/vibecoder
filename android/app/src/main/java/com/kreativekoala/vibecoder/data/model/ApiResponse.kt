@@ -203,3 +203,8 @@ data class TweakRequest(
     val userId: String,
     val tweakDescription: String
 )
+
+data class FeedbackRequest(
+    val userId: String,
+    val rating: String
+)

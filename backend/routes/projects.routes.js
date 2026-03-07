@@ -161,9 +161,19 @@ async function refreshBrowseCache() {
         if (newestResult.error) throw newestResult.error;
         if (popularResult.error) throw popularResult.error;
 
-        browseCache.newest = newestResult.data || [];
-        browseCache.popular = popularResult.data || [];
-        browseCache.totalCount = newestResult.count || browseCache.newest.length;
+        // Filter out test/junk projects from public browse
+        const isRealProject = (p) => {
+            const name = (p.creator_name || '').toLowerCase();
+            const title = (p.title || '').toLowerCase();
+            if (name === 'anonymous' || name === 'test user') return false;
+            if (p.creator_id?.startsWith('test-')) return false;
+            if (/^test\b/i.test(title) && title.length < 30) return false;
+            if (title === 'prefix-test' || title === 'test') return false;
+            return true;
+        };
+        browseCache.newest = (newestResult.data || []).filter(isRealProject);
+        browseCache.popular = (popularResult.data || []).filter(isRealProject);
+        browseCache.totalCount = browseCache.newest.length;
         browseCache.lastRefreshed = Date.now();
 
         console.log(`[cache] Browse cache refreshed: ${browseCache.totalCount} projects`);
@@ -210,9 +220,61 @@ async function refreshSuggestionsCache() {
     }
 }
 
+const BUILT_IN_SUGGESTIONS = [
+    { label: 'Portfolio Site', prompt: 'Build a personal portfolio website with a dark theme, animated hero section, project gallery with hover effects, skills section, and a working contact form' },
+    { label: 'Task Manager', prompt: 'Build a Kanban-style task manager with drag and drop columns (To Do, In Progress, Done), ability to add/edit/delete tasks, priority labels, and local storage persistence' },
+    { label: 'E-Commerce Store', prompt: 'Build a modern e-commerce product page with image gallery, size selector, add to cart button, customer reviews section, and a responsive mobile layout' },
+    { label: 'Analytics Dashboard', prompt: 'Build an analytics dashboard with sidebar navigation, chart cards showing revenue/users/orders metrics, a data table with sorting, and a dark professional theme' },
+    { label: 'Restaurant Menu', prompt: 'Build a restaurant website with a hero image, interactive menu with categories and filtering, reservation form, photo gallery, and Google Maps embed placeholder' },
+    { label: 'Quiz Game', prompt: 'Build an interactive quiz game with multiple choice questions, score tracking, timer, progress bar, results screen with share button, and colorful animations' },
+    { label: 'Recipe Finder', prompt: 'Build a recipe search app with ingredient-based filtering, step-by-step cooking instructions, save favorites, and a warm kitchen-themed design' },
+    { label: 'Weather Dashboard', prompt: 'Build a weather app that shows current conditions and 5-day forecast using geolocation, with temperature, humidity, wind speed, weather icons, and a clean card layout' },
+    { label: 'Habit Tracker', prompt: 'Build a habit tracking app where each habit grows a virtual plant based on consistency, with streak counters, weekly progress charts, and a garden aesthetic' },
+    { label: 'Mood Journal', prompt: 'Build a mood tracking journal where users log daily emotions with color-coded entries, write reflections, view mood trends over time, and export their history' },
+    { label: 'Pomodoro Timer', prompt: 'Build a Pomodoro productivity timer with customizable work/break intervals, session counter, task list integration, ambient sounds, and a minimal focused design' },
+    { label: 'Budget Planner', prompt: 'Build a personal budget planner with income and expense tracking, category breakdowns with pie charts, monthly summaries, savings goals, and a clean modern UI' },
+    { label: 'Flashcard App', prompt: 'Build a spaced repetition flashcard app with deck creation, flip animations, difficulty rating, progress tracking, and a study streak counter' },
+    { label: 'Music Player', prompt: 'Build a music player UI with album art display, playback controls, playlist management, equalizer visualization, and a sleek dark gradient theme' },
+    { label: 'Travel Planner', prompt: 'Build a trip planning app with destination search, itinerary builder with drag-and-drop days, packing checklist, budget tracker, and a map-themed design' },
+    { label: 'Fitness Logger', prompt: 'Build a workout tracker with exercise library, set/rep logging, progress charts, personal records, rest timer, and an energetic sports-themed design' },
+    { label: 'Landing Page', prompt: 'Build a SaaS landing page with animated hero, feature cards, pricing table, testimonial carousel, FAQ accordion, and a call-to-action with email signup' },
+    { label: 'Chat Interface', prompt: 'Build a real-time chat interface with message bubbles, typing indicators, emoji picker, file attachment previews, and a clean WhatsApp-inspired design' },
+    { label: 'Notes App', prompt: 'Build a markdown notes app with sidebar navigation, rich text editing, tag-based organization, search functionality, and a Notion-inspired minimal design' },
+    { label: 'Photo Gallery', prompt: 'Build a photo gallery with masonry grid layout, lightbox viewer, album organization, drag-and-drop upload, and smooth transition animations' },
+    { label: 'Booking System', prompt: 'Build a service booking app with calendar date picker, time slot selection, service menu, booking confirmation, and a professional clean design' },
+    { label: 'Social Feed', prompt: 'Build a social media feed with post cards, like/comment interactions, user avatars, infinite scroll, stories bar at top, and a modern Instagram-inspired layout' },
+    { label: 'Code Playground', prompt: 'Build a live code editor with HTML/CSS/JS tabs, real-time preview panel, syntax highlighting, code sharing, and a VS Code-inspired dark theme' },
+    { label: 'Movie Browser', prompt: 'Build a movie discovery app with trending carousel, genre filtering, movie detail cards with ratings, watchlist feature, and a Netflix-inspired dark theme' },
+    { label: 'Resume Builder', prompt: 'Build a resume builder with form sections for experience, education, and skills, live preview, multiple template choices, and PDF-style export view' },
+    { label: 'Countdown Timer', prompt: 'Build an event countdown app with multiple countdowns, custom background images per event, share functionality, and animated flip-clock style numbers' },
+    { label: 'Drawing Canvas', prompt: 'Build a drawing app with brush tools, color picker, undo/redo, layer support, canvas resize, and the ability to save artwork as PNG' },
+    { label: 'Crypto Tracker', prompt: 'Build a cryptocurrency dashboard with live price cards, sparkline charts, portfolio tracker, watchlist, price alerts setup, and a futuristic dark theme' },
+    { label: 'Survey Builder', prompt: 'Build a form/survey builder with drag-and-drop question types, preview mode, response summary, and a clean Typeform-inspired design' },
+    { label: 'Podcast Player', prompt: 'Build a podcast player with episode list, playback speed controls, chapter markers, queue management, and a minimal audio-focused design' },
+    { label: 'Grocery List', prompt: 'Build a smart grocery list app with category grouping, quantity adjusters, check-off items, frequently bought suggestions, and a fresh produce-themed design' },
+    { label: 'Color Palette', prompt: 'Build a color palette generator with random palette creation, color harmony rules, copy hex codes, save palettes, and smooth gradient previews' },
+    { label: 'Blog Platform', prompt: 'Build a blog with article list, reading time estimates, tag filtering, dark/light mode toggle, and a clean Medium-inspired typography-focused design' },
+    { label: 'Meditation App', prompt: 'Build a meditation timer with guided breathing animation, ambient nature sounds, session history, streak tracking, and a calming zen-inspired design' },
+    { label: 'Typing Speed', prompt: 'Build a typing speed test with random text passages, live WPM counter, accuracy tracking, high score board, and a retro terminal-style design' },
+    { label: 'Event Board', prompt: 'Build a community event board with event cards, date filtering, category tags, RSVP buttons, map location previews, and a vibrant poster-style design' },
+    { label: 'Invoice Maker', prompt: 'Build an invoice generator with client details form, line item table, tax calculations, PDF preview, and a professional business-themed design' },
+    { label: 'Reading List', prompt: 'Build a book tracking app with reading status, star ratings, notes per book, reading stats, and a warm library-themed design' },
+    { label: 'Password Gen', prompt: 'Build a password generator with length slider, character type toggles, strength meter, copy button, password history, and a security-themed dark design' },
+    { label: 'Pet Dashboard', prompt: 'Build a pet care tracker with feeding schedules, vet appointment calendar, medication reminders, photo gallery per pet, and a playful paw-print themed design' },
+    { label: 'Kanban Board', prompt: 'Build a project management board with customizable columns, task cards with labels and due dates, drag and drop, member avatars, and a Trello-inspired design' },
+    { label: 'Language Cards', prompt: 'Build a language learning flashcard app with vocabulary decks, pronunciation guide, spaced repetition, daily goals, and a colorful educational design' },
+    { label: 'Meal Planner', prompt: 'Build a weekly meal planning app with drag-and-drop recipe slots, auto-generated grocery lists, nutritional summaries, and a fresh food-photography inspired design' },
+    { label: 'Pixel Art Editor', prompt: 'Build a pixel art editor with grid canvas, color palette, brush and fill tools, animation frames, export as sprite sheet, and a retro 8-bit themed interface' },
+    { label: 'Expense Splitter', prompt: 'Build a bill splitting app for groups with itemized expenses, equal or custom splits, running balances, settle up tracking, and a friendly social design' },
+    { label: 'Mood Playlist', prompt: 'Build a mood-based playlist maker where users pick emotions from a wheel, get song suggestions with album art, create shareable playlists, and a Spotify-inspired dark UI' },
+    { label: 'Daily Standup', prompt: 'Build a daily standup tracker where team members log yesterday, today, and blockers, with history view, team overview, and a clean Slack-inspired design' },
+    { label: 'Emoji Kitchen', prompt: 'Build a fun emoji mixer app where users combine two emojis to create mashup designs, browse combinations, share results, and a playful colorful interface' },
+    { label: 'Plant Identifier', prompt: 'Build a plant care app with a plant library, watering schedule reminders, growth photo journal, care tips, and a lush botanical green-themed design' },
+    { label: 'Debate Timer', prompt: 'Build a debate/speech timer with configurable rounds, speaker tracking, bell sounds, score cards, and a professional podium-themed dark design' },
+];
+
 function getRandomSuggestions(count = 6) {
-    const pool = suggestionsCache.items;
-    if (pool.length === 0) return [];
+    const pool = suggestionsCache.items.length > 0 ? suggestionsCache.items : BUILT_IN_SUGGESTIONS;
     const shuffled = [...pool].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, Math.min(count, pool.length));
 }
@@ -612,6 +674,45 @@ router.get('/browse', (req, res) => {
         console.error('[browse] Error:', error.message);
         res.status(500).json({ error: 'Failed to fetch projects' });
     }
+});
+
+// ============================================
+// POST /api/projects/:id/feedback
+// Record thumbs up/down feedback for a generated project
+// ============================================
+router.post('/:id/feedback', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { userId, rating } = req.body; // rating: 'up' | 'down'
+        if (!userId || !['up', 'down'].includes(rating)) {
+            return res.status(400).json({ error: 'userId and rating (up/down) required' });
+        }
+
+        const { error } = await supabase
+            .from('project_feedback')
+            .upsert({
+                project_id: id,
+                user_id: userId,
+                rating,
+                created_at: new Date().toISOString(),
+            }, { onConflict: 'project_id,user_id' });
+
+        if (error) throw error;
+        console.log(`[feedback] Project ${id}: ${rating} by ${userId}`);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('[feedback] Error:', error.message);
+        res.status(500).json({ error: 'Failed to save feedback' });
+    }
+});
+
+// ============================================
+// POST /api/projects/suggest-ideas
+// Return 6 random ideas from the built-in pool (always fresh)
+// ============================================
+router.post('/suggest-ideas', async (req, res) => {
+    const shuffled = [...BUILT_IN_SUGGESTIONS].sort(() => Math.random() - 0.5);
+    res.json({ success: true, suggestions: shuffled.slice(0, 6) });
 });
 
 // ============================================

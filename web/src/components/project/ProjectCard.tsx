@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import type { ProjectSummary } from '@/types/api';
 import { formatDate } from '@/lib/utils';
 
@@ -12,6 +13,21 @@ interface ProjectCardProps {
   showActions?: boolean;
 }
 
+// Deterministic gradient based on project title
+function getGradient(title: string) {
+  const gradients = [
+    'from-violet-600/40 to-indigo-600/40',
+    'from-blue-600/40 to-cyan-600/40',
+    'from-emerald-600/40 to-teal-600/40',
+    'from-orange-600/40 to-amber-600/40',
+    'from-pink-600/40 to-rose-600/40',
+    'from-purple-600/40 to-fuchsia-600/40',
+  ];
+  let hash = 0;
+  for (let i = 0; i < title.length; i++) hash = title.charCodeAt(i) + ((hash << 5) - hash);
+  return gradients[Math.abs(hash) % gradients.length];
+}
+
 export function ProjectCard({
   project,
   onClick,
@@ -20,20 +36,64 @@ export function ProjectCard({
   onTryIt,
   showActions = false,
 }: ProjectCardProps) {
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [iframeError, setIframeError] = useState(false);
+
+  const hasLivePreview = project.published_url && !iframeError;
+
   return (
     <div
       onClick={onClick}
-      className="group bg-card border border-border rounded-xl overflow-hidden cursor-pointer hover:border-accent/30 transition"
+      className="group bg-card border border-border rounded-xl overflow-hidden cursor-pointer hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 transition-all duration-200"
     >
       {/* Thumbnail */}
-      <div className="aspect-video bg-surface flex items-center justify-center relative">
-        <span className="text-4xl opacity-30">📱</span>
+      <div className="aspect-video relative overflow-hidden">
+        {hasLivePreview ? (
+          <>
+            {/* Live iframe preview */}
+            <div className="absolute inset-0 origin-top-left" style={{ width: '400%', height: '400%', transform: 'scale(0.25)' }}>
+              <iframe
+                src={project.published_url!}
+                title={project.title}
+                className="w-full h-full border-0"
+                loading="lazy"
+                sandbox="allow-scripts allow-same-origin"
+                onLoad={() => setIframeLoaded(true)}
+                onError={() => setIframeError(true)}
+                tabIndex={-1}
+              />
+            </div>
+            {/* Loading overlay */}
+            {!iframeLoaded && (
+              <div className={`absolute inset-0 bg-gradient-to-br ${getGradient(project.title)} flex items-center justify-center`}>
+                <div className="w-5 h-5 border-2 border-white/40 border-t-white/80 rounded-full animate-spin" />
+              </div>
+            )}
+            {/* Prevent clicks on iframe */}
+            <div className="absolute inset-0" />
+          </>
+        ) : (
+          /* Branded gradient placeholder */
+          <div className={`absolute inset-0 bg-gradient-to-br ${getGradient(project.title)} flex items-center justify-center`}>
+            <div className="flex flex-col items-center gap-1.5">
+              <svg className="w-8 h-8 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+              </svg>
+              <span className="text-[10px] text-white/25 font-medium tracking-wide uppercase">
+                {project.project_type === 'web_app' ? 'Web App' : 'Project'}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Live badge */}
         {project.published_url && (
-          <div className="absolute top-2 right-2 px-2 py-0.5 bg-success/20 text-success text-xs rounded-full flex items-center gap-1">
+          <div className="absolute top-2 right-2 px-2 py-0.5 bg-success/20 text-success text-xs rounded-full flex items-center gap-1 backdrop-blur-sm">
             <span className="w-1.5 h-1.5 bg-success rounded-full animate-pulse" />
             Live
           </div>
         )}
+
         {/* Try it button overlay */}
         {onTryIt && project.published_url && (
           <button
@@ -54,9 +114,20 @@ export function ProjectCard({
           <p className="text-xs text-accent/80 mb-1">by {project.creator_name}</p>
         )}
         {project.description && (
-          <p className="text-xs text-muted line-clamp-2 mb-2 leading-relaxed">
+          <p className="text-xs text-muted line-clamp-2 mb-1.5 leading-relaxed">
             {project.description}
           </p>
+        )}
+        {project.published_url && (
+          <a
+            href={project.published_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-[10px] text-accent/70 hover:text-accent hover:underline truncate block mb-1.5"
+          >
+            {project.published_url.replace('https://', '')}
+          </a>
         )}
 
         <div className="flex items-center justify-between">

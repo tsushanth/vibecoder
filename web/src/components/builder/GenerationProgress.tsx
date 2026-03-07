@@ -1,16 +1,25 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useGenerationStore } from '@/stores/generationStore';
-import { PHASE_LABELS } from '@/lib/constants';
 
 export function GenerationProgress() {
+  const t = useTranslations();
   const { phase, message, detail, progressPercent, estimatedSecondsRemaining } =
     useGenerationStore();
+
+  const PHASE_LABELS: Record<string, string> = {
+    generating: t('generation.phases.generating'),
+    validating: t('generation.phases.validating'),
+    fixing: t('generation.phases.fixing'),
+    polishing: t('generation.phases.polishing'),
+    verifying: t('generation.phases.verifying'),
+  };
 
   const radius = 56;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progressPercent / 100) * circumference;
-  const phaseLabel = PHASE_LABELS[phase] || phase || 'Starting';
+  const phaseLabel = PHASE_LABELS[phase] || phase || t('generation.starting');
   const isIndeterminate = progressPercent === 0;
 
   return (
@@ -61,7 +70,7 @@ export function GenerationProgress() {
           {isIndeterminate ? (
             <>
               <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin mb-1" />
-              <span className="text-xs text-muted">Initializing</span>
+              <span className="text-xs text-muted">{t('generation.initializing')}</span>
             </>
           ) : (
             <>
@@ -74,7 +83,7 @@ export function GenerationProgress() {
 
       {/* Status text */}
       <p className="text-sm font-medium text-foreground mb-1">
-        {message || 'Connecting to build server...'}
+        {message || t('generation.connectingServer')}
       </p>
       {detail && (
         <p className="text-xs text-muted max-w-md text-center">{detail}</p>
@@ -83,7 +92,7 @@ export function GenerationProgress() {
       {/* ETA */}
       {estimatedSecondsRemaining != null && estimatedSecondsRemaining > 0 && (
         <p className="text-xs text-subtle mt-3">
-          ~{Math.ceil(estimatedSecondsRemaining)}s remaining
+          {t('generation.secondsRemaining', { seconds: Math.ceil(estimatedSecondsRemaining) })}
         </p>
       )}
     </div>

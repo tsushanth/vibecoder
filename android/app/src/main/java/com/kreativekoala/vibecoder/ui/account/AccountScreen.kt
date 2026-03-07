@@ -1,6 +1,8 @@
 package com.kreativekoala.vibecoder.ui.account
 
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -17,11 +19,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.components.SettingsRow
 import com.kreativekoala.vibecoder.ui.theme.*
 
@@ -34,24 +39,89 @@ fun AccountScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showSignOutDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
+
+    val supportedLanguages = listOf(
+        "en" to R.string.language_english,
+        "es" to R.string.language_spanish,
+        "fr" to R.string.language_french,
+        "de" to R.string.language_german,
+        "ja" to R.string.language_japanese,
+        "zh-CN" to R.string.language_chinese,
+        "ko" to R.string.language_korean,
+        "pt-BR" to R.string.language_portuguese,
+        "it" to R.string.language_italian,
+        "hi" to R.string.language_hindi,
+    )
+
+    val currentLocale = AppCompatDelegate.getApplicationLocales().toLanguageTags().ifEmpty { "en" }
+
+    if (showLanguageDialog) {
+        AlertDialog(
+            onDismissRequest = { showLanguageDialog = false },
+            title = { Text(stringResource(R.string.language_picker_title)) },
+            text = {
+                Column {
+                    supportedLanguages.forEach { (code, nameRes) ->
+                        val isSelected = currentLocale.startsWith(code.split("-")[0])
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    AppCompatDelegate.setApplicationLocales(
+                                        LocaleListCompat.forLanguageTags(code)
+                                    )
+                                    showLanguageDialog = false
+                                }
+                                .padding(vertical = 12.dp, horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = isSelected,
+                                onClick = {
+                                    AppCompatDelegate.setApplicationLocales(
+                                        LocaleListCompat.forLanguageTags(code)
+                                    )
+                                    showLanguageDialog = false
+                                },
+                                colors = RadioButtonDefaults.colors(selectedColor = VibePurple)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(nameRes),
+                                color = if (isSelected) VibePurple else TextPrimary,
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLanguageDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+            containerColor = DarkSurfaceVariant
+        )
+    }
 
     if (showSignOutDialog) {
         AlertDialog(
             onDismissRequest = { showSignOutDialog = false },
-            title = { Text("Sign Out") },
-            text = { Text("Are you sure you want to sign out?") },
+            title = { Text(stringResource(R.string.account_dialog_sign_out_title)) },
+            text = { Text(stringResource(R.string.account_dialog_sign_out_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.signOut()
                     showSignOutDialog = false
                     onSignOut()
                 }) {
-                    Text("Sign Out", color = ErrorRed)
+                    Text(stringResource(R.string.sign_out), color = ErrorRed)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showSignOutDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
             containerColor = DarkSurfaceVariant
@@ -77,7 +147,7 @@ fun AccountScreen(
             if (avatarUrl != null) {
                 AsyncImage(
                     model = avatarUrl,
-                    contentDescription = "Profile photo",
+                    contentDescription = stringResource(R.string.account_cd_profile_photo),
                     modifier = Modifier
                         .size(80.dp)
                         .clip(CircleShape),
@@ -103,7 +173,7 @@ fun AccountScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = uiState.user?.displayName ?: "User",
+                text = uiState.user?.displayName ?: stringResource(R.string.account_default_display_name),
                 style = MaterialTheme.typography.titleLarge,
                 color = TextPrimary,
                 fontWeight = FontWeight.Bold
@@ -155,7 +225,7 @@ fun AccountScreen(
                 Icon(Icons.Default.Star, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Upgrade to Pro",
+                    text = stringResource(R.string.upgrade_to_pro),
                     fontWeight = FontWeight.SemiBold
                 )
             }
@@ -170,7 +240,7 @@ fun AccountScreen(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "Usage",
+                    text = stringResource(R.string.account_section_usage),
                     style = MaterialTheme.typography.titleMedium,
                     color = TextPrimary,
                     fontWeight = FontWeight.SemiBold
@@ -184,11 +254,11 @@ fun AccountScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     UsageStat(
-                        label = "Projects",
+                        label = stringResource(R.string.account_stat_projects),
                         value = "${uiState.user?.totalProjects ?: 0}"
                     )
                     UsageStat(
-                        label = "Today's Gens",
+                        label = stringResource(R.string.account_stat_todays_gens),
                         value = "${uiState.user?.dailyGenerationCount ?: 0}" +
                                 if (limit?.unlimited == true) "" else "/${limit?.dailyGenerations ?: 3}"
                     )
@@ -200,7 +270,7 @@ fun AccountScreen(
 
         // Settings
         Text(
-            text = "Settings",
+            text = stringResource(R.string.account_section_settings),
             style = MaterialTheme.typography.titleMedium,
             color = TextPrimary,
             fontWeight = FontWeight.SemiBold
@@ -215,21 +285,30 @@ fun AccountScreen(
             Column {
                 SettingsRow(
                     icon = Icons.Default.CreditCard,
-                    title = "Subscription",
+                    title = stringResource(R.string.account_settings_subscription),
                     onClick = onSubscriptionsClick
                 )
                 HorizontalDivider(color = DarkBorder)
                 SettingsRow(
                     icon = Icons.Default.Palette,
-                    title = "Theme",
-                    subtitle = "Dark",
+                    title = stringResource(R.string.account_settings_theme),
+                    subtitle = stringResource(R.string.account_settings_theme_value),
                     onClick = { /* Dark only */ }
                 )
                 HorizontalDivider(color = DarkBorder)
                 SettingsRow(
+                    icon = Icons.Default.Language,
+                    title = stringResource(R.string.account_settings_language),
+                    subtitle = supportedLanguages
+                        .firstOrNull { currentLocale.startsWith(it.first.split("-")[0]) }
+                        ?.let { stringResource(it.second) } ?: stringResource(R.string.language_english),
+                    onClick = { showLanguageDialog = true }
+                )
+                HorizontalDivider(color = DarkBorder)
+                SettingsRow(
                     icon = Icons.Default.Info,
-                    title = "About",
-                    subtitle = "Version 1.0.0",
+                    title = stringResource(R.string.account_settings_about),
+                    subtitle = stringResource(R.string.account_settings_version),
                     onClick = { }
                 )
             }
@@ -251,7 +330,7 @@ fun AccountScreen(
                 tint = ErrorRed
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Sign Out", fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.sign_out), fontWeight = FontWeight.SemiBold)
         }
 
         Spacer(modifier = Modifier.height(32.dp))

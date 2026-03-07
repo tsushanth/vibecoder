@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VibeBuild</string>
+
+    <!-- Common -->
+    <string name="cancel">रद्द करें</string>
+    <string name="ok">ठीक है</string>
+    <string name="back">वापस</string>
+    <string name="refresh">रिफ़्रेश</string>
+    <string name="share">शेयर करें</string>
+    <string name="copy">कॉपी</string>
+    <string name="open">खोलें</string>
+    <string name="error">त्रुटि</string>
+    <string name="live">लाइव</string>
+    <string name="publish">प्रकाशित करें</string>
+    <string name="deploy">डिप्लॉय</string>
+    <string name="close">बंद करें</string>
+    <string name="reload">रीलोड</string>
+    <string name="save">सेव करें</string>
+    <string name="saved">सेव हो गया</string>
+    <string name="delete_label">हटाएँ</string>
+    <string name="public_label">सार्वजनिक</string>
+    <string name="private_label">निजी</string>
+    <string name="sign_out">साइन आउट</string>
+
+    <!-- Tabs -->
+    <string name="tab_apps">ऐप्स</string>
+    <string name="tab_create">बनाएँ</string>
+    <string name="tab_account">अकाउंट</string>
+    <string name="tab_browse">एक्सप्लोर</string>
+
+    <!-- Landing Screen -->
+    <string name="landing_hero_subtitle">बताइए। AI बनाएगा।\nआपका ऐप, कुछ ही सेकंड में लाइव।</string>
+    <string name="landing_prompt_example">"एक साफ़ डार्क UI वाला मौसम ऐप बनाओ"</string>
+    <string name="landing_how_it_works_title">यह कैसे काम करता है</string>
+    <string name="landing_step_describe_title">बताएँ</string>
+    <string name="landing_step_describe_desc">AI को सरल हिन्दी में बताएँ कि आप क्या चाहते हैं</string>
+    <string name="landing_step_generate_title">जनरेट</string>
+    <string name="landing_step_generate_desc">AI कुछ ही सेकंड में कोड लिख देता है</string>
+    <string name="landing_step_preview_title">प्रीव्यू</string>
+    <string name="landing_step_preview_desc">अपना ऐप तुरंत लाइव चलता हुआ देखें</string>
+    <string name="landing_step_deploy_title">डिप्लॉय</string>
+    <string name="landing_step_deploy_desc">एक टैप में वेब पर प्रकाशित करें</string>
+    <string name="landing_examples_title">लोग क्या बना रहे हैं</string>
+    <string name="landing_example_weather_title">मौसम डैशबोर्ड</string>
+    <string name="landing_example_weather_desc">सुंदर चार्ट के साथ रियल-टाइम मौसम</string>
+    <string name="landing_example_memory_title">मेमोरी गेम</string>
+    <string name="landing_example_memory_desc">एनिमेशन के साथ मज़ेदार कार्ड-मैचिंग गेम</string>
+    <string name="landing_example_budget_title">बजट ट्रैकर</string>
+    <string name="landing_example_budget_desc">श्रेणी के अनुसार खर्चों को ट्रैक करें</string>
+    <string name="landing_example_pomodoro_title">पोमोडोरो टाइमर</string>
+    <string name="landing_example_pomodoro_desc">कार्य प्रबंधन के साथ फ़ोकस टाइमर</string>
+    <string name="landing_example_quiz_title">क्विज़ ऐप</string>
+    <string name="landing_example_quiz_desc">स्कोर ट्रैकिंग के साथ इंटरैक्टिव ट्रिविया</string>
+    <string name="landing_example_workout_title">वर्कआउट लॉगर</string>
+    <string name="landing_example_workout_desc">व्यायाम रिकॉर्ड करें और प्रगति ट्रैक करें</string>
+    <string name="landing_cta_get_started">शुरू करें — यह मुफ़्त है</string>
+    <string name="landing_cta_sign_in">पहले से अकाउंट है? साइन इन करें</string>
+    <string name="landing_trust_badge_instant">तुरंत</string>
+    <string name="landing_trust_badge_secure">सुरक्षित</string>
+    <string name="landing_trust_badge_no_card">कार्ड नहीं</string>
+
+    <!-- Sign In Screen -->
+    <string name="sign_in_subtitle">AI से ऐप्स बनाएँ</string>
+    <string name="sign_in_label_display_name">प्रदर्शित नाम</string>
+    <string name="sign_in_label_email">ईमेल</string>
+    <string name="sign_in_label_password">पासवर्ड</string>
+    <string name="sign_in_cd_hide_password">पासवर्ड छिपाएँ</string>
+    <string name="sign_in_cd_show_password">पासवर्ड दिखाएँ</string>
+    <string name="sign_in_btn_creating_account">अकाउंट बन रहा है…</string>
+    <string name="sign_in_btn_signing_in">साइन इन हो रहा है…</string>
+    <string name="sign_in_btn_create_account">अकाउंट बनाएँ</string>
+    <string name="sign_in_btn_sign_in">साइन इन</string>
+    <string name="sign_in_toggle_have_account">पहले से अकाउंट है? </string>
+    <string name="sign_in_toggle_no_account">अकाउंट नहीं है? </string>
+    <string name="sign_in_toggle_link_sign_in">साइन इन</string>
+    <string name="sign_in_toggle_link_sign_up">साइन अप</string>
+    <string name="sign_in_divider_or">" या "</string>
+    <string name="sign_in_with_google">Google से साइन इन करें</string>
+    <string name="sign_in_terms_notice">साइन इन करके, आप हमारी सेवा की शर्तों से सहमत होते हैं</string>
+
+    <!-- Onboarding Screen -->
+    <string name="onboarding_btn_skip">छोड़ें</string>
+    <string name="onboarding_page1_title">अपना ऐप बताएँ</string>
+    <string name="onboarding_page1_desc">AI को सरल हिन्दी में बताएँ कि आप क्या बनाना चाहते हैं। कोडिंग अनुभव की ज़रूरत नहीं।</string>
+    <string name="onboarding_page2_title">AI बनाता है</string>
+    <string name="onboarding_page2_desc">देखें कैसे AI कुछ ही सेकंड में असली कोड के साथ पूरी तरह काम करने वाला ऐप बनाता है।</string>
+    <string name="onboarding_page3_title">बदलें &amp; सुधारें</string>
+    <string name="onboarding_page3_desc">अपने ऐप को परफेक्ट बनाने के लिए AI के साथ बदलाव करें। रंग, फ़ीचर और लेआउट तुरंत बदलें।</string>
+    <string name="onboarding_page4_title">डिप्लॉय &amp; शेयर</string>
+    <string name="onboarding_page4_desc">एक टैप में अपना ऐप वेब पर प्रकाशित करें। अपनी रचनाएँ दुनिया के साथ शेयर करें।</string>
+    <string name="onboarding_btn_next">अगला</string>
+    <string name="onboarding_btn_get_started">शुरू करें</string>
+
+    <!-- Create Screen -->
+    <string name="create_title">आप क्या बनाना चाहते हैं?</string>
+    <string name="create_subtitle">अपने ऐप का आइडिया बताएँ और AI उसे बनाएगा</string>
+    <string name="create_prompt_placeholder">उदा., एक मौसम ऐप बनाओ जो मेरे शहर का पूर्वानुमान दिखाए…</string>
+    <string name="create_cd_attach_image">इमेज जोड़ें</string>
+    <string name="create_cd_voice_input">वॉइस इनपुट</string>
+    <string name="create_cd_remove_image">इमेज हटाएँ</string>
+    <string name="create_cd_reference_image">संदर्भ इमेज</string>
+    <string name="create_default_project_title">मेरा प्रोजेक्ट</string>
+    <string name="create_error_generation_failed">जनरेशन विफल</string>
+    <string name="create_error_extract_failed">प्रोजेक्ट निकालने में विफल: %s</string>
+    <string name="create_error_save_failed">सेव करने में विफल: %s</string>
+    <string name="create_error_publish_failed">प्रकाशन विफल: %s</string>
+    <string name="create_save_dialog_title">सेव हो गया!</string>
+    <string name="create_save_dialog_message">आपका प्रोजेक्ट सेव हो गया है। इसे लाइव करने के लिए प्रकाशित बटन दबाएँ!</string>
+
+    <!-- Generation Progress -->
+    <string name="generation_time_remaining">~%d सेकंड शेष</string>
+    <string name="generation_btn_notify">तैयार होने पर सूचित करें</string>
+    <string name="generation_notify_confirmation">तैयार होने पर आपको सूचित किया जाएगा</string>
+    <string name="generation_notify_leave_hint">आप इस स्क्रीन से जा सकते हैं</string>
+    <string name="generation_btn_cancel">रद्द करें</string>
+    <string name="generation_phase_connecting">कनेक्ट हो रहा है…</string>
+    <string name="generation_phase_complete">पूर्ण!</string>
+    <string name="generation_limit_reached">दैनिक जनरेशन सीमा पूरी हो गई</string>
+    <string name="upgrade_to_pro">Pro में अपग्रेड करें</string>
+    <string name="start_generating">शुरू करें</string>
+
+    <!-- Suggestion Chips -->
+    <string name="suggestions_header">इनमें से कोई आज़माएँ</string>
+    <string name="suggestions_btn_generating">आइडिया बना रहे हैं…</string>
+    <string name="suggestions_btn_suggest_new">नए आइडिया सुझाएँ</string>
+    <string name="suggestion_label_todo_app">टू-डू ऐप</string>
+    <string name="suggestion_label_weather_app">मौसम ऐप</string>
+    <string name="suggestion_label_calculator">कैलकुलेटर</string>
+    <string name="suggestion_label_pomodoro_timer">पोमोडोरो टाइमर</string>
+    <string name="suggestion_label_markdown_editor">मार्कडाउन एडिटर</string>
+    <string name="suggestion_label_color_palette">रंग पैलेट</string>
+
+    <!-- Account Screen -->
+    <string name="account_dialog_sign_out_title">साइन आउट</string>
+    <string name="account_dialog_sign_out_message">क्या आप वाकई साइन आउट करना चाहते हैं?</string>
+    <string name="account_cd_profile_photo">प्रोफ़ाइल फ़ोटो</string>
+    <string name="account_default_display_name">उपयोगकर्ता</string>
+    <string name="account_section_usage">उपयोग</string>
+    <string name="account_stat_projects">प्रोजेक्ट</string>
+    <string name="account_stat_todays_gens">आज की जनरेशन</string>
+    <string name="account_section_settings">सेटिंग्स</string>
+    <string name="account_settings_subscription">सब्सक्रिप्शन</string>
+    <string name="account_settings_theme">थीम</string>
+    <string name="account_settings_theme_value">डार्क</string>
+    <string name="account_settings_about">जानकारी</string>
+    <string name="account_settings_version">संस्करण 1.0.0</string>
+    <string name="account_settings_language">भाषा</string>
+
+    <!-- Apps Screen -->
+    <string name="apps_screen_title">मेरे ऐप्स</string>
+    <string name="apps_empty_title">अभी कोई ऐप नहीं</string>
+    <string name="apps_empty_subtitle">AI के साथ अपना पहला ऐप बनाएँ\nया देखें दूसरों ने क्या बनाया है</string>
+    <string name="apps_cd_sort">क्रमबद्ध करें</string>
+
+    <!-- Browse Screen -->
+    <string name="browse_screen_title">एक्सप्लोर</string>
+
+    <!-- Preview Screen -->
+    <string name="preview_screen_title">प्रीव्यू</string>
+    <string name="preview_deploy_dialog_title">अपना ऐप प्रकाशित करें</string>
+    <string name="preview_deploy_dialog_message">अपने ऐप के लिए सबडोमेन चुनें:</string>
+    <string name="preview_deploy_placeholder">mera-shandar-app</string>
+    <string name="preview_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="preview_share_text">मेरा ऐप देखें: %s</string>
+
+    <!-- Project Preview Screen -->
+    <string name="project_preview_btn_forked">फ़ॉर्क हो गया!</string>
+    <string name="project_preview_btn_fork">फ़ॉर्क</string>
+    <string name="project_preview_error_title">प्रीव्यू लोड करने में विफल</string>
+
+    <!-- Project Detail Screen -->
+    <string name="project_detail_deploy_dialog_title">ऐप डिप्लॉय करें</string>
+    <string name="project_detail_deploy_dialog_message">अपने ऐप के लिए सबडोमेन चुनें:</string>
+    <string name="project_detail_deploy_label_subdomain">सबडोमेन</string>
+    <string name="project_detail_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="project_detail_screen_title_fallback">प्रोजेक्ट</string>
+    <string name="project_detail_created_at">बनाया गया %s</string>
+    <string name="project_detail_btn_preview">ऐप प्रीव्यू</string>
+    <string name="project_detail_badge_deployed">डिप्लॉय हो गया</string>
+    <string name="project_detail_btn_deploying">डिप्लॉय हो रहा है…</string>
+    <string name="project_detail_btn_deploy_to_web">वेब पर डिप्लॉय करें</string>
+    <string name="project_detail_stat_views">व्यूज़</string>
+    <string name="project_detail_stat_forks">फ़ॉर्क्स</string>
+    <string name="project_detail_stat_tweaks">बदलाव</string>
+    <string name="project_detail_section_original_prompt">मूल प्रॉम्प्ट</string>
+    <string name="project_detail_share_text">मेरा ऐप देखें: %s</string>
+
+    <!-- Project Card -->
+    <string name="project_card_delete_dialog_title">प्रोजेक्ट हटाएँ</string>
+    <string name="project_card_delete_dialog_message">क्या आप वाकई \"%s\" को हटाना चाहते हैं? यह पूर्ववत नहीं किया जा सकता।</string>
+
+    <!-- Language Picker -->
+    <string name="language_picker_title">भाषा चुनें</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese">中文(简体)</string>
+    <string name="language_korean">한국어</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_hindi">हिन्दी</string>
+</resources>

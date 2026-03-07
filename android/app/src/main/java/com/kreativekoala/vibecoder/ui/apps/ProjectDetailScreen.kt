@@ -23,9 +23,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.preview.LivePreviewScreen
 import com.kreativekoala.vibecoder.ui.theme.*
 import com.kreativekoala.vibecoder.util.DateUtil
@@ -51,11 +53,11 @@ fun ProjectDetailScreen(
     if (uiState.showDeployDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissDeployDialog() },
-            title = { Text("Deploy App") },
+            title = { Text(stringResource(R.string.project_detail_deploy_dialog_title)) },
             text = {
                 Column {
                     Text(
-                        "Choose a subdomain for your app:",
+                        stringResource(R.string.project_detail_deploy_dialog_message),
                         style = MaterialTheme.typography.bodyMedium,
                         color = TextSecondary
                     )
@@ -63,8 +65,8 @@ fun ProjectDetailScreen(
                     OutlinedTextField(
                         value = subdomainInput,
                         onValueChange = { subdomainInput = it.lowercase().replace(Regex("[^a-z0-9-]"), "") },
-                        label = { Text("Subdomain") },
-                        suffix = { Text(".vibebuild.cc", color = TextTertiary) },
+                        label = { Text(stringResource(R.string.project_detail_deploy_label_subdomain)) },
+                        suffix = { Text(stringResource(R.string.project_detail_deploy_domain_suffix), color = TextTertiary) },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = VibePurple,
@@ -78,12 +80,12 @@ fun ProjectDetailScreen(
                     onClick = { viewModel.deployProject(subdomainInput) },
                     enabled = subdomainInput.length >= 3
                 ) {
-                    Text("Deploy", color = if (subdomainInput.length >= 3) VibePurple else TextTertiary)
+                    Text(stringResource(R.string.deploy), color = if (subdomainInput.length >= 3) VibePurple else TextTertiary)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.dismissDeployDialog() }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
             containerColor = DarkSurfaceVariant
@@ -94,11 +96,11 @@ fun ProjectDetailScreen(
     if (uiState.errorMessage != null) {
         AlertDialog(
             onDismissRequest = { viewModel.clearError() },
-            title = { Text("Error") },
+            title = { Text(stringResource(R.string.error)) },
             text = { Text(uiState.errorMessage ?: "") },
             confirmButton = {
                 TextButton(onClick = { viewModel.clearError() }) {
-                    Text("OK", color = VibePurple)
+                    Text(stringResource(R.string.ok), color = VibePurple)
                 }
             },
             containerColor = DarkSurfaceVariant
@@ -127,12 +129,12 @@ fun ProjectDetailScreen(
         containerColor = DarkBackground,
         topBar = {
             TopAppBar(
-                title = { Text(uiState.project?.title ?: "Project") },
+                title = { Text(uiState.project?.title ?: stringResource(R.string.project_detail_screen_title_fallback)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                             tint = TextPrimary
                         )
                     }
@@ -210,7 +212,7 @@ fun ProjectDetailScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Created ${DateUtil.relativeTimeString(project.createdAt)}",
+                        text = stringResource(R.string.project_detail_created_at, DateUtil.relativeTimeString(project.createdAt)),
                         style = MaterialTheme.typography.bodySmall,
                         color = TextTertiary
                     )
@@ -235,7 +237,7 @@ fun ProjectDetailScreen(
                         } else {
                             Icon(Icons.Default.PlayArrow, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Preview App", fontWeight = FontWeight.SemiBold)
+                            Text(stringResource(R.string.project_detail_btn_preview), fontWeight = FontWeight.SemiBold)
                         }
                     }
 
@@ -261,7 +263,7 @@ fun ProjectDetailScreen(
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        "Deployed",
+                                        stringResource(R.string.project_detail_badge_deployed),
                                         style = MaterialTheme.typography.titleSmall,
                                         color = VibeGreen,
                                         fontWeight = FontWeight.SemiBold
@@ -289,7 +291,7 @@ fun ProjectDetailScreen(
                                     ) {
                                         Icon(Icons.Default.Rocket, contentDescription = null, tint = VibePurple, modifier = Modifier.size(16.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Open", color = VibePurple)
+                                        Text(stringResource(R.string.open), color = VibePurple)
                                     }
                                     OutlinedButton(
                                         onClick = {
@@ -300,23 +302,25 @@ fun ProjectDetailScreen(
                                     ) {
                                         Icon(Icons.Default.ContentCopy, contentDescription = null, tint = VibePurple, modifier = Modifier.size(16.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Copy", color = VibePurple)
+                                        Text(stringResource(R.string.copy), color = VibePurple)
                                     }
+                                    val shareText = stringResource(R.string.project_detail_share_text, liveUrl)
+                                    val shareTitle = stringResource(R.string.share)
                                     OutlinedButton(
                                         onClick = {
                                             val sendIntent = Intent().apply {
                                                 action = Intent.ACTION_SEND
-                                                putExtra(Intent.EXTRA_TEXT, "Check out my app: $liveUrl")
+                                                putExtra(Intent.EXTRA_TEXT, shareText)
                                                 type = "text/plain"
                                             }
-                                            context.startActivity(Intent.createChooser(sendIntent, "Share"))
+                                            context.startActivity(Intent.createChooser(sendIntent, shareTitle))
                                         },
                                         modifier = Modifier.weight(1f),
                                         shape = RoundedCornerShape(12.dp)
                                     ) {
                                         Icon(Icons.Default.Share, contentDescription = null, tint = VibePurple, modifier = Modifier.size(16.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Share", color = VibePurple)
+                                        Text(stringResource(R.string.share), color = VibePurple)
                                     }
                                 }
                             }
@@ -344,11 +348,11 @@ fun ProjectDetailScreen(
                                     strokeWidth = 2.dp
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Deploying...", fontWeight = FontWeight.SemiBold)
+                                Text(stringResource(R.string.project_detail_btn_deploying), fontWeight = FontWeight.SemiBold)
                             } else {
                                 Icon(Icons.Default.Rocket, contentDescription = null)
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Deploy to Web", fontWeight = FontWeight.SemiBold)
+                                Text(stringResource(R.string.project_detail_btn_deploy_to_web), fontWeight = FontWeight.SemiBold)
                             }
                         }
                     }
@@ -360,16 +364,16 @@ fun ProjectDetailScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        StatItem("Views", project.viewCount.toString())
-                        StatItem("Forks", project.forkCount.toString())
-                        StatItem("Tweaks", project.tweakCount.toString())
+                        StatItem(stringResource(R.string.project_detail_stat_views), project.viewCount.toString())
+                        StatItem(stringResource(R.string.project_detail_stat_forks), project.forkCount.toString())
+                        StatItem(stringResource(R.string.project_detail_stat_tweaks), project.tweakCount.toString())
                     }
 
                     // Prompt
                     if (!project.initialPrompt.isNullOrBlank()) {
                         Spacer(modifier = Modifier.height(24.dp))
                         Text(
-                            text = "Original Prompt",
+                            text = stringResource(R.string.project_detail_section_original_prompt),
                             style = MaterialTheme.typography.titleMedium,
                             color = TextPrimary,
                             fontWeight = FontWeight.SemiBold

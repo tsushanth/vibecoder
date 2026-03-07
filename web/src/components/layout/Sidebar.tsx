@@ -1,22 +1,24 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
 import { cn } from '@/lib/utils';
-
-const navItems = [
-  { href: '/dashboard', label: 'My Apps', icon: '📱' },
-  { href: '/browse', label: 'Browse', icon: '🔍' },
-  { href: '/settings', label: 'Settings', icon: '⚙️' },
-];
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuthStore();
   const { sidebarOpen } = useUIStore();
+  const t = useTranslations();
+
+  const navItems = [
+    { href: '/dashboard', label: t('common.myApps'), icon: '📱' },
+    { href: '/browse', label: t('common.browse'), icon: '🔍' },
+    { href: '/settings', label: t('common.settings'), icon: '⚙️' },
+  ];
 
   if (!sidebarOpen) return null;
 
@@ -31,8 +33,8 @@ export function Sidebar() {
       {/* Logo */}
       <div className="p-4 border-b border-border">
         <a href="/dashboard" className="flex items-center gap-2 text-lg font-bold">
-          <span className="text-xl">⚡</span>
-          <span>VibeBuild</span>
+          <img src="/favicon-32x32.png" alt="VibeBuild" className="w-6 h-6 rounded" />
+          <span>{t('common.vibebuild')}</span>
         </a>
       </div>
 
@@ -43,7 +45,7 @@ export function Sidebar() {
           className="w-full px-4 py-2.5 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition flex items-center justify-center gap-2"
         >
           <span className="text-lg">+</span>
-          New Project
+          {t('common.newProject')}
         </button>
       </div>
 
@@ -81,7 +83,7 @@ export function Sidebar() {
           <button
             onClick={handleSignOut}
             className="text-subtle hover:text-foreground transition p-1"
-            title="Sign out"
+            title={t('common.signOut')}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

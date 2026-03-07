@@ -51,6 +51,11 @@ class ProjectRepository @Inject constructor(
         return response.suggestions
     }
 
+    suspend fun suggestNewIdeas(): List<Suggestion> {
+        val response = api.suggestNewIdeas()
+        return response.suggestions
+    }
+
     suspend fun saveProject(
         title: String,
         description: String?,
@@ -120,5 +125,9 @@ class ProjectRepository @Inject constructor(
             url = "${Constants.BASE_URL}api/projects/$projectId/tweak",
             jsonBody = jsonBody
         )
+    }
+
+    suspend fun sendFeedback(projectId: String, userId: String, rating: String) {
+        api.sendFeedback(projectId, FeedbackRequest(userId, rating))
     }
 }

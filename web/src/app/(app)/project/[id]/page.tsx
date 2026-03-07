@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   Panel,
   Group,
@@ -32,7 +33,8 @@ import type { ChatMessage } from '@/types/project';
 
 function buildChatFromVersions(
   versions: ProjectVersion[],
-  initialPrompt: string | null
+  initialPrompt: string | null,
+  t: ReturnType<typeof useTranslations>
 ): { messages: ChatMessage[]; latestSha: string | null } {
   if (versions.length === 0) {
     if (initialPrompt) {
@@ -81,7 +83,7 @@ function buildChatFromVersions(
     messages.push({
       id: `version-${version.sha}`,
       role: 'assistant',
-      content: isFirst ? 'Initial generation' : 'Changes applied',
+      content: isFirst ? t('project.initialGeneration') : t('project.changesApplied'),
       timestamp: ts,
       versionSha: version.sha,
       versionNumber: versionNum,
@@ -95,8 +97,9 @@ function buildChatFromVersions(
 }
 
 export default function ProjectBuilderPage() {
+  const t = useTranslations();
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuthStore();
+  const { user, subscription } = useAuthStore();
   const router = useRouter();
   const store = useProjectStore();
   const genStore = useGenerationStore();
@@ -136,7 +139,8 @@ export default function ProjectBuilderPage() {
         store.setVersions(v.versions);
         const { messages, latestSha } = buildChatFromVersions(
           v.versions,
-          data.project.initialPrompt
+          data.project.initialPrompt,
+          t
         );
         store.setChatMessages(messages);
         store.setActiveVersion(latestSha);
@@ -254,13 +258,23 @@ export default function ProjectBuilderPage() {
         if ((err as Error).name !== 'AbortError') {
           const msg =
             err instanceof Error ? err.message : 'Tweak failed';
-          genStore.setError(msg);
-          store.addChatMessage({
-            id: `error-${Date.now()}`,
-            role: 'assistant',
-            content: `Error: ${msg}`,
-            timestamp: Date.now(),
-          });
+
+          // Detect usage limit errors from backend 403
+          if (msg.includes('limited to') || msg.includes('limit') || msg.includes('Upgrade')) {
+            setUsageLimitError(msg);
+            genStore.reset();
+            // Remove the optimistic user message
+            const messages = useProjectStore.getState().chatMessages;
+            store.setChatMessages(messages.slice(0, -1));
+          } else {
+            genStore.setError(msg);
+            store.addChatMessage({
+              id: `error-${Date.now()}`,
+              role: 'assistant',
+              content: `Error: ${msg}`,
+              timestamp: Date.now(),
+            });
+          }
         }
       }
     },
@@ -299,6 +313,7 @@ export default function ProjectBuilderPage() {
   );
 
   const [showPublish, setShowPublish] = useState(false);
+  const [usageLimitError, setUsageLimitError] = useState<string | null>(null);
 
   const isOwner = store.project?.creatorId === user?.id;
 
@@ -313,7 +328,7 @@ export default function ProjectBuilderPage() {
   if (!store.project) {
     return (
       <div className="h-full flex items-center justify-center text-muted">
-        Project not found
+        {t('project.notFound')}
       </div>
     );
   }
@@ -336,7 +351,7 @@ export default function ProjectBuilderPage() {
           </h1>
           {!isOwner && (
             <span className="px-2 py-0.5 bg-surface text-subtle text-[10px] rounded-full">
-              Read-only
+              {t('common.readOnly')}
             </span>
           )}
         </div>
@@ -353,7 +368,7 @@ export default function ProjectBuilderPage() {
               rel="noopener noreferrer"
               className="px-3 py-1.5 text-xs text-accent hover:bg-accent/10 rounded-lg transition"
             >
-              View Live
+              {t('common.viewLive')}
             </a>
           )}
           {isOwner && (
@@ -364,7 +379,7 @@ export default function ProjectBuilderPage() {
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
-              {store.project.publishedUrl ? 'Manage' : 'Publish'}
+              {store.project.publishedUrl ? t('common.manage') : t('common.publish')}
             </button>
           )}
         </div>
@@ -407,10 +422,35 @@ export default function ProjectBuilderPage() {
         </Group>
       </div>
 
+      {/* Tweak usage limit modal */}
+      {usageLimitError && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => setUsageLimitError(null)}>
+          <div className="bg-card border border-border rounded-2xl p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-2">{t('project.tweakLimitReached')}</h3>
+            <p className="text-sm text-muted mb-6">{usageLimitError}</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setUsageLimitError(null)}
+                className="flex-1 px-4 py-2 border border-border hover:bg-surface rounded-xl text-sm font-medium transition"
+              >
+                {t('common.ok')}
+              </button>
+              <button
+                onClick={() => { setUsageLimitError(null); router.push('/settings'); }}
+                className="flex-1 px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-semibold transition"
+              >
+                {t('common.upgrade')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showPublish && user && (
         <PublishDialog
           projectId={id}
           userId={user.id}
+          subscriptionTier={subscription?.tier || 'free'}
           onClose={() => setShowPublish(false)}
           onPublished={(url) => {
             if (store.project) {

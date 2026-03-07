@@ -19,7 +19,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>10</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>
@@ -55,8 +55,8 @@
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>VibeBuild needs permission to save images to your photo library.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>VibeBuild needs access to your microphone to use voice input for describing your app ideas.</string>
+	<string>VibeBuild needs access to your microphone to use voice input for describing your coding projects.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>VibeBuild uses speech recognition to convert your voice to text when creating apps.</string>
+	<string>VibeBuild uses speech recognition to convert your voice to text when creating coding projects.</string>
 </dict>
 </plist>

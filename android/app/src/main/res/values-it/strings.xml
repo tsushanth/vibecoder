@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VibeBuild</string>
+
+    <!-- Common -->
+    <string name="cancel">Annulla</string>
+    <string name="ok">OK</string>
+    <string name="back">Indietro</string>
+    <string name="refresh">Aggiorna</string>
+    <string name="share">Condividi</string>
+    <string name="copy">Copia</string>
+    <string name="open">Apri</string>
+    <string name="error">Errore</string>
+    <string name="live">Live</string>
+    <string name="publish">Pubblica</string>
+    <string name="deploy">Distribuisci</string>
+    <string name="close">Chiudi</string>
+    <string name="reload">Ricarica</string>
+    <string name="save">Salva</string>
+    <string name="saved">Salvato</string>
+    <string name="delete_label">Elimina</string>
+    <string name="public_label">Pubblico</string>
+    <string name="private_label">Privato</string>
+    <string name="sign_out">Esci</string>
+
+    <!-- Tabs -->
+    <string name="tab_apps">App</string>
+    <string name="tab_create">Crea</string>
+    <string name="tab_account">Account</string>
+    <string name="tab_browse">Esplora</string>
+
+    <!-- Landing Screen -->
+    <string name="landing_hero_subtitle">Descrivila. L\'IA la costruisce.\nLa tua app, online in pochi secondi.</string>
+    <string name="landing_prompt_example">"Creami un\'app meteo con un\'interfaccia scura e pulita"</string>
+    <string name="landing_how_it_works_title">Come Funziona</string>
+    <string name="landing_step_describe_title">Descrivi</string>
+    <string name="landing_step_describe_desc">Dì all\'IA cosa vuoi in italiano semplice</string>
+    <string name="landing_step_generate_title">Genera</string>
+    <string name="landing_step_generate_desc">L\'IA scrive il codice in pochi secondi</string>
+    <string name="landing_step_preview_title">Anteprima</string>
+    <string name="landing_step_preview_desc">Guarda la tua app funzionare dal vivo all\'istante</string>
+    <string name="landing_step_deploy_title">Distribuisci</string>
+    <string name="landing_step_deploy_desc">Pubblica sul web con un tocco</string>
+    <string name="landing_examples_title">Cosa Stanno Creando le Persone</string>
+    <string name="landing_example_weather_title">Dashboard Meteo</string>
+    <string name="landing_example_weather_desc">Meteo in tempo reale con grafici eleganti</string>
+    <string name="landing_example_memory_title">Gioco della Memoria</string>
+    <string name="landing_example_memory_desc">Divertente gioco di carte con animazioni</string>
+    <string name="landing_example_budget_title">Monitoraggio Spese</string>
+    <string name="landing_example_budget_desc">Tieni traccia delle spese con suddivisione per categorie</string>
+    <string name="landing_example_pomodoro_title">Timer Pomodoro</string>
+    <string name="landing_example_pomodoro_desc">Timer di concentrazione con gestione delle attività</string>
+    <string name="landing_example_quiz_title">App Quiz</string>
+    <string name="landing_example_quiz_desc">Trivia interattiva con tracciamento del punteggio</string>
+    <string name="landing_example_workout_title">Registro Allenamenti</string>
+    <string name="landing_example_workout_desc">Registra gli esercizi e monitora i progressi</string>
+    <string name="landing_cta_get_started">Inizia — È Gratis</string>
+    <string name="landing_cta_sign_in">Hai già un account? Accedi</string>
+    <string name="landing_trust_badge_instant">Istantaneo</string>
+    <string name="landing_trust_badge_secure">Sicuro</string>
+    <string name="landing_trust_badge_no_card">Senza Carta</string>
+
+    <!-- Sign In Screen -->
+    <string name="sign_in_subtitle">Crea app con l\'IA</string>
+    <string name="sign_in_label_display_name">Nome Visualizzato</string>
+    <string name="sign_in_label_email">E-mail</string>
+    <string name="sign_in_label_password">Password</string>
+    <string name="sign_in_cd_hide_password">Nascondi password</string>
+    <string name="sign_in_cd_show_password">Mostra password</string>
+    <string name="sign_in_btn_creating_account">Creazione account…</string>
+    <string name="sign_in_btn_signing_in">Accesso in corso…</string>
+    <string name="sign_in_btn_create_account">Crea Account</string>
+    <string name="sign_in_btn_sign_in">Accedi</string>
+    <string name="sign_in_toggle_have_account">Hai già un account? </string>
+    <string name="sign_in_toggle_no_account">Non hai un account? </string>
+    <string name="sign_in_toggle_link_sign_in">Accedi</string>
+    <string name="sign_in_toggle_link_sign_up">Registrati</string>
+    <string name="sign_in_divider_or">" o "</string>
+    <string name="sign_in_with_google">Accedi con Google</string>
+    <string name="sign_in_terms_notice">Accedendo, accetti i nostri Termini di Servizio</string>
+
+    <!-- Onboarding Screen -->
+    <string name="onboarding_btn_skip">Salta</string>
+    <string name="onboarding_page1_title">Descrivi la Tua App</string>
+    <string name="onboarding_page1_desc">Dì all\'IA cosa vuoi creare in italiano semplice. Nessuna esperienza di programmazione necessaria.</string>
+    <string name="onboarding_page2_title">L\'IA la Costruisce</string>
+    <string name="onboarding_page2_desc">Guarda mentre l\'IA genera un\'app completamente funzionante con codice reale in pochi secondi.</string>
+    <string name="onboarding_page3_title">Modifica &amp; Perfeziona</string>
+    <string name="onboarding_page3_desc">Itera con l\'IA per perfezionare la tua app. Cambia colori, funzionalità e layout all\'istante.</string>
+    <string name="onboarding_page4_title">Distribuisci &amp; Condividi</string>
+    <string name="onboarding_page4_desc">Pubblica la tua app sul web con un tocco. Condividi le tue creazioni con il mondo.</string>
+    <string name="onboarding_btn_next">Avanti</string>
+    <string name="onboarding_btn_get_started">Inizia</string>
+
+    <!-- Create Screen -->
+    <string name="create_title">Cosa vuoi creare?</string>
+    <string name="create_subtitle">Descrivi la tua idea di app e l\'IA la costruirà</string>
+    <string name="create_prompt_placeholder">es., Crea un\'app meteo che mostra le previsioni per la mia città…</string>
+    <string name="create_cd_attach_image">Allega immagine</string>
+    <string name="create_cd_voice_input">Input vocale</string>
+    <string name="create_cd_remove_image">Rimuovi immagine</string>
+    <string name="create_cd_reference_image">Immagine di riferimento</string>
+    <string name="create_default_project_title">Il Mio Progetto</string>
+    <string name="create_error_generation_failed">Generazione fallita</string>
+    <string name="create_error_extract_failed">Estrazione progetto fallita: %s</string>
+    <string name="create_error_save_failed">Salvataggio fallito: %s</string>
+    <string name="create_error_publish_failed">Pubblicazione fallita: %s</string>
+    <string name="create_save_dialog_title">Salvato!</string>
+    <string name="create_save_dialog_message">Il tuo progetto è stato salvato. Tocca il pulsante pubblica per metterlo online!</string>
+
+    <!-- Generation Progress -->
+    <string name="generation_time_remaining">~%ds rimanenti</string>
+    <string name="generation_btn_notify">Avvisami quando è pronto</string>
+    <string name="generation_notify_confirmation">Sarai avvisato quando sarà pronto</string>
+    <string name="generation_notify_leave_hint">Puoi uscire da questa schermata</string>
+    <string name="generation_btn_cancel">Annulla</string>
+    <string name="generation_phase_connecting">Connessione…</string>
+    <string name="generation_phase_complete">Completato!</string>
+    <string name="generation_limit_reached">Limite giornaliero di generazioni raggiunto</string>
+    <string name="upgrade_to_pro">Passa a Pro</string>
+    <string name="start_generating">Inizia</string>
+
+    <!-- Suggestion Chips -->
+    <string name="suggestions_header">Prova uno di questi</string>
+    <string name="suggestions_btn_generating">Generazione idee…</string>
+    <string name="suggestions_btn_suggest_new">Suggerisci Nuove Idee</string>
+    <string name="suggestion_label_todo_app">App Attività</string>
+    <string name="suggestion_label_weather_app">App Meteo</string>
+    <string name="suggestion_label_calculator">Calcolatrice</string>
+    <string name="suggestion_label_pomodoro_timer">Timer Pomodoro</string>
+    <string name="suggestion_label_markdown_editor">Editor Markdown</string>
+    <string name="suggestion_label_color_palette">Palette Colori</string>
+
+    <!-- Account Screen -->
+    <string name="account_dialog_sign_out_title">Esci</string>
+    <string name="account_dialog_sign_out_message">Sei sicuro di voler uscire?</string>
+    <string name="account_cd_profile_photo">Foto profilo</string>
+    <string name="account_default_display_name">Utente</string>
+    <string name="account_section_usage">Utilizzo</string>
+    <string name="account_stat_projects">Progetti</string>
+    <string name="account_stat_todays_gens">Generazioni Oggi</string>
+    <string name="account_section_settings">Impostazioni</string>
+    <string name="account_settings_subscription">Abbonamento</string>
+    <string name="account_settings_theme">Tema</string>
+    <string name="account_settings_theme_value">Scuro</string>
+    <string name="account_settings_about">Info</string>
+    <string name="account_settings_version">Versione 1.0.0</string>
+    <string name="account_settings_language">Lingua</string>
+
+    <!-- Apps Screen -->
+    <string name="apps_screen_title">Le Mie App</string>
+    <string name="apps_empty_title">Nessuna app ancora</string>
+    <string name="apps_empty_subtitle">Crea la tua prima app con l\'IA\no esplora cosa hanno creato gli altri</string>
+    <string name="apps_cd_sort">Ordina</string>
+
+    <!-- Browse Screen -->
+    <string name="browse_screen_title">Esplora</string>
+
+    <!-- Preview Screen -->
+    <string name="preview_screen_title">Anteprima</string>
+    <string name="preview_deploy_dialog_title">Pubblica la Tua App</string>
+    <string name="preview_deploy_dialog_message">Scegli un sottodominio per la tua app:</string>
+    <string name="preview_deploy_placeholder">la-mia-app-fantastica</string>
+    <string name="preview_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="preview_share_text">Guarda la mia app: %s</string>
+
+    <!-- Project Preview Screen -->
+    <string name="project_preview_btn_forked">Biforcato!</string>
+    <string name="project_preview_btn_fork">Biforca</string>
+    <string name="project_preview_error_title">Caricamento anteprima fallito</string>
+
+    <!-- Project Detail Screen -->
+    <string name="project_detail_deploy_dialog_title">Distribuisci App</string>
+    <string name="project_detail_deploy_dialog_message">Scegli un sottodominio per la tua app:</string>
+    <string name="project_detail_deploy_label_subdomain">Sottodominio</string>
+    <string name="project_detail_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="project_detail_screen_title_fallback">Progetto</string>
+    <string name="project_detail_created_at">Creato %s</string>
+    <string name="project_detail_btn_preview">Anteprima App</string>
+    <string name="project_detail_badge_deployed">Distribuito</string>
+    <string name="project_detail_btn_deploying">Distribuzione…</string>
+    <string name="project_detail_btn_deploy_to_web">Distribuisci sul Web</string>
+    <string name="project_detail_stat_views">Visualizzazioni</string>
+    <string name="project_detail_stat_forks">Biforcazioni</string>
+    <string name="project_detail_stat_tweaks">Modifiche</string>
+    <string name="project_detail_section_original_prompt">Prompt Originale</string>
+    <string name="project_detail_share_text">Guarda la mia app: %s</string>
+
+    <!-- Project Card -->
+    <string name="project_card_delete_dialog_title">Elimina Progetto</string>
+    <string name="project_card_delete_dialog_message">Sei sicuro di voler eliminare \"%s\"? Questa azione non può essere annullata.</string>
+
+    <!-- Language Picker -->
+    <string name="language_picker_title">Seleziona Lingua</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese">中文(简体)</string>
+    <string name="language_korean">한국어</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_hindi">हिन्दी</string>
+</resources>

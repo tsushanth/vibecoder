@@ -26,10 +26,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.theme.*
 
 @Composable
@@ -90,14 +92,14 @@ fun SignInScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "VibeBuild",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.displaySmall,
                 color = TextPrimary,
                 fontWeight = FontWeight.Bold
             )
 
             Text(
-                text = "Build apps with AI",
+                text = stringResource(R.string.sign_in_subtitle),
                 style = MaterialTheme.typography.titleMedium,
                 color = TextSecondary
             )
@@ -129,7 +131,7 @@ fun SignInScreen(
                 OutlinedTextField(
                     value = displayName,
                     onValueChange = { displayName = it },
-                    label = { Text("Display Name") },
+                    label = { Text(stringResource(R.string.sign_in_label_display_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -153,7 +155,7 @@ fun SignInScreen(
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email") },
+                label = { Text(stringResource(R.string.sign_in_label_email)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(
@@ -180,7 +182,7 @@ fun SignInScreen(
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
+                label = { Text(stringResource(R.string.sign_in_label_password)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -188,7 +190,7 @@ fun SignInScreen(
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
                             if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                            contentDescription = if (passwordVisible) stringResource(R.string.sign_in_cd_hide_password) else stringResource(R.string.sign_in_cd_show_password),
                             tint = TextTertiary
                         )
                     }
@@ -244,9 +246,9 @@ fun SignInScreen(
                 }
                 Text(
                     text = if (isLoading) {
-                        if (isSignUpMode) "Creating account..." else "Signing in..."
+                        if (isSignUpMode) stringResource(R.string.sign_in_btn_creating_account) else stringResource(R.string.sign_in_btn_signing_in)
                     } else {
-                        if (isSignUpMode) "Create Account" else "Sign In"
+                        if (isSignUpMode) stringResource(R.string.sign_in_btn_create_account) else stringResource(R.string.sign_in_btn_sign_in)
                     },
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold
@@ -261,12 +263,12 @@ fun SignInScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = if (isSignUpMode) "Already have an account? " else "Don't have an account? ",
+                    text = if (isSignUpMode) stringResource(R.string.sign_in_toggle_have_account) else stringResource(R.string.sign_in_toggle_no_account),
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextTertiary
                 )
                 Text(
-                    text = if (isSignUpMode) "Sign In" else "Sign Up",
+                    text = if (isSignUpMode) stringResource(R.string.sign_in_toggle_link_sign_in) else stringResource(R.string.sign_in_toggle_link_sign_up),
                     style = MaterialTheme.typography.bodyMedium,
                     color = VibePurple,
                     fontWeight = FontWeight.SemiBold,
@@ -286,7 +288,7 @@ fun SignInScreen(
             ) {
                 HorizontalDivider(modifier = Modifier.weight(1f), color = DarkBorder)
                 Text(
-                    text = "  or  ",
+                    text = stringResource(R.string.sign_in_divider_or),
                     style = MaterialTheme.typography.bodySmall,
                     color = TextTertiary
                 )
@@ -314,7 +316,7 @@ fun SignInScreen(
                 )
             ) {
                 Text(
-                    text = "Sign in with Google",
+                    text = stringResource(R.string.sign_in_with_google),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -323,7 +325,7 @@ fun SignInScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = "By signing in, you agree to our Terms of Service",
+                text = stringResource(R.string.sign_in_terms_notice),
                 style = MaterialTheme.typography.bodySmall,
                 color = TextTertiary,
                 textAlign = TextAlign.Center
