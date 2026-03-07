@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/stores/authStore';
 import { api, ApiError } from '@/lib/api';
 import { ProjectCard } from '@/components/project/ProjectCard';
@@ -11,6 +12,7 @@ import { cn } from '@/lib/utils';
 export default function BrowsePage() {
   const { user } = useAuthStore();
   const router = useRouter();
+  const t = useTranslations();
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [featuredProjects, setFeaturedProjects] = useState<ProjectSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -73,15 +75,15 @@ export default function BrowsePage() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-2">Browse Apps</h1>
-      <p className="text-muted text-sm mb-6">Discover apps built by the community</p>
+      <h1 className="text-2xl font-bold mb-2">{t('browse.title')}</h1>
+      <p className="text-muted text-sm mb-6">{t('browse.subtitle')}</p>
 
       {/* Featured section */}
       {featuredProjects.length > 0 && !search && (
         <section className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
-            <h2 className="text-sm font-semibold text-accent">Featured Live Apps</h2>
+            <h2 className="text-sm font-semibold text-accent">{t('browse.featured')}</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {featuredProjects.slice(0, 3).map((project) => (
@@ -112,7 +114,7 @@ export default function BrowsePage() {
                   : 'text-muted hover:text-foreground'
               )}
             >
-              {tab === 'newest' ? 'Newest' : 'Popular'}
+              {tab === 'newest' ? t('browse.newest') : t('browse.popular')}
             </button>
           ))}
         </div>
@@ -122,7 +124,7 @@ export default function BrowsePage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search projects..."
+            placeholder={t('browse.searchPlaceholder')}
             className="w-full px-4 py-2 bg-surface border border-border rounded-xl text-sm focus:outline-none focus:border-accent transition"
           />
         </form>
@@ -133,7 +135,7 @@ export default function BrowsePage() {
           <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
         </div>
       ) : projects.length === 0 ? (
-        <div className="text-center py-20 text-muted">No projects found</div>
+        <div className="text-center py-20 text-muted">{t('browse.noResults')}</div>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -155,7 +157,7 @@ export default function BrowsePage() {
                 disabled={isLoading}
                 className="px-6 py-2 bg-surface hover:bg-surface-hover border border-border rounded-xl text-sm transition"
               >
-                {isLoading ? 'Loading...' : 'Load More'}
+                {isLoading ? t('common.loading') : t('browse.loadMore')}
               </button>
             </div>
           )}

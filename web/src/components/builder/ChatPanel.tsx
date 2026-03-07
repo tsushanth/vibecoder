@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useProjectStore } from '@/stores/projectStore';
 import { useGenerationStore } from '@/stores/generationStore';
 import { cn } from '@/lib/utils';
-import { PHASE_LABELS } from '@/lib/constants';
 import type { ChatMessage } from '@/types/project';
 
 interface ChatPanelProps {
@@ -29,12 +29,14 @@ function VersionCard({
   isReverting,
   onLoad,
   disabled,
+  t,
 }: {
   msg: ChatMessage;
   isActive: boolean;
   isReverting: boolean;
   onLoad: () => void;
   disabled: boolean;
+  t: ReturnType<typeof useTranslations>;
 }) {
   return (
     <div
@@ -67,7 +69,7 @@ function VersionCard({
           </span>
           {isActive ? (
             <span className="text-[10px] text-accent font-medium px-1.5 py-0.5 bg-accent/10 rounded">
-              Current
+              {t('common.current')}
             </span>
           ) : msg.versionSha && !disabled ? (
             <button
@@ -75,7 +77,7 @@ function VersionCard({
               disabled={isReverting}
               className="text-[10px] text-accent font-medium px-1.5 py-0.5 bg-accent/10 hover:bg-accent/20 rounded transition disabled:opacity-50"
             >
-              {isReverting ? '...' : 'Load'}
+              {isReverting ? '...' : t('common.load')}
             </button>
           ) : null}
         </div>
@@ -90,10 +92,19 @@ function VersionCard({
 }
 
 export function ChatPanel({ onTweak, onLoadVersion, disabled }: ChatPanelProps) {
+  const t = useTranslations();
   const [input, setInput] = useState('');
   const { chatMessages, activeVersionSha, isReverting } = useProjectStore();
   const { isGenerating, phase, progressPercent, message } = useGenerationStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const PHASE_LABELS: Record<string, string> = {
+    generating: t('generation.phases.generating'),
+    validating: t('generation.phases.validating'),
+    fixing: t('generation.phases.fixing'),
+    polishing: t('generation.phases.polishing'),
+    verifying: t('generation.phases.verifying'),
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -112,7 +123,7 @@ export function ChatPanel({ onTweak, onLoadVersion, disabled }: ChatPanelProps) 
       <div className="flex-1 overflow-auto px-4 py-3 space-y-2.5 min-h-0">
         {chatMessages.length === 0 && !isGenerating && (
           <p className="text-xs text-subtle text-center py-4">
-            Describe changes to iterate on your app
+            {t('chat.emptyHint')}
           </p>
         )}
         {chatMessages.map((msg) => {
@@ -127,6 +138,7 @@ export function ChatPanel({ onTweak, onLoadVersion, disabled }: ChatPanelProps) 
                 isReverting={isReverting}
                 onLoad={() => onLoadVersion(msg.versionSha!)}
                 disabled={!!disabled}
+                t={t}
               />
             );
           }
@@ -170,7 +182,7 @@ export function ChatPanel({ onTweak, onLoadVersion, disabled }: ChatPanelProps) 
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 border-2 border-accent border-t-transparent rounded-full animate-spin" />
               <span className="text-accent font-medium">
-                {PHASE_LABELS[phase] || 'Working'}
+                {PHASE_LABELS[phase] || t('generation.working')}
               </span>
               {progressPercent > 0 && (
                 <span className="text-subtle">{Math.round(progressPercent)}%</span>
@@ -190,7 +202,7 @@ export function ChatPanel({ onTweak, onLoadVersion, disabled }: ChatPanelProps) 
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={disabled ? 'Read-only project' : 'Describe changes...'}
+          placeholder={disabled ? t('chat.readOnlyPlaceholder') : t('chat.placeholder')}
           disabled={isGenerating || disabled || isReverting}
           className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-sm focus:outline-none focus:border-accent transition disabled:opacity-50"
         />
@@ -199,7 +211,7 @@ export function ChatPanel({ onTweak, onLoadVersion, disabled }: ChatPanelProps) 
           disabled={!input.trim() || isGenerating || disabled || isReverting}
           className="px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-medium rounded-lg transition disabled:opacity-50"
         >
-          Send
+          {t('common.send')}
         </button>
       </form>
     </div>

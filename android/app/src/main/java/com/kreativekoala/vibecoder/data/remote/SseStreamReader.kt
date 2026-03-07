@@ -27,7 +27,8 @@ class SseStreamReader @Inject constructor() {
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(Constants.SSE_TIMEOUT_MS, TimeUnit.MILLISECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
-        .retryOnConnectionFailure(false)
+        .pingInterval(20, TimeUnit.SECONDS) // Send HTTP/2 PING frames to keep connection alive through load balancers
+        .retryOnConnectionFailure(true)
         .build()
 
     private val gson = Gson()

@@ -19,6 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.VibeBuild"
         android:usesCleartextTraffic="false"
+        android:localeConfig="@xml/locales_config"
         tools:targetApi="35">
 
         <activity

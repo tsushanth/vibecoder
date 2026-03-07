@@ -15,9 +15,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.data.model.Project
 import com.kreativekoala.vibecoder.ui.theme.*
 import com.kreativekoala.vibecoder.util.DateUtil
@@ -34,19 +36,19 @@ fun ProjectCardItem(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete Project") },
-            text = { Text("Are you sure you want to delete \"${project.title}\"? This cannot be undone.") },
+            title = { Text(stringResource(R.string.project_card_delete_dialog_title)) },
+            text = { Text(stringResource(R.string.project_card_delete_dialog_message, project.title)) },
             confirmButton = {
                 TextButton(onClick = {
                     onDelete()
                     showDeleteConfirm = false
                 }) {
-                    Text("Delete", color = ErrorRed)
+                    Text(stringResource(R.string.delete_label), color = ErrorRed)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
             containerColor = DarkSurfaceVariant
@@ -105,7 +107,7 @@ fun ProjectCardItem(
                                     .background(TextPrimary)
                             )
                             Text(
-                                "Live",
+                                stringResource(R.string.live),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = TextPrimary,
                                 fontWeight = FontWeight.Bold
@@ -138,7 +140,7 @@ fun ProjectCardItem(
                     ) {
                         Icon(
                             Icons.Default.Delete,
-                            contentDescription = "Delete",
+                            contentDescription = stringResource(R.string.delete_label),
                             tint = TextTertiary,
                             modifier = Modifier.size(18.dp)
                         )
@@ -156,7 +158,7 @@ fun ProjectCardItem(
                         tint = TextTertiary
                     )
                     Text(
-                        text = if (project.isPublic) "Public" else "Private",
+                        text = if (project.isPublic) stringResource(R.string.public_label) else stringResource(R.string.private_label),
                         style = MaterialTheme.typography.bodySmall,
                         color = TextTertiary
                     )

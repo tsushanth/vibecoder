@@ -23,9 +23,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.preview.LivePreviewScreen
 import com.kreativekoala.vibecoder.ui.theme.*
 
@@ -90,17 +92,22 @@ fun CreateScreen(
                 deployedUrl = uiState.deployedUrl,
                 showDeployDialog = uiState.showDeployDialog,
                 onDeployConfirm = { subdomain -> viewModel.publishProject(subdomain) },
-                onDeployDismiss = { viewModel.dismissDeployDialog() }
+                onDeployDismiss = { viewModel.dismissDeployDialog() },
+                onTweak = { desc -> viewModel.tweakProject(desc) },
+                isTweaking = uiState.isTweaking,
+                tweakPhase = uiState.tweakPhase,
+                onFeedback = { rating -> viewModel.sendFeedback(rating) },
+                feedbackSent = uiState.feedbackSent
             )
 
             if (showSaveSuccess && uiState.deployedUrl == null) {
                 AlertDialog(
                     onDismissRequest = { showSaveSuccess = false },
-                    title = { Text("Saved!") },
-                    text = { Text("Your project has been saved. Tap the publish button to make it live!") },
+                    title = { Text(stringResource(R.string.create_save_dialog_title)) },
+                    text = { Text(stringResource(R.string.create_save_dialog_message)) },
                     confirmButton = {
                         TextButton(onClick = { showSaveSuccess = false }) {
-                            Text("OK", color = VibePurple)
+                            Text(stringResource(R.string.ok), color = VibePurple)
                         }
                     },
                     containerColor = DarkSurfaceVariant
@@ -114,11 +121,11 @@ fun CreateScreen(
     if (uiState.errorMessage != null) {
         AlertDialog(
             onDismissRequest = { viewModel.clearError() },
-            title = { Text("Error") },
+            title = { Text(stringResource(R.string.error)) },
             text = { Text(uiState.errorMessage ?: "") },
             confirmButton = {
                 TextButton(onClick = { viewModel.clearError() }) {
-                    Text("OK", color = VibePurple)
+                    Text(stringResource(R.string.ok), color = VibePurple)
                 }
             },
             containerColor = DarkSurfaceVariant
@@ -153,7 +160,7 @@ fun CreateScreen(
 
                 // Greeting
                 Text(
-                    text = "What do you want to make?",
+                    text = stringResource(R.string.create_title),
                     style = MaterialTheme.typography.headlineMedium,
                     color = TextPrimary,
                     fontWeight = FontWeight.Bold
@@ -162,7 +169,7 @@ fun CreateScreen(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "Describe your app idea and AI will build it",
+                    text = stringResource(R.string.create_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextSecondary
                 )
@@ -178,7 +185,7 @@ fun CreateScreen(
                         .heightIn(min = 160.dp),
                     placeholder = {
                         Text(
-                            text = "e.g., Build a weather app that shows the forecast for my city...",
+                            text = stringResource(R.string.create_prompt_placeholder),
                             color = TextTertiary
                         )
                     },
@@ -209,7 +216,7 @@ fun CreateScreen(
                         if (bitmap != null) {
                             androidx.compose.foundation.Image(
                                 bitmap = bitmap.asImageBitmap(),
-                                contentDescription = "Reference image",
+                                contentDescription = stringResource(R.string.create_cd_reference_image),
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Fit
                             )
@@ -220,7 +227,7 @@ fun CreateScreen(
                         ) {
                             Icon(
                                 Icons.Default.Close,
-                                contentDescription = "Remove image",
+                                contentDescription = stringResource(R.string.create_cd_remove_image),
                                 tint = TextPrimary
                             )
                         }
@@ -242,7 +249,7 @@ fun CreateScreen(
                         ) {
                             Icon(
                                 Icons.Default.AttachFile,
-                                contentDescription = "Attach image",
+                                contentDescription = stringResource(R.string.create_cd_attach_image),
                                 tint = TextSecondary
                             )
                         }
@@ -251,7 +258,7 @@ fun CreateScreen(
                         IconButton(onClick = { /* Phase 3 */ }) {
                             Icon(
                                 Icons.Default.Mic,
-                                contentDescription = "Voice input",
+                                contentDescription = stringResource(R.string.create_cd_voice_input),
                                 tint = TextSecondary
                             )
                         }
@@ -269,7 +276,7 @@ fun CreateScreen(
                         contentPadding = PaddingValues(horizontal = 32.dp, vertical = 12.dp)
                     ) {
                         Text(
-                            text = "Start",
+                            text = stringResource(R.string.start_generating),
                             fontWeight = FontWeight.SemiBold
                         )
                     }
@@ -282,7 +289,9 @@ fun CreateScreen(
                     suggestions = uiState.suggestions,
                     onSuggestionClick = { suggestion ->
                         viewModel.updatePrompt(suggestion.prompt)
-                    }
+                    },
+                    isLoadingSuggestions = uiState.isLoadingSuggestions,
+                    onSuggestNewIdeas = { viewModel.suggestNewIdeas() }
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))

@@ -18,6 +18,7 @@ import com.kreativekoala.vibecoder.ui.auth.AuthViewModel
 import com.kreativekoala.vibecoder.ui.auth.SignInScreen
 import com.kreativekoala.vibecoder.ui.browse.BrowseScreen
 import com.kreativekoala.vibecoder.ui.browse.ProjectPreviewScreen
+import com.kreativekoala.vibecoder.ui.landing.LandingScreen
 import com.kreativekoala.vibecoder.ui.main.MainScreen
 import com.kreativekoala.vibecoder.ui.onboarding.OnboardingScreen
 
@@ -35,7 +36,7 @@ fun VibeBuildNavGraph() {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val hasCompletedOnboarding = prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false)
         when {
-            !isAuthenticated -> Screen.SignIn.route
+            !isAuthenticated -> Screen.Landing.route
             !hasCompletedOnboarding -> Screen.Onboarding.route
             else -> Screen.Main.route
         }
@@ -45,6 +46,17 @@ fun VibeBuildNavGraph() {
         navController = navController,
         startDestination = startDestination
     ) {
+        composable(Screen.Landing.route) {
+            LandingScreen(
+                onGetStarted = {
+                    navController.navigate(Screen.SignIn.route)
+                },
+                onSignIn = {
+                    navController.navigate(Screen.SignIn.route)
+                }
+            )
+        }
+
         composable(Screen.SignIn.route) {
             SignInScreen(
                 onSignInSuccess = {
@@ -52,11 +64,11 @@ fun VibeBuildNavGraph() {
                     val hasCompletedOnboarding = prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false)
                     if (hasCompletedOnboarding) {
                         navController.navigate(Screen.Main.route) {
-                            popUpTo(Screen.SignIn.route) { inclusive = true }
+                            popUpTo(Screen.Landing.route) { inclusive = true }
                         }
                     } else {
                         navController.navigate(Screen.Onboarding.route) {
-                            popUpTo(Screen.SignIn.route) { inclusive = true }
+                            popUpTo(Screen.Landing.route) { inclusive = true }
                         }
                     }
                 }

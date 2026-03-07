@@ -1,4 +1,6 @@
 import express from 'express';
+import Stripe from 'stripe';
+import { supabase } from '../config/database.js';
 import {
     getSubscriptionStatus,
     verifyReceipt,
@@ -7,6 +9,15 @@ import {
     SUBSCRIPTION_TIERS,
     ACTION_TYPES
 } from '../services/subscriptionService.js';
+
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
+
+const STRIPE_PRICE_IDS = {
+    pro: process.env.STRIPE_PRO_PRICE_ID,
+    team: process.env.STRIPE_TEAM_PRICE_ID,
+};
+
+const WEB_APP_URL = process.env.WEB_APP_URL || 'https://vibebuild.cc';
 
 const router = express.Router();
 
@@ -193,6 +204,141 @@ router.get('/plans', (req, res) => {
             error: 'Internal server error'
         });
     }
+});
+
+/**
+ * POST /api/subscriptions/create-checkout
+ * Create a Stripe Checkout Session for subscription upgrade
+ */
+router.post('/create-checkout', async (req, res) => {
+    try {
+        if (!stripe) {
+            return res.status(500).json({ error: 'Stripe is not configured' });
+        }
+
+        const { userId, email, tier } = req.body;
+
+        if (!userId || !tier) {
+            return res.status(400).json({ error: 'userId and tier are required' });
+        }
+
+        const priceId = STRIPE_PRICE_IDS[tier];
+        if (!priceId) {
+            return res.status(400).json({ error: 'Invalid tier' });
+        }
+
+        const session = await stripe.checkout.sessions.create({
+            mode: 'subscription',
+            payment_method_types: ['card'],
+            line_items: [{ price: priceId, quantity: 1 }],
+            success_url: `${WEB_APP_URL}/settings?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${WEB_APP_URL}/settings?checkout=cancelled`,
+            client_reference_id: userId,
+            customer_email: email || undefined,
+            metadata: { userId, tier },
+        });
+
+        res.json({ success: true, url: session.url, sessionId: session.id });
+    } catch (error) {
+        console.error('[subscriptions/create-checkout] Error:', error);
+        res.status(500).json({ error: 'Failed to create checkout session' });
+    }
+});
+
+/**
+ * POST /api/subscriptions/stripe-webhook
+ * Handle Stripe webhook events
+ */
+router.post('/stripe-webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+    if (!stripe) {
+        return res.status(500).json({ error: 'Stripe is not configured' });
+    }
+
+    const sig = req.headers['stripe-signature'];
+    let event;
+
+    try {
+        event = stripe.webhooks.constructEvent(
+            req.body,
+            sig,
+            process.env.STRIPE_WEBHOOK_SECRET
+        );
+    } catch (err) {
+        console.error('[stripe-webhook] Signature verification failed:', err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    try {
+        switch (event.type) {
+            case 'checkout.session.completed': {
+                const session = event.data.object;
+                const userId = session.client_reference_id || session.metadata?.userId;
+                const tier = session.metadata?.tier || 'pro';
+
+                if (userId) {
+                    await supabase.from('user_subscriptions').upsert({
+                        user_id: userId,
+                        tier,
+                        status: 'active',
+                        platform: 'web',
+                        product_id: session.subscription,
+                        receipt_data: session.id,
+                        expires_at: null,
+                        updated_at: new Date().toISOString(),
+                    }, { onConflict: 'user_id' });
+
+                    console.log(`[stripe-webhook] Subscription activated: user=${userId}, tier=${tier}`);
+                }
+                break;
+            }
+
+            case 'customer.subscription.deleted':
+            case 'customer.subscription.updated': {
+                const subscription = event.data.object;
+                const { data: sub } = await supabase
+                    .from('user_subscriptions')
+                    .select('user_id')
+                    .eq('product_id', subscription.id)
+                    .single();
+
+                if (sub) {
+                    const isActive = subscription.status === 'active';
+                    await supabase.from('user_subscriptions').update({
+                        status: isActive ? 'active' : 'cancelled',
+                        tier: isActive ? undefined : 'free',
+                        expires_at: subscription.current_period_end
+                            ? new Date(subscription.current_period_end * 1000).toISOString()
+                            : null,
+                        updated_at: new Date().toISOString(),
+                    }).eq('user_id', sub.user_id);
+
+                    console.log(`[stripe-webhook] Subscription ${subscription.status}: user=${sub.user_id}`);
+                }
+                break;
+            }
+
+            case 'invoice.payment_failed': {
+                const invoice = event.data.object;
+                const { data: sub } = await supabase
+                    .from('user_subscriptions')
+                    .select('user_id')
+                    .eq('product_id', invoice.subscription)
+                    .single();
+
+                if (sub) {
+                    await supabase.from('user_subscriptions').update({
+                        status: 'past_due',
+                        updated_at: new Date().toISOString(),
+                    }).eq('user_id', sub.user_id);
+                }
+                break;
+            }
+        }
+    } catch (error) {
+        console.error('[stripe-webhook] Processing error:', error);
+    }
+
+    res.json({ received: true });
 });
 
 export default router;

@@ -82,20 +82,20 @@ struct SignInView: View {
                         VStack(spacing: 20) {
                             featureRow(
                                 icon: "wand.and.stars",
-                                title: "AI-Powered Learning",
-                                description: "Explore web development with AI guidance"
+                                title: "AI Code Generation",
+                                description: "Describe an idea, get working HTML & CSS code"
                             )
 
                             featureRow(
                                 icon: "chevron.left.forwardslash.chevron.right",
-                                title: "Code & Preview",
+                                title: "Code Editor",
                                 description: "View, edit, and learn from source code"
                             )
 
                             featureRow(
-                                icon: "sparkles",
-                                title: "Real-time Preview",
-                                description: "See your code come to life instantly"
+                                icon: "safari",
+                                title: "Run in Safari",
+                                description: "Open your code in Safari to see the result"
                             )
                         }
                         .padding(.horizontal, 32)

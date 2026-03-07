@@ -69,6 +69,8 @@ class ProjectGenerationManager: ObservableObject {
                     self.endBackgroundTask()
                     self.completionPrompt = prompt
                     self.sendCompletionNotification(prompt: prompt)
+                    // Record usage only after successful generation
+                    SubscriptionManager.shared.recordGeneration()
                     showPreview = true
                 }
             } catch {

@@ -12,8 +12,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.theme.*
 
 @Composable
@@ -43,7 +45,7 @@ fun AppsScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "My Apps",
+                text = stringResource(R.string.apps_screen_title),
                 style = MaterialTheme.typography.headlineMedium,
                 color = TextPrimary,
                 fontWeight = FontWeight.Bold
@@ -52,7 +54,7 @@ fun AppsScreen(
             IconButton(onClick = { viewModel.loadProjects() }) {
                 Icon(
                     Icons.Default.Refresh,
-                    contentDescription = "Refresh",
+                    contentDescription = stringResource(R.string.refresh),
                     tint = TextSecondary
                 )
             }
@@ -85,13 +87,13 @@ fun AppsScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "No apps yet",
+                        text = stringResource(R.string.apps_empty_title),
                         style = MaterialTheme.typography.titleLarge,
                         color = TextSecondary,
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
-                        text = "Create your first app with AI\nor explore what others have built",
+                        text = stringResource(R.string.apps_empty_subtitle),
                         style = MaterialTheme.typography.bodyMedium,
                         color = TextTertiary,
                         textAlign = TextAlign.Center

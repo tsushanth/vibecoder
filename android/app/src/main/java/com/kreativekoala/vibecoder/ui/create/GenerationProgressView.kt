@@ -26,11 +26,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.theme.*
 import kotlinx.coroutines.delay
 
@@ -64,9 +66,14 @@ fun GenerationProgressView(
         onNotifyEnabledChanged(granted)
     }
 
-    // Keep simulated progress advancing — uses ViewModel state so it survives navigation
+    // rememberUpdatedState ensures the coroutine always reads the latest value
+    // even though LaunchedEffect(Unit) is only launched once
+    val currentSimulated by rememberUpdatedState(simulatedProgress)
+    val currentReal by rememberUpdatedState(progressPercent)
+
+    // Sync real progress into simulated when real jumps ahead
     LaunchedEffect(progressPercent) {
-        if (progressPercent > simulatedProgress) {
+        if (progressPercent > currentSimulated) {
             onSimulatedProgressChanged(progressPercent)
         }
     }
@@ -76,13 +83,13 @@ fun GenerationProgressView(
             delay(800)
             // Slowly advance simulated progress when real progress hasn't changed
             // Cap at 95% so the final 5% only comes from actual completion
-            if (simulatedProgress < 95.0) {
+            if (currentSimulated < 95.0) {
                 val increment = when {
-                    simulatedProgress < 8.0 -> 0.3    // Early: ramp quickly
-                    simulatedProgress < 50.0 -> 0.15  // Mid: moderate
-                    else -> 0.1                        // Late: slow creep
+                    currentSimulated < 8.0 -> 0.3    // Early: ramp quickly
+                    currentSimulated < 50.0 -> 0.15  // Mid: moderate
+                    else -> 0.1                       // Late: slow creep
                 }
-                onSimulatedProgressChanged(simulatedProgress + increment)
+                onSimulatedProgressChanged(currentSimulated + increment)
             }
         }
     }
@@ -186,7 +193,7 @@ fun GenerationProgressView(
         if (estimatedSecondsRemaining > 0) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "~${estimatedSecondsRemaining}s remaining",
+                text = stringResource(R.string.generation_time_remaining, estimatedSecondsRemaining),
                 style = MaterialTheme.typography.bodySmall,
                 color = TextTertiary
             )
@@ -216,7 +223,7 @@ fun GenerationProgressView(
                 modifier = Modifier.fillMaxWidth(0.7f)
             ) {
                 Text(
-                    text = "Notify me when done",
+                    text = stringResource(R.string.generation_btn_notify),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -231,14 +238,14 @@ fun GenerationProgressView(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "You'll be notified when it's ready",
+                    text = stringResource(R.string.generation_notify_confirmation),
                     style = MaterialTheme.typography.bodySmall,
                     color = VibePurple,
                     fontWeight = FontWeight.Medium
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Feel free to leave this screen",
+                    text = stringResource(R.string.generation_notify_leave_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = TextTertiary
                 )
@@ -249,7 +256,7 @@ fun GenerationProgressView(
 
         TextButton(onClick = onCancel) {
             Text(
-                text = "Cancel",
+                text = stringResource(R.string.generation_btn_cancel),
                 color = Color.Red.copy(alpha = 0.7f)
             )
         }

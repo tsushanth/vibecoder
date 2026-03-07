@@ -13,16 +13,24 @@ import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Publish
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.ThumbDown
+import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.outlined.ThumbDown
+import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.theme.*
 import java.io.File
 
@@ -39,10 +47,16 @@ fun LivePreviewScreen(
     deployedUrl: String?,
     showDeployDialog: Boolean,
     onDeployConfirm: (String) -> Unit,
-    onDeployDismiss: () -> Unit
+    onDeployDismiss: () -> Unit,
+    onTweak: (String) -> Unit = {},
+    isTweaking: Boolean = false,
+    tweakPhase: String = "",
+    onFeedback: (String) -> Unit = {},
+    feedbackSent: String? = null
 ) {
     var reloadTrigger by remember { mutableIntStateOf(0) }
     var subdomain by remember { mutableStateOf("") }
+    var tweakText by remember { mutableStateOf("") }
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
 
@@ -50,11 +64,11 @@ fun LivePreviewScreen(
     if (showDeployDialog) {
         AlertDialog(
             onDismissRequest = onDeployDismiss,
-            title = { Text("Publish Your App", color = TextPrimary) },
+            title = { Text(stringResource(R.string.preview_deploy_dialog_title), color = TextPrimary) },
             text = {
                 Column {
                     Text(
-                        "Choose a subdomain for your app:",
+                        stringResource(R.string.preview_deploy_dialog_message),
                         color = TextSecondary,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -62,8 +76,8 @@ fun LivePreviewScreen(
                     OutlinedTextField(
                         value = subdomain,
                         onValueChange = { subdomain = it.lowercase().filter { c -> c.isLetterOrDigit() || c == '-' } },
-                        placeholder = { Text("my-awesome-app", color = TextTertiary) },
-                        suffix = { Text(".vibebuild.cc", color = TextSecondary) },
+                        placeholder = { Text(stringResource(R.string.preview_deploy_placeholder), color = TextTertiary) },
+                        suffix = { Text(stringResource(R.string.preview_deploy_domain_suffix), color = TextSecondary) },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = VibePurple,
@@ -84,12 +98,12 @@ fun LivePreviewScreen(
                     enabled = subdomain.length >= 3,
                     colors = ButtonDefaults.buttonColors(containerColor = VibePurple)
                 ) {
-                    Text("Publish")
+                    Text(stringResource(R.string.publish))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeployDismiss) {
-                    Text("Cancel", color = TextSecondary)
+                    Text(stringResource(R.string.cancel), color = TextSecondary)
                 }
             },
             containerColor = DarkSurfaceElevated
@@ -106,7 +120,7 @@ fun LivePreviewScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = "Preview",
+                    text = stringResource(R.string.preview_screen_title),
                     fontWeight = FontWeight.SemiBold
                 )
             },
@@ -114,7 +128,7 @@ fun LivePreviewScreen(
                 IconButton(onClick = onClose) {
                     Icon(
                         Icons.Default.Close,
-                        contentDescription = "Close",
+                        contentDescription = stringResource(R.string.close),
                         tint = TextPrimary
                     )
                 }
@@ -123,7 +137,7 @@ fun LivePreviewScreen(
                 IconButton(onClick = { reloadTrigger++ }) {
                     Icon(
                         Icons.Default.Refresh,
-                        contentDescription = "Reload",
+                        contentDescription = stringResource(R.string.reload),
                         tint = TextPrimary
                     )
                 }
@@ -132,7 +146,7 @@ fun LivePreviewScreen(
                     IconButton(onClick = {}, enabled = false) {
                         Icon(
                             Icons.Default.Check,
-                            contentDescription = "Saved",
+                            contentDescription = stringResource(R.string.saved),
                             tint = SuccessGreen
                         )
                     }
@@ -150,7 +164,7 @@ fun LivePreviewScreen(
                         } else {
                             Icon(
                                 Icons.Default.Save,
-                                contentDescription = "Save",
+                                contentDescription = stringResource(R.string.save),
                                 tint = VibePurple
                             )
                         }
@@ -171,7 +185,7 @@ fun LivePreviewScreen(
                     } else {
                         Icon(
                             Icons.Default.Publish,
-                            contentDescription = "Publish",
+                            contentDescription = stringResource(R.string.publish),
                             tint = if (deployedUrl != null) SuccessGreen else VibeGreen
                         )
                     }
@@ -198,7 +212,7 @@ fun LivePreviewScreen(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Live",
+                            text = stringResource(R.string.live),
                             color = VibeGreen,
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold
@@ -216,7 +230,7 @@ fun LivePreviewScreen(
                             },
                             modifier = Modifier.size(32.dp)
                         ) {
-                            Icon(Icons.Default.ContentCopy, "Copy", tint = TextSecondary, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.ContentCopy, stringResource(R.string.copy), tint = TextSecondary, modifier = Modifier.size(18.dp))
                         }
                         IconButton(
                             onClick = {
@@ -224,21 +238,67 @@ fun LivePreviewScreen(
                             },
                             modifier = Modifier.size(32.dp)
                         ) {
-                            Icon(Icons.Default.OpenInBrowser, "Open", tint = TextSecondary, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.OpenInBrowser, stringResource(R.string.open), tint = TextSecondary, modifier = Modifier.size(18.dp))
                         }
+                        val shareText = stringResource(R.string.preview_share_text, deployedUrl)
+                        val shareLabel = stringResource(R.string.share)
                         IconButton(
                             onClick = {
                                 val intent = Intent(Intent.ACTION_SEND).apply {
                                     type = "text/plain"
-                                    putExtra(Intent.EXTRA_TEXT, "Check out my app: $deployedUrl")
+                                    putExtra(Intent.EXTRA_TEXT, shareText)
                                 }
-                                context.startActivity(Intent.createChooser(intent, "Share"))
+                                context.startActivity(Intent.createChooser(intent, shareLabel))
                             },
                             modifier = Modifier.size(32.dp)
                         ) {
-                            Icon(Icons.Default.Share, "Share", tint = TextSecondary, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.Share, stringResource(R.string.share), tint = TextSecondary, modifier = Modifier.size(18.dp))
                         }
                     }
+                }
+            }
+        }
+
+        // Feedback row
+        Surface(
+            color = DarkSurface,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (feedbackSent != null) "Thanks for your feedback!" else "How's this?",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextSecondary,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(
+                    onClick = { onFeedback("up") },
+                    enabled = feedbackSent == null,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        if (feedbackSent == "up") Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp,
+                        contentDescription = "Thumbs up",
+                        tint = if (feedbackSent == "up") SuccessGreen else TextSecondary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                IconButton(
+                    onClick = { onFeedback("down") },
+                    enabled = feedbackSent == null,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        if (feedbackSent == "down") Icons.Filled.ThumbDown else Icons.Outlined.ThumbDown,
+                        contentDescription = "Thumbs down",
+                        tint = if (feedbackSent == "down") Color(0xFFEF5350) else TextSecondary,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
         }
@@ -246,8 +306,81 @@ fun LivePreviewScreen(
         // WebView
         WebViewComposable(
             bundleDir = bundleDir,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
             onReloadRequested = if (reloadTrigger > 0) ({}) else null
         )
+
+        // Tweak bar at bottom
+        Surface(
+            color = DarkSurface,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.navigationBarsPadding()) {
+                // Phase text during tweak
+                if (isTweaking && tweakPhase.isNotEmpty()) {
+                    Text(
+                        text = tweakPhase,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = VibePurple,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                    )
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedTextField(
+                        value = tweakText,
+                        onValueChange = { tweakText = it },
+                        modifier = Modifier.weight(1f),
+                        placeholder = {
+                            Text("Describe changes...", color = TextTertiary)
+                        },
+                        enabled = !isTweaking,
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = VibePurple,
+                            unfocusedBorderColor = DarkBorder,
+                            focusedContainerColor = DarkSurfaceVariant,
+                            unfocusedContainerColor = DarkSurfaceVariant,
+                            cursorColor = VibePurple,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary
+                        ),
+                        shape = RoundedCornerShape(24.dp)
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    if (isTweaking) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(40.dp),
+                            color = VibePurple,
+                            strokeWidth = 3.dp
+                        )
+                    } else {
+                        IconButton(
+                            onClick = {
+                                onTweak(tweakText)
+                                tweakText = ""
+                            },
+                            enabled = tweakText.isNotBlank(),
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Send,
+                                contentDescription = "Send tweak",
+                                tint = if (tweakText.isNotBlank()) VibePurple else TextTertiary
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }

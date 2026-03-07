@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.kreativekoala.vibecoder.data.model.Project
 import com.kreativekoala.vibecoder.data.model.SseEvent
 import com.kreativekoala.vibecoder.data.model.Suggestion
+import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.data.repository.AuthRepository
 import com.kreativekoala.vibecoder.data.repository.DeployRepository
 import com.kreativekoala.vibecoder.data.repository.ProjectRepository
@@ -43,7 +44,11 @@ data class CreateUiState(
     val referenceImageBase64: String? = null,
     val isDeploying: Boolean = false,
     val deployedUrl: String? = null,
-    val showDeployDialog: Boolean = false
+    val showDeployDialog: Boolean = false,
+    val isLoadingSuggestions: Boolean = false,
+    val isTweaking: Boolean = false,
+    val tweakPhase: String = "",
+    val feedbackSent: String? = null
 )
 
 @HiltViewModel
@@ -61,12 +66,12 @@ class CreateViewModel @Inject constructor(
     private var generationJob: Job? = null
 
     private val fallbackSuggestions = listOf(
-        Suggestion("Todo App", "Build a clean todo list app with add, complete, and delete functionality. Use local storage to persist tasks."),
-        Suggestion("Weather App", "Create a weather app that shows current conditions and 5-day forecast with a clean card-based layout."),
-        Suggestion("Calculator", "Create a scientific calculator with basic operations, square root, percentage, and memory functions."),
-        Suggestion("Pomodoro Timer", "Build a focus timer with 25-minute work sessions and 5-minute breaks. Minimalist design."),
-        Suggestion("Markdown Editor", "Create a split-pane markdown editor with live preview. Support headings, lists, links, and code blocks."),
-        Suggestion("Color Palette", "Build a tool that generates harmonious color palettes. Show hex codes and allow copying to clipboard.")
+        Suggestion(appContext.getString(R.string.suggestion_label_todo_app), "Build a clean todo list app with add, complete, and delete functionality. Use local storage to persist tasks."),
+        Suggestion(appContext.getString(R.string.suggestion_label_weather_app), "Create a weather app that shows current conditions and 5-day forecast with a clean card-based layout."),
+        Suggestion(appContext.getString(R.string.suggestion_label_calculator), "Create a scientific calculator with basic operations, square root, percentage, and memory functions."),
+        Suggestion(appContext.getString(R.string.suggestion_label_pomodoro_timer), "Build a focus timer with 25-minute work sessions and 5-minute breaks. Minimalist design."),
+        Suggestion(appContext.getString(R.string.suggestion_label_markdown_editor), "Create a split-pane markdown editor with live preview. Support headings, lists, links, and code blocks."),
+        Suggestion(appContext.getString(R.string.suggestion_label_color_palette), "Build a tool that generates harmonious color palettes. Show hex codes and allow copying to clipboard.")
     )
 
     init {
@@ -90,6 +95,28 @@ class CreateViewModel @Inject constructor(
         }
     }
 
+    fun suggestNewIdeas() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingSuggestions = true) }
+            try {
+                val suggestions = projectRepository.suggestNewIdeas()
+                if (suggestions.isNotEmpty()) {
+                    _uiState.update { it.copy(suggestions = suggestions) }
+                }
+            } catch (e: Exception) {
+                // Fallback: reshuffle from API
+                try {
+                    val suggestions = projectRepository.getSuggestions()
+                    if (suggestions.isNotEmpty()) {
+                        _uiState.update { it.copy(suggestions = suggestions) }
+                    }
+                } catch (_: Exception) {}
+            } finally {
+                _uiState.update { it.copy(isLoadingSuggestions = false) }
+            }
+        }
+    }
+
     fun updatePrompt(prompt: String) {
         _uiState.update { it.copy(prompt = prompt) }
     }
@@ -103,7 +130,10 @@ class CreateViewModel @Inject constructor(
         val prompt = currentState.prompt.trim()
         if (prompt.isEmpty()) return
 
-        val userId = authRepository.currentUser?.uid ?: return
+        val userId = authRepository.currentUser?.uid ?: run {
+            _uiState.update { it.copy(errorMessage = "Please sign in to generate projects") }
+            return
+        }
         val userName = authRepository.currentUser?.displayName ?: "VibeBuild User"
 
         viewModelScope.launch {
@@ -114,7 +144,7 @@ class CreateViewModel @Inject constructor(
                     progressPercent = 0.0,
                     simulatedProgress = 0.0,
                     notifyEnabled = false,
-                    buildPhase = "Connecting...",
+                    buildPhase = appContext.getString(R.string.generation_phase_connecting),
                     buildDetail = "",
                     estimatedSecondsRemaining = 0,
                     errorMessage = null,
@@ -161,7 +191,7 @@ class CreateViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isGenerating = false,
-                            errorMessage = e.message ?: "Generation failed"
+                            errorMessage = e.message ?: appContext.getString(R.string.create_error_generation_failed)
                         )
                     }
                 }
@@ -180,7 +210,7 @@ class CreateViewModel @Inject constructor(
                 it.copy(
                     isGenerating = false,
                     progressPercent = 100.0,
-                    buildPhase = "Complete!",
+                    buildPhase = appContext.getString(R.string.generation_phase_complete),
                     bundleDir = bundleDir,
                     bundleBase64 = result.bundle,
                     showPreview = true
@@ -196,7 +226,7 @@ class CreateViewModel @Inject constructor(
             _uiState.update {
                 it.copy(
                     isGenerating = false,
-                    errorMessage = "Failed to extract project: ${e.message}"
+                    errorMessage = appContext.getString(R.string.create_error_extract_failed, e.message ?: "")
                 )
             }
         }
@@ -226,7 +256,7 @@ class CreateViewModel @Inject constructor(
             .take(6)
             .joinToString(" ")
             .take(80)
-            .ifBlank { "My Project" }
+            .ifBlank { appContext.getString(R.string.create_default_project_title) }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true) }
@@ -251,7 +281,7 @@ class CreateViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isSaving = false,
-                        errorMessage = "Failed to save: ${e.message}"
+                        errorMessage = appContext.getString(R.string.create_error_save_failed, e.message ?: "")
                     )
                 }
             }
@@ -269,7 +299,10 @@ class CreateViewModel @Inject constructor(
                 savedProjectId = null,
                 deployedUrl = null,
                 showDeployDialog = false,
-                isDeploying = false
+                isDeploying = false,
+                isTweaking = false,
+                tweakPhase = "",
+                feedbackSent = null
             )
         }
     }
@@ -284,6 +317,135 @@ class CreateViewModel @Inject constructor(
 
     fun clearError() {
         _uiState.update { it.copy(errorMessage = null) }
+    }
+
+    fun tweakProject(tweakDescription: String) {
+        val desc = tweakDescription.trim()
+        if (desc.isEmpty()) return
+
+        val userId = authRepository.currentUser?.uid ?: run {
+            _uiState.update { it.copy(errorMessage = "Please sign in to tweak projects") }
+            return
+        }
+        val userName = authRepository.currentUser?.displayName ?: "VibeBuild User"
+
+        viewModelScope.launch {
+            // Auto-save if not already saved
+            var projectId = _uiState.value.savedProjectId
+            if (projectId == null) {
+                val currentState = _uiState.value
+                val bundleBase64 = currentState.bundleBase64 ?: run {
+                    _uiState.update { it.copy(errorMessage = "No project to tweak") }
+                    return@launch
+                }
+                val title = currentState.prompt.trim()
+                    .split("\\s+".toRegex())
+                    .take(6)
+                    .joinToString(" ")
+                    .take(80)
+                    .ifBlank { appContext.getString(R.string.create_default_project_title) }
+
+                try {
+                    projectId = projectRepository.saveProject(
+                        title = title,
+                        description = currentState.prompt,
+                        bundle = bundleBase64,
+                        creatorId = userId,
+                        creatorName = userName,
+                        initialPrompt = currentState.prompt
+                    )
+                    _uiState.update { it.copy(savedProjectId = projectId) }
+                } catch (e: Exception) {
+                    _uiState.update { it.copy(errorMessage = "Failed to save before tweaking: ${e.message}") }
+                    return@launch
+                }
+            }
+
+            if (projectId == null) {
+                _uiState.update { it.copy(errorMessage = "Failed to save project") }
+                return@launch
+            }
+
+            _uiState.update { it.copy(isTweaking = true, tweakPhase = "Applying changes...") }
+
+            try {
+                projectRepository.tweak(
+                    projectId = projectId,
+                    userId = userId,
+                    tweakDescription = desc
+                ).collect { event ->
+                    when (event) {
+                        is SseEvent.Status -> {
+                            _uiState.update {
+                                it.copy(tweakPhase = event.detail.ifEmpty { event.message })
+                            }
+                        }
+                        is SseEvent.Result -> {
+                            val bundleDir = ZipExtractor.extractBundle(
+                                base64Bundle = event.bundle,
+                                cacheDir = appContext.cacheDir
+                            )
+                            _uiState.update {
+                                it.copy(
+                                    isTweaking = false,
+                                    tweakPhase = "",
+                                    bundleDir = bundleDir,
+                                    bundleBase64 = event.bundle
+                                )
+                            }
+                        }
+                        is SseEvent.Error -> {
+                            _uiState.update {
+                                it.copy(isTweaking = false, tweakPhase = "", errorMessage = event.error)
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(isTweaking = false, tweakPhase = "", errorMessage = "Tweak failed: ${e.message}")
+                }
+            }
+        }
+    }
+
+    fun sendFeedback(rating: String) {
+        val userId = authRepository.currentUser?.uid ?: return
+        val userName = authRepository.currentUser?.displayName ?: "VibeBuild User"
+
+        viewModelScope.launch {
+            // Auto-save if needed
+            var projectId = _uiState.value.savedProjectId
+            if (projectId == null) {
+                val currentState = _uiState.value
+                val bundleBase64 = currentState.bundleBase64 ?: return@launch
+                val title = currentState.prompt.trim()
+                    .split("\\s+".toRegex())
+                    .take(6)
+                    .joinToString(" ")
+                    .take(80)
+                    .ifBlank { appContext.getString(R.string.create_default_project_title) }
+
+                try {
+                    projectId = projectRepository.saveProject(
+                        title = title,
+                        description = currentState.prompt,
+                        bundle = bundleBase64,
+                        creatorId = userId,
+                        creatorName = userName,
+                        initialPrompt = currentState.prompt
+                    )
+                    _uiState.update { it.copy(savedProjectId = projectId) }
+                } catch (_: Exception) { return@launch }
+            }
+
+            if (projectId == null) return@launch
+
+            try {
+                projectRepository.sendFeedback(projectId, userId, rating)
+                _uiState.update { it.copy(feedbackSent = rating) }
+            } catch (_: Exception) {}
+        }
     }
 
     fun showDeployDialog() {
@@ -311,7 +473,7 @@ class CreateViewModel @Inject constructor(
                         .take(6)
                         .joinToString(" ")
                         .take(80)
-                        .ifBlank { "My Project" }
+                        .ifBlank { appContext.getString(R.string.create_default_project_title) }
 
                     _uiState.update { it.copy(isSaving = true) }
                     val id = projectRepository.saveProject(
@@ -339,7 +501,7 @@ class CreateViewModel @Inject constructor(
                     it.copy(
                         isDeploying = false,
                         isSaving = false,
-                        errorMessage = "Publish failed: ${e.message}"
+                        errorMessage = appContext.getString(R.string.create_error_publish_failed, e.message ?: "")
                     )
                 }
             }

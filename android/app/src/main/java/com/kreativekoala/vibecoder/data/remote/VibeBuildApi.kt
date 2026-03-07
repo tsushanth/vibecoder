@@ -40,8 +40,17 @@ interface VibeBuildApi {
     @GET("api/projects/suggestions")
     suspend fun getSuggestions(@Query("count") count: Int = 6): SuggestionsResponse
 
+    @POST("api/projects/suggest-ideas")
+    suspend fun suggestNewIdeas(): SuggestionsResponse
+
     @POST("api/projects/save")
     suspend fun saveProject(@Body body: SaveProjectRequest): SaveProjectResponse
+
+    @POST("api/projects/{id}/feedback")
+    suspend fun sendFeedback(
+        @Path("id") id: String,
+        @Body body: FeedbackRequest
+    ): SuccessResponse
 
     @POST("api/projects/{id}/fork")
     suspend fun forkProject(

@@ -818,8 +818,9 @@ Start building now. Create the files.`;
         const genResult = await runClaudeCommand(claudePath, generatePrompt, projectDir, requestId, 15);
 
         if (!genResult.success) {
-            activeGenerations--;
+            console.log(`[${requestId}] Generate phase failed: ${genResult.error || 'unknown error'}`);
             if (genResult.quotaError) {
+                activeGenerations--;
                 // Track quota state for fast-fail on future requests
                 quotaExhausted = true;
                 if (genResult.resetTime) quotaResetTime = genResult.resetTime;
@@ -830,7 +831,16 @@ Start building now. Create the files.`;
                 console.log(`[${requestId}] Quota exhausted: ${msg}`);
                 return sendError(msg);
             }
-            return sendError('Failed to generate app. Please try again.');
+            // Claude CLI sometimes exits with non-zero even when files were created.
+            // Check if index.html exists — if so, treat as success and continue.
+            const hasIndex = fs.existsSync(path.join(projectDir, 'index.html'));
+            const htmlFiles = hasIndex ? [] : fs.readdirSync(projectDir).filter(f => f.endsWith('.html') && f !== 'CLAUDE.md');
+            if (hasIndex || htmlFiles.length > 0) {
+                console.log(`[${requestId}] Non-zero exit but files exist — continuing build`);
+            } else {
+                activeGenerations--;
+                return sendError('Failed to generate app. Please try again.');
+            }
         }
 
         // Check index.html exists
