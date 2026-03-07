@@ -1,5 +1,6 @@
 import SwiftUI
 import UserNotifications
+import FirebaseCore
 
 @main
 struct VibeCoderApp: App {
@@ -21,6 +22,7 @@ struct VibeCoderApp: App {
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        FirebaseApp.configure()
         UNUserNotificationCenter.current().delegate = self
 
         // Request permission then register for remote notifications
