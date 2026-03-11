@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VibeBuild</string>
+
+    <!-- Common -->
+    <string name="cancel">Hủy</string>
+    <string name="ok">OK</string>
+    <string name="back">Quay lại</string>
+    <string name="refresh">Làm mới</string>
+    <string name="share">Chia sẻ</string>
+    <string name="copy">Sao chép</string>
+    <string name="open">Mở</string>
+    <string name="error">Lỗi</string>
+    <string name="live">Trực tiếp</string>
+    <string name="publish">Xuất bản</string>
+    <string name="deploy">Triển khai</string>
+    <string name="close">Đóng</string>
+    <string name="reload">Tải lại</string>
+    <string name="save">Lưu</string>
+    <string name="saved">Đã lưu</string>
+    <string name="delete_label">Xóa</string>
+    <string name="public_label">Công khai</string>
+    <string name="private_label">Riêng tư</string>
+    <string name="sign_out">Đăng xuất</string>
+
+    <!-- Tabs -->
+    <string name="tab_apps">Ứng dụng</string>
+    <string name="tab_create">Tạo mới</string>
+    <string name="tab_account">Tài khoản</string>
+    <string name="tab_browse">Khám phá</string>
+
+    <!-- Landing Screen -->
+    <string name="landing_hero_subtitle">Mô tả. AI xây dựng.\nỨng dụng của bạn, sẵn sàng trong vài giây.</string>
+    <string name="landing_prompt_example">"Tạo cho tôi ứng dụng thời tiết với giao diện tối sạch sẽ"</string>
+    <string name="landing_how_it_works_title">Cách hoạt động</string>
+    <string name="landing_step_describe_title">Mô tả</string>
+    <string name="landing_step_describe_desc">Cho AI biết bạn muốn gì bằng ngôn ngữ đơn giản</string>
+    <string name="landing_step_generate_title">Tạo</string>
+    <string name="landing_step_generate_desc">AI viết mã trong vài giây</string>
+    <string name="landing_step_preview_title">Xem trước</string>
+    <string name="landing_step_preview_desc">Xem ứng dụng của bạn chạy trực tiếp ngay lập tức</string>
+    <string name="landing_step_deploy_title">Triển khai</string>
+    <string name="landing_step_deploy_desc">Xuất bản lên web chỉ với một chạm</string>
+    <string name="landing_examples_title">Mọi người đang xây dựng gì</string>
+    <string name="landing_example_weather_title">Bảng điều khiển thời tiết</string>
+    <string name="landing_example_weather_desc">Thời tiết thời gian thực với biểu đồ đẹp</string>
+    <string name="landing_example_memory_title">Trò chơi trí nhớ</string>
+    <string name="landing_example_memory_desc">Trò chơi ghép thẻ vui nhộn với hiệu ứng động</string>
+    <string name="landing_example_budget_title">Theo dõi ngân sách</string>
+    <string name="landing_example_budget_desc">Theo dõi chi tiêu theo danh mục</string>
+    <string name="landing_example_pomodoro_title">Hẹn giờ Pomodoro</string>
+    <string name="landing_example_pomodoro_desc">Hẹn giờ tập trung với quản lý công việc</string>
+    <string name="landing_example_quiz_title">Ứng dụng đố vui</string>
+    <string name="landing_example_quiz_desc">Câu đố tương tác với theo dõi điểm số</string>
+    <string name="landing_example_workout_title">Nhật ký tập luyện</string>
+    <string name="landing_example_workout_desc">Ghi lại bài tập và theo dõi tiến trình</string>
+    <string name="landing_cta_get_started">Bắt đầu — Miễn phí</string>
+    <string name="landing_cta_sign_in">Đã có tài khoản? Đăng nhập</string>
+    <string name="landing_trust_badge_instant">Tức thì</string>
+    <string name="landing_trust_badge_secure">An toàn</string>
+    <string name="landing_trust_badge_no_card">Không cần thẻ</string>
+
+    <!-- Sign In Screen -->
+    <string name="sign_in_subtitle">Tạo ứng dụng với AI</string>
+    <string name="sign_in_label_display_name">Tên hiển thị</string>
+    <string name="sign_in_label_email">Email</string>
+    <string name="sign_in_label_password">Mật khẩu</string>
+    <string name="sign_in_cd_hide_password">Ẩn mật khẩu</string>
+    <string name="sign_in_cd_show_password">Hiện mật khẩu</string>
+    <string name="sign_in_btn_creating_account">Đang tạo tài khoản…</string>
+    <string name="sign_in_btn_signing_in">Đang đăng nhập…</string>
+    <string name="sign_in_btn_create_account">Tạo tài khoản</string>
+    <string name="sign_in_btn_sign_in">Đăng nhập</string>
+    <string name="sign_in_toggle_have_account">Đã có tài khoản? </string>
+    <string name="sign_in_toggle_no_account">Chưa có tài khoản? </string>
+    <string name="sign_in_toggle_link_sign_in">Đăng nhập</string>
+    <string name="sign_in_toggle_link_sign_up">Đăng ký</string>
+    <string name="sign_in_divider_or">" hoặc "</string>
+    <string name="sign_in_with_google">Đăng nhập bằng Google</string>
+    <string name="sign_in_terms_notice">Bằng cách đăng nhập, bạn đồng ý với Điều khoản dịch vụ của chúng tôi</string>
+
+    <!-- Onboarding Screen -->
+    <string name="onboarding_btn_skip">Bỏ qua</string>
+    <string name="onboarding_page1_title">Mô tả ứng dụng của bạn</string>
+    <string name="onboarding_page1_desc">Cho AI biết bạn muốn xây dựng gì bằng ngôn ngữ đơn giản. Không cần kinh nghiệm lập trình.</string>
+    <string name="onboarding_page2_title">AI xây dựng</string>
+    <string name="onboarding_page2_desc">Xem AI tạo ra ứng dụng hoàn chỉnh với mã thực trong vài giây.</string>
+    <string name="onboarding_page3_title">Chỉnh sửa &amp; Hoàn thiện</string>
+    <string name="onboarding_page3_desc">Hoàn thiện ứng dụng cùng AI. Thay đổi màu sắc, tính năng và bố cục ngay lập tức.</string>
+    <string name="onboarding_page4_title">Triển khai &amp; Chia sẻ</string>
+    <string name="onboarding_page4_desc">Xuất bản ứng dụng lên web chỉ với một chạm. Chia sẻ sáng tạo của bạn với thế giới.</string>
+    <string name="onboarding_btn_next">Tiếp theo</string>
+    <string name="onboarding_btn_get_started">Bắt đầu</string>
+
+    <!-- Create Screen -->
+    <string name="create_title">Bạn muốn tạo gì?</string>
+    <string name="create_subtitle">Mô tả ý tưởng ứng dụng và AI sẽ xây dựng nó</string>
+    <string name="create_prompt_placeholder">VD: Tạo ứng dụng thời tiết hiển thị dự báo cho thành phố của tôi…</string>
+    <string name="create_cd_attach_image">Đính kèm hình ảnh</string>
+    <string name="create_cd_voice_input">Nhập bằng giọng nói</string>
+    <string name="create_cd_remove_image">Xóa hình ảnh</string>
+    <string name="create_cd_reference_image">Hình ảnh tham khảo</string>
+    <string name="create_default_project_title">Dự án của tôi</string>
+    <string name="create_error_generation_failed">Tạo thất bại</string>
+    <string name="create_error_extract_failed">Không thể trích xuất dự án: %s</string>
+    <string name="create_error_save_failed">Không thể lưu: %s</string>
+    <string name="create_error_publish_failed">Xuất bản thất bại: %s</string>
+    <string name="create_save_dialog_title">Đã lưu!</string>
+    <string name="create_save_dialog_message">Dự án của bạn đã được lưu. Nhấn nút xuất bản để đưa lên trực tiếp!</string>
+
+    <!-- Generation Progress -->
+    <string name="generation_time_remaining">~%d giây còn lại</string>
+    <string name="generation_btn_notify">Thông báo khi hoàn tất</string>
+    <string name="generation_notify_confirmation">Bạn sẽ được thông báo khi sẵn sàng</string>
+    <string name="generation_notify_leave_hint">Bạn có thể rời khỏi màn hình này</string>
+    <string name="generation_btn_cancel">Hủy</string>
+    <string name="generation_phase_connecting">Đang kết nối…</string>
+    <string name="generation_phase_complete">Hoàn tất!</string>
+    <string name="generation_limit_reached">Đã đạt giới hạn tạo hàng ngày</string>
+    <string name="upgrade_to_pro">Nâng cấp lên Pro</string>
+    <string name="start_generating">Bắt đầu</string>
+
+    <!-- Suggestion Chips -->
+    <string name="suggestions_header">Thử một trong những gợi ý này</string>
+    <string name="suggestions_btn_generating">Đang tạo ý tưởng…</string>
+    <string name="suggestions_btn_suggest_new">⚡ Gợi ý ý tưởng mới</string>
+    <string name="suggestion_label_todo_app">Ứng dụng việc cần làm</string>
+    <string name="suggestion_label_weather_app">Ứng dụng thời tiết</string>
+    <string name="suggestion_label_calculator">Máy tính</string>
+    <string name="suggestion_label_pomodoro_timer">Hẹn giờ Pomodoro</string>
+    <string name="suggestion_label_markdown_editor">Trình soạn thảo Markdown</string>
+    <string name="suggestion_label_color_palette">Bảng màu</string>
+
+    <!-- Account Screen -->
+    <string name="account_dialog_sign_out_title">Đăng xuất</string>
+    <string name="account_dialog_sign_out_message">Bạn có chắc chắn muốn đăng xuất không?</string>
+    <string name="account_cd_profile_photo">Ảnh hồ sơ</string>
+    <string name="account_default_display_name">Người dùng</string>
+    <string name="account_section_usage">Sử dụng</string>
+    <string name="account_stat_projects">Dự án</string>
+    <string name="account_stat_todays_gens">Lượt tạo hôm nay</string>
+    <string name="account_section_settings">Cài đặt</string>
+    <string name="account_settings_subscription">Đăng ký</string>
+    <string name="account_settings_theme">Giao diện</string>
+    <string name="account_settings_theme_value">Tối</string>
+    <string name="account_settings_about">Giới thiệu</string>
+    <string name="account_settings_version">Phiên bản 1.0.0</string>
+    <string name="account_settings_language">Ngôn ngữ</string>
+
+    <!-- Apps Screen -->
+    <string name="apps_screen_title">Ứng dụng của tôi</string>
+    <string name="apps_empty_title">Chưa có ứng dụng</string>
+    <string name="apps_empty_subtitle">Tạo ứng dụng đầu tiên với AI\nhoặc khám phá những gì người khác đã xây dựng</string>
+    <string name="apps_cd_sort">Sắp xếp</string>
+
+    <!-- Browse Screen -->
+    <string name="browse_screen_title">Khám phá</string>
+
+    <!-- Preview Screen -->
+    <string name="preview_screen_title">Xem trước</string>
+    <string name="preview_deploy_dialog_title">Xuất bản ứng dụng</string>
+    <string name="preview_deploy_dialog_message">Chọn tên miền phụ cho ứng dụng của bạn:</string>
+    <string name="preview_deploy_placeholder">ung-dung-tuyet-voi</string>
+    <string name="preview_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="preview_share_text">Xem ứng dụng của tôi: %s</string>
+
+    <!-- Project Preview Screen -->
+    <string name="project_preview_btn_forked">Đã sao chép!</string>
+    <string name="project_preview_btn_fork">Sao chép</string>
+    <string name="project_preview_error_title">Không thể tải bản xem trước</string>
+
+    <!-- Project Detail Screen -->
+    <string name="project_detail_deploy_dialog_title">Triển khai ứng dụng</string>
+    <string name="project_detail_deploy_dialog_message">Chọn tên miền phụ cho ứng dụng của bạn:</string>
+    <string name="project_detail_deploy_label_subdomain">Tên miền phụ</string>
+    <string name="project_detail_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="project_detail_screen_title_fallback">Dự án</string>
+    <string name="project_detail_created_at">Tạo lúc %s</string>
+    <string name="project_detail_btn_preview">Xem trước ứng dụng</string>
+    <string name="project_detail_badge_deployed">Đã triển khai</string>
+    <string name="project_detail_btn_deploying">Đang triển khai…</string>
+    <string name="project_detail_btn_deploy_to_web">Triển khai lên Web</string>
+    <string name="project_detail_stat_views">Lượt xem</string>
+    <string name="project_detail_stat_forks">Bản sao</string>
+    <string name="project_detail_stat_tweaks">Chỉnh sửa</string>
+    <string name="project_detail_section_original_prompt">Mô tả gốc</string>
+    <string name="project_detail_share_text">Xem ứng dụng của tôi: %s</string>
+
+    <!-- Project Card -->
+    <string name="project_card_delete_dialog_title">Xóa dự án</string>
+    <string name="project_card_delete_dialog_message">Bạn có chắc chắn muốn xóa \"%s\" không? Hành động này không thể hoàn tác.</string>
+
+    <!-- Language Picker -->
+    <string name="language_picker_title">Chọn ngôn ngữ</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese">中文(简体)</string>
+    <string name="language_korean">한국어</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_hindi">हिन्दी</string>
+
+    <!-- Facebook SDK Configuration -->
+    <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
+    <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+</resources>

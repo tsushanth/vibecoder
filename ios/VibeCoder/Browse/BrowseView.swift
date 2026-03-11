@@ -72,7 +72,7 @@ struct BrowseView: View {
                 GridItem(.flexible())
             ], spacing: 16) {
                 ForEach(projects) { project in
-                    NavigationLink(destination: ProjectPreviewView(project: project)) {
+                    NavigationLink(destination: BrowseProjectDetailView(project: project)) {
                         ProjectCard(project: project)
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -121,7 +121,7 @@ struct ProjectCard: View {
                 .aspectRatio(16/9, contentMode: .fit)
                 .cornerRadius(12)
                 .overlay(
-                    Image(systemName: "app.fill")
+                    Image(systemName: "globe")
                         .font(.system(size: 40))
                         .foregroundColor(.white.opacity(0.7))
                 )
@@ -158,7 +158,7 @@ struct ProjectCard: View {
     }
 }
 
-struct ProjectPreviewView: View {
+struct BrowseProjectDetailView: View {
     let project: Project
     @EnvironmentObject var authManager: AuthManager
     @EnvironmentObject var subscriptionManager: SubscriptionManager
@@ -166,15 +166,15 @@ struct ProjectPreviewView: View {
 
     var body: some View {
         VStack {
-            // TODO: Show live preview of the project
-            Text("Preview: \(project.title)")
+            // Show web project details
+            Text("Web Project: \(project.title)")
                 .font(.title2)
 
             Spacer()
 
             HStack(spacing: 20) {
                 Button(action: { showForkConfirmation = true }) {
-                    Label("Fork (10 coins)", systemImage: "arrow.triangle.branch")
+                    Label("Remix (10 coins)", systemImage: "arrow.triangle.branch")
                         .padding()
                         .frame(maxWidth: .infinity)
                         .background(Color.blue)
@@ -195,13 +195,13 @@ struct ProjectPreviewView: View {
         }
         .navigationTitle(project.title)
         .navigationBarTitleDisplayMode(.inline)
-        .confirmationDialog("Fork Project", isPresented: $showForkConfirmation) {
-            Button("Fork for 10 coins") {
+        .confirmationDialog("Remix Project", isPresented: $showForkConfirmation) {
+            Button("Remix for 10 coins") {
                 Task { await forkProject() }
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Create your own copy of this project to customize")
+            Text("Create your own copy of this web project to customize")
         }
     }
 
