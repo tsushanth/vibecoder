@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VibeBuild</string>
+
+    <!-- Common -->
+    <string name="cancel">ยกเลิก</string>
+    <string name="ok">ตกลง</string>
+    <string name="back">กลับ</string>
+    <string name="refresh">รีเฟรช</string>
+    <string name="share">แชร์</string>
+    <string name="copy">คัดลอก</string>
+    <string name="open">เปิด</string>
+    <string name="error">ข้อผิดพลาด</string>
+    <string name="live">สด</string>
+    <string name="publish">เผยแพร่</string>
+    <string name="deploy">เปิดใช้งาน</string>
+    <string name="close">ปิด</string>
+    <string name="reload">โหลดใหม่</string>
+    <string name="save">บันทึก</string>
+    <string name="saved">บันทึกแล้ว</string>
+    <string name="delete_label">ลบ</string>
+    <string name="public_label">สาธารณะ</string>
+    <string name="private_label">ส่วนตัว</string>
+    <string name="sign_out">ออกจากระบบ</string>
+
+    <!-- Tabs -->
+    <string name="tab_apps">แอป</string>
+    <string name="tab_create">สร้าง</string>
+    <string name="tab_account">บัญชี</string>
+    <string name="tab_browse">สำรวจ</string>
+
+    <!-- Landing Screen -->
+    <string name="landing_hero_subtitle">อธิบาย AI จะสร้างให้\nแอปของคุณ พร้อมในไม่กี่วินาที</string>
+    <string name="landing_prompt_example">"สร้างแอปพยากรณ์อากาศพร้อม UI โทนมืดสวยงาม"</string>
+    <string name="landing_how_it_works_title">วิธีการทำงาน</string>
+    <string name="landing_step_describe_title">อธิบาย</string>
+    <string name="landing_step_describe_desc">บอก AI ว่าคุณต้องการอะไรด้วยภาษาง่ายๆ</string>
+    <string name="landing_step_generate_title">สร้าง</string>
+    <string name="landing_step_generate_desc">AI เขียนโค้ดในไม่กี่วินาที</string>
+    <string name="landing_step_preview_title">ดูตัวอย่าง</string>
+    <string name="landing_step_preview_desc">ดูแอปของคุณทำงานแบบสดทันที</string>
+    <string name="landing_step_deploy_title">เปิดใช้งาน</string>
+    <string name="landing_step_deploy_desc">เผยแพร่บนเว็บด้วยการแตะครั้งเดียว</string>
+    <string name="landing_examples_title">ผู้คนกำลังสร้างอะไร</string>
+    <string name="landing_example_weather_title">แดชบอร์ดสภาพอากาศ</string>
+    <string name="landing_example_weather_desc">สภาพอากาศแบบเรียลไทม์พร้อมกราฟสวยงาม</string>
+    <string name="landing_example_memory_title">เกมจำ</string>
+    <string name="landing_example_memory_desc">เกมจับคู่การ์ดสนุกพร้อมแอนิเมชัน</string>
+    <string name="landing_example_budget_title">ตัวติดตามงบประมาณ</string>
+    <string name="landing_example_budget_desc">ติดตามค่าใช้จ่ายพร้อมแยกหมวดหมู่</string>
+    <string name="landing_example_pomodoro_title">ตัวจับเวลาโพโมโดโร</string>
+    <string name="landing_example_pomodoro_desc">ตัวจับเวลาโฟกัสพร้อมการจัดการงาน</string>
+    <string name="landing_example_quiz_title">แอปควิซ</string>
+    <string name="landing_example_quiz_desc">คำถามแบบโต้ตอบพร้อมติดตามคะแนน</string>
+    <string name="landing_example_workout_title">บันทึกการออกกำลังกาย</string>
+    <string name="landing_example_workout_desc">บันทึกการออกกำลังกายและติดตามความก้าวหน้า</string>
+    <string name="landing_cta_get_started">เริ่มต้น — ฟรี</string>
+    <string name="landing_cta_sign_in">มีบัญชีแล้ว? เข้าสู่ระบบ</string>
+    <string name="landing_trust_badge_instant">ทันที</string>
+    <string name="landing_trust_badge_secure">ปลอดภัย</string>
+    <string name="landing_trust_badge_no_card">ไม่ต้องใช้บัตร</string>
+
+    <!-- Sign In Screen -->
+    <string name="sign_in_subtitle">สร้างแอปด้วย AI</string>
+    <string name="sign_in_label_display_name">ชื่อที่แสดง</string>
+    <string name="sign_in_label_email">อีเมล</string>
+    <string name="sign_in_label_password">รหัสผ่าน</string>
+    <string name="sign_in_cd_hide_password">ซ่อนรหัสผ่าน</string>
+    <string name="sign_in_cd_show_password">แสดงรหัสผ่าน</string>
+    <string name="sign_in_btn_creating_account">กำลังสร้างบัญชี…</string>
+    <string name="sign_in_btn_signing_in">กำลังเข้าสู่ระบบ…</string>
+    <string name="sign_in_btn_create_account">สร้างบัญชี</string>
+    <string name="sign_in_btn_sign_in">เข้าสู่ระบบ</string>
+    <string name="sign_in_toggle_have_account">มีบัญชีแล้ว? </string>
+    <string name="sign_in_toggle_no_account">ยังไม่มีบัญชี? </string>
+    <string name="sign_in_toggle_link_sign_in">เข้าสู่ระบบ</string>
+    <string name="sign_in_toggle_link_sign_up">สมัครสมาชิก</string>
+    <string name="sign_in_divider_or">" หรือ "</string>
+    <string name="sign_in_with_google">เข้าสู่ระบบด้วย Google</string>
+    <string name="sign_in_terms_notice">การเข้าสู่ระบบถือว่าคุณยอมรับข้อกำหนดการใช้บริการ</string>
+
+    <!-- Onboarding Screen -->
+    <string name="onboarding_btn_skip">ข้าม</string>
+    <string name="onboarding_page1_title">อธิบายแอปของคุณ</string>
+    <string name="onboarding_page1_desc">บอก AI ว่าคุณต้องการสร้างอะไรด้วยภาษาง่ายๆ ไม่ต้องมีประสบการณ์เขียนโค้ด</string>
+    <string name="onboarding_page2_title">AI สร้างให้</string>
+    <string name="onboarding_page2_desc">ดู AI สร้างแอปที่ทำงานได้เต็มรูปแบบพร้อมโค้ดจริงในไม่กี่วินาที</string>
+    <string name="onboarding_page3_title">ปรับแต่งและปรับปรุง</string>
+    <string name="onboarding_page3_desc">ปรับปรุงแอปของคุณกับ AI เปลี่ยนสี ฟีเจอร์ และเลย์เอาต์ได้ทันที</string>
+    <string name="onboarding_page4_title">เปิดใช้งานและแชร์</string>
+    <string name="onboarding_page4_desc">เผยแพร่แอปของคุณบนเว็บด้วยการแตะครั้งเดียว แชร์ผลงานของคุณกับทั่วโลก</string>
+    <string name="onboarding_btn_next">ถัดไป</string>
+    <string name="onboarding_btn_get_started">เริ่มต้น</string>
+
+    <!-- Create Screen -->
+    <string name="create_title">คุณต้องการสร้างอะไร?</string>
+    <string name="create_subtitle">อธิบายไอเดียแอปของคุณแล้ว AI จะสร้างให้</string>
+    <string name="create_prompt_placeholder">เช่น สร้างแอปพยากรณ์อากาศที่แสดงพยากรณ์สำหรับเมืองของฉัน…</string>
+    <string name="create_cd_attach_image">แนบรูปภาพ</string>
+    <string name="create_cd_voice_input">อินพุตเสียง</string>
+    <string name="create_cd_remove_image">ลบรูปภาพ</string>
+    <string name="create_cd_reference_image">รูปภาพอ้างอิง</string>
+    <string name="create_default_project_title">โปรเจกต์ของฉัน</string>
+    <string name="create_error_generation_failed">การสร้างล้มเหลว</string>
+    <string name="create_error_extract_failed">แยกโปรเจกต์ไม่สำเร็จ: %s</string>
+    <string name="create_error_save_failed">บันทึกไม่สำเร็จ: %s</string>
+    <string name="create_error_publish_failed">เผยแพร่ไม่สำเร็จ: %s</string>
+    <string name="create_save_dialog_title">บันทึกแล้ว!</string>
+    <string name="create_save_dialog_message">โปรเจกต์ของคุณถูกบันทึกแล้ว แตะปุ่มเผยแพร่เพื่อเปิดใช้งาน!</string>
+
+    <!-- Generation Progress -->
+    <string name="generation_time_remaining">~%d วินาทีที่เหลือ</string>
+    <string name="generation_btn_notify">แจ้งเตือนเมื่อเสร็จ</string>
+    <string name="generation_notify_confirmation">คุณจะได้รับแจ้งเตือนเมื่อพร้อม</string>
+    <string name="generation_notify_leave_hint">คุณสามารถออกจากหน้าจอนี้ได้</string>
+    <string name="generation_btn_cancel">ยกเลิก</string>
+    <string name="generation_phase_connecting">กำลังเชื่อมต่อ…</string>
+    <string name="generation_phase_complete">เสร็จสมบูรณ์!</string>
+    <string name="generation_limit_reached">ถึงขีดจำกัดการสร้างรายวันแล้ว</string>
+    <string name="upgrade_to_pro">อัปเกรดเป็น Pro</string>
+    <string name="start_generating">เริ่ม</string>
+
+    <!-- Suggestion Chips -->
+    <string name="suggestions_header">ลองอย่างใดอย่างหนึ่ง</string>
+    <string name="suggestions_btn_generating">กำลังสร้างไอเดีย…</string>
+    <string name="suggestions_btn_suggest_new">⚡ แนะนำไอเดียใหม่</string>
+    <string name="suggestion_label_todo_app">แอปสิ่งที่ต้องทำ</string>
+    <string name="suggestion_label_weather_app">แอปพยากรณ์อากาศ</string>
+    <string name="suggestion_label_calculator">เครื่องคิดเลข</string>
+    <string name="suggestion_label_pomodoro_timer">ตัวจับเวลาโพโมโดโร</string>
+    <string name="suggestion_label_markdown_editor">ตัวแก้ไข Markdown</string>
+    <string name="suggestion_label_color_palette">จานสี</string>
+
+    <!-- Account Screen -->
+    <string name="account_dialog_sign_out_title">ออกจากระบบ</string>
+    <string name="account_dialog_sign_out_message">คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?</string>
+    <string name="account_cd_profile_photo">รูปโปรไฟล์</string>
+    <string name="account_default_display_name">ผู้ใช้</string>
+    <string name="account_section_usage">การใช้งาน</string>
+    <string name="account_stat_projects">โปรเจกต์</string>
+    <string name="account_stat_todays_gens">การสร้างวันนี้</string>
+    <string name="account_section_settings">การตั้งค่า</string>
+    <string name="account_settings_subscription">การสมัครสมาชิก</string>
+    <string name="account_settings_theme">ธีม</string>
+    <string name="account_settings_theme_value">มืด</string>
+    <string name="account_settings_about">เกี่ยวกับ</string>
+    <string name="account_settings_version">เวอร์ชัน 1.0.0</string>
+    <string name="account_settings_language">ภาษา</string>
+
+    <!-- Apps Screen -->
+    <string name="apps_screen_title">แอปของฉัน</string>
+    <string name="apps_empty_title">ยังไม่มีแอป</string>
+    <string name="apps_empty_subtitle">สร้างแอปแรกของคุณด้วย AI\nหรือสำรวจสิ่งที่คนอื่นสร้าง</string>
+    <string name="apps_cd_sort">เรียงลำดับ</string>
+
+    <!-- Browse Screen -->
+    <string name="browse_screen_title">สำรวจ</string>
+
+    <!-- Preview Screen -->
+    <string name="preview_screen_title">ดูตัวอย่าง</string>
+    <string name="preview_deploy_dialog_title">เผยแพร่แอปของคุณ</string>
+    <string name="preview_deploy_dialog_message">เลือกโดเมนย่อยสำหรับแอปของคุณ:</string>
+    <string name="preview_deploy_placeholder">แอปเจ๋งของฉัน</string>
+    <string name="preview_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="preview_share_text">ดูแอปของฉัน: %s</string>
+
+    <!-- Project Preview Screen -->
+    <string name="project_preview_btn_forked">คัดลอกแล้ว!</string>
+    <string name="project_preview_btn_fork">คัดลอก</string>
+    <string name="project_preview_error_title">โหลดตัวอย่างไม่สำเร็จ</string>
+
+    <!-- Project Detail Screen -->
+    <string name="project_detail_deploy_dialog_title">เปิดใช้งานแอป</string>
+    <string name="project_detail_deploy_dialog_message">เลือกโดเมนย่อยสำหรับแอปของคุณ:</string>
+    <string name="project_detail_deploy_label_subdomain">โดเมนย่อย</string>
+    <string name="project_detail_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="project_detail_screen_title_fallback">โปรเจกต์</string>
+    <string name="project_detail_created_at">สร้างเมื่อ %s</string>
+    <string name="project_detail_btn_preview">ดูตัวอย่างแอป</string>
+    <string name="project_detail_badge_deployed">เปิดใช้งานแล้ว</string>
+    <string name="project_detail_btn_deploying">กำลังเปิดใช้งาน…</string>
+    <string name="project_detail_btn_deploy_to_web">เปิดใช้งานบนเว็บ</string>
+    <string name="project_detail_stat_views">การดู</string>
+    <string name="project_detail_stat_forks">สำเนา</string>
+    <string name="project_detail_stat_tweaks">การปรับแต่ง</string>
+    <string name="project_detail_section_original_prompt">คำอธิบายเดิม</string>
+    <string name="project_detail_share_text">ดูแอปของฉัน: %s</string>
+
+    <!-- Project Card -->
+    <string name="project_card_delete_dialog_title">ลบโปรเจกต์</string>
+    <string name="project_card_delete_dialog_message">คุณแน่ใจหรือไม่ว่าต้องการลบ \"%s\"? การดำเนินการนี้ไม่สามารถย้อนกลับได้</string>
+
+    <!-- Language Picker -->
+    <string name="language_picker_title">เลือกภาษา</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese">中文(简体)</string>
+    <string name="language_korean">한국어</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_hindi">हिन्दी</string>
+
+    <!-- Facebook SDK Configuration -->
+    <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
+    <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+</resources>

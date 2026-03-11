@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VibeBuild</string>
+
+    <!-- Common -->
+    <string name="cancel">Batal</string>
+    <string name="ok">OK</string>
+    <string name="back">Kembali</string>
+    <string name="refresh">Segarkan</string>
+    <string name="share">Bagikan</string>
+    <string name="copy">Salin</string>
+    <string name="open">Buka</string>
+    <string name="error">Kesalahan</string>
+    <string name="live">Langsung</string>
+    <string name="publish">Terbitkan</string>
+    <string name="deploy">Deploy</string>
+    <string name="close">Tutup</string>
+    <string name="reload">Muat Ulang</string>
+    <string name="save">Simpan</string>
+    <string name="saved">Tersimpan</string>
+    <string name="delete_label">Hapus</string>
+    <string name="public_label">Publik</string>
+    <string name="private_label">Privat</string>
+    <string name="sign_out">Keluar</string>
+
+    <!-- Tabs -->
+    <string name="tab_apps">Aplikasi</string>
+    <string name="tab_create">Buat</string>
+    <string name="tab_account">Akun</string>
+    <string name="tab_browse">Jelajahi</string>
+
+    <!-- Landing Screen -->
+    <string name="landing_hero_subtitle">Jelaskan. AI yang membuatnya.\nAplikasi Anda, siap dalam hitungan detik.</string>
+    <string name="landing_prompt_example">"Buatkan saya aplikasi cuaca dengan tampilan gelap yang bersih"</string>
+    <string name="landing_how_it_works_title">Cara Kerjanya</string>
+    <string name="landing_step_describe_title">Jelaskan</string>
+    <string name="landing_step_describe_desc">Beritahu AI apa yang Anda inginkan dengan bahasa sederhana</string>
+    <string name="landing_step_generate_title">Hasilkan</string>
+    <string name="landing_step_generate_desc">AI menulis kode dalam hitungan detik</string>
+    <string name="landing_step_preview_title">Pratinjau</string>
+    <string name="landing_step_preview_desc">Lihat aplikasi Anda berjalan langsung secara instan</string>
+    <string name="landing_step_deploy_title">Deploy</string>
+    <string name="landing_step_deploy_desc">Terbitkan ke web dengan satu ketukan</string>
+    <string name="landing_examples_title">Yang Dibuat Orang-Orang</string>
+    <string name="landing_example_weather_title">Dasbor Cuaca</string>
+    <string name="landing_example_weather_desc">Cuaca real-time dengan grafik yang indah</string>
+    <string name="landing_example_memory_title">Permainan Memori</string>
+    <string name="landing_example_memory_desc">Permainan mencocokkan kartu yang seru dengan animasi</string>
+    <string name="landing_example_budget_title">Pelacak Anggaran</string>
+    <string name="landing_example_budget_desc">Lacak pengeluaran dengan rincian kategori</string>
+    <string name="landing_example_pomodoro_title">Timer Pomodoro</string>
+    <string name="landing_example_pomodoro_desc">Timer fokus dengan manajemen tugas</string>
+    <string name="landing_example_quiz_title">Aplikasi Kuis</string>
+    <string name="landing_example_quiz_desc">Trivia interaktif dengan pelacakan skor</string>
+    <string name="landing_example_workout_title">Catatan Latihan</string>
+    <string name="landing_example_workout_desc">Catat latihan dan lacak kemajuan</string>
+    <string name="landing_cta_get_started">Mulai — Gratis</string>
+    <string name="landing_cta_sign_in">Sudah punya akun? Masuk</string>
+    <string name="landing_trust_badge_instant">Instan</string>
+    <string name="landing_trust_badge_secure">Aman</string>
+    <string name="landing_trust_badge_no_card">Tanpa Kartu</string>
+
+    <!-- Sign In Screen -->
+    <string name="sign_in_subtitle">Buat aplikasi dengan AI</string>
+    <string name="sign_in_label_display_name">Nama Tampilan</string>
+    <string name="sign_in_label_email">Email</string>
+    <string name="sign_in_label_password">Kata Sandi</string>
+    <string name="sign_in_cd_hide_password">Sembunyikan kata sandi</string>
+    <string name="sign_in_cd_show_password">Tampilkan kata sandi</string>
+    <string name="sign_in_btn_creating_account">Membuat akun…</string>
+    <string name="sign_in_btn_signing_in">Sedang masuk…</string>
+    <string name="sign_in_btn_create_account">Buat Akun</string>
+    <string name="sign_in_btn_sign_in">Masuk</string>
+    <string name="sign_in_toggle_have_account">Sudah punya akun? </string>
+    <string name="sign_in_toggle_no_account">Belum punya akun? </string>
+    <string name="sign_in_toggle_link_sign_in">Masuk</string>
+    <string name="sign_in_toggle_link_sign_up">Daftar</string>
+    <string name="sign_in_divider_or">" atau "</string>
+    <string name="sign_in_with_google">Masuk dengan Google</string>
+    <string name="sign_in_terms_notice">Dengan masuk, Anda menyetujui Ketentuan Layanan kami</string>
+
+    <!-- Onboarding Screen -->
+    <string name="onboarding_btn_skip">Lewati</string>
+    <string name="onboarding_page1_title">Jelaskan Aplikasi Anda</string>
+    <string name="onboarding_page1_desc">Beritahu AI apa yang ingin Anda buat dengan bahasa sederhana. Tidak perlu pengalaman coding.</string>
+    <string name="onboarding_page2_title">AI Membuatnya</string>
+    <string name="onboarding_page2_desc">Saksikan AI menghasilkan aplikasi yang berfungsi penuh dengan kode asli dalam hitungan detik.</string>
+    <string name="onboarding_page3_title">Sesuaikan &amp; Sempurnakan</string>
+    <string name="onboarding_page3_desc">Sempurnakan aplikasi Anda bersama AI. Ubah warna, fitur, dan tata letak secara instan.</string>
+    <string name="onboarding_page4_title">Deploy &amp; Bagikan</string>
+    <string name="onboarding_page4_desc">Terbitkan aplikasi Anda ke web dengan satu ketukan. Bagikan kreasi Anda dengan dunia.</string>
+    <string name="onboarding_btn_next">Berikutnya</string>
+    <string name="onboarding_btn_get_started">Mulai</string>
+
+    <!-- Create Screen -->
+    <string name="create_title">Apa yang ingin Anda buat?</string>
+    <string name="create_subtitle">Jelaskan ide aplikasi Anda dan AI akan membuatnya</string>
+    <string name="create_prompt_placeholder">Contoh: Buat aplikasi cuaca yang menampilkan prakiraan untuk kota saya…</string>
+    <string name="create_cd_attach_image">Lampirkan gambar</string>
+    <string name="create_cd_voice_input">Input suara</string>
+    <string name="create_cd_remove_image">Hapus gambar</string>
+    <string name="create_cd_reference_image">Gambar referensi</string>
+    <string name="create_default_project_title">Proyek Saya</string>
+    <string name="create_error_generation_failed">Pembuatan gagal</string>
+    <string name="create_error_extract_failed">Gagal mengekstrak proyek: %s</string>
+    <string name="create_error_save_failed">Gagal menyimpan: %s</string>
+    <string name="create_error_publish_failed">Penerbitan gagal: %s</string>
+    <string name="create_save_dialog_title">Tersimpan!</string>
+    <string name="create_save_dialog_message">Proyek Anda telah disimpan. Ketuk tombol terbitkan untuk membuatnya aktif!</string>
+
+    <!-- Generation Progress -->
+    <string name="generation_time_remaining">~%d detik tersisa</string>
+    <string name="generation_btn_notify">Beritahu saya saat selesai</string>
+    <string name="generation_notify_confirmation">Anda akan diberitahu saat sudah siap</string>
+    <string name="generation_notify_leave_hint">Silakan tinggalkan layar ini</string>
+    <string name="generation_btn_cancel">Batal</string>
+    <string name="generation_phase_connecting">Menghubungkan…</string>
+    <string name="generation_phase_complete">Selesai!</string>
+    <string name="generation_limit_reached">Batas pembuatan harian tercapai</string>
+    <string name="upgrade_to_pro">Upgrade ke Pro</string>
+    <string name="start_generating">Mulai</string>
+
+    <!-- Suggestion Chips -->
+    <string name="suggestions_header">Coba salah satu ini</string>
+    <string name="suggestions_btn_generating">Membuat ide…</string>
+    <string name="suggestions_btn_suggest_new">⚡ Sarankan Ide Baru</string>
+    <string name="suggestion_label_todo_app">Aplikasi Tugas</string>
+    <string name="suggestion_label_weather_app">Aplikasi Cuaca</string>
+    <string name="suggestion_label_calculator">Kalkulator</string>
+    <string name="suggestion_label_pomodoro_timer">Timer Pomodoro</string>
+    <string name="suggestion_label_markdown_editor">Editor Markdown</string>
+    <string name="suggestion_label_color_palette">Palet Warna</string>
+
+    <!-- Account Screen -->
+    <string name="account_dialog_sign_out_title">Keluar</string>
+    <string name="account_dialog_sign_out_message">Apakah Anda yakin ingin keluar?</string>
+    <string name="account_cd_profile_photo">Foto profil</string>
+    <string name="account_default_display_name">Pengguna</string>
+    <string name="account_section_usage">Penggunaan</string>
+    <string name="account_stat_projects">Proyek</string>
+    <string name="account_stat_todays_gens">Pembuatan Hari Ini</string>
+    <string name="account_section_settings">Pengaturan</string>
+    <string name="account_settings_subscription">Langganan</string>
+    <string name="account_settings_theme">Tema</string>
+    <string name="account_settings_theme_value">Gelap</string>
+    <string name="account_settings_about">Tentang</string>
+    <string name="account_settings_version">Versi 1.0.0</string>
+    <string name="account_settings_language">Bahasa</string>
+
+    <!-- Apps Screen -->
+    <string name="apps_screen_title">Aplikasi Saya</string>
+    <string name="apps_empty_title">Belum ada aplikasi</string>
+    <string name="apps_empty_subtitle">Buat aplikasi pertama Anda dengan AI\natau jelajahi apa yang dibuat orang lain</string>
+    <string name="apps_cd_sort">Urutkan</string>
+
+    <!-- Browse Screen -->
+    <string name="browse_screen_title">Jelajahi</string>
+
+    <!-- Preview Screen -->
+    <string name="preview_screen_title">Pratinjau</string>
+    <string name="preview_deploy_dialog_title">Terbitkan Aplikasi Anda</string>
+    <string name="preview_deploy_dialog_message">Pilih subdomain untuk aplikasi Anda:</string>
+    <string name="preview_deploy_placeholder">aplikasi-keren-saya</string>
+    <string name="preview_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="preview_share_text">Lihat aplikasi saya: %s</string>
+
+    <!-- Project Preview Screen -->
+    <string name="project_preview_btn_forked">Disalin!</string>
+    <string name="project_preview_btn_fork">Salin</string>
+    <string name="project_preview_error_title">Gagal memuat pratinjau</string>
+
+    <!-- Project Detail Screen -->
+    <string name="project_detail_deploy_dialog_title">Deploy Aplikasi</string>
+    <string name="project_detail_deploy_dialog_message">Pilih subdomain untuk aplikasi Anda:</string>
+    <string name="project_detail_deploy_label_subdomain">Subdomain</string>
+    <string name="project_detail_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="project_detail_screen_title_fallback">Proyek</string>
+    <string name="project_detail_created_at">Dibuat %s</string>
+    <string name="project_detail_btn_preview">Pratinjau Aplikasi</string>
+    <string name="project_detail_badge_deployed">Terpublikasi</string>
+    <string name="project_detail_btn_deploying">Menerbitkan…</string>
+    <string name="project_detail_btn_deploy_to_web">Deploy ke Web</string>
+    <string name="project_detail_stat_views">Dilihat</string>
+    <string name="project_detail_stat_forks">Salinan</string>
+    <string name="project_detail_stat_tweaks">Perubahan</string>
+    <string name="project_detail_section_original_prompt">Deskripsi Asli</string>
+    <string name="project_detail_share_text">Lihat aplikasi saya: %s</string>
+
+    <!-- Project Card -->
+    <string name="project_card_delete_dialog_title">Hapus Proyek</string>
+    <string name="project_card_delete_dialog_message">Apakah Anda yakin ingin menghapus \"%s\"? Tindakan ini tidak dapat dibatalkan.</string>
+
+    <!-- Language Picker -->
+    <string name="language_picker_title">Pilih Bahasa</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese">中文(简体)</string>
+    <string name="language_korean">한국어</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_hindi">हिन्दी</string>
+
+    <!-- Facebook SDK Configuration -->
+    <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
+    <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+</resources>
