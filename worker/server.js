@@ -1104,7 +1104,8 @@ function runClaudeCommand(claudePath, prompt, cwd, requestId, maxTurns = 10, hom
             env: {
                 ...process.env,
                 PATH: `${process.env.PATH || ''}:/usr/bin:/usr/local/bin:/opt/homebrew/bin`,
-                HOME: homeDir
+                HOME: homeDir,
+                IS_SANDBOX: '1'
             },
             stdio: ['ignore', 'pipe', 'pipe']
         });
