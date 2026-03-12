@@ -102,6 +102,42 @@ const accountPool = ACCOUNT_HOMES.map(homeDir => ({
 
 let currentAccountIdx = 0;
 
+// ============================================
+// OAuth Token Auto-Refresh
+// ============================================
+// If CLAUDE_REFRESH_TOKEN is set, refresh the access token on startup
+// and every 7 hours so CLAUDE_CODE_OAUTH_TOKEN never expires in production.
+
+const CLAUDE_OAUTH_CLIENT_ID = '9d1c250a-e61b-44d9-88ed-5944d1962f5e';
+const CLAUDE_TOKEN_URL = 'https://platform.claude.com/v1/oauth/token';
+
+async function refreshOAuthToken() {
+    const refreshToken = process.env.CLAUDE_REFRESH_TOKEN;
+    if (!refreshToken) return;
+    try {
+        const res = await fetch(CLAUDE_TOKEN_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                grant_type: 'refresh_token',
+                refresh_token: refreshToken,
+                client_id: CLAUDE_OAUTH_CLIENT_ID,
+            }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        process.env.CLAUDE_CODE_OAUTH_TOKEN = data.access_token;
+        if (data.refresh_token) process.env.CLAUDE_REFRESH_TOKEN = data.refresh_token;
+        console.log('[OAuth] Token refreshed, expires in', data.expires_in, 'seconds');
+    } catch (err) {
+        console.error('[OAuth] Token refresh failed:', err.message);
+    }
+}
+
+// Refresh on startup, then every 7 hours
+refreshOAuthToken();
+setInterval(refreshOAuthToken, 7 * 60 * 60 * 1000);
+
 function getActiveAccount() {
     for (let i = 0; i < accountPool.length; i++) {
         const idx = (currentAccountIdx + i) % accountPool.length;
