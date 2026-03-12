@@ -111,6 +111,26 @@ let currentAccountIdx = 0;
 const CLAUDE_OAUTH_CLIENT_ID = '9d1c250a-e61b-44d9-88ed-5944d1962f5e';
 const CLAUDE_TOKEN_URL = 'https://platform.claude.com/v1/oauth/token';
 
+async function writeSecretVersion(secretName, value) {
+    try {
+        const metaRes = await fetch('http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token', {
+            headers: { 'Metadata-Flavor': 'Google' },
+        });
+        const { access_token } = await metaRes.json();
+        const projectId = process.env.GCLOUD_PROJECT || 'summarizerproxy';
+        const encoded = Buffer.from(value).toString('base64');
+        const res = await fetch(`https://secretmanager.googleapis.com/v1/projects/${projectId}/secrets/${secretName}:addVersion`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ payload: { data: encoded } }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        console.log(`[OAuth] Written new ${secretName} to Secret Manager`);
+    } catch (err) {
+        console.error(`[OAuth] Failed to write ${secretName} to Secret Manager:`, err.message);
+    }
+}
+
 async function refreshOAuthToken() {
     const refreshToken = process.env.CLAUDE_REFRESH_TOKEN;
     if (!refreshToken) return;
@@ -127,7 +147,12 @@ async function refreshOAuthToken() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         process.env.CLAUDE_CODE_OAUTH_TOKEN = data.access_token;
-        if (data.refresh_token) process.env.CLAUDE_REFRESH_TOKEN = data.refresh_token;
+        if (data.refresh_token) {
+            process.env.CLAUDE_REFRESH_TOKEN = data.refresh_token;
+            // Write new tokens back so future cold-start instances get fresh credentials
+            await writeSecretVersion('CLAUDE_OAUTH_TOKEN', data.access_token);
+            await writeSecretVersion('CLAUDE_REFRESH_TOKEN', data.refresh_token);
+        }
         console.log('[OAuth] Token refreshed, expires in', data.expires_in, 'seconds');
     } catch (err) {
         console.error('[OAuth] Token refresh failed:', err.message);
