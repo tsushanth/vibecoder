@@ -7,7 +7,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Claude CLI
-RUN curl -fsSL https://raw.githubusercontent.com/anthropics/claude-code/main/install.sh | sh
+RUN curl -fsSL https://raw.githubusercontent.com/anthropics/claude-code/main/install.sh | sh && \
+    ln -sf /root/.local/bin/claude /usr/local/bin/claude
 
 WORKDIR /app
 
