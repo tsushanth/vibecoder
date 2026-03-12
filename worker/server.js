@@ -76,13 +76,96 @@ const QUOTA_PATTERNS = [
     'resets at',
 ];
 
-// Track quota state so we fail fast when exhausted
-let quotaExhausted = false;
-let quotaResetTime = null; // e.g. "8am PT" or specific time string
+// ============================================
+// Account Pool — Multi-Account Claude Rotation
+// ============================================
+// Set CLAUDE_ACCOUNT_HOMES to a comma-separated list of home directories,
+// each pre-authenticated with a different Claude Pro account.
+// e.g. CLAUDE_ACCOUNT_HOMES=/home/claude1,/home/claude2
+// Falls back to the current user's home if not set (single-account mode).
+
+const ACCOUNT_HOMES = process.env.CLAUDE_ACCOUNT_HOMES
+    ? process.env.CLAUDE_ACCOUNT_HOMES.split(',').map(s => s.trim()).filter(Boolean)
+    : [os.homedir()];
+
+const accountPool = ACCOUNT_HOMES.map(homeDir => ({
+    homeDir,
+    exhausted: false,
+    resetTime: null,
+    _timer: null,
+}));
+
+let currentAccountIdx = 0;
+
+function getActiveAccount() {
+    for (let i = 0; i < accountPool.length; i++) {
+        const idx = (currentAccountIdx + i) % accountPool.length;
+        if (!accountPool[idx].exhausted) {
+            currentAccountIdx = idx;
+            return accountPool[idx];
+        }
+    }
+    return null; // all exhausted
+}
+
+function markAccountExhausted(homeDir, resetTime) {
+    const account = accountPool.find(a => a.homeDir === homeDir);
+    if (!account || account.exhausted) return;
+    account.exhausted = true;
+    account.resetTime = resetTime || null;
+    if (account._timer) clearTimeout(account._timer);
+    // Auto-clear after 1 hour in case we missed the actual reset
+    account._timer = setTimeout(() => {
+        account.exhausted = false;
+        account.resetTime = null;
+        account._timer = null;
+        console.log(`[AccountPool] Account auto-reset: ${homeDir}`);
+    }, 3600000);
+    const available = accountPool.filter(a => !a.exhausted).length;
+    console.log(`[AccountPool] Exhausted: ${homeDir} | ${available}/${accountPool.length} accounts remaining`);
+    // Advance pointer to next available account
+    for (let i = 1; i <= accountPool.length; i++) {
+        const idx = (currentAccountIdx + i) % accountPool.length;
+        if (!accountPool[idx].exhausted) {
+            currentAccountIdx = idx;
+            console.log(`[AccountPool] Rotated to: ${accountPool[idx].homeDir}`);
+            break;
+        }
+    }
+}
+
+function clearAccountQuota(homeDir) {
+    const account = accountPool.find(a => a.homeDir === homeDir);
+    if (account && account.exhausted) {
+        account.exhausted = false;
+        account.resetTime = null;
+        if (account._timer) { clearTimeout(account._timer); account._timer = null; }
+        console.log(`[AccountPool] Quota cleared (successful run): ${homeDir}`);
+    }
+}
+
+function allAccountsExhausted() {
+    return accountPool.every(a => a.exhausted);
+}
 
 function containsQuotaError(text) {
     const lower = text.toLowerCase();
     return QUOTA_PATTERNS.some(p => lower.includes(p.toLowerCase()));
+}
+
+const AUTH_FAILURE_PATTERNS = [
+    'not logged in',
+    'please log in',
+    'authentication required',
+    'login required',
+    'not authenticated',
+    'invalid api key',
+    'api key not found',
+];
+
+function containsAuthError(text) {
+    const lower = text.toLowerCase();
+    return AUTH_FAILURE_PATTERNS.some(p => lower.includes(p));
 }
 
 /**
@@ -106,8 +189,9 @@ function extractResetTime(text) {
 }
 
 function getQuotaErrorMessage() {
-    if (quotaResetTime) {
-        return `AI usage limit reached. Service resets at ${quotaResetTime}. Please try again after that.`;
+    const resetTimes = accountPool.map(a => a.resetTime).filter(Boolean);
+    if (resetTimes.length > 0) {
+        return `AI usage limit reached. Service resets at ${resetTimes[0]}. Please try again after that.`;
     }
     return 'AI usage limit reached. The service typically resets at 8am Pacific Time. Please try again later.';
 }
@@ -648,8 +732,8 @@ app.get('/health', (req, res) => {
         cliPath,
         activeGenerations,
         maxConcurrent: MAX_CONCURRENT,
-        quotaExhausted,
-        quotaResetTime,
+        quotaExhausted: allAccountsExhausted(),
+        accounts: accountPool.map(a => ({ homeDir: a.homeDir, exhausted: a.exhausted, resetTime: a.resetTime })),
         gitAvailable: gitAvail,
         gitConfigured: !!GITHUB_PAT,
         githubOrg: GITHUB_ORG,
@@ -672,12 +756,11 @@ app.post('/generate', authMiddleware, async (req, res) => {
         return res.status(429).json({ error: 'Worker busy. Try again in a moment.' });
     }
 
-    // Check if we know quota is exhausted (fail fast)
-    if (quotaExhausted) {
+    // Fail fast if all accounts are exhausted
+    if (allAccountsExhausted()) {
         return res.status(503).json({
             error: getQuotaErrorMessage(),
             quotaExhausted: true,
-            resetTime: quotaResetTime
         });
     }
 
@@ -685,6 +768,7 @@ app.post('/generate', authMiddleware, async (req, res) => {
     const startTime = Date.now();
     const requestId = `app-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
     let projectDir = null;
+    let account = getActiveAccount();
 
     // If streaming requested, set up SSE
     const isSSE = stream === true;
@@ -785,19 +869,16 @@ IMPORTANT RULES:
 
 Start building now. Create the files.`;
 
-        const genResult = await runClaudeCommand(claudePath, generatePrompt, projectDir, requestId, 15);
+        // Use rotation wrapper so quota mid-generate auto-retries on next account
+        const genResult = await runClaudeWithRotation(claudePath, generatePrompt, projectDir, requestId, 15);
+        // Track which account actually ran (may have rotated)
+        account = getActiveAccount() || account;
 
         if (!genResult.success) {
             activeGenerations--;
             if (genResult.quotaError) {
-                // Track quota state for fast-fail on future requests
-                quotaExhausted = true;
-                if (genResult.resetTime) quotaResetTime = genResult.resetTime;
-                // Auto-clear quota flag after 1 hour (in case we missed the reset)
-                setTimeout(() => { quotaExhausted = false; quotaResetTime = null; }, 3600000);
-
                 const msg = getQuotaErrorMessage();
-                console.log(`[${requestId}] Quota exhausted: ${msg}`);
+                console.log(`[${requestId}] All accounts exhausted: ${msg}`);
                 return sendError(msg);
             }
             return sendError('Failed to generate app. Please try again.');
@@ -849,13 +930,10 @@ IMPORTANT:
 
 Fix all these issues now by editing the files directly.`;
 
-            const fixResult = await runClaudeCommand(claudePath, fixPrompt, projectDir, requestId, 10);
+            const fixResult = await runClaudeCommand(claudePath, fixPrompt, projectDir, requestId, 10, account.homeDir);
 
             if (!fixResult.success && fixResult.quotaError) {
-                // Quota hit during fix — track state, continue with what we have
-                quotaExhausted = true;
-                if (fixResult.resetTime) quotaResetTime = fixResult.resetTime;
-                setTimeout(() => { quotaExhausted = false; quotaResetTime = null; }, 3600000);
+                markAccountExhausted(account.homeDir, fixResult.resetTime);
                 console.log(`[${requestId}] Quota hit during fix phase, continuing with current state`);
             }
         } else {
@@ -887,12 +965,10 @@ Fix all these issues now by editing the files directly.`;
 
 Make targeted improvements — don't rewrite everything.`;
 
-            const polishResult = await runClaudeCommand(claudePath, polishPrompt, projectDir, requestId, 8);
+            const polishResult = await runClaudeCommand(claudePath, polishPrompt, projectDir, requestId, 8, account.homeDir);
 
             if (!polishResult.success && polishResult.quotaError) {
-                quotaExhausted = true;
-                if (polishResult.resetTime) quotaResetTime = polishResult.resetTime;
-                setTimeout(() => { quotaExhausted = false; quotaResetTime = null; }, 3600000);
+                markAccountExhausted(account.homeDir, polishResult.resetTime);
                 console.log(`[${requestId}] Quota hit during polish — continuing`);
             }
         } else {
@@ -909,7 +985,7 @@ ${criticalList}
 
 Fix them now. The app will not load at all if these aren't resolved.`;
 
-            await runClaudeCommand(claudePath, fixPrompt2, projectDir, requestId, 5);
+            await runClaudeCommand(claudePath, fixPrompt2, projectDir, requestId, 5, account.homeDir);
         }
 
         // ========================
@@ -970,7 +1046,7 @@ Fix them now. The app will not load at all if these aren't resolved.`;
 // Claude Code CLI Runner
 // ============================================
 
-function runClaudeCommand(claudePath, prompt, cwd, requestId, maxTurns = 10) {
+function runClaudeCommand(claudePath, prompt, cwd, requestId, maxTurns = 10, homeDir = os.homedir()) {
     return new Promise((resolve) => {
         const args = [
             '-p', prompt,
@@ -980,14 +1056,14 @@ function runClaudeCommand(claudePath, prompt, cwd, requestId, maxTurns = 10) {
             '--verbose'
         ];
 
-        console.log(`[${requestId}] Claude CLI starting (maxTurns: ${maxTurns})...`);
+        console.log(`[${requestId}] Claude CLI starting (maxTurns: ${maxTurns}, account: ${homeDir})...`);
 
         const proc = spawn(claudePath, args, {
             cwd,
             env: {
                 ...process.env,
                 PATH: `${process.env.PATH || ''}:/usr/bin:/usr/local/bin:/opt/homebrew/bin`,
-                HOME: os.homedir()
+                HOME: homeDir
             },
             stdio: ['ignore', 'pipe', 'pipe']
         });
@@ -1031,18 +1107,17 @@ function runClaudeCommand(claudePath, prompt, cwd, requestId, maxTurns = 10) {
             clearTimeout(timeout);
             const output = assistantBlocks.join('');
             const isQuotaError = containsQuotaError(stderr) || containsQuotaError(output);
+            const isAuthError = !isQuotaError && (containsAuthError(stderr) || containsAuthError(output));
             const resetTime = isQuotaError ? (extractResetTime(stderr) || extractResetTime(output)) : null;
 
             if (code === 0 && !isQuotaError) {
-                // Success — clear any stale quota flag
-                if (quotaExhausted) {
-                    quotaExhausted = false;
-                    quotaResetTime = null;
-                    console.log(`[${requestId}] Quota cleared — successful generation`);
-                }
+                clearAccountQuota(homeDir);
                 resolve({ success: true, output, quotaError: false });
             } else if (isQuotaError) {
                 resolve({ success: false, output, error: 'Quota exhausted', quotaError: true, resetTime });
+            } else if (isAuthError) {
+                console.error(`[${requestId}] Auth failure on account ${homeDir} — re-authentication needed`);
+                resolve({ success: false, output, error: `Auth failure on account ${homeDir}. Re-run 'claude login' for this account.`, quotaError: false, authError: true });
             } else {
                 resolve({ success: false, output, error: `Exit code ${code}`, quotaError: false });
             }
@@ -1053,6 +1128,32 @@ function runClaudeCommand(claudePath, prompt, cwd, requestId, maxTurns = 10) {
             resolve({ success: false, output: '', error: error.message, quotaError: false });
         });
     });
+}
+
+// ============================================
+// Account-rotating Claude runner (for critical phases)
+// Tries the active account; on quota hit, rotates and retries once.
+// ============================================
+
+async function runClaudeWithRotation(claudePath, prompt, cwd, requestId, maxTurns) {
+    let account = getActiveAccount();
+    if (!account) {
+        return { success: false, error: getQuotaErrorMessage(), quotaError: true };
+    }
+
+    const result = await runClaudeCommand(claudePath, prompt, cwd, requestId, maxTurns, account.homeDir);
+
+    if (!result.quotaError) return result;
+
+    // Quota hit — mark exhausted and try the next account
+    markAccountExhausted(account.homeDir, result.resetTime);
+    const next = getActiveAccount();
+    if (!next) {
+        return result; // all accounts exhausted
+    }
+
+    console.log(`[${requestId}] Retrying on rotated account: ${next.homeDir}`);
+    return runClaudeCommand(claudePath, prompt, cwd, requestId, maxTurns, next.homeDir);
 }
 
 // ============================================
@@ -1086,16 +1187,16 @@ app.post('/customize', authMiddleware, async (req, res) => {
         return res.status(429).json({ error: 'Worker busy. Try again in a moment.' });
     }
 
-    if (quotaExhausted) {
+    if (allAccountsExhausted()) {
         return res.status(503).json({
             error: getQuotaErrorMessage(),
             quotaExhausted: true,
-            resetTime: quotaResetTime
         });
     }
 
     activeGenerations++;
     const startTime = Date.now();
+    const account = getActiveAccount();
     const requestId = `customize-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
     let projectDir = null;
 
@@ -1182,14 +1283,11 @@ IMPORTANT RULES:
 
 Modify the existing files now to apply the customization.`;
 
-        const genResult = await runClaudeCommand(claudePath, customizePrompt, projectDir, requestId, 15);
+        const genResult = await runClaudeWithRotation(claudePath, customizePrompt, projectDir, requestId, 15);
 
         if (!genResult.success) {
             activeGenerations--;
             if (genResult.quotaError) {
-                quotaExhausted = true;
-                if (genResult.resetTime) quotaResetTime = genResult.resetTime;
-                setTimeout(() => { quotaExhausted = false; quotaResetTime = null; }, 3600000);
                 return sendError(getQuotaErrorMessage());
             }
             return sendError('Failed to customize app. Please try again.');
@@ -1214,7 +1312,7 @@ ${issueList}
 
 Fix ALL critical issues. Do NOT add TODO comments — implement actual fixes.`;
 
-            await runClaudeCommand(claudePath, fixPrompt, projectDir, requestId, 10);
+            await runClaudeCommand(claudePath, fixPrompt, projectDir, requestId, 10, account.homeDir);
         } else {
             sendStatus('fix', 'No issues found', 'App passed all quality checks');
         }
@@ -1231,7 +1329,7 @@ Fix ALL critical issues. Do NOT add TODO comments — implement actual fixes.`;
 
 Make any small fixes needed. Don't rewrite — just polish.`;
 
-            await runClaudeCommand(claudePath, polishPrompt, projectDir, requestId, 5);
+            await runClaudeCommand(claudePath, polishPrompt, projectDir, requestId, 5, account.homeDir);
         }
 
         // Phase 5: Verify
@@ -1629,16 +1727,16 @@ app.post('/tweak', authMiddleware, async (req, res) => {
         return res.status(429).json({ error: 'Worker busy. Try again in a moment.' });
     }
 
-    if (quotaExhausted) {
+    if (allAccountsExhausted()) {
         return res.status(503).json({
             error: getQuotaErrorMessage(),
             quotaExhausted: true,
-            resetTime: quotaResetTime
         });
     }
 
     activeGenerations++;
     const startTime = Date.now();
+    const account = getActiveAccount();
     const idPrefix = projectId ? projectId.substring(0, 8) : 'unknown';
     const requestId = `tweak-${idPrefix}-${Date.now()}`;
     let projectDir = null;
@@ -1749,14 +1847,11 @@ RULES:
 
 Apply the changes now.`;
 
-        const tweakResult = await runClaudeCommand(claudePath, tweakPrompt, projectDir, requestId, 12);
+        const tweakResult = await runClaudeWithRotation(claudePath, tweakPrompt, projectDir, requestId, 12);
 
         if (!tweakResult.success) {
             activeGenerations--;
             if (tweakResult.quotaError) {
-                quotaExhausted = true;
-                if (tweakResult.resetTime) quotaResetTime = tweakResult.resetTime;
-                setTimeout(() => { quotaExhausted = false; quotaResetTime = null; }, 3600000);
                 return sendError(getQuotaErrorMessage());
             }
             return sendError('Failed to apply tweak. Please try again.');
@@ -1782,7 +1877,7 @@ ${issueList}
 
 Fix them now. Do NOT add TODO comments — implement actual fixes.`;
 
-            await runClaudeCommand(claudePath, fixPrompt, projectDir, requestId, 8);
+            await runClaudeCommand(claudePath, fixPrompt, projectDir, requestId, 8, account.homeDir);
         } else {
             sendStatus('fix', 'No issues found', 'App passed quality checks');
         }
