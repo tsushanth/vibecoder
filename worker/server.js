@@ -1151,6 +1151,10 @@ function runClaudeCommand(claudePath, prompt, cwd, requestId, maxTurns = 10, hom
             const isAuthError = !isQuotaError && (containsAuthError(stderr) || containsAuthError(output));
             const resetTime = isQuotaError ? (extractResetTime(stderr) || extractResetTime(output)) : null;
 
+            if (code !== 0 || isQuotaError || isAuthError) {
+                console.error(`[${requestId}] Claude exited code=${code} stderr=${stderr.substring(0, 500)}`);
+            }
+
             if (code === 0 && !isQuotaError) {
                 clearAccountQuota(homeDir);
                 resolve({ success: true, output, quotaError: false });
