@@ -55,7 +55,12 @@ function findClaudeCLI() {
         }
     }
 
-    const paths = ['/opt/homebrew/bin/claude', '/usr/local/bin/claude'];
+    const paths = [
+        '/opt/homebrew/bin/claude',
+        '/usr/local/bin/claude',
+        '/root/.local/bin/claude',
+        path.join(os.homedir(), '.local', 'bin', 'claude'),
+    ];
     for (const p of paths) {
         if (fs.existsSync(p)) return p;
     }
