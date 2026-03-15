@@ -2006,6 +2006,43 @@ Fix them now. Do NOT add TODO comments — implement actual fixes.`;
 // ============================================
 // GET /versions/:repoName — Get commit history for a project
 // ============================================
+// GET /bundle/:repoName — Return latest bundle (HEAD) for a project repo
+// ============================================
+
+app.get('/bundle/:repoName', authMiddleware, async (req, res) => {
+    const { repoName } = req.params;
+    if (!GITHUB_PAT) {
+        return res.status(503).json({ error: 'Git integration not configured' });
+    }
+
+    const requestId = `bundle-${repoName}-${Date.now()}`;
+    let projectDir = null;
+    try {
+        projectDir = path.join(PROJECTS_DIR, requestId);
+        fs.mkdirSync(projectDir, { recursive: true });
+
+        gitClone(repoName, projectDir + '/repo');
+        const repoDir = path.join(projectDir, 'repo');
+        const files = fs.readdirSync(repoDir);
+        for (const file of files) {
+            if (file === '.git') continue;
+            fs.renameSync(path.join(repoDir, file), path.join(projectDir, file));
+        }
+        fs.rmSync(repoDir, { recursive: true, force: true });
+
+        const zip = await zipProjectFolder(projectDir);
+        const commitSha = execSync(`git -C "${projectDir}" rev-parse HEAD`, { encoding: 'utf-8' }).trim();
+
+        res.json({ success: true, bundle: zip.base64, bundleSize: zip.sizeBytes, commitSha });
+    } catch (err) {
+        console.error(`[bundle] Error for ${repoName}: ${err.message}`);
+        res.status(500).json({ error: 'Failed to fetch bundle' });
+    } finally {
+        if (projectDir) setTimeout(() => cleanupProjectFolder(projectDir), 30000);
+    }
+});
+
+// ============================================
 
 app.get('/versions/:repoName', authMiddleware, async (req, res) => {
     const { repoName } = req.params;
