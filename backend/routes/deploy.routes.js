@@ -4,6 +4,8 @@ import { getActiveDomainMap } from '../services/domainService.js';
 
 const DEPLOY_SERVER_URL = process.env.DEPLOY_SERVER_URL || 'http://localhost:4000';
 const INTERNAL_SECRET = process.env.INTERNAL_SECRET || 'vibecoder-internal-secret';
+const WORKER_URL = process.env.WORKER_URL || 'http://localhost:3456';
+const WORKER_SECRET = process.env.WORKER_SECRET || 'vibecoder-worker-secret';
 
 const router = express.Router();
 
@@ -28,21 +30,43 @@ router.post('/:projectId/deploy', async (req, res) => {
 
         if (existing) return res.status(409).json({ error: 'Subdomain already taken' });
 
-        // Get project bundle
+        // Get project
         const { data: project, error: projectError } = await supabase
             .from('projects')
-            .select('bundle, creator_id')
+            .select('bundle, creator_id, github_repo')
             .eq('id', projectId)
             .single();
 
         if (projectError || !project) return res.status(404).json({ error: 'Project not found' });
         if (project.creator_id !== userId) return res.status(403).json({ error: 'Not authorized' });
 
+        // Always fetch latest bundle from git if repo exists, fallback to DB bundle
+        let bundle = project.bundle;
+        if (project.github_repo) {
+            try {
+                const workerRes = await fetch(`${WORKER_URL}/bundle/${project.github_repo}`, {
+                    headers: { 'x-worker-secret': WORKER_SECRET },
+                    signal: AbortSignal.timeout(60000)
+                });
+                if (workerRes.ok) {
+                    const result = await workerRes.json();
+                    bundle = result.bundle;
+                    console.log(`[deploy] Fetched latest bundle from git for ${projectId} (commit: ${result.commitSha?.substring(0, 7)})`);
+                } else {
+                    console.warn(`[deploy] Worker bundle fetch failed (${workerRes.status}), falling back to DB bundle`);
+                }
+            } catch (err) {
+                console.warn(`[deploy] Worker bundle fetch error: ${err.message}, falling back to DB bundle`);
+            }
+        }
+
+        if (!bundle) return res.status(400).json({ error: 'No bundle available for this project' });
+
         // Send to deploy server
         const deployResponse = await fetch(`${DEPLOY_SERVER_URL}/deploy`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ subdomain, bundle: project.bundle })
+            body: JSON.stringify({ subdomain, bundle })
         });
 
         if (!deployResponse.ok) {
@@ -55,7 +79,7 @@ router.post('/:projectId/deploy', async (req, res) => {
             project_id: projectId,
             user_id: userId,
             subdomain,
-            bundle: project.bundle,
+            bundle,
             status: 'active',
             deployed_at: new Date().toISOString()
         }, { onConflict: 'project_id' });
