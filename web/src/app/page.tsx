@@ -103,6 +103,9 @@ export default function LandingPage() {
             <Link href="/browse" className="text-sm text-muted hover:text-foreground transition">
               {t('common.browse')}
             </Link>
+            <Link href="/blog" className="text-sm text-muted hover:text-foreground transition">
+              Blog
+            </Link>
             <Link href="/login" className="text-sm text-muted hover:text-foreground transition">
               {t('common.signIn')}
             </Link>
@@ -309,6 +312,11 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-6 text-xs text-subtle">
             <Link href="/browse" className="hover:text-foreground transition">{t('common.browse')}</Link>
+            <Link href="/blog" className="hover:text-foreground transition">Blog</Link>
+            <Link href="/about" className="hover:text-foreground transition">About</Link>
+            <Link href="/faq" className="hover:text-foreground transition">FAQ</Link>
+            <Link href="/terms" className="hover:text-foreground transition">Terms</Link>
+            <Link href="/privacy" className="hover:text-foreground transition">Privacy</Link>
             <Link href="/login" className="hover:text-foreground transition">{t('common.signIn')}</Link>
           </div>
           <p className="text-xs text-subtle">
