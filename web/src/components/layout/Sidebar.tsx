@@ -16,7 +16,7 @@ export function Sidebar() {
 
   const navItems = [
     { href: '/dashboard', label: t('common.myApps'), icon: '📱' },
-    { href: '/browse', label: t('common.browse'), icon: '🔍' },
+    { href: '/community', label: t('common.browse'), icon: '🔍' },
     { href: '/settings', label: t('common.settings'), icon: '⚙️' },
   ];
 
