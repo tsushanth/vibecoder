@@ -8,6 +8,8 @@ struct VibeCoderApp: App {
     @StateObject private var authManager = AuthManager.shared
     @StateObject private var subscriptionManager = SubscriptionManager.shared
     @StateObject private var generationManager = ProjectGenerationManager.shared
+    @StateObject private var paywallCoordinator = PaywallCoordinator.shared
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
@@ -15,6 +17,15 @@ struct VibeCoderApp: App {
                 .environmentObject(authManager)
                 .environmentObject(subscriptionManager)
                 .environmentObject(generationManager)
+                .sheet(isPresented: $paywallCoordinator.showWinbackOffer) {
+                    WinbackOfferView()
+                        .environmentObject(subscriptionManager)
+                }
+                .onChange(of: scenePhase) { newPhase in
+                    if newPhase == .active {
+                        paywallCoordinator.checkWinbackEligibility()
+                    }
+                }
         }
     }
 }
@@ -42,6 +53,10 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         let token = deviceToken.map { String(format: "%02x", $0) }.joined()
         print("✅ Device token: \(token)")
         DeviceTokenManager.shared.deviceToken = token
+        // Register with backend if user is signed in
+        if let userId = AuthManager.shared.userId {
+            Task { await NetworkManager.shared.registerPushToken(userId: userId, token: token) }
+        }
     }
 
     func application(_ application: UIApplication,

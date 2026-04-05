@@ -182,7 +182,9 @@ struct CreateProjectView: View {
             } message: {
                 Text(generationManager.errorMessage ?? "Unknown error occurred")
             }
-            .sheet(isPresented: $showUpgradeSheet) {
+            .sheet(isPresented: $showUpgradeSheet, onDismiss: {
+                PaywallCoordinator.shared.trackDismiss()
+            }) {
                 SubscriptionPlansView()
                     .environmentObject(subscriptionManager)
             }

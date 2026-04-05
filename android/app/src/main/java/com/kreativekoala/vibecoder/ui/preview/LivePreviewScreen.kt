@@ -2,13 +2,19 @@ package com.kreativekoala.vibecoder.ui.preview
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Publish
 import androidx.compose.material.icons.filled.Refresh
@@ -17,12 +23,15 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -32,12 +41,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.theme.*
+import com.kreativekoala.vibecoder.util.rememberSpeechRecognizer
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LivePreviewScreen(
-    bundleDir: File,
+    bundleDir: File? = null,
+    previewUrl: String? = null,
     onClose: () -> Unit,
     onSave: () -> Unit,
     onPublish: () -> Unit,
@@ -52,13 +63,149 @@ fun LivePreviewScreen(
     isTweaking: Boolean = false,
     tweakPhase: String = "",
     onFeedback: (String) -> Unit = {},
-    feedbackSent: String? = null
+    feedbackSent: String? = null,
+    versionNumber: Int = 0,
+    onVersionHistoryClick: () -> Unit = {}
 ) {
     var reloadTrigger by remember { mutableIntStateOf(0) }
     var subdomain by remember { mutableStateOf("") }
     var tweakText by remember { mutableStateOf("") }
+    var showTweakBar by remember { mutableStateOf(false) }
+    val tweakFocusRequester = remember { FocusRequester() }
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
+
+    // Voice input
+    val (_, launchSpeech) = rememberSpeechRecognizer { spokenText ->
+        tweakText = spokenText
+        showTweakBar = true
+    }
+
+    // Auto-focus tweak field when bar opens
+    LaunchedEffect(showTweakBar) {
+        if (showTweakBar) {
+            tweakFocusRequester.requestFocus()
+        }
+    }
+
+    // Collapse tweak bar when tweak finishes
+    LaunchedEffect(isTweaking) {
+        if (!isTweaking && showTweakBar && tweakText.isBlank()) {
+            showTweakBar = false
+        }
+    }
+
+    // Post-publish celebration sheet — only fires when deploy transitions null→non-null
+    val deployedUrlAtEntry = remember { deployedUrl }
+    var showPublishSheet by remember { mutableStateOf(false) }
+    LaunchedEffect(deployedUrl) {
+        if (deployedUrl != null && deployedUrlAtEntry == null) {
+            showPublishSheet = true
+        }
+    }
+
+    if (showPublishSheet && deployedUrl != null) {
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(
+            onDismissRequest = { showPublishSheet = false },
+            sheetState = sheetState,
+            containerColor = DarkSurfaceElevated
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "🎉",
+                    style = MaterialTheme.typography.displaySmall
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.publish_sheet_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = TextPrimary,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = deployedUrl,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = VibePurple
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.publish_sheet_subtitle),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextSecondary,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Open in Browser
+                Button(
+                    onClick = {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(deployedUrl)))
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = VibePurple),
+                    contentPadding = PaddingValues(vertical = 14.dp)
+                ) {
+                    Icon(Icons.Default.OpenInBrowser, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.publish_sheet_open_browser), fontWeight = FontWeight.SemiBold)
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Share
+                val shareText = stringResource(R.string.publish_sheet_share_text, deployedUrl)
+                val shareLabel = stringResource(R.string.share)
+                OutlinedButton(
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, shareText)
+                        }
+                        context.startActivity(Intent.createChooser(intent, shareLabel))
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, VibePurple),
+                    contentPadding = PaddingValues(vertical = 14.dp)
+                ) {
+                    Icon(Icons.Default.Share, contentDescription = null, tint = VibePurple, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.publish_sheet_share), color = VibePurple, fontWeight = FontWeight.SemiBold)
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Monetize CTA (coming soon)
+                OutlinedButton(
+                    onClick = { /* Monetization coming soon */ },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, VibeGreen.copy(alpha = 0.5f)),
+                    contentPadding = PaddingValues(vertical = 14.dp),
+                    enabled = false
+                ) {
+                    Icon(Icons.Default.TrendingUp, contentDescription = null, tint = VibeGreen.copy(alpha = 0.5f), modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Monetize (Coming Soon)", color = VibeGreen.copy(alpha = 0.5f), fontWeight = FontWeight.SemiBold)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                TextButton(onClick = { showPublishSheet = false }) {
+                    Text(stringResource(R.string.publish_sheet_done), color = TextSecondary)
+                }
+            }
+        }
+    }
 
     // Deploy subdomain dialog
     if (showDeployDialog) {
@@ -119,10 +266,39 @@ fun LivePreviewScreen(
         // Top bar
         TopAppBar(
             title = {
-                Text(
-                    text = stringResource(R.string.preview_screen_title),
-                    fontWeight = FontWeight.SemiBold
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(R.string.preview_screen_title),
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    if (versionNumber > 0) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Surface(
+                            color = VibePurple.copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.clickable { onVersionHistoryClick() }
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "v$versionNumber",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = VibePurple,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Icon(
+                                    Icons.Default.History,
+                                    contentDescription = stringResource(R.string.version_history),
+                                    tint = VibePurple,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            }
+                        }
+                    }
+                }
             },
             navigationIcon = {
                 IconButton(onClick = onClose) {
@@ -303,82 +479,133 @@ fun LivePreviewScreen(
             }
         }
 
-        // WebView
-        WebViewComposable(
-            bundleDir = bundleDir,
+        // WebView — use URL if available, fall back to local file
+        if (previewUrl != null) {
+            UrlWebViewComposable(
+                url = previewUrl,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                reloadTrigger = reloadTrigger
+            )
+        } else if (bundleDir != null) {
+            WebViewComposable(
+                bundleDir = bundleDir,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                reloadTrigger = reloadTrigger
+            )
+        }
+
+        // Bottom area: either expanded tweak bar or collapsed "Improve" FAB
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
-            onReloadRequested = if (reloadTrigger > 0) ({}) else null
-        )
-
-        // Tweak bar at bottom
-        Surface(
-            color = DarkSurface,
-            modifier = Modifier.fillMaxWidth()
+                .navigationBarsPadding()
+                .imePadding()
+                .animateContentSize()
         ) {
-            Column(modifier = Modifier.navigationBarsPadding()) {
-                // Phase text during tweak
-                if (isTweaking && tweakPhase.isNotEmpty()) {
-                    Text(
-                        text = tweakPhase,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = VibePurple,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-                    )
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+            if (showTweakBar || isTweaking) {
+                Surface(
+                    color = DarkSurface,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    OutlinedTextField(
-                        value = tweakText,
-                        onValueChange = { tweakText = it },
-                        modifier = Modifier.weight(1f),
-                        placeholder = {
-                            Text("Describe changes...", color = TextTertiary)
-                        },
-                        enabled = !isTweaking,
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = VibePurple,
-                            unfocusedBorderColor = DarkBorder,
-                            focusedContainerColor = DarkSurfaceVariant,
-                            unfocusedContainerColor = DarkSurfaceVariant,
-                            cursorColor = VibePurple,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary
-                        ),
-                        shape = RoundedCornerShape(24.dp)
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    if (isTweaking) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(40.dp),
-                            color = VibePurple,
-                            strokeWidth = 3.dp
-                        )
-                    } else {
-                        IconButton(
-                            onClick = {
-                                onTweak(tweakText)
-                                tweakText = ""
-                            },
-                            enabled = tweakText.isNotBlank(),
-                            modifier = Modifier.size(40.dp)
-                        ) {
-                            Icon(
-                                Icons.Default.Send,
-                                contentDescription = "Send tweak",
-                                tint = if (tweakText.isNotBlank()) VibePurple else TextTertiary
+                    Column {
+                        // Phase text during tweak
+                        if (isTweaking && tweakPhase.isNotEmpty()) {
+                            Text(
+                                text = tweakPhase,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = VibePurple,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
                             )
                         }
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OutlinedTextField(
+                                value = tweakText,
+                                onValueChange = { tweakText = it },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .focusRequester(tweakFocusRequester),
+                                placeholder = {
+                                    Text("What would you like to change?", color = TextTertiary)
+                                },
+                                enabled = !isTweaking,
+                                singleLine = true,
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = VibePurple,
+                                    unfocusedBorderColor = DarkBorder,
+                                    focusedContainerColor = DarkSurfaceVariant,
+                                    unfocusedContainerColor = DarkSurfaceVariant,
+                                    cursorColor = VibePurple,
+                                    focusedTextColor = TextPrimary,
+                                    unfocusedTextColor = TextPrimary
+                                ),
+                                shape = RoundedCornerShape(24.dp)
+                            )
+
+                            Spacer(modifier = Modifier.width(4.dp))
+
+                            if (isTweaking) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(40.dp),
+                                    color = VibePurple,
+                                    strokeWidth = 3.dp
+                                )
+                            } else {
+                                // Mic button
+                                IconButton(
+                                    onClick = { launchSpeech() },
+                                    modifier = Modifier.size(40.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Mic,
+                                        contentDescription = stringResource(R.string.create_cd_voice_input),
+                                        tint = TextSecondary
+                                    )
+                                }
+
+                                // Send button
+                                IconButton(
+                                    onClick = {
+                                        onTweak(tweakText)
+                                        tweakText = ""
+                                    },
+                                    enabled = tweakText.isNotBlank(),
+                                    modifier = Modifier.size(40.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Send,
+                                        contentDescription = "Send tweak",
+                                        tint = if (tweakText.isNotBlank()) VibePurple else TextTertiary
+                                    )
+                                }
+                            }
+                        }
                     }
+                }
+            } else {
+                // "Improve" FAB — shown when tweak bar is collapsed
+                FloatingActionButton(
+                    onClick = { showTweakBar = true },
+                    containerColor = VibePurple,
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = "Improve this app",
+                        tint = Color.White
+                    )
                 }
             }
         }

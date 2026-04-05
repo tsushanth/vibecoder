@@ -58,6 +58,19 @@ interface VibeBuildApi {
         @Body body: ForkRequest
     ): ForkResponse
 
+    @GET("api/projects/{id}/versions")
+    suspend fun getVersions(
+        @Path("id") id: String,
+        @Query("limit") limit: Int = 20
+    ): VersionsResponse
+
+    @POST("api/projects/{id}/revert/{sha}")
+    suspend fun revertToVersion(
+        @Path("id") id: String,
+        @Path("sha") sha: String,
+        @Body body: RevertRequest
+    ): RevertResponse
+
     // Subscriptions
     @GET("api/subscriptions/status")
     suspend fun getSubscriptionStatus(
@@ -73,6 +86,13 @@ interface VibeBuildApi {
     @GET("api/subscriptions/plans")
     suspend fun getPlans(): PlansResponse
 
+    // Export APK
+    @POST("api/projects/{id}/export-apk")
+    suspend fun exportApk(
+        @Path("id") id: String,
+        @Body body: ExportApkRequest
+    ): ExportApkResponse
+
     // Deploy
     @POST("api/deploy/{projectId}/deploy")
     suspend fun deploy(
@@ -85,26 +105,25 @@ interface VibeBuildApi {
         @Path("projectId") id: String
     ): DeployStatusResponse
 
+    @POST("api/deploy/{projectId}/ads")
+    suspend fun toggleAds(
+        @Path("projectId") id: String,
+        @Body body: AdsToggleRequest
+    ): AdsToggleResponse
+
     @HTTP(method = "DELETE", path = "api/deploy/{projectId}/deploy", hasBody = true)
     suspend fun undeploy(
         @Path("projectId") id: String,
         @Body body: DeleteRequest
     ): SuccessResponse
 
-    // Coins
-    @GET("api/coins/balance")
-    suspend fun getCoinBalance(
-        @Query("userId") userId: String
-    ): CoinBalanceResponse
+    // Push token registration
+    @POST("api/auth/push-token")
+    suspend fun registerPushToken(@Body body: PushTokenRequest): SuccessResponse
 
-    @GET("api/coins/store")
-    suspend fun getCoinStore(): CoinStoreResponse
-
-    @POST("api/coins/spend")
-    suspend fun spendCoins(@Body body: SpendCoinsRequest): SpendCoinsResponse
-
-    @POST("api/coins/purchase")
-    suspend fun purchaseCoins(@Body body: PurchaseCoinsRequest): PurchaseCoinsResponse
+    // System status (for maintenance banner)
+    @GET("api/status")
+    suspend fun getSystemStatus(): SystemStatusResponse
 
     // Health
     @GET("api/health")

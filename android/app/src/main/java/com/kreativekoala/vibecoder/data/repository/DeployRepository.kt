@@ -1,5 +1,7 @@
 package com.kreativekoala.vibecoder.data.repository
 
+import com.kreativekoala.vibecoder.data.model.AdsToggleRequest
+import com.kreativekoala.vibecoder.data.model.AdsToggleResponse
 import com.kreativekoala.vibecoder.data.model.DeleteRequest
 import com.kreativekoala.vibecoder.data.model.DeployRequest
 import com.kreativekoala.vibecoder.data.model.DeployResponse
@@ -24,5 +26,9 @@ class DeployRepository @Inject constructor(
 
     suspend fun undeploy(projectId: String, userId: String): SuccessResponse {
         return api.undeploy(projectId, DeleteRequest(userId = userId))
+    }
+
+    suspend fun toggleAds(projectId: String, userId: String, enabled: Boolean): AdsToggleResponse {
+        return api.toggleAds(projectId, AdsToggleRequest(userId = userId, enabled = enabled))
     }
 }

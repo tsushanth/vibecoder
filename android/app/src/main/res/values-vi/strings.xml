@@ -203,6 +203,25 @@
     <string name="language_italian">Italiano</string>
     <string name="language_hindi">हिन्दी</string>
 
+    <!-- Project Card -->
+    <string name="project_card_views">%d lượt xem</string>
+
+    <!-- Post-Publish Sheet -->
+    <string name="publish_sheet_title">Ứng dụng của bạn đã ra mắt!</string>
+    <string name="publish_sheet_subtitle">Chia sẻ với thế giới và bắt đầu kiếm tiền từ quảng cáo trong ứng dụng của bạn.</string>
+    <string name="publish_sheet_open_browser">Mở trong Trình duyệt</string>
+    <string name="publish_sheet_share">Chia sẻ App</string>
+    <string name="publish_sheet_monetize">Bật Kiếm tiền từ Quảng cáo →</string>
+    <string name="publish_sheet_done">Xong</string>
+    <string name="publish_sheet_share_text">Xem ứng dụng tôi đã xây dựng với VibeBuild! %s</string>
+
+    <!-- Monetization -->
+    <string name="monetize_section_title">Kiếm tiền</string>
+    <string name="monetize_revenue_label">Doanh thu tháng này</string>
+    <string name="monetize_revenue_value">$0.00</string>
+    <string name="monetize_enable_btn">Bật Kiếm tiền từ Quảng cáo →</string>
+    <string name="monetize_description">Kiếm tiền khi mọi người sử dụng ứng dụng của bạn. Chúng tôi đặt quảng cáo và trả tiền cho bạn hàng tháng.</string>
+
     <!-- Facebook SDK Configuration -->
     <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>

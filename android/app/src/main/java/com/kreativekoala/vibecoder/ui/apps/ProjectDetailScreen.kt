@@ -10,10 +10,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Rocket
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.preview.LivePreviewScreen
+import com.kreativekoala.vibecoder.ui.preview.VersionHistorySheet
 import com.kreativekoala.vibecoder.ui.theme.*
 import com.kreativekoala.vibecoder.util.DateUtil
 
@@ -46,7 +50,6 @@ fun ProjectDetailScreen(
 
     LaunchedEffect(projectId) {
         viewModel.loadProject(projectId)
-        viewModel.checkDeployStatus()
     }
 
     // Deploy subdomain dialog
@@ -107,20 +110,39 @@ fun ProjectDetailScreen(
         )
     }
 
+    // Version history bottom sheet
+    if (uiState.showVersionHistory) {
+        VersionHistorySheet(
+            versions = uiState.versions,
+            isLoading = uiState.isLoadingVersions,
+            isReverting = uiState.isReverting,
+            onUseVersion = { sha -> viewModel.revertToVersion(sha) },
+            onDismiss = { viewModel.dismissVersionHistory() }
+        )
+    }
+
     // Show preview
-    if (uiState.showPreview && uiState.bundleDir != null) {
+    if (uiState.showPreview && (uiState.previewUrl != null || uiState.bundleDir != null)) {
         LivePreviewScreen(
-            bundleDir = uiState.bundleDir!!,
+            bundleDir = uiState.bundleDir,
+            previewUrl = uiState.previewUrl,
             onClose = { viewModel.hidePreview() },
             onSave = {},
-            onPublish = {},
+            onPublish = { viewModel.showDeployDialog() },
             isSaving = false,
             isSaved = true,
-            isDeploying = false,
+            isDeploying = uiState.isDeploying,
             deployedUrl = uiState.deployedUrl ?: uiState.project?.publishedUrl,
-            showDeployDialog = false,
-            onDeployConfirm = {},
-            onDeployDismiss = {}
+            showDeployDialog = uiState.showDeployDialog,
+            onDeployConfirm = { subdomain -> viewModel.deployProject(subdomain) },
+            onDeployDismiss = { viewModel.dismissDeployDialog() },
+            onTweak = { desc -> viewModel.tweakProject(desc) },
+            isTweaking = uiState.isTweaking,
+            tweakPhase = uiState.tweakPhase,
+            onFeedback = { rating -> viewModel.sendFeedback(rating) },
+            feedbackSent = uiState.feedbackSent,
+            versionNumber = uiState.versionNumber,
+            onVersionHistoryClick = { viewModel.showVersionHistory() }
         )
         return
     }
@@ -276,6 +298,8 @@ fun ProjectDetailScreen(
                                     color = VibePurple
                                 )
                                 Spacer(modifier = Modifier.height(12.dp))
+                                val shareText = stringResource(R.string.project_detail_share_text, liveUrl)
+                                val shareTitle = stringResource(R.string.share)
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -287,25 +311,25 @@ fun ProjectDetailScreen(
                                             )
                                         },
                                         modifier = Modifier.weight(1f),
-                                        shape = RoundedCornerShape(12.dp)
+                                        shape = RoundedCornerShape(12.dp),
+                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
                                     ) {
                                         Icon(Icons.Default.Rocket, contentDescription = null, tint = VibePurple, modifier = Modifier.size(16.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text(stringResource(R.string.open), color = VibePurple)
+                                        Text(stringResource(R.string.open), color = VibePurple, maxLines = 1)
                                     }
                                     OutlinedButton(
                                         onClick = {
                                             clipboardManager.setText(AnnotatedString(liveUrl))
                                         },
                                         modifier = Modifier.weight(1f),
-                                        shape = RoundedCornerShape(12.dp)
+                                        shape = RoundedCornerShape(12.dp),
+                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
                                     ) {
                                         Icon(Icons.Default.ContentCopy, contentDescription = null, tint = VibePurple, modifier = Modifier.size(16.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text(stringResource(R.string.copy), color = VibePurple)
+                                        Text(stringResource(R.string.copy), color = VibePurple, maxLines = 1)
                                     }
-                                    val shareText = stringResource(R.string.project_detail_share_text, liveUrl)
-                                    val shareTitle = stringResource(R.string.share)
                                     OutlinedButton(
                                         onClick = {
                                             val sendIntent = Intent().apply {
@@ -316,11 +340,12 @@ fun ProjectDetailScreen(
                                             context.startActivity(Intent.createChooser(sendIntent, shareTitle))
                                         },
                                         modifier = Modifier.weight(1f),
-                                        shape = RoundedCornerShape(12.dp)
+                                        shape = RoundedCornerShape(12.dp),
+                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
                                     ) {
                                         Icon(Icons.Default.Share, contentDescription = null, tint = VibePurple, modifier = Modifier.size(16.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text(stringResource(R.string.share), color = VibePurple)
+                                        Text(stringResource(R.string.share), color = VibePurple, maxLines = 1)
                                     }
                                 }
                             }
@@ -357,6 +382,61 @@ fun ProjectDetailScreen(
                         }
                     }
 
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Export APK button
+                    Button(
+                        onClick = { viewModel.exportApk() },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = VibeGreen),
+                        contentPadding = PaddingValues(vertical = 16.dp),
+                        enabled = !uiState.isExportingApk
+                    ) {
+                        if (uiState.isExportingApk) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = TextPrimary,
+                                strokeWidth = 2.dp
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = uiState.apkExportProgress.ifEmpty { "Building APK..." },
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        } else {
+                            Icon(Icons.Default.PhoneAndroid, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Export Android App", fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+
+                    // Preview on iPhone (via Expo Go) — only for deployed apps
+                    if (liveUrl != null) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        OutlinedButton(
+                            onClick = {
+                                val appTitle = project.title
+                                    .replace(Regex("[^a-zA-Z0-9 ]"), "")
+                                    .trim().take(30)
+                                    .ifBlank { "My App" }
+                                val code = "import React from 'react';import {WebView} from 'react-native-webview';export default ()=> <WebView source={{uri:'${liveUrl}'}} style={{flex:1}}/>;"
+                                val encodedCode = java.net.URLEncoder.encode(code, "UTF-8")
+                                val encodedName = java.net.URLEncoder.encode(appTitle, "UTF-8")
+                                val snackUrl = "https://snack.expo.dev?platform=mydevice&name=$encodedName&dependencies=react-native-webview&code=$encodedCode&hideQueryParams=true"
+                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(snackUrl)))
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, VibePurple),
+                            contentPadding = PaddingValues(vertical = 16.dp)
+                        ) {
+                            Text("\uD83C\uDF4E", style = MaterialTheme.typography.titleMedium)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Preview on iPhone (Expo Go)", color = VibePurple, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+
                     // Stats
                     Spacer(modifier = Modifier.height(24.dp))
 
@@ -367,6 +447,57 @@ fun ProjectDetailScreen(
                         StatItem(stringResource(R.string.project_detail_stat_views), project.viewCount.toString())
                         StatItem(stringResource(R.string.project_detail_stat_forks), project.forkCount.toString())
                         StatItem(stringResource(R.string.project_detail_stat_tweaks), project.tweakCount.toString())
+                    }
+
+                    // Monetization card (only for deployed apps)
+                    if (liveUrl != null) {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Card(
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            Icons.Default.TrendingUp,
+                                            contentDescription = null,
+                                            tint = TextTertiary,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            "Monetization",
+                                            style = MaterialTheme.typography.titleSmall,
+                                            color = TextPrimary,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                    }
+                                    Surface(
+                                        color = VibePurple.copy(alpha = 0.15f),
+                                        shape = RoundedCornerShape(8.dp)
+                                    ) {
+                                        Text(
+                                            "Coming Soon",
+                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = VibePurple,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Earn revenue from ads shown on your deployed app. Ad monetization is currently under review and will be available soon.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextTertiary
+                                )
+                            }
+                        }
                     }
 
                     // Prompt

@@ -174,7 +174,7 @@ struct BrowseProjectDetailView: View {
 
             HStack(spacing: 20) {
                 Button(action: { showForkConfirmation = true }) {
-                    Label("Remix (10 coins)", systemImage: "arrow.triangle.branch")
+                    Label("Remix", systemImage: "arrow.triangle.branch")
                         .padding()
                         .frame(maxWidth: .infinity)
                         .background(Color.blue)
@@ -196,7 +196,7 @@ struct BrowseProjectDetailView: View {
         .navigationTitle(project.title)
         .navigationBarTitleDisplayMode(.inline)
         .confirmationDialog("Remix Project", isPresented: $showForkConfirmation) {
-            Button("Remix for 10 coins") {
+            Button("Remix Project") {
                 Task { await forkProject() }
             }
             Button("Cancel", role: .cancel) {}

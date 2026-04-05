@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.vibecoder.R
+import com.kreativekoala.vibecoder.ui.preview.UrlWebViewComposable
 import com.kreativekoala.vibecoder.ui.preview.WebViewComposable
 import com.kreativekoala.vibecoder.ui.theme.*
 
@@ -105,6 +106,14 @@ fun ProjectPreviewScreen(
                     )
                 }
 
+                // Fallback: load deployed URL if bundle is unavailable
+                uiState.project?.publishedUrl != null -> {
+                    UrlWebViewComposable(
+                        url = uiState.project!!.publishedUrl!!,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
                 uiState.errorMessage != null -> {
                     Column(
                         modifier = Modifier
@@ -128,7 +137,7 @@ fun ProjectPreviewScreen(
                 }
 
                 uiState.project != null -> {
-                    // Project loaded but bundle unavailable
+                    // Project loaded but bundle and published URL unavailable
                     Column(
                         modifier = Modifier
                             .fillMaxSize()

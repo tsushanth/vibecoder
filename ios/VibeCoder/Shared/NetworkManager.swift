@@ -255,6 +255,29 @@ extension NetworkManager {
             throw NSError(domain: "NetworkManager", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMsg])
         }
     }
+
+    func registerPushToken(userId: String, token: String) async {
+        guard let url = URL(string: "\(baseURL)/api/auth/push-token") else { return }
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try? JSONEncoder().encode(["userId": userId, "token": token, "platform": "ios"])
+        _ = try? await session.data(for: req)
+    }
+
+    func getSystemStatus() async -> SystemStatus? {
+        guard let url = URL(string: "\(baseURL)/api/status") else { return nil }
+        var req = URLRequest(url: url)
+        req.timeoutInterval = 5
+        guard let (data, _) = try? await session.data(for: req) else { return nil }
+        return try? JSONDecoder().decode(SystemStatus.self, from: data)
+    }
+}
+
+struct SystemStatus: Codable {
+    let operational: Bool
+    let message: String?
+    let activeBuildCount: Int?
 }
 
 struct SaveProjectResponse: Codable {

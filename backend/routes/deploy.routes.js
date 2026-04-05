@@ -2,6 +2,7 @@ import express from 'express';
 import crypto from 'crypto';
 import { supabase } from '../config/database.js';
 import { getActiveDomainMap } from '../services/domainService.js';
+import { WORKER_URL, WORKER_SECRET } from '../config/constants.js';
 
 const DEPLOY_SERVER_URL = process.env.DEPLOY_SERVER_URL || 'http://localhost:4000';
 const INTERNAL_SECRET = process.env.INTERNAL_SECRET || 'vibecoder-internal-secret';
@@ -63,18 +64,42 @@ router.post('/:projectId/deploy', async (req, res) => {
         // Get project bundle
         const { data: project, error: projectError } = await supabase
             .from('projects')
-            .select('bundle, creator_id')
+            .select('bundle, creator_id, github_repo')
             .eq('id', projectId)
             .single();
 
         if (projectError || !project) return res.status(404).json({ error: 'Project not found' });
         if (project.creator_id !== userId) return res.status(403).json({ error: 'Not authorized' });
 
+        // Bundle may not be in DB if it was never tweaked (initial save goes to GitHub only).
+        // Fall back to fetching it from the worker via GitHub.
+        let bundle = project.bundle;
+        if (!bundle && project.github_repo) {
+            try {
+                const workerRes = await fetch(`${WORKER_URL}/bundle/${project.github_repo}`, {
+                    headers: { 'x-worker-secret': WORKER_SECRET },
+                    signal: AbortSignal.timeout(30000)
+                });
+                if (workerRes.ok) {
+                    const result = await workerRes.json();
+                    bundle = result.bundle;
+                    // Cache it back to DB so future deploys are instant
+                    if (bundle) {
+                        await supabase.from('projects').update({ bundle }).eq('id', projectId);
+                    }
+                }
+            } catch (workerErr) {
+                console.error('[deploy] Worker bundle fetch failed:', workerErr.message);
+            }
+        }
+
+        if (!bundle) return res.status(400).json({ error: 'Your app has not been built yet. Please generate your app first before publishing.' });
+
         // Send to deploy server
         const deployResponse = await fetch(`${DEPLOY_SERVER_URL}/deploy`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ subdomain, bundle: project.bundle })
+            body: JSON.stringify({ subdomain, bundle })
         });
 
         if (!deployResponse.ok) {
@@ -82,19 +107,31 @@ router.post('/:projectId/deploy', async (req, res) => {
             return res.status(500).json({ error: err.error || 'Deployment failed' });
         }
 
-        // Upsert deployment record
-        await supabase.from('deployments').upsert({
+        // Upsert deployment record (conflict on subdomain which has the UNIQUE constraint)
+        const { error: upsertError } = await supabase.from('deployments').upsert({
             project_id: projectId,
             user_id: userId,
             subdomain,
-            bundle: project.bundle,
             status: 'active',
             deployed_at: new Date().toISOString()
-        }, { onConflict: 'project_id' });
+        }, { onConflict: 'subdomain' });
+        if (upsertError) console.error('[deploy] deployments upsert error:', upsertError);
 
-        // Update project with published URL
+        // Update project with published URL and clean up preview
         const url = `https://${subdomain}.vibebuild.cc`;
-        await supabase.from('projects').update({ published_url: url }).eq('id', projectId);
+        const { data: proj } = await supabase.from('projects').select('preview_url').eq('id', projectId).single();
+        await supabase.from('projects').update({ published_url: url, preview_url: null }).eq('id', projectId);
+
+        // Clean up preview deployment files (fire-and-forget)
+        if (proj?.preview_url) {
+            const previewSubdomain = proj.preview_url.replace('https://', '').split('.')[0];
+            fetch(`${DEPLOY_SERVER_URL}/cleanup`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subdomain: previewSubdomain })
+            }).catch(() => {});
+            console.log(`[deploy] Cleaned up preview: ${previewSubdomain}`);
+        }
 
         res.json({ success: true, url });
     } catch (error) {
@@ -121,7 +158,7 @@ router.delete('/:projectId/deploy', async (req, res) => {
 router.get('/:projectId/deploy', async (req, res) => {
     try {
         const { projectId } = req.params;
-        const { data } = await supabase.from('deployments').select('subdomain, status, deployed_at').eq('project_id', projectId).single();
+        const { data } = await supabase.from('deployments').select('subdomain, status, deployed_at, ads_enabled').eq('project_id', projectId).single();
 
         if (!data) return res.json({ success: true, deployed: false });
 
@@ -130,10 +167,36 @@ router.get('/:projectId/deploy', async (req, res) => {
             deployed: data.status === 'active',
             subdomain: data.subdomain,
             url: `https://${data.subdomain}.vibebuild.cc`,
-            deployedAt: data.deployed_at
+            deployedAt: data.deployed_at,
+            adsEnabled: data.ads_enabled || false
         });
     } catch (error) {
         res.status(500).json({ error: 'Failed to check deployment' });
+    }
+});
+
+// Toggle ads for a deployment
+router.post('/:projectId/ads', async (req, res) => {
+    try {
+        const { projectId } = req.params;
+        const { userId, enabled } = req.body;
+
+        if (!userId) return res.status(400).json({ error: 'userId is required' });
+        if (typeof enabled !== 'boolean') return res.status(400).json({ error: 'enabled (boolean) is required' });
+
+        // Verify ownership
+        const { data: project } = await supabase.from('projects').select('creator_id').eq('id', projectId).single();
+        if (!project || project.creator_id !== userId) return res.status(403).json({ error: 'Not authorized' });
+
+        // Update deployment
+        const { error } = await supabase.from('deployments').update({ ads_enabled: enabled }).eq('project_id', projectId);
+        if (error) throw error;
+
+        console.log(`[ads] ${enabled ? 'Enabled' : 'Disabled'} ads for project ${projectId}`);
+        res.json({ success: true, adsEnabled: enabled });
+    } catch (error) {
+        console.error('[ads] Error:', error.message);
+        res.status(500).json({ error: 'Failed to update ads setting' });
     }
 });
 

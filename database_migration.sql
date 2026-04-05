@@ -296,3 +296,8 @@ INSERT INTO project_suggestions (label, prompt, category, status) VALUES
 -- CREATE POLICY "Users can view public projects" ON projects FOR SELECT USING (is_public = true);
 -- CREATE POLICY "Users can view own projects" ON projects FOR SELECT USING (creator_id = current_setting('app.user_id'));
 -- CREATE POLICY "Users can update own projects" ON projects FOR UPDATE USING (creator_id = current_setting('app.user_id'));
+
+-- ============================================
+-- Thumbnail support (added 2026-04-01)
+-- ============================================
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS thumbnail_url TEXT;

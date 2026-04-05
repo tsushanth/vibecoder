@@ -117,7 +117,9 @@ struct ReplitStyleAccountView: View {
             .background(Color.black.ignoresSafeArea())
             .navigationBarHidden(true)
         }
-        .sheet(isPresented: $showSubscriptionSheet) {
+        .sheet(isPresented: $showSubscriptionSheet, onDismiss: {
+            PaywallCoordinator.shared.trackDismiss()
+        }) {
             SubscriptionPlansView()
                 .environmentObject(subscriptionManager)
         }

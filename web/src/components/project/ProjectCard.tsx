@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { ProjectSummary } from '@/types/api';
 import { formatDate } from '@/lib/utils';
+import { api } from '@/lib/api';
 
 interface ProjectCardProps {
   project: ProjectSummary;
@@ -10,7 +11,9 @@ interface ProjectCardProps {
   onDelete?: () => void;
   onFork?: () => void;
   onTryIt?: () => void;
+  onLike?: (projectId: string, liked: boolean) => void;
   showActions?: boolean;
+  userId?: string | null;
 }
 
 // Deterministic gradient based on project title
@@ -28,18 +31,57 @@ function getGradient(title: string) {
   return gradients[Math.abs(hash) % gradients.length];
 }
 
+function formatCount(n: number): string {
+  if (!n || n <= 0) return '0';
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return String(n);
+}
+
 export function ProjectCard({
   project,
   onClick,
   onDelete,
   onFork,
   onTryIt,
+  onLike,
   showActions = false,
+  userId,
 }: ProjectCardProps) {
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(project.like_count || 0);
+  const [isLiking, setIsLiking] = useState(false);
 
   const hasLivePreview = project.published_url && !iframeError;
+
+  async function handleLike(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!userId || isLiking) return;
+    setIsLiking(true);
+    try {
+      if (liked) {
+        const result = await api.delete<{ success: boolean; liked: boolean; likeCount: number }>(
+          `/api/projects/${project.id}/like`,
+          { userId }
+        );
+        setLiked(false);
+        setLikeCount(result.likeCount);
+      } else {
+        const result = await api.post<{ success: boolean; liked: boolean; likeCount: number }>(
+          `/api/projects/${project.id}/like`,
+          { userId }
+        );
+        setLiked(true);
+        setLikeCount(result.likeCount);
+      }
+      onLike?.(project.id, !liked);
+    } catch {
+      // ignore
+    } finally {
+      setIsLiking(false);
+    }
+  }
 
   return (
     <div
@@ -100,7 +142,7 @@ export function ProjectCard({
             onClick={(e) => { e.stopPropagation(); onTryIt(); }}
             className="absolute bottom-2 right-2 px-3 py-1 bg-accent hover:bg-accent-hover text-white text-xs font-semibold rounded-lg opacity-0 group-hover:opacity-100 transition shadow-lg"
           >
-            Try it →
+            Try it &rarr;
           </button>
         )}
       </div>
@@ -132,22 +174,47 @@ export function ProjectCard({
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 text-xs text-subtle">
-            <span>{project.is_public ? '🌐' : '🔒'}</span>
-            {project.play_count > 0 && (
-              <span className="flex items-center gap-1">
+            {/* View count */}
+            {(project.view_count || 0) > 0 && (
+              <span className="flex items-center gap-1" title="Views">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                {project.play_count}
+                {formatCount(project.view_count)}
               </span>
             )}
-            {project.fork_count > 0 && (
-              <span className="flex items-center gap-1">
+            {/* Play count */}
+            {(project.play_count || 0) > 0 && (
+              <span className="flex items-center gap-1" title="Plays">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {formatCount(project.play_count)}
+              </span>
+            )}
+            {/* Like count + button */}
+            <button
+              onClick={handleLike}
+              disabled={!userId || isLiking}
+              className={`flex items-center gap-1 transition ${
+                liked ? 'text-pink-500' : 'hover:text-pink-400'
+              } ${!userId ? 'cursor-default' : 'cursor-pointer'}`}
+              title={userId ? (liked ? 'Unlike' : 'Like') : 'Sign in to like'}
+            >
+              <svg className="w-3 h-3" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              {likeCount > 0 && formatCount(likeCount)}
+            </button>
+            {/* Fork count */}
+            {(project.fork_count || 0) > 0 && (
+              <span className="flex items-center gap-1" title="Forks">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
                 </svg>
-                {project.fork_count}
+                {formatCount(project.fork_count)}
               </span>
             )}
             <span>{formatDate(project.created_at)}</span>

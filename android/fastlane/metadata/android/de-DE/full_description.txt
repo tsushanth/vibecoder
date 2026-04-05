@@ -1,4 +1,4 @@
-VibeBuild verwandelt deine Ideen mithilfe von KI in funktionierende Apps. Beschreibe einfach, was du erstellen moechtest, und VibeBuild generiert in Sekunden eine voll funktionsfaehige Web-App.
+VibeBuild verwandelt deine Ideen mithilfe von KI in funktionierende Apps. Beschreibe einfach, was du erstellen moechtest, und VibeBuild generiert in Sekunden eine voll funktionsfaehige Web-App. Erstelle und verwalte deine Apps auch im Web auf vibebuild.cc.
 
 Keine Programmiererfahrung noetig. Egal ob du ein Anfaenger bist, der App-Entwicklung erkundet, oder ein Profi, der schnell Prototypen erstellt - VibeBuild macht es muehelos.
 
@@ -7,10 +7,12 @@ SO FUNKTIONIERT ES
 2. Beobachte, wie die KI deine App in Echtzeit mit einer Live-Fortschrittsanzeige erstellt
 3. Sieh dir deine App sofort in der Anwendung an
 4. Speichere deine Kreationen und greife jederzeit darauf zu
+5. Veroeffentliche im Web und teile deine App unter deineapp.vibebuild.cc
 
 FUNKTIONEN
 - KI-gesteuerte Generierung: Beschreibe jede App-Idee und erhalte sofort funktionierenden Code
 - Live-Vorschau: Sieh deine App sofort nach der Generierung in Aktion
+- Im Web veroeffentlichen: Teile deine App unter deineapp.vibebuild.cc - von jedem Browser aus zugaenglich
 - Speichern und verwalten: Behalte alle generierten Apps uebersichtlich an einem Ort
 - Vorschlagskarten: Lass dich von kreativen App-Ideen inspirieren
 - Echtzeit-Fortschritt: Verfolge den Erstellungsprozess mit Live-Statusupdates

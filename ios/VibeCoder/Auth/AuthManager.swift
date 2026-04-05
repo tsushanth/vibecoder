@@ -179,6 +179,10 @@ class AuthManager: ObservableObject {
             self.userId = session.user.id
             self.email = session.user.email
             self.displayName = session.user.userMetadata?["full_name"] as? String
+            // Register push token with backend if available
+            if let token = DeviceTokenManager.shared.deviceToken {
+                Task { await NetworkManager.shared.registerPushToken(userId: session.user.id, token: token) }
+            }
         }
     }
 

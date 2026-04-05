@@ -245,7 +245,7 @@ export default function ProjectBuilderPage() {
               .then((v) => store.setVersions(v.versions))
               .catch(() => {});
           } else if (event.type === 'error') {
-            genStore.setError(event.error);
+            genStore.setError(event.error, event.systemBusy);
             store.addChatMessage({
               id: `error-${Date.now()}`,
               role: 'assistant',
