@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import android.util.Log
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -41,6 +42,7 @@ class AppsViewModel @Inject constructor(
 
             try {
                 val projects = projectRepository.getMyProjects(userId)
+                Log.d("Apps", "Loaded ${projects.size} projects: ${projects.map { "${it.title.take(20)}(${it.status})" }}")
                 _uiState.update {
                     it.copy(
                         projects = projects,

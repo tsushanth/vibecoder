@@ -189,6 +189,34 @@
     <!-- Project Card -->
     <string name="project_card_delete_dialog_title">Delete Project</string>
     <string name="project_card_delete_dialog_message">Are you sure you want to delete \"%s\"? This cannot be undone.</string>
+    <string name="project_card_views">%d views</string>
+
+    <!-- Post-Publish Sheet -->
+    <string name="publish_sheet_title">Your app is live!</string>
+    <string name="publish_sheet_subtitle">Share it with the world and start earning from ad placements in your app.</string>
+    <string name="publish_sheet_open_browser">Open in Browser</string>
+    <string name="publish_sheet_share">Share App</string>
+    <string name="publish_sheet_monetize">Enable Ad Monetization →</string>
+    <string name="publish_sheet_done">Done</string>
+    <string name="publish_sheet_share_text">Check out the app I built with VibeBuild! %s</string>
+
+    <!-- Version History -->
+    <string name="version_history">Version History</string>
+    <string name="version_history_subtitle">Every change you make is saved as a new version</string>
+    <string name="version_current">Current</string>
+    <string name="version_use_this">Use this version</string>
+    <string name="version_use_title">Restore this version?</string>
+    <string name="version_use_message">This will replace your current version. Don\'t worry — you can always switch back to any version from history.</string>
+    <string name="version_use_confirm">Use this version</string>
+    <string name="version_restoring">Restoring version…</string>
+    <string name="version_empty">No version history yet. Make some changes to start tracking versions!</string>
+
+    <!-- Monetization -->
+    <string name="monetize_section_title">Monetization</string>
+    <string name="monetize_revenue_label">Revenue this month</string>
+    <string name="monetize_revenue_value">$0.00</string>
+    <string name="monetize_enable_btn">Enable Ad Monetization →</string>
+    <string name="monetize_description">Earn money when people use your app. We place ads and pay you monthly.</string>
 
     <!-- Language Picker -->
     <string name="language_picker_title">Select Language</string>

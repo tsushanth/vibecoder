@@ -69,4 +69,36 @@ router.post('/register', async (req, res) => {
     }
 });
 
+// POST /api/auth/push-token - Register or update FCM/APNs device token
+router.post('/push-token', async (req, res) => {
+    try {
+        const { userId, token, platform } = req.body;
+        if (!userId || !token) {
+            return res.status(400).json({ error: 'userId and token are required' });
+        }
+
+        if (platform === 'android') {
+            // Store FCM token in users table fcm_token column (may not exist yet - soft fail)
+            const { error } = await supabase
+                .from('users')
+                .update({ fcm_token: token, updated_at: new Date().toISOString() })
+                .eq('user_id', userId);
+            if (error) console.warn('[push-token] FCM token store failed (column may not exist yet):', error.message);
+        } else {
+            // iOS APNs token - use existing push_tokens table schema
+            const { error } = await supabase
+                .from('push_tokens')
+                .upsert({ user_id: userId, apns_token: token, sandbox: false, updated_at: new Date().toISOString() },
+                    { onConflict: 'user_id' });
+            if (error) throw error;
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Push token error:', error);
+        res.status(500).json({ error: 'Failed to register push token' });
+    }
+});
+
+
 export default router;

@@ -202,4 +202,27 @@
     <string name="language_portuguese">Português</string>
     <string name="language_italian">Italiano</string>
     <string name="language_hindi">हिन्दी</string>
+
+    <!-- Project Card -->
+    <string name="project_card_views">%d vues</string>
+
+    <!-- Post-Publish Sheet -->
+    <string name="publish_sheet_title">Votre application est en ligne !</string>
+    <string name="publish_sheet_subtitle">Partagez-le avec le monde et commencez à gagner grâce aux publicités dans votre app.</string>
+    <string name="publish_sheet_open_browser">Ouvrir dans le Navigateur</string>
+    <string name="publish_sheet_share">Partager l\'App</string>
+    <string name="publish_sheet_monetize">Activer la Monétisation par Pub →</string>
+    <string name="publish_sheet_done">Terminé</string>
+    <string name="publish_sheet_share_text">Regardez l\'app que j\'ai créée avec VibeBuild ! %s</string>
+
+    <!-- Monetization -->
+    <string name="monetize_section_title">Monétisation</string>
+    <string name="monetize_revenue_label">Revenus ce mois</string>
+    <string name="monetize_revenue_value">$0.00</string>
+    <string name="monetize_enable_btn">Activer la Monétisation par Pub →</string>
+    <string name="monetize_description">Gagnez de l\'argent quand les gens utilisent votre app. Nous plaçons des pubs et vous payons chaque mois.</string>
+
+    <!-- Facebook SDK Configuration -->
+    <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
+    <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
 </resources>

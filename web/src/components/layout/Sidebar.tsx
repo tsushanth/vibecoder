@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
@@ -19,6 +20,14 @@ export function Sidebar() {
     { href: '/community', label: t('common.browse'), icon: '🔍' },
     { href: '/settings', label: t('common.settings'), icon: '⚙️' },
   ];
+
+  const isActive = (href: string) => {
+    if (!pathname) return false;
+    if (href === '/dashboard') {
+      return pathname === '/dashboard' || pathname === '/';
+    }
+    return pathname === href || pathname.startsWith(href + '/');
+  };
 
   if (!sidebarOpen) return null;
 
@@ -52,19 +61,19 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 px-3">
         {navItems.map((item) => (
-          <a
+          <Link
             key={item.href}
             href={item.href}
             className={cn(
               'flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition text-sm',
-              pathname === item.href
-                ? 'bg-surface-hover text-foreground'
+              isActive(item.href)
+                ? 'bg-accent/15 text-accent font-semibold'
                 : 'text-muted hover:text-foreground hover:bg-surface'
             )}
           >
             <span>{item.icon}</span>
             <span>{item.label}</span>
-          </a>
+          </Link>
         ))}
       </nav>
 

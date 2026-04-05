@@ -2,11 +2,49 @@
 
 import { useTranslations } from 'next-intl';
 import { useGenerationStore } from '@/stores/generationStore';
+import { api } from '@/lib/api';
+import { useState } from 'react';
 
 export function GenerationProgress() {
   const t = useTranslations();
-  const { phase, message, detail, progressPercent, estimatedSecondsRemaining } =
+  const { phase, message, detail, progressPercent, estimatedSecondsRemaining, systemBusy, error } =
     useGenerationStore();
+  const [upgrading, setUpgrading] = useState(false);
+
+  const handleUpgrade = async () => {
+    setUpgrading(true);
+    try {
+      const data = await api.post<{ url: string }>('/api/subscriptions/create-checkout', {});
+      if (data.url) window.location.href = data.url;
+    } catch {
+      setUpgrading(false);
+    }
+  };
+
+  if (systemBusy && error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 animate-fade-in px-6 text-center">
+        <div className="text-4xl mb-4">🔥</div>
+        <h2 className="text-lg font-semibold mb-2">High demand right now</h2>
+        <p className="text-sm text-muted max-w-sm mb-6">
+          Our builders are at full capacity. Pro users get priority access and skip the queue.
+        </p>
+        <button
+          onClick={handleUpgrade}
+          disabled={upgrading}
+          className="px-6 py-3 rounded-lg bg-accent text-white font-medium text-sm hover:bg-accent/90 transition-colors disabled:opacity-60 mb-3"
+        >
+          {upgrading ? 'Redirecting...' : '⚡ Upgrade to Pro — Build Instantly'}
+        </button>
+        <button
+          onClick={() => window.location.reload()}
+          className="text-xs text-muted hover:text-foreground transition-colors"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
 
   const PHASE_LABELS: Record<string, string> = {
     generating: t('generation.phases.generating'),

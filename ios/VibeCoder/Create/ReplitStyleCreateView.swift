@@ -46,7 +46,9 @@ struct ReplitStyleCreateView: View {
                 showGenerationError = true
             }
         }
-        .sheet(isPresented: $showUpgradeSheet) {
+        .sheet(isPresented: $showUpgradeSheet, onDismiss: {
+            PaywallCoordinator.shared.trackDismiss()
+        }) {
             SubscriptionPlansView()
                 .environmentObject(subscriptionManager)
         }

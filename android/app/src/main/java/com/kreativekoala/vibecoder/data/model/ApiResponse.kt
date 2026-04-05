@@ -118,6 +118,20 @@ data class PlansResponse(
     val plans: List<SubscriptionPlan> = emptyList()
 )
 
+// --- Export APK ---
+data class ExportApkRequest(
+    val userId: String,
+    val bundle: String? = null
+)
+
+data class ExportApkResponse(
+    val success: Boolean,
+    val apk: String? = null,
+    @SerializedName("apkSize") val apkSize: Int? = null,
+    @SerializedName("buildTime") val buildTime: Double? = null,
+    val error: String? = null
+)
+
 // --- Deploy ---
 data class DeployRequest(
     val userId: String,
@@ -134,61 +148,18 @@ data class DeployStatusResponse(
     val deployed: Boolean = false,
     val subdomain: String? = null,
     val url: String? = null,
-    @SerializedName("deployedAt") val deployedAt: String? = null
+    @SerializedName("deployedAt") val deployedAt: String? = null,
+    @SerializedName("adsEnabled") val adsEnabled: Boolean = false
 )
 
-// --- Coins ---
-data class CoinBalanceResponse(
-    val success: Boolean,
-    val balance: Int = 0,
-    val totalPurchased: Int = 0,
-    val totalSpent: Int = 0,
-    val totalEarned: Int = 0
-)
-
-data class CoinStoreResponse(
-    val success: Boolean,
-    val generationCost: Int = 20,
-    val tweakCost: Int = 10,
-    val forkCost: Int = 10,
-    val creatorSharePercent: Int = 55,
-    val packs: List<CoinPack> = emptyList()
-)
-
-data class CoinPack(
-    val productId: String,
-    val coins: Int,
-    val price: String
-)
-
-data class SpendCoinsRequest(
+data class AdsToggleRequest(
     val userId: String,
-    val reason: String,
-    val projectId: String? = null,
-    val creatorId: String? = null,
-    val platform: String = "android"
+    val enabled: Boolean
 )
 
-data class SpendCoinsResponse(
+data class AdsToggleResponse(
     val success: Boolean,
-    val coinsSpent: Int = 0,
-    val newBalance: Int = 0,
-    val error: String? = null,
-    val balance: Int = 0
-)
-
-data class PurchaseCoinsRequest(
-    val userId: String,
-    val productId: String,
-    val transactionId: String,
-    val platform: String = "android"
-)
-
-data class PurchaseCoinsResponse(
-    val success: Boolean,
-    val coinsAdded: Int = 0,
-    val newBalance: Int = 0,
-    val message: String? = null
+    @SerializedName("adsEnabled") val adsEnabled: Boolean = false
 )
 
 // --- Generation ---
@@ -207,4 +178,39 @@ data class TweakRequest(
 data class FeedbackRequest(
     val userId: String,
     val rating: String
+)
+
+// --- Versions ---
+data class VersionsResponse(
+    val success: Boolean,
+    val versions: List<AppVersion> = emptyList()
+)
+
+data class AppVersion(
+    val sha: String,
+    @SerializedName("shortSha") val shortSha: String = "",
+    val message: String = "",
+    val date: String = "",
+    val author: String = ""
+)
+
+data class RevertRequest(val userId: String)
+
+data class RevertResponse(
+    val success: Boolean,
+    @SerializedName("commitSha") val commitSha: String? = null,
+    val bundle: String? = null,
+    @SerializedName("bundleSize") val bundleSize: Int? = null
+)
+
+data class PushTokenRequest(
+    @SerializedName("userId") val userId: String,
+    @SerializedName("token") val token: String,
+    @SerializedName("platform") val platform: String = "android"
+)
+
+data class SystemStatusResponse(
+    val operational: Boolean,
+    val message: String? = null,
+    @SerializedName("activeBuildCount") val activeBuildCount: Int = 0
 )

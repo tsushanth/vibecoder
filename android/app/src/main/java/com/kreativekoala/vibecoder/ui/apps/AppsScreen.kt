@@ -31,6 +31,17 @@ fun AppsScreen(
         viewModel.loadProjects()
     }
 
+    // Auto-refresh every 15s if any project is still building
+    val hasBuilding = uiState.projects.any { it.status == "building" }
+    LaunchedEffect(hasBuilding) {
+        if (hasBuilding) {
+            while (true) {
+                kotlinx.coroutines.delay(15_000)
+                viewModel.loadProjects()
+            }
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()

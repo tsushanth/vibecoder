@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3695BC2AB12B7F49E5516933 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E089AB0FCED2458DE60648B7 /* Foundation.framework */; };
 		A001 /* VibeCoderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001 /* VibeCoderApp.swift */; };
 		A002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B002 /* ContentView.swift */; };
 		A003 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B003 /* AuthManager.swift */; };
@@ -39,9 +40,24 @@
 		A031 /* SourceCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B024 /* SourceCodeView.swift */; };
 		A032 /* CustomDomainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B025 /* CustomDomainView.swift */; };
 		A033 /* CoinManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B026 /* CoinManager.swift */; };
+		A034 /* PaywallCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B027 /* PaywallCoordinator.swift */; };
+		A035 /* WinbackOfferView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B028 /* WinbackOfferView.swift */; };
+		D2D12B4A63E6910827565909 /* ScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECF05AFA3D780D6BFCD1205E /* ScreenshotTests.swift */; };
+		F1F0F0ACACACD2CAB6E78CCF /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6222A441E08F11FDECE00A6C /* SnapshotHelper.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		5B40E8EF6C3C4BA77192F454 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = K001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = G001;
+			remoteInfo = VibeCoder;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		6222A441E08F11FDECE00A6C /* SnapshotHelper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SnapshotHelper.swift; sourceTree = "<group>"; };
 		88B736A52F43CBF3007E4B75 /* VibeCoder.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VibeCoder.entitlements; sourceTree = "<group>"; };
 		B001 /* VibeCoderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VibeCoderApp.swift; sourceTree = "<group>"; };
 		B002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -68,13 +84,26 @@
 		B024 /* SourceCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceCodeView.swift; sourceTree = "<group>"; };
 		B025 /* CustomDomainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomDomainView.swift; sourceTree = "<group>"; };
 		B026 /* CoinManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinManager.swift; sourceTree = "<group>"; };
+		B027 /* PaywallCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallCoordinator.swift; sourceTree = "<group>"; };
+		B028 /* WinbackOfferView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WinbackOfferView.swift; sourceTree = "<group>"; };
 		C001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C002 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		C003 /* VibeBuild.storekit */ = {isa = PBXFileReference; lastKnownFileType = com.apple.storekit.configuration; path = "VibeBuild.storekit"; sourceTree = "<group>"; };
+		C003 /* VibeBuild.storekit */ = {isa = PBXFileReference; lastKnownFileType = com.apple.storekit.configuration; path = VibeBuild.storekit; sourceTree = "<group>"; };
 		D001 /* VibeCoder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VibeCoder.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E089AB0FCED2458DE60648B7 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		ECF05AFA3D780D6BFCD1205E /* ScreenshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScreenshotTests.swift; sourceTree = "<group>"; };
+		F04D6FF414BAB1101CE6BD22 /* VibeCoderUITests */ = {isa = PBXFileReference; includeInIndex = 0; path = VibeCoderUITests; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		0832977B9D1CE819B3C68D87 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3695BC2AB12B7F49E5516933 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -91,11 +120,39 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		44FBFAFD3ED8C837C93D8B9A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D3B7AA612A2D60C53851FBD4 /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		BAC72212EB7F2A158655CE31 /* VibeCoderUITests */ = {
+			isa = PBXGroup;
+			children = (
+				6222A441E08F11FDECE00A6C /* SnapshotHelper.swift */,
+				ECF05AFA3D780D6BFCD1205E /* ScreenshotTests.swift */,
+			);
+			name = VibeCoderUITests;
+			path = VibeCoderUITests;
+			sourceTree = "<group>";
+		};
+		D3B7AA612A2D60C53851FBD4 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				E089AB0FCED2458DE60648B7 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
 		F001 = {
 			isa = PBXGroup;
 			children = (
 				F002 /* VibeCoder */,
 				F003 /* Products */,
+				44FBFAFD3ED8C837C93D8B9A /* Frameworks */,
+				BAC72212EB7F2A158655CE31 /* VibeCoderUITests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -126,6 +183,7 @@
 			isa = PBXGroup;
 			children = (
 				D001 /* VibeCoder.app */,
+				F04D6FF414BAB1101CE6BD22 /* VibeCoderUITests */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -198,6 +256,8 @@
 				B017 /* SubscriptionManager.swift */,
 				B018 /* SubscriptionPlansView.swift */,
 				B026 /* CoinManager.swift */,
+				B027 /* PaywallCoordinator.swift */,
+				B028 /* WinbackOfferView.swift */,
 			);
 			path = Monetization;
 			sourceTree = "<group>";
@@ -242,6 +302,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		C683E6200ACC47B3743B288F /* VibeCoderUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0FD5ACD8B82F05A9703495FD /* Build configuration list for PBXNativeTarget "VibeCoderUITests" */;
+			buildPhases = (
+				203D13CFC2EB34430A0D29CC /* Sources */,
+				0832977B9D1CE819B3C68D87 /* Frameworks */,
+				01A9DCA99870DEDD50BA95F4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				10B1C3A6C7AB97C5AC2E2E63 /* PBXTargetDependency */,
+			);
+			name = VibeCoderUITests;
+			productName = VibeCoderUITests;
+			productReference = F04D6FF414BAB1101CE6BD22 /* VibeCoderUITests */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		G001 /* VibeCoder */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = H001 /* Build configuration list for PBXNativeTarget "VibeCoder" */;
@@ -301,11 +379,19 @@
 			projectRoot = "";
 			targets = (
 				G001 /* VibeCoder */,
+				C683E6200ACC47B3743B288F /* VibeCoderUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		01A9DCA99870DEDD50BA95F4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		J001 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -318,6 +404,15 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		203D13CFC2EB34430A0D29CC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F1F0F0ACACACD2CAB6E78CCF /* SnapshotHelper.swift in Sources */,
+				D2D12B4A63E6910827565909 /* ScreenshotTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		I001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -346,12 +441,52 @@
 				A031 /* SourceCodeView.swift in Sources */,
 				A032 /* CustomDomainView.swift in Sources */,
 				A033 /* CoinManager.swift in Sources */,
+				A034 /* PaywallCoordinator.swift in Sources */,
+				A035 /* WinbackOfferView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		10B1C3A6C7AB97C5AC2E2E63 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = VibeCoder;
+			target = G001 /* VibeCoder */;
+			targetProxy = 5B40E8EF6C3C4BA77192F454 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		6C89661D0DCEE25CB31DB1DB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 7RS696YC75;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.vibercoder.UITests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = VibeCoder;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C4EBDDBF8DBE0961FFDB10E8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 7RS696YC75;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.vibercoder.UITests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = VibeCoder;
+			};
+			name = Debug;
+		};
 		L001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -478,7 +613,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = VibeCoder/VibeCoder.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				ENABLE_PREVIEWS = YES;
@@ -510,7 +645,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = VibeCoder/VibeCoder.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				ENABLE_PREVIEWS = YES;
@@ -538,6 +673,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		0FD5ACD8B82F05A9703495FD /* Build configuration list for PBXNativeTarget "VibeCoderUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6C89661D0DCEE25CB31DB1DB /* Release */,
+				C4EBDDBF8DBE0961FFDB10E8 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		H001 /* Build configuration list for PBXNativeTarget "VibeCoder" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

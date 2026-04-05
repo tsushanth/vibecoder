@@ -130,4 +130,17 @@ class ProjectRepository @Inject constructor(
     suspend fun sendFeedback(projectId: String, userId: String, rating: String) {
         api.sendFeedback(projectId, FeedbackRequest(userId, rating))
     }
+
+    suspend fun getVersions(projectId: String): List<AppVersion> {
+        val response = api.getVersions(projectId)
+        return response.versions
+    }
+
+    suspend fun revertToVersion(projectId: String, sha: String, userId: String): RevertResponse {
+        return api.revertToVersion(projectId, sha, RevertRequest(userId))
+    }
+
+    suspend fun exportApk(projectId: String, userId: String, bundle: String? = null): ExportApkResponse {
+        return api.exportApk(projectId, ExportApkRequest(userId, bundle))
+    }
 }

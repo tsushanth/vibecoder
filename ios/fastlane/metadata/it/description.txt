@@ -1,4 +1,4 @@
-VibeBuild trasforma le tue idee in app funzionanti usando l'IA. Descrivi semplicemente cosa vuoi creare con le tue parole, e VibeBuild genera un'applicazione web completamente funzionante in pochi secondi.
+VibeBuild trasforma le tue idee in app funzionanti usando l'IA. Descrivi semplicemente cosa vuoi creare con le tue parole, e VibeBuild genera un'applicazione web completamente funzionante in pochi secondi. Crea e gestisci le tue app anche sul web su vibebuild.cc.
 
 Nessuna esperienza di programmazione necessaria. Che tu sia un principiante che esplora lo sviluppo di app o un professionista che crea prototipi rapidamente, VibeBuild rende tutto semplice.
 
@@ -7,10 +7,12 @@ COME FUNZIONA
 2. Guarda l'IA costruire la tua app in tempo reale con una vista di avanzamento dal vivo
 3. Visualizza l'anteprima della tua app istantaneamente nell'applicazione
 4. Salva le tue creazioni e accedi in qualsiasi momento
+5. Pubblica sul web e condividi la tua app su tuaapp.vibebuild.cc
 
 FUNZIONALITA
 - Generazione con IA: Descrivi qualsiasi idea di app e ottieni codice funzionante generato istantaneamente
 - Anteprima dal vivo: Vedi la tua app in esecuzione subito dopo la generazione
+- Pubblicazione sul web: Condividi la tua app su tuaapp.vibebuild.cc, accessibile da qualsiasi browser
 - Salva e gestisci: Tieni tutte le tue app generate organizzate in un unico posto
 - Schede suggerimenti: Lasciati ispirare da idee creative di app da provare
 - Avanzamento in tempo reale: Segui il processo di creazione con aggiornamenti di stato dal vivo

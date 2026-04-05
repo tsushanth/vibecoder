@@ -5,6 +5,7 @@ import com.facebook.appevents.AppEventsLogger
 import com.kreativekoala.vibecoder.service.FirebaseAnalyticsHelper
 import com.kreativekoala.vibecoder.service.TikTokHelper
 import com.kreativekoala.vibecoder.util.NotificationHelper
+import com.kreativekoala.paywallkit.manager.ExperimentManager
 import com.revenuecat.purchases.LogLevel
 import com.revenuecat.purchases.Purchases
 import com.revenuecat.purchases.PurchasesConfiguration
@@ -24,6 +25,9 @@ class VibeBuildApplication : Application() {
 
         // Initialize TikTok Events SDK for install attribution
         TikTokHelper.initialize(this)
+
+        // Initialize PaywallKit experiment manager
+        ExperimentManager.init(this)
 
         // Initialize RevenueCat
         Purchases.logLevel = if (BuildConfig.DEBUG) LogLevel.DEBUG else LogLevel.WARN

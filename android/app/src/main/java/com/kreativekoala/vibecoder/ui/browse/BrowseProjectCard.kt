@@ -13,9 +13,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.kreativekoala.vibecoder.data.model.Project
 import com.kreativekoala.vibecoder.ui.theme.*
 
@@ -33,28 +35,42 @@ fun BrowseProjectCard(
         colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant)
     ) {
         Column {
-            // Gradient thumbnail
+            // Thumbnail
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
+                    .height(140.dp)
                     .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-                    .background(
-                        Brush.linearGradient(
-                            colors = listOf(
-                                VibePurple.copy(alpha = 0.4f),
-                                VibeTeal.copy(alpha = 0.3f)
-                            )
-                        )
-                    ),
-                contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = project.title.take(2).uppercase(),
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = TextPrimary.copy(alpha = 0.4f),
-                    fontWeight = FontWeight.Bold
-                )
+                if (project.thumbnailUrl != null) {
+                    AsyncImage(
+                        model = project.thumbnailUrl,
+                        contentDescription = project.title,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        VibePurple.copy(alpha = 0.4f),
+                                        VibeTeal.copy(alpha = 0.3f)
+                                    )
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = project.title.take(2).uppercase(),
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = TextPrimary.copy(alpha = 0.4f),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
 
             Column(modifier = Modifier.padding(12.dp)) {

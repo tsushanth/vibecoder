@@ -1,10 +1,14 @@
 package com.kreativekoala.vibecoder.navigation
 
 import android.content.Context
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
@@ -21,6 +25,7 @@ import com.kreativekoala.vibecoder.ui.browse.ProjectPreviewScreen
 import com.kreativekoala.vibecoder.ui.landing.LandingScreen
 import com.kreativekoala.vibecoder.ui.main.MainScreen
 import com.kreativekoala.vibecoder.ui.onboarding.OnboardingScreen
+import com.kreativekoala.vibecoder.ui.theme.DarkBackground
 
 private const val PREFS_NAME = "vibebuild_prefs"
 private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
@@ -30,9 +35,19 @@ fun VibeBuildNavGraph() {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = hiltViewModel()
     val isAuthenticated by authViewModel.isAuthenticated.collectAsState()
+    val isAuthResolved by authViewModel.isAuthResolved.collectAsState()
     val context = LocalContext.current
 
-    val startDestination = remember {
+    // Wait for the Supabase session to be checked before deciding the start destination.
+    // Without this guard the NavHost would always start at Landing because the session
+    // hasn't been restored yet on cold start.
+    if (!isAuthResolved) {
+        // Show an empty dark screen while auth state is being resolved (typically <200ms)
+        Box(modifier = Modifier.fillMaxSize().background(DarkBackground))
+        return
+    }
+
+    val startDestination = remember(isAuthenticated) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val hasCompletedOnboarding = prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false)
         when {

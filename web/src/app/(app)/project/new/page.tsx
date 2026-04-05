@@ -150,7 +150,7 @@ export default function NewProjectPage() {
               setSaveError(err instanceof Error ? err.message : 'Save failed');
             }
           } else if (event.type === 'error') {
-            setError(event.error);
+            setError(event.error, event.systemBusy);
           }
         }
       } catch (err) {
