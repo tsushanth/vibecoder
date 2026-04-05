@@ -1,7 +1,9 @@
 package com.kreativekoala.vibecoder.ui.create
 
 import android.app.Activity
+import android.content.Intent
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.util.Base64
 import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -27,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.android.play.core.review.ReviewManagerFactory
 import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.preview.LivePreviewScreen
 import com.kreativekoala.vibecoder.ui.theme.*
@@ -34,25 +37,85 @@ import com.kreativekoala.vibecoder.ui.theme.*
 @Composable
 fun CreateScreen(
     modifier: Modifier = Modifier,
+    onNavigateToSubscriptions: () -> Unit = {},
     viewModel: CreateViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    // Keep screen on during generation
-    DisposableEffect(uiState.isGenerating) {
-        val window = (context as? Activity)?.window
-        if (uiState.isGenerating) {
-            window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        } else {
-            window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
-        onDispose {
-            window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    // No longer forcing screen on — if connection drops, we poll for the result
+
+    var showSaveSuccess by remember { mutableStateOf(false) }
+    var ratingStep by remember { mutableIntStateOf(0) } // 0 = hidden, 1 = "enjoying?", 2 = "contact support?"
+
+    // Trigger rating dialog when ViewModel signals it
+    LaunchedEffect(uiState.showRatingPrompt) {
+        if (uiState.showRatingPrompt) {
+            ratingStep = 1
         }
     }
 
-    var showSaveSuccess by remember { mutableStateOf(false) }
+    // Two-step rating dialog
+    if (ratingStep == 1) {
+        AlertDialog(
+            onDismissRequest = {
+                ratingStep = 0
+                viewModel.dismissRatingPrompt()
+            },
+            title = { Text("Enjoying VibeBuild?", color = TextPrimary) },
+            text = { Text("We'd love to hear what you think!", color = TextSecondary) },
+            confirmButton = {
+                TextButton(onClick = {
+                    ratingStep = 0
+                    viewModel.dismissRatingPrompt()
+                    val activity = context as? Activity ?: return@TextButton
+                    val manager = ReviewManagerFactory.create(activity)
+                    manager.requestReviewFlow().addOnCompleteListener { request ->
+                        if (request.isSuccessful) {
+                            manager.launchReviewFlow(activity, request.result)
+                        }
+                    }
+                }) {
+                    Text("Yes!", color = VibePurple)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    ratingStep = 2
+                    viewModel.dismissRatingPrompt()
+                }) {
+                    Text("Not really", color = TextSecondary)
+                }
+            },
+            containerColor = DarkSurfaceVariant
+        )
+    }
+
+    if (ratingStep == 2) {
+        AlertDialog(
+            onDismissRequest = { ratingStep = 0 },
+            title = { Text("We're sorry to hear that", color = TextPrimary) },
+            text = { Text("Would you like to contact our support team?", color = TextSecondary) },
+            confirmButton = {
+                TextButton(onClick = {
+                    ratingStep = 0
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("mailto:support@kreativekoala.llc")
+                        putExtra(Intent.EXTRA_SUBJECT, "VibeBuild Feedback")
+                    }
+                    try { context.startActivity(intent) } catch (_: Exception) {}
+                }) {
+                    Text("Contact Support", color = VibePurple)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { ratingStep = 0 }) {
+                    Text("No thanks", color = TextSecondary)
+                }
+            },
+            containerColor = DarkSurfaceVariant
+        )
+    }
 
     // Image picker
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -79,11 +142,21 @@ fun CreateScreen(
     }
 
     // Show preview overlay
+    var showClosePublishPrompt by remember { mutableStateOf(false) }
+
     if (uiState.showPreview && uiState.bundleDir != null) {
         Box(modifier = Modifier.fillMaxSize()) {
             LivePreviewScreen(
                 bundleDir = uiState.bundleDir!!,
-                onClose = { viewModel.dismissPreview() },
+                onClose = {
+                    // If already published or saved, just close
+                    if (uiState.deployedUrl != null || uiState.savedProjectId != null) {
+                        viewModel.dismissPreview()
+                    } else {
+                        // Not saved or published — ask if they want to save/publish first
+                        showClosePublishPrompt = true
+                    }
+                },
                 onSave = { viewModel.saveProject() },
                 onPublish = { viewModel.showDeployDialog() },
                 isSaving = uiState.isSaving,
@@ -97,7 +170,8 @@ fun CreateScreen(
                 isTweaking = uiState.isTweaking,
                 tweakPhase = uiState.tweakPhase,
                 onFeedback = { rating -> viewModel.sendFeedback(rating) },
-                feedbackSent = uiState.feedbackSent
+                feedbackSent = uiState.feedbackSent,
+                versionNumber = uiState.versionNumber
             )
 
             if (showSaveSuccess && uiState.deployedUrl == null) {
@@ -113,8 +187,49 @@ fun CreateScreen(
                     containerColor = DarkSurfaceVariant
                 )
             }
+
+            // Prompt to save before closing
+            if (showClosePublishPrompt) {
+                AlertDialog(
+                    onDismissRequest = { showClosePublishPrompt = false },
+                    title = { Text("Save your app?", color = TextPrimary) },
+                    text = { Text("Your app hasn't been saved yet. Would you like to save it before closing?", color = TextSecondary) },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            showClosePublishPrompt = false
+                            viewModel.saveProject()
+                        }) {
+                            Text("Save", color = VibePurple)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = {
+                            showClosePublishPrompt = false
+                            viewModel.dismissPreview()
+                        }) {
+                            Text("Discard", color = TextSecondary)
+                        }
+                    },
+                    containerColor = DarkSurfaceVariant
+                )
+            }
         }
         return
+    }
+
+    // Building confirmation dialog
+    if (uiState.showBuildingConfirmation) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissBuildingConfirmation() },
+            title = { Text("Your app is being built!", color = TextPrimary) },
+            text = { Text("We'll notify you when it's ready. Check My Projects in about 5 minutes.", color = TextSecondary) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.dismissBuildingConfirmation() }) {
+                    Text("Got it", color = VibePurple)
+                }
+            },
+            containerColor = DarkSurfaceVariant
+        )
     }
 
     // Error snackbar
@@ -132,24 +247,33 @@ fun CreateScreen(
         )
     }
 
+    if (uiState.showSystemBusyDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissSystemBusyDialog() },
+            title = { Text("🔥 High Demand Right Now") },
+            text = {
+                Text("Our builders are at full capacity. Pro users get priority access and build instantly.")
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.dismissSystemBusyDialog()
+                    onNavigateToSubscriptions()
+                }) {
+                    Text("⚡ Upgrade to Pro", color = VibePurple)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.dismissSystemBusyDialog() }) {
+                    Text(stringResource(R.string.ok))
+                }
+            },
+            containerColor = DarkSurfaceVariant
+        )
+    }
+
     Box(modifier = modifier.fillMaxSize()) {
-        if (uiState.isGenerating) {
-            // Generation progress view
-            GenerationProgressView(
-                progressPercent = uiState.progressPercent,
-                simulatedProgress = uiState.simulatedProgress,
-                notifyEnabled = uiState.notifyEnabled,
-                buildPhase = uiState.buildPhase,
-                buildDetail = uiState.buildDetail,
-                estimatedSecondsRemaining = uiState.estimatedSecondsRemaining,
-                onNotifyEnabledChanged = { viewModel.setNotifyEnabled(it) },
-                onSimulatedProgressChanged = { viewModel.updateSimulatedProgress(it) },
-                onCancel = { viewModel.cancelGeneration() },
-                modifier = Modifier.align(Alignment.Center)
-            )
-        } else {
-            // Input mode
-            Column(
+        // Input mode (generation runs in background — no progress screen)
+        Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
@@ -296,6 +420,5 @@ fun CreateScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
             }
-        }
     }
 }
