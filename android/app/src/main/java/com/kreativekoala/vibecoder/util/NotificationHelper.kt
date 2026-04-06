@@ -24,7 +24,7 @@ object NotificationHelper {
         manager.createNotificationChannel(channel)
     }
 
-    fun showGenerationComplete(context: Context, title: String = "Your app is ready!", body: String = "Tap to preview your generated app") {
+    fun showGenerationComplete(context: Context, title: String = "Your app is ready!", body: String = "Tap to open your project in My Apps") {
         val manager = context.getSystemService(NotificationManager::class.java)
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)

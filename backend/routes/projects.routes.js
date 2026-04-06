@@ -88,8 +88,8 @@ async function refreshBrowseCache() {
     if (browseCache.isRefreshing) return;
     browseCache.isRefreshing = true;
     try {
-        const selectFields = 'id, title, description, creator_id, creator_name, project_type, view_count, play_count, fork_count, like_count, created_at, published_url, preview_url, thumbnail_url';
-        const selectFieldsFallback = 'id, title, description, creator_id, creator_name, project_type, view_count, play_count, fork_count, like_count, created_at, published_url, preview_url';
+        const selectFields = 'id, title, description, creator_id, creator_name, project_type, view_count, play_count, fork_count, like_count, created_at, published_url, preview_url, thumbnail_url, status, initial_prompt';
+        const selectFieldsFallback = 'id, title, description, creator_id, creator_name, project_type, view_count, play_count, fork_count, like_count, created_at, published_url, preview_url, status, initial_prompt';
 
         let [newestResult, popularResult] = await Promise.all([
             supabase
@@ -286,8 +286,7 @@ async function proxyWorkerSSE(workerResponse, res, {
     label = 'proxy'
 } = {}) {
     if (!workerResponse.body) {
-        res.write(`data: ${JSON.stringify({ type: 'error', error: 'Build server connection failed' })}\n\n`);
-        res.end();
+        try { res.write(`data: ${JSON.stringify({ type: 'error', error: 'Build server connection failed' })}\n\n`); res.end(); } catch {}
         return false;
     }
 
@@ -295,6 +294,13 @@ async function proxyWorkerSSE(workerResponse, res, {
     const decoder = new TextDecoder();
     let buffer = '';
     let resultReceived = false;
+    let clientConnected = true;
+    res.on('close', () => { clientConnected = false; });
+
+    const safeWrite = (data) => {
+        if (!clientConnected) return;
+        try { res.write(data); } catch { clientConnected = false; }
+    };
 
     try {
         while (true) {
@@ -310,7 +316,7 @@ async function proxyWorkerSSE(workerResponse, res, {
             for (const line of lines) {
                 // Forward SSE comments (keepalives) from worker to client
                 if (line.startsWith(':')) {
-                    res.write(line + '\n\n');
+                    safeWrite(line + '\n\n');
                     continue;
                 }
                 if (line.startsWith('data: ')) {
@@ -319,8 +325,7 @@ async function proxyWorkerSSE(workerResponse, res, {
                         const parsed = JSON.parse(eventData);
 
                         if (parsed.type === 'status') {
-                            // Forward status to client (including progress fields)
-                            res.write(`data: ${JSON.stringify({
+                            safeWrite(`data: ${JSON.stringify({
                                 type: 'status',
                                 phase: parsed.phase,
                                 message: parsed.message,
@@ -333,18 +338,16 @@ async function proxyWorkerSSE(workerResponse, res, {
                         } else if (parsed.type === 'result') {
                             resultReceived = true;
                             if (onResult) {
+                                // Always call onResult to save to DB, even if client disconnected
                                 await onResult(parsed, res);
                             } else {
-                                res.write(`data: ${JSON.stringify(parsed)}\n\n`);
+                                safeWrite(`data: ${JSON.stringify(parsed)}\n\n`);
                             }
                         } else if (parsed.type === 'error') {
                             if (onError) {
                                 await onError(parsed, res);
                             } else {
-                                res.write(`data: ${JSON.stringify({
-                                    type: 'error',
-                                    error: parsed.error
-                                })}\n\n`);
+                                safeWrite(`data: ${JSON.stringify({ type: 'error', error: parsed.error })}\n\n`);
                             }
                         }
                     } catch {
@@ -356,7 +359,7 @@ async function proxyWorkerSSE(workerResponse, res, {
     } catch (streamError) {
         console.error(`[${label}] Stream error:`, streamError.message);
         if (!resultReceived) {
-            res.write(`data: ${JSON.stringify({ type: 'error', error: 'Connection to build server lost' })}\n\n`);
+            safeWrite(`data: ${JSON.stringify({ type: 'error', error: 'Connection to build server lost' })}\n\n`);
         }
     }
 
@@ -465,6 +468,11 @@ router.post('/generate', async (req, res) => {
         // Set up SSE
         setupSSE(res);
 
+        // Send projectId immediately so client can poll if connection drops
+        if (placeholderProjectId) {
+            res.write(`data: ${JSON.stringify({ type: 'queued', projectId: placeholderProjectId })}\n\n`);
+        }
+
         // Build worker request body
         const workerBody = {
             prompt: prompt.trim(),
@@ -505,8 +513,14 @@ router.post('/generate', async (req, res) => {
                     }
                 }
             } catch {}
-            res.write(`data: ${JSON.stringify({ type: 'error', error: errorMsg, systemBusy })}\n\n`);
-            res.end();
+            // Mark placeholder as failed so user sees it immediately
+            if (placeholderProjectId && !systemBusy) {
+                supabase.from('projects').update({ status: 'failed' }).eq('id', placeholderProjectId).then(() => {});
+                const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
+                if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', `"${shortPrompt}..." is queued. Pro users skip the line — upgrade for priority builds.`).catch(() => {});
+            }
+            safeWrite(`data: ${JSON.stringify({ type: 'error', error: errorMsg, systemBusy, projectId: placeholderProjectId })}\n\n`);
+            try { res.end(); } catch {}
             return;
         }
 
@@ -656,14 +670,28 @@ router.post('/generate', async (req, res) => {
             }
         });
 
-        res.end();
+        // If stream ended without a result, mark placeholder failed
+        if (!resultReceived && placeholderProjectId) {
+            supabase.from('projects').update({ status: 'failed' }).eq('id', placeholderProjectId).then(() => {
+                console.log(`[generate] Marked ${placeholderProjectId} as failed (no result received)`);
+            });
+            const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
+            if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', `"${shortPrompt}..." hit a snag. Pro users get priority — upgrade to skip the queue.`).catch(() => {});
+        }
+        try { res.end(); } catch {}
 
     } catch (error) {
         console.error('[generate] Error:', error.message);
 
+        // Mark placeholder failed on exception
+        if (placeholderProjectId) {
+            supabase.from('projects').update({ status: 'failed' }).eq('id', placeholderProjectId).then(() => {});
+            const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
+            if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', `"${shortPrompt}..." hit a snag. Pro users get priority — upgrade to skip the queue.`).catch(() => {});
+        }
+
         if (res.headersSent) {
-            res.write(`data: ${JSON.stringify({ type: 'error', error: 'Server error. Please try again.' })}\n\n`);
-            res.end();
+            try { res.write(`data: ${JSON.stringify({ type: 'error', error: 'Server error. Please try again.' })}\n\n`); res.end(); } catch {}
         } else {
             if (error.name === 'TimeoutError') {
                 return res.status(504).json({ error: 'Project generation timed out. Try a simpler idea.' });
@@ -823,6 +851,64 @@ router.get('/browse', (req, res) => {
 // POST /api/projects/:id/feedback
 // Record thumbs up/down feedback for a generated project
 // ============================================
+// POST /api/projects/:id/retry
+// Re-dispatches a failed build without creating a new project
+router.post('/:id/retry', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { userId } = req.body;
+        if (!userId) return res.status(400).json({ error: 'userId is required' });
+
+        const { data: project, error: fetchErr } = await supabase
+            .from('projects')
+            .select('id, initial_prompt, status, creator_id')
+            .eq('id', id)
+            .single();
+
+        if (fetchErr || !project) return res.status(404).json({ error: 'Project not found' });
+        if (project.creator_id !== userId) return res.status(403).json({ error: 'Forbidden' });
+        if (project.status !== 'failed') return res.status(400).json({ error: 'Project is not in failed state' });
+        if (!project.initial_prompt) return res.status(400).json({ error: 'No prompt to retry' });
+
+        // Reset to building
+        await supabase.from('projects').update({ status: 'building' }).eq('id', id);
+
+        // Fire-and-forget dispatch to worker — worker result updates this same project
+        res.json({ success: true, projectId: id });
+
+        // Dispatch to worker with callback URL — worker POSTs result back when done
+        // This avoids Cloud Run killing the long-running SSE stream after response is sent
+        const callbackUrl = `${process.env.SELF_URL || 'https://vibecoder-api-917362189743.us-central1.run.app'}/api/projects/${id}/build-complete`;
+        const workerBody = { prompt: project.initial_prompt, userId, framework: 'react', stream: false, projectId: id, callbackUrl, callbackSecret: WORKER_SECRET };
+        console.log(`[retry] Dispatching to worker for ${id}`);
+        fetch(`${WORKER_URL}/generate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-worker-secret': WORKER_SECRET },
+            body: JSON.stringify(workerBody),
+            signal: AbortSignal.timeout(30000)
+        }).then(async (workerRes) => {
+            console.log(`[retry] Worker accepted: ${workerRes.status} for ${id}`);
+            if (!workerRes.ok) {
+                const errText = await workerRes.text().catch(() => '');
+                if (workerRes.status === 429) {
+                    console.log(`[retry] Worker busy for ${id} — build stays in building state, will poll`);
+                    // Leave as building — cleanup cron will reset if it gets stuck
+                    return;
+                }
+                console.error(`[retry] Worker error ${workerRes.status}: ${errText.substring(0, 200)}`);
+                await supabase.from('projects').update({ status: 'failed' }).eq('id', id);
+            }
+        }).catch(async (err) => {
+            console.error(`[retry] Worker fetch error: ${err.message}`);
+            await supabase.from('projects').update({ status: 'failed' }).eq('id', id);
+        });
+
+    } catch (error) {
+        console.error('[retry] Error:', error.message);
+        res.status(500).json({ error: 'Failed to retry project' });
+    }
+});
+
 router.post('/:id/feedback', async (req, res) => {
     try {
         const { id } = req.params;
@@ -846,6 +932,38 @@ router.post('/:id/feedback', async (req, res) => {
     } catch (error) {
         console.error('[feedback] Error:', error.message);
         res.status(500).json({ error: 'Failed to save feedback' });
+    }
+});
+
+// ============================================
+// POST /api/projects/:id/build-complete
+// Callback from worker when a retry build finishes
+// ============================================
+router.post('/:id/build-complete', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { bundle, status, error, userId, secret } = req.body;
+
+        if (secret !== WORKER_SECRET) return res.status(401).json({ error: 'Unauthorized' });
+        if (!id) return res.status(400).json({ error: 'Missing id' });
+
+        if (bundle && status === 'ready') {
+            await supabase.from('projects').update({ bundle, status: 'ready' }).eq('id', id);
+            console.log(`[build-complete] Project ${id} ready`);
+            if (userId) {
+                const { data: proj } = await supabase.from('projects').select('initial_prompt').eq('id', id).single();
+                const shortPrompt = (proj?.initial_prompt || '').substring(0, 40);
+                sendPushToUser(userId, `"${shortPrompt}" is ready!`, 'Tap to open your app').catch(() => {});
+            }
+        } else {
+            await supabase.from('projects').update({ status: 'failed' }).eq('id', id);
+            console.log(`[build-complete] Project ${id} failed: ${error}`);
+            if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', 'Retry failed. Pro users get priority — upgrade to skip the queue.').catch(() => {});
+        }
+        res.json({ success: true });
+    } catch (err) {
+        console.error('[build-complete] Error:', err.message);
+        res.status(500).json({ error: err.message });
     }
 });
 
@@ -1198,7 +1316,7 @@ router.get('/my', async (req, res) => {
 
         const { data, error, count } = await supabase
             .from('projects')
-            .select('id, title, description, creator_name, project_type, view_count, play_count, fork_count, like_count, created_at, updated_at, is_public, published_url, preview_url, github_repo, status', { count: 'exact' })
+            .select('id, title, description, creator_id, creator_name, project_type, view_count, play_count, fork_count, like_count, created_at, updated_at, is_public, published_url, preview_url, thumbnail_url, github_repo, status, initial_prompt, creation_method', { count: 'exact' })
             .eq('creator_id', userId)
             .order('updated_at', { ascending: false })
             .range(parsedOffset, parsedOffset + parsedLimit - 1);
@@ -1240,8 +1358,12 @@ router.post('/:id/export-apk', async (req, res) => {
 
         if (error || !project) return res.status(404).json({ error: 'Project not found' });
 
-        // Get bundle: try client-provided bundle first, then github repo
+        // Get bundle: try client-provided bundle first, then DB bundle, then github repo
         let bundle = clientBundle || null;
+        if (!bundle) {
+            const { data: fullProject } = await supabase.from('projects').select('bundle').eq('id', id).single();
+            if (fullProject?.bundle) bundle = fullProject.bundle;
+        }
         if (!bundle && project.github_repo) {
             try {
                 const bundleRes = await fetch(`${WORKER_URL}/bundle/${project.github_repo}`, {
@@ -1897,6 +2019,46 @@ router.delete('/:id', async (req, res) => {
     } catch (error) {
         console.error('[delete] Error:', error.message);
         res.status(500).json({ error: 'Failed to delete project' });
+    }
+});
+
+// ============================================
+// Cleanup stuck builds (called by Cloud Scheduler every 10 min)
+// ============================================
+router.post('/api/admin/cleanup-stuck-builds', async (req, res) => {
+    const secret = req.headers['x-admin-secret'];
+    if (secret !== process.env.WORKER_SECRET) return res.status(401).json({ error: 'Unauthorized' });
+
+    try {
+        const cutoff = new Date(Date.now() - 20 * 60 * 1000).toISOString(); // 20 min ago
+
+        const { data: stuckProjects, error } = await supabase
+            .from('projects')
+            .select('id, creator_id, initial_prompt, created_at')
+            .eq('status', 'building')
+            .lt('created_at', cutoff);
+
+        if (error) throw error;
+        if (!stuckProjects?.length) return res.json({ cleaned: 0 });
+
+        // Mark all as failed
+        const ids = stuckProjects.map(p => p.id);
+        await supabase.from('projects').update({ status: 'failed' }).in('id', ids);
+
+        // Send push notifications
+        for (const project of stuckProjects) {
+            if (project.creator_id) {
+                const shortPrompt = (project.initial_prompt || 'Your app').substring(0, 40);
+                sendPushToUser(project.creator_id, 'Builders are overloaded 🔥', `"${shortPrompt}..." is in queue. Upgrade to Pro for priority builds that skip the line.`).catch(() => {});
+            }
+        }
+
+        console.log(`[cleanup] Marked ${stuckProjects.length} stuck builds as failed: ${ids.join(', ')}`);
+        res.json({ cleaned: stuckProjects.length, ids });
+
+    } catch (err) {
+        console.error('[cleanup] Error:', err.message);
+        res.status(500).json({ error: err.message });
     }
 });
 

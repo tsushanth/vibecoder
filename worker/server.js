@@ -703,7 +703,8 @@ app.get('/health', (req, res) => {
 // ============================================
 
 app.post('/generate', authMiddleware, async (req, res) => {
-    const { prompt, userId, stream, referenceImage } = req.body;
+    const { prompt, userId, stream, referenceImage, callbackUrl, callbackSecret } = req.body;
+    console.log(`[ENTRY] /generate called: userId=${userId}, stream=${stream}, hasCallback=${!!callbackUrl}, promptLen=${prompt?.length}`);
 
     if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
         return res.status(400).json({ error: 'App description is required' });
@@ -726,6 +727,12 @@ app.post('/generate', authMiddleware, async (req, res) => {
     const startTime = Date.now();
     const requestId = `app-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
     let projectDir = null;
+
+    // If callbackUrl is provided (fire-and-forget mode), respond immediately
+    // so Cloud Run doesn't kill the connection before the build completes
+    if (callbackUrl && !stream) {
+        res.status(202).json({ success: true, requestId, message: 'Build started, result will be POSTed to callbackUrl' });
+    }
 
     // If streaming requested, set up SSE
     const isSSE = stream === true;
@@ -767,18 +774,20 @@ app.post('/generate', authMiddleware, async (req, res) => {
         if (isSSE) {
             res.write(`data: ${JSON.stringify({ type: 'error', error })}\n\n`);
             res.end();
-        } else {
+        } else if (!callbackUrl) {
             res.status(503).json({ error });
         }
+        // If callbackUrl mode: 202 already sent, error goes via callback
     }
 
     function sendResult(data) {
         if (isSSE) {
             res.write(`data: ${JSON.stringify({ type: 'result', ...data })}\n\n`);
             res.end();
-        } else {
+        } else if (!callbackUrl) {
             res.json(data);
         }
+        // If callbackUrl mode: 202 already sent, result goes via callback
     }
 
     console.log(`[${requestId}] Starting multi-phase build for ${userId}: "${prompt}"`);
@@ -855,6 +864,7 @@ Start building now. Create the files.`;
                 console.log(`[${requestId}] Non-zero exit but files exist — continuing build`);
             } else {
                 activeGenerations = Math.max(0, activeGenerations - 1);
+                if (callbackUrl) fetch(callbackUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'failed', error: 'Failed to generate app', userId, secret: callbackSecret }), signal: AbortSignal.timeout(10000) }).catch(() => {});
                 return sendError('Failed to generate app. Please try again.');
             }
         }
@@ -1004,7 +1014,7 @@ Fix them now. The app will not load at all if these aren't resolved.`;
 
         console.log(`[${requestId}] App complete in ${elapsed}s (${files.length} files, ${(zip.sizeBytes / 1024).toFixed(1)}KB)`);
 
-        sendResult({
+        const resultData = {
             success: true,
             bundle: zip.base64,
             bundleSize: zip.sizeBytes,
@@ -1015,10 +1025,30 @@ Fix them now. The app will not load at all if these aren't resolved.`;
                 warnings: warningsLeft,
                 phasesCompleted: criticalLeft === 0 ? 5 : 3,
             }
-        });
+        };
+        sendResult(resultData);
+
+        // If a callback URL was provided, POST the result back
+        if (callbackUrl) {
+            fetch(callbackUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bundle: zip.base64, status: 'ready', userId, secret: callbackSecret }),
+                signal: AbortSignal.timeout(30000)
+            }).then(() => console.log(`[${requestId}] Callback sent to ${callbackUrl}`))
+              .catch(err => console.error(`[${requestId}] Callback failed: ${err.message}`));
+        }
 
     } catch (error) {
         console.error(`[${requestId}] Error:`, error.message);
+        if (callbackUrl) {
+            fetch(callbackUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'failed', error: error.message, userId, secret: callbackSecret }),
+                signal: AbortSignal.timeout(10000)
+            }).catch(() => {});
+        }
         sendError('Internal worker error. Please try again.');
     } finally {
         activeGenerations = Math.max(0, activeGenerations - 1);
@@ -1039,7 +1069,8 @@ function runClaudeCommand(claudePath, prompt, cwd, requestId, maxTurns = 10) {
             '--dangerously-skip-permissions',
             '--output-format', 'stream-json',
             '--max-turns', String(maxTurns),
-            '--verbose'
+            '--verbose',
+            '--model', 'claude-sonnet-4-5'
         ];
 
         console.log(`[${requestId}] Claude CLI starting (maxTurns: ${maxTurns})...`);
@@ -1068,6 +1099,7 @@ function runClaudeCommand(claudePath, prompt, cwd, requestId, maxTurns = 10) {
             resolve({ success: false, output: assistantBlocks.join(''), error: 'Timeout', quotaError: false });
         }, 480000);
 
+        let rateLimitedFromStdout = false;
         proc.stdout?.on('data', (data) => {
             for (const line of data.toString().split('\n').filter(l => l.trim())) {
                 try {
@@ -1076,6 +1108,9 @@ function runClaudeCommand(claudePath, prompt, cwd, requestId, maxTurns = 10) {
                         assistantBlocks.push(event.delta.text || '');
                     } else if (event.type === 'result') {
                         console.log(`[${requestId}] Claude finished`);
+                    } else if (event.type === 'rate_limit_event' && event.rate_limit_info?.status === 'rejected') {
+                        console.log(`[${requestId}] Rate limit rejected — quota exhausted`);
+                        rateLimitedFromStdout = true;
                     }
                 } catch {}
             }
@@ -1097,8 +1132,8 @@ function runClaudeCommand(claudePath, prompt, cwd, requestId, maxTurns = 10) {
         proc.on('close', (code) => {
             clearTimeout(timeout);
             const output = assistantBlocks.join('');
-            const isQuotaError = containsQuotaError(stderr) || containsQuotaError(output);
-            const resetTime = isQuotaError ? (extractResetTime(stderr) || extractResetTime(output)) : null;
+            const isQuotaError = rateLimitedFromStdout || containsQuotaError(stderr) || containsQuotaError(output);
+            const resetTime = isQuotaError ? (extractResetTime(stderr) || extractResetTime(output) || '2am UTC') : null;
 
             // Detect auth or quota failure and switch to backup account
             const isAuthError = stderr.includes('401') || stderr.includes('expired') || stderr.includes('Failed to authenticate') || stderr.includes('not logged in');

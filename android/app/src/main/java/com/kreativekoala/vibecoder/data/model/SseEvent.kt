@@ -3,6 +3,10 @@ package com.kreativekoala.vibecoder.data.model
 import com.google.gson.annotations.SerializedName
 
 sealed class SseEvent {
+    data class Queued(
+        @SerializedName("projectId") val projectId: String
+    ) : SseEvent()
+
     data class Status(
         val phase: String = "",
         val message: String = "",

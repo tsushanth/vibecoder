@@ -284,6 +284,7 @@ class CreateViewModel @Inject constructor(
 
             // Run generation in background
             generationJob = viewModelScope.launch {
+                var queuedProjectId: String? = null
                 try {
                     projectRepository.generate(
                         prompt = prompt,
@@ -292,6 +293,10 @@ class CreateViewModel @Inject constructor(
                         referenceImage = currentState.referenceImageBase64
                     ).collect { event ->
                         when (event) {
+                            is SseEvent.Queued -> {
+                                queuedProjectId = event.projectId
+                                Log.d("Create", "Build queued: projectId=${event.projectId}")
+                            }
                             is SseEvent.Status -> {
                                 // Silently track progress in background
                             }
@@ -304,16 +309,48 @@ class CreateViewModel @Inject constructor(
                                     _uiState.update {
                                         it.copy(isGenerating = false, showSystemBusyDialog = true)
                                     }
+                                } else {
+                                    // Start polling if we have a projectId — build may still be running
+                                    val pid = queuedProjectId
+                                    if (pid != null) {
+                                        pollForProjectById(pid)
+                                    }
                                 }
-                                // Otherwise generation may still be running server-side — it will auto-save
                             }
                         }
                     }
                 } catch (e: Exception) {
                     Log.w("Create", "SSE stream dropped: ${e.message}")
-                    // Generation may still be running server-side — it will auto-save
+                    // If we have a projectId, poll for completion
+                    val pid = queuedProjectId
+                    if (pid != null) {
+                        pollForProjectById(pid)
+                    }
                 }
             }
+        }
+    }
+
+    private fun pollForProjectById(projectId: String) {
+        viewModelScope.launch {
+            // Poll every 10 seconds for up to 5 minutes
+            val maxAttempts = 30
+            for (attempt in 1..maxAttempts) {
+                kotlinx.coroutines.delay(10_000)
+
+                try {
+                    val project = projectRepository.getProject(projectId)
+                    if (project != null && project.status == "ready") {
+                        Log.d("Create", "Project $projectId ready via polling")
+                        userPreferences.clearPendingGeneration()
+                        NotificationHelper.showGenerationComplete(appContext)
+                        return@launch
+                    }
+                } catch (e: Exception) {
+                    Log.d("Create", "Poll attempt $attempt failed: ${e.message}")
+                }
+            }
+            userPreferences.clearPendingGeneration()
         }
     }
 
@@ -553,6 +590,7 @@ class CreateViewModel @Inject constructor(
                     tweakDescription = desc
                 ).collect { event ->
                     when (event) {
+                        is SseEvent.Queued -> { /* not used for tweaks */ }
                         is SseEvent.Status -> {
                             _uiState.update {
                                 it.copy(tweakPhase = event.detail.ifEmpty { event.message })
