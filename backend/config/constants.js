@@ -1,6 +1,6 @@
 export const WORKER_URL = process.env.WORKER_URL || 'http://localhost:3456';
 export const DEPLOY_SERVER_URL = process.env.DEPLOY_SERVER_URL || 'http://localhost:4000';
-export const WORKER_SECRET = process.env.WORKER_SECRET || 'vibecoder-worker-secret';
+export const WORKER_SECRET = process.env.WORKER_SECRET || 'vibecoder-worker-secret-2024';
 
 // Monetization
 export const COIN_PACKS = {

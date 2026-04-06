@@ -31,6 +31,7 @@ fun ProjectCardItem(
     project: Project,
     onClick: () -> Unit,
     onDelete: () -> Unit,
+    onRetry: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var showDeleteConfirm by remember { mutableStateOf(false) }
@@ -127,6 +128,33 @@ fun ProjectCardItem(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = TextTertiary
                             )
+                        }
+                    }
+                }
+
+                // Failed overlay
+                if (project.status == "failed") {
+                    Box(
+                        modifier = Modifier.fillMaxSize().background(DarkBackground.copy(alpha = 0.88f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                "Build failed",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = ErrorRed,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            if (onRetry != null) {
+                                Button(
+                                    onClick = onRetry,
+                                    colors = ButtonDefaults.buttonColors(containerColor = VibePurple),
+                                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 6.dp)
+                                ) {
+                                    Text("Retry", style = MaterialTheme.typography.labelMedium)
+                                }
+                            }
                         }
                     }
                 }

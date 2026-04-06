@@ -46,6 +46,12 @@ interface VibeBuildApi {
     @POST("api/projects/save")
     suspend fun saveProject(@Body body: SaveProjectRequest): SaveProjectResponse
 
+    @POST("api/projects/{id}/retry")
+    suspend fun retryProject(
+        @Path("id") id: String,
+        @Body body: DeleteRequest
+    ): SuccessResponse
+
     @POST("api/projects/{id}/feedback")
     suspend fun sendFeedback(
         @Path("id") id: String,

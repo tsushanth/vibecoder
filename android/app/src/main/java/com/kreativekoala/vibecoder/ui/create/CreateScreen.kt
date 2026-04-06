@@ -28,8 +28,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.play.core.review.ReviewManagerFactory
+import com.kreativekoala.vibecoder.MainActivity
 import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.preview.LivePreviewScreen
 import com.kreativekoala.vibecoder.ui.theme.*
@@ -217,17 +220,48 @@ fun CreateScreen(
         return
     }
 
-    // Building confirmation dialog
+    // Building confirmation dialog — with upsell on 2nd generation for free users
     if (uiState.showBuildingConfirmation) {
+        val generationCount = remember { MainActivity.getGenerationCount(context) }
+        val isPremium = remember { MainActivity.isPremiumUser(context) }
+        val isLastFree = !isPremium && generationCount >= MainActivity.FREE_GENERATION_LIMIT - 1
+
         AlertDialog(
             onDismissRequest = { viewModel.dismissBuildingConfirmation() },
-            title = { Text("Your app is being built!", color = TextPrimary) },
-            text = { Text("We'll notify you when it's ready. Check My Projects in about 5 minutes.", color = TextSecondary) },
-            confirmButton = {
-                TextButton(onClick = { viewModel.dismissBuildingConfirmation() }) {
-                    Text("Got it", color = VibePurple)
+            title = { Text("Your app is being built! 🎉", color = TextPrimary) },
+            text = {
+                Column {
+                    Text("We'll notify you when it's ready. Check My Projects in about 5 minutes.", color = TextSecondary)
+                    if (isLastFree) {
+                        Spacer(Modifier.height(12.dp))
+                        Card(
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFF6366F1).copy(alpha = 0.15f)),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Column(Modifier.padding(12.dp)) {
+                                Text("⚡ This is your last free build", color = Color(0xFF818CF8), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                Spacer(Modifier.height(4.dp))
+                                Text("Upgrade to Pro for unlimited apps, priority builds, and no wait times.", color = TextSecondary, fontSize = 12.sp)
+                            }
+                        }
+                    }
                 }
             },
+            confirmButton = {
+                if (isLastFree) {
+                    Button(
+                        onClick = { viewModel.dismissBuildingConfirmation(); onNavigateToSubscriptions() },
+                        colors = ButtonDefaults.buttonColors(containerColor = VibePurple)
+                    ) { Text("Upgrade to Pro") }
+                } else {
+                    TextButton(onClick = { viewModel.dismissBuildingConfirmation() }) {
+                        Text("Got it", color = VibePurple)
+                    }
+                }
+            },
+            dismissButton = if (isLastFree) {
+                { TextButton(onClick = { viewModel.dismissBuildingConfirmation() }) { Text("Later", color = TextSecondary) } }
+            } else null,
             containerColor = DarkSurfaceVariant
         )
     }

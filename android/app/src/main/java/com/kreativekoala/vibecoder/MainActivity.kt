@@ -52,6 +52,16 @@ class MainActivity : AppCompatActivity() {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             return prefs.getInt(KEY_GENERATION_COUNT, 0)
         }
+
+        fun isPremiumUser(context: Context): Boolean {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            return prefs.getBoolean("is_premium", false)
+        }
+
+        fun setPremiumUser(context: Context, premium: Boolean) {
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit().putBoolean("is_premium", premium).apply()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,6 +90,7 @@ class MainActivity : AppCompatActivity() {
                         val hasPro = customerInfo.entitlements["pro"]?.isActive == true
                         val hasTeam = customerInfo.entitlements["team"]?.isActive == true
                         isPremium = hasPro || hasTeam
+                        setPremiumUser(this@MainActivity, hasPro || hasTeam)
                     }
 
                     override fun onError(error: PurchasesError) {

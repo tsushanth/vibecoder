@@ -37,6 +37,10 @@ class ProjectRepository @Inject constructor(
         api.deleteProject(id, DeleteRequest(userId))
     }
 
+    suspend fun retryProject(id: String, userId: String) {
+        api.retryProject(id, DeleteRequest(userId))
+    }
+
     suspend fun browseProjects(
         sort: String = "newest",
         limit: Int = 50,

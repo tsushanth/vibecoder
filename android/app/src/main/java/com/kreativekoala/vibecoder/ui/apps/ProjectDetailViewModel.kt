@@ -232,6 +232,7 @@ class ProjectDetailViewModel @Inject constructor(
                     tweakDescription = desc
                 ).collect { event ->
                     when (event) {
+                        is SseEvent.Queued -> { /* not used for tweaks */ }
                         is SseEvent.Status -> {
                             _uiState.update {
                                 it.copy(tweakPhase = event.detail.ifEmpty { event.message })
