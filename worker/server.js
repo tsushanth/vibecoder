@@ -699,6 +699,25 @@ app.get('/health', (req, res) => {
 });
 
 // ============================================
+// Credentials endpoint — lets VM pull fresh tokens from this machine
+// Protected by worker secret. macOS only (reads from Keychain).
+// ============================================
+
+app.get('/credentials', authMiddleware, (req, res) => {
+    try {
+        const raw = execSync(
+            'security find-generic-password -s "Claude Code-credentials" -w 2>/dev/null',
+            { encoding: 'utf8' }
+        ).trim();
+        if (!raw) return res.status(404).json({ error: 'No credentials found' });
+        const parsed = JSON.parse(raw);
+        res.json(parsed);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// ============================================
 // SSE Generate Endpoint (streaming status)
 // ============================================
 
