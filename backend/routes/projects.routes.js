@@ -473,17 +473,17 @@ router.post('/generate', async (req, res) => {
             res.write(`data: ${JSON.stringify({ type: 'queued', projectId: placeholderProjectId })}\n\n`);
         }
 
-        // Dispatch to worker with callback — close SSE immediately so Cloud Run doesn't timeout
-        // App polls /api/projects/:id for status; worker POSTs result to build-complete when done
+        // Use async callback path — close SSE after queued event, app polls for result
+        // Old app versions (stream:true) still get the SSE proxy path for compatibility
+        const clientWantsStream = req.body.stream === true;
         const callbackUrl = `${process.env.SELF_URL || 'https://vibecoder-api-917362189743.us-central1.run.app'}/api/projects/${placeholderProjectId}/build-complete`;
         const workerBody = {
             prompt: prompt.trim(),
             userId,
             framework: framework || 'react',
-            stream: false,
+            stream: clientWantsStream,
             projectId: placeholderProjectId,
-            callbackUrl,
-            callbackSecret: WORKER_SECRET
+            ...(!clientWantsStream && { callbackUrl, callbackSecret: WORKER_SECRET })
         };
         if (referenceImage && typeof referenceImage === 'string') {
             workerBody.referenceImage = referenceImage;
@@ -493,7 +493,7 @@ router.post('/generate', async (req, res) => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-worker-secret': WORKER_SECRET },
             body: JSON.stringify(workerBody),
-            signal: AbortSignal.timeout(30000)
+            signal: AbortSignal.timeout(clientWantsStream ? 600000 : 30000)
         });
 
         if (!workerResponse.ok) {
@@ -525,14 +525,16 @@ router.post('/generate', async (req, res) => {
             return;
         }
 
-        // Worker accepted (202) — close SSE stream now, app will poll for completion
-        console.log(`[generate] Dispatched async build for ${placeholderProjectId}, closing SSE`);
-        recordGeneration(userId);
-        if (userId) recordUsage(userId, ACTION_TYPES.generation).catch(() => {});
-        try { res.end(); } catch {}
-        return;
+        // Async callback path (new app, stream:false) — close SSE now, app polls
+        if (!clientWantsStream) {
+            console.log(`[generate] Dispatched async build for ${placeholderProjectId}, closing SSE`);
+            recordGeneration(userId);
+            if (userId) recordUsage(userId, ACTION_TYPES.generation).catch(() => {});
+            try { res.end(); } catch {}
+            return;
+        }
 
-        // (dead code below preserved for reference — old sync SSE proxy path)
+        // SSE proxy path (old app, stream:true) — keep connection open, proxy worker events
         const resultReceived = await proxyWorkerSSE(workerResponse, res, {
             label: 'generate',
             onResult: async (parsed, res) => {
