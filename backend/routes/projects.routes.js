@@ -473,26 +473,27 @@ router.post('/generate', async (req, res) => {
             res.write(`data: ${JSON.stringify({ type: 'queued', projectId: placeholderProjectId })}\n\n`);
         }
 
-        // Build worker request body
+        // Dispatch to worker with callback — close SSE immediately so Cloud Run doesn't timeout
+        // App polls /api/projects/:id for status; worker POSTs result to build-complete when done
+        const callbackUrl = `${process.env.SELF_URL || 'https://vibecoder-api-917362189743.us-central1.run.app'}/api/projects/${placeholderProjectId}/build-complete`;
         const workerBody = {
             prompt: prompt.trim(),
             userId,
             framework: framework || 'react',
-            stream: true
+            stream: false,
+            projectId: placeholderProjectId,
+            callbackUrl,
+            callbackSecret: WORKER_SECRET
         };
         if (referenceImage && typeof referenceImage === 'string') {
             workerBody.referenceImage = referenceImage;
         }
 
-        // Request streaming from the worker
         const workerResponse = await fetch(`${WORKER_URL}/generate`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-worker-secret': WORKER_SECRET
-            },
+            headers: { 'Content-Type': 'application/json', 'x-worker-secret': WORKER_SECRET },
             body: JSON.stringify(workerBody),
-            signal: AbortSignal.timeout(600000) // 10 min timeout
+            signal: AbortSignal.timeout(30000)
         });
 
         if (!workerResponse.ok) {
@@ -505,6 +506,7 @@ router.post('/generate', async (req, res) => {
                     if (err.quotaExhausted) {
                         res.write(`data: ${JSON.stringify({ type: 'error', error: errorMsg, quotaExhausted: true, resetTime: err.resetTime })}\n\n`);
                         res.end();
+                        if (placeholderProjectId) supabase.from('projects').update({ status: 'failed' }).eq('id', placeholderProjectId).then(() => {});
                         return;
                     }
                     if (workerResponse.status === 429) {
@@ -513,7 +515,6 @@ router.post('/generate', async (req, res) => {
                     }
                 }
             } catch {}
-            // Mark placeholder as failed so user sees it immediately
             if (placeholderProjectId && !systemBusy) {
                 supabase.from('projects').update({ status: 'failed' }).eq('id', placeholderProjectId).then(() => {});
                 const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
@@ -524,7 +525,14 @@ router.post('/generate', async (req, res) => {
             return;
         }
 
-        // Stream SSE from worker to client
+        // Worker accepted (202) — close SSE stream now, app will poll for completion
+        console.log(`[generate] Dispatched async build for ${placeholderProjectId}, closing SSE`);
+        recordGeneration(userId);
+        if (userId) recordUsage(userId, ACTION_TYPES.generation).catch(() => {});
+        try { res.end(); } catch {}
+        return;
+
+        // (dead code below preserved for reference — old sync SSE proxy path)
         const resultReceived = await proxyWorkerSSE(workerResponse, res, {
             label: 'generate',
             onResult: async (parsed, res) => {
@@ -950,6 +958,44 @@ router.post('/:id/build-complete', async (req, res) => {
         if (bundle && status === 'ready') {
             await supabase.from('projects').update({ bundle, status: 'ready' }).eq('id', id);
             console.log(`[build-complete] Project ${id} ready`);
+
+            // Auto-deploy preview + capture thumbnail
+            try {
+                const previewSubdomain = `prev-${id.substring(0, 8)}`;
+                const previewServiceUrl = process.env.PREVIEW_SERVICE_URL || 'http://178.156.231.255:3456';
+                const deployRes = await fetch(`${previewServiceUrl}/deploy-preview`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ subdomain: previewSubdomain, bundle })
+                });
+                if (deployRes.ok) {
+                    const previewUrl = `https://${previewSubdomain}.vibecoder.app`;
+                    await supabase.from('projects').update({ preview_url: previewUrl }).eq('id', id);
+                    // Capture thumbnail in background
+                    const screenshotServiceUrl = process.env.SCREENSHOT_SERVICE_URL || 'http://178.156.231.255:3465';
+                    fetch(`${screenshotServiceUrl}/screenshot?url=${encodeURIComponent(previewUrl)}&width=390&height=844`)
+                        .then(async (sr) => {
+                            if (!sr.ok) return;
+                            const imgBuffer = await sr.arrayBuffer();
+                            const fileName = `thumbnails/${id}.jpg`;
+                            const { error: uploadErr } = await supabase.storage
+                                .from('project-assets')
+                                .upload(fileName, Buffer.from(imgBuffer), { contentType: 'image/jpeg', upsert: true });
+                            if (!uploadErr) {
+                                const { data: { publicUrl } } = supabase.storage.from('project-assets').getPublicUrl(fileName);
+                                await supabase.from('projects').update({ thumbnail_url: publicUrl }).eq('id', id);
+                                console.log(`[build-complete] Thumbnail captured: ${publicUrl}`);
+                            } else {
+                                const thumbnailUrl = `${screenshotServiceUrl}/screenshot?url=${encodeURIComponent(previewUrl)}&width=390&height=844`;
+                                await supabase.from('projects').update({ thumbnail_url: thumbnailUrl }).eq('id', id);
+                            }
+                        })
+                        .catch(e => console.error(`[build-complete] Thumbnail failed: ${e.message}`));
+                }
+            } catch (e) {
+                console.error(`[build-complete] Preview/thumbnail error: ${e.message}`);
+            }
+
             if (userId) {
                 const { data: proj } = await supabase.from('projects').select('initial_prompt').eq('id', id).single();
                 const shortPrompt = (proj?.initial_prompt || '').substring(0, 40);
