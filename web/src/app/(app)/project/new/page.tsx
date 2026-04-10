@@ -25,6 +25,7 @@ export default function NewProjectPage() {
     updateProgress,
     setResult,
     setError,
+    stopGeneration,
     reset,
   } = useGenerationStore();
   const {
@@ -159,9 +160,11 @@ export default function NewProjectPage() {
             err instanceof Error ? err.message : 'Generation failed'
           );
         }
+      } finally {
+        stopGeneration();
       }
     },
-    [user, startGeneration, updateProgress, setResult, setError, setExtractedFiles, setBundle, setPreviewUrl]
+    [user, startGeneration, updateProgress, setResult, setError, stopGeneration, setExtractedFiles, setBundle, setPreviewUrl]
   );
 
   // Show preview + action buttons after generation completes
