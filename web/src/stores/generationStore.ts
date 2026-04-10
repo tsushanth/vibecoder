@@ -33,6 +33,7 @@ interface GenerationState {
     generationId?: string;
   }) => void;
   setError: (error: string, systemBusy?: boolean) => void;
+  stopGeneration: () => void;
   reset: () => void;
 }
 
@@ -89,6 +90,8 @@ export const useGenerationStore = create<GenerationState>((set) => ({
       error,
       systemBusy,
     }),
+
+  stopGeneration: () => set({ isGenerating: false }),
 
   reset: () => set(initialState),
 }));
