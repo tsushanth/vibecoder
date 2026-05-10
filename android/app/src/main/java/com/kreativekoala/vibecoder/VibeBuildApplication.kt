@@ -2,10 +2,12 @@ package com.kreativekoala.vibecoder
 
 import android.app.Application
 import com.facebook.appevents.AppEventsLogger
+import com.kreativekoala.vibecoder.service.FacebookSDKHelper
 import com.kreativekoala.vibecoder.service.FirebaseAnalyticsHelper
 import com.kreativekoala.vibecoder.service.TikTokHelper
 import com.kreativekoala.vibecoder.util.NotificationHelper
 import com.kreativekoala.paywallkit.manager.ExperimentManager
+import com.kreativekoala.paywallkit.manager.PromoCodeManager
 import com.revenuecat.purchases.LogLevel
 import com.revenuecat.purchases.Purchases
 import com.revenuecat.purchases.PurchasesConfiguration
@@ -19,6 +21,7 @@ class VibeBuildApplication : Application() {
 
         // Initialize Facebook SDK for Meta Ads attribution
         AppEventsLogger.activateApp(this)
+        FacebookSDKHelper.initialize(this)
 
         // Initialize Firebase Analytics for Google Ads conversion tracking
         FirebaseAnalyticsHelper.initialize(this)
@@ -28,6 +31,7 @@ class VibeBuildApplication : Application() {
 
         // Initialize PaywallKit experiment manager
         ExperimentManager.init(this)
+        PromoCodeManager.init(this)
 
         // Initialize RevenueCat
         Purchases.logLevel = if (BuildConfig.DEBUG) LogLevel.DEBUG else LogLevel.WARN

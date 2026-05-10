@@ -231,7 +231,7 @@
     <string name="language_italian">Italiano</string>
     <string name="language_hindi">हिन्दी</string>
 
-    <!-- Facebook SDK Configuration (Replace with your actual values from Meta Developer Console) -->
-    <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
-    <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+    <!-- Facebook SDK Configuration -->
+    <string name="facebook_app_id">2361731814322648</string>
+    <string name="facebook_client_token">32ed2eb93cd2e41e4a113956d7f53d03</string>
 </resources>

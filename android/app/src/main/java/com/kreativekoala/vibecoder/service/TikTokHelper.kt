@@ -3,6 +3,7 @@ package com.kreativekoala.vibecoder.service
 import android.content.Context
 import android.util.Log
 import com.tiktok.TikTokBusinessSdk
+import org.json.JSONObject
 
 object TikTokHelper {
     private const val TAG = "TikTokHelper"
@@ -27,6 +28,23 @@ object TikTokHelper {
             Log.d(TAG, "Tracked event: $eventName")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to track event: $eventName", e)
+        }
+    }
+
+    fun trackPurchase(productId: String, price: Double, currency: String = "USD") {
+        try {
+            val props = JSONObject().apply {
+                put("currency", currency)
+                put("value", price)
+                put("content_id", productId)
+                put("content_type", "product")
+                put("description", productId)
+            }
+            // "Subscribe" is the standard TikTok event for subscription purchases
+            TikTokBusinessSdk.trackEvent("Subscribe", props)
+            Log.d(TAG, "Tracked Subscribe: $productId @ $price $currency")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to track purchase event", e)
         }
     }
 }
