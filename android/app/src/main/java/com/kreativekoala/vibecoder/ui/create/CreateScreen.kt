@@ -223,7 +223,7 @@ fun CreateScreen(
     // Building confirmation dialog — with upsell on 2nd generation for free users
     if (uiState.showBuildingConfirmation) {
         val generationCount = remember { MainActivity.getGenerationCount(context) }
-        val isPremium = remember { MainActivity.isPremiumUser(context) }
+        val isPremium = MainActivity.isPremiumUser(context)
         val isLastFree = !isPremium && generationCount >= MainActivity.FREE_GENERATION_LIMIT - 1
 
         AlertDialog(

@@ -160,29 +160,20 @@ fun AppsScreen(
             }
 
             else -> {
-                val hasFailedProjects = uiState.projects.any { it.status == "failed" }
+                val visibleProjects = uiState.projects.filter { it.status != "failed" }
                 LazyColumn(
                     contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Pro upsell banner — show to free users who have failed projects
-                    if (!isPremium && hasFailedProjects) {
-                        item {
-                            ProUpsellBanner(onClick = onUpgradeClick)
-                        }
-                    }
-
                     items(
-                        items = uiState.projects,
+                        items = visibleProjects,
                         key = { it.id }
                     ) { project ->
                         ProjectCardItem(
                             project = project,
-                            onClick = { if (project.status != "failed") onProjectClick(project.id) },
+                            onClick = { onProjectClick(project.id) },
                             onDelete = { viewModel.deleteProject(project.id) },
-                            onRetry = if (project.status == "failed" && project.initialPrompt != null) {
-                                { viewModel.retryProject(project) }
-                            } else null
+                            onRetry = null
                         )
                     }
 

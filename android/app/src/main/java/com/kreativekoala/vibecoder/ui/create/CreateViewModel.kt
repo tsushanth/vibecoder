@@ -321,11 +321,16 @@ class CreateViewModel @Inject constructor(
                     }
                 } catch (e: Exception) {
                     Log.w("Create", "SSE stream dropped: ${e.message}")
-                    // If we have a projectId, poll for completion
                     val pid = queuedProjectId
                     if (pid != null) {
                         pollForProjectById(pid)
                     }
+                }
+                // SSE closed (normally or via error) — poll if we have a projectId and no result yet
+                // In callback mode, server closes SSE after dispatching so build continues async
+                val pid = queuedProjectId
+                if (pid != null) {
+                    pollForProjectById(pid)
                 }
             }
         }

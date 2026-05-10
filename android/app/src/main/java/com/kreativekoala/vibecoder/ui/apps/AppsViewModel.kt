@@ -87,9 +87,39 @@ class AppsViewModel @Inject constructor(
             updateProjectStatus(project.id, "building")
             try {
                 projectRepository.retryProject(project.id, userId)
+                // Poll until the build completes (backend uses async callback mode)
+                pollProjectUntilReady(project.id)
             } catch (e: Exception) {
                 updateProjectStatus(project.id, "failed")
             }
+        }
+    }
+
+    private fun pollProjectUntilReady(projectId: String) {
+        viewModelScope.launch {
+            val maxAttempts = 36 // 6 minutes at 10s intervals
+            for (attempt in 1..maxAttempts) {
+                kotlinx.coroutines.delay(10_000)
+                try {
+                    val project = projectRepository.getProject(projectId)
+                    if (project != null && project.status != "building") {
+                        // Update this project's status in the list
+                        updateProjectStatus(projectId, project.status ?: "failed")
+                        if (project.status == "ready") {
+                            NotificationHelper.showGenerationComplete(
+                                appContext,
+                                title = "\"${project.title}\" is ready!",
+                                body = "Tap to open your app"
+                            )
+                        }
+                        return@launch
+                    }
+                } catch (e: Exception) {
+                    Log.d("Apps", "Poll attempt $attempt failed: ${e.message}")
+                }
+            }
+            // Timed out — reload full list to get accurate state
+            loadProjects()
         }
     }
 

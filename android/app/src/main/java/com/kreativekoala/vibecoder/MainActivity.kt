@@ -1,6 +1,8 @@
 package com.kreativekoala.vibecoder
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.BackHandler
@@ -16,9 +18,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.kreativekoala.paywallkit.manager.PaywallManager
 import com.kreativekoala.paywallkit.models.PaywallFeature
 import com.kreativekoala.paywallkit.models.PaywallProduct
 import com.kreativekoala.paywallkit.view.PaywallView
+import com.kreativekoala.vibecoder.service.TikTokHelper
 import com.kreativekoala.vibecoder.navigation.VibeBuildNavGraph
 import com.kreativekoala.vibecoder.ui.theme.VibeBuildTheme
 import com.revenuecat.purchases.CustomerInfo
@@ -89,13 +93,17 @@ class MainActivity : AppCompatActivity() {
                     override fun onReceived(customerInfo: CustomerInfo) {
                         val hasPro = customerInfo.entitlements["pro"]?.isActive == true
                         val hasTeam = customerInfo.entitlements["team"]?.isActive == true
-                        isPremium = hasPro || hasTeam
-                        setPremiumUser(this@MainActivity, hasPro || hasTeam)
+                        val hasAny = customerInfo.entitlements.active.isNotEmpty()
+                        val isActive = hasPro || hasTeam || hasAny
+                        isPremium = isActive
+                        setPremiumUser(this@MainActivity, isActive)
+                        Log.d(TAG, "RC entitlements: active=${customerInfo.entitlements.active.keys}, isPremium=$isActive")
                     }
 
                     override fun onError(error: PurchasesError) {
                         Log.e(TAG, "Error checking entitlements: ${error.message}")
-                        isPremium = false
+                        // Don't downgrade — use cached value so offline purchase still works
+                        isPremium = isPremiumUser(this@MainActivity)
                     }
                 }
             )
@@ -158,9 +166,20 @@ class MainActivity : AppCompatActivity() {
                                 onSuccess = { _, customerInfo ->
                                     val hasPro = customerInfo.entitlements["pro"]?.isActive == true
                                     val hasTeam = customerInfo.entitlements["team"]?.isActive == true
-                                    if (hasPro || hasTeam) {
+                                    val hasAny = customerInfo.entitlements.active.isNotEmpty()
+                                    if (hasPro || hasTeam || hasAny) {
                                         isPremium = true
+                                        setPremiumUser(this@MainActivity, true)
                                     }
+                                    val price = pkg.product.price.amountMicros / 1_000_000.0
+                                    TikTokHelper.trackPurchase(productId, price)
+                                    PaywallManager.trackEvent(
+                                        appId = "vibebuild",
+                                        placement = "paywall",
+                                        templateId = "default",
+                                        event = "purchased",
+                                        productId = productId
+                                    )
                                 }
                             )
                         }
@@ -173,11 +192,18 @@ class MainActivity : AppCompatActivity() {
                             onSuccess = { customerInfo ->
                                 val hasPro = customerInfo.entitlements["pro"]?.isActive == true
                                 val hasTeam = customerInfo.entitlements["team"]?.isActive == true
-                                if (hasPro || hasTeam) {
+                                val hasAny = customerInfo.entitlements.active.isNotEmpty()
+                                if (hasPro || hasTeam || hasAny) {
                                     isPremium = true
+                                    setPremiumUser(this@MainActivity, true)
                                 }
                             }
                         )
+                    },
+                    onRedeemCode = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/redeem?code=promo-1month-free"))
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        try { startActivity(intent) } catch (_: Exception) {}
                     },
                     onDismiss = {
                         // Non-dismissible paywall — no action needed
