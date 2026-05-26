@@ -2,13 +2,14 @@
 //  AuthManager.swift
 //  VibeCoder
 //
-//  Supabase authentication with Apple Sign In
+//  Supabase authentication with Apple, Google, and Email/Password
 //
 
 import Foundation
 import UIKit
 import AuthenticationServices
 import CryptoKit
+import GoogleSignIn
 
 class AuthManager: ObservableObject {
     static let shared = AuthManager()
@@ -39,8 +40,11 @@ class AuthManager: ObservableObject {
             self.userId = session.user.id
             self.email = session.user.email
             self.displayName = session.user.userMetadata?["full_name"] as? String
-        } else if UserDefaults.standard.bool(forKey: "isGuestUser") {
-            // Restore guest session
+        } else {
+            // No signed-in session — default to guest so first-launch users land
+            // directly in the gallery (no registration required to browse public websites).
+            // Sign-in remains available from the Account tab. Compliance: 5.1.1(v).
+            UserDefaults.standard.set(true, forKey: "isGuestUser")
             self.userId = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
             self.displayName = "Guest"
             self.isAuthenticated = true
@@ -168,21 +172,88 @@ class AuthManager: ObservableObject {
         }
 
         let session = try JSONDecoder().decode(SupabaseSession.self, from: data)
+        try saveSession(session)
+    }
 
-        // Save session
+    // MARK: - Sign In with Google
+
+    func signInWithGoogle() async throws {
+        guard let rootViewController = await UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .flatMap({ $0.windows })
+            .first(where: { $0.isKeyWindow })?.rootViewController else {
+            throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "No root view controller"])
+        }
+
+        let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController)
+        guard let idToken = result.user.idToken?.tokenString else {
+            throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Missing Google ID token"])
+        }
+
+        try await signInWithIdToken(provider: "google", idToken: idToken, nonce: "")
+    }
+
+    // MARK: - Sign In with Email
+
+    func signInWithEmail(email: String, password: String) async throws {
+        guard let url = URL(string: "\(supabaseURL)/auth/v1/token?grant_type=password") else {
+            throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid auth URL"])
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+
+        let body: [String: Any] = ["email": email, "password": password]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            let msg = (try? JSONDecoder().decode([String: String].self, from: data))?["error_description"]
+                ?? String(data: data, encoding: .utf8)
+                ?? "Sign in failed"
+            throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: msg])
+        }
+
+        let session = try JSONDecoder().decode(SupabaseSession.self, from: data)
+        try saveSession(session)
+    }
+
+    func signUpWithEmail(email: String, password: String) async throws {
+        guard let url = URL(string: "\(supabaseURL)/auth/v1/signup") else {
+            throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid auth URL"])
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+
+        let body: [String: Any] = ["email": email, "password": password]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            let msg = (try? JSONDecoder().decode([String: String].self, from: data))?["error_description"]
+                ?? String(data: data, encoding: .utf8)
+                ?? "Sign up failed"
+            throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: msg])
+        }
+
+        let session = try JSONDecoder().decode(SupabaseSession.self, from: data)
+        try saveSession(session)
+    }
+
+    private func saveSession(_ session: SupabaseSession) throws {
         let sessionData = try JSONEncoder().encode(session)
         UserDefaults.standard.set(sessionData, forKey: "supabase_session")
-
         DispatchQueue.main.async {
             self.session = session
             self.isAuthenticated = true
             self.userId = session.user.id
             self.email = session.user.email
             self.displayName = session.user.userMetadata?["full_name"] as? String
-            // Register push token with backend if available
-            if let token = DeviceTokenManager.shared.deviceToken {
-                Task { await NetworkManager.shared.registerPushToken(userId: session.user.id, token: token) }
-            }
+            // Push token registration removed in v2.0 — no live feed, no push.
+            _ = DeviceTokenManager.shared.deviceToken
         }
     }
 
@@ -205,11 +276,9 @@ class AuthManager: ObservableObject {
     // MARK: - Delete Account
 
     func deleteAccount() async throws {
-        guard let userId = userId else {
-            throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "No user ID"])
-        }
-
-        try await NetworkManager.shared.deleteAccount(userId: userId)
+        // v2.0: server-side account record was removed when the live feed was
+        // retired. We just sign the user out locally; the Supabase auth row
+        // can be removed via the existing web flow.
         signOut()
     }
 

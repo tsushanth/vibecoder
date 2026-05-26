@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuizMaster</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Start Screen -->
+  <div id="screen-start" class="screen active">
+    <div class="container">
+      <div class="logo">
+        <svg viewBox="0 0 120 120" width="100" height="100">
+          <defs>
+            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#6c5ce7"/>
+              <stop offset="100%" style="stop-color:#a29bfe"/>
+            </linearGradient>
+          </defs>
+          <circle cx="60" cy="60" r="55" fill="url(#grad1)" />
+          <text x="60" y="72" text-anchor="middle" fill="#fff" font-size="48" font-weight="bold" font-family="sans-serif">?</text>
+        </svg>
+      </div>
+      <h1 class="title">QuizMaster</h1>
+      <p class="subtitle">Test your knowledge across multiple categories!</p>
+
+      <div class="category-select">
+        <label for="category">Choose a Category</label>
+        <select id="category">
+          <option value="general">General Knowledge</option>
+          <option value="science">Science &amp; Nature</option>
+          <option value="history">History</option>
+          <option value="tech">Technology</option>
+          <option value="geography">Geography</option>
+        </select>
+      </div>
+
+      <div class="difficulty-select">
+        <label>Difficulty</label>
+        <div class="difficulty-buttons">
+          <button class="diff-btn active" data-diff="easy">Easy</button>
+          <button class="diff-btn" data-diff="medium">Medium</button>
+          <button class="diff-btn" data-diff="hard">Hard</button>
+        </div>
+      </div>
+
+      <button id="btn-start" class="btn btn-primary btn-large pulse-animation">Start Quiz</button>
+
+      <div class="stats-preview" id="stats-preview"></div>
+    </div>
+    <div class="confetti-container" id="start-confetti"></div>
+  </div>
+
+  <!-- Quiz Screen -->
+  <div id="screen-quiz" class="screen">
+    <div class="container">
+      <div class="quiz-header">
+        <div class="quiz-info">
+          <span class="question-counter" id="question-counter">1 / 10</span>
+          <span class="score-display" id="score-display">Score: 0</span>
+        </div>
+        <div class="timer-bar">
+          <div class="timer-fill" id="timer-fill"></div>
+        </div>
+        <div class="timer-text" id="timer-text">15s</div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+
+      <div class="question-area" id="question-area">
+        <div class="category-badge" id="category-badge">General Knowledge</div>
+        <h2 class="question-text" id="question-text">Loading question...</h2>
+      </div>
+
+      <div class="options-grid" id="options-grid">
+        <button class="option-btn" data-index="0"><span class="option-letter">A</span><span class="option-text"></span></button>
+        <button class="option-btn" data-index="1"><span class="option-letter">B</span><span class="option-text"></span></button>
+        <button class="option-btn" data-index="2"><span class="option-letter">C</span><span class="option-text"></span></button>
+        <button class="option-btn" data-index="3"><span class="option-letter">D</span><span class="option-text"></span></button>
+      </div>
+
+      <div class="feedback-overlay" id="feedback-overlay">
+        <div class="feedback-icon" id="feedback-icon"></div>
+        <div class="feedback-text" id="feedback-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Screen -->
+  <div id="screen-results" class="screen">
+    <div class="container">
+      <div class="results-header">
+        <div class="trophy-icon" id="trophy-icon"></div>
+        <h1 class="results-title" id="results-title">Quiz Complete!</h1>
+        <p class="results-subtitle" id="results-subtitle"></p>
+      </div>
+
+      <div class="score-circle" id="score-circle">
+        <svg viewBox="0 0 140 140">
+          <circle cx="70" cy="70" r="62" fill="none" stroke="#e0e0e0" stroke-width="10"/>
+          <circle cx="70" cy="70" r="62" fill="none" stroke="#6c5ce7" stroke-width="10"
+            stroke-dasharray="389.56" stroke-dashoffset="389.56" stroke-linecap="round"
+            id="score-ring" transform="rotate(-90 70 70)"/>
+        </svg>
+        <div class="score-value" id="score-value">0%</div>
+      </div>
+
+      <div class="results-stats">
+        <div class="stat-card">
+          <div class="stat-number" id="stat-correct">0</div>
+          <div class="stat-label">Correct</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="stat-wrong">0</div>
+          <div class="stat-label">Wrong</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="stat-time">0s</div>
+          <div class="stat-label">Avg Time</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="stat-streak">0</div>
+          <div class="stat-label">Best Streak</div>
+        </div>
+      </div>
+
+      <div class="results-breakdown" id="results-breakdown"></div>
+
+      <div class="results-actions">
+        <button id="btn-share" class="btn btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Share Results
+        </button>
+        <button id="btn-review" class="btn btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Review Answers
+        </button>
+        <button id="btn-restart" class="btn btn-primary btn-large">Play Again</button>
+      </div>
+    </div>
+    <div class="confetti-container" id="results-confetti"></div>
+  </div>
+
+  <!-- Review Modal -->
+  <div id="modal-review" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Answer Review</h2>
+        <button id="btn-close-review" class="btn-close">&times;</button>
+      </div>
+      <div class="modal-body" id="review-body"></div>
+    </div>
+  </div>
+
+  <!-- Share Toast -->
+  <div id="share-toast" class="toast">Results copied to clipboard!</div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

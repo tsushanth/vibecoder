@@ -12,9 +12,9 @@
 "AI Code Generation" = "AIコード生成";
 "Describe an idea, get working HTML & CSS code" = "アイデアを説明すると、動くHTML & CSSコードを取得";
 "Code Editor" = "コードエディタ";
-"View, edit, and learn from source code" = "ソースコードを見て、編集して、学ぶ";
-"Run in Safari" = "Safariで実行";
-"Open your code in Safari to see the result" = "Safariでコードを開いて結果を確認";
+"View, edit, and learn from source code" = "プロジェクトのファイルを表示・編集";
+"Run in Safari" = "Safariで開く";
+"Open your code in Safari to see the result" = "Safariでウェブサイトを開く";
 "Signing in..." = "サインイン中...";
 "Sign In Error" = "サインインエラー";
 "An unknown error occurred" = "不明なエラーが発生しました";
@@ -67,7 +67,6 @@
 "Create a Coding Project" = "コーディングプロジェクトを作成";
 "Describe what you want to learn and AI will generate example code" = "学びたいことを説明すると、AIがサンプルコードを生成します";
 "Free tier limit" = "無料プランの制限";
-"Unlimited generations" = "無制限の生成";
 "What do you want to learn?" = "何を学びたいですか？";
 "Be specific! Describe features, colors, and functionality." = "具体的に！機能、色、動作を説明してください。";
 "Examples:" = "例：";
@@ -77,7 +76,6 @@
 "~%ds remaining" = "残り約%d秒";
 "Generation Error" = "生成エラー";
 "Unknown error occurred" = "不明なエラーが発生しました";
-"Daily limit reached. You've used all 3 free generations today. Upgrade to Pro for unlimited generations." = "1日の上限に達しました。本日の無料生成3回をすべて使用しました。Proにアップグレードして無制限に生成しましょう。";
 "Unable to generate. Please try again." = "生成できませんでした。もう一度お試しください。";
 
 /* ==== Create View (Replit-style) ==== */
@@ -100,7 +98,7 @@
 "Markdown Editor" = "Markdownエディタ";
 
 /* ==== Live Preview / Source Code View ==== */
-"Source Code" = "ソースコード";
+"Source Code" = "ファイル";
 "Close" = "閉じる";
 "Save" = "保存";
 "Saved!" = "保存しました！";
@@ -116,14 +114,12 @@
 /* ==== Subscription Plans View ==== */
 "Subscription Plans" = "サブスクリプションプラン";
 "Choose Your Plan" = "プランを選択";
-"Unlock unlimited generations and premium features" = "無制限の生成とプレミアム機能を解放";
 "Restore Purchases" = "購入を復元";
 "Current Plan" = "現在のプラン";
 "Free" = "無料";
 "Subscribe Now" = "今すぐ登録";
 
 /* ==== Subscription Plan Features ==== */
-"3 AI generations per day" = "1日3回のAI生成";
 "3 tweaks per project" = "プロジェクトごとに3回の調整";
 "Public projects only" = "公開プロジェクトのみ";
 "Standard queue" = "標準キュー";

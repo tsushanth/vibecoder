@@ -12,9 +12,9 @@
 "AI Code Generation" = "AI कोड जनरेशन";
 "Describe an idea, get working HTML & CSS code" = "एक आइडिया बताएं, काम करने वाला HTML और CSS कोड पाएं";
 "Code Editor" = "कोड एडिटर";
-"View, edit, and learn from source code" = "सोर्स कोड देखें, संपादित करें और सीखें";
-"Run in Safari" = "Safari में चलाएं";
-"Open your code in Safari to see the result" = "परिणाम देखने के लिए Safari में अपना कोड खोलें";
+"View, edit, and learn from source code" = "प्रोजेक्ट फ़ाइलें देखें और संपादित करें";
+"Run in Safari" = "Safari में खोलें";
+"Open your code in Safari to see the result" = "Safari में अपनी वेबसाइट खोलें";
 "Signing in..." = "साइन इन हो रहा है...";
 "Sign In Error" = "साइन इन त्रुटि";
 "An unknown error occurred" = "एक अज्ञात त्रुटि हुई";
@@ -67,7 +67,6 @@
 "Create a Coding Project" = "कोडिंग प्रोजेक्ट बनाएं";
 "Describe what you want to learn and AI will generate example code" = "बताएं कि आप क्या सीखना चाहते हैं और AI उदाहरण कोड बनाएगा";
 "Free tier limit" = "मुफ्त प्लान की सीमा";
-"Unlimited generations" = "असीमित जनरेशन";
 "What do you want to learn?" = "आप क्या सीखना चाहते हैं?";
 "Be specific! Describe features, colors, and functionality." = "विशिष्ट रहें! सुविधाएं, रंग और कार्यक्षमता बताएं।";
 "Examples:" = "उदाहरण:";
@@ -77,7 +76,6 @@
 "~%ds remaining" = "~%d सेकंड शेष";
 "Generation Error" = "जनरेशन त्रुटि";
 "Unknown error occurred" = "एक अज्ञात त्रुटि हुई";
-"Daily limit reached. You've used all 3 free generations today. Upgrade to Pro for unlimited generations." = "दैनिक सीमा पूरी हुई। आपने आज की 3 मुफ्त जनरेशन का उपयोग कर लिया है। असीमित जनरेशन के लिए Pro में अपग्रेड करें।";
 "Unable to generate. Please try again." = "जनरेट नहीं हो सका। कृपया पुनः प्रयास करें।";
 
 /* ==== Create View (Replit-style) ==== */
@@ -100,7 +98,7 @@
 "Markdown Editor" = "मार्कडाउन एडिटर";
 
 /* ==== Live Preview / Source Code View ==== */
-"Source Code" = "सोर्स कोड";
+"Source Code" = "फ़ाइलें";
 "Close" = "बंद करें";
 "Save" = "सेव करें";
 "Saved!" = "सेव हो गया!";
@@ -116,14 +114,12 @@
 /* ==== Subscription Plans View ==== */
 "Subscription Plans" = "सदस्यता प्लान";
 "Choose Your Plan" = "अपना प्लान चुनें";
-"Unlock unlimited generations and premium features" = "असीमित जनरेशन और प्रीमियम सुविधाएं अनलॉक करें";
 "Restore Purchases" = "खरीदारी पुनर्स्थापित करें";
 "Current Plan" = "वर्तमान प्लान";
 "Free" = "मुफ्त";
 "Subscribe Now" = "अभी सदस्यता लें";
 
 /* ==== Subscription Plan Features ==== */
-"3 AI generations per day" = "प्रतिदिन 3 AI जनरेशन";
 "3 tweaks per project" = "प्रति प्रोजेक्ट 3 बदलाव";
 "Public projects only" = "केवल सार्वजनिक प्रोजेक्ट";
 "Standard queue" = "मानक कतार";

@@ -17,15 +17,61 @@
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.917362189743-s7v2aog4n3ch74hn7igq4jekjfcsi38g</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
-	<string>10</string>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>GIDClientID</key>
+	<string>917362189743-s7v2aog4n3ch74hn7igq4jekjfcsi38g.apps.googleusercontent.com</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>UIRequiresFullScreen</key>
+	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!--
+		Narrow ATS exception for the screenshot/thumbnail service that renders project previews.
+		The service is on a fixed Hetzner IP and currently only listens on HTTP. Without this
+		exception, iOS blocks the thumbnail loads and project cards show empty placeholders.
+		Replace with HTTPS endpoint when the screenshot service moves behind TLS.
+		-->
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>178.156.231.255</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSIncludesSubdomains</key>
+				<false/>
+			</dict>
+		</dict>
+	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>VibeBuild needs access to your camera to capture photos for your projects.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>VibeBuild needs access to your microphone to use voice input for describing your coding projects.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>VibeBuild needs permission to save images to your photo library.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>VibeBuild needs access to your photo library to select images for your projects.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>VibeBuild uses speech recognition to convert your voice to text when creating coding projects.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
-		<true/>
+		<false/>
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
@@ -48,15 +94,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSCameraUsageDescription</key>
-	<string>VibeBuild needs access to your camera to capture photos for your projects.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>VibeBuild needs access to your photo library to select images for your projects.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>VibeBuild needs permission to save images to your photo library.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>VibeBuild needs access to your microphone to use voice input for describing your coding projects.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>VibeBuild uses speech recognition to convert your voice to text when creating coding projects.</string>
 </dict>
 </plist>

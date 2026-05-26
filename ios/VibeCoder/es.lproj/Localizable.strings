@@ -12,9 +12,9 @@
 "AI Code Generation" = "Generacion de codigo con IA";
 "Describe an idea, get working HTML & CSS code" = "Describe una idea, obtiene codigo HTML y CSS funcional";
 "Code Editor" = "Editor de codigo";
-"View, edit, and learn from source code" = "Ve, edita y aprende del codigo fuente";
-"Run in Safari" = "Ejecutar en Safari";
-"Open your code in Safari to see the result" = "Abre tu codigo en Safari para ver el resultado";
+"View, edit, and learn from source code" = "Ver y editar los archivos del proyecto";
+"Run in Safari" = "Abrir en Safari";
+"Open your code in Safari to see the result" = "Abre tu sitio web en Safari para verlo";
 "Signing in..." = "Iniciando sesion...";
 "Sign In Error" = "Error de inicio de sesion";
 "An unknown error occurred" = "Ocurrio un error desconocido";
@@ -67,7 +67,6 @@
 "Create a Coding Project" = "Crear un proyecto de codigo";
 "Describe what you want to learn and AI will generate example code" = "Describe lo que quieres aprender y la IA generara codigo de ejemplo";
 "Free tier limit" = "Limite del plan gratuito";
-"Unlimited generations" = "Generaciones ilimitadas";
 "What do you want to learn?" = "Que quieres aprender?";
 "Be specific! Describe features, colors, and functionality." = "Se especifico. Describe funciones, colores y funcionalidad.";
 "Examples:" = "Ejemplos:";
@@ -77,7 +76,6 @@
 "~%ds remaining" = "~%ds restantes";
 "Generation Error" = "Error de generacion";
 "Unknown error occurred" = "Ocurrio un error desconocido";
-"Daily limit reached. You've used all 3 free generations today. Upgrade to Pro for unlimited generations." = "Limite diario alcanzado. Has usado las 3 generaciones gratuitas de hoy. Mejora a Pro para generaciones ilimitadas.";
 "Unable to generate. Please try again." = "No se pudo generar. Intentalo de nuevo.";
 
 /* ==== Create View (Replit-style) ==== */
@@ -100,7 +98,7 @@
 "Markdown Editor" = "Editor Markdown";
 
 /* ==== Live Preview / Source Code View ==== */
-"Source Code" = "Codigo fuente";
+"Source Code" = "Archivos";
 "Close" = "Cerrar";
 "Save" = "Guardar";
 "Saved!" = "Guardado!";
@@ -116,14 +114,12 @@
 /* ==== Subscription Plans View ==== */
 "Subscription Plans" = "Planes de suscripcion";
 "Choose Your Plan" = "Elige tu plan";
-"Unlock unlimited generations and premium features" = "Desbloquea generaciones ilimitadas y funciones premium";
 "Restore Purchases" = "Restaurar compras";
 "Current Plan" = "Plan actual";
 "Free" = "Gratis";
 "Subscribe Now" = "Suscribirse ahora";
 
 /* ==== Subscription Plan Features ==== */
-"3 AI generations per day" = "3 generaciones con IA por dia";
 "3 tweaks per project" = "3 ajustes por proyecto";
 "Public projects only" = "Solo proyectos publicos";
 "Standard queue" = "Cola estandar";

@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8-Bit Pixel Art Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a2e;
+            color: #00ff00;
+            overflow-x: hidden;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .container {
+            max-width: 100%;
+            padding: 10px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 15px 10px;
+            background: #0f0f1e;
+            border: 3px solid #00ff00;
+            margin-bottom: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        h1 {
+            font-size: clamp(1.2rem, 5vw, 2rem);
+            text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: clamp(0.7rem, 3vw, 0.9rem);
+            color: #00cc00;
+            margin-top: 5px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .main-grid {
+                grid-template-columns: auto 1fr;
+            }
+        }
+
+        .tools-panel {
+            background: #0f0f1e;
+            border: 3px solid #00ff00;
+            padding: 15px;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            color: #00ff00;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #00ff00;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .tool-button, .action-button {
+            background: #0f0f1e;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: clamp(0.8rem, 2.5vw, 0.95rem);
+            transition: all 0.2s;
+            touch-action: manipulation;
+            min-height: 44px;
+        }
+
+        .tool-button:hover, .action-button:hover {
+            background: #00ff00;
+            color: #0f0f1e;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+
+        .tool-button.active {
+            background: #00ff00;
+            color: #0f0f1e;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 5px;
+        }
+
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .color-swatch {
+            width: 100%;
+            height: 40px;
+            border: 2px solid #00ff00;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .color-swatch.active::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00ff00;
+            font-size: 20px;
+            text-shadow: 0 0 5px #000, 0 0 10px #000;
+            font-weight: bold;
+        }
+
+        .current-color {
+            width: 100%;
+            height: 60px;
+            border: 3px solid #00ff00;
+            margin: 10px 0;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        .canvas-container {
+            background: #0f0f1e;
+            border: 3px solid #00ff00;
+            padding: 15px;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+            overflow: auto;
+        }
+
+        .canvas-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+        }
+
+        #pixelCanvas {
+            border: 2px solid #00ff00;
+            cursor: crosshair;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+            touch-action: none;
+        }
+
+        .canvas-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .canvas-controls label {
+            color: #00ff00;
+            font-size: clamp(0.8rem, 2.5vw, 0.95rem);
+        }
+
+        .canvas-controls input[type="number"] {
+            background: #0f0f1e;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 8px;
+            width: 70px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .frames-panel {
+            background: #0f0f1e;
+            border: 3px solid #00ff00;
+            padding: 15px;
+            margin-top: 15px;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+        }
+
+        .frames-list {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 10px 0;
+            margin-bottom: 10px;
+        }
+
+        .frame-item {
+            flex-shrink: 0;
+            position: relative;
+            border: 3px solid #00ff00;
+            background: #1a1a2e;
+            padding: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 100px;
+        }
+
+        .frame-item:hover {
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+
+        .frame-item.active {
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+        }
+
+        .frame-preview {
+            width: 80px;
+            height: 80px;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            background: #000;
+            border: 1px solid #00ff00;
+        }
+
+        .frame-label {
+            text-align: center;
+            color: #00ff00;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        .frame-delete {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff0000;
+            color: #fff;
+            border: 2px solid #00ff00;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 20px;
+            text-align: center;
+        }
+
+        .frame-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .animation-preview {
+            width: 200px;
+            height: 200px;
+            border: 3px solid #00ff00;
+            margin: 10px auto;
+            background: #000;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            display: block;
+        }
+
+        .fps-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .fps-control input[type="range"] {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        input[type="color"] {
+            width: 100%;
+            height: 50px;
+            border: 2px solid #00ff00;
+            background: #0f0f1e;
+            cursor: pointer;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #0f0f1e;
+            border: 3px solid #00ff00;
+            padding: 20px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: #ff0000;
+            color: #fff;
+            border: 2px solid #00ff00;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .sprite-sheet-preview {
+            max-width: 100%;
+            border: 2px solid #00ff00;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            background: #000;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 767px) {
+            .container {
+                padding: 5px;
+            }
+
+            header {
+                padding: 10px 5px;
+                margin-bottom: 10px;
+            }
+
+            .tools-panel, .canvas-container, .frames-panel {
+                padding: 10px;
+            }
+
+            .animation-preview {
+                width: 150px;
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>◤ 8-BIT PIXEL ART EDITOR ◢</h1>
+            <div class="subtitle">[ CREATE • ANIMATE • EXPORT ]</div>
+        </header>
+
+        <div class="main-grid">
+            <div class="tools-panel">
+                <div class="section">
+                    <div class="section-title">▸ TOOLS</div>
+                    <div class="tool-grid">
+                        <button class="tool-button active" data-tool="brush">✎ BRUSH</button>
+                        <button class="tool-button" data-tool="fill">◼ FILL</button>
+                        <button class="tool-button" data-tool="eraser">✗ ERASE</button>
+                        <button class="tool-button" data-tool="eyedropper">◉ PICK</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">▸ CURRENT COLOR</div>
+                    <div class="current-color" id="currentColor"></div>
+                    <input type="color" id="customColor" value="#00ff00">
+                </div>
+
+                <div class="section">
+                    <div class="section-title">▸ PALETTE</div>
+                    <div class="color-palette" id="colorPalette"></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">▸ ACTIONS</div>
+                    <button class="action-button" id="clearCanvas">⌧ CLEAR</button>
+                    <button class="action-button" id="saveWork">💾 SAVE</button>
+                    <button class="action-button" id="loadWork">📂 LOAD</button>
+                    <button class="action-button" id="exportSprite">⬇ EXPORT</button>
+                </div>
+            </div>
+
+            <div>
+                <div class="canvas-container">
+                    <div class="canvas-controls">
+                        <label>Grid Size:</label>
+                        <input type="number" id="gridSize" value="32" min="8" max="64" step="8">
+                        <button class="action-button" id="applyGridSize">APPLY</button>
+                        <label>Pixel Size:</label>
+                        <input type="number" id="pixelSize" value="12" min="4" max="32" step="2">
+                        <button class="action-button" id="applyPixelSize">APPLY</button>
+                    </div>
+                    <div class="canvas-wrapper">
+                        <canvas id="pixelCanvas"></canvas>
+                    </div>
+                </div>
+
+                <div class="frames-panel">
+                    <div class="section-title">▸ ANIMATION FRAMES</div>
+                    <div class="frames-list" id="framesList"></div>
+                    <div class="frame-controls">
+                        <button class="action-button" id="addFrame">+ ADD FRAME</button>
+                        <button class="action-button" id="duplicateFrame">⧉ DUPLICATE</button>
+                        <button class="action-button" id="playAnimation">▶ PLAY</button>
+                        <button class="action-button" id="stopAnimation">◼ STOP</button>
+                    </div>
+                    <div class="fps-control">
+                        <label>FPS:</label>
+                        <input type="range" id="fpsSlider" min="1" max="30" value="8">
+                        <span id="fpsValue">8</span>
+                    </div>
+                    <canvas class="animation-preview" id="animationPreview"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="exportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>▸ EXPORT SPRITE SHEET</h2>
+                <button class="modal-close" id="closeModal">✕</button>
+            </div>
+            <canvas class="sprite-sheet-preview" id="spriteSheetPreview"></canvas>
+            <button class="action-button" id="downloadSprite">⬇ DOWNLOAD PNG</button>
+        </div>
+    </div>
+
+    <script>
+        class PixelArtEditor {
+            constructor() {
+                this.canvas = document.getElementById('pixelCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.gridSize = 32;
+                this.pixelSize = 12;
+                this.currentColor = '#00ff00';
+                this.currentTool = 'brush';
+                this.isDrawing = false;
+                this.frames = [];
+                this.currentFrame = 0;
+                this.animationInterval = null;
+                this.fps = 8;
+
+                this.defaultPalette = [
+                    '#000000', '#ffffff', '#00ff00', '#ff0000',
+                    '#0000ff', '#ffff00', '#ff00ff', '#00ffff',
+                    '#ff8800', '#8800ff', '#00ff88', '#ff0088',
+                    '#88ff00', '#0088ff', '#808080', '#c0c0c0'
+                ];
+
+                this.initCanvas();
+                this.initColorPalette();
+                this.initEventListeners();
+                this.addFrame();
+                this.loadFromStorage();
+                this.updateFramesList();
+            }
+
+            initCanvas() {
+                this.canvas.width = this.gridSize * this.pixelSize;
+                this.canvas.height = this.gridSize * this.pixelSize;
+                this.clearCanvas();
+            }
+
+            initColorPalette() {
+                const palette = document.getElementById('colorPalette');
+                palette.innerHTML = '';
+
+                this.defaultPalette.forEach(color => {
+                    const swatch = document.createElement('div');
+                    swatch.className = 'color-swatch';
+                    swatch.style.backgroundColor = color;
+                    swatch.addEventListener('click', () => this.setColor(color));
+                    palette.appendChild(swatch);
+                });
+
+                this.updateCurrentColor();
+            }
+
+            setColor(color) {
+                this.currentColor = color;
+                this.currentTool = 'brush';
+                this.updateCurrentColor();
+                this.updateToolButtons();
+            }
+
+            updateCurrentColor() {
+                document.getElementById('currentColor').style.backgroundColor = this.currentColor;
+                document.getElementById('customColor').value = this.currentColor;
+
+                document.querySelectorAll('.color-swatch').forEach(swatch => {
+                    swatch.classList.toggle('active',
+                        swatch.style.backgroundColor === this.rgbToHex(this.currentColor));
+                });
+            }
+
+            rgbToHex(color) {
+                if (color.startsWith('#')) return color.toLowerCase();
+                const rgb = color.match(/\d+/g);
+                if (!rgb) return color;
+                return '#' + rgb.map(x => {
+                    const hex = parseInt(x).toString(16);
+                    return hex.length === 1 ? '0' + hex : hex;
+                }).join('');
+            }
+
+            initEventListeners() {
+                // Tools
+                document.querySelectorAll('.tool-button').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        this.currentTool = btn.dataset.tool;
+                        this.updateToolButtons();
+                    });
+                });
+
+                // Color picker
+                document.getElementById('customColor').addEventListener('input', (e) => {
+                    this.setColor(e.target.value);
+                });
+
+                // Canvas drawing
+                this.canvas.addEventListener('mousedown', (e) => this.startDrawing(e));
+                this.canvas.addEventListener('mousemove', (e) => this.draw(e));
+                this.canvas.addEventListener('mouseup', () => this.stopDrawing());
+                this.canvas.addEventListener('mouseleave', () => this.stopDrawing());
+
+                // Touch events
+                this.canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.startDrawing(e.touches[0]);
+                });
+                this.canvas.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    this.draw(e.touches[0]);
+                });
+                this.canvas.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.stopDrawing();
+                });
+
+                // Actions
+                document.getElementById('clearCanvas').addEventListener('click', () => this.clearCurrentFrame());
+                document.getElementById('saveWork').addEventListener('click', () => this.saveToStorage());
+                document.getElementById('loadWork').addEventListener('click', () => this.loadFromStorage());
+                document.getElementById('exportSprite').addEventListener('click', () => this.showExportModal());
+
+                // Grid/Pixel size
+                document.getElementById('applyGridSize').addEventListener('click', () => {
+                    this.gridSize = parseInt(document.getElementById('gridSize').value);
+                    this.initCanvas();
+                    this.loadFrame(this.currentFrame);
+                });
+                document.getElementById('applyPixelSize').addEventListener('click', () => {
+                    this.pixelSize = parseInt(document.getElementById('pixelSize').value);
+                    this.initCanvas();
+                    this.loadFrame(this.currentFrame);
+                });
+
+                // Frame controls
+                document.getElementById('addFrame').addEventListener('click', () => {
+                    this.addFrame();
+                    this.updateFramesList();
+                });
+                document.getElementById('duplicateFrame').addEventListener('click', () => {
+                    this.duplicateFrame();
+                    this.updateFramesList();
+                });
+                document.getElementById('playAnimation').addEventListener('click', () => this.playAnimation());
+                document.getElementById('stopAnimation').addEventListener('click', () => this.stopAnimation());
+
+                // FPS
+                document.getElementById('fpsSlider').addEventListener('input', (e) => {
+                    this.fps = parseInt(e.target.value);
+                    document.getElementById('fpsValue').textContent = this.fps;
+                    if (this.animationInterval) {
+                        this.stopAnimation();
+                        this.playAnimation();
+                    }
+                });
+
+                // Export modal
+                document.getElementById('closeModal').addEventListener('click', () => this.closeExportModal());
+                document.getElementById('downloadSprite').addEventListener('click', () => this.downloadSpriteSheet());
+            }
+
+            updateToolButtons() {
+                document.querySelectorAll('.tool-button').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.tool === this.currentTool);
+                });
+            }
+
+            getCanvasCoords(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const scaleX = this.canvas.width / rect.width;
+                const scaleY = this.canvas.height / rect.height;
+                const x = Math.floor(((e.clientX - rect.left) * scaleX) / this.pixelSize);
+                const y = Math.floor(((e.clientY - rect.top) * scaleY) / this.pixelSize);
+                return { x, y };
+            }
+
+            startDrawing(e) {
+                this.isDrawing = true;
+                const { x, y } = this.getCanvasCoords(e);
+
+                if (this.currentTool === 'fill') {
+                    this.floodFill(x, y);
+                    this.isDrawing = false;
+                } else if (this.currentTool === 'eyedropper') {
+                    this.pickColor(x, y);
+                    this.isDrawing = false;
+                } else {
+                    this.draw(e);
+                }
+            }
+
+            draw(e) {
+                if (!this.isDrawing) return;
+
+                const { x, y } = this.getCanvasCoords(e);
+
+                if (x < 0 || x >= this.gridSize || y < 0 || y >= this.gridSize) return;
+
+                if (this.currentTool === 'brush') {
+                    this.drawPixel(x, y, this.currentColor);
+                } else if (this.currentTool === 'eraser') {
+                    this.drawPixel(x, y, '#000000');
+                }
+            }
+
+            stopDrawing() {
+                if (this.isDrawing) {
+                    this.isDrawing = false;
+                    this.saveFrame();
+                }
+            }
+
+            drawPixel(x, y, color) {
+                this.ctx.fillStyle = color;
+                this.ctx.fillRect(x * this.pixelSize, y * this.pixelSize, this.pixelSize, this.pixelSize);
+            }
+
+            pickColor(x, y) {
+                const imageData = this.ctx.getImageData(
+                    x * this.pixelSize,
+                    y * this.pixelSize,
+                    1,
+                    1
+                );
+                const [r, g, b] = imageData.data;
+                const hex = '#' + [r, g, b].map(x => {
+                    const hex = x.toString(16);
+                    return hex.length === 1 ? '0' + hex : hex;
+                }).join('');
+                this.setColor(hex);
+            }
+
+            floodFill(startX, startY) {
+                const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+                const data = imageData.data;
+
+                const startPos = (startY * this.pixelSize * this.canvas.width + startX * this.pixelSize) * 4;
+                const startR = data[startPos];
+                const startG = data[startPos + 1];
+                const startB = data[startPos + 2];
+
+                const fillColor = this.hexToRgb(this.currentColor);
+
+                if (startR === fillColor.r && startG === fillColor.g && startB === fillColor.b) {
+                    return;
+                }
+
+                const stack = [[startX, startY]];
+                const visited = new Set();
+
+                while (stack.length > 0) {
+                    const [x, y] = stack.pop();
+                    const key = `${x},${y}`;
+
+                    if (visited.has(key)) continue;
+                    if (x < 0 || x >= this.gridSize || y < 0 || y >= this.gridSize) continue;
+
+                    const pos = (y * this.pixelSize * this.canvas.width + x * this.pixelSize) * 4;
+
+                    if (data[pos] === startR && data[pos + 1] === startG && data[pos + 2] === startB) {
+                        this.drawPixel(x, y, this.currentColor);
+                        visited.add(key);
+
+                        stack.push([x + 1, y]);
+                        stack.push([x - 1, y]);
+                        stack.push([x, y + 1]);
+                        stack.push([x, y - 1]);
+                    }
+                }
+
+                this.saveFrame();
+            }
+
+            hexToRgb(hex) {
+                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? {
+                    r: parseInt(result[1], 16),
+                    g: parseInt(result[2], 16),
+                    b: parseInt(result[3], 16)
+                } : { r: 0, g: 0, b: 0 };
+            }
+
+            clearCanvas() {
+                this.ctx.fillStyle = '#000000';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+
+            clearCurrentFrame() {
+                if (confirm('Clear current frame?')) {
+                    this.clearCanvas();
+                    this.saveFrame();
+                }
+            }
+
+            addFrame() {
+                const frameData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+                this.frames.push(frameData);
+                this.currentFrame = this.frames.length - 1;
+                this.clearCanvas();
+            }
+
+            duplicateFrame() {
+                const currentData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+                this.frames.splice(this.currentFrame + 1, 0, currentData);
+                this.currentFrame++;
+                this.updateFramesList();
+            }
+
+            deleteFrame(index) {
+                if (this.frames.length <= 1) {
+                    alert('Cannot delete the last frame!');
+                    return;
+                }
+
+                if (confirm('Delete this frame?')) {
+                    this.frames.splice(index, 1);
+                    if (this.currentFrame >= this.frames.length) {
+                        this.currentFrame = this.frames.length - 1;
+                    }
+                    this.loadFrame(this.currentFrame);
+                    this.updateFramesList();
+                }
+            }
+
+            saveFrame() {
+                const frameData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+                this.frames[this.currentFrame] = frameData;
+                this.updateFramesList();
+            }
+
+            loadFrame(index) {
+                if (index >= 0 && index < this.frames.length) {
+                    this.currentFrame = index;
+                    this.ctx.putImageData(this.frames[index], 0, 0);
+                    this.updateFramesList();
+                }
+            }
+
+            updateFramesList() {
+                const list = document.getElementById('framesList');
+                list.innerHTML = '';
+
+                this.frames.forEach((frame, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'frame-item' + (index === this.currentFrame ? ' active' : '');
+
+                    const preview = document.createElement('canvas');
+                    preview.className = 'frame-preview';
+                    preview.width = 80;
+                    preview.height = 80;
+                    const previewCtx = preview.getContext('2d');
+
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = this.canvas.width;
+                    tempCanvas.height = this.canvas.height;
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCtx.putImageData(frame, 0, 0);
+
+                    previewCtx.drawImage(tempCanvas, 0, 0, 80, 80);
+
+                    const label = document.createElement('div');
+                    label.className = 'frame-label';
+                    label.textContent = `Frame ${index + 1}`;
+
+                    item.appendChild(preview);
+                    item.appendChild(label);
+
+                    if (this.frames.length > 1) {
+                        const deleteBtn = document.createElement('div');
+                        deleteBtn.className = 'frame-delete';
+                        deleteBtn.textContent = '×';
+                        deleteBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            this.deleteFrame(index);
+                        });
+                        item.appendChild(deleteBtn);
+                    }
+
+                    item.addEventListener('click', () => {
+                        this.saveFrame();
+                        this.loadFrame(index);
+                    });
+
+                    list.appendChild(item);
+                });
+            }
+
+            playAnimation() {
+                this.stopAnimation();
+
+                const preview = document.getElementById('animationPreview');
+                preview.width = this.canvas.width;
+                preview.height = this.canvas.height;
+                const previewCtx = preview.getContext('2d');
+
+                let frameIndex = 0;
+
+                this.animationInterval = setInterval(() => {
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = this.canvas.width;
+                    tempCanvas.height = this.canvas.height;
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCtx.putImageData(this.frames[frameIndex], 0, 0);
+
+                    previewCtx.clearRect(0, 0, preview.width, preview.height);
+                    previewCtx.drawImage(tempCanvas, 0, 0);
+
+                    frameIndex = (frameIndex + 1) % this.frames.length;
+                }, 1000 / this.fps);
+            }
+
+            stopAnimation() {
+                if (this.animationInterval) {
+                    clearInterval(this.animationInterval);
+                    this.animationInterval = null;
+                }
+            }
+
+            saveToStorage() {
+                try {
+                    const data = {
+                        gridSize: this.gridSize,
+                        pixelSize: this.pixelSize,
+                        frames: this.frames.map(frame => {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = this.canvas.width;
+                            canvas.height = this.canvas.height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.putImageData(frame, 0, 0);
+                            return canvas.toDataURL();
+                        }),
+                        currentFrame: this.currentFrame
+                    };
+                    localStorage.setItem('pixelArtEditor', JSON.stringify(data));
+                    alert('✓ Work saved!');
+                } catch (e) {
+                    alert('Failed to save: ' + e.message);
+                }
+            }
+
+            loadFromStorage() {
+                try {
+                    const saved = localStorage.getItem('pixelArtEditor');
+                    if (!saved) {
+                        return;
+                    }
+
+                    const data = JSON.parse(saved);
+                    this.gridSize = data.gridSize;
+                    this.pixelSize = data.pixelSize;
+
+                    document.getElementById('gridSize').value = this.gridSize;
+                    document.getElementById('pixelSize').value = this.pixelSize;
+
+                    this.initCanvas();
+
+                    this.frames = [];
+
+                    const loadPromises = data.frames.map(dataUrl => {
+                        return new Promise((resolve) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = this.canvas.width;
+                                canvas.height = this.canvas.height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0);
+                                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                                resolve(imageData);
+                            };
+                            img.src = dataUrl;
+                        });
+                    });
+
+                    Promise.all(loadPromises).then(frames => {
+                        this.frames = frames;
+                        this.currentFrame = Math.min(data.currentFrame || 0, this.frames.length - 1);
+                        this.loadFrame(this.currentFrame);
+                        alert('✓ Work loaded!');
+                    });
+                } catch (e) {
+                    console.error('Failed to load:', e);
+                }
+            }
+
+            showExportModal() {
+                const modal = document.getElementById('exportModal');
+                modal.classList.add('active');
+                this.generateSpriteSheet();
+            }
+
+            closeExportModal() {
+                const modal = document.getElementById('exportModal');
+                modal.classList.remove('active');
+            }
+
+            generateSpriteSheet() {
+                const preview = document.getElementById('spriteSheetPreview');
+                const cols = Math.ceil(Math.sqrt(this.frames.length));
+                const rows = Math.ceil(this.frames.length / cols);
+
+                preview.width = cols * this.canvas.width;
+                preview.height = rows * this.canvas.height;
+
+                const ctx = preview.getContext('2d');
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(0, 0, preview.width, preview.height);
+
+                this.frames.forEach((frame, index) => {
+                    const col = index % cols;
+                    const row = Math.floor(index / cols);
+
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = this.canvas.width;
+                    tempCanvas.height = this.canvas.height;
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCtx.putImageData(frame, 0, 0);
+
+                    ctx.drawImage(
+                        tempCanvas,
+                        col * this.canvas.width,
+                        row * this.canvas.height
+                    );
+                });
+            }
+
+            downloadSpriteSheet() {
+                const preview = document.getElementById('spriteSheetPreview');
+                const link = document.createElement('a');
+                link.download = `sprite-sheet-${Date.now()}.png`;
+                link.href = preview.toDataURL('image/png');
+                link.click();
+            }
+        }
+
+        const editor = new PixelArtEditor();
+    </script>
+</body>
+</html>

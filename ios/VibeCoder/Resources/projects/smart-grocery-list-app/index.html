@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Grocery List</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .add-item-section {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .quantity-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quantity-input-group input {
+            flex: 1;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:active {
+            background: #e0e0e0;
+        }
+
+        .suggestions {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .suggestions-title {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .suggestion-chip {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border: 2px solid #c8e6c9;
+            transition: all 0.2s;
+        }
+
+        .suggestion-chip:active {
+            transform: scale(0.95);
+            background: #c8e6c9;
+        }
+
+        .list-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .list-header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-header h2 {
+            font-size: 1.2rem;
+        }
+
+        .clear-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 6px 12px;
+            border: 1px solid rgba(255,255,255,0.4);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .clear-btn:active {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .category-group {
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .category-group:last-child {
+            border-bottom: none;
+        }
+
+        .category-header {
+            background: #f9fafb;
+            padding: 12px 20px;
+            font-weight: 700;
+            color: #4CAF50;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-icon {
+            font-size: 1.2rem;
+        }
+
+        .item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f5f5f5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background 0.2s;
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .item.checked {
+            opacity: 0.6;
+            background: #fafafa;
+        }
+
+        .item.checked .item-name {
+            text-decoration: line-through;
+        }
+
+        .checkbox-container {
+            position: relative;
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: #4CAF50;
+        }
+
+        .item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #333;
+            word-break: break-word;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .quantity-btn {
+            background: #f0f0f0;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            color: #4CAF50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .quantity-btn:active {
+            background: #e0e0e0;
+            transform: scale(0.9);
+        }
+
+        .quantity-display {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 700;
+            color: #4CAF50;
+            font-size: 1rem;
+        }
+
+        .delete-btn {
+            background: #ffebee;
+            color: #c62828;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:active {
+            background: #ffcdd2;
+            transform: scale(0.9);
+        }
+
+        .empty-state {
+            padding: 40px 20px;
+            text-align: center;
+            color: #999;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .empty-text {
+            font-size: 1rem;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .add-item-section {
+                padding: 15px;
+            }
+
+            .item {
+                padding: 12px 15px;
+            }
+
+            .quantity-btn, .delete-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🥬 Smart Grocery List</h1>
+            <p class="subtitle">Fresh, organized, and simple</p>
+        </header>
+
+        <div class="add-item-section">
+            <form id="addItemForm">
+                <div class="input-group">
+                    <label for="itemName">Item Name</label>
+                    <input type="text" id="itemName" placeholder="e.g., Bananas" required autocomplete="off">
+                </div>
+
+                <div class="input-group">
+                    <label for="itemQuantity">Quantity</label>
+                    <div class="quantity-input-group">
+                        <input type="number" id="itemQuantity" min="1" value="1" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="itemCategory">Category</label>
+                    <select id="itemCategory" required>
+                        <option value="produce">🥬 Produce</option>
+                        <option value="dairy">🥛 Dairy & Eggs</option>
+                        <option value="meat">🥩 Meat & Seafood</option>
+                        <option value="bakery">🍞 Bakery</option>
+                        <option value="pantry">🥫 Pantry</option>
+                        <option value="frozen">❄️ Frozen</option>
+                        <option value="beverages">🥤 Beverages</option>
+                        <option value="snacks">🍿 Snacks</option>
+                        <option value="other">📦 Other</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Add to List</button>
+            </form>
+
+            <div class="suggestions" id="suggestionsSection" style="display: none;">
+                <div class="suggestions-title">Frequently Bought:</div>
+                <div class="suggestion-chips" id="suggestionChips"></div>
+            </div>
+        </div>
+
+        <div class="list-section">
+            <div class="list-header">
+                <h2>My List</h2>
+                <button class="clear-btn" id="clearCheckedBtn">Clear Checked</button>
+            </div>
+            <div id="groceryList"></div>
+        </div>
+    </div>
+
+    <script>
+        const CATEGORIES = {
+            produce: { name: 'Produce', icon: '🥬' },
+            dairy: { name: 'Dairy & Eggs', icon: '🥛' },
+            meat: { name: 'Meat & Seafood', icon: '🥩' },
+            bakery: { name: 'Bakery', icon: '🍞' },
+            pantry: { name: 'Pantry', icon: '🥫' },
+            frozen: { name: 'Frozen', icon: '❄️' },
+            beverages: { name: 'Beverages', icon: '🥤' },
+            snacks: { name: 'Snacks', icon: '🍿' },
+            other: { name: 'Other', icon: '📦' }
+        };
+
+        class GroceryListApp {
+            constructor() {
+                this.items = [];
+                this.frequencyMap = {};
+                this.loadData();
+                this.initEventListeners();
+                this.render();
+                this.updateSuggestions();
+            }
+
+            loadData() {
+                const savedItems = localStorage.getItem('groceryItems');
+                const savedFrequency = localStorage.getItem('itemFrequency');
+
+                if (savedItems) {
+                    try {
+                        this.items = JSON.parse(savedItems);
+                    } catch (e) {
+                        this.items = [];
+                    }
+                }
+
+                if (savedFrequency) {
+                    try {
+                        this.frequencyMap = JSON.parse(savedFrequency);
+                    } catch (e) {
+                        this.frequencyMap = {};
+                    }
+                }
+            }
+
+            saveData() {
+                localStorage.setItem('groceryItems', JSON.stringify(this.items));
+                localStorage.setItem('itemFrequency', JSON.stringify(this.frequencyMap));
+            }
+
+            initEventListeners() {
+                document.getElementById('addItemForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addItem();
+                });
+
+                document.getElementById('clearCheckedBtn').addEventListener('click', () => {
+                    this.clearChecked();
+                });
+            }
+
+            addItem() {
+                const nameInput = document.getElementById('itemName');
+                const quantityInput = document.getElementById('itemQuantity');
+                const categoryInput = document.getElementById('itemCategory');
+
+                const name = nameInput.value.trim();
+                const quantity = parseInt(quantityInput.value);
+                const category = categoryInput.value;
+
+                if (!name || quantity < 1) {
+                    return;
+                }
+
+                const item = {
+                    id: Date.now(),
+                    name: name,
+                    quantity: quantity,
+                    category: category,
+                    checked: false
+                };
+
+                this.items.push(item);
+                this.updateFrequency(name);
+                this.saveData();
+                this.render();
+                this.updateSuggestions();
+
+                nameInput.value = '';
+                quantityInput.value = '1';
+                categoryInput.value = 'produce';
+                nameInput.focus();
+            }
+
+            updateFrequency(itemName) {
+                const normalizedName = itemName.toLowerCase();
+                this.frequencyMap[normalizedName] = (this.frequencyMap[normalizedName] || 0) + 1;
+            }
+
+            deleteItem(id) {
+                this.items = this.items.filter(item => item.id !== id);
+                this.saveData();
+                this.render();
+            }
+
+            toggleCheck(id) {
+                const item = this.items.find(item => item.id === id);
+                if (item) {
+                    item.checked = !item.checked;
+                    this.saveData();
+                    this.render();
+                }
+            }
+
+            updateQuantity(id, delta) {
+                const item = this.items.find(item => item.id === id);
+                if (item) {
+                    item.quantity = Math.max(1, item.quantity + delta);
+                    this.saveData();
+                    this.render();
+                }
+            }
+
+            clearChecked() {
+                const hasChecked = this.items.some(item => item.checked);
+                if (!hasChecked) {
+                    return;
+                }
+
+                this.items = this.items.filter(item => !item.checked);
+                this.saveData();
+                this.render();
+            }
+
+            getItemsByCategory() {
+                const grouped = {};
+
+                this.items.forEach(item => {
+                    if (!grouped[item.category]) {
+                        grouped[item.category] = [];
+                    }
+                    grouped[item.category].push(item);
+                });
+
+                return grouped;
+            }
+
+            updateSuggestions() {
+                const suggestions = Object.entries(this.frequencyMap)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5)
+                    .map(([name]) => name);
+
+                const suggestionsSection = document.getElementById('suggestionsSection');
+                const suggestionChips = document.getElementById('suggestionChips');
+
+                if (suggestions.length > 0) {
+                    suggestionsSection.style.display = 'block';
+                    suggestionChips.innerHTML = suggestions.map(name =>
+                        `<div class="suggestion-chip" data-name="${name}">${this.capitalize(name)}</div>`
+                    ).join('');
+
+                    suggestionChips.querySelectorAll('.suggestion-chip').forEach(chip => {
+                        chip.addEventListener('click', (e) => {
+                            const itemName = e.target.dataset.name;
+                            document.getElementById('itemName').value = this.capitalize(itemName);
+                            document.getElementById('itemName').focus();
+                        });
+                    });
+                } else {
+                    suggestionsSection.style.display = 'none';
+                }
+            }
+
+            capitalize(str) {
+                return str.charAt(0).toUpperCase() + str.slice(1);
+            }
+
+            render() {
+                const listContainer = document.getElementById('groceryList');
+
+                if (this.items.length === 0) {
+                    listContainer.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">🛒</div>
+                            <div class="empty-text">Your list is empty<br>Add some items to get started!</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const grouped = this.getItemsByCategory();
+                const categoryOrder = ['produce', 'dairy', 'meat', 'bakery', 'pantry', 'frozen', 'beverages', 'snacks', 'other'];
+
+                let html = '';
+
+                categoryOrder.forEach(categoryKey => {
+                    if (grouped[categoryKey] && grouped[categoryKey].length > 0) {
+                        const category = CATEGORIES[categoryKey];
+                        html += `
+                            <div class="category-group">
+                                <div class="category-header">
+                                    <span class="category-icon">${category.icon}</span>
+                                    <span>${category.name}</span>
+                                </div>
+                        `;
+
+                        grouped[categoryKey].forEach(item => {
+                            html += this.renderItem(item);
+                        });
+
+                        html += `</div>`;
+                    }
+                });
+
+                listContainer.innerHTML = html;
+
+                this.items.forEach(item => {
+                    const checkbox = document.getElementById(`check-${item.id}`);
+                    const decreaseBtn = document.getElementById(`dec-${item.id}`);
+                    const increaseBtn = document.getElementById(`inc-${item.id}`);
+                    const deleteBtn = document.getElementById(`del-${item.id}`);
+
+                    if (checkbox) {
+                        checkbox.addEventListener('change', () => this.toggleCheck(item.id));
+                    }
+                    if (decreaseBtn) {
+                        decreaseBtn.addEventListener('click', () => this.updateQuantity(item.id, -1));
+                    }
+                    if (increaseBtn) {
+                        increaseBtn.addEventListener('click', () => this.updateQuantity(item.id, 1));
+                    }
+                    if (deleteBtn) {
+                        deleteBtn.addEventListener('click', () => this.deleteItem(item.id));
+                    }
+                });
+            }
+
+            renderItem(item) {
+                return `
+                    <div class="item ${item.checked ? 'checked' : ''}">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="check-${item.id}" ${item.checked ? 'checked' : ''}>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name">${this.escapeHtml(item.name)}</div>
+                        </div>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" id="dec-${item.id}">−</button>
+                            <div class="quantity-display">${item.quantity}</div>
+                            <button class="quantity-btn" id="inc-${item.id}">+</button>
+                        </div>
+                        <button class="delete-btn" id="del-${item.id}">×</button>
+                    </div>
+                `;
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        const app = new GroceryListApp();
+    </script>
+</body>
+</html>
