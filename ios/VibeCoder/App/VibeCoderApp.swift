@@ -8,25 +8,12 @@ import RatingKit
 struct VibeCoderApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var authManager = AuthManager.shared
-    @StateObject private var subscriptionManager = SubscriptionManager.shared
-    @StateObject private var paywallCoordinator = PaywallCoordinator.shared
-    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .ratingPrompt()
                 .environmentObject(authManager)
-                .environmentObject(subscriptionManager)
-                .sheet(isPresented: $paywallCoordinator.showWinbackOffer) {
-                    WinbackOfferView()
-                        .environmentObject(subscriptionManager)
-                }
-                .onChange(of: scenePhase) { newPhase in
-                    if newPhase == .active {
-                        paywallCoordinator.checkWinbackEligibility()
-                    }
-                }
         }
     }
 }

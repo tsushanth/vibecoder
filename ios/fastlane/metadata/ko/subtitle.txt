@@ -1,1 +1,1 @@
-웹 앱 프로젝트 발견 및 탐색
+Learn Web Dev by Example

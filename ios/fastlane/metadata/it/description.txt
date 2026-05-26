@@ -1,22 +1,27 @@
-VibeBuild è un costruttore di app basato su IA che ti permette di creare e pubblicare app web usando il linguaggio naturale, senza bisogno di programmare.
+VibeBuild is a curated catalog of web app examples for learning HTML, CSS, and JavaScript by reading real code.
 
-Descrivi cosa vuoi costruire e VibeBuild genera un'app web funzionante in pochi secondi. Perfezionala con prompt aggiuntivi, visualizza un'anteprima in tempo reale e pubblicala istantaneamente.
+Browse 30 hand-picked projects across difficulty levels — Beginner, Intermediate, Advanced — and categories like layouts, games, mobile UIs, productivity, and creative tools. For each project you can:
 
-COSA PUOI FARE
-- Creare app web descrivendole in linguaggio naturale
-- Iterare e perfezionare la tua app con prompt aggiuntivi
-- Vedere un'anteprima live mentre costruisci
-- Pubblicare e condividere i tuoi progetti
-- Esplorare i progetti pubblici di altri creatori
-- Ordinare i progetti della community per più recenti o più popolari
+• Read the full source code, file by file
+• Tweak the code in-app to see how it works
+• Run the preview in a strictly sandboxed WebView (no network access)
+• Visit the project's GitHub repo (when available)
 
-COSTRUISCI QUALSIASI COSA
-- Strumenti di produttività e utilità
-- Giochi ed esperienze interattive
-- Strumenti creativi ed editor
-- Visualizzatori di dati e dashboard
-- E molto altro
+WHAT'S INSIDE
+• SaaS Landing Page — hero, features, pricing, FAQ
+• Drawing App — HTML5 canvas, brushes, color picker
+• Social Media Feed — card layouts, stories bar
+• Kanban Task Manager — drag and drop, local storage
+• Markdown Notes — real-time markdown rendering
+• Pixel Art Editor — pixel grid, color palette
+• Plus 24 more projects covering games, dashboards, generators, and UI patterns.
 
-VibeBuild rende facile per chiunque passare da un'idea a un'app funzionante, senza esperienza richiesta.
+HOW THE SANDBOX WORKS
+Every preview runs inside an isolated WebView with a strict Content Security Policy. The preview cannot reach the network, call native iOS code, or navigate to external URLs. This is why VibeBuild works completely offline.
 
-Privacy: Raccogliamo solo i dati minimi necessari per far funzionare il servizio. Non condividiamo mai i tuoi dati con terze parti.
+WHO IT'S FOR
+• Beginners who want to learn by reading real code, not toy snippets
+• Intermediate devs looking for layout, animation, and UI patterns
+• Anyone curious about how a particular UI is built
+
+Privacy: VibeBuild does not collect personal data. Optional sign-in (Apple or Google) is used only to sync settings across devices.

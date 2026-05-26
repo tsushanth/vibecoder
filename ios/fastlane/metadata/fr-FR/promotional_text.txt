@@ -1,1 +1,1 @@
-Explorez une galerie croissante de projets d'apps web créatifs de développeurs du monde entier.
+30 hand-picked web app examples — read the source code, edit it in-app, and run it in a sandbox. Learn HTML, CSS, and JavaScript by tinkering with real projects.

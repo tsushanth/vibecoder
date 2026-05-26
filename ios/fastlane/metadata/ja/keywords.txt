@@ -1,1 +1,1 @@
-ウェブアプリギャラリー,アプリ発見,ウェブプロジェクト,アプリショーケース,コミュニティアプリ,アプリ探索,ウェブアプリ
+learn to code,html css javascript,web dev,coding tutorial,programming,code examples,beginner coding

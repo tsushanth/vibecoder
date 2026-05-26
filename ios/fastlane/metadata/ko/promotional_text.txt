@@ -1,1 +1,1 @@
-전 세계 개발자와 크리에이터들이 만든 웹 앱 프로젝트의 성장하는 갤러리를 탐색하세요.
+30 hand-picked web app examples — read the source code, edit it in-app, and run it in a sandbox. Learn HTML, CSS, and JavaScript by tinkering with real projects.

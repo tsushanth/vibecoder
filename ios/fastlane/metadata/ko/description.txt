@@ -1,22 +1,27 @@
-VibeBuild는 AI 기반 앱 빌더로, 코딩 없이 자연어로 웹 앱을 만들고 게시할 수 있습니다.
+VibeBuild is a curated catalog of web app examples for learning HTML, CSS, and JavaScript by reading real code.
 
-만들고 싶은 것을 설명하면 VibeBuild가 몇 초 만에 작동하는 웹 앱을 생성합니다. 추가 프롬프트로 개선하고, 실시간으로 미리 보고, 즉시 게시하세요.
+Browse 30 hand-picked projects across difficulty levels — Beginner, Intermediate, Advanced — and categories like layouts, games, mobile UIs, productivity, and creative tools. For each project you can:
 
-할 수 있는 것
-- 자연어로 설명해서 웹 앱 만들기
-- 추가 프롬프트로 앱 반복 개선
-- 만드는 동안 라이브 미리보기 확인
-- 프로젝트 게시 및 공유
-- 다른 빌더들의 공개 프로젝트 탐색
-- 커뮤니티 프로젝트를 최신순 또는 인기순으로 정렬
+• Read the full source code, file by file
+• Tweak the code in-app to see how it works
+• Run the preview in a strictly sandboxed WebView (no network access)
+• Visit the project's GitHub repo (when available)
 
-무엇이든 만들 수 있어요
-- 생산성 도구 및 유틸리티
-- 게임 및 인터랙티브 경험
-- 크리에이티브 도구 및 에디터
-- 데이터 시각화 및 대시보드
-- 그 외 다양한 것들
+WHAT'S INSIDE
+• SaaS Landing Page — hero, features, pricing, FAQ
+• Drawing App — HTML5 canvas, brushes, color picker
+• Social Media Feed — card layouts, stories bar
+• Kanban Task Manager — drag and drop, local storage
+• Markdown Notes — real-time markdown rendering
+• Pixel Art Editor — pixel grid, color palette
+• Plus 24 more projects covering games, dashboards, generators, and UI patterns.
 
-VibeBuild를 사용하면 경험 없이도 아이디어에서 작동하는 앱까지 쉽게 만들 수 있습니다.
+HOW THE SANDBOX WORKS
+Every preview runs inside an isolated WebView with a strict Content Security Policy. The preview cannot reach the network, call native iOS code, or navigate to external URLs. This is why VibeBuild works completely offline.
 
-개인정보 보호: 서비스 운영에 필요한 최소한의 데이터만 수집합니다. 귀하의 데이터를 제3자와 공유하지 않습니다.
+WHO IT'S FOR
+• Beginners who want to learn by reading real code, not toy snippets
+• Intermediate devs looking for layout, animation, and UI patterns
+• Anyone curious about how a particular UI is built
+
+Privacy: VibeBuild does not collect personal data. Optional sign-in (Apple or Google) is used only to sync settings across devices.
