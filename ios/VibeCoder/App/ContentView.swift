@@ -3,9 +3,8 @@
 //  VibeCoder
 //
 //  Tab shell for the redesigned 2.0 app. Auth is optional — users can
-//  browse and read every lesson without signing in. Sign-in only gates
-//  the optional Pro subscription perks (saved favorites, ad-free, etc.)
-//  on the Account tab.
+//  browse and read every lesson without signing in. There is no paid
+//  tier: everything in the catalog is free.
 //
 
 import SwiftUI
@@ -37,5 +36,4 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environmentObject(AuthManager.shared)
-        .environmentObject(SubscriptionManager.shared)
 }

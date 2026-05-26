@@ -1,1 +1,1 @@
-探索来自世界各地开发者和创作者构建的Web应用项目的不断增长的画廊。
+30 hand-picked web app examples — read the source code, edit it in-app, and run it in a sandbox. Learn HTML, CSS, and JavaScript by tinkering with real projects.

@@ -2,19 +2,16 @@
 //  ReplitStyleAccountView.swift
 //  VibeCoder
 //
-//  Account / Settings tab. Sign-in is optional. Surface: subscription
-//  status + manage, sign-in/out, privacy + terms links, app version.
-//  Stripped of all live-feed / favorites / history features since those
-//  were tied to the now-removed user-generated content browser.
+//  Account tab. Sign-in is optional. There is no paid tier — every lesson
+//  in the catalog is free. Surface: sign-in/out, privacy + terms links,
+//  app version.
 //
 
 import SwiftUI
 
 struct ReplitStyleAccountView: View {
     @EnvironmentObject var authManager: AuthManager
-    @EnvironmentObject var subscriptionManager: SubscriptionManager
     @State private var showSignInSheet = false
-    @State private var showSubscriptionSheet = false
     @State private var showSignOutConfirm = false
 
     var body: some View {
@@ -22,7 +19,6 @@ struct ReplitStyleAccountView: View {
             ScrollView {
                 VStack(spacing: 24) {
                     profileHeader
-                    subscriptionCard
                     aboutSection
                     legalSection
                     if authManager.isAuthenticated {
@@ -42,10 +38,6 @@ struct ReplitStyleAccountView: View {
         .sheet(isPresented: $showSignInSheet) {
             SignInView()
                 .environmentObject(authManager)
-        }
-        .sheet(isPresented: $showSubscriptionSheet) {
-            SubscriptionPlansView()
-                .environmentObject(subscriptionManager)
         }
         .alert("Sign Out?", isPresented: $showSignOutConfirm) {
             Button("Cancel", role: .cancel) {}
@@ -94,56 +86,12 @@ struct ReplitStyleAccountView: View {
         .padding(.top, 12)
     }
 
-    private var subscriptionCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text(subscriptionManager.isSubscribed ? "VibeBuild Pro" : "Free")
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                Spacer()
-                if subscriptionManager.isSubscribed {
-                    Text("ACTIVE")
-                        .font(.caption2.weight(.bold))
-                        .padding(.horizontal, 8).padding(.vertical, 4)
-                        .background(Capsule().fill(Color.green.opacity(0.7)))
-                        .foregroundStyle(.white)
-                }
-            }
-            Text(subscriptionManager.isSubscribed
-                 ? "Thanks for supporting VibeBuild. You have access to every lesson."
-                 : "Unlock all lessons across Beginner, Intermediate, and Advanced tiers.")
-                .font(.callout)
-                .foregroundStyle(.white.opacity(0.7))
-            if !subscriptionManager.isSubscribed {
-                Button { showSubscriptionSheet = true } label: {
-                    Text("View Plans")
-                        .font(.callout.weight(.semibold))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 11)
-                        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
-                        .foregroundStyle(.black)
-                }
-                .padding(.top, 4)
-            } else {
-                Button("Manage Subscription") {
-                    if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
-                        UIApplication.shared.open(url)
-                    }
-                }
-                .font(.callout)
-                .foregroundStyle(.white.opacity(0.7))
-            }
-        }
-        .padding(16)
-        .background(RoundedRectangle(cornerRadius: 14).fill(Color.white.opacity(0.06)))
-    }
-
     private var aboutSection: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("About")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.white.opacity(0.5))
-            Text("VibeBuild is an educational app that ships with a curated catalog of 30 AI-generated web apps. Read the source code, edit local copies, and run previews in a sandboxed WebView with no network access.")
+            Text("VibeBuild ships with a curated catalog of 30 web app examples for learning HTML, CSS, and JavaScript. Read the full source code, edit local copies, and run previews in a sandboxed WebView with no network access.")
                 .font(.callout)
                 .foregroundStyle(.white.opacity(0.7))
         }

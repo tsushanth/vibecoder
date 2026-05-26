@@ -1,22 +1,27 @@
-VibeBuild 是一款 AI 驱动的应用构建器，让你用自然语言创建并发布 Web 应用，无需编写任何代码。
+VibeBuild is a curated catalog of web app examples for learning HTML, CSS, and JavaScript by reading real code.
 
-描述你想构建的内容，VibeBuild 在几秒内生成一个可运行的 Web 应用。通过追加提示词不断优化，实时预览效果，立即发布。
+Browse 30 hand-picked projects across difficulty levels — Beginner, Intermediate, Advanced — and categories like layouts, games, mobile UIs, productivity, and creative tools. For each project you can:
 
-你可以做什么
-- 用自然语言描述来创建 Web 应用
-- 通过追加提示词迭代完善你的应用
-- 构建时实时预览效果
-- 发布并分享你的项目
-- 探索其他创作者的公开项目
-- 按最新或最热门排序浏览社区项目
+• Read the full source code, file by file
+• Tweak the code in-app to see how it works
+• Run the preview in a strictly sandboxed WebView (no network access)
+• Visit the project's GitHub repo (when available)
 
-构建任何东西
-- 生产力工具和实用程序
-- 游戏和互动体验
-- 创意工具和编辑器
-- 数据可视化和仪表盘
-- 以及更多
+WHAT'S INSIDE
+• SaaS Landing Page — hero, features, pricing, FAQ
+• Drawing App — HTML5 canvas, brushes, color picker
+• Social Media Feed — card layouts, stories bar
+• Kanban Task Manager — drag and drop, local storage
+• Markdown Notes — real-time markdown rendering
+• Pixel Art Editor — pixel grid, color palette
+• Plus 24 more projects covering games, dashboards, generators, and UI patterns.
 
-VibeBuild 让任何人都能轻松从想法到可用应用，无需任何经验。
+HOW THE SANDBOX WORKS
+Every preview runs inside an isolated WebView with a strict Content Security Policy. The preview cannot reach the network, call native iOS code, or navigate to external URLs. This is why VibeBuild works completely offline.
 
-隐私：我们仅收集运行服务所需的最少数据。我们绝不会与第三方共享你的数据。
+WHO IT'S FOR
+• Beginners who want to learn by reading real code, not toy snippets
+• Intermediate devs looking for layout, animation, and UI patterns
+• Anyone curious about how a particular UI is built
+
+Privacy: VibeBuild does not collect personal data. Optional sign-in (Apple or Google) is used only to sync settings across devices.

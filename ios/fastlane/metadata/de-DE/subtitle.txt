@@ -1,1 +1,1 @@
-Web-App-Projekte entdecken
+Learn Web Dev by Example

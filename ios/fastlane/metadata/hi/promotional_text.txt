@@ -1,1 +1,1 @@
-दुनिया भर के डेवलपर्स और क्रिएटर्स द्वारा बनाए गए वेब ऐप प्रोजेक्ट्स की बढ़ती गैलरी एक्सप्लोर करें।
+30 hand-picked web app examples — read the source code, edit it in-app, and run it in a sandbox. Learn HTML, CSS, and JavaScript by tinkering with real projects.
