@@ -12,9 +12,9 @@
 "AI Code Generation" = "AI代码生成";
 "Describe an idea, get working HTML & CSS code" = "描述一个想法，获得可运行的HTML和CSS代码";
 "Code Editor" = "代码编辑器";
-"View, edit, and learn from source code" = "查看、编辑并学习源代码";
-"Run in Safari" = "在Safari中运行";
-"Open your code in Safari to see the result" = "在Safari中打开代码查看结果";
+"View, edit, and learn from source code" = "查看和编辑项目文件";
+"Run in Safari" = "在 Safari 中打开";
+"Open your code in Safari to see the result" = "在 Safari 中打开你的网站查看";
 "Signing in..." = "登录中...";
 "Sign In Error" = "登录错误";
 "An unknown error occurred" = "发生未知错误";
@@ -67,7 +67,6 @@
 "Create a Coding Project" = "创建编程项目";
 "Describe what you want to learn and AI will generate example code" = "描述你想学习的内容，AI将生成示例代码";
 "Free tier limit" = "免费版限制";
-"Unlimited generations" = "无限生成";
 "What do you want to learn?" = "你想学什么？";
 "Be specific! Describe features, colors, and functionality." = "请具体描述！说明功能、颜色和特性。";
 "Examples:" = "示例：";
@@ -77,7 +76,6 @@
 "~%ds remaining" = "剩余约%d秒";
 "Generation Error" = "生成错误";
 "Unknown error occurred" = "发生未知错误";
-"Daily limit reached. You've used all 3 free generations today. Upgrade to Pro for unlimited generations." = "已达每日上限。今天的3次免费生成已全部使用。升级到Pro享受无限生成。";
 "Unable to generate. Please try again." = "无法生成。请重试。";
 
 /* ==== Create View (Replit-style) ==== */
@@ -100,7 +98,7 @@
 "Markdown Editor" = "Markdown编辑器";
 
 /* ==== Live Preview / Source Code View ==== */
-"Source Code" = "源代码";
+"Source Code" = "文件";
 "Close" = "关闭";
 "Save" = "保存";
 "Saved!" = "已保存！";
@@ -116,14 +114,12 @@
 /* ==== Subscription Plans View ==== */
 "Subscription Plans" = "订阅方案";
 "Choose Your Plan" = "选择你的方案";
-"Unlock unlimited generations and premium features" = "解锁无限生成和高级功能";
 "Restore Purchases" = "恢复购买";
 "Current Plan" = "当前方案";
 "Free" = "免费";
 "Subscribe Now" = "立即订阅";
 
 /* ==== Subscription Plan Features ==== */
-"3 AI generations per day" = "每天3次AI生成";
 "3 tweaks per project" = "每个项目3次调整";
 "Public projects only" = "仅公开项目";
 "Standard queue" = "标准队列";

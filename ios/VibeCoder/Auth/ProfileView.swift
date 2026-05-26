@@ -50,16 +50,6 @@ struct ProfileView: View {
 
                     if subscriptionManager.currentTier == .free {
                         VStack(spacing: 12) {
-                            HStack {
-                                Text("Generations")
-                                    .font(.subheadline)
-                                Spacer()
-                                Text(subscriptionManager.generationsRemaining())
-                                    .font(.subheadline)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.orange)
-                            }
-
                             NavigationLink(destination: SubscriptionPlansView()) {
                                 HStack {
                                     Label("Upgrade to Pro", systemImage: "bolt.fill")

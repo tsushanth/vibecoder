@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>TabarakViral</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ===== Splash Screen ===== -->
+  <div id="splash-screen">
+    <svg class="logo-icon" viewBox="0 0 80 80" fill="none">
+      <defs>
+        <linearGradient id="logo-grad" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#ff6b35"/>
+          <stop offset="100%" stop-color="#e63946"/>
+        </linearGradient>
+      </defs>
+      <rect width="80" height="80" rx="20" fill="url(#logo-grad)"/>
+      <path d="M28 22v36l28-18L28 22z" fill="#fff"/>
+      <circle cx="56" cy="56" r="10" fill="#fff" opacity=".3"/>
+    </svg>
+    <h1><span class="accent-text">Tabarak</span>Viral</h1>
+    <p>Go Viral. Go Tabarak.</p>
+  </div>
+
+  <!-- ===== Login Screen ===== -->
+  <div id="login-screen" style="display:none">
+    <div class="login-box">
+      <svg width="60" height="60" viewBox="0 0 80 80" fill="none" style="margin-bottom:16px">
+        <defs><linearGradient id="lg2" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#ff6b35"/><stop offset="100%" stop-color="#e63946"/></linearGradient></defs>
+        <rect width="80" height="80" rx="20" fill="url(#lg2)"/>
+        <path d="M28 22v36l28-18L28 22z" fill="#fff"/>
+      </svg>
+      <h2><span class="accent-text">Tabarak</span>Viral</h2>
+      <p>Sign in with your phone number</p>
+
+      <!-- Step 1: Phone -->
+      <div class="login-step active" id="step-phone">
+        <div class="login-input-group">
+          <input type="text" class="country-code" value="+92" readonly>
+          <input type="tel" id="phone-input" placeholder="Phone number" maxlength="15">
+        </div>
+        <button class="btn-primary" id="btn-send-otp">Send OTP</button>
+      </div>
+
+      <!-- Step 2: OTP -->
+      <div class="login-step" id="step-otp">
+        <p style="font-size:13px;color:#aaa;margin-bottom:16px;">Enter the 4-digit code sent to your phone</p>
+        <div class="otp-row">
+          <input type="tel" class="otp-input" maxlength="1">
+          <input type="tel" class="otp-input" maxlength="1">
+          <input type="tel" class="otp-input" maxlength="1">
+          <input type="tel" class="otp-input" maxlength="1">
+        </div>
+        <button class="btn-primary" id="btn-verify-otp">Verify & Login</button>
+        <span class="resend-timer" id="resend-timer">Resend in 30s</span>
+        <button class="btn-secondary hidden" id="btn-resend">Resend OTP</button>
+        <button class="btn-secondary" id="btn-back-phone">← Change Number</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Main App ===== -->
+  <div id="app" class="hidden">
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="logo" id="top-title"><span class="accent-text">Tabarak</span>Viral</div>
+      <div class="actions">
+        <button id="btn-search-top">🔍</button>
+        <button id="btn-notif">
+          🔔
+          <span class="notif-badge">3</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Notification Panel -->
+    <div class="notif-panel" id="notif-panel">
+      <div class="notif-header">Notifications</div>
+      <div id="notif-list"></div>
+    </div>
+
+    <!-- Pages Container -->
+    <div class="pages-container">
+
+      <!-- HOME PAGE -->
+      <div class="page active" id="page-home">
+        <div class="stories-bar" id="stories-bar"></div>
+        <div class="video-feed" id="video-feed"></div>
+      </div>
+
+      <!-- TRENDING PAGE -->
+      <div class="page" id="page-trending">
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="trending-search" placeholder="Search videos, users, tags...">
+        </div>
+        <div class="tabs-row">
+          <div class="tab active" data-filter="all">All</div>
+          <div class="tab" data-filter="singing">🎤 Singing</div>
+          <div class="tab" data-filter="comedy">😂 Comedy</div>
+          <div class="tab" data-filter="acting">🎬 Acting</div>
+        </div>
+        <div id="trending-content" style="overflow-y:auto;height:calc(100% - 100px);padding-bottom:20px;"></div>
+      </div>
+
+      <!-- UPLOAD PAGE -->
+      <div class="page" id="page-upload">
+        <div class="upload-page">
+          <div class="upload-area" id="upload-area">
+            <div class="upload-icon">📹</div>
+            <h3>Upload Video</h3>
+            <p>Tap to select a video from your gallery</p>
+          </div>
+
+          <div class="upload-preview hidden" id="upload-preview">
+            <canvas></canvas>
+            <button class="remove-preview" id="remove-preview">✕</button>
+          </div>
+
+          <div class="upload-form hidden" id="upload-form">
+            <label>Title</label>
+            <input type="text" id="upload-title" placeholder="Give your video a title">
+
+            <label>Caption</label>
+            <textarea id="upload-caption" placeholder="Write a caption... #hashtags"></textarea>
+
+            <label>Category</label>
+            <select id="upload-category">
+              <option value="general">General</option>
+              <option value="comedy">😂 Comedy</option>
+              <option value="singing">🎤 Singing</option>
+              <option value="acting">🎬 Acting</option>
+              <option value="dance">💃 Dance</option>
+              <option value="cooking">🍳 Cooking</option>
+              <option value="gaming">🎮 Gaming</option>
+            </select>
+
+            <button class="btn-primary" id="btn-publish">🚀 Publish Video</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIVE PAGE -->
+      <div class="page" id="page-live">
+        <div class="live-page">
+          <div class="go-live-banner" id="go-live-btn">
+            <h3>🔴 Go Live Now</h3>
+            <p>Start streaming to your followers</p>
+          </div>
+          <div style="padding:0 16px 12px;"><h3 style="font-size:16px;">Live Now</h3></div>
+          <div class="live-streams-grid" id="live-grid"></div>
+        </div>
+      </div>
+
+      <!-- PROFILE PAGE -->
+      <div class="page" id="page-profile">
+        <div class="profile-page">
+          <div class="profile-header">
+            <div class="profile-avatar" id="profile-avatar">U</div>
+            <div class="username" id="profile-username">User</div>
+            <div class="handle" id="profile-handle">@user</div>
+            <div class="bio" id="profile-bio">Welcome!</div>
+          </div>
+          <div class="profile-stats">
+            <div class="stat"><div class="num" id="profile-followers">0</div><div class="label">Followers</div></div>
+            <div class="stat"><div class="num" id="profile-following">0</div><div class="label">Following</div></div>
+            <div class="stat"><div class="num" id="profile-likes">0</div><div class="label">Likes</div></div>
+          </div>
+          <div class="profile-actions">
+            <button class="btn-edit" id="btn-edit-profile">Edit Profile</button>
+            <button class="btn-share-profile" id="btn-share-profile">↗️</button>
+            <button class="btn-edit" id="btn-logout" style="color:#e63946;">Logout</button>
+          </div>
+          <div class="tabs-row">
+            <div class="tab active">📹 Videos</div>
+            <div class="tab">❤️ Liked</div>
+            <div class="tab">🔖 Saved</div>
+          </div>
+          <div class="profile-videos-grid" id="profile-videos-grid"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-page="home">
+        <span class="nav-icon">🏠</span>
+        <span>Home</span>
+      </button>
+      <button class="nav-item" data-page="trending">
+        <span class="nav-icon">🔥</span>
+        <span>Trending</span>
+      </button>
+      <button class="nav-item upload-btn" data-page="upload">
+        <span class="nav-icon">+</span>
+        <span>Upload</span>
+      </button>
+      <button class="nav-item" data-page="live">
+        <span class="nav-icon">📡</span>
+        <span>Live</span>
+      </button>
+      <button class="nav-item" data-page="profile">
+        <span class="nav-icon">👤</span>
+        <span>Profile</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ===== Overlays ===== -->
+
+  <!-- Backdrop -->
+  <div class="overlay-backdrop" id="overlay-backdrop"></div>
+
+  <!-- Comment Sheet -->
+  <div class="comment-sheet" id="comment-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <h3 id="comment-count-display">Comments</h3>
+      <button class="close-sheet" id="close-comments">✕</button>
+    </div>
+    <div class="comments-list" id="comments-list"></div>
+    <div class="comment-input-row">
+      <input type="text" id="comment-input" placeholder="Add a comment...">
+      <button class="post-comment" id="post-comment-btn">Post</button>
+    </div>
+  </div>
+
+  <!-- Share Sheet -->
+  <div class="share-sheet" id="share-sheet">
+    <div class="sheet-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <h3 style="font-size:15px;">Share to</h3>
+      <button id="close-share" style="font-size:18px;">✕</button>
+    </div>
+    <div class="share-options">
+      <div class="share-option">
+        <div class="share-icon" style="background:#25D366">💬</div>
+        <span class="share-label">WhatsApp</span>
+      </div>
+      <div class="share-option">
+        <div class="share-icon" style="background:#1DA1F2">🐦</div>
+        <span class="share-label">Twitter</span>
+      </div>
+      <div class="share-option">
+        <div class="share-icon" style="background:#4267B2">📘</div>
+        <span class="share-label">Facebook</span>
+      </div>
+      <div class="share-option">
+        <div class="share-icon" style="background:#E4405F">📷</div>
+        <span class="share-label">Instagram</span>
+      </div>
+      <div class="share-option">
+        <div class="share-icon" style="background:#555">🔗</div>
+        <span class="share-label">Copy Link</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Viewer -->
+  <div class="live-viewer" id="live-viewer">
+    <div class="live-video-area">
+      <canvas id="live-canvas"></canvas>
+      <div class="live-top-bar">
+        <div class="streamer-info">
+          <div class="avatar" id="live-streamer-avatar">S</div>
+          <div class="details">
+            <div class="name" id="live-streamer-name">Streamer</div>
+            <div class="viewer-count" id="live-viewer-count">0 viewers</div>
+          </div>
+          <span class="live-badge" style="margin-left:8px;">LIVE</span>
+        </div>
+        <button class="close-live" id="close-live-btn">✕</button>
+      </div>
+      <div class="live-chat-panel">
+        <div class="live-chat-messages" id="live-chat-messages"></div>
+        <div class="live-chat-input">
+          <input type="text" id="live-chat-input" placeholder="Say something...">
+          <button class="send-chat" id="send-live-chat">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Story Viewer -->
+  <div class="story-viewer" id="story-viewer">
+    <div class="story-progress" id="story-progress"></div>
+    <div class="story-top">
+      <div class="story-user-avatar" id="story-user-avatar">U</div>
+      <span class="story-user-name" id="story-user-name">User</span>
+      <span class="story-time" id="story-time-display">2h ago</span>
+      <button class="close-story" id="close-story-btn">✕</button>
+    </div>
+    <div class="story-content">
+      <div class="story-text" id="story-text-content">Story text here</div>
+    </div>
+  </div>
+
+  <!-- Story Create -->
+  <div class="story-create" id="story-create">
+    <div class="sc-header">
+      <button id="close-story-create">✕</button>
+      <h3>Create Story</h3>
+      <button class="btn-primary" id="btn-post-story" style="width:auto;padding:8px 20px;font-size:13px;">Post</button>
+    </div>
+    <div class="sc-body">
+      <textarea id="story-textarea" placeholder="Share your thoughts, feelings, or a story..."></textarea>
+      <div>
+        <label style="font-size:12px;color:#aaa;margin-bottom:8px;display:block;">Background</label>
+        <div class="bg-options">
+          <div class="bg-option" style="background:linear-gradient(135deg,#667eea,#764ba2)" data-bg="linear-gradient(135deg,#667eea,#764ba2)"></div>
+          <div class="bg-option" style="background:linear-gradient(135deg,#f093fb,#f5576c)" data-bg="linear-gradient(135deg,#f093fb,#f5576c)"></div>
+          <div class="bg-option" style="background:linear-gradient(135deg,#ff6b35,#e63946)" data-bg="linear-gradient(135deg,#ff6b35,#e63946)"></div>
+          <div class="bg-option" style="background:linear-gradient(135deg,#43e97b,#38f9d7)" data-bg="linear-gradient(135deg,#43e97b,#38f9d7)"></div>
+          <div class="bg-option" style="background:linear-gradient(135deg,#4facfe,#00f2fe)" data-bg="linear-gradient(135deg,#4facfe,#00f2fe)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Profile Modal -->
+  <div class="modal-overlay" id="edit-profile-modal">
+    <div class="modal-box">
+      <h3>Edit Profile</h3>
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" id="edit-name" placeholder="Your name">
+      </div>
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="edit-handle" placeholder="@username">
+      </div>
+      <div class="form-group">
+        <label>Bio</label>
+        <textarea id="edit-bio" placeholder="Tell the world about yourself..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="cancel-edit">Cancel</button>
+        <button class="btn-save" id="save-edit">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

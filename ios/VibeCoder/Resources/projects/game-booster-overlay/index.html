@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>NEXUS Game Booster | S25 Ultra</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a28;--bg4:#222235;
+--accent:#00f0ff;--accent2:#ff00e5;--accent3:#7b2aff;--accent4:#00ff88;
+--danger:#ff3355;--warn:#ffaa00;--text:#e8e8f0;--text2:#8888aa;
+--glow:0 0 20px rgba(0,240,255,0.3);
+--glow2:0 0 20px rgba(255,0,229,0.3);
+}
+html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+.app{height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden}
+
+/* Animated background */
+.bg-fx{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.bg-fx .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.15;animation:orbFloat 8s ease-in-out infinite}
+.bg-fx .orb:nth-child(1){width:300px;height:300px;background:var(--accent);top:-50px;left:-50px;animation-delay:0s}
+.bg-fx .orb:nth-child(2){width:250px;height:250px;background:var(--accent2);bottom:-50px;right:-50px;animation-delay:-3s}
+.bg-fx .orb:nth-child(3){width:200px;height:200px;background:var(--accent3);top:40%;left:60%;animation-delay:-5s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-30px) scale(1.1)}}
+
+/* Header */
+.header{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(18,18,26,0.9);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,240,255,0.1)}
+.header .logo{display:flex;align-items:center;gap:8px}
+.header .logo svg{width:28px;height:28px}
+.header .logo span{font-size:16px;font-weight:800;letter-spacing:3px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header .device-tag{font-size:10px;background:var(--bg3);padding:3px 8px;border-radius:4px;color:var(--text2);border:1px solid rgba(255,255,255,0.05)}
+.header-actions{display:flex;gap:8px;align-items:center}
+.icon-btn{width:36px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:var(--bg3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;color:var(--text2)}
+.icon-btn:active{transform:scale(.92)}
+.icon-btn.active{border-color:var(--accent);color:var(--accent);box-shadow:var(--glow)}
+
+/* Navigation */
+.nav{position:relative;z-index:10;display:flex;gap:4px;padding:8px 12px;background:rgba(18,18,26,0.8);backdrop-filter:blur(20px);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav-item{flex-shrink:0;padding:8px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;transition:all .3s;color:var(--text2);background:transparent;border:1px solid transparent;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.nav-item.active{color:var(--accent);background:rgba(0,240,255,0.08);border-color:rgba(0,240,255,0.2);box-shadow:inset 0 0 20px rgba(0,240,255,0.05)}
+
+/* Main content */
+.content{flex:1;overflow-y:auto;overflow-x:hidden;position:relative;z-index:5;padding:16px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--bg4) transparent}
+.content::-webkit-scrollbar{width:3px}
+.content::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+.page{display:none;animation:fadeIn .3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Cards */
+.card{background:rgba(26,26,40,0.7);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:16px;margin-bottom:12px;backdrop-filter:blur(10px);transition:all .3s}
+.card:active{transform:scale(.98)}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text)}
+.card-badge{font-size:10px;padding:3px 8px;border-radius:6px;font-weight:600}
+.badge-active{background:rgba(0,255,136,0.15);color:var(--accent4)}
+.badge-inactive{background:rgba(255,51,85,0.15);color:var(--danger)}
+.badge-warn{background:rgba(255,170,0,0.15);color:var(--warn)}
+
+/* Boost Button */
+.boost-section{text-align:center;padding:20px 0}
+.boost-btn{width:140px;height:140px;border-radius:50%;border:3px solid rgba(0,240,255,0.3);background:radial-gradient(circle,rgba(0,240,255,0.1),transparent);cursor:pointer;position:relative;transition:all .4s;display:flex;align-items:center;justify-content:center;flex-direction:column;margin:0 auto;-webkit-tap-highlight-color:transparent}
+.boost-btn::before{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid transparent;border-top-color:var(--accent);animation:spin 2s linear infinite;opacity:0;transition:opacity .4s}
+.boost-btn.boosted{border-color:var(--accent);box-shadow:0 0 40px rgba(0,240,255,0.4),0 0 80px rgba(0,240,255,0.1);background:radial-gradient(circle,rgba(0,240,255,0.2),transparent)}
+.boost-btn.boosted::before{opacity:1}
+.boost-btn .boost-icon{font-size:36px;margin-bottom:4px;transition:all .4s}
+.boost-btn.boosted .boost-icon{filter:drop-shadow(0 0 10px var(--accent))}
+.boost-btn .boost-label{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--text2);transition:color .4s}
+.boost-btn.boosted .boost-label{color:var(--accent)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.boost-status{margin-top:16px;font-size:13px;font-weight:600;color:var(--text2)}
+.boost-status.active{color:var(--accent4)}
+
+/* Metrics */
+.metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.metric-card{background:rgba(26,26,40,0.6);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:14px;text-align:center;position:relative;overflow:hidden}
+.metric-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:opacity .3s}
+.metric-card.highlight::after{opacity:1}
+.metric-value{font-size:28px;font-weight:800;line-height:1;margin-bottom:4px;font-variant-numeric:tabular-nums}
+.metric-value.cyan{color:var(--accent)}
+.metric-value.pink{color:var(--accent2)}
+.metric-value.purple{color:var(--accent3)}
+.metric-value.green{color:var(--accent4)}
+.metric-value.warn{color:var(--warn)}
+.metric-value.danger{color:var(--danger)}
+.metric-label{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.metric-unit{font-size:14px;font-weight:400}
+.metric-bar{height:4px;background:var(--bg);border-radius:2px;margin-top:8px;overflow:hidden}
+.metric-bar-fill{height:100%;border-radius:2px;transition:width .5s ease,background .5s}
+
+/* Toggle */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-info{display:flex;align-items:center;gap:10px}
+.toggle-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.toggle-text h4{font-size:13px;font-weight:600;margin-bottom:2px}
+.toggle-text p{font-size:11px;color:var(--text2)}
+.toggle{width:46px;height:26px;border-radius:13px;background:var(--bg4);cursor:pointer;position:relative;transition:background .3s;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.toggle.on{background:linear-gradient(135deg,var(--accent),var(--accent3))}
+.toggle::after{content:'';position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform .3s;box-shadow:0 2px 4px rgba(0,0,0,.3)}
+.toggle.on::after{transform:translateX(20px)}
+
+/* Slider */
+.slider-row{padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.slider-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.slider-header h4{font-size:13px;font-weight:600}
+.slider-val{font-size:13px;font-weight:700;color:var(--accent)}
+input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:3px;background:var(--bg4);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent3));cursor:pointer;box-shadow:0 0 10px rgba(0,240,255,0.4)}
+
+/* Game Profiles */
+.profile-card{display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg3);border-radius:12px;margin-bottom:8px;cursor:pointer;transition:all .3s;border:1px solid transparent}
+.profile-card.active{border-color:var(--accent);box-shadow:var(--glow)}
+.profile-card:active{transform:scale(.97)}
+.profile-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(135deg,var(--bg),var(--bg3))}
+.profile-info{flex:1}
+.profile-info h4{font-size:13px;font-weight:600;margin-bottom:2px}
+.profile-info p{font-size:11px;color:var(--text2)}
+.profile-status{width:8px;height:8px;border-radius:50%;background:var(--bg4)}
+.profile-card.active .profile-status{background:var(--accent4);box-shadow:0 0 8px var(--accent4)}
+
+/* Canvas charts */
+.chart-container{width:100%;height:120px;border-radius:12px;overflow:hidden;background:rgba(10,10,15,0.5);margin-bottom:12px;position:relative}
+.chart-container canvas{width:100%;height:100%}
+.chart-label{position:absolute;top:8px;left:10px;font-size:10px;color:var(--text2);font-weight:600;letter-spacing:1px;text-transform:uppercase}
+
+/* Network */
+.net-stat{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.net-stat:last-child{border-bottom:none}
+.net-dot{width:8px;height:8px;border-radius:50%}
+.net-dot.good{background:var(--accent4);box-shadow:0 0 8px var(--accent4)}
+.net-dot.mid{background:var(--warn);box-shadow:0 0 8px var(--warn)}
+.net-dot.bad{background:var(--danger);box-shadow:0 0 8px var(--danger)}
+.net-info{flex:1}
+.net-info h4{font-size:12px;font-weight:600}
+.net-info p{font-size:11px;color:var(--text2)}
+.net-val{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* Floating Overlay Preview */
+.overlay-preview{position:relative;width:100%;aspect-ratio:9/16;background:linear-gradient(180deg,#1a1a2e,#0a0a1a);border-radius:20px;overflow:hidden;margin-bottom:16px;border:1px solid rgba(255,255,255,0.08)}
+.overlay-preview .mock-game{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:40px;opacity:.15}
+.overlay-hud{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
+.hud-left,.hud-right{display:flex;flex-direction:column;gap:4px}
+.hud-item{background:rgba(0,0,0,0.7);backdrop-filter:blur(10px);padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;font-variant-numeric:tabular-nums;border:1px solid rgba(255,255,255,0.08)}
+.hud-fps{color:var(--accent4);border-color:rgba(0,255,136,0.2)}
+.hud-temp{color:var(--warn);border-color:rgba(255,170,0,0.2)}
+.hud-ram{color:var(--accent);border-color:rgba(0,240,255,0.2)}
+.hud-ping{color:var(--accent2);border-color:rgba(255,0,229,0.2)}
+.hud-battery{color:#fff;border-color:rgba(255,255,255,0.1)}
+.overlay-crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:30px;height:30px;opacity:.3}
+
+/* Action Buttons */
+.action-btn{width:100%;padding:14px;border-radius:12px;border:none;font-size:14px;font-weight:700;cursor:pointer;transition:all .3s;letter-spacing:1px;-webkit-tap-highlight-color:transparent}
+.action-btn:active{transform:scale(.96)}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent3));color:#000;box-shadow:0 4px 20px rgba(0,240,255,0.3)}
+.btn-danger{background:linear-gradient(135deg,var(--danger),#ff0066);color:#fff}
+.btn-outline{background:transparent;border:1px solid rgba(255,255,255,0.1);color:var(--text)}
+.btn-sm{padding:8px 16px;font-size:12px;border-radius:8px;width:auto}
+
+/* Bottom bar */
+.bottom-bar{position:relative;z-index:10;display:flex;justify-content:space-around;padding:10px 16px 16px;background:rgba(18,18,26,0.95);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.05)}
+.bottom-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .3s;color:var(--text2)}
+.bottom-item.active{color:var(--accent)}
+.bottom-item svg{width:22px;height:22px}
+.bottom-item span{font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+
+/* Notification Toast */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(100px);background:rgba(26,26,40,0.95);backdrop-filter:blur(20px);border:1px solid rgba(0,240,255,0.2);border-radius:12px;padding:12px 20px;font-size:13px;font-weight:600;z-index:100;transition:transform .4s cubic-bezier(.4,0,.2,1);white-space:nowrap;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* RAM Cleaner animation */
+.cleaner-ring{width:120px;height:120px;margin:20px auto;position:relative}
+.cleaner-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.cleaner-ring .ring-bg{fill:none;stroke:var(--bg4);stroke-width:8}
+.cleaner-ring .ring-fill{fill:none;stroke:url(#cleanGrad);stroke-width:8;stroke-linecap:round;stroke-dasharray:339.292;stroke-dashoffset:339.292;transition:stroke-dashoffset 1.5s ease}
+.cleaner-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.cleaner-val .pct{font-size:28px;font-weight:800;color:var(--accent)}
+.cleaner-val .lbl{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px}
+
+/* DND Banner */
+.dnd-banner{padding:10px 16px;border-radius:12px;display:flex;align-items:center;gap:10px;margin-bottom:12px;transition:all .3s}
+.dnd-banner.off{background:rgba(255,51,85,0.08);border:1px solid rgba(255,51,85,0.15)}
+.dnd-banner.on{background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.15)}
+.dnd-banner .dnd-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.dnd-banner.off .dnd-dot{background:var(--danger)}
+.dnd-banner.on .dnd-dot{background:var(--accent4);box-shadow:0 0 8px var(--accent4)}
+.dnd-banner span{font-size:12px;font-weight:600}
+
+/* Scrollbar fix for pages */
+.page{padding-bottom:20px}
+
+/* Pulse animation for active elements */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.pulse{animation:pulse 1.5s ease-in-out infinite}
+
+/* Haptic feedback visual */
+@keyframes haptic{0%{transform:scale(1)}50%{transform:scale(.95)}100%{transform:scale(1)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Background Effects -->
+  <div class="bg-fx">
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <svg viewBox="0 0 28 28" fill="none">
+        <path d="M14 2L2 8v12l12 6 12-6V8L14 2z" stroke="url(#logoGrad)" stroke-width="1.5" fill="none"/>
+        <path d="M14 8l-6 3v6l6 3 6-3v-6l-6-3z" fill="url(#logoGrad)" opacity=".3"/>
+        <path d="M14 8v12M8 11l6 3 6-3" stroke="url(#logoGrad)" stroke-width="1.2"/>
+        <defs><linearGradient id="logoGrad" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#00f0ff"/><stop offset="1" stop-color="#ff00e5"/></linearGradient></defs>
+      </svg>
+      <span>NEXUS</span>
+    </div>
+    <div class="header-actions">
+      <div class="device-tag">S25 ULTRA</div>
+      <div class="icon-btn" id="notifBtn" title="Notifications">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+      </div>
+      <div class="icon-btn" id="settingsBtn" title="Settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="nav" id="navBar">
+    <div class="nav-item active" data-tab="dashboard">Dashboard</div>
+    <div class="nav-item" data-tab="performance">Performance</div>
+    <div class="nav-item" data-tab="network">Network</div>
+    <div class="nav-item" data-tab="overlay">Overlay</div>
+    <div class="nav-item" data-tab="profiles">Profiles</div>
+    <div class="nav-item" data-tab="tools">Tools</div>
+  </div>
+
+  <!-- Content Area -->
+  <div class="content" id="content">
+
+    <!-- DASHBOARD PAGE -->
+    <div class="page active" id="page-dashboard">
+      <!-- Boost Button -->
+      <div class="boost-section">
+        <div class="boost-btn" id="boostBtn">
+          <div class="boost-icon">
+            <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="url(#boltGrad)" stroke="none"/><defs><linearGradient id="boltGrad" x1="3" y1="2" x2="21" y2="22"><stop stop-color="#00f0ff"/><stop offset="1" stop-color="#7b2aff"/></linearGradient></defs></svg>
+          </div>
+          <div class="boost-label">BOOST</div>
+        </div>
+        <div class="boost-status" id="boostStatus">TAP TO ACTIVATE</div>
+      </div>
+
+      <!-- Quick Metrics -->
+      <div class="metrics-grid" id="dashMetrics">
+        <div class="metric-card highlight">
+          <div class="metric-value green" id="dashFps">60<span class="metric-unit"> FPS</span></div>
+          <div class="metric-label">Frame Rate</div>
+          <div class="metric-bar"><div class="metric-bar-fill" id="fpsBar" style="width:100%;background:var(--accent4)"></div></div>
+        </div>
+        <div class="metric-card highlight">
+          <div class="metric-value cyan" id="dashCpu">32<span class="metric-unit">%</span></div>
+          <div class="metric-label">CPU Usage</div>
+          <div class="metric-bar"><div class="metric-bar-fill" id="cpuBar" style="width:32%;background:var(--accent)"></div></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value purple" id="dashGpu">28<span class="metric-unit">%</span></div>
+          <div class="metric-label">GPU Usage</div>
+          <div class="metric-bar"><div class="metric-bar-fill" id="gpuBar" style="width:28%;background:var(--accent3)"></div></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value pink" id="dashRam">4.2<span class="metric-unit"> GB</span></div>
+          <div class="metric-label">RAM Used</div>
+          <div class="metric-bar"><div class="metric-bar-fill" id="ramBar" style="width:35%;background:var(--accent2)"></div></div>
+        </div>
+      </div>
+
+      <!-- Quick Toggles -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Quick Controls</div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-icon" style="background:rgba(0,240,255,0.1);color:var(--accent)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <div class="toggle-text"><h4>120Hz Display</h4><p>Max refresh rate</p></div>
+          </div>
+          <div class="toggle on" data-key="hz120"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-icon" style="background:rgba(255,0,229,0.1);color:var(--accent2)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 11-12.73 0M12 2v10"/></svg>
+            </div>
+            <div class="toggle-text"><h4>Force GPU Rendering</h4><p>Hardware acceleration</p></div>
+          </div>
+          <div class="toggle on" data-key="gpuRender"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-icon" style="background:rgba(123,42,255,0.1);color:var(--accent3)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="toggle-text"><h4>Do Not Disturb</h4><p>Block notifications</p></div>
+          </div>
+          <div class="toggle" data-key="dnd"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-icon" style="background:rgba(0,255,136,0.1);color:var(--accent4)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 12l-2.44-2.78.34-3.68-3.61-.82-1.89-3.18L12 3 8.6 1.54 6.71 4.72l-3.61.81.34 3.68L1 12l2.44 2.78-.34 3.69 3.61.82 1.89 3.18L12 21l3.4 1.46 1.89-3.18 3.61-.82-.34-3.68L23 12z"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <div class="toggle-text"><h4>Game Priority Mode</h4><p>Allocate max resources</p></div>
+          </div>
+          <div class="toggle" data-key="priority"></div>
+        </div>
+      </div>
+
+      <!-- Temperature -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Thermal Status</div>
+          <div class="card-badge badge-active" id="thermalBadge">COOL</div>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-value green" id="cpuTemp">38<span class="metric-unit">°C</span></div>
+            <div class="metric-label">CPU Temp</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value green" id="batteryTemp">32<span class="metric-unit">°C</span></div>
+            <div class="metric-label">Battery</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERFORMANCE PAGE -->
+    <div class="page" id="page-performance">
+      <div class="card">
+        <div class="card-header"><div class="card-title">FPS History</div><div class="card-badge badge-active" id="fpsBadge">STABLE</div></div>
+        <div class="chart-container">
+          <canvas id="fpsChart"></canvas>
+          <div class="chart-label">FPS OVER TIME</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">CPU & GPU Load</div></div>
+        <div class="chart-container">
+          <canvas id="loadChart"></canvas>
+          <div class="chart-label">PROCESSOR LOAD</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Performance Tuning</div></div>
+        <div class="slider-row">
+          <div class="slider-header"><h4>CPU Clock Speed</h4><span class="slider-val" id="cpuClockVal">2.8 GHz</span></div>
+          <input type="range" min="18" max="36" value="28" id="cpuClockSlider">
+        </div>
+        <div class="slider-row">
+          <div class="slider-header"><h4>GPU Clock Speed</h4><span class="slider-val" id="gpuClockVal">900 MHz</span></div>
+          <input type="range" min="400" max="1300" value="900" step="50" id="gpuClockSlider">
+        </div>
+        <div class="slider-row">
+          <div class="slider-header"><h4>Touch Sensitivity</h4><span class="slider-val" id="touchVal">High</span></div>
+          <input type="range" min="1" max="4" value="3" id="touchSlider">
+        </div>
+        <div class="slider-row">
+          <div class="slider-header"><h4>Screen Resolution</h4><span class="slider-val" id="resVal">QHD+</span></div>
+          <input type="range" min="1" max="3" value="3" id="resSlider">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Memory Usage</div></div>
+        <div class="chart-container" style="height:100px">
+          <canvas id="memChart"></canvas>
+          <div class="chart-label">RAM ALLOCATION (12 GB)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NETWORK PAGE -->
+    <div class="page" id="page-network">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Connection Status</div><div class="card-badge badge-active" id="netBadge">CONNECTED</div></div>
+        <div class="net-stat">
+          <div class="net-dot good" id="pingDot"></div>
+          <div class="net-info"><h4>Latency</h4><p>Game Server Ping</p></div>
+          <div class="net-val cyan" id="pingVal">24ms</div>
+        </div>
+        <div class="net-stat">
+          <div class="net-dot good"></div>
+          <div class="net-info"><h4>Download</h4><p>Current Speed</p></div>
+          <div class="net-val green" id="dlVal">142 Mbps</div>
+        </div>
+        <div class="net-stat">
+          <div class="net-dot good"></div>
+          <div class="net-info"><h4>Upload</h4><p>Current Speed</p></div>
+          <div class="net-val purple" id="ulVal">48 Mbps</div>
+        </div>
+        <div class="net-stat">
+          <div class="net-dot good" id="jitterDot"></div>
+          <div class="net-info"><h4>Jitter</h4><p>Connection Stability</p></div>
+          <div class="net-val pink" id="jitterVal">2ms</div>
+        </div>
+        <div class="net-stat">
+          <div class="net-dot good" id="lossDot"></div>
+          <div class="net-info"><h4>Packet Loss</h4><p>Data Integrity</p></div>
+          <div class="net-val" id="lossVal" style="color:var(--accent4)">0.0%</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Ping History</div></div>
+        <div class="chart-container">
+          <canvas id="pingChart"></canvas>
+          <div class="chart-label">LATENCY (MS)</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Network Optimization</div></div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-icon" style="background:rgba(0,240,255,0.1);color:var(--accent)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0114.08 0M1.42 9a16 16 0 0121.16 0M8.53 16.11a6 6 0 016.95 0M12 20h.01"/></svg>
+            </div>
+            <div class="toggle-text"><h4>Wi-Fi 7 Boost</h4><p>Prioritize gaming traffic</p></div>
+          </div>
+          <div class="toggle on" data-key="wifi7"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-icon" style="background:rgba(255,0,229,0.1);color:var(--accent2)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div class="toggle-text"><h4>Smart DNS</h4><p>Low-latency DNS routing</p></div>
+          </div>
+          <div class="toggle on" data-key="smartdns"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-icon" style="background:rgba(0,255,136,0.1);color:var(--accent4)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            </div>
+            <div class="toggle-text"><h4>VPN Kill Switch</h4><p>Secure connection guard</p></div>
+          </div>
+          <div class="toggle" data-key="vpnkill"></div>
+        </div>
+      </div>
+
+      <button class="action-btn btn-primary" id="netTestBtn" style="margin-top:8px">
+        RUN SPEED TEST
+      </button>
+    </div>
+
+    <!-- OVERLAY PAGE -->
+    <div class="page" id="page-overlay">
+      <div class="card">
+        <div class="card-header"><div class="card-title">HUD Preview</div><div class="card-badge badge-active">LIVE</div></div>
+        <div class="overlay-preview" id="overlayPreview">
+          <div class="mock-game">GAME</div>
+          <div class="overlay-hud">
+            <div class="hud-left">
+              <div class="hud-item hud-fps" id="hudFps">60 FPS</div>
+              <div class="hud-item hud-temp" id="hudTemp">38°C</div>
+            </div>
+            <div class="hud-right">
+              <div class="hud-item hud-ram" id="hudRam">4.2 GB</div>
+              <div class="hud-item hud-ping" id="hudPing">24ms</div>
+              <div class="hud-item hud-battery" id="hudBatt">87%</div>
+            </div>
+          </div>
+          <svg class="overlay-crosshair" viewBox="0 0 30 30">
+            <line x1="15" y1="5" x2="15" y2="12" stroke="#fff" stroke-width="1"/>
+            <line x1="15" y1="18" x2="15" y2="25" stroke="#fff" stroke-width="1"/>
+            <line x1="5" y1="15" x2="12" y2="15" stroke="#fff" stroke-width="1"/>
+            <line x1="18" y1="15" x2="25" y2="15" stroke="#fff" stroke-width="1"/>
+            <circle cx="15" cy="15" r="2" fill="none" stroke="#fff" stroke-width="0.5"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Overlay Elements</div></div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-text"><h4>FPS Counter</h4><p>Show frame rate</p></div></div>
+          <div class="toggle on" data-key="showFps"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-text"><h4>Temperature</h4><p>CPU/GPU temp</p></div></div>
+          <div class="toggle on" data-key="showTemp"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-text"><h4>RAM Usage</h4><p>Memory monitor</p></div></div>
+          <div class="toggle on" data-key="showRam"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-text"><h4>Network Ping</h4><p>Latency display</p></div></div>
+          <div class="toggle on" data-key="showPing"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-text"><h4>Battery Level</h4><p>Remaining charge</p></div></div>
+          <div class="toggle on" data-key="showBatt"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-text"><h4>Crosshair</h4><p>Center screen marker</p></div></div>
+          <div class="toggle" data-key="showCross"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Overlay Style</div></div>
+        <div class="slider-row">
+          <div class="slider-header"><h4>Opacity</h4><span class="slider-val" id="opacityVal">80%</span></div>
+          <input type="range" min="20" max="100" value="80" id="opacitySlider">
+        </div>
+        <div class="slider-row">
+          <div class="slider-header"><h4>HUD Size</h4><span class="slider-val" id="hudSizeVal">Medium</span></div>
+          <input type="range" min="1" max="3" value="2" id="hudSizeSlider">
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILES PAGE -->
+    <div class="page" id="page-profiles">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Game Profiles</div><button class="action-btn btn-outline btn-sm" id="addProfileBtn">+ ADD</button></div>
+        <div id="profileList">
+          <div class="profile-card active" data-profile="fps">
+            <div class="profile-icon">&#x1F3AF;</div>
+            <div class="profile-info"><h4>FPS Shooter</h4><p>Max FPS, low latency, high touch</p></div>
+            <div class="profile-status"></div>
+          </div>
+          <div class="profile-card" data-profile="moba">
+            <div class="profile-icon">&#x2694;&#xFE0F;</div>
+            <div class="profile-info"><h4>MOBA / Strategy</h4><p>Balanced performance, stable FPS</p></div>
+            <div class="profile-status"></div>
+          </div>
+          <div class="profile-card" data-profile="racing">
+            <div class="profile-icon">&#x1F3CE;&#xFE0F;</div>
+            <div class="profile-info"><h4>Racing</h4><p>High GPU, smooth rendering</p></div>
+            <div class="profile-status"></div>
+          </div>
+          <div class="profile-card" data-profile="rpg">
+            <div class="profile-icon">&#x1F5E1;&#xFE0F;</div>
+            <div class="profile-info"><h4>RPG / Open World</h4><p>High quality graphics, battery saver</p></div>
+            <div class="profile-status"></div>
+          </div>
+          <div class="profile-card" data-profile="casual">
+            <div class="profile-icon">&#x1F3AE;</div>
+            <div class="profile-info"><h4>Casual</h4><p>Battery priority, standard performance</p></div>
+            <div class="profile-status"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="profileDetails">
+        <div class="card-header"><div class="card-title">Profile Settings</div><div class="card-badge badge-active" id="profileActive">ACTIVE</div></div>
+        <div class="slider-row">
+          <div class="slider-header"><h4>Target FPS</h4><span class="slider-val" id="profFpsVal">120</span></div>
+          <input type="range" min="30" max="120" value="120" step="10" id="profFpsSlider">
+        </div>
+        <div class="slider-row">
+          <div class="slider-header"><h4>Graphics Quality</h4><span class="slider-val" id="profGfxVal">Ultra</span></div>
+          <input type="range" min="1" max="4" value="4" id="profGfxSlider">
+        </div>
+        <div class="slider-row">
+          <div class="slider-header"><h4>Touch Response</h4><span class="slider-val" id="profTouchVal">Instant</span></div>
+          <input type="range" min="1" max="4" value="4" id="profTouchSlider">
+        </div>
+        <button class="action-btn btn-primary" id="saveProfileBtn" style="margin-top:12px">SAVE PROFILE</button>
+      </div>
+    </div>
+
+    <!-- TOOLS PAGE -->
+    <div class="page" id="page-tools">
+      <!-- RAM Cleaner -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">RAM Cleaner</div><div class="card-badge badge-active" id="ramCleanBadge">READY</div></div>
+        <div class="cleaner-ring" id="cleanerRing">
+          <svg viewBox="0 0 120 120">
+            <defs><linearGradient id="cleanGrad" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse"><stop stop-color="#00f0ff"/><stop offset="1" stop-color="#7b2aff"/></linearGradient></defs>
+            <circle class="ring-bg" cx="60" cy="60" r="54"/>
+            <circle class="ring-fill" id="cleanRingFill" cx="60" cy="60" r="54"/>
+          </svg>
+          <div class="cleaner-val">
+            <div class="pct" id="cleanPct">0%</div>
+            <div class="lbl">Freed</div>
+          </div>
+        </div>
+        <button class="action-btn btn-primary" id="cleanRamBtn">CLEAN RAM NOW</button>
+      </div>
+
+      <!-- DND -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">Focus Mode</div></div>
+        <div class="dnd-banner off" id="dndBanner">
+          <div class="dnd-dot"></div>
+          <span id="dndText">Notifications are enabled</span>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-text"><h4>Block All Notifications</h4><p>Silence everything during gameplay</p></div></div>
+          <div class="toggle" data-key="dndFull" id="dndFullToggle"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-text"><h4>Auto-Brightness Lock</h4><p>Prevent brightness changes</p></div></div>
+          <div class="toggle" data-key="brightLock"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-text"><h4>Disable Navigation Bar</h4><p>Prevent accidental exits</p></div></div>
+          <div class="toggle" data-key="noNav"></div>
+        </div>
+      </div>
+
+      <!-- Battery Stats -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">Battery Optimizer</div></div>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-value green" id="battPct">87<span class="metric-unit">%</span></div>
+            <div class="metric-label">Battery</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value cyan" id="battTime">3h 42m</div>
+            <div class="metric-label">Game Time Left</div>
+          </div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-text"><h4>Battery Saver Mode</h4><p>Limit background processes</p></div></div>
+          <div class="toggle" data-key="battSaver"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-text"><h4>Charge Bypass</h4><p>Power device directly while charging</p></div></div>
+          <div class="toggle" data-key="chargeBypass"></div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">Quick Actions</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button class="action-btn btn-outline btn-sm" id="screenshotBtn">Screenshot</button>
+          <button class="action-btn btn-outline btn-sm" id="recordBtn">Screen Record</button>
+          <button class="action-btn btn-outline btn-sm" id="macroBtn">Macro Editor</button>
+          <button class="action-btn btn-outline btn-sm" id="resetBtn">Reset All</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-bar">
+    <div class="bottom-item active" data-page="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Home</span>
+    </div>
+    <div class="bottom-item" data-page="performance">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Perf</span>
+    </div>
+    <div class="bottom-item" data-page="network">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0114.08 0M1.42 9a16 16 0 0121.16 0M8.53 16.11a6 6 0 016.95 0M12 20h.01"/></svg>
+      <span>Network</span>
+    </div>
+    <div class="bottom-item" data-page="overlay">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      <span>Overlay</span>
+    </div>
+    <div class="bottom-item" data-page="tools">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      <span>Tools</span>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ========== STATE ==========
+const defaultState = {
+  boosted: false,
+  hz120: true, gpuRender: true, dnd: false, priority: false,
+  wifi7: true, smartdns: true, vpnkill: false,
+  showFps: true, showTemp: true, showRam: true, showPing: true, showBatt: true, showCross: false,
+  dndFull: false, brightLock: false, noNav: false,
+  battSaver: false, chargeBypass: false,
+  activeProfile: 'fps',
+  cpuClock: 28, gpuClock: 900, touchSens: 3, resolution: 3,
+  overlayOpacity: 80, hudSize: 2,
+  profiles: {
+    fps: { name:'FPS Shooter', targetFps:120, gfx:4, touch:4 },
+    moba: { name:'MOBA / Strategy', targetFps:60, gfx:3, touch:3 },
+    racing: { name:'Racing', targetFps:90, gfx:4, touch:2 },
+    rpg: { name:'RPG / Open World', targetFps:60, gfx:4, touch:2 },
+    casual: { name:'Casual', targetFps:30, gfx:2, touch:2 }
+  }
+};
+
+let state;
+try {
+  const saved = localStorage.getItem('nexus_state');
+  state = saved ? { ...defaultState, ...JSON.parse(saved), profiles: { ...defaultState.profiles, ...(JSON.parse(saved).profiles || {}) } } : { ...defaultState };
+} catch(e) { state = { ...defaultState }; }
+
+function saveState() {
+  try { localStorage.setItem('nexus_state', JSON.stringify(state)); } catch(e) {}
+}
+
+// ========== TOAST ==========
+let toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ========== NAVIGATION ==========
+const navItems = document.querySelectorAll('.nav-item');
+const bottomItems = document.querySelectorAll('.bottom-item');
+const pages = document.querySelectorAll('.page');
+let currentPage = 'dashboard';
+
+function switchPage(page) {
+  currentPage = page;
+  pages.forEach(p => p.classList.toggle('active', p.id === 'page-' + page));
+  navItems.forEach(n => n.classList.toggle('active', n.dataset.tab === page));
+  bottomItems.forEach(b => b.classList.toggle('active', b.dataset.page === page));
+  // Scroll nav item into view
+  const activeNav = document.querySelector(`.nav-item[data-tab="${page}"]`);
+  if (activeNav) activeNav.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  // Init charts when switching to performance/network
+  if (page === 'performance') initPerfCharts();
+  if (page === 'network') initNetChart();
+}
+
+navItems.forEach(n => n.addEventListener('click', () => switchPage(n.dataset.tab)));
+bottomItems.forEach(b => b.addEventListener('click', () => switchPage(b.dataset.page)));
+
+// ========== TOGGLES ==========
+function initToggles() {
+  document.querySelectorAll('.toggle[data-key]').forEach(el => {
+    const key = el.dataset.key;
+    if (state[key]) el.classList.add('on'); else el.classList.remove('on');
+    el.addEventListener('click', () => {
+      state[key] = !state[key];
+      el.classList.toggle('on', state[key]);
+      saveState();
+      handleToggleChange(key, state[key]);
+    });
+  });
+}
+
+function handleToggleChange(key, val) {
+  const names = {
+    hz120:'120Hz Display',gpuRender:'GPU Rendering',dnd:'Do Not Disturb',priority:'Game Priority',
+    wifi7:'Wi-Fi 7 Boost',smartdns:'Smart DNS',vpnkill:'VPN Kill Switch',
+    showFps:'FPS Counter',showTemp:'Temperature',showRam:'RAM Usage',showPing:'Network Ping',showBatt:'Battery',showCross:'Crosshair',
+    dndFull:'Block Notifications',brightLock:'Brightness Lock',noNav:'Nav Bar Disabled',
+    battSaver:'Battery Saver',chargeBypass:'Charge Bypass'
+  };
+  showToast(`${names[key] || key} ${val ? 'ENABLED' : 'DISABLED'}`);
+
+  // Sync DND toggles
+  if (key === 'dnd' || key === 'dndFull') {
+    state.dnd = val; state.dndFull = val;
+    document.querySelectorAll('.toggle[data-key="dnd"],.toggle[data-key="dndFull"]').forEach(t => t.classList.toggle('on', val));
+    updateDNDBanner();
+  }
+  // Update overlay preview
+  updateOverlayPreview();
+}
+
+function updateDNDBanner() {
+  const banner = document.getElementById('dndBanner');
+  const text = document.getElementById('dndText');
+  if (state.dnd) {
+    banner.className = 'dnd-banner on';
+    text.textContent = 'All notifications blocked';
+  } else {
+    banner.className = 'dnd-banner off';
+    text.textContent = 'Notifications are enabled';
+  }
+}
+
+// ========== BOOST BUTTON ==========
+const boostBtn = document.getElementById('boostBtn');
+const boostStatus = document.getElementById('boostStatus');
+
+function updateBoostUI() {
+  boostBtn.classList.toggle('boosted', state.boosted);
+  boostStatus.textContent = state.boosted ? 'BOOST ACTIVE' : 'TAP TO ACTIVATE';
+  boostStatus.classList.toggle('active', state.boosted);
+}
+
+boostBtn.addEventListener('click', () => {
+  state.boosted = !state.boosted;
+  if (state.boosted) {
+    state.priority = true;
+    state.hz120 = true;
+    state.gpuRender = true;
+    document.querySelectorAll('.toggle[data-key="priority"],.toggle[data-key="hz120"],.toggle[data-key="gpuRender"]').forEach(t => t.classList.add('on'));
+  }
+  updateBoostUI();
+  saveState();
+  showToast(state.boosted ? 'NEXUS BOOST ACTIVATED' : 'BOOST DEACTIVATED');
+});
+
+// ========== SLIDERS ==========
+function initSliders() {
+  // CPU Clock
+  const cpuS = document.getElementById('cpuClockSlider');
+  const cpuV = document.getElementById('cpuClockVal');
+  cpuS.value = state.cpuClock;
+  cpuV.textContent = (state.cpuClock / 10).toFixed(1) + ' GHz';
+  cpuS.addEventListener('input', () => {
+    state.cpuClock = parseInt(cpuS.value);
+    cpuV.textContent = (state.cpuClock / 10).toFixed(1) + ' GHz';
+    saveState();
+  });
+
+  // GPU Clock
+  const gpuS = document.getElementById('gpuClockSlider');
+  const gpuV = document.getElementById('gpuClockVal');
+  gpuS.value = state.gpuClock;
+  gpuV.textContent = state.gpuClock + ' MHz';
+  gpuS.addEventListener('input', () => {
+    state.gpuClock = parseInt(gpuS.value);
+    gpuV.textContent = state.gpuClock + ' MHz';
+    saveState();
+  });
+
+  // Touch Sensitivity
+  const touchS = document.getElementById('touchSlider');
+  const touchV = document.getElementById('touchVal');
+  const touchLabels = ['','Low','Medium','High','Ultra'];
+  touchS.value = state.touchSens;
+  touchV.textContent = touchLabels[state.touchSens];
+  touchS.addEventListener('input', () => {
+    state.touchSens = parseInt(touchS.value);
+    touchV.textContent = touchLabels[state.touchSens];
+    saveState();
+  });
+
+  // Resolution
+  const resS = document.getElementById('resSlider');
+  const resV = document.getElementById('resVal');
+  const resLabels = ['','HD+','FHD+','QHD+'];
+  resS.value = state.resolution;
+  resV.textContent = resLabels[state.resolution];
+  resS.addEventListener('input', () => {
+    state.resolution = parseInt(resS.value);
+    resV.textContent = resLabels[state.resolution];
+    saveState();
+  });
+
+  // Overlay Opacity
+  const opS = document.getElementById('opacitySlider');
+  const opV = document.getElementById('opacityVal');
+  opS.value = state.overlayOpacity;
+  opV.textContent = state.overlayOpacity + '%';
+  opS.addEventListener('input', () => {
+    state.overlayOpacity = parseInt(opS.value);
+    opV.textContent = state.overlayOpacity + '%';
+    updateOverlayPreview();
+    saveState();
+  });
+
+  // HUD Size
+  const hsS = document.getElementById('hudSizeSlider');
+  const hsV = document.getElementById('hudSizeVal');
+  const hsLabels = ['','Small','Medium','Large'];
+  hsS.value = state.hudSize;
+  hsV.textContent = hsLabels[state.hudSize];
+  hsS.addEventListener('input', () => {
+    state.hudSize = parseInt(hsS.value);
+    hsV.textContent = hsLabels[state.hudSize];
+    saveState();
+  });
+
+  // Profile sliders
+  const pfS = document.getElementById('profFpsSlider');
+  const pfV = document.getElementById('profFpsVal');
+  const pgS = document.getElementById('profGfxSlider');
+  const pgV = document.getElementById('profGfxVal');
+  const ptS = document.getElementById('profTouchSlider');
+  const ptV = document.getElementById('profTouchVal');
+  const gfxLabels = ['','Low','Medium','High','Ultra'];
+  const touchPLabels = ['','Normal','Fast','Quick','Instant'];
+
+  function loadProfileSliders() {
+    const p = state.profiles[state.activeProfile];
+    pfS.value = p.targetFps; pfV.textContent = p.targetFps;
+    pgS.value = p.gfx; pgV.textContent = gfxLabels[p.gfx];
+    ptS.value = p.touch; ptV.textContent = touchPLabels[p.touch];
+  }
+
+  pfS.addEventListener('input', () => { pfV.textContent = pfS.value; });
+  pgS.addEventListener('input', () => { pgV.textContent = gfxLabels[parseInt(pgS.value)]; });
+  ptS.addEventListener('input', () => { ptV.textContent = touchPLabels[parseInt(ptS.value)]; });
+
+  loadProfileSliders();
+  window._loadProfileSliders = loadProfileSliders;
+}
+
+// ========== PROFILES ==========
+function initProfiles() {
+  const cards = document.querySelectorAll('.profile-card[data-profile]');
+  cards.forEach(c => {
+    c.classList.toggle('active', c.dataset.profile === state.activeProfile);
+    c.addEventListener('click', () => {
+      state.activeProfile = c.dataset.profile;
+      cards.forEach(cc => cc.classList.toggle('active', cc.dataset.profile === state.activeProfile));
+      if (window._loadProfileSliders) window._loadProfileSliders();
+      saveState();
+      showToast(`${state.profiles[state.activeProfile].name} profile selected`);
+    });
+  });
+
+  document.getElementById('saveProfileBtn').addEventListener('click', () => {
+    const p = state.profiles[state.activeProfile];
+    p.targetFps = parseInt(document.getElementById('profFpsSlider').value);
+    p.gfx = parseInt(document.getElementById('profGfxSlider').value);
+    p.touch = parseInt(document.getElementById('profTouchSlider').value);
+    saveState();
+    showToast('Profile saved successfully!');
+  });
+
+  document.getElementById('addProfileBtn').addEventListener('click', () => {
+    const name = 'Custom ' + (Object.keys(state.profiles).length + 1);
+    const key = 'custom' + Date.now();
+    state.profiles[key] = { name, targetFps: 60, gfx: 3, touch: 3 };
+    const list = document.getElementById('profileList');
+    const div = document.createElement('div');
+    div.className = 'profile-card';
+    div.dataset.profile = key;
+    div.innerHTML = `<div class="profile-icon">&#x2B50;</div><div class="profile-info"><h4>${name}</h4><p>Custom profile</p></div><div class="profile-status"></div>`;
+    div.addEventListener('click', () => {
+      state.activeProfile = key;
+      document.querySelectorAll('.profile-card').forEach(cc => cc.classList.toggle('active', cc.dataset.profile === key));
+      if (window._loadProfileSliders) window._loadProfileSliders();
+      saveState();
+      showToast(`${name} profile selected`);
+    });
+    list.appendChild(div);
+    saveState();
+    showToast('New profile created!');
+  });
+}
+
+// ========== OVERLAY PREVIEW ==========
+function updateOverlayPreview() {
+  const elMap = {
+    showFps: 'hudFps', showTemp: 'hudTemp', showRam: 'hudRam',
+    showPing: 'hudPing', showBatt: 'hudBatt'
+  };
+  Object.entries(elMap).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = state[key] ? 'block' : 'none';
+  });
+  const cross = document.querySelector('.overlay-crosshair');
+  if (cross) cross.style.display = state.showCross ? 'block' : 'none';
+  const hud = document.querySelector('.overlay-hud');
+  if (hud) hud.style.opacity = state.overlayOpacity / 100;
+}
+
+// ========== SIMULATED METRICS ==========
+let simData = {
+  fps: [], cpu: [], gpu: [], ping: [],
+  currentFps: 60, currentCpu: 32, currentGpu: 28,
+  currentPing: 24, currentRam: 4.2, currentTemp: 38,
+  battery: 87, battTemp: 32
+};
+
+function simValue(current, min, max, variance) {
+  let v = current + (Math.random() - 0.5) * variance;
+  return Math.max(min, Math.min(max, v));
+}
+
+function updateMetrics() {
+  const boosted = state.boosted;
+  const fpsMax = boosted ? 120 : 60;
+  const cpuBase = boosted ? 55 : 32;
+  const gpuBase = boosted ? 65 : 28;
+
+  simData.currentFps = Math.round(simValue(simData.currentFps, fpsMax - 15, fpsMax, boosted ? 4 : 8));
+  simData.currentCpu = Math.round(simValue(simData.currentCpu < cpuBase - 15 ? cpuBase : simData.currentCpu, cpuBase - 12, cpuBase + 15, 3));
+  simData.currentGpu = Math.round(simValue(simData.currentGpu < gpuBase - 10 ? gpuBase : simData.currentGpu, gpuBase - 10, gpuBase + 12, 2));
+  simData.currentPing = Math.round(simValue(simData.currentPing, 8, 60, state.wifi7 ? 2 : 8));
+  simData.currentRam = parseFloat(simValue(simData.currentRam, 3.2, 7.5, 0.1).toFixed(1));
+  simData.currentTemp = Math.round(simValue(simData.currentTemp, boosted ? 42 : 34, boosted ? 52 : 45, 1));
+  simData.battTemp = Math.round(simValue(simData.battTemp, 28, 40, 0.5));
+
+  // Store history
+  simData.fps.push(simData.currentFps); if (simData.fps.length > 60) simData.fps.shift();
+  simData.cpu.push(simData.currentCpu); if (simData.cpu.length > 60) simData.cpu.shift();
+  simData.gpu.push(simData.currentGpu); if (simData.gpu.length > 60) simData.gpu.shift();
+  simData.ping.push(simData.currentPing); if (simData.ping.length > 60) simData.ping.shift();
+
+  // Battery drain sim
+  if (Math.random() < 0.1) {
+    simData.battery = Math.max(1, simData.battery - (boosted ? 0.3 : 0.1));
+  }
+
+  updateDashboard();
+  updateHUD();
+}
+
+function updateDashboard() {
+  const d = simData;
+  // FPS
+  document.getElementById('dashFps').innerHTML = d.currentFps + '<span class="metric-unit"> FPS</span>';
+  document.getElementById('fpsBar').style.width = (d.currentFps / 120 * 100) + '%';
+  const fpsEl = document.getElementById('dashFps');
+  fpsEl.className = 'metric-value ' + (d.currentFps >= 55 ? 'green' : d.currentFps >= 30 ? 'warn' : 'danger');
+
+  // CPU
+  document.getElementById('dashCpu').innerHTML = d.currentCpu + '<span class="metric-unit">%</span>';
+  document.getElementById('cpuBar').style.width = d.currentCpu + '%';
+  document.getElementById('cpuBar').style.background = d.currentCpu > 80 ? 'var(--danger)' : d.currentCpu > 60 ? 'var(--warn)' : 'var(--accent)';
+
+  // GPU
+  document.getElementById('dashGpu').innerHTML = d.currentGpu + '<span class="metric-unit">%</span>';
+  document.getElementById('gpuBar').style.width = d.currentGpu + '%';
+
+  // RAM
+  document.getElementById('dashRam').innerHTML = d.currentRam + '<span class="metric-unit"> GB</span>';
+  document.getElementById('ramBar').style.width = (d.currentRam / 12 * 100) + '%';
+
+  // Temp
+  document.getElementById('cpuTemp').innerHTML = d.currentTemp + '<span class="metric-unit">°C</span>';
+  const tempEl = document.getElementById('cpuTemp');
+  tempEl.className = 'metric-value ' + (d.currentTemp < 42 ? 'green' : d.currentTemp < 50 ? 'warn' : 'danger');
+
+  document.getElementById('batteryTemp').innerHTML = d.battTemp + '<span class="metric-unit">°C</span>';
+
+  const badge = document.getElementById('thermalBadge');
+  if (d.currentTemp < 42) { badge.textContent = 'COOL'; badge.className = 'card-badge badge-active'; }
+  else if (d.currentTemp < 50) { badge.textContent = 'WARM'; badge.className = 'card-badge badge-warn'; }
+  else { badge.textContent = 'HOT'; badge.className = 'card-badge badge-inactive'; }
+
+  // Battery
+  document.getElementById('battPct').innerHTML = Math.round(simData.battery) + '<span class="metric-unit">%</span>';
+  const hrs = Math.floor(simData.battery * 2.5 / 60);
+  const mins = Math.round(simData.battery * 2.5 % 60);
+  document.getElementById('battTime').textContent = hrs + 'h ' + mins + 'm';
+
+  // Network
+  const ping = d.currentPing;
+  document.getElementById('pingVal').textContent = ping + 'ms';
+  const pingDot = document.getElementById('pingDot');
+  pingDot.className = 'net-dot ' + (ping < 30 ? 'good' : ping < 60 ? 'mid' : 'bad');
+  document.getElementById('pingVal').style.color = ping < 30 ? 'var(--accent)' : ping < 60 ? 'var(--warn)' : 'var(--danger)';
+
+  const jitter = Math.round(Math.random() * 5 + 1);
+  document.getElementById('jitterVal').textContent = jitter + 'ms';
+  document.getElementById('jitterDot').className = 'net-dot ' + (jitter < 5 ? 'good' : 'mid');
+
+  const loss = (Math.random() * 0.5).toFixed(1);
+  document.getElementById('lossVal').textContent = loss + '%';
+  document.getElementById('lossDot').className = 'net-dot ' + (parseFloat(loss) < 0.3 ? 'good' : 'mid');
+
+  // FPS badge
+  const fpsBadge = document.getElementById('fpsBadge');
+  if (fpsBadge) {
+    if (d.currentFps >= 55) { fpsBadge.textContent = 'STABLE'; fpsBadge.className = 'card-badge badge-active'; }
+    else if (d.currentFps >= 30) { fpsBadge.textContent = 'DROPS'; fpsBadge.className = 'card-badge badge-warn'; }
+    else { fpsBadge.textContent = 'LOW'; fpsBadge.className = 'card-badge badge-inactive'; }
+  }
+}
+
+function updateHUD() {
+  const d = simData;
+  document.getElementById('hudFps').textContent = d.currentFps + ' FPS';
+  document.getElementById('hudTemp').textContent = d.currentTemp + '°C';
+  document.getElementById('hudRam').textContent = d.currentRam + ' GB';
+  document.getElementById('hudPing').textContent = d.currentPing + 'ms';
+  document.getElementById('hudBatt').textContent = Math.round(d.battery) + '%';
+}
+
+// ========== CHARTS ==========
+function drawLineChart(canvas, data, color, maxVal, filled) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width = canvas.offsetWidth * 2;
+  const h = canvas.height = canvas.offsetHeight * 2;
+  ctx.clearRect(0, 0, w, h);
+
+  if (data.length < 2) return;
+
+  const padding = 10;
+  const graphW = w - padding * 2;
+  const graphH = h - padding * 2;
+
+  ctx.beginPath();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+
+  for (let i = 0; i < data.length; i++) {
+    const x = padding + (i / (data.length - 1)) * graphW;
+    const y = padding + graphH - (data[i] / maxVal) * graphH;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  if (filled) {
+    ctx.lineTo(padding + graphW, padding + graphH);
+    ctx.lineTo(padding, padding + graphH);
+    ctx.closePath();
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, color.replace(')', ',0.3)').replace('rgb', 'rgba'));
+    grad.addColorStop(1, color.replace(')', ',0.0)').replace('rgb', 'rgba'));
+    ctx.fillStyle = grad;
+    ctx.fill();
+  }
+}
+
+function drawMultiLineChart(canvas, datasets) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width = canvas.offsetWidth * 2;
+  const h = canvas.height = canvas.offsetHeight * 2;
+  ctx.clearRect(0, 0, w, h);
+
+  const padding = 10;
+  const graphW = w - padding * 2;
+  const graphH = h - padding * 2;
+
+  datasets.forEach(({ data, color, maxVal }) => {
+    if (data.length < 2) return;
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    for (let i = 0; i < data.length; i++) {
+      const x = padding + (i / (data.length - 1)) * graphW;
+      const y = padding + graphH - (data[i] / maxVal) * graphH;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  });
+}
+
+function drawMemBar(canvas) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width = canvas.offsetWidth * 2;
+  const h = canvas.height = canvas.offsetHeight * 2;
+  ctx.clearRect(0, 0, w, h);
+
+  const total = 12;
+  const used = simData.currentRam;
+  const system = 2.1;
+  const game = used - system;
+  const free = total - used;
+
+  const pad = 20;
+  const barH = 40;
+  const y = (h - barH) / 2;
+  const barW = w - pad * 2;
+
+  // System
+  const sysW = (system / total) * barW;
+  ctx.fillStyle = '#ff00e5';
+  ctx.beginPath(); ctx.roundRect(pad, y, sysW, barH, [8, 0, 0, 8]); ctx.fill();
+
+  // Game
+  const gameW = (game / total) * barW;
+  ctx.fillStyle = '#00f0ff';
+  ctx.fillRect(pad + sysW, y, gameW, barH);
+
+  // Free
+  ctx.fillStyle = '#222235';
+  const freeW = (free / total) * barW;
+  ctx.beginPath(); ctx.roundRect(pad + sysW + gameW, y, freeW, barH, [0, 8, 8, 0]); ctx.fill();
+
+  // Labels
+  ctx.fillStyle = '#fff';
+  ctx.font = '600 20px system-ui';
+  ctx.textAlign = 'center';
+  if (sysW > 60) ctx.fillText('SYS', pad + sysW / 2, y + barH / 2 + 7);
+  if (gameW > 60) ctx.fillText('GAME', pad + sysW + gameW / 2, y + barH / 2 + 7);
+  if (freeW > 60) ctx.fillText('FREE', pad + sysW + gameW + freeW / 2, y + barH / 2 + 7);
+}
+
+let chartsInited = { perf: false, net: false };
+function initPerfCharts() {
+  chartsInited.perf = true;
+}
+function initNetChart() {
+  chartsInited.net = true;
+}
+
+function renderCharts() {
+  if (currentPage === 'performance' || chartsInited.perf) {
+    const fpsCanvas = document.getElementById('fpsChart');
+    const loadCanvas = document.getElementById('loadChart');
+    const memCanvas = document.getElementById('memChart');
+    if (fpsCanvas) drawLineChart(fpsCanvas, simData.fps, 'rgb(0,255,136)', 130, true);
+    if (loadCanvas) drawMultiLineChart(loadCanvas, [
+      { data: simData.cpu, color: 'rgb(0,240,255)', maxVal: 100 },
+      { data: simData.gpu, color: 'rgb(123,42,255)', maxVal: 100 }
+    ]);
+    if (memCanvas) drawMemBar(memCanvas);
+  }
+  if (currentPage === 'network' || chartsInited.net) {
+    const pingCanvas = document.getElementById('pingChart');
+    if (pingCanvas) drawLineChart(pingCanvas, simData.ping, 'rgb(255,0,229)', 100, true);
+  }
+}
+
+// ========== RAM CLEANER ==========
+document.getElementById('cleanRamBtn').addEventListener('click', function() {
+  const btn = this;
+  const ring = document.getElementById('cleanRingFill');
+  const pct = document.getElementById('cleanPct');
+  const badge = document.getElementById('ramCleanBadge');
+
+  btn.disabled = true;
+  btn.textContent = 'CLEANING...';
+  badge.textContent = 'RUNNING';
+  badge.className = 'card-badge badge-warn';
+
+  let progress = 0;
+  const circumference = 2 * Math.PI * 54;
+  const interval = setInterval(() => {
+    progress += Math.random() * 8 + 2;
+    if (progress > 100) progress = 100;
+    const offset = circumference - (progress / 100) * circumference;
+    ring.style.strokeDashoffset = offset;
+    pct.textContent = Math.round(progress) + '%';
+
+    if (progress >= 100) {
+      clearInterval(interval);
+      const freed = (Math.random() * 1.5 + 0.5).toFixed(1);
+      simData.currentRam = Math.max(2.5, simData.currentRam - parseFloat(freed));
+      btn.textContent = 'CLEAN RAM NOW';
+      btn.disabled = false;
+      badge.textContent = 'DONE';
+      badge.className = 'card-badge badge-active';
+      showToast(`Freed ${freed} GB of RAM!`);
+      setTimeout(() => {
+        ring.style.strokeDashoffset = circumference;
+        pct.textContent = '0%';
+        badge.textContent = 'READY';
+      }, 3000);
+    }
+  }, 80);
+});
+
+// ========== SPEED TEST ==========
+document.getElementById('netTestBtn').addEventListener('click', function() {
+  const btn = this;
+  btn.disabled = true;
+  btn.textContent = 'TESTING...';
+
+  let step = 0;
+  const steps = ['Testing Download...', 'Testing Upload...', 'Measuring Ping...'];
+  const interval = setInterval(() => {
+    if (step < steps.length) {
+      btn.textContent = steps[step];
+      step++;
+    } else {
+      clearInterval(interval);
+      const dl = Math.round(Math.random() * 200 + 100);
+      const ul = Math.round(Math.random() * 80 + 30);
+      const ping = Math.round(Math.random() * 15 + 8);
+      document.getElementById('dlVal').textContent = dl + ' Mbps';
+      document.getElementById('ulVal').textContent = ul + ' Mbps';
+      simData.currentPing = ping;
+      btn.textContent = 'RUN SPEED TEST';
+      btn.disabled = false;
+      showToast(`Speed Test: ${dl} Mbps ↓ / ${ul} Mbps ↑ / ${ping}ms`);
+    }
+  }, 1200);
+});
+
+// ========== QUICK ACTIONS ==========
+document.getElementById('screenshotBtn').addEventListener('click', () => {
+  showToast('Screenshot captured!');
+});
+
+let recording = false;
+document.getElementById('recordBtn').addEventListener('click', function() {
+  recording = !recording;
+  this.textContent = recording ? 'Stop Record' : 'Screen Record';
+  this.style.borderColor = recording ? 'var(--danger)' : '';
+  this.style.color = recording ? 'var(--danger)' : '';
+  showToast(recording ? 'Recording started...' : 'Recording saved!');
+});
+
+document.getElementById('macroBtn').addEventListener('click', () => {
+  showToast('Macro Editor: Coming in next update');
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (confirm('Reset all settings to defaults?')) {
+    localStorage.removeItem('nexus_state');
+    state = { ...defaultState };
+    initToggles();
+    updateBoostUI();
+    updateDNDBanner();
+    updateOverlayPreview();
+    showToast('All settings reset to defaults');
+  }
+});
+
+// ========== HEADER BUTTONS ==========
+document.getElementById('notifBtn').addEventListener('click', function() {
+  this.classList.toggle('active');
+  showToast(this.classList.contains('active') ? 'Notifications panel opened' : 'Notifications panel closed');
+});
+
+document.getElementById('settingsBtn').addEventListener('click', function() {
+  this.classList.toggle('active');
+  showToast('Settings: Use tabs below to configure');
+});
+
+// ========== INIT ==========
+function init() {
+  initToggles();
+  initSliders();
+  initProfiles();
+  updateBoostUI();
+  updateDNDBanner();
+  updateOverlayPreview();
+
+  // Start metrics simulation
+  setInterval(() => {
+    updateMetrics();
+    renderCharts();
+  }, 1000);
+
+  // Initial render
+  updateMetrics();
+  renderCharts();
+}
+
+init();
+</script>
+</body>
+</html>

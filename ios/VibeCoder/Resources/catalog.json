@@ -1,0 +1,515 @@
+{
+  "version": 1,
+  "projects": [
+    {
+      "id": "051484e4-e8a3-48dd-aa77-14c4d4e08e18",
+      "slug": "saas-landing-page",
+      "title": "SaaS Landing Page",
+      "creator": "Sushanth Tiruvaipati",
+      "difficulty": "Beginner",
+      "category": "Layouts",
+      "learn": [
+        "Hero with gradient background",
+        "Responsive grid for features",
+        "Clear call-to-action button"
+      ],
+      "fileCount": 1,
+      "description": "Build a SaaS landing page with animated hero, feature cards, pricing table, testimonial carousel, FAQ accordion, and a call-to-action with email signup",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    },
+    {
+      "id": "73b2b00a-c5ec-4f2e-978d-731a0d268421",
+      "slug": "drawing-app",
+      "title": "Drawing App",
+      "creator": "Sushanth Tiruvaipati",
+      "difficulty": "Beginner",
+      "category": "Games & Canvas",
+      "learn": [
+        "HTML5 canvas basics",
+        "Mouse/touch event handling",
+        "RGB color picker"
+      ],
+      "fileCount": 1,
+      "description": "Build a drawing app with brush tools, color picker, undo/redo, layer support, canvas resize, and the ability to save artwork as PNG",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    },
+    {
+      "id": "3cd168c0-7f70-453d-8d20-2c37b405e938",
+      "slug": "social-media-feed",
+      "title": "Social Media Feed",
+      "creator": "Sushanth Tiruvaipati",
+      "difficulty": "Beginner",
+      "category": "Mobile UIs",
+      "learn": [
+        "Card-based feed layout",
+        "Avatar + timestamp pattern",
+        "Like / comment buttons"
+      ],
+      "fileCount": 1,
+      "description": "Build a social media feed with post cards, like/comment interactions, user avatars, infinite scroll, stories bar at top, and a modern Instagram-inspired layout",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    },
+    {
+      "id": "659b8da1-3d9e-4428-8736-824bac2b424e",
+      "slug": "kanban-style-task-manager",
+      "title": "Kanban-style Task Manager",
+      "creator": "Arthur Constancio",
+      "difficulty": "Beginner",
+      "category": "Productivity",
+      "learn": [
+        "Three-column flexbox layout",
+        "Drag-and-drop tasks",
+        "Adding + removing items"
+      ],
+      "fileCount": 1,
+      "description": "Build a Kanban-style task manager with drag and drop columns (To Do, In Progress, Done), ability to add/edit/delete tasks, priority labels, and local storage persistence",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    },
+    {
+      "id": "17e31ab5-8958-48d4-ad56-00920ccde20c",
+      "slug": "markdown-notes-app",
+      "title": "Markdown Notes App",
+      "creator": "Sushanth Tiruvaipati",
+      "difficulty": "Beginner",
+      "category": "Productivity",
+      "learn": [
+        "Real-time markdown to HTML",
+        "Side-by-side editor & preview",
+        "localStorage persistence"
+      ],
+      "fileCount": 1,
+      "description": "Build a markdown notes app with sidebar navigation, rich text editing, tag-based organization, search functionality, and a Notion-inspired minimal design",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    },
+    {
+      "id": "2e20eafc-6324-4f0f-9f0e-c3cb309539b9",
+      "slug": "smart-grocery-list-app",
+      "title": "Smart Grocery List App",
+      "creator": "Sushanth Tiruvaipati",
+      "difficulty": "Beginner",
+      "category": "Productivity",
+      "learn": [
+        "Adding & removing items",
+        "Checked-state styling",
+        "Filter completed"
+      ],
+      "fileCount": 1,
+      "description": "Build a smart grocery list app with category grouping, quantity adjusters, check-off items, frequently bought suggestions, and a fresh produce-themed design",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    },
+    {
+      "id": "88a287f4-8713-40fb-8f88-93012a5dce8e",
+      "slug": "pixel-art-editor",
+      "title": "Pixel Art Editor",
+      "creator": "Sushanth Tiruvaipati",
+      "difficulty": "Beginner",
+      "category": "Games & Canvas",
+      "learn": [
+        "Click-to-fill grid cells",
+        "Color palette UI",
+        "Export pattern"
+      ],
+      "fileCount": 1,
+      "description": "Build a pixel art editor with grid canvas, color palette, brush and fill tools, animation frames, export as sprite sheet, and a retro 8-bit themed interface",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    },
+    {
+      "id": "6806dafe-6d57-4547-bb73-aff572b3115a",
+      "slug": "personal-budget-planner",
+      "title": "Personal Budget Planner",
+      "creator": "Sushanth Tiruvaipati",
+      "difficulty": "Beginner",
+      "category": "Finance",
+      "learn": [
+        "Income vs expense tracking",
+        "Running balance display",
+        "Category totals"
+      ],
+      "fileCount": 1,
+      "description": "Build a personal budget planner with income and expense tracking, category breakdowns with pie charts, monthly summaries, savings goals, and a clean modern UI",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    },
+    {
+      "id": "27a58272-fcc4-4ef0-b65d-6fd94dadacfe",
+      "slug": "personal-portfolio-website",
+      "title": "Personal Portfolio Website",
+      "creator": "Sushanth Tiruvaipati",
+      "difficulty": "Beginner",
+      "category": "Layouts",
+      "learn": [
+        "Hero + about + projects sections",
+        "Sticky navigation",
+        "Smooth scroll"
+      ],
+      "fileCount": 1,
+      "description": "Build a personal portfolio website with a dark theme, animated hero section, project gallery with hover effects, skills section, and a working contact form",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    },
+    {
+      "id": "75ef920a-465c-4192-8ad6-e7584818b883",
+      "slug": "n-invoice-generator",
+      "title": "N Invoice Generator",
+      "creator": "Arthur Constancio",
+      "difficulty": "Beginner",
+      "category": "Forms & Input",
+      "learn": [
+        "Form to printable receipt",
+        "Itemized line calculations",
+        "Total with tax"
+      ],
+      "fileCount": 1,
+      "description": "Build an invoice generator with client details form, line item table, tax calculations, PDF preview, and a professional business-themed design",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    },
+    {
+      "id": "b9d41d34-17a7-4bc5-82f3-19af20014ea0",
+      "slug": "resume-builder",
+      "title": "Resume Builder",
+      "creator": "Sushanth Tiruvaipati",
+      "difficulty": "Beginner",
+      "category": "Forms & Input",
+      "learn": [
+        "Editable resume sections",
+        "Live preview pane",
+        "Print-friendly styling"
+      ],
+      "fileCount": 1,
+      "description": "Build a resume builder with form sections for experience, education, and skills, live preview, multiple template choices, and PDF-style export view",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    },
+    {
+      "id": "0aab62e5-db62-4af9-905f-6c3546be1711",
+      "slug": "bitcoin-wallet",
+      "title": "Bitcoin Wallet",
+      "creator": "VibeBuild User",
+      "difficulty": "Beginner",
+      "category": "Finance",
+      "learn": [
+        "Send/receive UI mock",
+        "QR code placeholder",
+        "Transaction history list"
+      ],
+      "fileCount": 1,
+      "description": "build a bitcoin wallet for all crypto currency trading mining transferringcurrency and make this bc1qwzrryqr3ja8w7hnja2spmkgfdcgvqwp5swz4af4ngsjecfz0w0pqud7k38 the one main sender add option for sending and receiving",
+      "githubRepo": "app-0aab62e5-db62-4af9-905f-6c3546be1711",
+      "thumbnailUrl": null
+    },
+    {
+      "id": "da8af06d-04c0-4d76-8824-e82e58bcd75d",
+      "slug": "photo-gallery",
+      "title": "Photo Gallery",
+      "creator": "Sushanth Tiruvaipati",
+      "difficulty": "Intermediate",
+      "category": "Mobile UIs",
+      "learn": [
+        "Responsive image grid",
+        "Lightbox-style detail view",
+        "Thumb hover effects"
+      ],
+      "fileCount": 3,
+      "description": "Build a photo gallery with masonry grid layout, lightbox viewer, album organization, drag-and-drop upload, and smooth transition animations",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    },
+    {
+      "id": "ccb6e09d-b1a2-4b16-8bc9-f7a86863e77c",
+      "slug": "community-event-board",
+      "title": "Community Event Board",
+      "creator": "Sushanth Tiruvaipati",
+      "difficulty": "Intermediate",
+      "category": "Layouts",
+      "learn": [
+        "Cards with date badges",
+        "Filter by category",
+        "RSVP toggle button"
+      ],
+      "fileCount": 3,
+      "description": "Build a community event board with event cards, date filtering, category tags, RSVP buttons, map location previews, and a vibrant poster-style design",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    },
+    {
+      "id": "fccd51c0-5a3e-4d06-a132-2d9a84b1c1a9",
+      "slug": "real-time-chat-interface",
+      "title": "Real-time Chat Interface",
+      "creator": "Sushanth Tiruvaipati",
+      "difficulty": "Intermediate",
+      "category": "Mobile UIs",
+      "learn": [
+        "Chat bubble layout",
+        "Sticky input bar",
+        "Timestamp grouping"
+      ],
+      "fileCount": 3,
+      "description": "Build a real-time chat interface with message bubbles, typing indicators, emoji picker, file attachment previews, and a clean WhatsApp-inspired design",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    },
+    {
+      "id": "d8050fa3-ae52-4982-8ccc-5d5f3c907a1b",
+      "slug": "n-interactive-quiz-game",
+      "title": "N Interactive Quiz Game",
+      "creator": "Masoom Ansari",
+      "difficulty": "Intermediate",
+      "category": "Games & Canvas",
+      "learn": [
+        "Multi-question state machine",
+        "Scoring system",
+        "Reveal correct answer"
+      ],
+      "fileCount": 3,
+      "description": "Build an interactive quiz game with multiple choice questions, score tracking, timer, progress bar, results screen with share button, and colorful animations",
+      "githubRepo": "app-d8050fa3-ae52-4982-8ccc-5d5f3c907a1b",
+      "thumbnailUrl": null
+    },
+    {
+      "id": "0806846b-4dda-466c-b76e-1c4a9d3e7873",
+      "slug": "pet-care-tracker",
+      "title": "Pet Care Tracker",
+      "creator": "Sushanth Tiruvaipati",
+      "difficulty": "Intermediate",
+      "category": "Productivity",
+      "learn": [
+        "Pet profile cards",
+        "Feeding/medication checklists",
+        "Notes per pet"
+      ],
+      "fileCount": 3,
+      "description": "Build a pet care tracker with feeding schedules, vet appointment calendar, medication reminders, photo gallery per pet, and a playful paw-print themed design",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    },
+    {
+      "id": "10b014ab-5075-4715-8882-92f792a01c27",
+      "slug": "podcast-player",
+      "title": "Podcast Player",
+      "creator": "Sushanth Tiruvaipati",
+      "difficulty": "Intermediate",
+      "category": "Mobile UIs",
+      "learn": [
+        "Custom HTML5 audio controls",
+        "Playback progress UI",
+        "Episode list"
+      ],
+      "fileCount": 3,
+      "description": "Build a podcast player with episode list, playback speed controls, chapter markers, queue management, and a minimal audio-focused design",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    },
+    {
+      "id": "638d7319-e6ba-40e5-b2a7-24dbf0dc8efd",
+      "slug": "a-3d-model-app",
+      "title": "A 3d Model App",
+      "creator": "John Campbell",
+      "difficulty": "Intermediate",
+      "category": "Visual / Animation",
+      "learn": [
+        "CSS 3D transforms",
+        "Rotate on drag",
+        "Reset to default view"
+      ],
+      "fileCount": 3,
+      "description": "a 3d model app where you can generate 3d models just from pictures",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    },
+    {
+      "id": "f38c80be-c56e-4e5c-ad98-cf4e19387dac",
+      "slug": "service-booking-app",
+      "title": "Service Booking App",
+      "creator": "Hurera",
+      "difficulty": "Intermediate",
+      "category": "Forms & Input",
+      "learn": [
+        "Date/time picker UI",
+        "Service selection step",
+        "Confirmation screen"
+      ],
+      "fileCount": 3,
+      "description": "Build a service booking app with calendar date picker, time slot selection, service menu, booking confirmation, and a professional clean design",
+      "githubRepo": "app-f38c80be-c56e-4e5c-ad98-cf4e19387dac",
+      "thumbnailUrl": null
+    },
+    {
+      "id": "b50ffc4c-07fb-4f48-82ec-7072660339e4",
+      "slug": "game-booster-overlay",
+      "title": "Game Booster Overlay",
+      "creator": "Joey Malinak",
+      "difficulty": "Intermediate",
+      "category": "Visual / Animation",
+      "learn": [
+        "Overlay z-index management",
+        "Glow/blur effects",
+        "Toggle button states"
+      ],
+      "fileCount": 1,
+      "description": "Build me a game booster overlay for my Samsung Galaxy s25 add badass Futures to it",
+      "githubRepo": "app-b50ffc4c-07fb-4f48-82ec-7072660339e4",
+      "thumbnailUrl": null
+    },
+    {
+      "id": "183c43cd-b7ea-424e-9c44-9731fb159c1f",
+      "slug": "uzblox",
+      "title": "Uzblox",
+      "creator": "Uljanoy Ergasheva",
+      "difficulty": "Intermediate",
+      "category": "Games & Canvas",
+      "learn": [
+        "Grid-based block game",
+        "Clear rows logic",
+        "Score keeping"
+      ],
+      "fileCount": 3,
+      "description": "Uzblox",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    },
+    {
+      "id": "61e8040e-0331-4bfc-b905-adf152165cc2",
+      "slug": "plant-care-app",
+      "title": "Plant Care App",
+      "creator": "VibeBuild User",
+      "difficulty": "Advanced",
+      "category": "Productivity",
+      "learn": [
+        "Multi-screen navigation",
+        "Per-plant reminders",
+        "Watering history"
+      ],
+      "fileCount": 4,
+      "description": "Build a plant care app with a plant library, watering schedule reminders, growth photo journal, care tips, and a lush botanical green-themed design add information on specific plants and describe flowers",
+      "githubRepo": "app-61e8040e-0331-4bfc-b905-adf152165cc2",
+      "thumbnailUrl": null
+    },
+    {
+      "id": "869eb5ff-ee27-42fd-808a-f0a9197a91b6",
+      "slug": "social-media-video-app",
+      "title": "Social Media Video App",
+      "creator": "MR Tabarak",
+      "difficulty": "Advanced",
+      "category": "Mobile UIs",
+      "learn": [
+        "Vertical video feed",
+        "Tap-to-pause",
+        "Like + share floating UI"
+      ],
+      "fileCount": 4,
+      "description": "Create a social media video app called Tabarak Viral.\nFeatures:\nLogin with phone number\nHome page with scrolling viral videos\nUsers can upload their own videos\nLike, comment, and share buttons on every video\nTalent zone for singing, comedy, and acting videos\nStory section where u",
+      "githubRepo": "app-869eb5ff-ee27-42fd-808a-f0a9197a91b6",
+      "thumbnailUrl": null
+    },
+    {
+      "id": "4943b65c-df34-4cad-a0d8-6c803ee71cf4",
+      "slug": "build-a-resume-builder-with-form-section",
+      "title": "Build a resume builder with form sections",
+      "creator": "Sushanth Tiruvaipati",
+      "difficulty": "Advanced",
+      "category": "Forms & Input",
+      "learn": [
+        "Multi-step form",
+        "Per-section validation",
+        "Generate downloadable HTML"
+      ],
+      "fileCount": 4,
+      "description": "Build a resume builder with form sections for experience, education, and skills, live preview, multiple template choices, and PDF-style export view",
+      "githubRepo": "app-4943b65c-df34-4cad-a0d8-6c803ee71cf4",
+      "thumbnailUrl": null
+    },
+    {
+      "id": "f7760ad8-05e1-46e0-86bf-c9380a3d4ce9",
+      "slug": "ai-app-assient",
+      "title": "Ai App Assient",
+      "creator": "Elizabeth Lujan",
+      "difficulty": "Advanced",
+      "category": "Mobile UIs",
+      "learn": [
+        "Chat-style assistant UI",
+        "Suggestion chips",
+        "Streaming text mock"
+      ],
+      "fileCount": 3,
+      "description": "ai app assient",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    },
+    {
+      "id": "ac31b130-3368-41e9-bd32-0c1d1c4f38d5",
+      "slug": "game-booster-launcher-overlay-panel",
+      "title": "Game Booster Launcher Overlay Panel",
+      "creator": "Joey Malinak",
+      "difficulty": "Advanced",
+      "category": "Visual / Animation",
+      "learn": [
+        "Multi-panel layout",
+        "Smooth slide-in animation",
+        "State toggles"
+      ],
+      "fileCount": 3,
+      "description": "Build me a game booster launcher overlay panel for my Samsung Galaxy s25 add badass Futures to it add voice changer Graphics filter like HDR and things like that",
+      "githubRepo": "app-ac31b130-3368-41e9-bd32-0c1d1c4f38d5",
+      "thumbnailUrl": null
+    },
+    {
+      "id": "25e96d05-5e25-45d0-ba78-4e65f1c08174",
+      "slug": "crie-um-app-sobre-alimenta-o",
+      "title": "Crie Um App Sobre Alimentação",
+      "creator": "Yasmin Bazi",
+      "difficulty": "Advanced",
+      "category": "Productivity",
+      "learn": [
+        "Food logging UI",
+        "Daily totals",
+        "Multi-locale (pt-BR sample)"
+      ],
+      "fileCount": 1,
+      "description": "Crie um app sobre alimentação saudável.\nNome do app: #mais saudável 🌱.\nTela inicial: fundo verde pastel com legumes, frutas e gotas de água fofas escrito Seja bem vindo (a) só #mais saudável 🌱.\n2° tela: pedir o nome da pessoa, idade, peso e o horário que acorda e dorme.\n3° tela: ",
+      "githubRepo": "app-25e96d05-5e25-45d0-ba78-4e65f1c08174",
+      "thumbnailUrl": null
+    },
+    {
+      "id": "0e9c1c95-a196-4ef4-894c-c93dc07a8f50",
+      "slug": "crea-una-app-donde-tenga-fork",
+      "title": "Crea Una App Donde Tenga (Fork)",
+      "creator": "Anahi Martinez Rangel",
+      "difficulty": "Advanced",
+      "category": "Productivity",
+      "learn": [
+        "Custom-list app from fork",
+        "Add/edit/delete flow",
+        "Multi-locale (es) sample"
+      ],
+      "fileCount": 1,
+      "description": "Forked from \"Crea Una App Donde Tenga\" by Anahí Martinez Rangel. Crea una app donde tenga una alarma para registrar cuando tomar las pastillas, cuando caducan y cuántas quedan y que se pueda ligar a arduino uno, debe tener colores morado, rosa y azul que tenga este logo con el no",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    },
+    {
+      "id": "cead4e9d-e6df-4e51-9957-8b52acf77c2e",
+      "slug": "minecraft-block-builder",
+      "title": "Minecraft Block Builder",
+      "creator": "Anonymous",
+      "difficulty": "Advanced",
+      "category": "Games & Canvas",
+      "learn": [
+        "Grid-based world rendering",
+        "Block placement on click",
+        "Texture/color picker"
+      ],
+      "fileCount": 2,
+      "description": "Build with blocks in a Minecraft-style grid world.",
+      "githubRepo": null,
+      "thumbnailUrl": null
+    }
+  ]
+}

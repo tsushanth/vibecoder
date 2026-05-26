@@ -1,30 +1,37 @@
-VibeBuild turns your ideas into working apps using AI. Just describe what you want to build in plain English, and VibeBuild generates a fully functional web app in seconds. Also build and manage your apps on the web at vibebuild.cc.
+VibeBuild is an AI-powered app builder that lets you create web apps using plain English — no coding required.
 
-No coding experience needed. Whether you are a beginner exploring app development or a pro rapidly prototyping ideas, VibeBuild makes it effortless.
+Describe what you want to build, and VibeBuild generates a working web app in seconds. Refine it with follow-up prompts, preview it in Safari, and share it with a link.
 
-HOW IT WORKS
-1. Describe your app idea in a few words or sentences
-2. Watch as AI builds your app in real-time with a live progress view
-3. Preview your app instantly right in the app
-4. Save your creations and access them anytime
-5. Publish to the web and share your app at yourapp.vibebuild.cc
+WHAT YOU CAN DO
+- Describe your idea in plain English and get a working web app
+- Refine your app with follow-up prompts
+- Preview and test your app in Safari
+- Share your projects with a public link
+- Browse web apps published by other users
 
-FEATURES
-- AI-Powered Generation: Describe any app idea and get working code generated instantly
-- Live Preview: See your app running immediately after generation
-- Publish to the Web: Share your app live at yourapp.vibebuild.cc — accessible from any browser
-- Save and Manage: Keep all your generated apps organized in one place
-- Suggestion Cards: Get inspired with creative app ideas to try
-- Real-Time Progress: Watch the build process with live status updates
-- Pro Subscription: Unlock unlimited generations with VibeBuild Pro
+BUILD ANYTHING
+- Productivity tools and utilities
+- Games and interactive experiences
+- Creative tools and editors
+- Data visualizers and dashboards
+- And much more
 
-BUILT FOR EVERYONE
-- Students learning to code
-- Entrepreneurs prototyping startup ideas
-- Designers creating interactive mockups
-- Developers rapidly testing concepts
-- Anyone curious about building apps
+FREE PLAN
+- 3 AI-generated apps per day
+- 3 follow-up edits per project
+- Preview in Safari
+- Browse public projects
 
-VibeBuild Pro unlocks unlimited app generations. Free users get a daily generation limit to explore the platform.
+PRO PLAN ($19/month or $190/year)
+- Unlimited AI-generated apps
+- Unlimited follow-up edits
+- Private projects
+- Custom domains
+- Download source code
+- Priority build queue
+- 30-day version history
+- Remove VibeBuild branding
 
-Privacy: We only collect the minimum data needed to run the service (email for auth, your prompts for generation). We never share your data with third parties.
+VibeBuild makes it easy for anyone to go from idea to working app — no experience required.
+
+Privacy: We only collect the minimum data needed to run the service (email for authentication). We never share your data with third parties.

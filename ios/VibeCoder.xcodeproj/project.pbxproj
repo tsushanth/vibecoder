@@ -8,42 +8,35 @@
 
 /* Begin PBXBuildFile section */
 		3695BC2AB12B7F49E5516933 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E089AB0FCED2458DE60648B7 /* Foundation.framework */; };
+		5EADBF9A4F6492FF8D96896F /* catalog.json in Resources */ = {isa = PBXBuildFile; fileRef = 508ED5F3A2CB6DE2DFB3B466 /* catalog.json */; };
+		7CD7E0DB8711F0C61A4F843D /* LessonDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87442C049C7606E22540A952 /* LessonDetailView.swift */; };
 		A001 /* VibeCoderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001 /* VibeCoderApp.swift */; };
 		A002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B002 /* ContentView.swift */; };
 		A003 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B003 /* AuthManager.swift */; };
 		A004 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B004 /* SignInView.swift */; };
 		A005 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B005 /* ProfileView.swift */; };
-		A006 /* BrowseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B006 /* BrowseView.swift */; };
-		A007 /* ProjectGenerationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B007 /* ProjectGenerationManager.swift */; };
-		A008 /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = B008 /* Project.swift */; };
 		A009 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = B009 /* User.swift */; };
-		A011 /* LivePreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B011 /* LivePreviewView.swift */; };
-		A012 /* ProjectListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B012 /* ProjectListView.swift */; };
-		A013 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B013 /* NetworkManager.swift */; };
-		A014 /* ZipExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B014 /* ZipExtractor.swift */; };
-		A015 /* SSEStreamReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B015 /* SSEStreamReader.swift */; };
 		A016 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = P001 /* FirebaseAuth */; };
 		A017 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = P002 /* FirebaseFirestore */; };
 		A018 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = P003 /* FirebaseStorage */; };
 		A019 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = P004 /* GoogleSignIn */; };
 		A020 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = P005 /* GoogleSignInSwift */; };
 		A021 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C002 /* GoogleService-Info.plist */; };
-		A022 /* CreateProjectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B016 /* CreateProjectView.swift */; };
 		A023 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B017 /* SubscriptionManager.swift */; };
 		A024 /* SubscriptionPlansView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B018 /* SubscriptionPlansView.swift */; };
-		A025 /* ReplitStyleCreateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B019 /* ReplitStyleCreateView.swift */; };
-		A026 /* ReplitStyleAppsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B020 /* ReplitStyleAppsView.swift */; };
 		A027 /* ReplitStyleAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B021 /* ReplitStyleAccountView.swift */; };
 		A028 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B022 /* Assets.xcassets */; };
-		A029 /* SpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B023 /* SpeechRecognizer.swift */; };
 		A030 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = P006 /* ZIPFoundation */; };
-		A031 /* SourceCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B024 /* SourceCodeView.swift */; };
-		A032 /* CustomDomainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B025 /* CustomDomainView.swift */; };
-		A033 /* CoinManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B026 /* CoinManager.swift */; };
 		A034 /* PaywallCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B027 /* PaywallCoordinator.swift */; };
 		A035 /* WinbackOfferView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B028 /* WinbackOfferView.swift */; };
+		B77A46B0DCD0557AEA08FD83 /* CatalogManifest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEC0AB220640094313AD2B0E /* CatalogManifest.swift */; };
 		D2D12B4A63E6910827565909 /* ScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECF05AFA3D780D6BFCD1205E /* ScreenshotTests.swift */; };
+		DAAD24228BB668EF16069A13 /* CatalogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11B61A9C52D868146E50252 /* CatalogView.swift */; };
+		E4900943324A6C01481FA30F /* SandboxedPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8731E8106D6FD5FD91AAAD5 /* SandboxedPreviewView.swift */; };
 		F1F0F0ACACACD2CAB6E78CCF /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6222A441E08F11FDECE00A6C /* SnapshotHelper.swift */; };
+		F391FB6B3BCB3A68B3EFF998 /* projects in Resources */ = {isa = PBXBuildFile; fileRef = BC694E05DFF8D2B6A635F62F /* projects */; };
+		FA36AC616E1D7AEA0A5B24E8 /* CodeReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82A407B4B02484A2788C4BF1 /* CodeReaderView.swift */; };
+		RKB001 /* RatingKit in Frameworks */ = {isa = PBXBuildFile; productRef = RKP001 /* RatingKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,35 +50,26 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		508ED5F3A2CB6DE2DFB3B466 /* catalog.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = catalog.json; sourceTree = "<group>"; };
 		6222A441E08F11FDECE00A6C /* SnapshotHelper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SnapshotHelper.swift; sourceTree = "<group>"; };
+		82A407B4B02484A2788C4BF1 /* CodeReaderView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CodeReaderView.swift; sourceTree = "<group>"; };
+		87442C049C7606E22540A952 /* LessonDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LessonDetailView.swift; sourceTree = "<group>"; };
 		88B736A52F43CBF3007E4B75 /* VibeCoder.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VibeCoder.entitlements; sourceTree = "<group>"; };
+		AEC0AB220640094313AD2B0E /* CatalogManifest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CatalogManifest.swift; sourceTree = "<group>"; };
 		B001 /* VibeCoderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VibeCoderApp.swift; sourceTree = "<group>"; };
 		B002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		B003 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 		B004 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
 		B005 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
-		B006 /* BrowseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowseView.swift; sourceTree = "<group>"; };
-		B007 /* ProjectGenerationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectGenerationManager.swift; sourceTree = "<group>"; };
-		B008 /* Project.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Project.swift; sourceTree = "<group>"; };
 		B009 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
-		B011 /* LivePreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivePreviewView.swift; sourceTree = "<group>"; };
-		B012 /* ProjectListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectListView.swift; sourceTree = "<group>"; };
-		B013 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
-		B014 /* ZipExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZipExtractor.swift; sourceTree = "<group>"; };
-		B015 /* SSEStreamReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSEStreamReader.swift; sourceTree = "<group>"; };
-		B016 /* CreateProjectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateProjectView.swift; sourceTree = "<group>"; };
 		B017 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		B018 /* SubscriptionPlansView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionPlansView.swift; sourceTree = "<group>"; };
-		B019 /* ReplitStyleCreateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplitStyleCreateView.swift; sourceTree = "<group>"; };
-		B020 /* ReplitStyleAppsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplitStyleAppsView.swift; sourceTree = "<group>"; };
 		B021 /* ReplitStyleAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplitStyleAccountView.swift; sourceTree = "<group>"; };
 		B022 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		B023 /* SpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognizer.swift; sourceTree = "<group>"; };
-		B024 /* SourceCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceCodeView.swift; sourceTree = "<group>"; };
-		B025 /* CustomDomainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomDomainView.swift; sourceTree = "<group>"; };
-		B026 /* CoinManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinManager.swift; sourceTree = "<group>"; };
 		B027 /* PaywallCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallCoordinator.swift; sourceTree = "<group>"; };
 		B028 /* WinbackOfferView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WinbackOfferView.swift; sourceTree = "<group>"; };
+		B8731E8106D6FD5FD91AAAD5 /* SandboxedPreviewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SandboxedPreviewView.swift; sourceTree = "<group>"; };
+		BC694E05DFF8D2B6A635F62F /* projects */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder; path = projects; sourceTree = "<group>"; };
 		C001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C002 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		C003 /* VibeBuild.storekit */ = {isa = PBXFileReference; lastKnownFileType = com.apple.storekit.configuration; path = VibeBuild.storekit; sourceTree = "<group>"; };
@@ -93,6 +77,7 @@
 		E089AB0FCED2458DE60648B7 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		ECF05AFA3D780D6BFCD1205E /* ScreenshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScreenshotTests.swift; sourceTree = "<group>"; };
 		F04D6FF414BAB1101CE6BD22 /* VibeCoderUITests */ = {isa = PBXFileReference; includeInIndex = 0; path = VibeCoderUITests; sourceTree = BUILT_PRODUCTS_DIR; };
+		F11B61A9C52D868146E50252 /* CatalogView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CatalogView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +99,7 @@
 				A019 /* GoogleSignIn in Frameworks */,
 				A020 /* GoogleSignInSwift in Frameworks */,
 				A030 /* ZIPFoundation in Frameworks */,
+				RKB001 /* RatingKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -128,6 +114,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		680AE1945983350AE54E32EE /* Catalog */ = {
+			isa = PBXGroup;
+			children = (
+				F11B61A9C52D868146E50252 /* CatalogView.swift */,
+			);
+			name = Catalog;
+			path = Catalog;
+			sourceTree = "<group>";
+		};
 		BAC72212EB7F2A158655CE31 /* VibeCoderUITests */ = {
 			isa = PBXGroup;
 			children = (
@@ -136,6 +131,17 @@
 			);
 			name = VibeCoderUITests;
 			path = VibeCoderUITests;
+			sourceTree = "<group>";
+		};
+		CD09EF77BD59D023F34C9817 /* Lesson */ = {
+			isa = PBXGroup;
+			children = (
+				87442C049C7606E22540A952 /* LessonDetailView.swift */,
+				82A407B4B02484A2788C4BF1 /* CodeReaderView.swift */,
+				B8731E8106D6FD5FD91AAAD5 /* SandboxedPreviewView.swift */,
+			);
+			name = Lesson;
+			path = Lesson;
 			sourceTree = "<group>";
 		};
 		D3B7AA612A2D60C53851FBD4 /* iOS */ = {
@@ -165,16 +171,13 @@
 				C003 /* VibeBuild.storekit */,
 				F004 /* App */,
 				F005 /* Auth */,
-				F006 /* Browse */,
 				F007 /* Chat */,
-				F008 /* Create */,
-				F009 /* Editor */,
 				F010 /* Models */,
 				F011 /* Monetization */,
-				F012 /* Preview */,
-				F013 /* Projects */,
 				F014 /* Resources */,
 				F015 /* Shared */,
+				680AE1945983350AE54E32EE /* Catalog */,
+				CD09EF77BD59D023F34C9817 /* Lesson */,
 			);
 			path = VibeCoder;
 			sourceTree = "<group>";
@@ -208,14 +211,6 @@
 			path = Auth;
 			sourceTree = "<group>";
 		};
-		F006 /* Browse */ = {
-			isa = PBXGroup;
-			children = (
-				B006 /* BrowseView.swift */,
-			);
-			path = Browse;
-			sourceTree = "<group>";
-		};
 		F007 /* Chat */ = {
 			isa = PBXGroup;
 			children = (
@@ -223,29 +218,11 @@
 			path = Chat;
 			sourceTree = "<group>";
 		};
-		F008 /* Create */ = {
-			isa = PBXGroup;
-			children = (
-				B007 /* ProjectGenerationManager.swift */,
-				B016 /* CreateProjectView.swift */,
-				B019 /* ReplitStyleCreateView.swift */,
-			);
-			path = Create;
-			sourceTree = "<group>";
-		};
-		F009 /* Editor */ = {
-			isa = PBXGroup;
-			children = (
-				B024 /* SourceCodeView.swift */,
-			);
-			path = Editor;
-			sourceTree = "<group>";
-		};
 		F010 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				B008 /* Project.swift */,
 				B009 /* User.swift */,
+				AEC0AB220640094313AD2B0E /* CatalogManifest.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -255,35 +232,18 @@
 			children = (
 				B017 /* SubscriptionManager.swift */,
 				B018 /* SubscriptionPlansView.swift */,
-				B026 /* CoinManager.swift */,
 				B027 /* PaywallCoordinator.swift */,
 				B028 /* WinbackOfferView.swift */,
 			);
 			path = Monetization;
 			sourceTree = "<group>";
 		};
-		F012 /* Preview */ = {
-			isa = PBXGroup;
-			children = (
-				B011 /* LivePreviewView.swift */,
-			);
-			path = Preview;
-			sourceTree = "<group>";
-		};
-		F013 /* Projects */ = {
-			isa = PBXGroup;
-			children = (
-				B012 /* ProjectListView.swift */,
-				B020 /* ReplitStyleAppsView.swift */,
-				B025 /* CustomDomainView.swift */,
-			);
-			path = Projects;
-			sourceTree = "<group>";
-		};
 		F014 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
 				B022 /* Assets.xcassets */,
+				508ED5F3A2CB6DE2DFB3B466 /* catalog.json */,
+				BC694E05DFF8D2B6A635F62F /* projects */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -291,10 +251,6 @@
 		F015 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				B013 /* NetworkManager.swift */,
-				B014 /* ZipExtractor.swift */,
-				B015 /* SSEStreamReader.swift */,
-				B023 /* SpeechRecognizer.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -340,6 +296,7 @@
 				P004 /* GoogleSignIn */,
 				P005 /* GoogleSignInSwift */,
 				P006 /* ZIPFoundation */,
+				RKP001 /* RatingKit */,
 			);
 			productName = VibeCoder;
 			productReference = D001 /* VibeCoder.app */;
@@ -373,6 +330,7 @@
 				M001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				M002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				M003 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+				RKL001 /* XCLocalSwiftPackageReference "RatingKit" */,
 			);
 			productRefGroup = F003 /* Products */;
 			projectDirPath = "";
@@ -398,6 +356,8 @@
 			files = (
 				A021 /* GoogleService-Info.plist in Resources */,
 				A028 /* Assets.xcassets in Resources */,
+				5EADBF9A4F6492FF8D96896F /* catalog.json in Resources */,
+				F391FB6B3BCB3A68B3EFF998 /* projects in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -422,27 +382,17 @@
 				A003 /* AuthManager.swift in Sources */,
 				A004 /* SignInView.swift in Sources */,
 				A005 /* ProfileView.swift in Sources */,
-				A006 /* BrowseView.swift in Sources */,
-				A007 /* ProjectGenerationManager.swift in Sources */,
-				A008 /* Project.swift in Sources */,
 				A009 /* User.swift in Sources */,
-				A011 /* LivePreviewView.swift in Sources */,
-				A012 /* ProjectListView.swift in Sources */,
-				A013 /* NetworkManager.swift in Sources */,
-				A014 /* ZipExtractor.swift in Sources */,
-				A015 /* SSEStreamReader.swift in Sources */,
-				A022 /* CreateProjectView.swift in Sources */,
 				A023 /* SubscriptionManager.swift in Sources */,
 				A024 /* SubscriptionPlansView.swift in Sources */,
-				A025 /* ReplitStyleCreateView.swift in Sources */,
-				A026 /* ReplitStyleAppsView.swift in Sources */,
 				A027 /* ReplitStyleAccountView.swift in Sources */,
-				A029 /* SpeechRecognizer.swift in Sources */,
-				A031 /* SourceCodeView.swift in Sources */,
-				A032 /* CustomDomainView.swift in Sources */,
-				A033 /* CoinManager.swift in Sources */,
 				A034 /* PaywallCoordinator.swift in Sources */,
 				A035 /* WinbackOfferView.swift in Sources */,
+				B77A46B0DCD0557AEA08FD83 /* CatalogManifest.swift in Sources */,
+				DAAD24228BB668EF16069A13 /* CatalogView.swift in Sources */,
+				7CD7E0DB8711F0C61A4F843D /* LessonDetailView.swift in Sources */,
+				FA36AC616E1D7AEA0A5B24E8 /* CodeReaderView.swift in Sources */,
+				E4900943324A6C01481FA30F /* SandboxedPreviewView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -613,7 +563,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = VibeCoder/VibeCoder.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 34;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				ENABLE_PREVIEWS = YES;
@@ -629,12 +579,12 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.vibercoder;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -645,7 +595,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = VibeCoder/VibeCoder.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 34;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				ENABLE_PREVIEWS = YES;
@@ -661,12 +611,12 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.vibercoder;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -701,6 +651,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		RKL001 /* XCLocalSwiftPackageReference "RatingKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../RatingKit;
+		};
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
 		M001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
@@ -759,6 +716,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = M003 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
 			productName = ZIPFoundation;
+		};
+		RKP001 /* RatingKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = RKL001 /* XCLocalSwiftPackageReference "RatingKit" */;
+			productName = RatingKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

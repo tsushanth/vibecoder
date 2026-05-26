@@ -1,30 +1,22 @@
-VibeBuild transforma suas ideias em apps funcionais usando IA. Basta descrever o que voce quer criar com suas proprias palavras, e o VibeBuild gera um aplicativo web totalmente funcional em segundos. Crie e gerencie seus apps na web em vibebuild.cc.
+VibeBuild é um criador de apps com IA que permite criar e publicar apps web usando linguagem natural, sem necessidade de programação.
 
-Nenhuma experiencia em programacao necessaria. Seja voce um iniciante explorando o desenvolvimento de apps ou um profissional criando prototipos rapidamente, o VibeBuild torna tudo facil.
+Descreva o que você quer criar e o VibeBuild gera um app web funcional em segundos. Itere com prompts adicionais, visualize em tempo real e publique instantaneamente.
 
-COMO FUNCIONA
-1. Descreva sua ideia de app em poucas palavras ou frases
-2. Assista a IA construir seu app em tempo real com uma visualizacao de progresso ao vivo
-3. Visualize seu app instantaneamente dentro do aplicativo
-4. Salve suas criacoes e acesse a qualquer momento
-5. Publique na web e compartilhe seu app em seuapp.vibebuild.cc
+O QUE VOCÊ PODE FAZER
+- Criar apps web descrevendo-os em linguagem natural
+- Iterar e aperfeiçoar seu app com prompts adicionais
+- Ver uma prévia ao vivo enquanto constrói
+- Publicar e compartilhar seus projetos
+- Explorar projetos públicos de outros criadores
+- Ordenar projetos da comunidade por mais recentes ou mais populares
 
-RECURSOS
-- Geracao com IA: Descreva qualquer ideia de app e obtenha codigo funcional gerado instantaneamente
-- Visualizacao ao vivo: Veja seu app rodando imediatamente apos a geracao
-- Publicar na web: Compartilhe seu app em seuapp.vibebuild.cc, acessivel de qualquer navegador
-- Salvar e gerenciar: Mantenha todos os seus apps gerados organizados em um so lugar
-- Cartoes de sugestoes: Inspire-se com ideias criativas de apps para experimentar
-- Progresso em tempo real: Acompanhe o processo de criacao com atualizacoes de status ao vivo
-- Assinatura Pro: Desbloqueie geracoes ilimitadas com o VibeBuild Pro
+CONSTRUA QUALQUER COISA
+- Ferramentas de produtividade e utilitários
+- Jogos e experiências interativas
+- Ferramentas criativas e editores
+- Visualizadores de dados e dashboards
+- E muito mais
 
-FEITO PARA TODOS
-- Estudantes aprendendo a programar
-- Empreendedores prototipando ideias de startups
-- Designers criando mockups interativos
-- Desenvolvedores testando conceitos rapidamente
-- Qualquer pessoa curiosa sobre criar apps
+VibeBuild torna fácil para qualquer pessoa ir de uma ideia a um app funcional, sem experiência necessária.
 
-VibeBuild Pro desbloqueia geracoes ilimitadas de apps. Usuarios gratuitos tem um limite diario de geracoes para explorar a plataforma.
-
-Privacidade: Coletamos apenas os dados minimos necessarios para operar o servico (e-mail para autenticacao, seus prompts para geracao). Nunca compartilhamos seus dados com terceiros.
+Privacidade: Coletamos apenas os dados mínimos necessários para operar o serviço. Nunca compartilhamos seus dados com terceiros.

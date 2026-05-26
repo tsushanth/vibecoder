@@ -1,22 +1,23 @@
 import SwiftUI
 import UserNotifications
 import FirebaseCore
+import GoogleSignIn
+import RatingKit
 
 @main
 struct VibeCoderApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var authManager = AuthManager.shared
     @StateObject private var subscriptionManager = SubscriptionManager.shared
-    @StateObject private var generationManager = ProjectGenerationManager.shared
     @StateObject private var paywallCoordinator = PaywallCoordinator.shared
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .ratingPrompt()
                 .environmentObject(authManager)
                 .environmentObject(subscriptionManager)
-                .environmentObject(generationManager)
                 .sheet(isPresented: $paywallCoordinator.showWinbackOffer) {
                     WinbackOfferView()
                         .environmentObject(subscriptionManager)
@@ -32,9 +33,23 @@ struct VibeCoderApp: App {
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication,
+                     open url: URL,
+                     options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+        return GIDSignIn.sharedInstance.handle(url)
+    }
+
+    func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         FirebaseApp.configure()
+        GIDSignIn.sharedInstance.configuration = GIDConfiguration(
+            clientID: "917362189743-s7v2aog4n3ch74hn7igq4jekjfcsi38g.apps.googleusercontent.com",
+            serverClientID: "917362189743-2tgjn2l4m09ht423l9ogsm74aiotbjgv.apps.googleusercontent.com"
+        )
         UNUserNotificationCenter.current().delegate = self
+
+        // Server-driven rating prompts (variant testing + analytics).
+        RatingKit.configure(appId: "vibebuild", apiUrl: "https://paywallkit-api.fly.dev")
+        RatingKit.shared.trackAppOpen()
 
         // Request permission then register for remote notifications
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
@@ -53,10 +68,8 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         let token = deviceToken.map { String(format: "%02x", $0) }.joined()
         print("✅ Device token: \(token)")
         DeviceTokenManager.shared.deviceToken = token
-        // Register with backend if user is signed in
-        if let userId = AuthManager.shared.userId {
-            Task { await NetworkManager.shared.registerPushToken(userId: userId, token: token) }
-        }
+        // Push token registration to backend was removed in v2.0 — the new
+        // educational shell has no live feed and does not send push notifs.
     }
 
     func application(_ application: UIApplication,
@@ -71,13 +84,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         completionHandler([.banner, .sound])
     }
 
-    // Handle notification tap — open the completed project preview
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
-        DispatchQueue.main.async {
-            ProjectGenerationManager.shared.showPreview = true
-        }
         completionHandler()
     }
 }

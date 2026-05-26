@@ -11,10 +11,10 @@ struct WinbackOfferView: View {
     @State private var errorMessage = ""
 
     private let valueProps: [(icon: String, text: String)] = [
-        ("cpu", "AI-powered app building"),
-        ("infinity", "Unlimited projects"),
-        ("chevron.left.forwardslash.chevron.right", "Code generation"),
-        ("play.rectangle.fill", "Live preview")
+        ("safari.fill", "Unlimited Safari launches"),
+        ("heart.fill", "Unlimited favorites"),
+        ("clock.arrow.circlepath", "Full view history"),
+        ("bolt.fill", "Priority support")
     ]
 
     var body: some View {

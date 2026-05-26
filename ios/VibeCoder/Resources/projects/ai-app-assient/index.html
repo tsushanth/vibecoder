@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI App Assistant</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1>🤖 AI Assistant</h1>
+                <button class="menu-btn" id="menuBtn">☰</button>
+            </div>
+        </header>
+
+        <!-- Side Menu -->
+        <div class="side-menu" id="sideMenu">
+            <div class="menu-header">
+                <h2>Features</h2>
+                <button class="close-menu" id="closeMenu">✕</button>
+            </div>
+            <nav class="menu-nav">
+                <button class="menu-item active" data-view="chat">💬 Chat</button>
+                <button class="menu-item" data-view="calculator">🔢 Calculator</button>
+                <button class="menu-item" data-view="notes">📝 Notes</button>
+                <button class="menu-item" data-view="tasks">✓ Tasks</button>
+                <button class="menu-item" data-view="timer">⏱️ Timer</button>
+                <button class="menu-item" data-view="converter">🔄 Converter</button>
+            </nav>
+            <div class="menu-footer">
+                <button class="clear-data-btn" id="clearDataBtn">🗑️ Clear All Data</button>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Chat View -->
+            <div class="view active" id="chatView">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <div class="chat-suggestions" id="chatSuggestions">
+                        <button class="suggestion-chip">What can you do?</button>
+                        <button class="suggestion-chip">Calculate 25 * 8</button>
+                        <button class="suggestion-chip">Convert 100 km to miles</button>
+                        <button class="suggestion-chip">Help me with tasks</button>
+                    </div>
+                    <div class="chat-input-container">
+                        <input type="text" id="chatInput" class="chat-input" placeholder="Ask me anything...">
+                        <button class="send-btn" id="sendBtn">➤</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calculator View -->
+            <div class="view" id="calculatorView">
+                <div class="calculator">
+                    <div class="calc-display" id="calcDisplay">0</div>
+                    <div class="calc-buttons">
+                        <button class="calc-btn calc-fn" data-action="clear">C</button>
+                        <button class="calc-btn calc-fn" data-action="backspace">⌫</button>
+                        <button class="calc-btn calc-fn" data-action="percent">%</button>
+                        <button class="calc-btn calc-op" data-action="divide">÷</button>
+
+                        <button class="calc-btn" data-number="7">7</button>
+                        <button class="calc-btn" data-number="8">8</button>
+                        <button class="calc-btn" data-number="9">9</button>
+                        <button class="calc-btn calc-op" data-action="multiply">×</button>
+
+                        <button class="calc-btn" data-number="4">4</button>
+                        <button class="calc-btn" data-number="5">5</button>
+                        <button class="calc-btn" data-number="6">6</button>
+                        <button class="calc-btn calc-op" data-action="subtract">−</button>
+
+                        <button class="calc-btn" data-number="1">1</button>
+                        <button class="calc-btn" data-number="2">2</button>
+                        <button class="calc-btn" data-number="3">3</button>
+                        <button class="calc-btn calc-op" data-action="add">+</button>
+
+                        <button class="calc-btn calc-zero" data-number="0">0</button>
+                        <button class="calc-btn" data-action="decimal">.</button>
+                        <button class="calc-btn calc-equals" data-action="equals">=</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes View -->
+            <div class="view" id="notesView">
+                <div class="notes-container">
+                    <div class="notes-header">
+                        <input type="text" id="noteTitle" class="note-title-input" placeholder="Note title...">
+                        <button class="add-note-btn" id="addNoteBtn">+ New Note</button>
+                    </div>
+                    <textarea id="noteContent" class="note-content" placeholder="Start typing your note..."></textarea>
+                    <button class="save-note-btn" id="saveNoteBtn">💾 Save Note</button>
+                    <div class="notes-list" id="notesList"></div>
+                </div>
+            </div>
+
+            <!-- Tasks View -->
+            <div class="view" id="tasksView">
+                <div class="tasks-container">
+                    <div class="task-input-group">
+                        <input type="text" id="taskInput" class="task-input" placeholder="Add a new task...">
+                        <button class="add-task-btn" id="addTaskBtn">+</button>
+                    </div>
+                    <div class="task-filters">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="active">Active</button>
+                        <button class="filter-btn" data-filter="completed">Completed</button>
+                    </div>
+                    <div class="tasks-list" id="tasksList"></div>
+                    <div class="tasks-stats" id="tasksStats"></div>
+                </div>
+            </div>
+
+            <!-- Timer View -->
+            <div class="view" id="timerView">
+                <div class="timer-container">
+                    <div class="timer-tabs">
+                        <button class="timer-tab active" data-mode="timer">Timer</button>
+                        <button class="timer-tab" data-mode="stopwatch">Stopwatch</button>
+                    </div>
+
+                    <div class="timer-mode active" id="timerMode">
+                        <div class="time-display" id="timerDisplay">00:00:00</div>
+                        <div class="time-inputs">
+                            <input type="number" id="hoursInput" class="time-input" min="0" max="23" value="0" placeholder="HH">
+                            <span class="time-separator">:</span>
+                            <input type="number" id="minutesInput" class="time-input" min="0" max="59" value="0" placeholder="MM">
+                            <span class="time-separator">:</span>
+                            <input type="number" id="secondsInput" class="time-input" min="0" max="59" value="0" placeholder="SS">
+                        </div>
+                        <div class="timer-controls">
+                            <button class="timer-btn start-btn" id="startTimerBtn">Start</button>
+                            <button class="timer-btn reset-btn" id="resetTimerBtn">Reset</button>
+                        </div>
+                    </div>
+
+                    <div class="timer-mode" id="stopwatchMode">
+                        <div class="time-display" id="stopwatchDisplay">00:00:00</div>
+                        <div class="timer-controls">
+                            <button class="timer-btn start-btn" id="startStopwatchBtn">Start</button>
+                            <button class="timer-btn reset-btn" id="resetStopwatchBtn">Reset</button>
+                            <button class="timer-btn lap-btn" id="lapBtn">Lap</button>
+                        </div>
+                        <div class="laps-list" id="lapsList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Converter View -->
+            <div class="view" id="converterView">
+                <div class="converter-container">
+                    <div class="converter-type-tabs">
+                        <button class="converter-tab active" data-type="length">Length</button>
+                        <button class="converter-tab" data-type="weight">Weight</button>
+                        <button class="converter-tab" data-type="temperature">Temperature</button>
+                        <button class="converter-tab" data-type="volume">Volume</button>
+                    </div>
+
+                    <div class="converter-content">
+                        <div class="converter-group">
+                            <label>From:</label>
+                            <select id="fromUnit" class="unit-select"></select>
+                            <input type="number" id="fromValue" class="converter-input" placeholder="0" value="0">
+                        </div>
+
+                        <button class="swap-btn" id="swapBtn">⇅</button>
+
+                        <div class="converter-group">
+                            <label>To:</label>
+                            <select id="toUnit" class="unit-select"></select>
+                            <input type="number" id="toValue" class="converter-input" placeholder="0" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

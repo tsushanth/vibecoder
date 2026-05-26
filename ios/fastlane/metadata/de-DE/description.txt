@@ -1,30 +1,22 @@
-VibeBuild verwandelt deine Ideen mithilfe von KI in funktionierende Apps. Beschreibe einfach, was du erstellen moechtest, und VibeBuild generiert in Sekunden eine voll funktionsfaehige Web-App. Erstelle und verwalte deine Apps auch im Web auf vibebuild.cc.
+VibeBuild ist ein KI-gestützter App-Builder, mit dem du Web-Apps per natürlicher Sprache erstellen und veröffentlichen kannst – ganz ohne Programmierkenntnisse.
 
-Keine Programmiererfahrung noetig. Egal ob du ein Anfaenger bist, der App-Entwicklung erkundet, oder ein Profi, der schnell Prototypen erstellt - VibeBuild macht es muehelos.
+Beschreibe, was du bauen möchtest, und VibeBuild erstellt in Sekunden eine funktionierende Web-App. Verfeinere sie mit weiteren Prompts, sieh dir eine Live-Vorschau an und veröffentliche sie sofort.
 
-SO FUNKTIONIERT ES
-1. Beschreibe deine App-Idee in wenigen Worten oder Saetzen
-2. Beobachte, wie die KI deine App in Echtzeit mit einer Live-Fortschrittsanzeige erstellt
-3. Sieh dir deine App sofort in der Anwendung an
-4. Speichere deine Kreationen und greife jederzeit darauf zu
-5. Veroeffentliche im Web und teile deine App unter deineapp.vibebuild.cc
+WAS DU TUN KANNST
+- Web-Apps durch einfache Beschreibungen erstellen
+- Deine App mit weiteren Prompts iterieren und verfeinern
+- Live-Vorschau beim Bauen sehen
+- Projekte veröffentlichen und teilen
+- Öffentliche Projekte anderer Builder entdecken
+- Community-Projekte nach Neueste oder Beliebteste sortieren
 
-FUNKTIONEN
-- KI-gesteuerte Generierung: Beschreibe jede App-Idee und erhalte sofort funktionierenden Code
-- Live-Vorschau: Sieh deine App sofort nach der Generierung in Aktion
-- Im Web veroeffentlichen: Teile deine App unter deineapp.vibebuild.cc - von jedem Browser aus zugaenglich
-- Speichern und verwalten: Behalte alle generierten Apps uebersichtlich an einem Ort
-- Vorschlagskarten: Lass dich von kreativen App-Ideen inspirieren
-- Echtzeit-Fortschritt: Verfolge den Erstellungsprozess mit Live-Statusupdates
-- Pro-Abonnement: Schalte unbegrenzte Generierungen mit VibeBuild Pro frei
+BAUE ALLES MÖGLICHE
+- Produktivitätstools und Hilfsprogramme
+- Spiele und interaktive Erlebnisse
+- Kreativwerkzeuge und Editoren
+- Datenvisualisierungen und Dashboards
+- Und vieles mehr
 
-FUER ALLE GEMACHT
-- Schueler und Studenten, die Programmieren lernen
-- Unternehmer, die Startup-Ideen als Prototypen umsetzen
-- Designer, die interaktive Mockups erstellen
-- Entwickler, die Konzepte schnell testen
-- Alle, die neugierig auf App-Entwicklung sind
+VibeBuild macht es jedem leicht, von der Idee zur fertigen App zu kommen – ohne Vorkenntnisse.
 
-VibeBuild Pro schaltet unbegrenzte App-Generierungen frei. Kostenlose Nutzer erhalten ein taegliches Generierungslimit, um die Plattform zu erkunden.
-
-Datenschutz: Wir erfassen nur die minimal notwendigen Daten fuer den Betrieb des Dienstes (E-Mail zur Authentifizierung, deine Eingaben fuer die Generierung). Wir geben deine Daten niemals an Dritte weiter.
+Datenschutz: Wir erfassen nur die minimal notwendigen Daten für den Betrieb des Dienstes. Wir geben deine Daten niemals an Dritte weiter.
