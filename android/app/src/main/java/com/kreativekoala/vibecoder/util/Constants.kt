@@ -1,7 +1,7 @@
 package com.kreativekoala.vibecoder.util
 
 object Constants {
-    const val BASE_URL = "https://vibecoder-api-917362189743.us-central1.run.app/"
+    const val BASE_URL = "https://vibecoder-api.fly.dev/"
     const val SSE_TIMEOUT_MS = 600_000L // 10 minutes
 
     // Supabase

@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.kreativekoala.ratingkit.RatingKit
 import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.preview.LivePreviewScreen
 import com.kreativekoala.vibecoder.ui.preview.VersionHistorySheet
@@ -50,6 +51,15 @@ fun ProjectDetailScreen(
 
     LaunchedEffect(projectId) {
         viewModel.loadProject(projectId)
+    }
+
+    // Track APK export success as a rating-prompt action peak
+    var wasExportingApk by remember { mutableStateOf(false) }
+    LaunchedEffect(uiState.isExportingApk) {
+        if (wasExportingApk && !uiState.isExportingApk && uiState.errorMessage == null) {
+            (context as? android.app.Activity)?.let { RatingKit.trackAction(it) }
+        }
+        wasExportingApk = uiState.isExportingApk
     }
 
     // Deploy subdomain dialog

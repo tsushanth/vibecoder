@@ -22,6 +22,8 @@ import com.kreativekoala.paywallkit.manager.PaywallManager
 import com.kreativekoala.paywallkit.models.PaywallFeature
 import com.kreativekoala.paywallkit.models.PaywallProduct
 import com.kreativekoala.paywallkit.view.PaywallView
+import com.kreativekoala.ratingkit.RatingKit
+import com.kreativekoala.vibecoder.service.FacebookSDKHelper
 import com.kreativekoala.vibecoder.service.TikTokHelper
 import com.kreativekoala.vibecoder.navigation.VibeBuildNavGraph
 import com.kreativekoala.vibecoder.ui.theme.VibeBuildTheme
@@ -71,6 +73,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        RatingKit.trackAppOpen(this)
 
         setContent {
             VibeBuildTheme {
@@ -172,7 +176,16 @@ class MainActivity : AppCompatActivity() {
                                         setPremiumUser(this@MainActivity, true)
                                     }
                                     val price = pkg.product.price.amountMicros / 1_000_000.0
+                                    val currency = pkg.product.price.currencyCode
                                     TikTokHelper.trackPurchase(productId, price)
+                                    RatingKit.trackPurchase(this@MainActivity)
+                                    // Meta attribution — without this, the Meta ad campaign can't
+                                    // close the CAC loop (was missing on hard paywall, only soft
+                                    // paywall in SubscriptionViewModel had it).
+                                    FacebookSDKHelper.logPurchase(price, currency, productId)
+                                    if (pkg.product.subscriptionOptions?.freeTrial != null) {
+                                        FacebookSDKHelper.logTrialStarted(productId)
+                                    }
                                     PaywallManager.trackEvent(
                                         appId = "vibebuild",
                                         placement = "paywall",

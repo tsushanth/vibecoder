@@ -55,7 +55,10 @@ data class CreateUiState(
     val versionNumber: Int = 0,
     val showRatingPrompt: Boolean = false,
     val showBuildingConfirmation: Boolean = false,
-    val showSystemBusyDialog: Boolean = false
+    val showSystemBusyDialog: Boolean = false,
+    /** True when the user attempted generation past the free limit. Triggers a
+     * non-dismissible paywall inside CreateScreen until they subscribe. */
+    val showHardPaywall: Boolean = false
 )
 
 @HiltViewModel
@@ -258,6 +261,15 @@ class CreateViewModel @Inject constructor(
             return
         }
 
+        // Hard paywall gate — check at the *action*, not just app launch. Previously
+        // the limit was only checked when AppContentWithPaywallGate first mounted,
+        // so a user could keep building indefinitely once their session started.
+        if (!MainActivity.isPremiumUser(appContext) &&
+            MainActivity.getGenerationCount(appContext) >= MainActivity.FREE_GENERATION_LIMIT) {
+            _uiState.update { it.copy(showHardPaywall = true) }
+            return
+        }
+
         val userId = authRepository.currentUser?.uid ?: run {
             _uiState.update { it.copy(errorMessage = "Please sign in to generate projects") }
             return
@@ -441,6 +453,12 @@ class CreateViewModel @Inject constructor(
 
     fun dismissBuildingConfirmation() {
         _uiState.update { it.copy(showBuildingConfirmation = false) }
+    }
+
+    /** Called after a successful purchase from the hard paywall — re-checks the
+     * `is_premium` flag set by MainActivity and lets the user resume. */
+    fun onPaywallPurchaseSuccess() {
+        _uiState.update { it.copy(showHardPaywall = false) }
     }
 
     fun dismissRatingPrompt() {

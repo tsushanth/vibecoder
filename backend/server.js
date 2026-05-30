@@ -19,7 +19,8 @@ app.use(cors({
     origin: [
         'https://vibebuild.cc',
         'https://www.vibebuild.cc',
-        'https://vibebuild-web-917362189743.us-central1.run.app',
+        'https://vibebuild-web.fly.dev',
+        'https://vibebuild-web.fly.dev',
         'http://localhost:3000',
     ],
     credentials: true,
