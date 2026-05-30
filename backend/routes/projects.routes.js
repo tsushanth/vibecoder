@@ -132,6 +132,8 @@ async function refreshBrowseCache() {
             if (p.creator_id?.startsWith('test-')) return false;
             if (/^test\b/i.test(title) && title.length < 30) return false;
             if (title === 'prefix-test' || title === 'test') return false;
+            // Must have a visual (preview screenshot or thumbnail) to show in browse
+            if (!p.preview_url && !p.thumbnail_url) return false;
             return true;
         };
         browseCache.newest = (newestResult.data || []).filter(isRealProject);
@@ -323,6 +325,9 @@ async function proxyWorkerSSE(workerResponse, res, {
                     const eventData = line.substring(6);
                     try {
                         const parsed = JSON.parse(eventData);
+                        if (parsed.type !== 'status') {
+                            console.log(`[${label}] SSE event type=${parsed.type} dataLen=${eventData.length}`);
+                        }
 
                         if (parsed.type === 'status') {
                             safeWrite(`data: ${JSON.stringify({
@@ -350,8 +355,8 @@ async function proxyWorkerSSE(workerResponse, res, {
                                 safeWrite(`data: ${JSON.stringify({ type: 'error', error: parsed.error })}\n\n`);
                             }
                         }
-                    } catch {
-                        // Malformed event, skip
+                    } catch (parseErr) {
+                        console.log(`[${label}] SSE parse error: ${parseErr.message} dataLen=${eventData.length} preview=${eventData.substring(0, 100)}`);
                     }
                 }
             }
@@ -387,8 +392,12 @@ function setupSSE(res) {
 // Streaming endpoint — proxies SSE status events from the worker to the client
 // ============================================
 router.post('/generate', async (req, res) => {
+    // Declared outside the try block so the catch handler can reference it.
+    // `let` inside the try is scoped to the try only, which caused a
+    // ReferenceError → process crash whenever the outer catch fired.
+    let placeholderProjectId = null;
     try {
-        const { prompt, userId, userName, framework, referenceImage, deviceToken } = req.body;
+        const { prompt, userId, userName, framework, referenceImage, deviceToken, source } = req.body;
 
         if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
             return res.status(400).json({ error: 'Project description is required' });
@@ -432,7 +441,6 @@ router.post('/generate', async (req, res) => {
         console.log(`[generate] User ${userId}: "${prompt.substring(0, 80)}"${referenceImage ? ' (with reference image)' : ''}`);
 
         // Create placeholder project in "building" state so it shows in My Projects immediately
-        let placeholderProjectId = null;
         try {
             let title = prompt.trim()
                 .replace(/^(build|create|make|design|develop)\s+(a|an|the|me\s+a|me\s+an)?\s*/i, '')
@@ -451,7 +459,7 @@ router.post('/generate', async (req, res) => {
                     initial_prompt: prompt,
                     is_public: true,
                     project_type: 'web_app',
-                    creation_method: 'ai_generated',
+                    creation_method: source === 'telegram' ? 'telegram' : 'ai_generated',
                     status: 'building'
                 })
                 .select('id')
@@ -476,7 +484,7 @@ router.post('/generate', async (req, res) => {
         // Use async callback path — close SSE after queued event, app polls for result
         // Old app versions (stream:true) still get the SSE proxy path for compatibility
         const clientWantsStream = req.body.stream === true;
-        const callbackUrl = `${process.env.SELF_URL || 'https://vibecoder-api-917362189743.us-central1.run.app'}/api/projects/${placeholderProjectId}/build-complete`;
+        const callbackUrl = `${process.env.SELF_URL || 'https://vibecoder-api.fly.dev'}/api/projects/${placeholderProjectId}/build-complete`;
         const workerBody = {
             prompt: prompt.trim(),
             userId,
@@ -540,129 +548,17 @@ router.post('/generate', async (req, res) => {
             onResult: async (parsed, res) => {
                 recordGeneration(userId);
 
-                // Record usage for subscription tracking
-                if (userId) {
-                    await recordUsage(userId, ACTION_TYPES.generation);
-                }
-
-                const generationId = `gen-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
+                const generationId = `gen-${Date.now()}-${crypto.randomUUID().split('-')[0]}`;
+                const savedProjectId = placeholderProjectId;
 
                 console.log(`[generate] Complete: ${generationId} (${parsed.files?.length} files, ${((parsed.bundleSize || 0) / 1024).toFixed(1)}KB, ${parsed.generationTime}s)`);
 
-                // Update placeholder project with bundle and deploy preview
-                let savedProjectId = placeholderProjectId;
-                try {
-                    if (savedProjectId) {
-                        // Update existing placeholder with bundle and mark as ready
-                        await supabase.from('projects').update({
-                            bundle: parsed.bundle,
-                            status: 'ready'
-                        }).eq('id', savedProjectId);
-                        console.log(`[generate] Updated project ${savedProjectId} with bundle`);
-                    } else {
-                        // Fallback: create new project if placeholder wasn't created
-                        let title = prompt.trim()
-                            .replace(/^(build|create|make|design|develop)\s+(a|an|the|me\s+a|me\s+an)?\s*/i, '')
-                            .replace(/\s+(with|that|where|which|for|using|featuring|including|and\s+a)\s+.*/i, '')
-                            .split(/\s+/).slice(0, 5).join(' ')
-                            .substring(0, 50) || 'My App';
-                        title = title.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-                        const { data: saved, error: saveErr } = await supabase
-                            .from('projects')
-                            .insert({
-                                title, description: prompt, bundle: parsed.bundle,
-                                creator_id: userId, creator_name: userName || 'VibeBuild User',
-                                initial_prompt: prompt, is_public: true,
-                                project_type: 'web_app', creation_method: 'ai_generated', status: 'ready'
-                            })
-                            .select('id').single();
-                        if (!saveErr && saved) savedProjectId = saved.id;
-                    }
-
-                    if (savedProjectId) {
-                        console.log(`[generate] Project ready: ${savedProjectId}`);
-
-                        // Auto-deploy preview (so URL-based preview works)
-                        try {
-                            const previewSubdomain = `preview-${savedProjectId.substring(0, 12)}`;
-                            const deployRes = await fetch(`${DEPLOY_SERVER_URL}/deploy`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ subdomain: previewSubdomain, bundle: parsed.bundle })
-                            });
-                            if (deployRes.ok) {
-                                const previewUrl = `https://${previewSubdomain}.vibecoder.app`;
-                                await supabase.from('projects').update({ preview_url: previewUrl }).eq('id', savedProjectId);
-                                console.log(`[generate] Preview deployed: ${previewUrl}`);
-
-                                // Auto-capture thumbnail in background
-                                const screenshotServiceUrl = process.env.SCREENSHOT_SERVICE_URL || 'http://178.156.231.255:3465';
-                                fetch(`${screenshotServiceUrl}/screenshot?url=${encodeURIComponent(previewUrl)}&width=390&height=844`)
-                                    .then(async (sr) => {
-                                        if (sr.ok) {
-                                            const imgBuffer = await sr.arrayBuffer();
-                                            // Upload to Supabase Storage
-                                            const fileName = `thumbnails/${savedProjectId}.jpg`;
-                                            const { error: uploadErr } = await supabase.storage
-                                                .from('project-assets')
-                                                .upload(fileName, Buffer.from(imgBuffer), {
-                                                    contentType: 'image/jpeg',
-                                                    upsert: true
-                                                });
-                                            if (!uploadErr) {
-                                                const { data: { publicUrl } } = supabase.storage
-                                                    .from('project-assets')
-                                                    .getPublicUrl(fileName);
-                                                await supabase.from('projects').update({ thumbnail_url: publicUrl }).eq('id', savedProjectId);
-                                                console.log(`[generate] Thumbnail captured: ${publicUrl}`);
-                                            } else {
-                                                // Fallback: store screenshot service URL directly
-                                                const thumbnailUrl = `${screenshotServiceUrl}/screenshot?url=${encodeURIComponent(previewUrl)}&width=390&height=844`;
-                                                await supabase.from('projects').update({ thumbnail_url: thumbnailUrl }).eq('id', savedProjectId);
-                                                console.log(`[generate] Thumbnail URL stored (direct): ${thumbnailUrl}`);
-                                            }
-                                        }
-                                    })
-                                    .catch(e => console.error(`[generate] Thumbnail capture failed: ${e.message}`));
-                            }
-                        } catch (e) {
-                            console.error(`[generate] Preview deploy failed: ${e.message}`);
-                        }
-
-                        // Init git repo in background (updates github_repo on project)
-                        fetch(`${WORKER_URL}/init-repo`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'x-worker-secret': WORKER_SECRET },
-                            body: JSON.stringify({ projectId: savedProjectId, bundle: parsed.bundle })
-                        }).then(async (r) => {
-                            if (r.ok) {
-                                const result = await r.json();
-                                if (result.repoName) {
-                                    await supabase.from('projects').update({ github_repo: result.repoName }).eq('id', savedProjectId);
-                                    console.log(`[generate] Git repo linked: ${result.repoName}`);
-                                }
-                            }
-                        }).catch((e) => {
-                            console.error(`[generate] Init repo failed: ${e.message}`);
-                        });
-                    }
-                } catch (e) {
-                    console.error(`[generate] Auto-save failed: ${e.message}`);
-                }
-
-                // Get preview URL from saved project
-                let previewUrl = null;
-                if (savedProjectId) {
-                    const { data: proj } = await supabase.from('projects').select('preview_url').eq('id', savedProjectId).single();
-                    previewUrl = proj?.preview_url;
-                }
-
+                // Send result to client immediately — don't block on DB/deploy ops
                 res.write(`data: ${JSON.stringify({
                     type: 'result',
                     success: true,
                     generationId,
                     projectId: savedProjectId,
-                    previewUrl,
                     bundle: parsed.bundle,
                     bundleSize: parsed.bundleSize,
                     files: parsed.files,
@@ -670,13 +566,100 @@ router.post('/generate', async (req, res) => {
                     quality: parsed.quality
                 })}\n\n`);
 
-                // Send push notification to user (iOS + Android)
-                const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
-                if (userId) {
-                    sendPushToUser(userId, 'Project Ready!', `"${shortPrompt}" has been built. Tap to view!`).catch(() => {});
-                } else if (deviceToken) {
-                    sendAPNsPush(deviceToken, 'Project Ready!', `"${shortPrompt}" has been built. Tap to view!`).catch(() => {});
-                }
+                // All backend work runs in background after client gets bundle
+                (async () => {
+                    try {
+                        // Record usage for subscription tracking
+                        if (userId) await recordUsage(userId, ACTION_TYPES.generation);
+
+                        let finalProjectId = savedProjectId;
+                        if (finalProjectId) {
+                            await supabase.from('projects').update({ bundle: parsed.bundle, status: 'ready' }).eq('id', finalProjectId);
+                            console.log(`[generate] Updated project ${finalProjectId} with bundle`);
+                        } else {
+                            // Fallback: create new project if placeholder wasn't created
+                            let title = prompt.trim()
+                                .replace(/^(build|create|make|design|develop)\s+(a|an|the|me\s+a|me\s+an)?\s*/i, '')
+                                .replace(/\s+(with|that|where|which|for|using|featuring|including|and\s+a)\s+.*/i, '')
+                                .split(/\s+/).slice(0, 5).join(' ')
+                                .substring(0, 50) || 'My App';
+                            title = title.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                            const { data: saved } = await supabase.from('projects').insert({
+                                title, description: prompt, bundle: parsed.bundle,
+                                creator_id: userId, creator_name: userName || 'VibeBuild User',
+                                initial_prompt: prompt, is_public: true,
+                                project_type: 'web_app', creation_method: 'ai_generated', status: 'ready'
+                            }).select('id').single();
+                            if (saved) finalProjectId = saved.id;
+                        }
+
+                        if (finalProjectId) {
+                            console.log(`[generate] Project ready: ${finalProjectId}`);
+
+                            // Auto-deploy preview
+                            try {
+                                const previewSubdomain = `preview-${finalProjectId.substring(0, 12)}`;
+                                const deployRes = await fetch(`${DEPLOY_SERVER_URL}/deploy`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ subdomain: previewSubdomain, bundle: parsed.bundle }),
+                                    signal: AbortSignal.timeout(30000)
+                                });
+                                if (deployRes.ok) {
+                                    const previewUrl = `https://${previewSubdomain}.${process.env.BASE_DOMAIN || 'vibebuild.cc'}`;
+                                    await supabase.from('projects').update({ preview_url: previewUrl }).eq('id', finalProjectId);
+                                    console.log(`[generate] Preview deployed: ${previewUrl}`);
+
+                                    // Thumbnail capture in background
+                                    const screenshotServiceUrl = process.env.SCREENSHOT_SERVICE_URL || 'http://178.156.231.255:3465';
+                                    fetch(`${screenshotServiceUrl}/screenshot?url=${encodeURIComponent(previewUrl)}&width=390&height=844`)
+                                        .then(async (sr) => {
+                                            if (sr.ok) {
+                                                const imgBuffer = await sr.arrayBuffer();
+                                                const fileName = `thumbnails/${finalProjectId}.jpg`;
+                                                const { error: uploadErr } = await supabase.storage
+                                                    .from('project-assets')
+                                                    .upload(fileName, Buffer.from(imgBuffer), { contentType: 'image/jpeg', upsert: true });
+                                                if (!uploadErr) {
+                                                    const { data: { publicUrl } } = supabase.storage.from('project-assets').getPublicUrl(fileName);
+                                                    await supabase.from('projects').update({ thumbnail_url: publicUrl }).eq('id', finalProjectId);
+                                                    console.log(`[generate] Thumbnail captured: ${publicUrl}`);
+                                                } else {
+                                                    const thumbnailUrl = `${screenshotServiceUrl}/screenshot?url=${encodeURIComponent(previewUrl)}&width=390&height=844`;
+                                                    await supabase.from('projects').update({ thumbnail_url: thumbnailUrl }).eq('id', finalProjectId);
+                                                }
+                                            }
+                                        })
+                                        .catch(e => console.error(`[generate] Thumbnail capture failed: ${e.message}`));
+                                }
+                            } catch (e) {
+                                console.error(`[generate] Preview deploy failed: ${e.message}`);
+                            }
+
+                            // Init git repo in background
+                            fetch(`${WORKER_URL}/init-repo`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'x-worker-secret': WORKER_SECRET },
+                                body: JSON.stringify({ projectId: finalProjectId, bundle: parsed.bundle })
+                            }).then(async (r) => {
+                                if (r.ok) {
+                                    const result = await r.json();
+                                    if (result.repoName) {
+                                        await supabase.from('projects').update({ github_repo: result.repoName }).eq('id', finalProjectId);
+                                        console.log(`[generate] Git repo linked: ${result.repoName}`);
+                                    }
+                                }
+                            }).catch(e => console.error(`[generate] Init repo failed: ${e.message}`));
+                        }
+                    } catch (e) {
+                        console.error(`[generate] Auto-save failed: ${e.message}`);
+                    }
+
+                    // Push notification
+                    const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
+                    if (userId) sendPushToUser(userId, 'Project Ready!', `"${shortPrompt}" has been built. Tap to view!`).catch(() => {});
+                    else if (deviceToken) sendAPNsPush(deviceToken, 'Project Ready!', `"${shortPrompt}" has been built. Tap to view!`).catch(() => {});
+                })();
             }
         });
 
@@ -888,7 +871,7 @@ router.post('/:id/retry', async (req, res) => {
 
         // Dispatch to worker with callback URL — worker POSTs result back when done
         // This avoids Cloud Run killing the long-running SSE stream after response is sent
-        const callbackUrl = `${process.env.SELF_URL || 'https://vibecoder-api-917362189743.us-central1.run.app'}/api/projects/${id}/build-complete`;
+        const callbackUrl = `${process.env.SELF_URL || 'https://vibecoder-api.fly.dev'}/api/projects/${id}/build-complete`;
         const workerBody = { prompt: project.initial_prompt, userId, framework: 'react', stream: false, projectId: id, callbackUrl, callbackSecret: WORKER_SECRET };
         console.log(`[retry] Dispatching to worker for ${id}`);
         fetch(`${WORKER_URL}/generate`, {
@@ -964,15 +947,20 @@ router.post('/:id/build-complete', async (req, res) => {
             // Auto-deploy preview + capture thumbnail
             try {
                 const previewSubdomain = `prev-${id.substring(0, 8)}`;
-                const previewServiceUrl = process.env.PREVIEW_SERVICE_URL || 'http://178.156.231.255:3456';
-                const deployRes = await fetch(`${previewServiceUrl}/deploy-preview`, {
+                const deployRes = await fetch(`${DEPLOY_SERVER_URL}/deploy`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ subdomain: previewSubdomain, bundle })
+                    body: JSON.stringify({ subdomain: previewSubdomain, bundle }),
+                    signal: AbortSignal.timeout(30000)
                 });
+                if (!deployRes.ok) {
+                    const body = await deployRes.text().catch(() => '');
+                    console.error(`[build-complete] Deploy failed for ${id}: HTTP ${deployRes.status} ${body.substring(0, 200)}`);
+                }
                 if (deployRes.ok) {
-                    const previewUrl = `https://${previewSubdomain}.vibecoder.app`;
+                    const previewUrl = `https://${previewSubdomain}.${process.env.BASE_DOMAIN || 'vibebuild.cc'}`;
                     await supabase.from('projects').update({ preview_url: previewUrl }).eq('id', id);
+                    console.log(`[build-complete] Preview deployed for ${id}: ${previewUrl}`);
                     // Capture thumbnail in background
                     const screenshotServiceUrl = process.env.SCREENSHOT_SERVICE_URL || 'http://178.156.231.255:3465';
                     fetch(`${screenshotServiceUrl}/screenshot?url=${encodeURIComponent(previewUrl)}&width=390&height=844`)
@@ -1469,15 +1457,15 @@ router.get('/:id', async (req, res) => {
 
         const { data, error } = await supabase
             .from('projects')
-            .select('id, title, description, github_repo, creator_id, creator_name, project_type, view_count, play_count, fork_count, like_count, created_at, updated_at, is_public, published_url, free_tweaks_remaining, initial_prompt')
+            .select('id, title, description, bundle, github_repo, creator_id, creator_name, project_type, view_count, play_count, fork_count, like_count, created_at, updated_at, is_public, published_url, free_tweaks_remaining, initial_prompt')
             .eq('id', id)
             .single();
 
         if (error) throw error;
         if (!data) return res.status(404).json({ error: 'Project not found' });
 
-        // Fetch bundle from GitHub
-        let bundle = null;
+        // Fetch bundle: prefer GitHub repo, fallback to DB bundle column
+        let bundle = data.bundle || null;
         if (data.github_repo) {
             try {
                 const workerRes = await fetch(`${WORKER_URL}/bundle/${data.github_repo}`, {

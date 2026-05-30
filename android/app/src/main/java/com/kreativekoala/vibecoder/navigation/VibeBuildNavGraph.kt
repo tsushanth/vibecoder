@@ -124,6 +124,9 @@ fun VibeBuildNavGraph() {
                 onNavigateToSubscriptions = {
                     navController.navigate(Screen.SubscriptionPlans.route)
                 },
+                onNavigateToHardPaywall = {
+                    navController.navigate(Screen.HardPaywall.route)
+                },
                 onNavigateToProjectDetail = { projectId ->
                     navController.navigate(Screen.ProjectDetail.createRoute(projectId))
                 },
@@ -167,6 +170,13 @@ fun VibeBuildNavGraph() {
         composable(Screen.SubscriptionPlans.route) {
             SubscriptionPlansScreen(
                 onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.HardPaywall.route) {
+            SubscriptionPlansScreen(
+                onBack = { navController.popBackStack() },
+                hardGate = true,
             )
         }
     }

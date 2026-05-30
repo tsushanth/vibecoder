@@ -6,7 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.kreativekoala.vibecoder.data.local.UserPreferences
 import com.kreativekoala.vibecoder.data.model.User
 import com.kreativekoala.vibecoder.data.repository.AuthRepository
+import com.kreativekoala.vibecoder.service.FacebookSDKHelper
 import com.kreativekoala.vibecoder.service.FCMTokenManager
+import com.kreativekoala.vibecoder.service.FirebaseAnalyticsHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -64,6 +66,10 @@ class AuthViewModel @Inject constructor(
                 _currentUser.value = user
                 userPreferences.saveUser(user.userId, user.displayName)
                 fcmTokenManager.registerTokenForUser(user.userId)
+                FirebaseAnalyticsHelper.logLogin("google")
+                // FacebookSDKHelper.logSignUp dedupes per install — safe to call
+                // on every Google sign-in; only fires for first-time users.
+                FacebookSDKHelper.logSignUp("google")
             } catch (e: Exception) {
                 _errorMessage.value = e.message ?: "Sign in failed"
             } finally {
@@ -81,6 +87,7 @@ class AuthViewModel @Inject constructor(
                 _currentUser.value = user
                 userPreferences.saveUser(user.userId, user.displayName)
                 fcmTokenManager.registerTokenForUser(user.userId)
+                FirebaseAnalyticsHelper.logLogin("email")
             } catch (e: Exception) {
                 _errorMessage.value = e.message ?: "Sign in failed"
             } finally {
@@ -98,6 +105,8 @@ class AuthViewModel @Inject constructor(
                 _currentUser.value = user
                 userPreferences.saveUser(user.userId, user.displayName)
                 fcmTokenManager.registerTokenForUser(user.userId)
+                FirebaseAnalyticsHelper.logSignUp("email")
+                FacebookSDKHelper.logSignUp("email")
             } catch (e: Exception) {
                 _errorMessage.value = e.message ?: "Sign up failed"
             } finally {

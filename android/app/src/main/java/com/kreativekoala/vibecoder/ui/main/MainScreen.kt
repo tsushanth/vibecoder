@@ -50,6 +50,7 @@ private const val PREF_TELEGRAM_BANNER_DISMISSED = "telegram_banner_dismissed"
 fun MainScreen(
     onSignOut: () -> Unit,
     onNavigateToSubscriptions: () -> Unit,
+    onNavigateToHardPaywall: () -> Unit,
     onNavigateToProjectDetail: (String) -> Unit,
     onNavigateToProjectPreview: (String) -> Unit,
     viewModel: MainViewModel = hiltViewModel()
@@ -176,7 +177,8 @@ fun MainScreen(
                     )
                     1 -> CreateScreen(
                         modifier = Modifier.fillMaxSize(),
-                        onNavigateToSubscriptions = onNavigateToSubscriptions
+                        onNavigateToSubscriptions = onNavigateToSubscriptions,
+                        onNavigateToHardPaywall = onNavigateToHardPaywall
                     )
                     2 -> BrowseScreen(
                         modifier = Modifier.fillMaxSize(),

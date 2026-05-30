@@ -15,6 +15,26 @@ setInterval(() => {
     }
 }, 5 * 60 * 1000);
 
+// GET /api/telegram/connect?tg_id=X - Called by web app after user signs in
+// Generates a code that links a Telegram user to a VibeBuild account
+router.get('/connect', async (req, res) => {
+    try {
+        const { tg_id, user_id } = req.query;
+        if (!tg_id || !user_id) return res.status(400).json({ error: 'tg_id and user_id are required' });
+
+        const code = crypto.randomBytes(3).toString('hex').toUpperCase();
+        magicLinks.set(code, {
+            userId: user_id,
+            expiresAt: Date.now() + 10 * 60 * 1000,
+        });
+
+        res.json({ success: true, code, expiresIn: 600 });
+    } catch (error) {
+        console.error('[telegram/connect] Error:', error.message);
+        res.status(500).json({ error: 'Failed to generate connect code' });
+    }
+});
+
 // POST /api/telegram/link - Generate magic link code for a VibeBuild user
 // Called from the app when user taps "Connect Telegram"
 router.post('/link', async (req, res) => {

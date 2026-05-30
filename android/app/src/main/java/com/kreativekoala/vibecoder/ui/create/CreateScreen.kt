@@ -41,10 +41,22 @@ import com.kreativekoala.vibecoder.ui.theme.*
 fun CreateScreen(
     modifier: Modifier = Modifier,
     onNavigateToSubscriptions: () -> Unit = {},
+    onNavigateToHardPaywall: () -> Unit = {},
     viewModel: CreateViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+
+    // Triggered when startGeneration() blocks the free-build cap. Navigates to
+    // the non-dismissible paywall and immediately clears the flag — if the user
+    // comes back without purchasing, the next generation attempt re-blocks and
+    // re-fires this navigation.
+    LaunchedEffect(uiState.showHardPaywall) {
+        if (uiState.showHardPaywall) {
+            onNavigateToHardPaywall()
+            viewModel.onPaywallPurchaseSuccess()
+        }
+    }
 
     // No longer forcing screen on — if connection drops, we poll for the result
 

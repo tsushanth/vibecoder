@@ -4,6 +4,7 @@ import android.app.Activity
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.kreativekoala.paywallkit.manager.PaywallManager
+import com.kreativekoala.ratingkit.RatingKit
 import com.kreativekoala.vibecoder.service.FacebookSDKHelper
 import com.kreativekoala.vibecoder.service.FirebaseAnalyticsHelper
 import com.kreativekoala.vibecoder.service.TikTokHelper
@@ -150,6 +151,11 @@ class SubscriptionViewModel @Inject constructor(
                 FirebaseAnalyticsHelper.logPurchaseCompleted(productId, price)
                 TikTokHelper.trackPurchase(productId, price)
                 FacebookSDKHelper.logPurchase(price, currency, productId)
+                RatingKit.trackPurchase(activity)
+                // Trial starts are a distinct Meta event used for LTV modeling.
+                if (pkg.product.subscriptionOptions?.freeTrial != null) {
+                    FacebookSDKHelper.logTrialStarted(productId)
+                }
                 PaywallManager.trackEvent(
                     appId = "vibebuild",
                     placement = "subscription_screen",

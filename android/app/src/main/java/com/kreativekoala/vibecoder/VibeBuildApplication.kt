@@ -8,6 +8,7 @@ import com.kreativekoala.vibecoder.service.TikTokHelper
 import com.kreativekoala.vibecoder.util.NotificationHelper
 import com.kreativekoala.paywallkit.manager.ExperimentManager
 import com.kreativekoala.paywallkit.manager.PromoCodeManager
+import com.kreativekoala.ratingkit.RatingKit
 import com.revenuecat.purchases.LogLevel
 import com.revenuecat.purchases.Purchases
 import com.revenuecat.purchases.PurchasesConfiguration
@@ -32,6 +33,9 @@ class VibeBuildApplication : Application() {
         // Initialize PaywallKit experiment manager
         ExperimentManager.init(this)
         PromoCodeManager.init(this)
+
+        // Initialize RatingKit
+        RatingKit.init(this, appId = "vibebuild")
 
         // Initialize RevenueCat
         Purchases.logLevel = if (BuildConfig.DEBUG) LogLevel.DEBUG else LogLevel.WARN

@@ -15,6 +15,10 @@ sealed class Screen(val route: String) {
     }
     data object LivePreview : Screen("preview")
     data object SubscriptionPlans : Screen("subscriptions")
+    /** Non-dismissible paywall — entered when the user hits the free-build cap.
+     * Same RevenueCat paywall UI, but no X button and back navigation is blocked
+     * until purchase completes. */
+    data object HardPaywall : Screen("subscriptions/hard")
     data object ProjectPreview : Screen("browse/preview/{projectId}") {
         fun createRoute(projectId: String) = "browse/preview/$projectId"
     }
