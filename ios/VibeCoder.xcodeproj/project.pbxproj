@@ -7,9 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0140C152DFDB77CBAC12F900 /* AdServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA493087611CB389B5859871 /* AdServices.framework */; };
 		3695BC2AB12B7F49E5516933 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E089AB0FCED2458DE60648B7 /* Foundation.framework */; };
 		5EADBF9A4F6492FF8D96896F /* catalog.json in Resources */ = {isa = PBXBuildFile; fileRef = 508ED5F3A2CB6DE2DFB3B466 /* catalog.json */; };
 		7CD7E0DB8711F0C61A4F843D /* LessonDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87442C049C7606E22540A952 /* LessonDetailView.swift */; };
+		8DC0989E0E659A67EDE5D590 /* AttributionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EABD0DF335BADE7D5EE7DB9 /* AttributionService.swift */; };
 		A001 /* VibeCoderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001 /* VibeCoderApp.swift */; };
 		A002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B002 /* ContentView.swift */; };
 		A003 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B003 /* AuthManager.swift */; };
@@ -50,6 +52,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4EABD0DF335BADE7D5EE7DB9 /* AttributionService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AttributionService.swift; path = ../../../../Users/sushanthtiruvaipati/Documents/GitHub/VibeBuild/ios/VibeCoder/Monetization/AttributionService.swift; sourceTree = "<group>"; };
 		508ED5F3A2CB6DE2DFB3B466 /* catalog.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = catalog.json; sourceTree = "<group>"; };
 		6222A441E08F11FDECE00A6C /* SnapshotHelper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SnapshotHelper.swift; sourceTree = "<group>"; };
 		82A407B4B02484A2788C4BF1 /* CodeReaderView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CodeReaderView.swift; sourceTree = "<group>"; };
@@ -73,6 +76,7 @@
 		C001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C002 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		C003 /* VibeBuild.storekit */ = {isa = PBXFileReference; lastKnownFileType = com.apple.storekit.configuration; path = VibeBuild.storekit; sourceTree = "<group>"; };
+		CA493087611CB389B5859871 /* AdServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AdServices.framework; path = System/Library/Frameworks/AdServices.framework; sourceTree = SDKROOT; };
 		D001 /* VibeCoder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VibeCoder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E089AB0FCED2458DE60648B7 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		ECF05AFA3D780D6BFCD1205E /* ScreenshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScreenshotTests.swift; sourceTree = "<group>"; };
@@ -100,6 +104,7 @@
 				A020 /* GoogleSignInSwift in Frameworks */,
 				A030 /* ZIPFoundation in Frameworks */,
 				RKB001 /* RatingKit in Frameworks */,
+				0140C152DFDB77CBAC12F900 /* AdServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -110,6 +115,7 @@
 			isa = PBXGroup;
 			children = (
 				D3B7AA612A2D60C53851FBD4 /* iOS */,
+				CA493087611CB389B5859871 /* AdServices.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -234,6 +240,7 @@
 				B018 /* SubscriptionPlansView.swift */,
 				B027 /* PaywallCoordinator.swift */,
 				B028 /* WinbackOfferView.swift */,
+				4EABD0DF335BADE7D5EE7DB9 /* AttributionService.swift */,
 			);
 			path = Monetization;
 			sourceTree = "<group>";
@@ -393,6 +400,7 @@
 				7CD7E0DB8711F0C61A4F843D /* LessonDetailView.swift in Sources */,
 				FA36AC616E1D7AEA0A5B24E8 /* CodeReaderView.swift in Sources */,
 				E4900943324A6C01481FA30F /* SandboxedPreviewView.swift in Sources */,
+				8DC0989E0E659A67EDE5D590 /* AttributionService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

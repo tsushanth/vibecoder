@@ -38,6 +38,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         RatingKit.configure(appId: "vibebuild", apiUrl: "https://paywallkit-api.fly.dev")
         RatingKit.shared.trackAppOpen()
 
+        // Apple Search Ads attribution registration (one-shot per install).
+        AttributionService.shared.trackAttribution()
+
         // Request permission then register for remote notifications
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
             if granted {
