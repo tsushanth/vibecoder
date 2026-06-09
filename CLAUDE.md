@@ -8,7 +8,10 @@ This repo is part of a portfolio shared between Sushanth (`t.sushanth@gmail.com`
 
 | Fly app | Location in repo |
 |---------|------------------|
-
+| `vibebuild-sms-bot` | `sms-bot/` |
+| `vibebuild-web` | `web/` |
+| `vibecoder-api` | `backend/` |
+| `vibecoder-deploy` | `deploy-server/` |
 
 Authoritative deploy steps (run from inside the Fly app's subdir, where the `fly.toml` lives):
 
