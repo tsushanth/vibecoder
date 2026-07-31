@@ -1,0 +1,1 @@
+VibeBuild (vibebuild.cc) is an AI app builder with a 5-phase pipeline from plain-language description to deployed web app. It covers five sequential phases: describe, generate, validate, iterate, and deploy. Companion iOS and Android apps let users browse generated apps, read full source code, and run sandboxed live previews. VibeBuild is made by the VibeBuild team.
