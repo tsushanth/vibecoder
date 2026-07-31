@@ -88,10 +88,21 @@ fun LivePreviewScreen(
         }
     }
 
-    // Collapse tweak bar when tweak finishes
+    // Collapse tweak bar when tweak finishes + force-reload the WebView so
+    // the new bundle is fetched. WebView caches HTML aggressively; without
+    // a manual reload it keeps showing the pre-tweak content even though
+    // the server has redeployed.
+    var wasTweaking by remember { mutableStateOf(false) }
     LaunchedEffect(isTweaking) {
-        if (!isTweaking && showTweakBar && tweakText.isBlank()) {
-            showTweakBar = false
+        if (isTweaking) {
+            wasTweaking = true
+        } else if (wasTweaking) {
+            // tweak just transitioned true → false: success path.
+            wasTweaking = false
+            reloadTrigger++
+            if (showTweakBar && tweakText.isBlank()) {
+                showTweakBar = false
+            }
         }
     }
 

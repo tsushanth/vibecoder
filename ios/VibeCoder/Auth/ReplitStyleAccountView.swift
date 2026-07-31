@@ -2,29 +2,58 @@
 //  ReplitStyleAccountView.swift
 //  VibeCoder
 //
-//  Account tab. Sign-in is optional. There is no paid tier — every lesson
-//  in the catalog is free. Surface: sign-in/out, privacy + terms links,
-//  app version.
+//  Account tab. Sign-in is optional. The catalog is fully free; Pro
+//  unlocks Tinker Pro (persistent attempts, multiple scratchpads, compare
+//  to original). Surface: subscription status, Upgrade / Restore,
+//  sign-in/out, privacy + terms links, app version.
 //
 
 import SwiftUI
+import PaywallKit
 
 struct ReplitStyleAccountView: View {
     @EnvironmentObject var authManager: AuthManager
+    @ObservedObject private var premium = PremiumManager.shared
     @State private var showSignInSheet = false
     @State private var showSignOutConfirm = false
+    @State private var showDeleteConfirm = false
+    @State private var showPaywall = false
+    @State private var isDeleting = false
+    @State private var isRestoring = false
+    @State private var deleteError: String?
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
                     profileHeader
+                    subscriptionCard
                     aboutSection
                     legalSection
                     if authManager.isAuthenticated {
-                        Button("Sign Out") { showSignOutConfirm = true }
-                            .foregroundStyle(.red)
-                            .padding(.top, 8)
+                        VStack(spacing: 12) {
+                            Button("Sign Out") { showSignOutConfirm = true }
+                                .foregroundStyle(.red)
+                            Button {
+                                showDeleteConfirm = true
+                            } label: {
+                                if isDeleting {
+                                    ProgressView().tint(.red)
+                                } else {
+                                    Text("Delete Account")
+                                        .font(.callout.weight(.semibold))
+                                        .foregroundStyle(.red)
+                                }
+                            }
+                            .disabled(isDeleting)
+                            if let err = deleteError {
+                                Text(err)
+                                    .font(.caption)
+                                    .foregroundStyle(.red.opacity(0.8))
+                                    .multilineTextAlignment(.center)
+                            }
+                        }
+                        .padding(.top, 8)
                     }
                     Spacer(minLength: 60)
                 }
@@ -39,6 +68,9 @@ struct ReplitStyleAccountView: View {
             SignInView()
                 .environmentObject(authManager)
         }
+        .fullScreenCover(isPresented: $showPaywall) {
+            RemotePaywallView(triggerSource: "account_tab")
+        }
         .alert("Sign Out?", isPresented: $showSignOutConfirm) {
             Button("Cancel", role: .cancel) {}
             Button("Sign Out", role: .destructive) {
@@ -47,6 +79,93 @@ struct ReplitStyleAccountView: View {
         } message: {
             Text("You can keep using all lessons offline without signing in.")
         }
+        .alert("Delete Account?", isPresented: $showDeleteConfirm) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                deleteError = nil
+                isDeleting = true
+                Task {
+                    do {
+                        try await authManager.deleteAccount()
+                    } catch {
+                        deleteError = error.localizedDescription
+                    }
+                    isDeleting = false
+                }
+            }
+        } message: {
+            Text("This permanently deletes your VibeBuild account and removes your sign-in data from our server. All lessons remain available without signing in.")
+        }
+    }
+
+    private var subscriptionCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text(premium.isPremium ? "VibeBuild Pro" : "Free")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                Spacer()
+                if premium.isPremium {
+                    Text("ACTIVE")
+                        .font(.caption2.weight(.bold))
+                        .padding(.horizontal, 8).padding(.vertical, 4)
+                        .background(Capsule().fill(Color.green.opacity(0.7)))
+                        .foregroundStyle(.white)
+                }
+            }
+            Text(premium.isPremium
+                 ? "Tinker Pro is on. Edits persist, multiple attempts per lesson, compare to original."
+                 : "Unlock Tinker Pro to save attempts across launches, keep multiple per lesson, and compare against the original.")
+                .font(.callout)
+                .foregroundStyle(.white.opacity(0.7))
+            if !premium.isPremium {
+                Button { showPaywall = true } label: {
+                    Text("Upgrade to Pro")
+                        .font(.callout.weight(.semibold))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 11)
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
+                        .foregroundStyle(.black)
+                }
+                Button {
+                    isRestoring = true
+                    Task {
+                        await StoreManager.shared.restore()
+                        await PremiumManager.shared.refresh()
+                        isRestoring = false
+                    }
+                } label: {
+                    if isRestoring {
+                        ProgressView().tint(.white)
+                    } else {
+                        Text("Restore Purchases")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.white.opacity(0.7))
+                    }
+                }
+                .disabled(isRestoring)
+                .padding(.top, 4)
+
+                Button {
+                    OfferCodeManager.shared.presentRedemptionSheet()
+                } label: {
+                    Text("Redeem Promo Code")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.7))
+                }
+                .padding(.top, 4)
+            } else {
+                Button("Manage Subscription") {
+                    if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                .font(.callout)
+                .foregroundStyle(.white.opacity(0.7))
+            }
+        }
+        .padding(16)
+        .background(RoundedRectangle(cornerRadius: 14).fill(Color.white.opacity(0.06)))
     }
 
     // MARK: - Sections

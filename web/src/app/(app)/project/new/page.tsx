@@ -10,7 +10,7 @@ import { PromptInput } from '@/components/builder/PromptInput';
 import { GenerationProgress } from '@/components/builder/GenerationProgress';
 import { PreviewPane } from '@/components/builder/PreviewPane';
 import { streamSSE } from '@/lib/sse';
-import { extractBundle, buildFileTree, createPreviewUrl } from '@/lib/zip';
+import { extractBundle, buildFileTree, createPreviewHtml } from '@/lib/zip';
 import { api, ApiError } from '@/lib/api';
 import type { SaveProjectResponse } from '@/types/api';
 
@@ -31,8 +31,8 @@ export default function NewProjectPage() {
   const {
     setExtractedFiles,
     setBundle,
-    setPreviewUrl,
-    previewUrl,
+    setPreviewHtml,
+    previewHtml,
   } = useProjectStore();
   const abortRef = useRef<AbortController | null>(null);
   const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
@@ -55,7 +55,15 @@ export default function NewProjectPage() {
     async (prompt: string, referenceImage?: string) => {
       if (!user) return;
 
-      // Check usage limits before generating
+      // Flip generating-state immediately so the UI swaps to the progress
+      // indicator BEFORE the usage-check round trip. Otherwise users tap
+      // Generate and see no feedback for ~1–2 seconds.
+      setSavedProjectId(null);
+      setSaveError(null);
+      setUsageLimitError(null);
+      startGeneration();
+
+      // Check usage limits before kicking off the (more expensive) generation.
       try {
         await api.post('/api/subscriptions/usage', {
           userId: user.id,
@@ -67,14 +75,11 @@ export default function NewProjectPage() {
           setUsageLimitError(
             `Daily generation limit reached (${data.limit || 3}/day on ${data.currentTier || 'Free'} plan). Upgrade to Pro for unlimited generations.`
           );
+          stopGeneration();
           return;
         }
       }
 
-      setSavedProjectId(null);
-      setSaveError(null);
-      setUsageLimitError(null);
-      startGeneration();
       abortRef.current = new AbortController();
 
       try {
@@ -116,8 +121,8 @@ export default function NewProjectPage() {
               const tree = buildFileTree(files);
               setExtractedFiles(files, tree);
               setBundle(event.bundle);
-              const url = createPreviewUrl(files);
-              setPreviewUrl(url);
+              const url = createPreviewHtml(files);
+              setPreviewHtml(url);
             } catch (extractErr) {
               console.error('Bundle extraction failed:', extractErr);
               // Still set the bundle so the preview screen shows
@@ -164,7 +169,7 @@ export default function NewProjectPage() {
         stopGeneration();
       }
     },
-    [user, startGeneration, updateProgress, setResult, setError, stopGeneration, setExtractedFiles, setBundle, setPreviewUrl]
+    [user, startGeneration, updateProgress, setResult, setError, stopGeneration, setExtractedFiles, setBundle, setPreviewHtml]
   );
 
   // Show preview + action buttons after generation completes

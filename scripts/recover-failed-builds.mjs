@@ -23,7 +23,7 @@ const WORKER_SECRET   = process.env.WORKER_SECRET   || 'vibecoder-worker-secret-
 // Local machine workers (connected via reverse SSH tunnel from VM)
 // Add Mac Mini here once tunnel is set up: 'http://localhost:3472'
 const LOCAL_WORKER_PORTS = (process.env.LOCAL_WORKER_PORTS || '3471').split(',').map(p => `http://localhost:${p.trim()}`);
-const BACKEND_URL     = process.env.BACKEND_URL     || 'https://vibecoder-api-917362189743.us-central1.run.app';
+const BACKEND_URL     = process.env.BACKEND_URL     || 'https://vibecoder-api.fly.dev';
 const DRY_RUN         = process.argv.includes('--dry-run');
 const LIMIT           = parseInt(process.argv.find(a => a.startsWith('--limit='))?.split('=')[1] || '200');
 const CONCURRENCY     = parseInt(process.argv.find(a => a.startsWith('--concurrency='))?.split('=')[1] || '2');

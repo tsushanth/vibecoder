@@ -38,7 +38,7 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="w-64 h-screen bg-card border-r border-border flex flex-col shrink-0">
+    <aside className="hidden md:flex w-64 h-screen bg-card border-r border-border flex-col shrink-0">
       {/* Logo */}
       <div className="p-4 border-b border-border">
         <a href="/dashboard" className="flex items-center gap-2 text-lg font-bold">

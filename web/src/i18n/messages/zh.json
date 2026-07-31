@@ -31,7 +31,8 @@
     "allRightsReserved": "All rights reserved.",
     "remove": "移除",
     "add": "添加",
-    "unlimited": "无限"
+    "unlimited": "无限",
+    "versions": "版本"
   },
   "landing": {
     "availablePlatforms": "现已支持 Web、iOS 和 Android",
@@ -54,8 +55,6 @@
     "everythingYouNeedSubtitle": "一个用于构建、迭代和发布 Web 应用的完整平台",
     "featurePipeline": "AI 驱动管线",
     "featurePipelineDetail": "五阶段生成：构建、验证、修复、优化和确认。每次都是生产级质量。",
-    "featurePreview": "实时预览 & 代码编辑器",
-    "featurePreviewDetail": "即时查看应用运行效果。直接编辑代码或用自然语言描述更改。",
     "featureVersions": "版本历史",
     "featureVersionsDetail": "每次调整都会创建版本。浏览历史、对比更改，随时回滚。",
     "featureDeploy": "一键部署",
@@ -87,7 +86,6 @@
     "readyToBuild": "准备好开始了吗？",
     "readyToBuildSubtitle": "加入数千名正在用 AI 将想法变成应用的创作者。",
     "getStartedFree": "免费开始",
-    "mockCodeComment": "// AI 生成，生产就绪",
     "mockChatPlaceholder": "描述你想对应用做的更改..."
   },
   "create": {
@@ -210,5 +208,10 @@
     "notFound": "未找到项目",
     "initialGeneration": "初始生成",
     "changesApplied": "更改已应用"
+  },
+  "versions": {
+    "empty": "尚无版本",
+    "count": "{count} 个版本",
+    "emptyHint": "在聊天中进行更改以开始跟踪版本。"
   }
 }

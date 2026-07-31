@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>#mais saudável 🌱</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--green:#b8e6c8;--green-dark:#7bc896;--green-deeper:#4a9e6e;
+--blue:#b8d4e8;--blue-dark:#8bb8d4;
+--bg:#e8f5e9;--text:#2d5a3d;--text-light:#5a8a6a;
+--white:#fff;--shadow:0 4px 15px rgba(0,0,0,.1);
+}
+html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+body{display:flex;flex-direction:column}
+
+.screen{display:none;flex-direction:column;min-height:100vh;width:100%;animation:fadeIn .4s ease}
+.screen.active{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes dropFall{0%{opacity:0;transform:translateY(-20px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes wiggle{0%,100%{transform:rotate(0deg)}25%{transform:rotate(3deg)}75%{transform:rotate(-3deg)}}
+
+/* ===== WELCOME SCREEN ===== */
+#welcome{background:linear-gradient(160deg,#c8edcf 0%,#a8ddb5 50%,#b8e6c8 100%);align-items:center;justify-content:center;text-align:center;padding:20px;position:relative;overflow:hidden}
+.welcome-deco{position:absolute;width:100%;height:100%;top:0;left:0;pointer-events:none}
+.welcome-content{z-index:2;position:relative}
+.welcome-title{font-size:2.2rem;font-weight:800;color:var(--green-deeper);margin-bottom:8px;text-shadow:0 2px 4px rgba(0,0,0,.08)}
+.welcome-subtitle{font-size:1.1rem;color:var(--text-light);margin-bottom:30px;line-height:1.5}
+.welcome-logo{font-size:3.5rem;margin-bottom:20px;animation:float 3s ease-in-out infinite}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:14px 36px;border:none;border-radius:50px;font-size:1rem;font-weight:600;cursor:pointer;transition:all .25s ease;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.btn-primary{background:linear-gradient(135deg,var(--green-deeper),#3d8b5e);color:#fff;box-shadow:0 4px 15px rgba(74,158,110,.35)}
+.btn-primary:active{transform:scale(.96);box-shadow:0 2px 8px rgba(74,158,110,.3)}
+.btn-secondary{background:var(--white);color:var(--green-deeper);box-shadow:var(--shadow)}
+.btn-secondary:active{transform:scale(.96)}
+.btn-small{padding:10px 20px;font-size:.9rem}
+
+/* ===== PROFILE SCREEN ===== */
+#profile{background:var(--bg);padding:24px 20px}
+.profile-header{text-align:center;margin-bottom:30px}
+.profile-header h2{font-size:1.6rem;color:var(--green-deeper)}
+.profile-header p{color:var(--text-light);margin-top:6px}
+.form-group{margin-bottom:18px}
+.form-group label{display:block;font-weight:600;margin-bottom:6px;color:var(--text);font-size:.95rem}
+.form-group input{width:100%;padding:14px 16px;border:2px solid #d4e8d8;border-radius:14px;font-size:1rem;background:#fff;color:var(--text);transition:border-color .2s;outline:none}
+.form-group input:focus{border-color:var(--green-deeper)}
+.form-group input::placeholder{color:#aac4b0}
+.form-row{display:flex;gap:12px}
+.form-row .form-group{flex:1}
+.form-error{color:#d44;font-size:.8rem;margin-top:4px;display:none}
+.profile-btn-wrap{text-align:center;margin-top:24px}
+
+/* ===== MAIN MENU ===== */
+#menu{background:var(--bg);padding:20px}
+.menu-header{text-align:center;padding:20px 0}
+.menu-greeting{font-size:1.1rem;color:var(--text-light)}
+.menu-title{font-size:1.7rem;font-weight:800;color:var(--green-deeper);margin-top:4px}
+.menu-cards{display:flex;flex-direction:column;gap:16px;padding:10px 0;max-width:500px;margin:0 auto}
+.menu-card{background:linear-gradient(135deg,#c5dff0,#b0d0e8);border-radius:20px;padding:24px;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.08);transition:all .25s ease;display:flex;align-items:center;gap:16px;-webkit-tap-highlight-color:transparent}
+.menu-card:active{transform:scale(.97);box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.menu-card-icon{font-size:2.4rem;min-width:50px;text-align:center;animation:wiggle 3s ease-in-out infinite}
+.menu-card h3{font-size:1.15rem;font-weight:700;color:#2a5070}
+.menu-card p{font-size:.85rem;color:#4a7a9a;margin-top:4px;line-height:1.4}
+
+/* ===== SUB SCREENS ===== */
+.sub-screen{background:var(--bg);padding:0 0 30px}
+.sub-header{background:linear-gradient(135deg,#a8ddb5,#7bc896);padding:20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:10}
+.sub-header h2{font-size:1.3rem;color:#fff;font-weight:700}
+.back-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.25);border:none;color:#fff;font-size:1.3rem;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.sub-body{padding:16px 18px}
+
+/* Meal cards */
+.meal-section{margin-bottom:20px}
+.meal-header{display:flex;align-items:center;gap:10px;padding:14px 16px;background:linear-gradient(135deg,#c5dff0,#b0d0e8);border-radius:16px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .2s}
+.meal-header:active{transform:scale(.98)}
+.meal-header .meal-icon{font-size:1.5rem}
+.meal-header h3{font-size:1.05rem;color:#2a5070;font-weight:700}
+.meal-header .arrow{margin-left:auto;font-size:.8rem;color:#6a9abc;transition:transform .3s}
+.meal-header.open .arrow{transform:rotate(180deg)}
+.meal-content{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.meal-content.open{max-height:2000px}
+.meal-list{padding:12px 16px 6px}
+.meal-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #d8eede}
+.meal-item:last-child{border-bottom:none}
+.meal-item .dot{width:8px;height:8px;border-radius:50%;background:var(--green-deeper);margin-top:6px;flex-shrink:0}
+.meal-item-text{font-size:.92rem;line-height:1.5;color:var(--text)}
+.meal-item-text strong{color:var(--green-deeper)}
+
+/* Hydration */
+.hydration-info{background:#fff;border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
+.hydration-info h3{font-size:1.05rem;color:var(--green-deeper);margin-bottom:10px}
+.hydration-info p{font-size:.9rem;color:var(--text);line-height:1.6}
+.water-table{width:100%;border-collapse:collapse;margin:10px 0}
+.water-table th{background:var(--green-deeper);color:#fff;padding:10px;font-size:.85rem;text-align:center}
+.water-table td{padding:10px;text-align:center;font-size:.88rem;border-bottom:1px solid #e0efe4}
+.water-table tr:nth-child(even){background:#f0f8f2}
+.reminder-card{background:#fff;border-radius:16px;padding:18px;margin-bottom:12px;box-shadow:var(--shadow)}
+.reminder-card h3{font-size:1.05rem;color:var(--green-deeper);margin-bottom:6px}
+.reminder-card .total{font-size:1.8rem;font-weight:800;color:var(--green-deeper);text-align:center;margin:12px 0}
+.reminder-list{max-height:350px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.reminder-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;margin-bottom:6px;background:#f0f8f2;font-size:.9rem}
+.reminder-item .time{font-weight:700;color:var(--green-deeper);min-width:55px}
+.reminder-item .amount{color:var(--text)}
+.reminder-item.past{opacity:.5}
+.reminder-item.current{background:var(--green);font-weight:600}
+
+/* Recipes */
+.recipe-tabs{display:flex;overflow-x:auto;gap:8px;padding:4px 0 14px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.recipe-tabs::-webkit-scrollbar{display:none}
+.recipe-tab{flex-shrink:0;padding:10px 18px;border-radius:50px;border:2px solid var(--green-dark);background:transparent;color:var(--green-deeper);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.recipe-tab.active{background:var(--green-deeper);color:#fff;border-color:var(--green-deeper)}
+.recipes-grid{display:flex;flex-direction:column;gap:12px}
+.recipe-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .2s}
+.recipe-card:active{transform:scale(.98)}
+.recipe-card-header{display:flex;align-items:center;gap:12px;padding:16px}
+.recipe-card-icon{font-size:2rem;min-width:40px;text-align:center}
+.recipe-card-info h4{font-size:1rem;color:var(--text);font-weight:700}
+.recipe-card-info p{font-size:.8rem;color:var(--text-light);margin-top:2px}
+.recipe-detail{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.recipe-detail.open{max-height:3000px}
+.recipe-detail-inner{padding:0 16px 16px;border-top:1px solid #e8f0ea}
+.recipe-detail-inner h5{font-size:.95rem;color:var(--green-deeper);margin:12px 0 8px;font-weight:700}
+.recipe-detail-inner ul{list-style:none;padding:0}
+.recipe-detail-inner li{padding:4px 0;font-size:.88rem;color:var(--text);display:flex;align-items:flex-start;gap:8px}
+.recipe-detail-inner li::before{content:"•";color:var(--green-deeper);font-weight:bold;flex-shrink:0}
+.recipe-detail-inner .steps{counter-reset:step}
+.recipe-detail-inner .steps li{counter-increment:step}
+.recipe-detail-inner .steps li::before{content:counter(step)".";color:var(--green-deeper);font-weight:700;min-width:20px}
+
+/* Decorative SVGs */
+.deco-fruit{position:absolute;opacity:.15;pointer-events:none}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--green-dark);border-radius:4px}
+
+/* Toast */
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--green-deeper);color:#fff;padding:12px 24px;border-radius:50px;font-size:.9rem;font-weight:600;z-index:100;transition:transform .3s ease;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* Hover states for desktop */
+@media(hover:hover){
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(74,158,110,.45)}
+  .btn-secondary:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.12)}
+  .menu-card:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(0,0,0,.12)}
+  .recipe-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.1)}
+  .meal-header:hover{opacity:.9}
+  .recipe-tab:hover:not(.active){background:rgba(74,158,110,.1)}
+  .back-btn:hover{background:rgba(255,255,255,.4)}
+}
+
+/* Menu card color variants */
+.menu-card:nth-child(1){background:linear-gradient(135deg,#c5e8d0,#a8d8b8)}
+.menu-card:nth-child(1) h3{color:#2a6e45}
+.menu-card:nth-child(1) p{color:#4a8a60}
+.menu-card:nth-child(2){background:linear-gradient(135deg,#c5dff0,#a8cce8)}
+.menu-card:nth-child(2) h3{color:#2a5070}
+.menu-card:nth-child(2) p{color:#4a7a9a}
+.menu-card:nth-child(3){background:linear-gradient(135deg,#f0e0c5,#e8d0a8)}
+.menu-card:nth-child(3) h3{color:#6e5a2a}
+.menu-card:nth-child(3) p{color:#8a7640}
+
+@media(min-width:600px){
+  .sub-body,.menu-cards{max-width:560px;margin-left:auto;margin-right:auto}
+  .form-group input{max-width:500px}
+}
+
+/* Small phones */
+@media(max-width:359px){
+  .welcome-title{font-size:1.7rem}
+  .welcome-subtitle{font-size:.95rem}
+  .menu-title{font-size:1.4rem}
+  .menu-card{padding:18px;gap:12px}
+  .menu-card-icon{font-size:2rem;min-width:40px}
+  .menu-card h3{font-size:1rem}
+  .sub-header h2{font-size:1.1rem}
+  .form-row{flex-direction:column;gap:0}
+  .recipe-card-header{padding:12px}
+  .recipe-detail-inner{padding:0 12px 12px}
+  .btn{padding:12px 28px;font-size:.9rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== WELCOME SCREEN ===== -->
+<div id="welcome" class="screen active">
+  <div class="welcome-deco" id="welcomeDeco"></div>
+  <div class="welcome-content">
+    <div class="welcome-logo">🌱</div>
+    <h1 class="welcome-title">#mais saudável 🌱</h1>
+    <p class="welcome-subtitle">Seja bem-vindo(a) ao<br><strong>#mais saudável</strong> 🌱<br><br>Sua jornada para uma vida<br>mais saudável começa aqui!</p>
+    <svg width="200" height="100" viewBox="0 0 200 100" style="margin-bottom:24px">
+      <!-- Cute fruits and veggies -->
+      <circle cx="30" cy="50" r="18" fill="#e74c3c" opacity=".8"/><!-- tomato -->
+      <ellipse cx="30" cy="42" rx="6" ry="3" fill="#27ae60"/>
+      <circle cx="70" cy="55" r="15" fill="#f39c12" opacity=".8"/><!-- orange -->
+      <path d="M70 40 Q72 32 76 38" stroke="#27ae60" fill="none" stroke-width="2"/>
+      <ellipse cx="110" cy="50" rx="20" ry="16" fill="#27ae60" opacity=".7"/><!-- avocado -->
+      <circle cx="113" cy="52" r="7" fill="#8B4513" opacity=".5"/>
+      <circle cx="150" cy="50" r="16" fill="#e74c3c" opacity=".7"/><!-- apple -->
+      <path d="M150 34 Q155 26 158 34" stroke="#27ae60" fill="none" stroke-width="2"/>
+      <ellipse cx="150" cy="36" rx="4" ry="3" fill="#27ae60"/>
+      <!-- Water drops -->
+      <path d="M22 85 Q25 75 28 85 Q25 90 22 85Z" fill="#74b9ff" opacity=".6">
+        <animate attributeName="opacity" values=".6;1;.6" dur="2s" repeatCount="indefinite"/>
+      </path>
+      <path d="M90 80 Q93 70 96 80 Q93 85 90 80Z" fill="#74b9ff" opacity=".5">
+        <animate attributeName="opacity" values=".5;.9;.5" dur="2.5s" repeatCount="indefinite"/>
+      </path>
+      <path d="M165 82 Q168 72 171 82 Q168 87 165 82Z" fill="#74b9ff" opacity=".7">
+        <animate attributeName="opacity" values=".7;1;.7" dur="1.8s" repeatCount="indefinite"/>
+      </path>
+    </svg>
+    <button class="btn btn-primary" onclick="showScreen('profile')">Começar 🌿</button>
+  </div>
+</div>
+
+<!-- ===== PROFILE SCREEN ===== -->
+<div id="profile" class="screen">
+  <div class="profile-header">
+    <div style="font-size:3rem;margin-bottom:10px">🥗</div>
+    <h2>Conte-nos sobre você</h2>
+    <p>Para personalizar sua experiência</p>
+  </div>
+  <form id="profileForm" onsubmit="return false">
+    <div class="form-group">
+      <label>Seu nome</label>
+      <input type="text" id="inputName" placeholder="Digite seu nome" maxlength="40">
+      <div class="form-error" id="errName">Por favor, digite seu nome</div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Idade</label>
+        <input type="number" id="inputAge" placeholder="Ex: 65" min="1" max="120">
+        <div class="form-error" id="errAge">Idade inválida</div>
+      </div>
+      <div class="form-group">
+        <label>Peso (kg)</label>
+        <input type="number" id="inputWeight" placeholder="Ex: 70" min="20" max="300" step="0.1">
+        <div class="form-error" id="errWeight">Peso inválido</div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Hora que acorda</label>
+        <input type="time" id="inputWake" value="06:00">
+        <div class="form-error" id="errWake">Informe o horário</div>
+      </div>
+      <div class="form-group">
+        <label>Hora que dorme</label>
+        <input type="time" id="inputSleep" value="22:00">
+        <div class="form-error" id="errSleep">Informe o horário</div>
+      </div>
+    </div>
+    <div class="profile-btn-wrap">
+      <button class="btn btn-primary" type="button" onclick="saveProfile()">Continuar 💚</button>
+    </div>
+  </form>
+</div>
+
+<!-- ===== MAIN MENU ===== -->
+<div id="menu" class="screen">
+  <div class="menu-header">
+    <p class="menu-greeting">Olá, <span id="menuName">Usuário</span>! 👋</p>
+    <h2 class="menu-title">#mais saudável 🌱</h2>
+  </div>
+  <div class="menu-cards">
+    <div class="menu-card" onclick="showScreen('meals')">
+      <div class="menu-card-icon">🍽️</div>
+      <div>
+        <h3>Rotina de Alimentação</h3>
+        <p>Plano alimentar saudável para o dia todo</p>
+      </div>
+    </div>
+    <div class="menu-card" onclick="showScreen('hydration')">
+      <div class="menu-card-icon">💧</div>
+      <div>
+        <h3>Rotina de Hidratação</h3>
+        <p>Controle sua ingestão de água diária</p>
+      </div>
+    </div>
+    <div class="menu-card" onclick="showScreen('recipes')">
+      <div class="menu-card-icon">📖</div>
+      <div>
+        <h3>Minhas Receitas</h3>
+        <p>50 receitas saudáveis para todas as refeições</p>
+      </div>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:24px">
+    <button class="btn btn-secondary btn-small" onclick="clearProfile()">Editar perfil ✏️</button>
+  </div>
+</div>
+
+<!-- ===== MEALS SCREEN ===== -->
+<div id="meals" class="screen sub-screen">
+  <div class="sub-header">
+    <button class="back-btn" onclick="showScreen('menu')">←</button>
+    <h2>🍽️ Rotina de Alimentação</h2>
+  </div>
+  <div class="sub-body" id="mealsBody"></div>
+</div>
+
+<!-- ===== HYDRATION SCREEN ===== -->
+<div id="hydration" class="screen sub-screen">
+  <div class="sub-header">
+    <button class="back-btn" onclick="showScreen('menu')">←</button>
+    <h2>💧 Rotina de Hidratação</h2>
+  </div>
+  <div class="sub-body" id="hydrationBody"></div>
+</div>
+
+<!-- ===== RECIPES SCREEN ===== -->
+<div id="recipes" class="screen sub-screen">
+  <div class="sub-header">
+    <button class="back-btn" onclick="showScreen('menu')">←</button>
+    <h2>📖 Minhas Receitas</h2>
+  </div>
+  <div class="sub-body" id="recipesBody"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== APP STATE =====
+let userData = JSON.parse(localStorage.getItem('maisSaudavel_user') || 'null');
+
+// ===== NAVIGATION =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  if (id === 'menu') document.getElementById('menuName').textContent = userData?.name || 'Usuário';
+  if (id === 'meals') renderMeals();
+  if (id === 'hydration') renderHydration();
+  if (id === 'recipes') renderRecipes();
+}
+
+// Check if user already registered
+if (userData) {
+  showScreen('menu');
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ===== PROFILE =====
+function saveProfile() {
+  const name = document.getElementById('inputName').value.trim();
+  const age = parseInt(document.getElementById('inputAge').value);
+  const weight = parseFloat(document.getElementById('inputWeight').value);
+  const wake = document.getElementById('inputWake').value;
+  const sleep = document.getElementById('inputSleep').value;
+
+  let valid = true;
+  function showErr(id, show) {
+    document.getElementById(id).style.display = show ? 'block' : 'none';
+    if (show) valid = false;
+  }
+  showErr('errName', !name);
+  showErr('errAge', !age || age < 1 || age > 120);
+  showErr('errWeight', !weight || weight < 20 || weight > 300);
+  showErr('errWake', !wake);
+  showErr('errSleep', !sleep);
+
+  if (!valid) return;
+
+  userData = { name, age, weight, wake, sleep };
+  localStorage.setItem('maisSaudavel_user', JSON.stringify(userData));
+  showToast('Perfil salvo com sucesso! ✅');
+  showScreen('menu');
+}
+
+function clearProfile() {
+  if (userData) {
+    document.getElementById('inputName').value = userData.name;
+    document.getElementById('inputAge').value = userData.age;
+    document.getElementById('inputWeight').value = userData.weight;
+    document.getElementById('inputWake').value = userData.wake;
+    document.getElementById('inputSleep').value = userData.sleep;
+  }
+  showScreen('profile');
+}
+
+// ===== MEALS DATA & RENDER =====
+const mealsData = [
+  {
+    title: 'Café da Manhã', icon: '☀️', time: '6:00 - 8:00',
+    items: [
+      { name: 'Aveia com frutas', desc: '3 colheres de aveia em flocos, 1 banana picada, morangos e 1 colher de mel' },
+      { name: 'Pão integral', desc: '2 fatias de pão integral com pasta de amendoim natural e fatias de banana' },
+      { name: 'Vitamina verde', desc: 'Suco de couve com maçã, gengibre e limão' },
+      { name: 'Ovos mexidos', desc: '2 ovos mexidos com tomate e ervas finas, acompanhado de torrada integral' },
+      { name: 'Iogurte natural', desc: 'Iogurte natural desnatado com granola caseira e mel' },
+      { name: 'Tapioca', desc: 'Tapioca com queijo branco e orégano' },
+      { name: 'Frutas da estação', desc: 'Mix de mamão, banana, maçã e uva com linhaça' }
+    ]
+  },
+  {
+    title: 'Lanche da Manhã', icon: '🍎', time: '9:30 - 10:30',
+    items: [
+      { name: 'Frutas frescas', desc: '1 maçã ou pera com 5 castanhas-do-pará' },
+      { name: 'Mix de oleaginosas', desc: 'Punhado de nozes, amêndoas e castanha de caju (30g)' },
+      { name: 'Suco natural', desc: 'Suco de laranja natural sem açúcar com 1 torrada integral' },
+      { name: 'Banana com canela', desc: '1 banana amassada com canela e aveia' },
+      { name: 'Iogurte com chia', desc: 'Iogurte natural com 1 colher de chia e frutas vermelhas' }
+    ]
+  },
+  {
+    title: 'Almoço', icon: '🥗', time: '12:00 - 13:00',
+    items: [
+      { name: 'Arroz integral', desc: '3 colheres de arroz integral' },
+      { name: 'Feijão', desc: '1 concha de feijão carioca ou preto' },
+      { name: 'Proteína magra', desc: 'Filé de frango grelhado, peixe assado ou ovo cozido (120g)' },
+      { name: 'Salada colorida', desc: 'Alface, tomate, cenoura ralada, beterraba e pepino' },
+      { name: 'Legumes cozidos', desc: 'Brócolis, abobrinha e chuchu no vapor com azeite' },
+      { name: 'Temperos naturais', desc: 'Use alho, cebola, ervas e azeite de oliva extra virgem' },
+      { name: 'Sobremesa', desc: '1 fatia de melancia ou 1 laranja' }
+    ]
+  },
+  {
+    title: 'Lanche da Tarde', icon: '🥤', time: '15:00 - 16:00',
+    items: [
+      { name: 'Sanduíche natural', desc: 'Pão integral com frango desfiado, cenoura e alface' },
+      { name: 'Smoothie', desc: 'Vitamina de abacate com leite desnatado e cacau em pó' },
+      { name: 'Biscoito integral', desc: '4 biscoitos integrais com chá verde ou de camomila' },
+      { name: 'Torrada com abacate', desc: 'Torrada integral com pasta de abacate e tomate cereja' },
+      { name: 'Frutas secas', desc: 'Mix de damasco, uva passa e amêndoas (pequena porção)' }
+    ]
+  },
+  {
+    title: 'Janta', icon: '🌙', time: '19:00 - 20:00',
+    items: [
+      { name: 'Sopa nutritiva', desc: 'Sopa de legumes (abóbora, cenoura, batata-doce) com frango desfiado' },
+      { name: 'Omelete de legumes', desc: '2 ovos com espinafre, tomate e queijo branco' },
+      { name: 'Salada completa', desc: 'Salada de folhas verdes com atum, grão-de-bico e azeite' },
+      { name: 'Crepioca', desc: 'Crepioca (tapioca + ovo) com recheio de frango e salada' },
+      { name: 'Chá calmante', desc: 'Chá de camomila ou erva-cidreira antes de dormir' },
+      { name: 'Evitar', desc: 'Evite alimentos pesados, frituras e açúcar refinado à noite' }
+    ]
+  }
+];
+
+function renderMeals() {
+  const body = document.getElementById('mealsBody');
+  body.innerHTML = '<p style="text-align:center;color:var(--text-light);margin-bottom:16px;font-size:.9rem">Toque em uma refeição para ver os detalhes</p>';
+  mealsData.forEach((meal, i) => {
+    const section = document.createElement('div');
+    section.className = 'meal-section';
+    section.innerHTML = `
+      <div class="meal-header" onclick="toggleMeal(this)" data-index="${i}">
+        <span class="meal-icon">${meal.icon}</span>
+        <h3>${meal.title} <span style="font-weight:400;font-size:.8rem;color:#6a9abc">${meal.time}</span></h3>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="meal-content">
+        <div class="meal-list">
+          ${meal.items.map(item => `
+            <div class="meal-item">
+              <div class="dot"></div>
+              <div class="meal-item-text"><strong>${item.name}:</strong> ${item.desc}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    body.appendChild(section);
+  });
+}
+
+function toggleMeal(el) {
+  const content = el.nextElementSibling;
+  const isOpen = content.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.meal-content').forEach(c => c.classList.remove('open'));
+  document.querySelectorAll('.meal-header').forEach(h => h.classList.remove('open'));
+  if (!isOpen) {
+    content.classList.add('open');
+    el.classList.add('open');
+  }
+}
+
+// ===== HYDRATION =====
+function renderHydration() {
+  const body = document.getElementById('hydrationBody');
+  const weight = userData?.weight || 70;
+  const wake = userData?.wake || '06:00';
+  const sleep = userData?.sleep || '22:00';
+
+  // Water calculation: 30ml per kg for elderly
+  const dailyWaterMl = Math.round(weight * 30);
+  const dailyWaterL = (dailyWaterMl / 1000).toFixed(1);
+
+  // Calculate awake hours
+  const [wH, wM] = wake.split(':').map(Number);
+  const [sH, sM] = sleep.split(':').map(Number);
+  let wakeMinutes = wH * 60 + wM;
+  let sleepMinutes = sH * 60 + sM;
+  if (sleepMinutes <= wakeMinutes) sleepMinutes += 24 * 60;
+  const awakeMinutes = sleepMinutes - wakeMinutes;
+  const intervals = Math.floor(awakeMinutes / 30);
+  const perInterval = Math.round(dailyWaterMl / intervals);
+
+  // Build reminder list
+  let reminders = [];
+  for (let i = 0; i <= intervals; i++) {
+    let totalMin = wakeMinutes + i * 30;
+    let h = Math.floor(totalMin / 60) % 24;
+    let m = totalMin % 60;
+    reminders.push({
+      time: `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`,
+      amount: i < intervals ? perInterval : 0,
+      cumulative: Math.min((i) * perInterval, dailyWaterMl)
+    });
+  }
+
+  // Weight-based water table for elderly
+  const waterTable = [
+    { weight: '40-50 kg', water: '1.2 - 1.5 L' },
+    { weight: '50-60 kg', water: '1.5 - 1.8 L' },
+    { weight: '60-70 kg', water: '1.8 - 2.1 L' },
+    { weight: '70-80 kg', water: '2.1 - 2.4 L' },
+    { weight: '80-90 kg', water: '2.4 - 2.7 L' },
+    { weight: '90-100 kg', water: '2.7 - 3.0 L' },
+    { weight: '100+ kg', water: '3.0+ L' },
+  ];
+
+  body.innerHTML = `
+    <div class="hydration-info">
+      <h3>💧 Tabela de Hidratação para Idosos</h3>
+      <p>A recomendação geral é de <strong>30ml de água por kg de peso</strong> corporal por dia. Idosos precisam de atenção especial com a hidratação.</p>
+      <table class="water-table">
+        <thead><tr><th>Peso Corporal</th><th>Água Diária Recomendada</th></tr></thead>
+        <tbody>
+          ${waterTable.map(r => `<tr><td>${r.weight}</td><td>${r.water}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="reminder-card">
+      <h3>🎯 Sua Meta Diária</h3>
+      <p>Com <strong>${weight} kg</strong>, você deve beber:</p>
+      <div class="total">💧 ${dailyWaterL} litros/dia</div>
+      <p style="text-align:center;font-size:.85rem;color:var(--text-light)">≈ ${Math.round(dailyWaterMl / 200)} copos de 200ml</p>
+    </div>
+
+    <div class="reminder-card">
+      <h3>⏰ Lembretes a cada 30 minutos</h3>
+      <p style="font-size:.88rem;color:var(--text-light);margin-bottom:12px">
+        De ${wake} até ${userData?.sleep || '22:00'} — beba <strong>${perInterval}ml</strong> a cada 30 min
+      </p>
+      <div class="reminder-list">
+        ${reminders.filter(r => r.amount > 0).map((r, i) => {
+          const now = new Date();
+          const nowMin = now.getHours() * 60 + now.getMinutes();
+          const [rH, rM] = r.time.split(':').map(Number);
+          const rMin = rH * 60 + rM;
+          let cls = '';
+          if (rMin < nowMin - 15) cls = 'past';
+          else if (rMin >= nowMin - 15 && rMin <= nowMin + 15) cls = 'current';
+          return `<div class="reminder-item ${cls}">
+            <span class="time">${r.time}</span>
+            <span class="amount">Beber ${r.amount}ml de água 💧</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ===== RECIPES DATA =====
+const recipesData = {
+  'Café da Manhã': [
+    { name:'Panqueca de Banana e Aveia', icon:'🥞', time:'15 min',
+      ingredients:['2 bananas maduras','2 ovos','4 colheres de aveia em flocos','1 pitada de canela','Óleo de coco para untar'],
+      steps:['Amasse as bananas com um garfo','Misture os ovos e a aveia até ficar homogêneo','Adicione a canela','Aqueça uma frigideira com óleo de coco','Despeje pequenas porções e cozinhe 2 min de cada lado','Sirva com frutas frescas por cima']},
+    { name:'Smoothie Bowl de Açaí', icon:'🫐', time:'10 min',
+      ingredients:['200g de polpa de açaí sem açúcar','1 banana congelada','100ml de leite vegetal','Granola caseira','Fatias de morango e kiwi','1 colher de mel'],
+      steps:['Bata o açaí, banana e leite no liquidificador até ficar cremoso','Despeje numa tigela','Decore com granola, morangos e kiwi','Finalize com um fio de mel']},
+    { name:'Tapioca de Queijo Branco e Tomate', icon:'🧀', time:'10 min',
+      ingredients:['3 colheres de goma de tapioca','50g de queijo branco','2 rodelas de tomate','Orégano a gosto','Folhas de manjericão'],
+      steps:['Aqueça uma frigideira antiaderente','Espalhe a goma de tapioca uniformemente','Quando firmar, vire e adicione o queijo','Coloque o tomate e orégano','Dobre e sirva com manjericão fresco']},
+    { name:'Mingau de Aveia com Maçã', icon:'🍎', time:'12 min',
+      ingredients:['4 colheres de aveia','200ml de leite desnatado','1 maçã ralada','Canela em pó','1 colher de mel'],
+      steps:['Ferva o leite com a aveia em fogo baixo','Mexa constantemente por 5 minutos','Adicione a maçã ralada e a canela','Cozinhe por mais 2 minutos','Sirva morno com mel por cima']},
+    { name:'Torrada Integral com Abacate', icon:'🥑', time:'8 min',
+      ingredients:['2 fatias de pão integral','1 abacate maduro','Suco de meio limão','Sal e pimenta a gosto','Tomate cereja cortado','Sementes de gergelim'],
+      steps:['Toste as fatias de pão','Amasse o abacate com limão, sal e pimenta','Espalhe a pasta nas torradas','Coloque os tomates cereja por cima','Finalize com gergelim']},
+    { name:'Omelete de Espinafre', icon:'🥬', time:'10 min',
+      ingredients:['3 ovos','1 xícara de espinafre picado','2 colheres de queijo cottage','Sal e ervas finas','Azeite de oliva'],
+      steps:['Bata os ovos com sal e ervas','Aqueça o azeite na frigideira','Refogue o espinafre por 1 minuto','Despeje os ovos batidos','Adicione o cottage e dobre quando firmar','Sirva com torrada integral']},
+    { name:'Iogurte com Granola Caseira', icon:'🥣', time:'5 min',
+      ingredients:['200ml de iogurte natural','3 colheres de granola sem açúcar','1 colher de mel','Frutas vermelhas','1 colher de linhaça'],
+      steps:['Coloque o iogurte numa tigela','Adicione a granola por cima','Distribua as frutas vermelhas','Polvilhe a linhaça','Finalize com mel']},
+    { name:'Crepioca Proteica', icon:'🥚', time:'12 min',
+      ingredients:['2 colheres de goma de tapioca','1 ovo','1 colher de chia','Recheio: frango desfiado e ricota','Temperos naturais'],
+      steps:['Misture a goma, ovo e chia','Aqueça a frigideira antiaderente','Despeje a massa e espalhe','Quando dourar embaixo, vire','Adicione o recheio e dobre','Sirva quente']},
+    { name:'Pão de Queijo Fit', icon:'🧁', time:'25 min',
+      ingredients:['1 xícara de polvilho doce','1 ovo','3 colheres de queijo ralado','2 colheres de azeite','Sal a gosto','Leite para dar ponto'],
+      steps:['Misture todos os ingredientes secos','Adicione o ovo e o azeite','Vá adicionando leite até dar ponto de enrolar','Faça bolinhas pequenas','Asse em forno pré-aquecido a 180°C por 20 min','Sirva quentinhos']},
+    { name:'Vitamina Energética', icon:'🥤', time:'5 min',
+      ingredients:['1 banana','200ml de leite desnatado','1 colher de aveia','1 colher de pasta de amendoim','1 colher de cacau em pó','Gelo a gosto'],
+      steps:['Coloque todos ingredientes no liquidificador','Bata por 2 minutos até ficar cremoso','Ajuste a consistência com mais leite se necessário','Sirva imediatamente bem gelado']}
+  ],
+  'Lanche da Manhã': [
+    { name:'Mix de Castanhas e Frutas Secas', icon:'🥜', time:'2 min',
+      ingredients:['5 castanhas-do-pará','10 amêndoas','1 colher de uva passa','5 nozes','1 colher de cranberry seco'],
+      steps:['Separe as porções de cada oleaginosa','Misture tudo em um potinho','Consuma como lanche entre as refeições','Dica: prepare porções para a semana toda']},
+    { name:'Banana com Pasta de Amendoim', icon:'🍌', time:'3 min',
+      ingredients:['1 banana','1 colher de pasta de amendoim natural','Canela em pó','Granola (opcional)'],
+      steps:['Corte a banana em rodelas','Espalhe a pasta de amendoim por cima','Polvilhe canela','Adicione granola se desejar']},
+    { name:'Palitos de Cenoura com Homus', icon:'🥕', time:'10 min',
+      ingredients:['2 cenouras médias','200g de grão-de-bico cozido','2 colheres de tahine','Suco de 1 limão','1 dente de alho','Azeite, sal e cominho'],
+      steps:['Corte as cenouras em palitos','Para o homus: bata grão-de-bico, tahine, limão, alho e sal','Adicione azeite e cominho','Bata até ficar cremoso','Sirva os palitos com o homus para mergulhar']},
+    { name:'Maçã Assada com Canela', icon:'🍎', time:'15 min',
+      ingredients:['1 maçã grande','1 colher de mel','Canela em pó','Aveia em flocos','Nozes picadas'],
+      steps:['Corte a maçã ao meio e retire o miolo','Coloque numa assadeira','Preencha com aveia, mel e canela','Adicione nozes por cima','Asse a 180°C por 12 minutos']},
+    { name:'Wrap de Alface com Atum', icon:'🥬', time:'8 min',
+      ingredients:['Folhas grandes de alface','1 lata de atum em água','Tomate picado','Cenoura ralada','Suco de limão'],
+      steps:['Escorra bem o atum','Misture com tomate, cenoura e limão','Coloque porções sobre cada folha de alface','Enrole como um wrap','Sirva fresco']},
+    { name:'Chips de Batata-Doce', icon:'🍠', time:'25 min',
+      ingredients:['1 batata-doce média','1 colher de azeite','Sal e páprica','Alecrim seco'],
+      steps:['Fatie a batata-doce bem fina','Tempere com azeite, sal e páprica','Espalhe numa assadeira forrada','Asse a 200°C por 20 min virando na metade','Polvilhe alecrim e sirva crocante']},
+    { name:'Smoothie de Morango', icon:'🍓', time:'5 min',
+      ingredients:['10 morangos','200ml de leite vegetal','1 colher de aveia','1 colher de mel','Gelo'],
+      steps:['Coloque tudo no liquidificador','Bata até ficar homogêneo','Sirva gelado','Dica: congele os morangos para ficar mais cremoso']},
+    { name:'Bolinhas de Energia', icon:'⚡', time:'15 min',
+      ingredients:['1 xícara de aveia','3 colheres de pasta de amendoim','2 colheres de mel','2 colheres de cacau em pó','Coco ralado para cobrir'],
+      steps:['Misture aveia, pasta de amendoim, mel e cacau','Amasse bem até formar uma massa','Faça bolinhas pequenas com as mãos','Passe no coco ralado','Leve à geladeira por 30 min']},
+    { name:'Iogurte com Frutas Vermelhas', icon:'🫐', time:'3 min',
+      ingredients:['200ml de iogurte grego natural','Morangos picados','Mirtilos','Framboesas','1 colher de mel'],
+      steps:['Coloque o iogurte em uma tigela','Adicione as frutas por cima','Finalize com mel','Consuma imediatamente']},
+    { name:'Torrada com Ricota e Mel', icon:'🍯', time:'5 min',
+      ingredients:['2 torradas integrais','3 colheres de ricota','1 colher de mel','Nozes picadas','Canela'],
+      steps:['Torre o pão integral','Espalhe a ricota generosamente','Distribua as nozes por cima','Regue com mel','Polvilhe canela']}
+  ],
+  'Almoço': [
+    { name:'Bowl de Frango Grelhado', icon:'🍗', time:'30 min',
+      ingredients:['150g de peito de frango','Arroz integral','Brócolis','Cenoura baby','Edamame','Molho de gergelim e shoyu light'],
+      steps:['Tempere o frango com ervas e grelhe','Cozinhe o arroz integral','Cozinhe brócolis e cenoura no vapor','Prepare o edamame','Monte o bowl com todos ingredientes','Finalize com molho de gergelim']},
+    { name:'Salmão com Legumes Assados', icon:'🐟', time:'35 min',
+      ingredients:['150g de filé de salmão','Abobrinha','Berinjela','Pimentão','Azeite e ervas','Limão'],
+      steps:['Tempere o salmão com limão, sal e ervas','Corte os legumes em cubos','Tempere os legumes com azeite e ervas','Asse tudo a 200°C por 25 minutos','Sirva com uma fatia de limão']},
+    { name:'Escondidinho de Frango Light', icon:'🥘', time:'40 min',
+      ingredients:['300g de batata-doce','200g de frango desfiado','Creme de ricota','Temperos naturais','Queijo ralado light'],
+      steps:['Cozinhe e amasse a batata-doce','Refogue o frango com temperos naturais','Monte camadas: purê, frango, purê','Cubra com queijo ralado light','Asse a 180°C por 15 minutos até dourar']},
+    { name:'Salada Completa Mediterrânea', icon:'🥗', time:'15 min',
+      ingredients:['Mix de folhas verdes','Tomate cereja','Pepino','Azeitonas pretas','Queijo feta','Grão-de-bico','Azeite e limão'],
+      steps:['Lave e seque as folhas verdes','Corte tomate e pepino','Adicione azeitonas e grão-de-bico','Esfarele o queijo feta por cima','Tempere com azeite e limão','Misture delicadamente']},
+    { name:'Risoto de Abóbora', icon:'🎃', time:'35 min',
+      ingredients:['1 xícara de arroz arbório ou integral','300g de abóbora em cubos','Caldo de legumes caseiro','Cebola e alho','Queijo parmesão ralado','Sálvia fresca'],
+      steps:['Refogue cebola e alho em azeite','Adicione o arroz e mexa por 2 min','Vá adicionando o caldo quente aos poucos','Cozinhe a abóbora separadamente e amasse parte dela','Misture ao risoto quando estiver al dente','Finalize com parmesão e sálvia']},
+    { name:'Wrap Integral de Atum', icon:'🌯', time:'10 min',
+      ingredients:['1 tortilha integral','1 lata de atum em água','Alface crespa','Tomate fatiado','Cenoura ralada','Molho de iogurte com ervas'],
+      steps:['Escorra bem o atum','Misture com o molho de iogurte','Coloque a alface sobre a tortilha','Adicione atum, tomate e cenoura','Enrole firme','Corte ao meio e sirva']},
+    { name:'Frango Xadrez Saudável', icon:'🍲', time:'25 min',
+      ingredients:['200g de peito de frango em cubos','Pimentão vermelho, amarelo e verde','Amendoim torrado','Shoyu light','Gengibre ralado','Amido de milho'],
+      steps:['Corte o frango e os pimentões em cubos','Refogue o frango com gengibre','Adicione os pimentões e mexa bem','Misture shoyu com amido diluído em água','Adicione ao preparo e mexa','Finalize com amendoim torrado']},
+    { name:'Sopa de Lentilha', icon:'🥣', time:'30 min',
+      ingredients:['1 xícara de lentilha','1 cenoura','1 batata','Cebola e alho','Tomate','Cúrcuma e cominho'],
+      steps:['Refogue cebola, alho e tomate','Adicione as lentilhas lavadas','Cubra com água e cozinhe','Adicione cenoura e batata em cubos','Tempere com cúrcuma e cominho','Cozinhe até tudo ficar macio']},
+    { name:'Strogonoff de Frango Light', icon:'🍛', time:'25 min',
+      ingredients:['200g de peito de frango','Champignon fatiado','Creme de ricota ou iogurte','Mostarda dijon','Tomate pelado','Arroz integral'],
+      steps:['Corte o frango em tiras e tempere','Refogue em azeite com alho','Adicione champignon e tomate','Cozinhe por 10 minutos','Finalize com creme de ricota e mostarda','Sirva com arroz integral']},
+    { name:'Omelete de Forno com Legumes', icon:'🥚', time:'25 min',
+      ingredients:['4 ovos','Abobrinha ralada','Cenoura ralada','Espinafre','Queijo cottage','Sal e ervas finas'],
+      steps:['Bata os ovos com sal e ervas','Adicione os legumes e o cottage','Misture bem','Despeje numa forma untada','Asse a 180°C por 20 minutos','Corte em fatias e sirva com salada']}
+  ],
+  'Lanche da Tarde': [
+    { name:'Bolo de Caneca Integral', icon:'🧁', time:'5 min',
+      ingredients:['2 colheres de farinha integral','1 ovo','1 colher de cacau em pó','1 colher de mel','1 colher de leite','Pitada de fermento'],
+      steps:['Misture todos ingredientes numa caneca','Mexa bem até ficar homogêneo','Leve ao micro-ondas por 2 minutos','Desenforme se preferir','Sirva morno']},
+    { name:'Frozen de Banana', icon:'🍦', time:'10 min',
+      ingredients:['2 bananas congeladas','1 colher de cacau em pó','1 colher de pasta de amendoim','Frutas para decorar'],
+      steps:['Bata as bananas congeladas no processador','Adicione cacau e pasta de amendoim','Bata até ficar cremoso como sorvete','Sirva imediatamente','Decore com frutas frescas']},
+    { name:'Sanduíche Natural', icon:'🥪', time:'8 min',
+      ingredients:['2 fatias de pão integral','Peito de peru','Queijo branco','Alface e tomate','Cenoura ralada','Mostarda'],
+      steps:['Torre levemente o pão','Espalhe mostarda numa fatia','Monte com peru, queijo, alface e tomate','Adicione cenoura ralada','Feche e corte ao meio']},
+    { name:'Açaí na Tigela Caseiro', icon:'🫐', time:'8 min',
+      ingredients:['200g polpa de açaí','1 banana congelada','Granola sem açúcar','Frutas frescas','Mel ou melado'],
+      steps:['Bata açaí e banana no liquidificador','Use pouco líquido para ficar cremoso','Despeje na tigela','Cubra com granola e frutas','Finalize com mel']},
+    { name:'Cookies de Aveia', icon:'🍪', time:'20 min',
+      ingredients:['2 bananas maduras','1 xícara de aveia','Gotas de chocolate amargo','Canela','Coco ralado'],
+      steps:['Amasse as bananas','Misture com aveia, chocolate e canela','Faça pequenas porções na assadeira','Polvilhe coco ralado','Asse a 180°C por 15 minutos']},
+    { name:'Espetinho de Frutas', icon:'🍡', time:'10 min',
+      ingredients:['Morango','Uva','Manga em cubos','Kiwi','Melão','Palitos de espetinho'],
+      steps:['Lave e corte todas as frutas','Monte os espetinhos alternando as frutas','Sirva com iogurte natural para mergulhar','Dica: congele para um picolé natural']},
+    { name:'Pipoca Caseira Temperada', icon:'🍿', time:'8 min',
+      ingredients:['3 colheres de milho de pipoca','1 colher de óleo de coco','Sal rosa','Açafrão em pó','Alecrim seco'],
+      steps:['Aqueça o óleo de coco na panela','Adicione o milho e tampe','Mexa a panela ocasionalmente','Quando parar de estourar, desligue','Tempere com sal rosa, açafrão e alecrim']},
+    { name:'Mousse de Abacate', icon:'🥑', time:'10 min',
+      ingredients:['1 abacate maduro','2 colheres de cacau em pó','2 colheres de mel','Pitada de baunilha','Frutas vermelhas para decorar'],
+      steps:['Bata o abacate no processador','Adicione cacau, mel e baunilha','Bata até ficar cremoso e liso','Coloque em taças','Leve à geladeira por 30 min e decore com frutas']},
+    { name:'Chá Verde com Biscoito de Arroz', icon:'🍵', time:'5 min',
+      ingredients:['1 sachê de chá verde','4 biscoitos de arroz','Pasta de amendoim','Fatias de banana','Mel'],
+      steps:['Ferva água e prepare o chá verde','Espalhe pasta de amendoim nos biscoitos','Coloque rodelas de banana por cima','Regue com mel','Acompanhe com o chá morno']},
+    { name:'Gelatina Natural de Frutas', icon:'🍮', time:'15 min + gelar',
+      ingredients:['1 pacote de gelatina sem sabor','300ml de suco natural de uva','Frutas picadas (morango, kiwi)','Mel a gosto'],
+      steps:['Hidrate a gelatina conforme a embalagem','Aqueça o suco de uva (não ferver)','Dissolva a gelatina no suco','Adicione mel a gosto','Coloque frutas no fundo das taças','Despeje a mistura e leve à geladeira por 3 horas']}
+  ],
+  'Janta': [
+    { name:'Sopa Cremosa de Abóbora', icon:'🎃', time:'30 min',
+      ingredients:['500g de abóbora em cubos','1 cenoura','1 cebola','2 dentes de alho','Gengibre ralado','Creme de ricota'],
+      steps:['Refogue cebola e alho em azeite','Adicione abóbora, cenoura e gengibre','Cubra com água e cozinhe até amolecer','Bata tudo no liquidificador','Volte ao fogo e adicione creme de ricota','Sirva com sementes de abóbora por cima']},
+    { name:'Omelete de Forno', icon:'🥚', time:'20 min',
+      ingredients:['3 ovos','Espinafre','Tomate seco','Queijo feta','Ervas finas','Sal e pimenta'],
+      steps:['Bata os ovos com sal e ervas','Adicione espinafre picado e tomate','Despeje numa forma pequena untada','Esfarele queijo feta por cima','Asse a 180°C por 15 minutos']},
+    { name:'Salada Quente de Quinoa', icon:'🌾', time:'20 min',
+      ingredients:['1 xícara de quinoa','Tomate cereja','Pepino','Hortelã fresca','Suco de limão','Azeite de oliva'],
+      steps:['Cozinhe a quinoa conforme embalagem','Escorra e deixe esfriar levemente','Corte tomate e pepino','Misture tudo com quinoa','Tempere com limão, azeite e hortelã','Sirva morna']},
+    { name:'Caldo Verde Light', icon:'🥬', time:'25 min',
+      ingredients:['3 batatas médias','1 maço de couve','Cebola e alho','Azeite de oliva','Sal e pimenta','Linguiça de frango (opcional)'],
+      steps:['Cozinhe as batatas até ficarem macias','Bata no liquidificador com a água do cozimento','Corte a couve em tiras bem finas','Volte o caldo ao fogo','Adicione a couve e cozinhe 5 min','Finalize com um fio de azeite']},
+    { name:'Peixe Assado com Ervas', icon:'🐟', time:'25 min',
+      ingredients:['1 filé de tilápia ou pescada','Limão','Alho','Ervas finas','Tomate','Abobrinha'],
+      steps:['Tempere o peixe com limão, alho e ervas','Corte tomate e abobrinha em rodelas','Monte numa assadeira: legumes embaixo, peixe em cima','Regue com azeite','Asse a 200°C por 20 minutos','Sirva com arroz integral ou salada']},
+    { name:'Wrap de Frango e Cottage', icon:'🌯', time:'10 min',
+      ingredients:['1 tortilha integral','100g de frango desfiado','2 colheres de cottage','Rúcula','Tomate seco','Cenoura ralada'],
+      steps:['Aqueça levemente a tortilha','Espalhe o cottage','Distribua o frango desfiado','Adicione rúcula, tomate seco e cenoura','Enrole firme','Corte ao meio e sirva']},
+    { name:'Creme de Espinafre com Ovo', icon:'🥬', time:'20 min',
+      ingredients:['2 xícaras de espinafre','1 batata média','1 cebola','Noz-moscada','2 ovos','Queijo parmesão ralado'],
+      steps:['Cozinhe batata e espinafre','Bata no liquidificador com noz-moscada','Volte ao fogo e aqueça','Sirva em tigelas','Coloque um ovo pochê por cima de cada','Finalize com parmesão ralado']},
+    { name:'Berinjela Recheada', icon:'🍆', time:'30 min',
+      ingredients:['2 berinjelas','Carne moída magra ou proteína de soja','Tomate','Cebola e alho','Queijo ralado light','Ervas finas'],
+      steps:['Corte as berinjelas ao meio e retire parte da polpa','Refogue a carne com cebola, alho e tomate','Adicione a polpa da berinjela ao refogado','Recheie as berinjelas','Cubra com queijo ralado','Asse a 180°C por 20 minutos']},
+    { name:'Sopa de Legumes com Frango', icon:'🍲', time:'30 min',
+      ingredients:['200g de peito de frango','1 cenoura','1 abobrinha','1 chuchu','Vagem','Batata-doce','Temperos naturais'],
+      steps:['Cozinhe o frango com temperos e desfie','Corte todos os legumes em cubos','Cozinhe os legumes no caldo do frango','Quando estiverem macios, adicione o frango desfiado','Ajuste o tempero','Sirva quente com salsinha picada']},
+    { name:'Panqueca de Espinafre Recheada', icon:'🥞', time:'25 min',
+      ingredients:['2 ovos','3 colheres de farinha integral','1 xícara de espinafre','Leite','Recheio: ricota com tomate','Molho de tomate caseiro'],
+      steps:['Bata ovos, farinha, espinafre e leite','Faça panquecas finas na frigideira','Misture ricota com tomate picado para o recheio','Recheie cada panqueca e enrole','Coloque numa assadeira com molho de tomate','Aqueça no forno por 10 min e sirva']}
+  ]
+};
+
+const recipeCategories = Object.keys(recipesData);
+let activeRecipeTab = recipeCategories[0];
+
+function renderRecipes() {
+  const body = document.getElementById('recipesBody');
+  body.innerHTML = `
+    <div class="recipe-tabs" id="recipeTabs"></div>
+    <div class="recipes-grid" id="recipesGrid"></div>
+  `;
+  renderRecipeTabs();
+  renderRecipeList();
+}
+
+function renderRecipeTabs() {
+  const tabs = document.getElementById('recipeTabs');
+  tabs.innerHTML = recipeCategories.map(cat =>
+    `<button class="recipe-tab ${cat === activeRecipeTab ? 'active' : ''}" onclick="switchRecipeTab('${cat}')">${cat}</button>`
+  ).join('');
+}
+
+function switchRecipeTab(cat) {
+  activeRecipeTab = cat;
+  renderRecipeTabs();
+  renderRecipeList();
+}
+
+function renderRecipeList() {
+  const grid = document.getElementById('recipesGrid');
+  const recipes = recipesData[activeRecipeTab];
+  grid.innerHTML = recipes.map((r, i) => `
+    <div class="recipe-card" onclick="toggleRecipe(this)">
+      <div class="recipe-card-header">
+        <div class="recipe-card-icon">${r.icon}</div>
+        <div class="recipe-card-info">
+          <h4>${r.name}</h4>
+          <p>⏱ ${r.time}</p>
+        </div>
+      </div>
+      <div class="recipe-detail">
+        <div class="recipe-detail-inner">
+          <h5>🧾 Ingredientes</h5>
+          <ul>${r.ingredients.map(ing => `<li>${ing}</li>`).join('')}</ul>
+          <h5>👩‍🍳 Modo de Preparo</h5>
+          <ul class="steps">${r.steps.map(s => `<li>${s}</li>`).join('')}</ul>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleRecipe(card) {
+  const detail = card.querySelector('.recipe-detail');
+  const wasOpen = detail.classList.contains('open');
+  // Close all in current view
+  document.querySelectorAll('.recipe-detail').forEach(d => d.classList.remove('open'));
+  if (!wasOpen) {
+    detail.classList.add('open');
+    setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+  }
+}
+
+// ===== WELCOME DECORATIONS =====
+(function renderWelcomeDeco() {
+  const deco = document.getElementById('welcomeDeco');
+  const items = ['🍅','🥕','🥒','🍊','🍇','🥬','🍓','💧','🫐','🥑','💧','🍋','💧','🥝','💧'];
+  let html = '';
+  items.forEach((item, i) => {
+    const x = Math.random() * 90 + 5;
+    const y = Math.random() * 90 + 5;
+    const size = Math.random() * 1.2 + 0.8;
+    const delay = Math.random() * 3;
+    html += `<span class="deco-fruit" style="left:${x}%;top:${y}%;font-size:${size}rem;animation:float ${3+Math.random()*2}s ease-in-out ${delay}s infinite">${item}</span>`;
+  });
+  deco.innerHTML = html;
+})();
+
+// ===== RESTORE STATE =====
+if (userData) {
+  document.getElementById('inputName').value = userData.name;
+  document.getElementById('inputAge').value = userData.age;
+  document.getElementById('inputWeight').value = userData.weight;
+  document.getElementById('inputWake').value = userData.wake;
+  document.getElementById('inputSleep').value = userData.sleep;
+}
+</script>
+</body>
+</html>

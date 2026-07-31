@@ -24,4 +24,16 @@ WHO IT'S FOR
 • Intermediate devs looking for layout, animation, and UI patterns
 • Anyone curious about how a particular UI is built
 
+VIBEBUILD PRO (OPTIONAL)
+Pro unlocks Tinker Pro features:
+• Your tinker edits persist across app launches
+• Multiple named attempts per lesson
+• Compare your version against the original
+Subscriptions auto-renew until canceled. Payment charged to your Apple ID. Cancel anytime in your Apple ID settings.
+• Monthly: $2.99 / month
+• Yearly: $19.99 / year
+
+Privacy Policy: https://kreativekoala.llc/privacy
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+
 Privacy: VibeBuild does not collect personal data. Optional sign-in (Apple or Google) is used only to sync settings across devices.

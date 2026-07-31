@@ -276,9 +276,36 @@ class AuthManager: ObservableObject {
     // MARK: - Delete Account
 
     func deleteAccount() async throws {
-        // v2.0: server-side account record was removed when the live feed was
-        // retired. We just sign the user out locally; the Supabase auth row
-        // can be removed via the existing web flow.
+        // Apple Guideline 5.1.1(v) requires real account deletion — local
+        // sign-out alone is "insufficient." We call Supabase's user
+        // self-deletion endpoint with the user's access token, which removes
+        // the auth row server-side. On success (or hard 4xx confirming the
+        // row no longer exists) we drop the local session as well.
+        guard let session = session else {
+            // Nothing to delete server-side — just ensure local state is clean.
+            signOut()
+            return
+        }
+
+        guard let url = URL(string: "\(supabaseURL)/auth/v1/user") else {
+            throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid Supabase URL"])
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+        // Supabase returns 204 on success. 401/403/404 here means the row is
+        // already unreachable for this token — also acceptable since we're
+        // throwing away the session next anyway.
+        guard (200...299).contains(status) || [401, 403, 404].contains(status) else {
+            let body = String(data: data, encoding: .utf8) ?? ""
+            throw NSError(domain: "AuthManager", code: status, userInfo: [
+                NSLocalizedDescriptionKey: "Account deletion failed (\(status)): \(body)",
+            ])
+        }
         signOut()
     }
 

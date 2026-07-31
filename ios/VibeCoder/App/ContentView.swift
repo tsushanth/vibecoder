@@ -18,9 +18,13 @@ struct ContentView: View {
                 .tabItem { Label("Lessons", systemImage: "book.closed.fill") }
                 .tag(0)
 
+            BuildHomeView()
+                .tabItem { Label("Build", systemImage: "sparkles") }
+                .tag(1)
+
             ReplitStyleAccountView()
                 .tabItem { Label("Account", systemImage: "person.circle") }
-                .tag(1)
+                .tag(2)
         }
         .preferredColorScheme(.dark)
         .onAppear {

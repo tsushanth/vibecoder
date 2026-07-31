@@ -23,15 +23,6 @@ export default function LandingPage() {
       ),
     },
     {
-      title: t('landing.featurePreview'),
-      description: t('landing.featurePreviewDetail'),
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-        </svg>
-      ),
-    },
-    {
       title: t('landing.featureVersions'),
       description: t('landing.featureVersionsDetail'),
       icon: (
@@ -171,31 +162,10 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="flex min-h-[320px]">
-              <div className="w-40 border-r border-border bg-card p-3 hidden sm:block">
-                <div className="space-y-1">
-                  <div className="px-2 py-1.5 text-xs text-accent bg-accent/10 rounded font-mono">index.html</div>
-                  <div className="px-2 py-1.5 text-xs text-subtle rounded font-mono">style.css</div>
-                  <div className="px-2 py-1.5 text-xs text-subtle rounded font-mono">app.js</div>
-                </div>
-              </div>
-
-              <div className="flex-1 p-4 font-mono text-xs leading-relaxed overflow-hidden">
-                <div><span className="text-[#c586c0]">&lt;div</span> <span className="text-[#9cdcfe]">class</span>=<span className="text-[#ce9178]">&quot;hero&quot;</span><span className="text-[#c586c0]">&gt;</span></div>
-                <div className="pl-4"><span className="text-[#c586c0]">&lt;h1&gt;</span><span className="text-foreground">Welcome to my app</span><span className="text-[#c586c0]">&lt;/h1&gt;</span></div>
-                <div className="pl-4"><span className="text-[#c586c0]">&lt;p&gt;</span><span className="text-foreground">Built with VibeBuild</span><span className="text-[#c586c0]">&lt;/p&gt;</span></div>
-                <div className="pl-4"><span className="text-[#c586c0]">&lt;button</span> <span className="text-[#9cdcfe]">class</span>=<span className="text-[#ce9178]">&quot;cta&quot;</span><span className="text-[#c586c0]">&gt;</span></div>
-                <div className="pl-8"><span className="text-foreground">Get Started</span></div>
-                <div className="pl-4"><span className="text-[#c586c0]">&lt;/button&gt;</span></div>
-                <div><span className="text-[#c586c0]">&lt;/div&gt;</span></div>
-                <div className="mt-4 text-subtle">{t('landing.mockCodeComment')}</div>
-              </div>
-
-              <div className="w-1/3 border-l border-border bg-white p-6 hidden md:flex flex-col items-center justify-center text-center">
-                <div className="text-black text-lg font-bold mb-1">Welcome to my app</div>
-                <div className="text-gray-500 text-xs mb-3">Built with VibeBuild</div>
-                <div className="px-4 py-1.5 bg-blue-500 text-white text-xs rounded-lg font-medium">Get Started</div>
-              </div>
+            <div className="min-h-[320px] bg-white flex flex-col items-center justify-center text-center px-6 py-12">
+              <div className="text-black text-2xl font-bold mb-2">Welcome to my app</div>
+              <div className="text-gray-500 text-sm mb-6">Built with VibeBuild</div>
+              <div className="px-6 py-2.5 bg-blue-500 text-white text-sm rounded-lg font-medium">Get Started</div>
             </div>
 
             <div className="border-t border-border px-4 py-3 flex items-center gap-3 bg-surface">

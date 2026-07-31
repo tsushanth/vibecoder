@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Galaxy S25 Game Booster Pro</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-left">
+      <span id="clock">12:00</span>
+    </div>
+    <div class="status-center">
+      <span class="game-active-badge">GAME MODE ACTIVE</span>
+    </div>
+    <div class="status-right">
+      <span id="battery-icon">🔋</span>
+      <span id="battery-pct">87%</span>
+    </div>
+  </div>
+
+  <!-- FPS & Performance HUD -->
+  <div id="perf-hud" class="perf-hud hidden">
+    <div class="hud-item">
+      <span class="hud-label">FPS</span>
+      <span id="fps-value" class="hud-value fps-val">60</span>
+    </div>
+    <div class="hud-item">
+      <span class="hud-label">CPU</span>
+      <span id="cpu-value" class="hud-value cpu-val">32%</span>
+    </div>
+    <div class="hud-item">
+      <span class="hud-label">GPU</span>
+      <span id="gpu-value" class="hud-value gpu-val">45%</span>
+    </div>
+    <div class="hud-item">
+      <span class="hud-label">RAM</span>
+      <span id="ram-value" class="hud-value ram-val">4.2GB</span>
+    </div>
+    <div class="hud-item">
+      <span class="hud-label">TEMP</span>
+      <span id="temp-value" class="hud-value temp-val">38°C</span>
+    </div>
+  </div>
+
+  <!-- Main Overlay Panel -->
+  <div id="overlay-panel" class="overlay-panel">
+    <!-- Panel Header -->
+    <div class="panel-header">
+      <div class="panel-logo">
+        <svg class="logo-svg" viewBox="0 0 48 48" width="48" height="48">
+          <defs>
+            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#00f0ff"/>
+              <stop offset="50%" style="stop-color:#7b2fff"/>
+              <stop offset="100%" style="stop-color:#ff2d87"/>
+            </linearGradient>
+          </defs>
+          <polygon points="24,2 44,14 44,34 24,46 4,34 4,14" fill="none" stroke="url(#logoGrad)" stroke-width="2"/>
+          <polygon points="24,8 38,16 38,32 24,40 10,32 10,16" fill="url(#logoGrad)" opacity="0.15"/>
+          <path d="M18,16 L32,24 L18,32 Z" fill="url(#logoGrad)"/>
+        </svg>
+        <div class="logo-text">
+          <h1>GAME BOOSTER</h1>
+          <span class="subtitle">Galaxy S25 Ultra • Pro Edition</span>
+        </div>
+      </div>
+      <button id="close-panel" class="close-btn" aria-label="Close">✕</button>
+    </div>
+
+    <!-- Boost Meter -->
+    <div class="boost-section">
+      <div class="boost-ring-container">
+        <svg class="boost-ring" viewBox="0 0 160 160">
+          <defs>
+            <linearGradient id="boostGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#00f0ff"/>
+              <stop offset="100%" style="stop-color:#7b2fff"/>
+            </linearGradient>
+          </defs>
+          <circle cx="80" cy="80" r="70" fill="none" stroke="#1a1a2e" stroke-width="8"/>
+          <circle id="boost-circle" cx="80" cy="80" r="70" fill="none" stroke="url(#boostGrad)" stroke-width="8" stroke-dasharray="440" stroke-dashoffset="176" stroke-linecap="round" transform="rotate(-90 80 80)"/>
+        </svg>
+        <div class="boost-center">
+          <span id="boost-pct" class="boost-pct">60</span>
+          <span class="boost-label">BOOST</span>
+        </div>
+      </div>
+      <button id="turbo-btn" class="turbo-btn">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path d="M13 2L3 14h9l-1 10 10-12h-9l1-10z" fill="currentColor"/></svg>
+        TURBO BOOST
+      </button>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="performance">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M13 2L3 14h9l-1 10 10-12h-9l1-10z" fill="currentColor"/></svg>
+        Performance
+      </button>
+      <button class="tab-btn" data-tab="graphics">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/></svg>
+        Graphics
+      </button>
+      <button class="tab-btn" data-tab="voice">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5z" fill="currentColor"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" fill="currentColor"/></svg>
+        Voice
+      </button>
+      <button class="tab-btn" data-tab="tools">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z" fill="currentColor"/></svg>
+        Tools
+      </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+      <!-- Performance Tab -->
+      <div id="tab-performance" class="tab-pane active">
+        <div class="settings-group">
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-icon perf-icon">⚡</span>
+              <div>
+                <span class="setting-name">CPU Overclock</span>
+                <span class="setting-desc">Snapdragon 8 Elite → Max Performance</span>
+              </div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-cpu" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-icon ram-icon">🧠</span>
+              <div>
+                <span class="setting-name">RAM Optimizer</span>
+                <span class="setting-desc">Clear background apps • Free 2.1GB</span>
+              </div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-ram">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-icon gpu-icon">🎮</span>
+              <div>
+                <span class="setting-name">GPU Turbo</span>
+                <span class="setting-desc">Adreno 830 → Unlocked Clocks</span>
+              </div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-gpu" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-icon net-icon">📡</span>
+              <div>
+                <span class="setting-name">Network Booster</span>
+                <span class="setting-desc">Low latency mode • Priority packets</span>
+              </div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-net">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-icon touch-icon">👆</span>
+              <div>
+                <span class="setting-name">Touch Response</span>
+                <span class="setting-desc">240Hz sampling rate</span>
+              </div>
+            </div>
+            <div class="slider-control">
+              <input type="range" id="touch-rate" min="60" max="480" value="240" step="60">
+              <span id="touch-rate-val" class="slider-val">240Hz</span>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-icon fps-icon">🖥️</span>
+              <div>
+                <span class="setting-name">Target FPS</span>
+                <span class="setting-desc">Frame rate target</span>
+              </div>
+            </div>
+            <div class="slider-control">
+              <input type="range" id="target-fps" min="30" max="120" value="60" step="10">
+              <span id="target-fps-val" class="slider-val">60 FPS</span>
+            </div>
+          </div>
+        </div>
+        <button id="optimize-btn" class="action-btn optimize-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path d="M17.66 11.2C17.43 10.9 17.15 10.64 16.89 10.38C16.22 9.78 15.46 9.35 14.82 8.72C13.33 7.26 13 4.85 13.95 3C13 3.23 12.17 3.75 11.46 4.32C8.87 6.4 7.85 10.07 9.07 13.22C9.11 13.32 9.15 13.42 9.15 13.55C9.15 13.77 9 13.97 8.8 14.05C8.57 14.15 8.33 14.09 8.14 13.93C8.08 13.88 8.04 13.83 8 13.76C6.87 12.33 6.69 10.28 7.45 8.64C5.78 10 4.87 12.3 5 14.47C5.06 14.97 5.12 15.47 5.29 15.97C5.43 16.57 5.7 17.17 6 17.7C7.08 19.43 8.95 20.67 10.96 20.92C13.1 21.19 15.39 20.8 16.89 19.32C18.55 17.68 19.12 15.13 18.09 13C17.98 12.79 17.85 12.58 17.72 12.38L17.66 11.2zM14.5 17.7C14.22 17.95 13.76 18.22 13.4 18.34C12.31 18.73 11.22 18.22 10.64 17.43C11.81 17.18 12.56 16.32 12.82 15.34C13.05 14.46 12.72 13.72 12.57 12.88C12.44 12.09 12.46 11.41 12.82 10.68C13.06 11.09 13.31 11.5 13.6 11.84C14.46 12.83 15.74 13.3 16.09 14.65C16.14 14.81 16.17 14.98 16.17 15.15C16.2 16.12 15.67 17.06 14.82 17.56L14.5 17.7z" fill="currentColor"/></svg>
+          ONE-TAP OPTIMIZE
+        </button>
+      </div>
+
+      <!-- Graphics Tab -->
+      <div id="tab-graphics" class="tab-pane">
+        <div class="settings-group">
+          <h3 class="group-title">Graphics Filters</h3>
+          <div class="filter-grid">
+            <button class="filter-btn active" data-filter="none">
+              <div class="filter-preview" style="background: linear-gradient(135deg, #667eea, #764ba2)"></div>
+              <span>Normal</span>
+            </button>
+            <button class="filter-btn" data-filter="hdr">
+              <div class="filter-preview filter-hdr" style="background: linear-gradient(135deg, #f093fb, #f5576c)"></div>
+              <span>HDR+</span>
+            </button>
+            <button class="filter-btn" data-filter="vivid">
+              <div class="filter-preview filter-vivid" style="background: linear-gradient(135deg, #4facfe, #00f2fe)"></div>
+              <span>Vivid</span>
+            </button>
+            <button class="filter-btn" data-filter="cinematic">
+              <div class="filter-preview filter-cinematic" style="background: linear-gradient(135deg, #a18cd1, #fbc2eb)"></div>
+              <span>Cinema</span>
+            </button>
+            <button class="filter-btn" data-filter="nightvision">
+              <div class="filter-preview filter-nightvision" style="background: linear-gradient(135deg, #0f3443, #34e89e)"></div>
+              <span>Night V.</span>
+            </button>
+            <button class="filter-btn" data-filter="retro">
+              <div class="filter-preview filter-retro" style="background: linear-gradient(135deg, #c79081, #dfa579)"></div>
+              <span>Retro</span>
+            </button>
+            <button class="filter-btn" data-filter="cyberpunk">
+              <div class="filter-preview filter-cyberpunk" style="background: linear-gradient(135deg, #fc00ff, #00dbde)"></div>
+              <span>Cyber</span>
+            </button>
+            <button class="filter-btn" data-filter="noir">
+              <div class="filter-preview filter-noir" style="background: linear-gradient(135deg, #434343, #000000)"></div>
+              <span>Noir</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h3 class="group-title">Display Settings</h3>
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-icon">🌟</span>
+              <div>
+                <span class="setting-name">Brightness Boost</span>
+                <span class="setting-desc">Extra brightness in sunlight</span>
+              </div>
+            </div>
+            <div class="slider-control">
+              <input type="range" id="brightness" min="50" max="200" value="100">
+              <span id="brightness-val" class="slider-val">100%</span>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-icon">🎨</span>
+              <div>
+                <span class="setting-name">Color Saturation</span>
+                <span class="setting-desc">Boost color intensity</span>
+              </div>
+            </div>
+            <div class="slider-control">
+              <input type="range" id="saturation" min="50" max="200" value="100">
+              <span id="saturation-val" class="slider-val">100%</span>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-icon">🔆</span>
+              <div>
+                <span class="setting-name">Contrast</span>
+                <span class="setting-desc">Dynamic contrast enhancement</span>
+              </div>
+            </div>
+            <div class="slider-control">
+              <input type="range" id="contrast" min="50" max="200" value="100">
+              <span id="contrast-val" class="slider-val">100%</span>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-icon">🌡️</span>
+              <div>
+                <span class="setting-name">Color Temperature</span>
+                <span class="setting-desc">Warm to cool tone shift</span>
+              </div>
+            </div>
+            <div class="slider-control">
+              <input type="range" id="temperature" min="0" max="100" value="50">
+              <span id="temperature-val" class="slider-val">Neutral</span>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-icon">✨</span>
+              <div>
+                <span class="setting-name">Sharpness</span>
+                <span class="setting-desc">Edge enhancement</span>
+              </div>
+            </div>
+            <div class="slider-control">
+              <input type="range" id="sharpness" min="0" max="100" value="50">
+              <span id="sharpness-val" class="slider-val">50%</span>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-icon">🎞️</span>
+              <div>
+                <span class="setting-name">Anti-Aliasing</span>
+                <span class="setting-desc">Smooth jagged edges</span>
+              </div>
+            </div>
+            <div class="select-control">
+              <select id="aa-mode">
+                <option value="off">Off</option>
+                <option value="fxaa" selected>FXAA</option>
+                <option value="msaa2x">MSAA 2x</option>
+                <option value="msaa4x">MSAA 4x</option>
+                <option value="taa">TAA</option>
+              </select>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-icon">📐</span>
+              <div>
+                <span class="setting-name">Resolution Scale</span>
+                <span class="setting-desc">Render resolution multiplier</span>
+              </div>
+            </div>
+            <div class="slider-control">
+              <input type="range" id="res-scale" min="50" max="150" value="100" step="10">
+              <span id="res-scale-val" class="slider-val">100%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Voice Changer Tab -->
+      <div id="tab-voice" class="tab-pane">
+        <div class="settings-group">
+          <h3 class="group-title">Voice Changer</h3>
+          <div class="voice-status" id="voice-status">
+            <div class="mic-icon" id="mic-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40">
+                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" fill="currentColor"/>
+                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" fill="currentColor"/>
+              </svg>
+            </div>
+            <span id="mic-status-text">Tap to activate mic</span>
+            <div class="voice-visualizer" id="voice-visualizer">
+              <div class="viz-bar"></div><div class="viz-bar"></div><div class="viz-bar"></div>
+              <div class="viz-bar"></div><div class="viz-bar"></div><div class="viz-bar"></div>
+              <div class="viz-bar"></div><div class="viz-bar"></div><div class="viz-bar"></div>
+              <div class="viz-bar"></div><div class="viz-bar"></div><div class="viz-bar"></div>
+              <div class="viz-bar"></div><div class="viz-bar"></div><div class="viz-bar"></div>
+              <div class="viz-bar"></div>
+            </div>
+          </div>
+
+          <div class="voice-presets">
+            <button class="voice-btn active" data-voice="normal">
+              <span class="voice-emoji">🎤</span>
+              <span>Normal</span>
+            </button>
+            <button class="voice-btn" data-voice="deep">
+              <span class="voice-emoji">👹</span>
+              <span>Deep</span>
+            </button>
+            <button class="voice-btn" data-voice="high">
+              <span class="voice-emoji">🐿️</span>
+              <span>Chipmunk</span>
+            </button>
+            <button class="voice-btn" data-voice="robot">
+              <span class="voice-emoji">🤖</span>
+              <span>Robot</span>
+            </button>
+            <button class="voice-btn" data-voice="echo">
+              <span class="voice-emoji">🏔️</span>
+              <span>Echo</span>
+            </button>
+            <button class="voice-btn" data-voice="alien">
+              <span class="voice-emoji">👽</span>
+              <span>Alien</span>
+            </button>
+            <button class="voice-btn" data-voice="demon">
+              <span class="voice-emoji">😈</span>
+              <span>Demon</span>
+            </button>
+            <button class="voice-btn" data-voice="radio">
+              <span class="voice-emoji">📻</span>
+              <span>Radio</span>
+            </button>
+          </div>
+
+          <div class="voice-controls">
+            <div class="setting-item">
+              <div class="setting-info">
+                <span class="setting-icon">🎚️</span>
+                <div>
+                  <span class="setting-name">Pitch</span>
+                  <span class="setting-desc">Voice pitch adjustment</span>
+                </div>
+              </div>
+              <div class="slider-control">
+                <input type="range" id="voice-pitch" min="-12" max="12" value="0">
+                <span id="voice-pitch-val" class="slider-val">0</span>
+              </div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <span class="setting-icon">🔊</span>
+                <div>
+                  <span class="setting-name">Voice Gain</span>
+                  <span class="setting-desc">Microphone volume</span>
+                </div>
+              </div>
+              <div class="slider-control">
+                <input type="range" id="voice-gain" min="0" max="200" value="100">
+                <span id="voice-gain-val" class="slider-val">100%</span>
+              </div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <span class="setting-icon">🌊</span>
+                <div>
+                  <span class="setting-name">Reverb</span>
+                  <span class="setting-desc">Room echo effect</span>
+                </div>
+              </div>
+              <div class="slider-control">
+                <input type="range" id="voice-reverb" min="0" max="100" value="0">
+                <span id="voice-reverb-val" class="slider-val">0%</span>
+              </div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <span class="setting-icon">📢</span>
+                <div>
+                  <span class="setting-name">Distortion</span>
+                  <span class="setting-desc">Voice distortion amount</span>
+                </div>
+              </div>
+              <div class="slider-control">
+                <input type="range" id="voice-distortion" min="0" max="100" value="0">
+                <span id="voice-distortion-val" class="slider-val">0%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tools Tab -->
+      <div id="tab-tools" class="tab-pane">
+        <div class="settings-group">
+          <h3 class="group-title">Quick Tools</h3>
+          <div class="tools-grid">
+            <button class="tool-card" id="tool-dnd">
+              <span class="tool-icon">🔕</span>
+              <span class="tool-name">DND Mode</span>
+              <span class="tool-status" id="dnd-status">OFF</span>
+            </button>
+            <button class="tool-card" id="tool-screenshot">
+              <span class="tool-icon">📸</span>
+              <span class="tool-name">Screenshot</span>
+              <span class="tool-status">Ready</span>
+            </button>
+            <button class="tool-card" id="tool-record">
+              <span class="tool-icon">🔴</span>
+              <span class="tool-name">Screen Rec</span>
+              <span class="tool-status" id="rec-status">OFF</span>
+            </button>
+            <button class="tool-card" id="tool-crosshair">
+              <span class="tool-icon">🎯</span>
+              <span class="tool-name">Crosshair</span>
+              <span class="tool-status" id="crosshair-status">OFF</span>
+            </button>
+            <button class="tool-card" id="tool-macro">
+              <span class="tool-icon">⌨️</span>
+              <span class="tool-name">Macro Keys</span>
+              <span class="tool-status" id="macro-status">OFF</span>
+            </button>
+            <button class="tool-card" id="tool-floating">
+              <span class="tool-icon">💬</span>
+              <span class="tool-name">Chat Float</span>
+              <span class="tool-status" id="float-status">OFF</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h3 class="group-title">Battery & Thermal</h3>
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-icon">🔋</span>
+              <div>
+                <span class="setting-name">Battery Saver Gaming</span>
+                <span class="setting-desc">Reduce power draw while gaming</span>
+              </div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-battery">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-icon">❄️</span>
+              <div>
+                <span class="setting-name">Cooling Mode</span>
+                <span class="setting-desc">Throttle to reduce temperature</span>
+              </div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-cooling">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-icon">🔒</span>
+              <div>
+                <span class="setting-name">Lock Navigation</span>
+                <span class="setting-desc">Disable nav buttons while gaming</span>
+              </div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-navlock">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h3 class="group-title">Game Profiles</h3>
+          <div class="profiles-list" id="profiles-list">
+            <!-- Populated by JS -->
+          </div>
+          <button id="save-profile-btn" class="action-btn save-profile-btn">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" fill="currentColor"/></svg>
+            Save Current Profile
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Toggle Button -->
+  <div id="fab-toggle" class="fab-toggle">
+    <svg viewBox="0 0 48 48" width="32" height="32">
+      <defs>
+        <linearGradient id="fabGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#00f0ff"/>
+          <stop offset="100%" style="stop-color:#7b2fff"/>
+        </linearGradient>
+      </defs>
+      <polygon points="24,4 42,15 42,33 24,44 6,33 6,15" fill="url(#fabGrad)" opacity="0.9"/>
+      <path d="M18,16 L32,24 L18,32 Z" fill="white"/>
+    </svg>
+  </div>
+
+  <!-- Crosshair Overlay -->
+  <div id="crosshair-overlay" class="crosshair-overlay hidden">
+    <svg viewBox="0 0 60 60" width="60" height="60">
+      <circle cx="30" cy="30" r="3" fill="none" stroke="#ff0040" stroke-width="1.5"/>
+      <line x1="30" y1="10" x2="30" y2="24" stroke="#ff0040" stroke-width="1.5"/>
+      <line x1="30" y1="36" x2="30" y2="50" stroke="#ff0040" stroke-width="1.5"/>
+      <line x1="10" y1="30" x2="24" y2="30" stroke="#ff0040" stroke-width="1.5"/>
+      <line x1="36" y1="30" x2="50" y2="30" stroke="#ff0040" stroke-width="1.5"/>
+      <circle cx="30" cy="30" r="12" fill="none" stroke="#ff0040" stroke-width="0.5" opacity="0.5"/>
+    </svg>
+  </div>
+
+  <!-- Recording Indicator -->
+  <div id="rec-indicator" class="rec-indicator hidden">
+    <span class="rec-dot"></span> REC <span id="rec-timer">00:00</span>
+  </div>
+
+  <!-- Screenshot Flash -->
+  <div id="screenshot-flash" class="screenshot-flash"></div>
+
+  <!-- Toast Notifications -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Macro Editor Modal -->
+  <div id="macro-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Macro Key Editor</h3>
+        <button class="modal-close" id="macro-modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="macro-slots" id="macro-slots">
+          <div class="macro-slot" data-slot="1">
+            <span class="macro-key">M1</span>
+            <input type="text" class="macro-input" placeholder="Tap sequence..." maxlength="30">
+            <select class="macro-action">
+              <option value="none">No Action</option>
+              <option value="rapidfire">Rapid Fire</option>
+              <option value="combo">Combo Attack</option>
+              <option value="reload">Quick Reload</option>
+              <option value="scope">Quick Scope</option>
+              <option value="crouch">Crouch Spam</option>
+            </select>
+          </div>
+          <div class="macro-slot" data-slot="2">
+            <span class="macro-key">M2</span>
+            <input type="text" class="macro-input" placeholder="Tap sequence..." maxlength="30">
+            <select class="macro-action">
+              <option value="none">No Action</option>
+              <option value="rapidfire">Rapid Fire</option>
+              <option value="combo">Combo Attack</option>
+              <option value="reload">Quick Reload</option>
+              <option value="scope">Quick Scope</option>
+              <option value="crouch">Crouch Spam</option>
+            </select>
+          </div>
+          <div class="macro-slot" data-slot="3">
+            <span class="macro-key">M3</span>
+            <input type="text" class="macro-input" placeholder="Tap sequence..." maxlength="30">
+            <select class="macro-action">
+              <option value="none">No Action</option>
+              <option value="rapidfire">Rapid Fire</option>
+              <option value="combo">Combo Attack</option>
+              <option value="reload">Quick Reload</option>
+              <option value="scope">Quick Scope</option>
+              <option value="crouch">Crouch Spam</option>
+            </select>
+          </div>
+          <div class="macro-slot" data-slot="4">
+            <span class="macro-key">M4</span>
+            <input type="text" class="macro-input" placeholder="Tap sequence..." maxlength="30">
+            <select class="macro-action">
+              <option value="none">No Action</option>
+              <option value="rapidfire">Rapid Fire</option>
+              <option value="combo">Combo Attack</option>
+              <option value="reload">Quick Reload</option>
+              <option value="scope">Quick Scope</option>
+              <option value="crouch">Crouch Spam</option>
+            </select>
+          </div>
+        </div>
+        <button id="save-macros-btn" class="action-btn optimize-btn">Save Macros</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Save Modal -->
+  <div id="profile-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Save Game Profile</h3>
+        <button class="modal-close" id="profile-modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Profile Name</label>
+          <input type="text" id="profile-name-input" placeholder="e.g., PUBG Max Settings" maxlength="30">
+        </div>
+        <div class="form-group">
+          <label>Game Icon</label>
+          <div class="icon-picker" id="icon-picker">
+            <button class="icon-opt active" data-icon="🎮">🎮</button>
+            <button class="icon-opt" data-icon="🔫">🔫</button>
+            <button class="icon-opt" data-icon="⚔️">⚔️</button>
+            <button class="icon-opt" data-icon="🏎️">🏎️</button>
+            <button class="icon-opt" data-icon="⚽">⚽</button>
+            <button class="icon-opt" data-icon="🧩">🧩</button>
+            <button class="icon-opt" data-icon="🎯">🎯</button>
+            <button class="icon-opt" data-icon="🏆">🏆</button>
+          </div>
+        </div>
+        <button id="confirm-save-profile" class="action-btn">Save Profile</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

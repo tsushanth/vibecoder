@@ -58,7 +58,10 @@ data class CreateUiState(
     val showSystemBusyDialog: Boolean = false,
     /** True when the user attempted generation past the free limit. Triggers a
      * non-dismissible paywall inside CreateScreen until they subscribe. */
-    val showHardPaywall: Boolean = false
+    val showHardPaywall: Boolean = false,
+    /** Curated starter templates bundled in the app — same 30 lessons the
+     *  iOS catalog ships. Tapping one fills `prompt` with its description. */
+    val templates: List<com.kreativekoala.vibecoder.data.model.Template> = emptyList(),
 )
 
 @HiltViewModel
@@ -68,11 +71,21 @@ class CreateViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val subscriptionRepository: SubscriptionRepository,
     private val deployRepository: DeployRepository,
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val templateRepository: com.kreativekoala.vibecoder.data.repository.TemplateRepository,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(CreateUiState())
+    private val _uiState = MutableStateFlow(
+        CreateUiState(templates = templateRepository.all())
+    )
     val uiState: StateFlow<CreateUiState> = _uiState.asStateFlow()
+
+    /** Fills the prompt with the template's description and lets the user
+     *  tweak before tapping Generate. We deliberately don't auto-start
+     *  generation — the template is an idea seed, not a one-tap action. */
+    fun selectTemplate(template: com.kreativekoala.vibecoder.data.model.Template) {
+        _uiState.update { it.copy(prompt = template.description) }
+    }
 
     private var generationJob: Job? = null
 

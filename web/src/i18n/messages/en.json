@@ -31,7 +31,8 @@
     "allRightsReserved": "All rights reserved.",
     "remove": "Remove",
     "add": "Add",
-    "unlimited": "Unlimited"
+    "unlimited": "Unlimited",
+    "versions": "Versions"
   },
   "landing": {
     "availablePlatforms": "Now available on Web, iOS & Android",
@@ -54,8 +55,6 @@
     "everythingYouNeedSubtitle": "A complete platform for building, iterating, and shipping web apps",
     "featurePipeline": "AI-Powered Pipeline",
     "featurePipelineDetail": "5-phase generation: build, validate, fix, polish, and verify. Production-quality output every time.",
-    "featurePreview": "Live Preview & Code Editor",
-    "featurePreviewDetail": "See your app running instantly. Edit code directly or use natural language to describe changes.",
     "featureVersions": "Version History",
     "featureVersionsDetail": "Every tweak creates a version. Browse your history, compare changes, and revert anytime.",
     "featureDeploy": "One-Click Deploy",
@@ -87,7 +86,6 @@
     "readyToBuild": "Ready to build?",
     "readyToBuildSubtitle": "Join thousands of creators turning ideas into apps with AI.",
     "getStartedFree": "Get Started — Free",
-    "mockCodeComment": "// AI-generated, production-ready",
     "mockChatPlaceholder": "Describe changes to your app..."
   },
   "create": {
@@ -210,5 +208,10 @@
     "notFound": "Project not found",
     "initialGeneration": "Initial generation",
     "changesApplied": "Changes applied"
+  },
+  "versions": {
+    "empty": "No versions yet",
+    "count": "{count} versions",
+    "emptyHint": "Make a change in chat to start tracking versions."
   }
 }

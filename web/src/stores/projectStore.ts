@@ -9,7 +9,7 @@ interface ProjectState {
   activeFilePath: string | null;
   openFiles: string[];
   bundle: string | null;
-  previewUrl: string | null;
+  previewHtml: string | null;
   isDirty: boolean;
   chatMessages: ChatMessage[];
   versions: ProjectVersion[];
@@ -23,7 +23,7 @@ interface ProjectState {
   openFile: (path: string) => void;
   closeFile: (path: string) => void;
   setBundle: (bundle: string) => void;
-  setPreviewUrl: (url: string | null) => void;
+  setPreviewHtml: (html: string | null) => void;
   setDirty: (dirty: boolean) => void;
   addChatMessage: (message: ChatMessage) => void;
   setChatMessages: (messages: ChatMessage[]) => void;
@@ -41,7 +41,7 @@ const initialState = {
   activeFilePath: null as string | null,
   openFiles: [] as string[],
   bundle: null as string | null,
-  previewUrl: null as string | null,
+  previewHtml: null as string | null,
   isDirty: false,
   chatMessages: [] as ChatMessage[],
   versions: [] as ProjectVersion[],
@@ -90,7 +90,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
     }),
 
   setBundle: (bundle) => set({ bundle }),
-  setPreviewUrl: (url) => set({ previewUrl: url }),
+  setPreviewHtml: (html) => set({ previewHtml: html }),
   setDirty: (dirty) => set({ isDirty: dirty }),
 
   addChatMessage: (message) =>

@@ -1,0 +1,82 @@
+default_platform(:ios)
+
+KEY_ID      = "3WHS49Y787"
+ISSUER_ID   = "17f51aa8-305f-48b3-acbe-fd8ed3dd5fb6"
+KEY_PATH    = File.expand_path("~/private_keys/AuthKey_3WHS49Y787.p8")
+
+platform :ios do
+  desc "Submit an already-uploaded build for review"
+  lane :submit_review do |options|
+    api_key = app_store_connect_api_key(
+      key_id: KEY_ID,
+      issuer_id: ISSUER_ID,
+      key_filepath: KEY_PATH,
+      duration: 1200,
+      in_house: false
+    )
+    deliver(
+      api_key: api_key,
+      app_identifier: "com.kreativekoala.vibercoder",
+      app_version: options[:version] || "3.1.5",
+      build_number: options[:build] || "46",
+      skip_binary_upload: true,
+      submit_for_review: true,
+      automatic_release: false,
+      force: true,
+      skip_screenshots: true,
+      skip_metadata: true,
+      run_precheck_before_submit: false,
+      submission_information: {
+        add_id_info_uses_idfa: false,
+        export_compliance_uses_encryption: false,
+        export_compliance_is_exempt: false
+      }
+    )
+  end
+
+  desc "Build and submit to App Store for review"
+  lane :build_and_submit do
+    api_key = app_store_connect_api_key(
+      key_id: KEY_ID,
+      issuer_id: ISSUER_ID,
+      key_filepath: KEY_PATH,
+      duration: 1200,
+      in_house: false
+    )
+
+    gym(
+      project: "VibeCoder.xcodeproj",
+      scheme: "VibeCoder",
+      configuration: "Release",
+      export_method: "app-store",
+      export_options: {
+        method: "app-store-connect",
+        teamID: "7RS696YC75",
+        signingStyle: "automatic",
+        destination: "upload"
+      },
+      xcargs: "-allowProvisioningUpdates -authenticationKeyPath #{KEY_PATH} -authenticationKeyID #{KEY_ID} -authenticationKeyIssuerID #{ISSUER_ID}",
+      output_directory: "/tmp/vibebuild_build",
+      output_name: "VibeCoder.ipa",
+      clean: true
+    )
+
+    deliver(
+      api_key: api_key,
+      app_identifier: "com.kreativekoala.vibercoder",
+      app_version: "3.1.5",
+      skip_binary_upload: true,
+      submit_for_review: true,
+      automatic_release: false,
+      force: true,
+      skip_screenshots: true,
+      skip_metadata: true,
+      run_precheck_before_submit: false,
+      submission_information: {
+        add_id_info_uses_idfa: false,
+        export_compliance_uses_encryption: false,
+        export_compliance_is_exempt: false
+      }
+    )
+  end
+end

@@ -454,6 +454,16 @@ fun CreateScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // Templates: curated starter projects (same 30 the iOS catalog
+                // ships). Tapping one seeds the prompt with its description.
+                if (uiState.templates.isNotEmpty()) {
+                    TemplateRow(
+                        templates = uiState.templates,
+                        onTemplateClick = { viewModel.selectTemplate(it) }
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+
                 // Suggestion chips
                 SuggestionChips(
                     suggestions = uiState.suggestions,
