@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Feed</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #fafafa;
+            padding-bottom: 60px;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            background: white;
+            border-bottom: 1px solid #dbdbdb;
+            padding: 8px 16px;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 16px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .stories-container {
+            background: white;
+            border-bottom: 1px solid #dbdbdb;
+            padding: 16px 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .stories-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .stories {
+            display: inline-flex;
+            gap: 16px;
+            padding: 0 16px;
+        }
+
+        .story {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .story-avatar {
+            width: 66px;
+            height: 66px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            padding: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .story-avatar-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: white;
+            padding: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .story-username {
+            font-size: 12px;
+            color: #262626;
+            max-width: 66px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .feed {
+            max-width: 614px;
+            margin: 0 auto;
+        }
+
+        .post {
+            background: white;
+            border: 1px solid #dbdbdb;
+            margin: 24px 0;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            gap: 12px;
+        }
+
+        .post-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .post-username {
+            font-weight: 600;
+            font-size: 14px;
+            color: #262626;
+            flex: 1;
+        }
+
+        .post-menu {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #262626;
+        }
+
+        .post-image {
+            width: 100%;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 48px;
+            user-select: none;
+        }
+
+        .post-actions {
+            padding: 8px 16px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            transition: transform 0.2s;
+        }
+
+        .action-btn:active {
+            transform: scale(0.9);
+        }
+
+        .action-btn.liked {
+            color: #ed4956;
+        }
+
+        .spacer {
+            flex: 1;
+        }
+
+        .post-likes {
+            padding: 0 16px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #262626;
+        }
+
+        .post-caption {
+            padding: 8px 16px;
+            font-size: 14px;
+            color: #262626;
+        }
+
+        .post-caption-username {
+            font-weight: 600;
+            margin-right: 6px;
+        }
+
+        .post-comments {
+            padding: 0 16px;
+        }
+
+        .view-comments {
+            background: none;
+            border: none;
+            color: #8e8e8e;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 4px 0;
+            text-align: left;
+        }
+
+        .comment {
+            padding: 4px 0;
+            font-size: 14px;
+            color: #262626;
+            display: flex;
+            gap: 8px;
+        }
+
+        .comment-username {
+            font-weight: 600;
+        }
+
+        .comment-text {
+            flex: 1;
+        }
+
+        .comment-like {
+            background: none;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            color: #8e8e8e;
+        }
+
+        .post-time {
+            padding: 8px 16px;
+            font-size: 10px;
+            color: #8e8e8e;
+            text-transform: uppercase;
+        }
+
+        .add-comment {
+            border-top: 1px solid #efefef;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .comment-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .comment-input::placeholder {
+            color: #8e8e8e;
+        }
+
+        .post-comment-btn {
+            background: none;
+            border: none;
+            color: #0095f6;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .post-comment-btn:disabled {
+            color: #b3dffc;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #8e8e8e;
+            font-size: 14px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #8e8e8e;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #dbdbdb;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px 16px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 16px;
+            border-bottom: 1px solid #dbdbdb;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .comments-list {
+            padding: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .comment-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+        }
+
+        .comment-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #405de6, #5851db, #833ab4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: white;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .comment-content {
+            flex: 1;
+        }
+
+        .comment-header {
+            display: flex;
+            gap: 8px;
+            align-items: baseline;
+        }
+
+        .comment-time {
+            font-size: 12px;
+            color: #8e8e8e;
+        }
+
+        @media (max-width: 614px) {
+            .post {
+                margin: 0;
+                border-left: none;
+                border-right: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">Socialgram</div>
+        <div class="header-icons">
+            <button class="icon-btn">➕</button>
+            <button class="icon-btn">❤️</button>
+            <button class="icon-btn">✉️</button>
+        </div>
+    </div>
+
+    <div class="stories-container">
+        <div class="stories" id="stories"></div>
+    </div>
+
+    <div class="feed" id="feed"></div>
+
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-btn">🏠</button>
+        <button class="nav-btn">🔍</button>
+        <button class="nav-btn">➕</button>
+        <button class="nav-btn">🎬</button>
+        <button class="nav-btn">👤</button>
+    </div>
+
+    <div class="modal" id="commentsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                Comments
+                <button class="modal-close" onclick="closeCommentsModal()">✕</button>
+            </div>
+            <div class="comments-list" id="commentsList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Data storage
+        const STORAGE_KEYS = {
+            LIKES: 'social_feed_likes',
+            COMMENTS: 'social_feed_comments',
+            POSTS: 'social_feed_posts'
+        };
+
+        // Load from localStorage
+        function loadData(key, defaultValue = {}) {
+            try {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : defaultValue;
+            } catch {
+                return defaultValue;
+            }
+        }
+
+        // Save to localStorage
+        function saveData(key, data) {
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+            } catch (e) {
+                console.error('Failed to save data:', e);
+            }
+        }
+
+        // State
+        let likes = loadData(STORAGE_KEYS.LIKES);
+        let comments = loadData(STORAGE_KEYS.COMMENTS);
+        let posts = [];
+        let currentPage = 0;
+        let isLoading = false;
+        let currentCommentsPostId = null;
+
+        // Sample data
+        const users = [
+            { name: 'alex_photo', emoji: '📸', color: '#667eea' },
+            { name: 'sarah_travels', emoji: '✈️', color: '#764ba2' },
+            { name: 'mike_fitness', emoji: '💪', color: '#f093fb' },
+            { name: 'emma_art', emoji: '🎨', color: '#4facfe' },
+            { name: 'david_chef', emoji: '👨‍🍳', color: '#43e97b' },
+            { name: 'lisa_yoga', emoji: '🧘‍♀️', color: '#fa709a' },
+            { name: 'john_music', emoji: '🎵', color: '#30cfd0' },
+            { name: 'kate_fashion', emoji: '👗', color: '#a8edea' },
+            { name: 'tom_tech', emoji: '💻', color: '#fbc2eb' },
+            { name: 'anna_food', emoji: '🍕', color: '#f6d365' },
+            { name: 'chris_gaming', emoji: '🎮', color: '#667eea' },
+            { name: 'sophia_books', emoji: '📚', color: '#764ba2' },
+            { name: 'ryan_sports', emoji: '⚽', color: '#f093fb' },
+            { name: 'olivia_pets', emoji: '🐶', color: '#4facfe' },
+            { name: 'daniel_cars', emoji: '🚗', color: '#43e97b' }
+        ];
+
+        const captions = [
+            'Living my best life! ✨',
+            'Sunshine and good vibes ☀️',
+            'Adventures await 🌍',
+            'Making memories 📷',
+            'Grateful for moments like these 🙏',
+            'Chasing dreams 💫',
+            'Life is beautiful 🌸',
+            'Good times, great people ❤️',
+            'Creating magic ✨',
+            'Just another day in paradise 🌴',
+            'Feeling blessed 🙌',
+            'Weekend mood 🎉',
+            'Living for moments like this 💕',
+            'Stay positive, work hard 💪',
+            'Life is short, make it sweet 🍰'
+        ];
+
+        const sampleComments = [
+            'Amazing! 😍',
+            'Love this! ❤️',
+            'So cool! 🔥',
+            'Beautiful! 🌟',
+            'Incredible! 👏',
+            'Wow! 😮',
+            'Perfect! ✨',
+            'Awesome! 🎉',
+            'Stunning! 💫',
+            'Goals! 🙌'
+        ];
+
+        // Initialize stories
+        function initStories() {
+            const storiesContainer = document.getElementById('stories');
+            users.forEach(user => {
+                const story = document.createElement('div');
+                story.className = 'story';
+                story.innerHTML = `
+                    <div class="story-avatar">
+                        <div class="story-avatar-inner">${user.emoji}</div>
+                    </div>
+                    <div class="story-username">${user.name}</div>
+                `;
+                story.onclick = () => alert(`Viewing ${user.name}'s story!`);
+                storiesContainer.appendChild(story);
+            });
+        }
+
+        // Generate posts
+        function generatePosts(count = 5) {
+            const newPosts = [];
+            const startIndex = posts.length;
+
+            for (let i = 0; i < count; i++) {
+                const postId = `post_${startIndex + i}`;
+                const user = users[Math.floor(Math.random() * users.length)];
+                const caption = captions[Math.floor(Math.random() * captions.length)];
+                const likesCount = Math.floor(Math.random() * 1000) + 50;
+                const hoursAgo = Math.floor(Math.random() * 24) + 1;
+
+                // Initialize likes and comments for new posts
+                if (!likes[postId]) {
+                    likes[postId] = {
+                        count: likesCount,
+                        liked: false
+                    };
+                }
+
+                if (!comments[postId]) {
+                    const numComments = Math.floor(Math.random() * 5);
+                    comments[postId] = [];
+                    for (let j = 0; j < numComments; j++) {
+                        const commenter = users[Math.floor(Math.random() * users.length)];
+                        comments[postId].push({
+                            id: `comment_${Date.now()}_${j}`,
+                            username: commenter.name,
+                            emoji: commenter.emoji,
+                            text: sampleComments[Math.floor(Math.random() * sampleComments.length)],
+                            time: Math.floor(Math.random() * 24) + 1
+                        });
+                    }
+                }
+
+                newPosts.push({
+                    id: postId,
+                    user: user,
+                    caption: caption,
+                    hoursAgo: hoursAgo,
+                    imageEmoji: user.emoji,
+                    imageColor: user.color
+                });
+            }
+
+            posts = posts.concat(newPosts);
+            saveData(STORAGE_KEYS.LIKES, likes);
+            saveData(STORAGE_KEYS.COMMENTS, comments);
+            return newPosts;
+        }
+
+        // Render posts
+        function renderPosts(postsToRender) {
+            const feed = document.getElementById('feed');
+
+            postsToRender.forEach(post => {
+                const postEl = document.createElement('div');
+                postEl.className = 'post';
+                postEl.dataset.postId = post.id;
+
+                const postLikes = likes[post.id];
+                const postComments = comments[post.id] || [];
+                const displayedComments = postComments.slice(0, 2);
+
+                postEl.innerHTML = `
+                    <div class="post-header">
+                        <div class="post-avatar">${post.user.emoji}</div>
+                        <div class="post-username">${post.user.name}</div>
+                        <button class="post-menu" onclick="alert('Options menu')">⋯</button>
+                    </div>
+                    <div class="post-image" style="background: linear-gradient(135deg, ${post.imageColor} 0%, ${shadeColor(post.imageColor, -20)} 100%)">
+                        ${post.imageEmoji}
+                    </div>
+                    <div class="post-actions">
+                        <button class="action-btn like-btn ${postLikes.liked ? 'liked' : ''}" data-post-id="${post.id}">
+                            ${postLikes.liked ? '❤️' : '🤍'}
+                        </button>
+                        <button class="action-btn" onclick="openCommentsModal('${post.id}')">💬</button>
+                        <button class="action-btn" onclick="alert('Share!')">✈️</button>
+                        <div class="spacer"></div>
+                        <button class="action-btn">🔖</button>
+                    </div>
+                    <div class="post-likes">${formatNumber(postLikes.count)} likes</div>
+                    <div class="post-caption">
+                        <span class="post-caption-username">${post.user.name}</span>
+                        ${post.caption}
+                    </div>
+                    <div class="post-comments">
+                        ${postComments.length > 2 ? `<button class="view-comments" onclick="openCommentsModal('${post.id}')">View all ${postComments.length} comments</button>` : ''}
+                        ${displayedComments.map(comment => `
+                            <div class="comment">
+                                <span class="comment-username">${comment.username}</span>
+                                <span class="comment-text">${comment.text}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="post-time">${post.hoursAgo} hours ago</div>
+                    <div class="add-comment">
+                        <input type="text" class="comment-input" placeholder="Add a comment..." data-post-id="${post.id}">
+                        <button class="post-comment-btn" disabled data-post-id="${post.id}">Post</button>
+                    </div>
+                `;
+
+                feed.appendChild(postEl);
+            });
+
+            // Add event listeners for likes
+            document.querySelectorAll('.like-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    toggleLike(btn.dataset.postId);
+                };
+            });
+
+            // Add event listeners for comments
+            document.querySelectorAll('.comment-input').forEach(input => {
+                input.oninput = () => {
+                    const postId = input.dataset.postId;
+                    const btn = document.querySelector(`.post-comment-btn[data-post-id="${postId}"]`);
+                    btn.disabled = input.value.trim().length === 0;
+                };
+
+                input.onkeypress = (e) => {
+                    if (e.key === 'Enter' && input.value.trim()) {
+                        addComment(input.dataset.postId, input.value.trim());
+                        input.value = '';
+                        const btn = document.querySelector(`.post-comment-btn[data-post-id="${input.dataset.postId}"]`);
+                        btn.disabled = true;
+                    }
+                };
+            });
+
+            document.querySelectorAll('.post-comment-btn').forEach(btn => {
+                btn.onclick = () => {
+                    const postId = btn.dataset.postId;
+                    const input = document.querySelector(`.comment-input[data-post-id="${postId}"]`);
+                    if (input.value.trim()) {
+                        addComment(postId, input.value.trim());
+                        input.value = '';
+                        btn.disabled = true;
+                    }
+                };
+            });
+        }
+
+        // Toggle like
+        function toggleLike(postId) {
+            const postLikes = likes[postId];
+            postLikes.liked = !postLikes.liked;
+            postLikes.count += postLikes.liked ? 1 : -1;
+
+            saveData(STORAGE_KEYS.LIKES, likes);
+
+            // Update UI
+            const btn = document.querySelector(`.like-btn[data-post-id="${postId}"]`);
+            if (postLikes.liked) {
+                btn.classList.add('liked');
+                btn.textContent = '❤️';
+            } else {
+                btn.classList.remove('liked');
+                btn.textContent = '🤍';
+            }
+
+            const likesEl = btn.closest('.post').querySelector('.post-likes');
+            likesEl.textContent = `${formatNumber(postLikes.count)} likes`;
+        }
+
+        // Add comment
+        function addComment(postId, text) {
+            const currentUser = users[0]; // Simulate current user
+            const comment = {
+                id: `comment_${Date.now()}`,
+                username: currentUser.name,
+                emoji: currentUser.emoji,
+                text: text,
+                time: 0 // Just now
+            };
+
+            if (!comments[postId]) {
+                comments[postId] = [];
+            }
+            comments[postId].unshift(comment);
+
+            saveData(STORAGE_KEYS.COMMENTS, comments);
+
+            // Update UI
+            const post = document.querySelector(`[data-post-id="${postId}"]`);
+            const commentsContainer = post.querySelector('.post-comments');
+
+            // Update view all comments button
+            const viewAllBtn = commentsContainer.querySelector('.view-comments');
+            if (viewAllBtn) {
+                viewAllBtn.textContent = `View all ${comments[postId].length} comments`;
+            } else if (comments[postId].length > 2) {
+                const btn = document.createElement('button');
+                btn.className = 'view-comments';
+                btn.textContent = `View all ${comments[postId].length} comments`;
+                btn.onclick = () => openCommentsModal(postId);
+                commentsContainer.insertBefore(btn, commentsContainer.firstChild);
+            }
+
+            // Update displayed comments
+            const existingComments = commentsContainer.querySelectorAll('.comment');
+            if (existingComments.length >= 2) {
+                existingComments[existingComments.length - 1].remove();
+            }
+
+            const commentEl = document.createElement('div');
+            commentEl.className = 'comment';
+            commentEl.innerHTML = `
+                <span class="comment-username">${comment.username}</span>
+                <span class="comment-text">${comment.text}</span>
+            `;
+
+            const firstComment = commentsContainer.querySelector('.comment');
+            if (firstComment) {
+                commentsContainer.insertBefore(commentEl, firstComment);
+            } else {
+                commentsContainer.appendChild(commentEl);
+            }
+
+            // Update modal if open
+            if (currentCommentsPostId === postId) {
+                renderCommentsModal(postId);
+            }
+        }
+
+        // Open comments modal
+        function openCommentsModal(postId) {
+            currentCommentsPostId = postId;
+            renderCommentsModal(postId);
+            document.getElementById('commentsModal').classList.add('active');
+        }
+
+        // Close comments modal
+        function closeCommentsModal() {
+            document.getElementById('commentsModal').classList.remove('active');
+            currentCommentsPostId = null;
+        }
+
+        // Render comments modal
+        function renderCommentsModal(postId) {
+            const postComments = comments[postId] || [];
+            const commentsList = document.getElementById('commentsList');
+
+            if (postComments.length === 0) {
+                commentsList.innerHTML = '<div style="text-align: center; color: #8e8e8e; padding: 40px;">No comments yet</div>';
+                return;
+            }
+
+            commentsList.innerHTML = postComments.map(comment => `
+                <div class="comment-item">
+                    <div class="comment-avatar">${comment.emoji}</div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <span class="comment-username">${comment.username}</span>
+                            <span class="comment-time">${comment.time === 0 ? 'Just now' : comment.time + 'h'}</span>
+                        </div>
+                        <div class="comment-text">${comment.text}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Format number
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            }
+            if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num.toString();
+        }
+
+        // Shade color
+        function shadeColor(color, percent) {
+            const num = parseInt(color.replace('#', ''), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+                (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+                (B < 255 ? B < 1 ? 0 : B : 255))
+                .toString(16).slice(1);
+        }
+
+        // Load more posts
+        function loadMore() {
+            if (isLoading) return;
+
+            isLoading = true;
+            document.getElementById('loading').style.display = 'block';
+
+            // Simulate loading delay
+            setTimeout(() => {
+                const newPosts = generatePosts(5);
+                renderPosts(newPosts);
+                currentPage++;
+                isLoading = false;
+                document.getElementById('loading').style.display = 'none';
+            }, 800);
+        }
+
+        // Infinite scroll
+        function handleScroll() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight;
+            const clientHeight = document.documentElement.clientHeight;
+
+            if (scrollTop + clientHeight >= scrollHeight - 500) {
+                loadMore();
+            }
+        }
+
+        // Initialize app
+        function init() {
+            initStories();
+            loadMore();
+
+            window.addEventListener('scroll', handleScroll);
+
+            // Close modal on background click
+            document.getElementById('commentsModal').onclick = (e) => {
+                if (e.target.id === 'commentsModal') {
+                    closeCommentsModal();
+                }
+            };
+        }
+
+        // Start app
+        init();
+    </script>
+</body>
+</html>

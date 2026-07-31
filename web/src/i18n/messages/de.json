@@ -31,7 +31,8 @@
     "allRightsReserved": "Alle Rechte vorbehalten.",
     "remove": "Entfernen",
     "add": "Hinzufügen",
-    "unlimited": "Unbegrenzt"
+    "unlimited": "Unbegrenzt",
+    "versions": "Versionen"
   },
   "landing": {
     "availablePlatforms": "Jetzt verfügbar auf Web, iOS und Android",
@@ -54,8 +55,6 @@
     "everythingYouNeedSubtitle": "Eine vollständige Plattform zum Erstellen, Iterieren und Veröffentlichen von Web-Apps",
     "featurePipeline": "KI-gestützte Pipeline",
     "featurePipelineDetail": "5-Phasen-Generierung: Erstellen, Validieren, Beheben, Verfeinern und Prüfen. Produktionsqualität jedes Mal.",
-    "featurePreview": "Live-Vorschau und Code-Editor",
-    "featurePreviewDetail": "Sieh deine App sofort in Aktion. Bearbeite den Code direkt oder beschreibe Änderungen in natürlicher Sprache.",
     "featureVersions": "Versionsverlauf",
     "featureVersionsDetail": "Jede Anpassung erstellt eine Version. Durchsuche den Verlauf, vergleiche Änderungen und stelle jederzeit frühere Versionen wieder her.",
     "featureDeploy": "Ein-Klick-Deployment",
@@ -87,7 +86,6 @@
     "readyToBuild": "Bereit loszulegen?",
     "readyToBuildSubtitle": "Schließe dich Tausenden von Kreativen an, die mit KI Ideen in Apps verwandeln.",
     "getStartedFree": "Loslegen — Kostenlos",
-    "mockCodeComment": "// KI-generiert, produktionsbereit",
     "mockChatPlaceholder": "Beschreibe Änderungen an deiner App..."
   },
   "create": {
@@ -210,5 +208,10 @@
     "notFound": "Projekt nicht gefunden",
     "initialGeneration": "Erste Generierung",
     "changesApplied": "Änderungen angewendet"
+  },
+  "versions": {
+    "empty": "Noch keine Versionen",
+    "count": "{count} Versionen",
+    "emptyHint": "Mache eine Änderung im Chat, um Versionen zu verfolgen."
   }
 }

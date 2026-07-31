@@ -4,97 +4,19 @@ import { useState, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useProjectStore } from '@/stores/projectStore';
 import { useGenerationStore } from '@/stores/generationStore';
-import { cn } from '@/lib/utils';
-import type { ChatMessage } from '@/types/project';
 
 interface ChatPanelProps {
   onTweak: (description: string) => void;
+  // Version load is handled by VersionsPopover in the toolbar now, but we
+  // keep the callback in the props so parent wiring doesn't have to change.
   onLoadVersion: (sha: string) => void;
   disabled?: boolean;
 }
 
-function formatDate(ts: number): string {
-  const d = new Date(ts);
-  const now = new Date();
-  const isToday = d.toDateString() === now.toDateString();
-  if (isToday) {
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
-  return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
-}
-
-function VersionCard({
-  msg,
-  isActive,
-  isReverting,
-  onLoad,
-  disabled,
-  t,
-}: {
-  msg: ChatMessage;
-  isActive: boolean;
-  isReverting: boolean;
-  onLoad: () => void;
-  disabled: boolean;
-  t: ReturnType<typeof useTranslations>;
-}) {
-  return (
-    <div
-      className={cn(
-        'rounded-lg px-3 py-2.5 text-xs border transition',
-        isActive
-          ? 'border-accent/40 bg-accent/5'
-          : 'border-border bg-surface hover:border-accent/20'
-      )}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <span
-            className={cn(
-              'flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded text-[10px] font-bold',
-              isActive
-                ? 'bg-accent text-white'
-                : 'bg-surface-hover text-subtle'
-            )}
-          >
-            {msg.versionNumber}
-          </span>
-          <span className="text-foreground truncate">
-            {msg.content}
-          </span>
-        </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="text-[10px] text-subtle">
-            {formatDate(msg.timestamp)}
-          </span>
-          {isActive ? (
-            <span className="text-[10px] text-accent font-medium px-1.5 py-0.5 bg-accent/10 rounded">
-              {t('common.current')}
-            </span>
-          ) : msg.versionSha && !disabled ? (
-            <button
-              onClick={onLoad}
-              disabled={isReverting}
-              className="text-[10px] text-accent font-medium px-1.5 py-0.5 bg-accent/10 hover:bg-accent/20 rounded transition disabled:opacity-50"
-            >
-              {isReverting ? '...' : t('common.load')}
-            </button>
-          ) : null}
-        </div>
-      </div>
-      {msg.versionSha && (
-        <span className="text-[9px] text-subtle font-mono mt-1 block">
-          {msg.versionSha.slice(0, 7)}
-        </span>
-      )}
-    </div>
-  );
-}
-
-export function ChatPanel({ onTweak, onLoadVersion, disabled }: ChatPanelProps) {
+export function ChatPanel({ onTweak, disabled }: ChatPanelProps) {
   const t = useTranslations();
   const [input, setInput] = useState('');
-  const { chatMessages, activeVersionSha, isReverting } = useProjectStore();
+  const { chatMessages, isReverting } = useProjectStore();
   const { isGenerating, phase, progressPercent, message } = useGenerationStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -119,6 +41,55 @@ export function ChatPanel({ onTweak, onLoadVersion, disabled }: ChatPanelProps) 
 
   return (
     <div className="flex flex-col h-full bg-card border-t border-border">
+      {/* Input — sits at the TOP of the chat panel so "Describe a change"
+          is immediately visible at the top of the panel rather than buried
+          below message history. shrink-0 so it can't be clipped. */}
+      <form onSubmit={handleSubmit} className="shrink-0 p-3 border-b border-border flex gap-2 bg-card">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder={disabled ? t('chat.readOnlyPlaceholder') : t('chat.placeholder')}
+          disabled={isGenerating || disabled || isReverting}
+          className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-sm focus:outline-none focus:border-accent transition disabled:opacity-50"
+        />
+        <button
+          type="submit"
+          disabled={!input.trim() || isGenerating || disabled || isReverting}
+          className="px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-medium rounded-lg transition disabled:opacity-50"
+        >
+          {t('common.send')}
+        </button>
+      </form>
+
+      {/* Pinned generation banner — sits between the input and the message
+          history while a tweak is in flight, so the user always sees what's
+          happening without having to scroll to the bottom of the chat. */}
+      {isGenerating && (
+        <div className="shrink-0 px-3 py-2.5 border-b border-border bg-accent/5">
+          <div className="flex items-center gap-2 text-xs">
+            <div className="w-3.5 h-3.5 border-2 border-accent border-t-transparent rounded-full animate-spin shrink-0" />
+            <span className="text-accent font-semibold">
+              {PHASE_LABELS[phase] || t('generation.working')}
+            </span>
+            {progressPercent > 0 && (
+              <span className="text-accent/70 font-medium">{Math.round(progressPercent)}%</span>
+            )}
+          </div>
+          {message && (
+            <p className="text-[11px] text-subtle mt-1 ml-5 truncate">{message}</p>
+          )}
+          {progressPercent > 0 && (
+            <div className="mt-2 h-1 bg-accent/10 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-accent transition-[width] duration-300 ease-out"
+                style={{ width: `${Math.min(100, Math.round(progressPercent))}%` }}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Messages */}
       <div className="flex-1 overflow-auto px-4 py-3 space-y-2.5 min-h-0">
         {chatMessages.length === 0 && !isGenerating && (
@@ -127,20 +98,11 @@ export function ChatPanel({ onTweak, onLoadVersion, disabled }: ChatPanelProps) 
           </p>
         )}
         {chatMessages.map((msg) => {
-          // Version card (assistant message with version info)
+          // Version-bearing assistant messages now live in the top-right
+          // Versions dropdown — skip rendering them here to keep the chat
+          // focused on the prompt-response conversation.
           if (msg.role === 'assistant' && msg.versionSha) {
-            const isActive = msg.versionSha === activeVersionSha;
-            return (
-              <VersionCard
-                key={msg.id}
-                msg={msg}
-                isActive={isActive}
-                isReverting={isReverting}
-                onLoad={() => onLoadVersion(msg.versionSha!)}
-                disabled={!!disabled}
-                t={t}
-              />
-            );
+            return null;
           }
 
           // Error message
@@ -177,43 +139,9 @@ export function ChatPanel({ onTweak, onLoadVersion, disabled }: ChatPanelProps) 
             </div>
           );
         })}
-        {isGenerating && (
-          <div className="bg-surface rounded-lg px-3 py-2.5 text-xs border border-border">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-              <span className="text-accent font-medium">
-                {PHASE_LABELS[phase] || t('generation.working')}
-              </span>
-              {progressPercent > 0 && (
-                <span className="text-subtle">{Math.round(progressPercent)}%</span>
-              )}
-            </div>
-            {message && (
-              <p className="text-subtle mt-1">{message}</p>
-            )}
-          </div>
-        )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <form onSubmit={handleSubmit} className="p-3 border-t border-border flex gap-2">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder={disabled ? t('chat.readOnlyPlaceholder') : t('chat.placeholder')}
-          disabled={isGenerating || disabled || isReverting}
-          className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-sm focus:outline-none focus:border-accent transition disabled:opacity-50"
-        />
-        <button
-          type="submit"
-          disabled={!input.trim() || isGenerating || disabled || isReverting}
-          className="px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-medium rounded-lg transition disabled:opacity-50"
-        >
-          {t('common.send')}
-        </button>
-      </form>
     </div>
   );
 }

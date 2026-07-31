@@ -16,8 +16,8 @@ android {
         applicationId = "com.kreativekoala.vibecoder"
         minSdk = 26
         targetSdk = 35
-        versionCode = 57
-        versionName = "2.1.6"
+        versionCode = 62
+        versionName = "2.3.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -151,6 +151,7 @@ dependencies {
 
     // PaywallKit
     implementation(project(":paywallkit"))
+    implementation(project(":crosspromokit"))
 
     // RatingKit
     implementation(project(":ratingkit"))

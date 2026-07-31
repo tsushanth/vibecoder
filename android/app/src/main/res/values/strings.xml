@@ -176,7 +176,7 @@
     <string name="project_detail_deploy_domain_suffix">.vibebuild.cc</string>
     <string name="project_detail_screen_title_fallback">Project</string>
     <string name="project_detail_created_at">Created %s</string>
-    <string name="project_detail_btn_preview">Preview App</string>
+    <string name="project_detail_btn_preview">Preview &amp; Tweak App</string>
     <string name="project_detail_badge_deployed">Deployed</string>
     <string name="project_detail_btn_deploying">Deploying…</string>
     <string name="project_detail_btn_deploy_to_web">Deploy to Web</string>

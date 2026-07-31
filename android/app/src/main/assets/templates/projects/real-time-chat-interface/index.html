@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Header -->
+        <header class="chat-header">
+            <div class="header-content">
+                <div class="avatar">👤</div>
+                <div class="contact-info">
+                    <h1 class="contact-name">Chat Room</h1>
+                    <p class="contact-status" id="typingStatus">online</p>
+                </div>
+            </div>
+            <button class="clear-btn" id="clearChat" title="Clear chat">🗑️</button>
+        </header>
+
+        <!-- Messages Area -->
+        <div class="messages-area" id="messagesArea">
+            <div class="date-divider">
+                <span id="todayDate"></span>
+            </div>
+        </div>
+
+        <!-- Typing Indicator -->
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area">
+            <!-- Emoji Picker -->
+            <div class="emoji-picker" id="emojiPicker">
+                <div class="emoji-header">
+                    <span class="emoji-category active" data-category="smileys">😀</span>
+                    <span class="emoji-category" data-category="animals">🐶</span>
+                    <span class="emoji-category" data-category="food">🍕</span>
+                    <span class="emoji-category" data-category="activities">⚽</span>
+                    <span class="emoji-category" data-category="objects">💡</span>
+                    <span class="emoji-category" data-category="symbols">❤️</span>
+                </div>
+                <div class="emoji-grid" id="emojiGrid"></div>
+            </div>
+
+            <!-- File Preview -->
+            <div class="file-preview" id="filePreview">
+                <div class="preview-content">
+                    <img id="previewImage" alt="Preview">
+                    <div id="previewFile" class="file-info">
+                        <span class="file-icon">📎</span>
+                        <span id="fileName"></span>
+                    </div>
+                </div>
+                <button class="remove-file" id="removeFile">✕</button>
+            </div>
+
+            <!-- Input Controls -->
+            <div class="input-controls">
+                <button class="icon-btn" id="emojiBtn" title="Emoji">😊</button>
+                <label class="icon-btn" id="attachBtn" title="Attach file">
+                    📎
+                    <input type="file" id="fileInput" accept="image/*,application/pdf,.doc,.docx,.txt" hidden>
+                </label>
+                <input type="text" id="messageInput" placeholder="Type a message" autocomplete="off">
+                <button class="send-btn" id="sendBtn">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="currentColor" d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

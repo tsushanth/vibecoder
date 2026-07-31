@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plantopia — Plant Care Companion</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Splash / Loading -->
+    <div id="splash" class="splash">
+        <div class="splash-content">
+            <svg class="splash-logo" viewBox="0 0 120 120" width="100" height="100">
+                <circle cx="60" cy="60" r="55" fill="#1a472a" stroke="#2d6a4f" stroke-width="3"/>
+                <path d="M60 85 L60 50" stroke="#52b788" stroke-width="3" stroke-linecap="round"/>
+                <path d="M60 50 Q45 30 35 35 Q30 45 50 50" fill="#52b788"/>
+                <path d="M60 55 Q75 35 80 40 Q82 52 62 55" fill="#40916c"/>
+                <path d="M60 65 Q42 50 38 55 Q37 65 55 65" fill="#74c69d"/>
+                <circle cx="60" cy="28" r="6" fill="#f4d35e" opacity="0.9"/>
+            </svg>
+            <h1 class="splash-title">Plantopia</h1>
+            <p class="splash-sub">Your Plant Care Companion</p>
+            <div class="splash-loader"><div class="loader-bar"></div></div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="app hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <svg class="header-icon" viewBox="0 0 40 40" width="32" height="32">
+                    <circle cx="20" cy="20" r="18" fill="#1a472a"/>
+                    <path d="M20 30 L20 18" stroke="#52b788" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M20 18 Q13 8 10 12 Q9 18 18 20" fill="#52b788"/>
+                    <path d="M20 22 Q27 14 29 17 Q29 24 22 23" fill="#40916c"/>
+                </svg>
+                <h1 class="header-title">Plantopia</h1>
+            </div>
+            <div class="header-right">
+            <button class="header-btn" id="cameraBtn" aria-label="Identify Plant">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                </svg>
+            </button>
+            <button class="header-btn" id="settingsBtn" aria-label="Settings">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4m-9-9h4m14 0h4m-3.3-6.7l-2.8 2.8m-8.5 8.5l-2.8 2.8m0-14.1l2.8 2.8m8.5 8.5l2.8 2.8"/>
+                </svg>
+            </button>
+            </div>
+        </header>
+
+        <!-- Tab Content Area -->
+        <main class="main-content" id="mainContent">
+            <!-- My Plants Tab -->
+            <section class="tab-panel active" id="panelMyPlants">
+                <div class="panel-header">
+                    <h2>My Plants</h2>
+                    <button class="btn-primary btn-sm" id="addPlantBtn">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Add Plant
+                    </button>
+                </div>
+                <div id="myPlantsGrid" class="plants-grid">
+                    <!-- Populated by JS -->
+                </div>
+                <div id="emptyMyPlants" class="empty-state hidden">
+                    <svg viewBox="0 0 100 100" width="80" height="80">
+                        <rect x="25" y="50" width="50" height="40" rx="5" fill="#2d6a4f" opacity="0.3"/>
+                        <path d="M50 50 Q35 25 30 32 Q28 42 48 48" fill="#52b788" opacity="0.5"/>
+                        <path d="M50 50 Q65 25 68 32 Q70 42 52 48" fill="#40916c" opacity="0.5"/>
+                        <line x1="50" y1="50" x2="50" y2="35" stroke="#74c69d" stroke-width="2" opacity="0.5"/>
+                    </svg>
+                    <p>No plants yet!</p>
+                    <p class="text-sm">Tap "Add Plant" to start your garden</p>
+                </div>
+            </section>
+
+            <!-- Plant Library Tab -->
+            <section class="tab-panel" id="panelLibrary">
+                <div class="panel-header">
+                    <h2>Plant Library</h2>
+                </div>
+                <div class="search-bar">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="librarySearch" placeholder="Search plants..." autocomplete="off">
+                </div>
+                <div class="filter-chips" id="libraryFilters">
+                    <button class="chip active" data-filter="all">All</button>
+                    <button class="chip" data-filter="indoor">Indoor</button>
+                    <button class="chip" data-filter="outdoor">Outdoor</button>
+                    <button class="chip" data-filter="succulent">Succulents</button>
+                    <button class="chip" data-filter="flowering">Flowering</button>
+                    <button class="chip" data-filter="herb">Herbs</button>
+                </div>
+                <div id="libraryGrid" class="library-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- Schedule Tab -->
+            <section class="tab-panel" id="panelSchedule">
+                <div class="panel-header">
+                    <h2>Watering Schedule</h2>
+                </div>
+                <div class="schedule-today" id="scheduleToday">
+                    <h3>Today's Tasks</h3>
+                    <div id="todayTasks" class="task-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <div class="schedule-upcoming">
+                    <h3>Upcoming</h3>
+                    <div id="upcomingTasks" class="task-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <div id="emptySchedule" class="empty-state hidden">
+                    <svg viewBox="0 0 100 100" width="80" height="80">
+                        <rect x="20" y="15" width="60" height="70" rx="8" fill="#2d6a4f" opacity="0.3"/>
+                        <line x1="30" y1="35" x2="70" y2="35" stroke="#52b788" stroke-width="2" opacity="0.4"/>
+                        <line x1="30" y1="50" x2="70" y2="50" stroke="#52b788" stroke-width="2" opacity="0.4"/>
+                        <line x1="30" y1="65" x2="55" y2="65" stroke="#52b788" stroke-width="2" opacity="0.4"/>
+                    </svg>
+                    <p>No watering tasks</p>
+                    <p class="text-sm">Add plants to see their schedules</p>
+                </div>
+            </section>
+
+            <!-- Journal Tab -->
+            <section class="tab-panel" id="panelJournal">
+                <div class="panel-header">
+                    <h2>Growth Journal</h2>
+                    <button class="btn-primary btn-sm" id="addJournalBtn">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        New Entry
+                    </button>
+                </div>
+                <div id="journalEntries" class="journal-list">
+                    <!-- Populated by JS -->
+                </div>
+                <div id="emptyJournal" class="empty-state hidden">
+                    <svg viewBox="0 0 100 100" width="80" height="80">
+                        <rect x="20" y="10" width="60" height="75" rx="5" fill="#2d6a4f" opacity="0.3"/>
+                        <circle cx="50" cy="40" r="15" fill="#52b788" opacity="0.3"/>
+                        <line x1="30" y1="65" x2="70" y2="65" stroke="#74c69d" stroke-width="2" opacity="0.4"/>
+                        <line x1="30" y1="75" x2="55" y2="75" stroke="#74c69d" stroke-width="2" opacity="0.4"/>
+                    </svg>
+                    <p>No journal entries yet</p>
+                    <p class="text-sm">Document your plants' growth journey</p>
+                </div>
+            </section>
+
+            <!-- Care Tips Tab -->
+            <section class="tab-panel" id="panelTips">
+                <div class="panel-header">
+                    <h2>Care Tips</h2>
+                </div>
+                <div class="tips-categories" id="tipsCategoryList">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-tab="panelMyPlants">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22 L12 12"/>
+                    <path d="M12 12 Q5 2 3 6 Q2 12 10 13" fill="currentColor" opacity="0.3"/>
+                    <path d="M12 12 Q19 2 21 6 Q22 12 14 13" fill="currentColor" opacity="0.3"/>
+                </svg>
+                <span>My Plants</span>
+            </button>
+            <button class="nav-item" data-tab="panelLibrary">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+                </svg>
+                <span>Library</span>
+            </button>
+            <button class="nav-item" data-tab="panelSchedule">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22c5-3 10-7 10-13a10 10 0 00-20 0c0 6 5 10 10 13z" opacity="0.2" fill="currentColor"/>
+                    <path d="M12 6v6l4 2"/>
+                    <circle cx="12" cy="12" r="10"/>
+                </svg>
+                <span>Schedule</span>
+            </button>
+            <button class="nav-item" data-tab="panelJournal">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
+                </svg>
+                <span>Journal</span>
+            </button>
+            <button class="nav-item" data-tab="panelTips">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><circle cx="12" cy="12" r="10"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <span>Tips</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- Add/Edit Plant Modal -->
+    <div class="modal-overlay hidden" id="modalAddPlant">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="addPlantTitle">Add Plant</h3>
+                <button class="modal-close" data-close="modalAddPlant">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="plantForm">
+                    <input type="hidden" id="plantEditId" value="">
+                    <div class="form-group">
+                        <label for="plantName">Plant Name *</label>
+                        <input type="text" id="plantName" required placeholder="e.g. My Monstera">
+                    </div>
+                    <div class="form-group">
+                        <label for="plantSpecies">Species</label>
+                        <select id="plantSpecies">
+                            <option value="">Select species (optional)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="plantLocation">Location</label>
+                        <select id="plantLocation">
+                            <option value="indoor">Indoor</option>
+                            <option value="outdoor">Outdoor</option>
+                            <option value="balcony">Balcony</option>
+                            <option value="windowsill">Windowsill</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="plantWaterDays">Watering Interval (days) *</label>
+                        <input type="number" id="plantWaterDays" required min="1" max="60" value="7">
+                    </div>
+                    <div class="form-group">
+                        <label for="plantLastWatered">Last Watered</label>
+                        <input type="date" id="plantLastWatered">
+                    </div>
+                    <div class="form-group">
+                        <label for="plantNotes">Notes</label>
+                        <textarea id="plantNotes" rows="3" placeholder="Any special care notes..."></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary btn-full" id="plantFormSubmit">Add Plant</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plant Detail Modal -->
+    <div class="modal-overlay hidden" id="modalPlantDetail">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h3 id="detailPlantName">Plant Name</h3>
+                <button class="modal-close" data-close="modalPlantDetail">&times;</button>
+            </div>
+            <div class="modal-body" id="plantDetailBody">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Library Detail Modal -->
+    <div class="modal-overlay hidden" id="modalLibraryDetail">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h3 id="libDetailName">Plant Name</h3>
+                <button class="modal-close" data-close="modalLibraryDetail">&times;</button>
+            </div>
+            <div class="modal-body" id="libraryDetailBody">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Journal Entry Modal -->
+    <div class="modal-overlay hidden" id="modalJournalEntry">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>New Journal Entry</h3>
+                <button class="modal-close" data-close="modalJournalEntry">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="journalForm">
+                    <div class="form-group">
+                        <label for="journalPlant">Plant *</label>
+                        <select id="journalPlant" required>
+                            <option value="">Select a plant</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="journalDate">Date</label>
+                        <input type="date" id="journalDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="journalMood">Plant Health</label>
+                        <div class="mood-selector" id="journalMood">
+                            <button type="button" class="mood-btn" data-mood="thriving" title="Thriving">🌿</button>
+                            <button type="button" class="mood-btn" data-mood="good" title="Good">🌱</button>
+                            <button type="button" class="mood-btn active" data-mood="okay" title="Okay">☘️</button>
+                            <button type="button" class="mood-btn" data-mood="struggling" title="Struggling">🍂</button>
+                            <button type="button" class="mood-btn" data-mood="critical" title="Critical">🥀</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="journalPhoto">Photo</label>
+                        <div class="photo-upload" id="photoUpload">
+                            <input type="file" id="journalPhoto" accept="image/*" class="hidden">
+                            <div class="photo-preview hidden" id="photoPreview">
+                                <img id="photoPreviewImg" src="" alt="Preview">
+                                <button type="button" class="photo-remove" id="photoRemoveBtn">&times;</button>
+                            </div>
+                            <button type="button" class="photo-add-btn" id="photoAddBtn">
+                                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
+                                </svg>
+                                <span>Add Photo</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="journalNotes">Notes *</label>
+                        <textarea id="journalNotes" rows="4" required placeholder="How is your plant doing? Any changes noticed?"></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary btn-full">Save Entry</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay hidden" id="modalSettings">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Settings</h3>
+                <button class="modal-close" data-close="modalSettings">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-group">
+                    <div class="setting-row">
+                        <div>
+                            <strong>Dark Mode</strong>
+                            <p class="text-sm">Switch to dark theme</p>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="darkModeToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-row">
+                        <div>
+                            <strong>Notification Sound</strong>
+                            <p class="text-sm">Play sound for reminders</p>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="notifSoundToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="settings-group">
+                    <h4>Data Management</h4>
+                    <button class="btn-outline btn-full" id="exportDataBtn">Export Data</button>
+                    <button class="btn-danger btn-full" id="clearDataBtn" style="margin-top:8px;">Clear All Data</button>
+                </div>
+                <p class="text-sm text-center" style="margin-top:16px;opacity:0.6;">Plantopia v1.0 — Made with 🌱</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plant Identifier Modal -->
+    <div class="modal-overlay hidden" id="modalIdentify">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h3>Identify Plant</h3>
+                <button class="modal-close" data-close="modalIdentify">&times;</button>
+            </div>
+            <div class="modal-body" id="identifyBody">
+                <div id="identifyStep1" class="identify-step">
+                    <p class="identify-intro">Take a photo or upload an image of a plant to identify it using our library.</p>
+                    <input type="file" id="identifyPhotoInput" accept="image/*" capture="environment" class="hidden">
+                    <div class="identify-capture-area" id="identifyCaptureArea">
+                        <div id="identifyPreview" class="identify-preview hidden">
+                            <img id="identifyPreviewImg" src="" alt="Captured plant">
+                        </div>
+                        <div id="identifyCapturePrompt" class="identify-capture-prompt">
+                            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                                <circle cx="12" cy="13" r="4"/>
+                            </svg>
+                            <span>Tap to capture or upload a plant photo</span>
+                        </div>
+                    </div>
+                    <div id="identifyPhotoActions" class="identify-photo-actions hidden">
+                        <button class="btn-outline btn-sm" id="identifyRetakeBtn">Retake</button>
+                        <button class="btn-primary btn-sm" id="identifyNextBtn">Next: Describe Plant</button>
+                    </div>
+                </div>
+                <div id="identifyStep2" class="identify-step hidden">
+                    <div class="identify-thumb-row">
+                        <img id="identifyThumb" class="identify-thumb" src="" alt="">
+                        <span>Describe what you see:</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Leaf Type</label>
+                        <div class="identify-options" id="idLeafType">
+                            <button type="button" class="id-opt" data-val="broad">Broad & Flat</button>
+                            <button type="button" class="id-opt" data-val="needle">Needle-like</button>
+                            <button type="button" class="id-opt" data-val="thick">Thick & Fleshy</button>
+                            <button type="button" class="id-opt" data-val="grass">Grass-like</button>
+                            <button type="button" class="id-opt" data-val="frond">Feathery / Fronds</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Plant Size</label>
+                        <div class="identify-options" id="idSize">
+                            <button type="button" class="id-opt" data-val="small">Small (< 1ft)</button>
+                            <button type="button" class="id-opt" data-val="medium">Medium (1-3ft)</button>
+                            <button type="button" class="id-opt" data-val="large">Large (3ft+)</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Has Flowers?</label>
+                        <div class="identify-options" id="idFlowers">
+                            <button type="button" class="id-opt" data-val="yes">Yes</button>
+                            <button type="button" class="id-opt" data-val="no">No</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Where is it growing?</label>
+                        <div class="identify-options" id="idLocation">
+                            <button type="button" class="id-opt" data-val="indoor">Indoors</button>
+                            <button type="button" class="id-opt" data-val="outdoor">Outdoors</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Primary Color</label>
+                        <div class="identify-options" id="idColor">
+                            <button type="button" class="id-opt" data-val="green">Green</button>
+                            <button type="button" class="id-opt" data-val="variegated">Variegated</button>
+                            <button type="button" class="id-opt" data-val="purple">Purple / Red</button>
+                            <button type="button" class="id-opt" data-val="silver">Silver / Gray</button>
+                        </div>
+                    </div>
+                    <button class="btn-primary btn-full" id="identifySubmitBtn">Identify Plant</button>
+                </div>
+                <div id="identifyStep3" class="identify-step hidden">
+                    <div class="identify-results-header">
+                        <img id="identifyResultThumb" class="identify-thumb" src="" alt="">
+                        <div>
+                            <h4>Possible Matches</h4>
+                            <p class="text-sm" style="color:var(--text-light)">Based on your description</p>
+                        </div>
+                    </div>
+                    <div id="identifyResults" class="identify-results"></div>
+                    <button class="btn-outline btn-full" id="identifyBackBtn" style="margin-top:12px;">Try Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <span id="toastMsg"></span>
+    </div>
+
+    <!-- Confirm Dialog -->
+    <div class="modal-overlay hidden" id="modalConfirm">
+        <div class="modal modal-sm">
+            <div class="modal-body" style="text-align:center;padding:24px;">
+                <p id="confirmMsg" style="margin-bottom:20px;font-size:1.05rem;"></p>
+                <div style="display:flex;gap:12px;justify-content:center;">
+                    <button class="btn-outline" id="confirmCancel">Cancel</button>
+                    <button class="btn-danger" id="confirmOk">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -31,7 +31,8 @@
     "allRightsReserved": "Todos los derechos reservados.",
     "remove": "Eliminar",
     "add": "Añadir",
-    "unlimited": "Ilimitado"
+    "unlimited": "Ilimitado",
+    "versions": "Versiones"
   },
   "landing": {
     "availablePlatforms": "Disponible en Web, iOS y Android",
@@ -54,8 +55,6 @@
     "everythingYouNeedSubtitle": "Una plataforma completa para crear, iterar y publicar apps web",
     "featurePipeline": "Pipeline con IA",
     "featurePipelineDetail": "Generación en 5 fases: crear, validar, corregir, pulir y verificar. Calidad de producción siempre.",
-    "featurePreview": "Vista previa y editor de código",
-    "featurePreviewDetail": "Mira tu app funcionando al instante. Edita el código directamente o usa lenguaje natural para describir cambios.",
     "featureVersions": "Historial de versiones",
     "featureVersionsDetail": "Cada ajuste crea una versión. Navega tu historial, compara cambios y revierte en cualquier momento.",
     "featureDeploy": "Despliegue en un clic",
@@ -87,7 +86,6 @@
     "readyToBuild": "¿Listo para crear?",
     "readyToBuildSubtitle": "Únete a miles de creadores que convierten ideas en apps con IA.",
     "getStartedFree": "Comenzar — Gratis",
-    "mockCodeComment": "// Generado por IA, listo para producción",
     "mockChatPlaceholder": "Describe los cambios para tu app..."
   },
   "create": {
@@ -210,5 +208,10 @@
     "notFound": "Proyecto no encontrado",
     "initialGeneration": "Generación inicial",
     "changesApplied": "Cambios aplicados"
+  },
+  "versions": {
+    "empty": "Aún no hay versiones",
+    "count": "{count} versiones",
+    "emptyHint": "Haz un cambio en el chat para empezar a rastrear versiones."
   }
 }

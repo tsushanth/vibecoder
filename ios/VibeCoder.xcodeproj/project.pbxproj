@@ -7,11 +7,22 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0140C152DFDB77CBAC12F900 /* AdServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA493087611CB389B5859871 /* AdServices.framework */; };
+		03F0E24E82DF50B70AE38157 /* ProjectPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3871DF8937C264389197CA1D /* ProjectPreviewView.swift */; };
+		0D09D9F6189E7808DB7C9512 /* AdServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6921AE24696FBE1B4B747A72 /* AdServices.framework */; };
+		1207C15D8AF332C54077037D /* BuildProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDABB336D3A792C3DC0FF27B /* BuildProgressView.swift */; };
+		12FF11BF904D6C92440F6C50 /* MyProjectsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBCE2F1851A3BE261B116895 /* MyProjectsView.swift */; };
+		1FF268428B3B80EE8F60BCAF /* BuildIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81E543EA32067FE8FBAD16C2 /* BuildIdentity.swift */; };
+		2EDE519B78ED4CED82058477 /* LessonEditStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE1BCCEC62AA489AA24F2463 /* LessonEditStore.swift */; };
+		334E067FF72CC8046EC5299B /* BuildLimitTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66617770456B8196EF22450 /* BuildLimitTracker.swift */; };
+		34FCE06CD9026552C08B2C43 /* BuildModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D29BCEF15E351E8BCC3F507 /* BuildModels.swift */; };
 		3695BC2AB12B7F49E5516933 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E089AB0FCED2458DE60648B7 /* Foundation.framework */; };
 		5EADBF9A4F6492FF8D96896F /* catalog.json in Resources */ = {isa = PBXBuildFile; fileRef = 508ED5F3A2CB6DE2DFB3B466 /* catalog.json */; };
+		6067A8CD2FB1AD8DDCC4EE63 /* VibeBuildAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEFC6BC5817BD30A7E19EF4A /* VibeBuildAPI.swift */; };
+		6F0F6FD3B6CC4D298C83668E /* PremiumManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEACD9F6D934849879D6645 /* PremiumManager.swift */; };
+		731C8907D4FC7736B116A094 /* SSEClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB21C05ED594C9089D9280A3 /* SSEClient.swift */; };
 		7CD7E0DB8711F0C61A4F843D /* LessonDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87442C049C7606E22540A952 /* LessonDetailView.swift */; };
-		8DC0989E0E659A67EDE5D590 /* AttributionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EABD0DF335BADE7D5EE7DB9 /* AttributionService.swift */; };
+		85466C4C67786B1B3DB6EE02 /* PromoOfferKit in Frameworks */ = {isa = PBXBuildFile; productRef = 2CCC1173B2276093013012E7 /* PromoOfferKit */; };
+		8FAD57C9A777BD55A4B479B9 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2036C22016DFA08A9A100358 /* ImagePicker.swift */; };
 		A001 /* VibeCoderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001 /* VibeCoderApp.swift */; };
 		A002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B002 /* ContentView.swift */; };
 		A003 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B003 /* AuthManager.swift */; };
@@ -31,13 +42,20 @@
 		A030 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = P006 /* ZIPFoundation */; };
 		A034 /* PaywallCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B027 /* PaywallCoordinator.swift */; };
 		A035 /* WinbackOfferView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B028 /* WinbackOfferView.swift */; };
+		B5FA25BD85DA32E5B5402EB5 /* EULAGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D321A465FC01E5BC688015E6 /* EULAGate.swift */; };
 		B77A46B0DCD0557AEA08FD83 /* CatalogManifest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEC0AB220640094313AD2B0E /* CatalogManifest.swift */; };
 		D2D12B4A63E6910827565909 /* ScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECF05AFA3D780D6BFCD1205E /* ScreenshotTests.swift */; };
+		D7C09F1076B83B6C52C53FAF /* AttributionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69597D8FB4C70A34499E8FA8 /* AttributionService.swift */; };
 		DAAD24228BB668EF16069A13 /* CatalogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11B61A9C52D868146E50252 /* CatalogView.swift */; };
+		DEFEA9F5A5E4447B9BF79B74 /* RemotePaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE1FF73EEA1147C5A003AFE7 /* RemotePaywallView.swift */; };
 		E4900943324A6C01481FA30F /* SandboxedPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8731E8106D6FD5FD91AAAD5 /* SandboxedPreviewView.swift */; };
+		E5F7EE210BAFAC6B6A2900B4 /* VersionHistorySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0134CD8AC4627D738CC6FB /* VersionHistorySheet.swift */; };
+		ECE6EC4C062B2DB91A668DB8 /* BuildHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AF56295C19537091E949555 /* BuildHomeView.swift */; };
+		F05E009ABC642EAB2A2F0E1C /* VoiceDictation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C26C5240D0F5B3DE44BD2AB /* VoiceDictation.swift */; };
 		F1F0F0ACACACD2CAB6E78CCF /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6222A441E08F11FDECE00A6C /* SnapshotHelper.swift */; };
 		F391FB6B3BCB3A68B3EFF998 /* projects in Resources */ = {isa = PBXBuildFile; fileRef = BC694E05DFF8D2B6A635F62F /* projects */; };
 		FA36AC616E1D7AEA0A5B24E8 /* CodeReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82A407B4B02484A2788C4BF1 /* CodeReaderView.swift */; };
+		PKB001 /* PaywallKit in Frameworks */ = {isa = PBXBuildFile; productRef = PKP001 /* PaywallKit */; };
 		RKB001 /* RatingKit in Frameworks */ = {isa = PBXBuildFile; productRef = RKP001 /* RatingKit */; };
 /* End PBXBuildFile section */
 
@@ -52,12 +70,19 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		4EABD0DF335BADE7D5EE7DB9 /* AttributionService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AttributionService.swift; path = ../../../../Users/sushanthtiruvaipati/Documents/GitHub/VibeBuild/ios/VibeCoder/Monetization/AttributionService.swift; sourceTree = "<group>"; };
+		0D29BCEF15E351E8BCC3F507 /* BuildModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BuildModels.swift; sourceTree = "<group>"; };
+		2036C22016DFA08A9A100358 /* ImagePicker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
+		3871DF8937C264389197CA1D /* ProjectPreviewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProjectPreviewView.swift; sourceTree = "<group>"; };
 		508ED5F3A2CB6DE2DFB3B466 /* catalog.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = catalog.json; sourceTree = "<group>"; };
 		6222A441E08F11FDECE00A6C /* SnapshotHelper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SnapshotHelper.swift; sourceTree = "<group>"; };
+		6921AE24696FBE1B4B747A72 /* AdServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AdServices.framework; path = System/Library/Frameworks/AdServices.framework; sourceTree = SDKROOT; };
+		69597D8FB4C70A34499E8FA8 /* AttributionService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AttributionService.swift; sourceTree = "<group>"; };
+		6AF56295C19537091E949555 /* BuildHomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BuildHomeView.swift; sourceTree = "<group>"; };
+		81E543EA32067FE8FBAD16C2 /* BuildIdentity.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BuildIdentity.swift; sourceTree = "<group>"; };
 		82A407B4B02484A2788C4BF1 /* CodeReaderView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CodeReaderView.swift; sourceTree = "<group>"; };
 		87442C049C7606E22540A952 /* LessonDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LessonDetailView.swift; sourceTree = "<group>"; };
 		88B736A52F43CBF3007E4B75 /* VibeCoder.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VibeCoder.entitlements; sourceTree = "<group>"; };
+		9C26C5240D0F5B3DE44BD2AB /* VoiceDictation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoiceDictation.swift; sourceTree = "<group>"; };
 		AEC0AB220640094313AD2B0E /* CatalogManifest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CatalogManifest.swift; sourceTree = "<group>"; };
 		B001 /* VibeCoderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VibeCoderApp.swift; sourceTree = "<group>"; };
 		B002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -73,15 +98,24 @@
 		B028 /* WinbackOfferView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WinbackOfferView.swift; sourceTree = "<group>"; };
 		B8731E8106D6FD5FD91AAAD5 /* SandboxedPreviewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SandboxedPreviewView.swift; sourceTree = "<group>"; };
 		BC694E05DFF8D2B6A635F62F /* projects */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder; path = projects; sourceTree = "<group>"; };
+		BE1BCCEC62AA489AA24F2463 /* LessonEditStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LessonEditStore.swift; sourceTree = "<group>"; };
+		BE1FF73EEA1147C5A003AFE7 /* RemotePaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemotePaywallView.swift; sourceTree = "<group>"; };
+		BEFC6BC5817BD30A7E19EF4A /* VibeBuildAPI.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VibeBuildAPI.swift; sourceTree = "<group>"; };
 		C001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C002 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		C003 /* VibeBuild.storekit */ = {isa = PBXFileReference; lastKnownFileType = com.apple.storekit.configuration; path = VibeBuild.storekit; sourceTree = "<group>"; };
-		CA493087611CB389B5859871 /* AdServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AdServices.framework; path = System/Library/Frameworks/AdServices.framework; sourceTree = SDKROOT; };
 		D001 /* VibeCoder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VibeCoder.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D321A465FC01E5BC688015E6 /* EULAGate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EULAGate.swift; sourceTree = "<group>"; };
+		DB21C05ED594C9089D9280A3 /* SSEClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SSEClient.swift; sourceTree = "<group>"; };
 		E089AB0FCED2458DE60648B7 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		EA0134CD8AC4627D738CC6FB /* VersionHistorySheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VersionHistorySheet.swift; sourceTree = "<group>"; };
+		EBCE2F1851A3BE261B116895 /* MyProjectsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MyProjectsView.swift; sourceTree = "<group>"; };
 		ECF05AFA3D780D6BFCD1205E /* ScreenshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScreenshotTests.swift; sourceTree = "<group>"; };
 		F04D6FF414BAB1101CE6BD22 /* VibeCoderUITests */ = {isa = PBXFileReference; includeInIndex = 0; path = VibeCoderUITests; sourceTree = BUILT_PRODUCTS_DIR; };
 		F11B61A9C52D868146E50252 /* CatalogView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CatalogView.swift; sourceTree = "<group>"; };
+		F66617770456B8196EF22450 /* BuildLimitTracker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BuildLimitTracker.swift; sourceTree = "<group>"; };
+		FDABB336D3A792C3DC0FF27B /* BuildProgressView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BuildProgressView.swift; sourceTree = "<group>"; };
+		FEEACD9F6D934849879D6645 /* PremiumManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,7 +138,9 @@
 				A020 /* GoogleSignInSwift in Frameworks */,
 				A030 /* ZIPFoundation in Frameworks */,
 				RKB001 /* RatingKit in Frameworks */,
-				0140C152DFDB77CBAC12F900 /* AdServices.framework in Frameworks */,
+				PKB001 /* PaywallKit in Frameworks */,
+				0D09D9F6189E7808DB7C9512 /* AdServices.framework in Frameworks */,
+				85466C4C67786B1B3DB6EE02 /* PromoOfferKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -115,7 +151,7 @@
 			isa = PBXGroup;
 			children = (
 				D3B7AA612A2D60C53851FBD4 /* iOS */,
-				CA493087611CB389B5859871 /* AdServices.framework */,
+				6921AE24696FBE1B4B747A72 /* AdServices.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -139,11 +175,33 @@
 			path = VibeCoderUITests;
 			sourceTree = "<group>";
 		};
+		BBED1781704DB7095AA802E4 /* Build */ = {
+			isa = PBXGroup;
+			children = (
+				0D29BCEF15E351E8BCC3F507 /* BuildModels.swift */,
+				DB21C05ED594C9089D9280A3 /* SSEClient.swift */,
+				BEFC6BC5817BD30A7E19EF4A /* VibeBuildAPI.swift */,
+				F66617770456B8196EF22450 /* BuildLimitTracker.swift */,
+				D321A465FC01E5BC688015E6 /* EULAGate.swift */,
+				FDABB336D3A792C3DC0FF27B /* BuildProgressView.swift */,
+				6AF56295C19537091E949555 /* BuildHomeView.swift */,
+				3871DF8937C264389197CA1D /* ProjectPreviewView.swift */,
+				EBCE2F1851A3BE261B116895 /* MyProjectsView.swift */,
+				81E543EA32067FE8FBAD16C2 /* BuildIdentity.swift */,
+				9C26C5240D0F5B3DE44BD2AB /* VoiceDictation.swift */,
+				EA0134CD8AC4627D738CC6FB /* VersionHistorySheet.swift */,
+				2036C22016DFA08A9A100358 /* ImagePicker.swift */,
+			);
+			name = Build;
+			path = Build;
+			sourceTree = "<group>";
+		};
 		CD09EF77BD59D023F34C9817 /* Lesson */ = {
 			isa = PBXGroup;
 			children = (
 				87442C049C7606E22540A952 /* LessonDetailView.swift */,
 				82A407B4B02484A2788C4BF1 /* CodeReaderView.swift */,
+				BE1BCCEC62AA489AA24F2463 /* LessonEditStore.swift */,
 				B8731E8106D6FD5FD91AAAD5 /* SandboxedPreviewView.swift */,
 			);
 			name = Lesson;
@@ -184,6 +242,7 @@
 				F015 /* Shared */,
 				680AE1945983350AE54E32EE /* Catalog */,
 				CD09EF77BD59D023F34C9817 /* Lesson */,
+				BBED1781704DB7095AA802E4 /* Build */,
 			);
 			path = VibeCoder;
 			sourceTree = "<group>";
@@ -237,10 +296,12 @@
 			isa = PBXGroup;
 			children = (
 				B017 /* SubscriptionManager.swift */,
+				FEEACD9F6D934849879D6645 /* PremiumManager.swift */,
+				BE1FF73EEA1147C5A003AFE7 /* RemotePaywallView.swift */,
 				B018 /* SubscriptionPlansView.swift */,
 				B027 /* PaywallCoordinator.swift */,
 				B028 /* WinbackOfferView.swift */,
-				4EABD0DF335BADE7D5EE7DB9 /* AttributionService.swift */,
+				69597D8FB4C70A34499E8FA8 /* AttributionService.swift */,
 			);
 			path = Monetization;
 			sourceTree = "<group>";
@@ -304,6 +365,8 @@
 				P005 /* GoogleSignInSwift */,
 				P006 /* ZIPFoundation */,
 				RKP001 /* RatingKit */,
+				PKP001 /* PaywallKit */,
+				2CCC1173B2276093013012E7 /* PromoOfferKit */,
 			);
 			productName = VibeCoder;
 			productReference = D001 /* VibeCoder.app */;
@@ -338,6 +401,8 @@
 				M002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				M003 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 				RKL001 /* XCLocalSwiftPackageReference "RatingKit" */,
+				PKL001 /* XCLocalSwiftPackageReference "PaywallKit" */,
+				0E898BE7C4C31BABE0AF8B58 /* XCRemoteSwiftPackageReference "PromoOfferKit" */,
 			);
 			productRefGroup = F003 /* Products */;
 			projectDirPath = "";
@@ -391,6 +456,8 @@
 				A005 /* ProfileView.swift in Sources */,
 				A009 /* User.swift in Sources */,
 				A023 /* SubscriptionManager.swift in Sources */,
+				6F0F6FD3B6CC4D298C83668E /* PremiumManager.swift in Sources */,
+				DEFEA9F5A5E4447B9BF79B74 /* RemotePaywallView.swift in Sources */,
 				A024 /* SubscriptionPlansView.swift in Sources */,
 				A027 /* ReplitStyleAccountView.swift in Sources */,
 				A034 /* PaywallCoordinator.swift in Sources */,
@@ -399,8 +466,22 @@
 				DAAD24228BB668EF16069A13 /* CatalogView.swift in Sources */,
 				7CD7E0DB8711F0C61A4F843D /* LessonDetailView.swift in Sources */,
 				FA36AC616E1D7AEA0A5B24E8 /* CodeReaderView.swift in Sources */,
+				2EDE519B78ED4CED82058477 /* LessonEditStore.swift in Sources */,
 				E4900943324A6C01481FA30F /* SandboxedPreviewView.swift in Sources */,
-				8DC0989E0E659A67EDE5D590 /* AttributionService.swift in Sources */,
+				34FCE06CD9026552C08B2C43 /* BuildModels.swift in Sources */,
+				731C8907D4FC7736B116A094 /* SSEClient.swift in Sources */,
+				6067A8CD2FB1AD8DDCC4EE63 /* VibeBuildAPI.swift in Sources */,
+				334E067FF72CC8046EC5299B /* BuildLimitTracker.swift in Sources */,
+				B5FA25BD85DA32E5B5402EB5 /* EULAGate.swift in Sources */,
+				1207C15D8AF332C54077037D /* BuildProgressView.swift in Sources */,
+				ECE6EC4C062B2DB91A668DB8 /* BuildHomeView.swift in Sources */,
+				03F0E24E82DF50B70AE38157 /* ProjectPreviewView.swift in Sources */,
+				12FF11BF904D6C92440F6C50 /* MyProjectsView.swift in Sources */,
+				1FF268428B3B80EE8F60BCAF /* BuildIdentity.swift in Sources */,
+				D7C09F1076B83B6C52C53FAF /* AttributionService.swift in Sources */,
+				F05E009ABC642EAB2A2F0E1C /* VoiceDictation.swift in Sources */,
+				E5F7EE210BAFAC6B6A2900B4 /* VersionHistorySheet.swift in Sources */,
+				8FAD57C9A777BD55A4B479B9 /* ImagePicker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -422,7 +503,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.vibercoder.UITests;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
@@ -437,7 +518,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.vibercoder.UITests;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
@@ -497,7 +578,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -554,7 +635,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -571,7 +652,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = VibeCoder/VibeCoder.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 35;
+				CURRENT_PROJECT_VERSION = 48;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				ENABLE_PREVIEWS = YES;
@@ -582,12 +663,12 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.0;
+				MARKETING_VERSION = 3.1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.vibercoder;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -603,7 +684,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = VibeCoder/VibeCoder.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 35;
+				CURRENT_PROJECT_VERSION = 48;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				ENABLE_PREVIEWS = YES;
@@ -614,12 +695,12 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.0;
+				MARKETING_VERSION = 3.1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.vibercoder;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -661,6 +742,10 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
+		PKL001 /* XCLocalSwiftPackageReference "PaywallKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../PaywallKit;
+		};
 		RKL001 /* XCLocalSwiftPackageReference "RatingKit" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../RatingKit;
@@ -668,6 +753,14 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		0E898BE7C4C31BABE0AF8B58 /* XCRemoteSwiftPackageReference "PromoOfferKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tsushanth/PromoOfferKit.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.0.0;
+			};
+		};
 		M001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -695,6 +788,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		2CCC1173B2276093013012E7 /* PromoOfferKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0E898BE7C4C31BABE0AF8B58 /* XCRemoteSwiftPackageReference "PromoOfferKit" */;
+			productName = PromoOfferKit;
+		};
 		P001 /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = M001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
@@ -724,6 +822,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = M003 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
 			productName = ZIPFoundation;
+		};
+		PKP001 /* PaywallKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = PKL001 /* XCLocalSwiftPackageReference "PaywallKit" */;
+			productName = PaywallKit;
 		};
 		RKP001 /* RatingKit */ = {
 			isa = XCSwiftPackageProductDependency;

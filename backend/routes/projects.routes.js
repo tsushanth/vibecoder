@@ -657,8 +657,8 @@ router.post('/generate', async (req, res) => {
 
                     // Push notification
                     const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
-                    if (userId) sendPushToUser(userId, 'Project Ready!', `"${shortPrompt}" has been built. Tap to view!`).catch(() => {});
-                    else if (deviceToken) sendAPNsPush(deviceToken, 'Project Ready!', `"${shortPrompt}" has been built. Tap to view!`).catch(() => {});
+                    if (userId) sendPushToUser(userId, 'Project Ready!', `"${shortPrompt}" has been built. Tap to view!`, { projectId: projectId }).catch(() => {});
+                    else if (deviceToken) sendAPNsPush(deviceToken, 'Project Ready!', `"${shortPrompt}" has been built. Tap to view!`, { projectId: projectId }).catch(() => {});
                 })();
             }
         });
@@ -989,7 +989,7 @@ router.post('/:id/build-complete', async (req, res) => {
             if (userId) {
                 const { data: proj } = await supabase.from('projects').select('initial_prompt').eq('id', id).single();
                 const shortPrompt = (proj?.initial_prompt || '').substring(0, 40);
-                sendPushToUser(userId, `"${shortPrompt}" is ready!`, 'Tap to open your app').catch(() => {});
+                sendPushToUser(userId, `"${shortPrompt}" is ready!`, 'Tap to open your app', { projectId: id }).catch(() => {});
             }
         } else {
             await supabase.from('projects').update({ status: 'failed' }).eq('id', id);
@@ -1726,6 +1726,43 @@ router.post('/:id/tweak', async (req, res) => {
 
                 console.log(`[tweak] Bundle updated for project ${id} (commit: ${parsed.commitSha || 'none'})`);
 
+                // Re-push the new bundle to the deploy-server so the live URL
+                // serves the updated content. Without this step the DB row
+                // moves forward but `prev-{id}.vibebuild.cc` keeps serving
+                // the original generate-time bundle.
+                try {
+                    const { data: proj } = await supabase
+                        .from('projects')
+                        .select('preview_url, published_url')
+                        .eq('id', id)
+                        .single();
+                    const subdomains = [];
+                    for (const u of [proj?.preview_url, proj?.published_url]) {
+                        if (!u) continue;
+                        const sub = u.replace(/^https?:\/\//, '').split('.')[0];
+                        if (sub && !subdomains.includes(sub)) subdomains.push(sub);
+                    }
+                    for (const sub of subdomains) {
+                        try {
+                            const dr = await fetch(`${DEPLOY_SERVER_URL}/deploy`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ subdomain: sub, bundle: parsed.bundle }),
+                                signal: AbortSignal.timeout(30000),
+                            });
+                            if (dr.ok) {
+                                console.log(`[tweak] Redeployed bundle to ${sub}`);
+                            } else {
+                                console.error(`[tweak] Redeploy ${sub} returned ${dr.status}`);
+                            }
+                        } catch (e) {
+                            console.error(`[tweak] Redeploy ${sub} failed: ${e.message}`);
+                        }
+                    }
+                } catch (e) {
+                    console.error(`[tweak] Could not look up project URLs for redeploy: ${e.message}`);
+                }
+
                 res.write(`data: ${JSON.stringify({
                     type: 'result',
                     success: true,
@@ -1886,6 +1923,42 @@ router.post('/:id/revert/:sha', async (req, res) => {
 
         console.log(`[revert] Project ${id} reverted to ${sha.substring(0, 7)}`);
 
+        // Re-push the bundle to the deploy-server so the live preview URL
+        // serves the reverted content. Without this the live URL keeps
+        // serving the last-tweaked bundle even though the DB row moved back.
+        try {
+            const { data: proj } = await supabase
+                .from('projects')
+                .select('preview_url, published_url')
+                .eq('id', id)
+                .single();
+            const subdomains = [];
+            for (const u of [proj?.preview_url, proj?.published_url]) {
+                if (!u) continue;
+                const sub = u.replace(/^https?:\/\//, '').split('.')[0];
+                if (sub && !subdomains.includes(sub)) subdomains.push(sub);
+            }
+            for (const sub of subdomains) {
+                try {
+                    const dr = await fetch(`${DEPLOY_SERVER_URL}/deploy`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ subdomain: sub, bundle: revertData.bundle }),
+                        signal: AbortSignal.timeout(30000),
+                    });
+                    if (dr.ok) {
+                        console.log(`[revert] Redeployed bundle to ${sub}`);
+                    } else {
+                        console.error(`[revert] Redeploy ${sub} returned ${dr.status}`);
+                    }
+                } catch (e) {
+                    console.error(`[revert] Redeploy ${sub} failed: ${e.message}`);
+                }
+            }
+        } catch (e) {
+            console.error(`[revert] Could not look up project URLs for redeploy: ${e.message}`);
+        }
+
         res.json({
             success: true,
             commitSha: sha,
@@ -1896,6 +1969,50 @@ router.post('/:id/revert/:sha', async (req, res) => {
     } catch (error) {
         console.error('[revert] Error:', error.message);
         res.status(500).json({ error: 'Failed to revert project' });
+    }
+});
+
+// ============================================
+// PATCH /api/projects/:id
+// Update editable project fields. Currently only `title` is whitelisted.
+// Verifies the caller is the project's creator before mutating.
+// ============================================
+router.patch('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { userId, title } = req.body;
+
+        if (!userId) return res.status(400).json({ error: 'userId is required' });
+        if (typeof title !== 'string') return res.status(400).json({ error: 'title (string) is required' });
+        const trimmed = title.trim();
+        if (trimmed.length === 0) return res.status(400).json({ error: 'title cannot be empty' });
+        if (trimmed.length > 180) return res.status(400).json({ error: 'title must be 180 chars or fewer' });
+
+        // Ownership check
+        const { data: project, error: projectError } = await supabase
+            .from('projects')
+            .select('id, creator_id')
+            .eq('id', id)
+            .single();
+        if (projectError || !project) return res.status(404).json({ error: 'Project not found' });
+        if (project.creator_id !== userId) return res.status(403).json({ error: 'Only the project creator can rename' });
+
+        const { data, error } = await supabase
+            .from('projects')
+            .update({ title: trimmed, updated_at: new Date().toISOString() })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error(`[patch] DB update failed for ${id}: ${error.message}`);
+            return res.status(500).json({ error: 'Could not save the new title' });
+        }
+        console.log(`[patch] Project ${id} renamed to "${trimmed}"`);
+        res.json({ success: true, project: data });
+    } catch (err) {
+        console.error('[patch] Error:', err.message);
+        res.status(500).json({ error: err.message });
     }
 });
 

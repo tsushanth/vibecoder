@@ -31,7 +31,8 @@
     "allRightsReserved": "All rights reserved.",
     "remove": "삭제",
     "add": "추가",
-    "unlimited": "무제한"
+    "unlimited": "무제한",
+    "versions": "버전"
   },
   "landing": {
     "availablePlatforms": "Web, iOS, Android에서 이용 가능",
@@ -54,8 +55,6 @@
     "everythingYouNeedSubtitle": "웹 앱을 구축, 개선, 배포하기 위한 완전한 플랫폼",
     "featurePipeline": "AI 기반 파이프라인",
     "featurePipelineDetail": "5단계 생성: 빌드, 검증, 수정, 다듬기, 확인. 매번 프로덕션 품질의 결과물.",
-    "featurePreview": "실시간 미리보기 & 코드 에디터",
-    "featurePreviewDetail": "앱이 즉시 실행되는 것을 확인하세요. 코드를 직접 편집하거나 자연어로 변경 사항을 설명.",
     "featureVersions": "버전 기록",
     "featureVersionsDetail": "모든 조정이 버전을 생성합니다. 기록을 탐색하고, 변경 사항을 비교하고, 언제든 되돌리세요.",
     "featureDeploy": "원클릭 배포",
@@ -87,7 +86,6 @@
     "readyToBuild": "시작할 준비가 되셨나요?",
     "readyToBuildSubtitle": "AI로 아이디어를 앱으로 만들고 있는 수천 명의 크리에이터에 합류하세요.",
     "getStartedFree": "무료로 시작하기",
-    "mockCodeComment": "// AI 생성, 프로덕션 준비 완료",
     "mockChatPlaceholder": "앱에 대한 변경 사항을 설명하세요..."
   },
   "create": {
@@ -210,5 +208,10 @@
     "notFound": "프로젝트를 찾을 수 없습니다",
     "initialGeneration": "초기 생성",
     "changesApplied": "변경 사항 적용됨"
+  },
+  "versions": {
+    "empty": "아직 버전이 없습니다",
+    "count": "{count}개 버전",
+    "emptyHint": "채팅에서 변경을 시작하여 버전을 추적하세요."
   }
 }

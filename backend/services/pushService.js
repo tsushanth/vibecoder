@@ -71,7 +71,7 @@ function getAPNsJWT() {
     return apnsJWT;
 }
 
-async function sendAPNsPush(deviceToken, title, body) {
+async function sendAPNsPush(deviceToken, title, body, data = {}) {
     if (!deviceToken || !APNS_PRIVATE_KEY) return;
     const token = getAPNsJWT();
     if (!token) return;
@@ -81,9 +81,14 @@ async function sendAPNsPush(deviceToken, title, body) {
             const client = http2.connect('https://api.push.apple.com');
             client.on('error', () => resolve());
 
-            const pushPayload = JSON.stringify({
-                aps: { alert: { title, body }, sound: 'default', badge: 1 }
-            });
+            // Custom data is merged at the top level of the APNs payload; the
+            // iOS app reads `userInfo[k]` for any key not under `aps`. We use
+            // this to carry projectId for tap-to-open deep linking.
+            const payloadObj = {
+                aps: { alert: { title, body }, sound: 'default', badge: 1 },
+                ...data
+            };
+            const pushPayload = JSON.stringify(payloadObj);
 
             const req = client.request({
                 ':method': 'POST',
@@ -212,7 +217,7 @@ async function sendFCMPush(fcmToken, title, body) {
 // ============================================
 // Unified: send push to a user (queries push_tokens table)
 // ============================================
-export async function sendPushToUser(userId, title, body) {
+export async function sendPushToUser(userId, title, body, data = {}) {
     let notified = false;
 
     // iOS: query push_tokens table
@@ -223,7 +228,7 @@ export async function sendPushToUser(userId, title, body) {
         .single();
 
     if (iosToken?.apns_token) {
-        await sendAPNsPush(iosToken.apns_token, title, body);
+        await sendAPNsPush(iosToken.apns_token, title, body, data);
         notified = true;
     }
 

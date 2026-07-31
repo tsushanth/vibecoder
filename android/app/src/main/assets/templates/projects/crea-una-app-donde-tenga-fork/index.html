@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Heal Tech - Gestión de Medicamentos</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--purple:#7B2D8E;--purple-light:#9B4DCA;--purple-dark:#5A1D6E;
+--pink:#E91E8C;--pink-light:#FF6EB4;--pink-dark:#C0157A;
+--blue:#3A7BD5;--blue-light:#5A9BF5;--blue-dark:#2A5BAA;
+--bg:#F5F0FA;--card:#FFFFFF;--text:#2D2042;--text-light:#6B5B7B;
+--shadow:0 4px 20px rgba(123,45,142,0.12);
+--gradient:linear-gradient(135deg,var(--purple),var(--pink),var(--blue));
+--gradient-h:linear-gradient(90deg,var(--purple),var(--pink),var(--blue));
+}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;padding-bottom:80px}
+.header{background:var(--gradient);padding:18px 20px 14px;position:sticky;top:0;z-index:100;box-shadow:0 2px 15px rgba(123,45,142,0.3)}
+.header-inner{display:flex;align-items:center;justify-content:space-between;max-width:600px;margin:0 auto}
+.logo-wrap{display:flex;align-items:center;gap:10px}
+.logo-svg{width:40px;height:40px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2))}
+.logo-text{font-size:22px;font-weight:800;color:#fff;letter-spacing:1px;text-shadow:0 2px 4px rgba(0,0,0,0.15)}
+.logo-text span{font-weight:300;opacity:0.9}
+.header-actions{display:flex;gap:8px}
+.header-btn{background:rgba(255,255,255,0.2);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;backdrop-filter:blur(4px)}
+.header-btn:hover,.header-btn:active{background:rgba(255,255,255,0.35);transform:scale(1.1)}
+.header-btn svg{width:20px;height:20px}
+.main{max-width:600px;margin:0 auto;padding:16px}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.stat-card{background:var(--card);border-radius:16px;padding:14px 10px;text-align:center;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.stat-card:nth-child(1)::before{background:var(--purple)}
+.stat-card:nth-child(2)::before{background:var(--pink)}
+.stat-card:nth-child(3)::before{background:var(--blue)}
+.stat-num{font-size:28px;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-label{font-size:11px;color:var(--text-light);margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.section-title{font-size:16px;font-weight:700;color:var(--purple-dark);margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+.section-title svg{width:20px;height:20px;color:var(--pink)}
+.med-list{display:flex;flex-direction:column;gap:10px}
+.med-card{background:var(--card);border-radius:16px;padding:16px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;animation:slideUp .4s ease}
+.med-card:active{transform:scale(0.98)}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.med-card-top{display:flex;justify-content:space-between;align-items:flex-start}
+.med-name{font-size:17px;font-weight:700;color:var(--text)}
+.med-dose{font-size:13px;color:var(--text-light);margin-top:2px}
+.med-badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.badge-ok{background:#E8F5E9;color:#2E7D32}
+.badge-warning{background:#FFF3E0;color:#E65100}
+.badge-danger{background:#FFEBEE;color:#C62828}
+.badge-expired{background:#F3E5F5;color:var(--purple-dark)}
+.med-info-row{display:flex;gap:14px;margin-top:12px;flex-wrap:wrap}
+.med-info-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-light)}
+.med-info-item svg{width:16px;height:16px;flex-shrink:0}
+.med-info-item strong{color:var(--text);font-weight:600}
+.med-progress{margin-top:12px}
+.med-progress-bar{height:6px;background:#EDE7F6;border-radius:3px;overflow:hidden}
+.med-progress-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.med-progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text-light);margin-top:4px}
+.med-actions{display:flex;gap:8px;margin-top:12px}
+.med-btn{flex:1;padding:8px;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;transition:all .2s}
+.med-btn svg{width:16px;height:16px}
+.btn-take{background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff}
+.btn-take:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn-edit{background:#EDE7F6;color:var(--purple)}
+.btn-edit:hover{background:#D1C4E9}
+.btn-delete{background:#FFEBEE;color:#C62828}
+.btn-delete:hover{background:#FFCDD2}
+.empty-state{text-align:center;padding:50px 20px}
+.empty-state svg{width:80px;height:80px;opacity:0.3;margin-bottom:16px}
+.empty-state p{color:var(--text-light);font-size:14px}
+.fab{position:fixed;bottom:90px;right:20px;width:56px;height:56px;border-radius:50%;background:var(--gradient);border:none;color:#fff;font-size:28px;cursor:pointer;box-shadow:0 4px 20px rgba(233,30,140,0.4);z-index:90;display:flex;align-items:center;justify-content:center;transition:all .3s}
+.fab:hover,.fab:active{transform:scale(1.1) rotate(90deg);box-shadow:0 6px 25px rgba(233,30,140,0.5)}
+.fab svg{width:28px;height:28px}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;box-shadow:0 -2px 15px rgba(123,45,142,0.1);z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.bottom-nav-inner{display:flex;max-width:600px;margin:0 auto}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 8px;cursor:pointer;transition:all .2s;border:none;background:none;color:var(--text-light);position:relative}
+.nav-item.active{color:var(--purple)}
+.nav-item.active::after{content:'';position:absolute;top:0;left:25%;right:25%;height:3px;background:var(--gradient-h);border-radius:0 0 3px 3px}
+.nav-item svg{width:22px;height:22px;margin-bottom:3px}
+.nav-item span{font-size:10px;font-weight:600}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.show{display:flex;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:#fff;border-radius:24px 24px 0 0;padding:24px 20px;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;animation:slideModal .3s ease}
+@keyframes slideModal{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:#DDD;border-radius:2px;margin:0 auto 16px}
+.modal h2{font-size:20px;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:20px;text-align:center}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 14px;border:2px solid #EDE7F6;border-radius:12px;font-size:15px;color:var(--text);background:#FAFAFA;transition:border-color .2s;font-family:inherit}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--purple-light);background:#fff}
+.form-group textarea{resize:vertical;min-height:60px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-error{color:#C62828;font-size:12px;margin-top:4px;display:none}
+.form-error.show{display:block}
+.submit-btn{width:100%;padding:14px;border:none;border-radius:14px;background:var(--gradient);color:#fff;font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;margin-top:8px}
+.submit-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.cancel-btn{width:100%;padding:12px;border:2px solid #EDE7F6;border-radius:14px;background:none;color:var(--text-light);font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;transition:all .2s}
+.cancel-btn:hover{border-color:var(--purple-light);color:var(--purple)}
+.alarms-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.alarm-item{display:flex;align-items:center;justify-content:space-between;background:#F5F0FA;padding:12px 14px;border-radius:12px}
+.alarm-time{font-size:24px;font-weight:700;color:var(--purple)}
+.alarm-label{font-size:12px;color:var(--text-light)}
+.alarm-toggle{position:relative;width:48px;height:26px}
+.alarm-toggle input{opacity:0;width:0;height:0}
+.alarm-toggle .slider{position:absolute;inset:0;background:#DDD;border-radius:13px;cursor:pointer;transition:all .3s}
+.alarm-toggle .slider::before{content:'';position:absolute;width:22px;height:22px;left:2px;top:2px;background:#fff;border-radius:50%;transition:all .3s;box-shadow:0 2px 4px rgba(0,0,0,0.15)}
+.alarm-toggle input:checked+.slider{background:var(--gradient)}
+.alarm-toggle input:checked+.slider::before{transform:translateX(22px)}
+.alarm-del{background:none;border:none;color:#C62828;cursor:pointer;padding:4px}
+.alarm-del svg{width:18px;height:18px}
+.tab-bar{display:flex;gap:0;margin-bottom:16px;background:#EDE7F6;border-radius:12px;padding:3px}
+.tab-btn{flex:1;padding:10px;border:none;background:none;border-radius:10px;font-size:13px;font-weight:700;color:var(--text-light);cursor:pointer;transition:all .2s}
+.tab-btn.active{background:#fff;color:var(--purple);box-shadow:0 2px 8px rgba(123,45,142,0.1)}
+.page{display:none}.page.active{display:block}
+.arduino-status{display:flex;align-items:center;gap:10px;padding:14px;background:var(--card);border-radius:16px;box-shadow:var(--shadow);margin-bottom:16px}
+.arduino-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.arduino-dot.connected{background:#4CAF50;box-shadow:0 0 8px rgba(76,175,80,0.5);animation:pulse 2s infinite}
+.arduino-dot.disconnected{background:#F44336}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.arduino-label{font-size:14px;font-weight:600;flex:1}
+.arduino-btn{padding:8px 16px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.connect-btn{background:var(--gradient);color:#fff}
+.disconnect-btn{background:#FFEBEE;color:#C62828}
+.arduino-log{background:#1A1A2E;border-radius:16px;padding:14px;margin-top:12px;max-height:200px;overflow-y:auto;font-family:'Courier New',monospace;font-size:12px;color:#7BF5A0}
+.arduino-log p{margin:2px 0;opacity:0;animation:logIn .3s forwards}
+@keyframes logIn{to{opacity:1}}
+.arduino-send-row{display:flex;gap:8px;margin-top:12px}
+.arduino-send-row input{flex:1;padding:10px 14px;border:2px solid #EDE7F6;border-radius:10px;font-size:14px}
+.arduino-send-row button{padding:10px 18px;border:none;border-radius:10px;background:var(--gradient);color:#fff;font-weight:700;cursor:pointer}
+.share-card{background:var(--card);border-radius:16px;padding:20px;box-shadow:var(--shadow);text-align:center;margin-bottom:12px}
+.share-card h3{font-size:15px;font-weight:700;margin-bottom:6px}
+.share-card p{font-size:12px;color:var(--text-light);margin-bottom:14px}
+.share-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.share-btn{display:flex;align-items:center;gap:6px;padding:10px 18px;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.share-btn:hover{transform:translateY(-2px)}
+.share-btn svg{width:18px;height:18px}
+.share-whatsapp{background:#25D366;color:#fff}
+.share-copy{background:#EDE7F6;color:var(--purple)}
+.share-native{background:var(--gradient);color:#fff}
+.notification-bar{position:fixed;top:0;left:0;right:0;padding:14px 20px;background:var(--gradient);color:#fff;font-weight:700;font-size:14px;text-align:center;z-index:300;transform:translateY(-100%);transition:transform .3s ease;box-shadow:0 4px 20px rgba(123,45,142,0.3)}
+.notification-bar.show{transform:translateY(0)}
+.history-item{display:flex;align-items:center;gap:12px;padding:12px;background:#F5F0FA;border-radius:12px;margin-bottom:8px}
+.history-icon{width:36px;height:36px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.history-icon svg{width:18px;height:18px;color:#fff}
+.history-info{flex:1}
+.history-info strong{font-size:13px;display:block}
+.history-info span{font-size:11px;color:var(--text-light)}
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:250;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.confirm-overlay.show{display:flex}
+.confirm-box{background:#fff;border-radius:20px;padding:24px;max-width:320px;width:90%;text-align:center;animation:slideUp .3s ease}
+.confirm-box h3{font-size:18px;font-weight:700;margin-bottom:8px}
+.confirm-box p{font-size:14px;color:var(--text-light);margin-bottom:20px}
+.confirm-btns{display:flex;gap:10px}
+.confirm-btns button{flex:1;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer}
+.confirm-yes{background:var(--gradient);color:#fff}
+.confirm-no{background:#EDE7F6;color:var(--text)}
+.search-bar{position:relative;margin-bottom:16px}
+.search-bar input{width:100%;padding:12px 14px 12px 40px;border:2px solid #EDE7F6;border-radius:14px;font-size:14px;background:var(--card);transition:border-color .2s}
+.search-bar input:focus{outline:none;border-color:var(--purple-light)}
+.search-bar svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:20px;height:20px;color:var(--text-light)}
+.filter-chips{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.filter-chips::-webkit-scrollbar{display:none}
+.chip{padding:7px 14px;border:2px solid #EDE7F6;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s;background:#fff}
+.chip.active{background:var(--gradient);color:#fff;border-color:transparent}
+.next-alarm-banner{background:var(--gradient);border-radius:16px;padding:16px;margin-bottom:18px;color:#fff;display:flex;align-items:center;gap:14px;box-shadow:0 4px 20px rgba(233,30,140,0.3)}
+.next-alarm-icon{width:48px;height:48px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.next-alarm-icon svg{width:28px;height:28px}
+.next-alarm-info h3{font-size:13px;opacity:0.9;font-weight:600}
+.next-alarm-info p{font-size:22px;font-weight:800;margin-top:2px}
+.next-alarm-info span{font-size:12px;opacity:0.8}
+</style>
+</head>
+<body>
+
+<div class="notification-bar" id="notifBar"></div>
+
+<header class="header">
+ <div class="header-inner">
+  <div class="logo-wrap">
+   <svg class="logo-svg" viewBox="0 0 40 40" fill="none">
+    <defs>
+     <linearGradient id="lg1" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E91E8C"/><stop offset="1" stop-color="#3A7BD5"/>
+     </linearGradient>
+    </defs>
+    <circle cx="20" cy="20" r="18" fill="white" opacity="0.95"/>
+    <path d="M20 8 L20 14 M20 26 L20 32 M8 20 L14 20 M26 20 L32 20" stroke="url(#lg1)" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="20" cy="20" r="5" fill="url(#lg1)"/>
+    <path d="M14 14 C14 10 20 6 20 12 C20 6 26 10 26 14 C26 20 20 24 20 24 C20 24 14 20 14 14Z" fill="url(#lg1)" opacity="0.2"/>
+   </svg>
+   <div class="logo-text">Heal<span>Tech</span></div>
+  </div>
+  <div class="header-actions">
+   <button class="header-btn" onclick="sharePage()" title="Compartir">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+   </button>
+   <button class="header-btn" id="arduinoHeaderBtn" onclick="switchPage('arduino')" title="Arduino">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/></svg>
+   </button>
+  </div>
+ </div>
+</header>
+
+<main class="main">
+ <!-- HOME PAGE -->
+ <div class="page active" id="pageMeds">
+  <div class="stats-row">
+   <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Medicamentos</div></div>
+   <div class="stat-card"><div class="stat-num" id="statAlarms">0</div><div class="stat-label">Alarmas</div></div>
+   <div class="stat-card"><div class="stat-num" id="statExpiring">0</div><div class="stat-label">Por vencer</div></div>
+  </div>
+
+  <div id="nextAlarmBanner" class="next-alarm-banner" style="display:none">
+   <div class="next-alarm-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+   </div>
+   <div class="next-alarm-info">
+    <h3>Próxima alarma</h3>
+    <p id="nextAlarmTime">--:--</p>
+    <span id="nextAlarmMed">---</span>
+   </div>
+  </div>
+
+  <div class="search-bar">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+   <input type="text" id="searchInput" placeholder="Buscar medicamento..." oninput="renderMeds()" autocomplete="off">
+  </div>
+
+  <div class="filter-chips">
+   <div class="chip active" data-filter="all" onclick="setFilter('all',this)">Todos</div>
+   <div class="chip" data-filter="ok" onclick="setFilter('ok',this)">Disponible</div>
+   <div class="chip" data-filter="low" onclick="setFilter('low',this)">Pocas</div>
+   <div class="chip" data-filter="expiring" onclick="setFilter('expiring',this)">Por vencer</div>
+   <div class="chip" data-filter="expired" onclick="setFilter('expired',this)">Vencidos</div>
+  </div>
+
+  <div class="med-list" id="medList"></div>
+ </div>
+
+ <!-- ALARMS PAGE -->
+ <div class="page" id="pageAlarms">
+  <div class="section-title">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+   Mis Alarmas
+  </div>
+  <div id="alarmsList" class="alarms-list"></div>
+  <button class="submit-btn" style="margin-top:16px" onclick="openAlarmModal()">
+   + Agregar Alarma
+  </button>
+ </div>
+
+ <!-- HISTORY PAGE -->
+ <div class="page" id="pageHistory">
+  <div class="section-title">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+   Historial de Tomas
+  </div>
+  <div id="historyList"></div>
+  <button class="cancel-btn" style="margin-top:12px" onclick="clearHistory()">Limpiar historial</button>
+ </div>
+
+ <!-- ARDUINO PAGE -->
+ <div class="page" id="pageArduino">
+  <div class="section-title">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/></svg>
+   Arduino Uno
+  </div>
+  <div class="arduino-status">
+   <div class="arduino-dot disconnected" id="arduinoDot"></div>
+   <div class="arduino-label" id="arduinoLabel">Desconectado</div>
+   <button class="arduino-btn connect-btn" id="arduinoConnBtn" onclick="toggleArduino()">Conectar</button>
+  </div>
+  <p style="font-size:13px;color:var(--text-light);margin-bottom:12px">Conecta tu Arduino Uno vía USB para recibir alertas de medicamentos con buzzer, LEDs y pantalla LCD.</p>
+
+  <div class="tab-bar">
+   <button class="tab-btn active" onclick="switchArduinoTab('monitor',this)">Monitor Serial</button>
+   <button class="tab-btn" onclick="switchArduinoTab('commands',this)">Comandos</button>
+   <button class="tab-btn" onclick="switchArduinoTab('code',this)">Código Arduino</button>
+  </div>
+
+  <div id="arduinoMonitor" class="arduino-tab">
+   <div class="arduino-log" id="serialLog"><p style="color:#888">Esperando conexión...</p></div>
+   <div class="arduino-send-row">
+    <input type="text" id="serialInput" placeholder="Enviar comando..." autocomplete="off" onkeydown="if(event.key==='Enter')sendSerial()">
+    <button onclick="sendSerial()">Enviar</button>
+   </div>
+  </div>
+
+  <div id="arduinoCommands" class="arduino-tab" style="display:none">
+   <div style="display:flex;flex-direction:column;gap:8px">
+    <button class="submit-btn" onclick="sendArduinoCommand('SYNC')">Sincronizar medicamentos</button>
+    <button class="submit-btn" style="background:linear-gradient(135deg,var(--blue),var(--purple))" onclick="sendArduinoCommand('TEST_ALARM')">Probar alarma</button>
+    <button class="submit-btn" style="background:linear-gradient(135deg,var(--pink),var(--blue))" onclick="sendArduinoCommand('STATUS')">Estado del dispensador</button>
+    <button class="cancel-btn" onclick="sendArduinoCommand('RESET')">Reiniciar Arduino</button>
+   </div>
+  </div>
+
+  <div id="arduinoCode" class="arduino-tab" style="display:none">
+   <div style="background:#1A1A2E;border-radius:16px;padding:14px;font-family:monospace;font-size:11px;color:#7BF5A0;max-height:300px;overflow-y:auto;white-space:pre-wrap;line-height:1.5" id="arduinoSketch"></div>
+   <button class="submit-btn" style="margin-top:12px" onclick="copyArduinoCode()">Copiar código</button>
+  </div>
+
+  <!-- Share Section -->
+  <div style="margin-top:24px">
+   <div class="section-title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+    Compartir App
+   </div>
+   <div class="share-card">
+    <h3>Comparte Heal Tech</h3>
+    <p>Ayuda a otros a gestionar sus medicamentos</p>
+    <div class="share-btns">
+     <button class="share-btn share-whatsapp" onclick="shareWhatsApp()">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+      WhatsApp
+     </button>
+     <button class="share-btn share-copy" onclick="copyShareLink()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      Copiar
+     </button>
+     <button class="share-btn share-native" onclick="sharePage()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      Compartir
+     </button>
+    </div>
+   </div>
+  </div>
+ </div>
+</main>
+
+<button class="fab" onclick="openMedModal()" title="Agregar medicamento">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<nav class="bottom-nav">
+ <div class="bottom-nav-inner">
+  <button class="nav-item active" onclick="switchPage('meds')">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2z"/><path d="M9 9h6v6H9z"/></svg>
+   <span>Medicinas</span>
+  </button>
+  <button class="nav-item" onclick="switchPage('alarms')">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+   <span>Alarmas</span>
+  </button>
+  <button class="nav-item" onclick="switchPage('history')">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+   <span>Historial</span>
+  </button>
+  <button class="nav-item" onclick="switchPage('arduino')">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/></svg>
+   <span>Arduino</span>
+  </button>
+ </div>
+</nav>
+
+<!-- ADD/EDIT MEDICATION MODAL -->
+<div class="modal-overlay" id="medModal">
+ <div class="modal">
+  <div class="modal-handle"></div>
+  <h2 id="medModalTitle">Nuevo Medicamento</h2>
+  <input type="hidden" id="medEditId">
+  <div class="form-group">
+   <label>Nombre del medicamento *</label>
+   <input type="text" id="medName" placeholder="Ej: Paracetamol" autocomplete="off" required>
+   <div class="form-error" id="errName">El nombre es obligatorio</div>
+  </div>
+  <div class="form-group">
+   <label>Dosis</label>
+   <input type="text" id="medDose" placeholder="Ej: 500mg, 1 tableta" autocomplete="off">
+  </div>
+  <div class="form-row">
+   <div class="form-group">
+    <label>Cantidad total *</label>
+    <input type="number" id="medTotal" min="1" placeholder="30" inputmode="numeric" required>
+    <div class="form-error" id="errTotal">Ingresa la cantidad</div>
+   </div>
+   <div class="form-group">
+    <label>Restantes *</label>
+    <input type="number" id="medRemaining" min="0" placeholder="30">
+    <div class="form-error" id="errRemaining">Ingresa las restantes</div>
+   </div>
+  </div>
+  <div class="form-group">
+   <label>Fecha de caducidad *</label>
+   <input type="date" id="medExpiry">
+   <div class="form-error" id="errExpiry">Selecciona la fecha</div>
+  </div>
+  <div class="form-group">
+   <label>Frecuencia</label>
+   <select id="medFreq">
+    <option value="8">Cada 8 horas</option>
+    <option value="12">Cada 12 horas</option>
+    <option value="24">Cada 24 horas</option>
+    <option value="6">Cada 6 horas</option>
+    <option value="custom">Personalizado</option>
+   </select>
+  </div>
+  <div class="form-group">
+   <label>Notas (opcional)</label>
+   <textarea id="medNotes" placeholder="Tomar con alimentos, evitar alcohol..."></textarea>
+  </div>
+  <div class="form-group">
+   <label>Color identificador</label>
+   <div style="display:flex;gap:10px;margin-top:4px" id="colorPicker">
+    <div class="color-opt" style="width:32px;height:32px;border-radius:50%;background:var(--purple);cursor:pointer;border:3px solid transparent" data-color="#7B2D8E" onclick="pickColor(this)"></div>
+    <div class="color-opt" style="width:32px;height:32px;border-radius:50%;background:var(--pink);cursor:pointer;border:3px solid transparent" data-color="#E91E8C" onclick="pickColor(this)"></div>
+    <div class="color-opt" style="width:32px;height:32px;border-radius:50%;background:var(--blue);cursor:pointer;border:3px solid transparent" data-color="#3A7BD5" onclick="pickColor(this)"></div>
+    <div class="color-opt" style="width:32px;height:32px;border-radius:50%;background:#4CAF50;cursor:pointer;border:3px solid transparent" data-color="#4CAF50" onclick="pickColor(this)"></div>
+    <div class="color-opt" style="width:32px;height:32px;border-radius:50%;background:#FF9800;cursor:pointer;border:3px solid transparent" data-color="#FF9800" onclick="pickColor(this)"></div>
+   </div>
+  </div>
+  <input type="hidden" id="medColor" value="#7B2D8E">
+  <button class="submit-btn" onclick="saveMed()">Guardar Medicamento</button>
+  <button class="cancel-btn" onclick="closeMedModal()">Cancelar</button>
+ </div>
+</div>
+
+<!-- ADD ALARM MODAL -->
+<div class="modal-overlay" id="alarmModal">
+ <div class="modal">
+  <div class="modal-handle"></div>
+  <h2>Nueva Alarma</h2>
+  <div class="form-group">
+   <label>Medicamento *</label>
+   <select id="alarmMed"><option value="">Seleccionar...</option></select>
+   <div class="form-error" id="errAlarmMed">Selecciona un medicamento</div>
+  </div>
+  <div class="form-group">
+   <label>Hora *</label>
+   <input type="time" id="alarmTime">
+   <div class="form-error" id="errAlarmTime">Selecciona la hora</div>
+  </div>
+  <div class="form-group">
+   <label>Días de la semana</label>
+   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px" id="dayPicker">
+    <button type="button" class="chip active" data-day="0" onclick="toggleDay(this)">Dom</button>
+    <button type="button" class="chip active" data-day="1" onclick="toggleDay(this)">Lun</button>
+    <button type="button" class="chip active" data-day="2" onclick="toggleDay(this)">Mar</button>
+    <button type="button" class="chip active" data-day="3" onclick="toggleDay(this)">Mié</button>
+    <button type="button" class="chip active" data-day="4" onclick="toggleDay(this)">Jue</button>
+    <button type="button" class="chip active" data-day="5" onclick="toggleDay(this)">Vie</button>
+    <button type="button" class="chip active" data-day="6" onclick="toggleDay(this)">Sáb</button>
+   </div>
+  </div>
+  <div class="form-group">
+   <label>Etiqueta (opcional)</label>
+   <input type="text" id="alarmLabel" placeholder="Ej: Después del desayuno">
+  </div>
+  <button class="submit-btn" onclick="saveAlarm()">Guardar Alarma</button>
+  <button class="cancel-btn" onclick="closeAlarmModal()">Cancelar</button>
+ </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="confirm-overlay" id="confirmOverlay">
+ <div class="confirm-box">
+  <h3 id="confirmTitle">¿Estás seguro?</h3>
+  <p id="confirmMsg">Esta acción no se puede deshacer.</p>
+  <div class="confirm-btns">
+   <button class="confirm-no" onclick="closeConfirm()">Cancelar</button>
+   <button class="confirm-yes" id="confirmYes">Confirmar</button>
+  </div>
+ </div>
+</div>
+
+<script>
+// ===== DATA LAYER =====
+let medications = JSON.parse(localStorage.getItem('ht_meds') || '[]');
+let alarms = JSON.parse(localStorage.getItem('ht_alarms') || '[]');
+let history = JSON.parse(localStorage.getItem('ht_history') || '[]');
+let currentFilter = 'all';
+let selectedColor = '#7B2D8E';
+let serialPort = null;
+let serialReader = null;
+let serialWriter = null;
+let arduinoConnected = false;
+let alarmCheckInterval = null;
+let lastAlarmCheck = '';
+
+function save() {
+  localStorage.setItem('ht_meds', JSON.stringify(medications));
+  localStorage.setItem('ht_alarms', JSON.stringify(alarms));
+  localStorage.setItem('ht_history', JSON.stringify(history));
+}
+
+function genId() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
+
+// ===== NAVIGATION =====
+function switchPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pageMap = { meds: 'pageMeds', alarms: 'pageAlarms', history: 'pageHistory', arduino: 'pageArduino' };
+  document.getElementById(pageMap[page]).classList.add('active');
+  const navBtns = document.querySelectorAll('.nav-item');
+  const idx = { meds: 0, alarms: 1, history: 2, arduino: 3 };
+  if (navBtns[idx[page]]) navBtns[idx[page]].classList.add('active');
+  if (page === 'alarms') renderAlarms();
+  if (page === 'history') renderHistory();
+}
+
+// ===== MEDICATIONS =====
+function getStatus(med) {
+  const now = new Date();
+  const exp = new Date(med.expiry + 'T23:59:59');
+  const daysLeft = Math.ceil((exp - now) / 86400000);
+  const pctLeft = med.total > 0 ? (med.remaining / med.total) * 100 : 0;
+  if (daysLeft < 0) return { label: 'Vencido', cls: 'badge-expired', priority: 0 };
+  if (daysLeft <= 30) return { label: `Vence en ${daysLeft}d`, cls: 'badge-warning', priority: 1 };
+  if (pctLeft <= 20) return { label: `Quedan ${med.remaining}`, cls: 'badge-danger', priority: 2 };
+  return { label: 'Disponible', cls: 'badge-ok', priority: 3 };
+}
+
+function matchesFilter(med) {
+  const st = getStatus(med);
+  if (currentFilter === 'all') return true;
+  if (currentFilter === 'ok') return st.priority === 3;
+  if (currentFilter === 'low') return med.remaining > 0 && (med.remaining / med.total) <= 0.2;
+  if (currentFilter === 'expiring') return st.priority === 1;
+  if (currentFilter === 'expired') return st.priority === 0;
+  return true;
+}
+
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderMeds();
+}
+
+function renderMeds() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const list = document.getElementById('medList');
+  const filtered = medications.filter(m => {
+    if (search && !m.name.toLowerCase().includes(search)) return false;
+    return matchesFilter(m);
+  });
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2z"/><path d="M9 9h6v6H9z"/></svg>
+      <p>${medications.length === 0 ? 'Agrega tu primer medicamento con el botón +' : 'No hay medicamentos con este filtro'}</p>
+    </div>`;
+  } else {
+    list.innerHTML = filtered.map(med => {
+      const st = getStatus(med);
+      const pct = med.total > 0 ? Math.round((med.remaining / med.total) * 100) : 0;
+      const exp = new Date(med.expiry + 'T00:00:00');
+      const expStr = exp.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' });
+      const barColor = pct > 50 ? med.color || '#7B2D8E' : pct > 20 ? '#FF9800' : '#F44336';
+      return `<div class="med-card">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${med.color || '#7B2D8E'}"></div>
+        <div class="med-card-top">
+          <div><div class="med-name">${esc(med.name)}</div><div class="med-dose">${esc(med.dose || 'Sin dosis especificada')}</div></div>
+          <span class="med-badge ${st.cls}">${st.label}</span>
+        </div>
+        <div class="med-info-row">
+          <div class="med-info-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Caduca: <strong>${expStr}</strong>
+          </div>
+          <div class="med-info-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 12V8H6a2 2 0 01-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><circle cx="18" cy="12" r="2"/></svg>
+            Quedan: <strong>${med.remaining} / ${med.total}</strong>
+          </div>
+        </div>
+        ${med.notes ? `<div style="margin-top:8px;font-size:12px;color:var(--text-light);font-style:italic">📝 ${esc(med.notes)}</div>` : ''}
+        <div class="med-progress">
+          <div class="med-progress-bar"><div class="med-progress-fill" style="width:${pct}%;background:${barColor}"></div></div>
+          <div class="med-progress-label"><span>${pct}% restante</span><span>Cada ${med.freq}h</span></div>
+        </div>
+        <div class="med-actions">
+          <button class="med-btn btn-take" onclick="takeMed('${med.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Tomar
+          </button>
+          <button class="med-btn btn-edit" onclick="editMed('${med.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Editar
+          </button>
+          <button class="med-btn btn-delete" onclick="deleteMed('${med.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  updateStats();
+  updateNextAlarm();
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function updateStats() {
+  document.getElementById('statTotal').textContent = medications.length;
+  document.getElementById('statAlarms').textContent = alarms.filter(a => a.enabled).length;
+  const expiring = medications.filter(m => {
+    const d = Math.ceil((new Date(m.expiry + 'T23:59:59') - new Date()) / 86400000);
+    return d >= 0 && d <= 30;
+  }).length;
+  document.getElementById('statExpiring').textContent = expiring;
+}
+
+// ===== MED MODAL =====
+function openMedModal(editId) {
+  document.getElementById('medModal').classList.add('show');
+  document.getElementById('medEditId').value = editId || '';
+  document.getElementById('medModalTitle').textContent = editId ? 'Editar Medicamento' : 'Nuevo Medicamento';
+  if (editId) {
+    const m = medications.find(x => x.id === editId);
+    if (m) {
+      document.getElementById('medName').value = m.name;
+      document.getElementById('medDose').value = m.dose || '';
+      document.getElementById('medTotal').value = m.total;
+      document.getElementById('medRemaining').value = m.remaining;
+      document.getElementById('medExpiry').value = m.expiry;
+      document.getElementById('medFreq').value = m.freq;
+      document.getElementById('medNotes').value = m.notes || '';
+      document.getElementById('medColor').value = m.color || '#7B2D8E';
+      selectedColor = m.color || '#7B2D8E';
+      highlightColor();
+    }
+  } else {
+    ['medName','medDose','medTotal','medRemaining','medExpiry','medNotes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('medFreq').value = '8';
+    selectedColor = '#7B2D8E';
+    document.getElementById('medColor').value = '#7B2D8E';
+    highlightColor();
+  }
+  clearErrors();
+}
+
+function closeMedModal() { document.getElementById('medModal').classList.remove('show'); }
+
+function pickColor(el) {
+  selectedColor = el.dataset.color;
+  document.getElementById('medColor').value = selectedColor;
+  highlightColor();
+}
+
+function highlightColor() {
+  document.querySelectorAll('.color-opt').forEach(c => {
+    c.style.borderColor = c.dataset.color === selectedColor ? '#333' : 'transparent';
+  });
+}
+
+function clearErrors() {
+  document.querySelectorAll('.form-error').forEach(e => e.classList.remove('show'));
+}
+
+function saveMed() {
+  clearErrors();
+  let valid = true;
+  const name = document.getElementById('medName').value.trim();
+  const dose = document.getElementById('medDose').value.trim();
+  const total = parseInt(document.getElementById('medTotal').value);
+  const remaining = parseInt(document.getElementById('medRemaining').value);
+  const expiry = document.getElementById('medExpiry').value;
+  const freq = document.getElementById('medFreq').value;
+  const notes = document.getElementById('medNotes').value.trim();
+  const color = document.getElementById('medColor').value;
+  const editId = document.getElementById('medEditId').value;
+
+  if (!name) { document.getElementById('errName').classList.add('show'); valid = false; }
+  if (isNaN(total) || total < 1) { document.getElementById('errTotal').classList.add('show'); valid = false; }
+  if (isNaN(remaining) || remaining < 0) { document.getElementById('errRemaining').classList.add('show'); valid = false; }
+  if (!expiry) { document.getElementById('errExpiry').classList.add('show'); valid = false; }
+  if (!valid) return;
+
+  if (editId) {
+    const idx = medications.findIndex(m => m.id === editId);
+    if (idx !== -1) medications[idx] = { ...medications[idx], name, dose, total, remaining, expiry, freq, notes, color };
+  } else {
+    medications.push({ id: genId(), name, dose, total, remaining, expiry, freq, notes, color, createdAt: new Date().toISOString() });
+  }
+  save();
+  renderMeds();
+  closeMedModal();
+  showNotif(editId ? 'Medicamento actualizado' : 'Medicamento agregado');
+  if (arduinoConnected) sendArduinoCommand('SYNC');
+}
+
+function editMed(id) { openMedModal(id); }
+
+function deleteMed(id) {
+  const med = medications.find(m => m.id === id);
+  showConfirm('Eliminar medicamento', `¿Eliminar "${med ? med.name : ''}"? Esta acción no se puede deshacer.`, () => {
+    medications = medications.filter(m => m.id !== id);
+    alarms = alarms.filter(a => a.medId !== id);
+    save();
+    renderMeds();
+    renderAlarms();
+    showNotif('Medicamento eliminado');
+  });
+}
+
+function takeMed(id) {
+  const med = medications.find(m => m.id === id);
+  if (!med) return;
+  if (med.remaining <= 0) { showNotif('¡No quedan pastillas! Repón tu medicamento.'); return; }
+  med.remaining--;
+  history.unshift({ id: genId(), medId: id, medName: med.name, dose: med.dose, timestamp: new Date().toISOString() });
+  if (history.length > 200) history = history.slice(0, 200);
+  save();
+  renderMeds();
+  showNotif(`${med.name}: tomada. Quedan ${med.remaining}`);
+  if (med.remaining <= 5 && med.remaining > 0) {
+    setTimeout(() => showNotif(`⚠️ Quedan pocas pastillas de ${med.name}`), 2000);
+  }
+  if (arduinoConnected) {
+    writeSerial(`TAKEN:${med.name}:${med.remaining}\n`);
+  }
+}
+
+// ===== ALARMS =====
+function renderAlarms() {
+  const list = document.getElementById('alarmsList');
+  if (alarms.length === 0) {
+    list.innerHTML = '<div class="empty-state"><p>No hay alarmas configuradas</p></div>';
+    return;
+  }
+  const dayNames = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  list.innerHTML = alarms.map(a => {
+    const med = medications.find(m => m.id === a.medId);
+    const daysStr = a.days.map(d => dayNames[d]).join(', ');
+    return `<div class="alarm-item">
+      <div style="flex:1">
+        <div class="alarm-time">${a.time}</div>
+        <div class="alarm-label">${med ? esc(med.name) : 'Medicamento eliminado'} ${a.label ? '· ' + esc(a.label) : ''}</div>
+        <div style="font-size:10px;color:var(--text-light);margin-top:2px">${daysStr}</div>
+      </div>
+      <label class="alarm-toggle">
+        <input type="checkbox" ${a.enabled ? 'checked' : ''} onchange="toggleAlarm('${a.id}',this.checked)">
+        <span class="slider"></span>
+      </label>
+      <button class="alarm-del" onclick="deleteAlarm('${a.id}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function openAlarmModal() {
+  const sel = document.getElementById('alarmMed');
+  sel.innerHTML = '<option value="">Seleccionar...</option>' + medications.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('');
+  document.getElementById('alarmTime').value = '';
+  document.getElementById('alarmLabel').value = '';
+  document.querySelectorAll('#dayPicker .chip').forEach(c => c.classList.add('active'));
+  clearErrors();
+  document.getElementById('alarmModal').classList.add('show');
+}
+
+function closeAlarmModal() { document.getElementById('alarmModal').classList.remove('show'); }
+
+function toggleDay(el) { el.classList.toggle('active'); }
+
+function saveAlarm() {
+  clearErrors();
+  let valid = true;
+  const medId = document.getElementById('alarmMed').value;
+  const time = document.getElementById('alarmTime').value;
+  const label = document.getElementById('alarmLabel').value.trim();
+  const days = [];
+  document.querySelectorAll('#dayPicker .chip.active').forEach(c => days.push(parseInt(c.dataset.day)));
+
+  if (!medId) { document.getElementById('errAlarmMed').classList.add('show'); valid = false; }
+  if (!time) { document.getElementById('errAlarmTime').classList.add('show'); valid = false; }
+  if (!valid) return;
+
+  alarms.push({ id: genId(), medId, time, label, days, enabled: true });
+  save();
+  renderAlarms();
+  closeAlarmModal();
+  updateNextAlarm();
+  showNotif('Alarma configurada');
+  if (arduinoConnected) sendArduinoCommand('SYNC');
+}
+
+function toggleAlarm(id, enabled) {
+  const a = alarms.find(x => x.id === id);
+  if (a) { a.enabled = enabled; save(); updateNextAlarm(); }
+}
+
+function deleteAlarm(id) {
+  showConfirm('Eliminar alarma', '¿Eliminar esta alarma?', () => {
+    alarms = alarms.filter(a => a.id !== id);
+    save();
+    renderAlarms();
+    updateNextAlarm();
+    showNotif('Alarma eliminada');
+  });
+}
+
+function updateNextAlarm() {
+  const banner = document.getElementById('nextAlarmBanner');
+  const active = alarms.filter(a => a.enabled);
+  if (active.length === 0) { banner.style.display = 'none'; return; }
+  const now = new Date();
+  const today = now.getDay();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  let best = null, bestMin = Infinity;
+  active.forEach(a => {
+    const [h, m] = a.time.split(':').map(Number);
+    const aMin = h * 60 + m;
+    let diff = aMin - nowMin;
+    if (diff < 0 || !a.days.includes(today)) {
+      for (let d = 1; d <= 7; d++) {
+        const nd = (today + d) % 7;
+        if (a.days.includes(nd)) { diff = d * 1440 + aMin - nowMin; break; }
+      }
+    }
+    if (diff < bestMin) { bestMin = diff; best = a; }
+  });
+  if (best) {
+    const med = medications.find(m => m.id === best.medId);
+    document.getElementById('nextAlarmTime').textContent = best.time;
+    document.getElementById('nextAlarmMed').textContent = med ? med.name : 'Medicamento';
+    banner.style.display = 'flex';
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+// ===== ALARM CHECKER =====
+function checkAlarms() {
+  const now = new Date();
+  const key = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  if (key === lastAlarmCheck) return;
+  lastAlarmCheck = key;
+  const today = now.getDay();
+  alarms.forEach(a => {
+    if (!a.enabled) return;
+    if (a.time !== key) return;
+    if (!a.days.includes(today)) return;
+    const med = medications.find(m => m.id === a.medId);
+    const name = med ? med.name : 'Medicamento';
+    showAlarmNotif(name, a);
+    if (arduinoConnected) {
+      writeSerial(`ALARM:${name}\n`);
+    }
+  });
+}
+
+function showAlarmNotif(medName, alarm) {
+  playAlarmSound();
+  showNotif(`⏰ ¡Hora de tomar ${medName}!`);
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification('Heal Tech', { body: `¡Hora de tomar ${medName}!`, icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="%237B2D8E"/><text x="20" y="26" text-anchor="middle" fill="white" font-size="18">💊</text></svg>' });
+  }
+}
+
+function playAlarmSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const notes = [523.25, 659.25, 783.99, 1046.50];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.15, ctx.currentTime + i * 0.2);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.2 + 0.3);
+      osc.start(ctx.currentTime + i * 0.2);
+      osc.stop(ctx.currentTime + i * 0.2 + 0.3);
+    });
+  } catch (e) {}
+}
+
+// ===== HISTORY =====
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (history.length === 0) {
+    list.innerHTML = '<div class="empty-state"><p>No hay registros todavía. Toma un medicamento para comenzar.</p></div>';
+    return;
+  }
+  list.innerHTML = history.map(h => {
+    const d = new Date(h.timestamp);
+    const dateStr = d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
+    const timeStr = d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+    return `<div class="history-item">
+      <div class="history-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="history-info">
+        <strong>${esc(h.medName)}</strong>
+        <span>${h.dose ? esc(h.dose) + ' · ' : ''}${dateStr} a las ${timeStr}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function clearHistory() {
+  if (history.length === 0) return;
+  showConfirm('Limpiar historial', '¿Borrar todo el historial de tomas?', () => {
+    history = [];
+    save();
+    renderHistory();
+    showNotif('Historial borrado');
+  });
+}
+
+// ===== ARDUINO WEB SERIAL =====
+async function toggleArduino() {
+  if (arduinoConnected) {
+    disconnectArduino();
+  } else {
+    await connectArduino();
+  }
+}
+
+async function connectArduino() {
+  if (!('serial' in navigator)) {
+    showNotif('Web Serial no soportado. Usa Chrome/Edge.');
+    addSerialLog('Error: Web Serial API no disponible en este navegador.', 'err');
+    return;
+  }
+  try {
+    serialPort = await navigator.serial.requestPort();
+    await serialPort.open({ baudRate: 9600 });
+    arduinoConnected = true;
+    updateArduinoUI();
+    addSerialLog('Conectado a Arduino Uno', 'ok');
+    showNotif('Arduino conectado');
+    const decoder = new TextDecoderStream();
+    serialPort.readable.pipeTo(decoder.writable);
+    serialReader = decoder.readable.getReader();
+    readSerialLoop();
+    const encoder = new TextEncoderStream();
+    encoder.readable.pipeTo(serialPort.writable);
+    serialWriter = encoder.writable.getWriter();
+    setTimeout(() => sendArduinoCommand('SYNC'), 500);
+  } catch (e) {
+    addSerialLog('Error: ' + e.message, 'err');
+    showNotif('No se pudo conectar');
+  }
+}
+
+async function disconnectArduino() {
+  try {
+    if (serialReader) { await serialReader.cancel(); serialReader = null; }
+    if (serialWriter) { await serialWriter.close(); serialWriter = null; }
+    if (serialPort) { await serialPort.close(); serialPort = null; }
+  } catch (e) {}
+  arduinoConnected = false;
+  updateArduinoUI();
+  addSerialLog('Desconectado', 'warn');
+  showNotif('Arduino desconectado');
+}
+
+function updateArduinoUI() {
+  const dot = document.getElementById('arduinoDot');
+  const label = document.getElementById('arduinoLabel');
+  const btn = document.getElementById('arduinoConnBtn');
+  if (arduinoConnected) {
+    dot.className = 'arduino-dot connected';
+    label.textContent = 'Conectado';
+    btn.textContent = 'Desconectar';
+    btn.className = 'arduino-btn disconnect-btn';
+  } else {
+    dot.className = 'arduino-dot disconnected';
+    label.textContent = 'Desconectado';
+    btn.textContent = 'Conectar';
+    btn.className = 'arduino-btn connect-btn';
+  }
+}
+
+async function readSerialLoop() {
+  try {
+    while (true) {
+      const { value, done } = await serialReader.read();
+      if (done) break;
+      if (value) addSerialLog(value.trim());
+    }
+  } catch (e) {
+    if (arduinoConnected) addSerialLog('Conexión perdida', 'err');
+    arduinoConnected = false;
+    updateArduinoUI();
+  }
+}
+
+async function writeSerial(data) {
+  if (!serialWriter) return;
+  try { await serialWriter.write(data); } catch (e) { addSerialLog('Error enviando: ' + e.message, 'err'); }
+}
+
+function addSerialLog(msg, type) {
+  const log = document.getElementById('serialLog');
+  const p = document.createElement('p');
+  p.textContent = `[${new Date().toLocaleTimeString('es-MX')}] ${msg}`;
+  if (type === 'err') p.style.color = '#FF6B6B';
+  else if (type === 'ok') p.style.color = '#7BF5A0';
+  else if (type === 'warn') p.style.color = '#FFD93D';
+  else if (type === 'cmd') p.style.color = '#6BC5F8';
+  log.appendChild(p);
+  log.scrollTop = log.scrollHeight;
+}
+
+function sendSerial() {
+  const input = document.getElementById('serialInput');
+  const val = input.value.trim();
+  if (!val) return;
+  if (arduinoConnected) {
+    writeSerial(val + '\n');
+    addSerialLog('>> ' + val, 'cmd');
+  } else {
+    addSerialLog('No conectado. Conecta el Arduino primero.', 'err');
+  }
+  input.value = '';
+}
+
+function sendArduinoCommand(cmd) {
+  if (cmd === 'SYNC') {
+    const data = medications.map(m => `${m.name}|${m.remaining}|${m.expiry}`).join(';');
+    const fullCmd = `SYNC:${data}`;
+    if (arduinoConnected) {
+      writeSerial(fullCmd + '\n');
+      addSerialLog('>> ' + fullCmd, 'cmd');
+    } else {
+      addSerialLog('>> [Simulado] ' + fullCmd, 'cmd');
+      addSerialLog('Datos sincronizados (modo simulación)', 'warn');
+    }
+  } else {
+    if (arduinoConnected) {
+      writeSerial(cmd + '\n');
+      addSerialLog('>> ' + cmd, 'cmd');
+    } else {
+      addSerialLog('>> [Simulado] ' + cmd, 'cmd');
+      if (cmd === 'TEST_ALARM') addSerialLog('Alarma de prueba activada (simulación)', 'warn');
+      if (cmd === 'STATUS') addSerialLog('Estado: OK | Pastillero: Listo | LED: Verde (simulación)', 'warn');
+      if (cmd === 'RESET') addSerialLog('Arduino reiniciado (simulación)', 'warn');
+    }
+  }
+}
+
+function switchArduinoTab(tab, btn) {
+  document.querySelectorAll('.arduino-tab').forEach(t => t.style.display = 'none');
+  document.querySelectorAll('.tab-bar .tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('arduino' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block';
+  btn.classList.add('active');
+}
+
+function initArduinoSketch() {
+  document.getElementById('arduinoSketch').textContent = `// Heal Tech - Arduino Uno
+// Conexiones:
+// Buzzer: Pin 8
+// LED Rojo: Pin 9
+// LED Verde: Pin 10
+// LCD I2C: SDA(A4), SCL(A5)
+
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+const int BUZZER = 8;
+const int LED_R = 9;
+const int LED_G = 10;
+String inputBuffer = "";
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(BUZZER, OUTPUT);
+  pinMode(LED_R, OUTPUT);
+  pinMode(LED_G, OUTPUT);
+  lcd.init();
+  lcd.backlight();
+  lcd.print("Heal Tech");
+  lcd.setCursor(0, 1);
+  lcd.print("Iniciando...");
+  digitalWrite(LED_G, HIGH);
+  delay(1000);
+  lcd.clear();
+  Serial.println("READY");
+}
+
+void loop() {
+  while (Serial.available()) {
+    char c = Serial.read();
+    if (c == '\\n') {
+      processCommand(inputBuffer);
+      inputBuffer = "";
+    } else {
+      inputBuffer += c;
+    }
+  }
+}
+
+void processCommand(String cmd) {
+  if (cmd.startsWith("ALARM:")) {
+    String med = cmd.substring(6);
+    lcd.clear();
+    lcd.print("TOMAR:");
+    lcd.setCursor(0, 1);
+    lcd.print(med.substring(0, 16));
+    playAlarm();
+    Serial.println("ACK:ALARM");
+  }
+  else if (cmd.startsWith("TAKEN:")) {
+    int i1 = cmd.indexOf(':', 6);
+    String med = cmd.substring(6, i1);
+    String rem = cmd.substring(i1 + 1);
+    lcd.clear();
+    lcd.print("Tomado: " + med.substring(0, 8));
+    lcd.setCursor(0, 1);
+    lcd.print("Quedan: " + rem);
+    blinkGreen();
+    Serial.println("ACK:TAKEN");
+  }
+  else if (cmd.startsWith("SYNC:")) {
+    lcd.clear();
+    lcd.print("Sincronizado");
+    lcd.setCursor(0, 1);
+    lcd.print("Datos OK");
+    digitalWrite(LED_G, HIGH);
+    delay(500);
+    Serial.println("ACK:SYNC");
+  }
+  else if (cmd == "TEST_ALARM") {
+    playAlarm();
+    Serial.println("ACK:TEST");
+  }
+  else if (cmd == "STATUS") {
+    Serial.println("STATUS:OK");
+  }
+  else if (cmd == "RESET") {
+    lcd.clear();
+    lcd.print("Reiniciando...");
+    delay(500);
+    asm volatile ("jmp 0");
+  }
+}
+
+void playAlarm() {
+  for (int i = 0; i < 3; i++) {
+    tone(BUZZER, 1000, 300);
+    digitalWrite(LED_R, HIGH);
+    delay(300);
+    noTone(BUZZER);
+    digitalWrite(LED_R, LOW);
+    delay(200);
+  }
+}
+
+void blinkGreen() {
+  for (int i = 0; i < 3; i++) {
+    digitalWrite(LED_G, HIGH);
+    delay(200);
+    digitalWrite(LED_G, LOW);
+    delay(200);
+  }
+  digitalWrite(LED_G, HIGH);
+}`;
+}
+
+function copyArduinoCode() {
+  const code = document.getElementById('arduinoSketch').textContent;
+  navigator.clipboard.writeText(code).then(() => showNotif('Código copiado al portapapeles'));
+}
+
+// ===== SHARE =====
+function sharePage() {
+  const text = `Heal Tech - Gestión de Medicamentos\nManeja tus medicinas, alarmas y más.\n\nMis medicamentos:\n` +
+    medications.map(m => `• ${m.name}: ${m.remaining}/${m.total} (vence ${m.expiry})`).join('\n');
+  if (navigator.share) {
+    navigator.share({ title: 'Heal Tech', text, url: window.location.href }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(text).then(() => showNotif('Información copiada al portapapeles'));
+  }
+}
+
+function shareWhatsApp() {
+  const text = encodeURIComponent(`*Heal Tech* - Mis Medicamentos:\n` +
+    medications.map(m => `💊 ${m.name}: ${m.remaining}/${m.total}`).join('\n') +
+    `\n\n_Gestiona tus medicinas con Heal Tech_`);
+  window.open(`https://wa.me/?text=${text}`, '_blank');
+}
+
+function copyShareLink() {
+  const text = `Heal Tech - Mis Medicamentos:\n` +
+    medications.map(m => `${m.name}: ${m.remaining}/${m.total} (vence ${m.expiry})`).join('\n');
+  navigator.clipboard.writeText(text).then(() => showNotif('Copiado al portapapeles'));
+}
+
+// ===== UI HELPERS =====
+function showNotif(msg) {
+  const bar = document.getElementById('notifBar');
+  bar.textContent = msg;
+  bar.classList.add('show');
+  setTimeout(() => bar.classList.remove('show'), 3000);
+}
+
+function showConfirm(title, msg, onYes) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent = msg;
+  document.getElementById('confirmOverlay').classList.add('show');
+  document.getElementById('confirmYes').onclick = () => { closeConfirm(); onYes(); };
+}
+
+function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('show'); }
+
+// Close modals on overlay click
+document.getElementById('medModal').addEventListener('click', function(e) { if (e.target === this) closeMedModal(); });
+document.getElementById('alarmModal').addEventListener('click', function(e) { if (e.target === this) closeAlarmModal(); });
+document.getElementById('confirmOverlay').addEventListener('click', function(e) { if (e.target === this) closeConfirm(); });
+
+// Serial input enter key
+document.getElementById('serialInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') sendSerial(); });
+
+// Request notification permission
+if ('Notification' in window && Notification.permission === 'default') {
+  Notification.requestPermission();
+}
+
+// ===== INIT =====
+renderMeds();
+renderAlarms();
+initArduinoSketch();
+highlightColor();
+alarmCheckInterval = setInterval(checkAlarms, 10000);
+checkAlarms();
+</script>
+</body>
+</html>

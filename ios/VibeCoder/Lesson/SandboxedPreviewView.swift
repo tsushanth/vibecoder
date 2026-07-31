@@ -18,36 +18,89 @@ import WebKit
 struct SandboxedPreviewView: View {
     let project: CatalogProject
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var edits = LessonEditStore.shared
+    @ObservedObject private var premium = PremiumManager.shared
+    @State private var showOriginal = false
+    @State private var showPaywall = false
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Color.black.ignoresSafeArea()
-                if let url = previewIndexURL {
-                    SandboxedWebView(indexURL: url)
-                        .ignoresSafeArea(edges: .bottom)
-                } else {
-                    VStack(spacing: 12) {
-                        Image(systemName: "exclamationmark.triangle")
-                            .font(.largeTitle)
-                            .foregroundStyle(.orange)
-                        Text("Preview is not available for this lesson.")
-                            .foregroundStyle(.white)
+            VStack(spacing: 0) {
+                if edits.hasEdits(slug: project.slug) {
+                    compareControl
+                }
+                ZStack {
+                    Color.black.ignoresSafeArea()
+                    if let url = previewIndexURL {
+                        SandboxedWebView(indexURL: url)
+                            .ignoresSafeArea(edges: .bottom)
+                            // Force the WKWebView to rebuild when toggling
+                            // between original and edited — a new URL means
+                            // a clean load.
+                            .id(url.path)
+                    } else {
+                        VStack(spacing: 12) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.largeTitle)
+                                .foregroundStyle(.orange)
+                            Text("Preview is not available for this lesson.")
+                                .foregroundStyle(.white)
+                        }
                     }
                 }
             }
             .preferredColorScheme(.dark)
-            .navigationTitle("Preview")
+            .navigationTitle(navTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Close") { dismiss() }
                 }
             }
+            .fullScreenCover(isPresented: $showPaywall) {
+                RemotePaywallView(triggerSource: "compare_original")
+            }
         }
     }
 
+    private var navTitle: String {
+        guard edits.hasEdits(slug: project.slug) else { return "Preview" }
+        return showOriginal ? "Preview · original" : "Preview · your edits"
+    }
+
+    @ViewBuilder
+    private var compareControl: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "rectangle.lefthalf.inset.filled")
+                .foregroundStyle(.white.opacity(0.7))
+            Picker("Show", selection: Binding<Bool>(
+                get: { showOriginal },
+                set: { newValue in
+                    if newValue && !premium.isPremium {
+                        showPaywall = true
+                    } else {
+                        showOriginal = newValue
+                    }
+                }
+            )) {
+                Text("Your edits").tag(false)
+                Text(premium.isPremium ? "Original" : "Original · Pro").tag(true)
+            }
+            .pickerStyle(.segmented)
+        }
+        .padding(.horizontal, 14).padding(.vertical, 10)
+        .background(Color.white.opacity(0.05))
+    }
+
+    /// When showing the original, return the bundled index.html. Otherwise
+    /// prefer the user's tinkered copy if any edits exist, falling back to
+    /// the bundle. WKWebView's allowingReadAccessTo is scoped to the parent
+    /// of whichever index.html we return so relative imports work in both
+    /// modes.
     private var previewIndexURL: URL? {
+        if !showOriginal, let tinkered = edits.materializeIfEdited(project: project) {
+            return tinkered
+        }
         guard let root = CatalogStore.shared.bundleURL(for: project) else { return nil }
         let index = root.appendingPathComponent("index.html")
         return FileManager.default.fileExists(atPath: index.path) ? index : nil

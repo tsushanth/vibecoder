@@ -30,6 +30,8 @@ import androidx.compose.ui.graphics.Color
 import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.components.SettingsRow
 import com.kreativekoala.vibecoder.ui.theme.*
+import com.kreativekoala.crosspromokit.models.AppId
+import com.kreativekoala.crosspromokit.view.CrossPromoSection
 import com.kreativekoala.paywallkit.models.PaywallFeature
 import com.kreativekoala.paywallkit.models.PaywallTheme
 import com.kreativekoala.paywallkit.view.PaywallPreview
@@ -366,6 +368,8 @@ fun AccountScreen(
             Spacer(modifier = Modifier.width(8.dp))
             Text(stringResource(R.string.sign_out), fontWeight = FontWeight.SemiBold)
         }
+
+        CrossPromoSection(currentApp = AppId.VIBEBUILD)
 
         Spacer(modifier = Modifier.height(32.dp))
     }

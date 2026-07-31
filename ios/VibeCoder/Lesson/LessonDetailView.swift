@@ -14,6 +14,12 @@ struct LessonDetailView: View {
 
     @State private var showCode = false
     @State private var showPreview = false
+    @State private var showPaywall = false
+    @State private var paywallTrigger = "lesson_detail"
+    @State private var newPadName = ""
+    @State private var showCreatePadAlert = false
+    @ObservedObject private var edits = LessonEditStore.shared
+    @ObservedObject private var premium = PremiumManager.shared
 
     var body: some View {
         ScrollView {
@@ -21,6 +27,10 @@ struct LessonDetailView: View {
                 hero
                 learningObjectives
                 actionButtons
+                if edits.hasEdits(slug: project.slug) {
+                    tinkerBanner
+                }
+                scratchpadsSection
                 if !project.description.isEmpty {
                     sourcePrompt
                 }
@@ -39,6 +49,27 @@ struct LessonDetailView: View {
         .fullScreenCover(isPresented: $showPreview) {
             SandboxedPreviewView(project: project)
         }
+        .fullScreenCover(isPresented: $showPaywall) {
+            RemotePaywallView(triggerSource: paywallTrigger)
+        }
+        .alert("Name this attempt", isPresented: $showCreatePadAlert) {
+            TextField("e.g. with red header", text: $newPadName)
+            Button("Cancel", role: .cancel) { newPadName = "" }
+            Button("Create") {
+                let trimmed = newPadName.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !trimmed.isEmpty {
+                    edits.createPad(slug: project.slug, name: trimmed)
+                }
+                newPadName = ""
+            }
+        } message: {
+            Text("Each attempt keeps its own edits. Switch between them anytime.")
+        }
+    }
+
+    private func showPaywall(_ trigger: String) {
+        paywallTrigger = trigger
+        showPaywall = true
     }
 
     private var hero: some View {
@@ -96,6 +127,91 @@ struct LessonDetailView: View {
                 }
             }
         }
+    }
+
+    private var scratchpadsSection: some View {
+        let pads = edits.pads(slug: project.slug)
+        let active = edits.activePad(slug: project.slug)
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("Attempts")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.5))
+                if !premium.isPremium {
+                    Text("PRO")
+                        .font(.caption2.weight(.bold))
+                        .padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(Capsule().fill(Color.orange.opacity(0.6)))
+                        .foregroundStyle(.white)
+                }
+                Spacer()
+                Button {
+                    if premium.isPremium {
+                        showCreatePadAlert = true
+                    } else {
+                        showPaywall("scratchpads")
+                    }
+                } label: {
+                    Label("New attempt", systemImage: "plus.circle.fill")
+                        .font(.caption.weight(.semibold))
+                }
+                .foregroundStyle(.white)
+            }
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    ForEach(pads, id: \.self) { name in
+                        Button {
+                            edits.selectPad(slug: project.slug, name: name)
+                        } label: {
+                            Text(name)
+                                .font(.caption.weight(.medium))
+                                .padding(.horizontal, 10).padding(.vertical, 6)
+                                .background(Capsule().fill(active == name ? Color.white : Color.white.opacity(0.10)))
+                                .foregroundStyle(active == name ? .black : .white)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            if !premium.isPremium {
+                Text("Free plan: one in-memory attempt that resets when you quit the app. Pro saves attempts across launches and lets you keep several side-by-side.")
+                    .font(.caption2)
+                    .foregroundStyle(.white.opacity(0.5))
+            }
+        }
+        .padding(14)
+        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.04)))
+    }
+
+    private var tinkerBanner: some View {
+        let edited = edits.editedFiles(slug: project.slug)
+        return HStack(spacing: 12) {
+            Image(systemName: "pencil.circle.fill")
+                .font(.title3)
+                .foregroundStyle(.orange)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Your edits are active")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white)
+                Text("Run Preview shows \(edited.count) tinkered \(edited.count == 1 ? "file" : "files"). Edits live only in this app on your device.")
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.7))
+            }
+            Spacer()
+            Button("Reset") {
+                edits.discardEdits(slug: project.slug)
+            }
+            .font(.caption.weight(.semibold))
+            .padding(.horizontal, 12).padding(.vertical, 6)
+            .background(Capsule().fill(Color.white.opacity(0.15)))
+            .foregroundStyle(.white)
+        }
+        .padding(14)
+        .background(RoundedRectangle(cornerRadius: 12).fill(Color.orange.opacity(0.10)))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+        )
     }
 
     private var sourcePrompt: some View {

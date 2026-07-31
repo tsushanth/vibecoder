@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>CryptoVault Wallet</title>
+<style>
+:root {
+  --bg: #0a0e17;
+  --bg2: #111827;
+  --bg3: #1a2235;
+  --card: #1e2a3a;
+  --card-hover: #243347;
+  --accent: #f7931a;
+  --accent2: #627eea;
+  --green: #00c853;
+  --red: #ff1744;
+  --text: #e8eaed;
+  --text2: #8899aa;
+  --border: #2a3a4a;
+  --radius: 14px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+
+/* Header */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+}
+.header h1 { font-size: 20px; font-weight: 700; }
+.header h1 span { color: var(--accent); }
+.header-icons { display: flex; gap: 12px; }
+.header-btn {
+  background: var(--bg3); border: none; color: var(--text2);
+  width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.header-btn:hover, .header-btn:active { background: var(--card); color: var(--text); }
+
+/* Screens */
+.screen { display: none; flex: 1; padding: 0 0 80px; overflow-y: auto; }
+.screen.active { display: block; }
+
+/* Bottom Nav */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  display: flex; background: var(--bg2);
+  border-top: 1px solid var(--border);
+  padding: 8px 0; padding-bottom: max(8px, env(safe-area-inset-bottom));
+  z-index: 100;
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 4px; padding: 6px 0; background: none; border: none;
+  color: var(--text2); cursor: pointer; transition: color 0.2s;
+  font-size: 10px; font-weight: 600;
+}
+.nav-item.active { color: var(--accent); }
+.nav-item svg { width: 22px; height: 22px; }
+
+/* Portfolio Card */
+.portfolio-card {
+  margin: 20px; padding: 28px 24px;
+  background: linear-gradient(135deg, #1a2a4a 0%, #0f1a2e 100%);
+  border-radius: var(--radius); border: 1px solid var(--border);
+  position: relative; overflow: hidden;
+}
+.portfolio-card::before {
+  content: ''; position: absolute; top: -50%; right: -30%;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(247,147,26,0.1) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.portfolio-label { font-size: 13px; color: var(--text2); margin-bottom: 6px; }
+.portfolio-value { font-size: 36px; font-weight: 800; letter-spacing: -1px; }
+.portfolio-change {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin-top: 8px; font-size: 14px; font-weight: 600;
+  padding: 4px 10px; border-radius: 20px;
+}
+.portfolio-change.up { color: var(--green); background: rgba(0,200,83,0.1); }
+.portfolio-change.down { color: var(--red); background: rgba(255,23,68,0.1); }
+
+/* Quick Actions */
+.quick-actions {
+  display: flex; gap: 12px; margin: 0 20px 20px;
+}
+.quick-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 8px; padding: 16px 8px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text);
+  cursor: pointer; transition: all 0.2s; font-size: 12px; font-weight: 600;
+}
+.quick-btn:hover, .quick-btn:active { background: var(--card-hover); transform: scale(0.97); }
+.quick-btn .icon {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.quick-btn .icon.send { background: rgba(255,23,68,0.15); color: var(--red); }
+.quick-btn .icon.receive { background: rgba(0,200,83,0.15); color: var(--green); }
+.quick-btn .icon.swap { background: rgba(98,126,234,0.15); color: var(--accent2); }
+.quick-btn .icon.mine { background: rgba(247,147,26,0.15); color: var(--accent); }
+
+/* Coin List */
+.section-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 20px; margin-bottom: 12px;
+}
+.section-title { font-size: 16px; font-weight: 700; }
+.section-link { font-size: 13px; color: var(--accent); background: none; border: none; cursor: pointer; }
+
+.coin-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px; cursor: pointer; transition: background 0.15s;
+}
+.coin-item:hover, .coin-item:active { background: var(--bg3); }
+.coin-icon {
+  width: 42px; height: 42px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 16px; flex-shrink: 0;
+}
+.coin-info { flex: 1; min-width: 0; }
+.coin-name { font-weight: 600; font-size: 15px; }
+.coin-symbol { font-size: 12px; color: var(--text2); }
+.coin-right { text-align: right; }
+.coin-price { font-weight: 600; font-size: 15px; }
+.coin-change { font-size: 12px; font-weight: 600; }
+.coin-change.up { color: var(--green); }
+.coin-change.down { color: var(--red); }
+.coin-balance { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+/* Send/Receive Screens */
+.screen-content { padding: 20px; }
+.screen-title-bar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+}
+.back-btn {
+  background: none; border: none; color: var(--text); cursor: pointer;
+  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+}
+.screen-title { font-size: 18px; font-weight: 700; }
+
+.form-group { margin-bottom: 20px; }
+.form-label { font-size: 13px; color: var(--text2); margin-bottom: 8px; display: block; font-weight: 600; }
+.form-input {
+  width: 100%; padding: 14px 16px; background: var(--bg3);
+  border: 1px solid var(--border); border-radius: 12px;
+  color: var(--text); font-size: 15px; outline: none;
+  transition: border-color 0.2s;
+}
+.form-input:focus { border-color: var(--accent); }
+.form-input::placeholder { color: var(--text2); opacity: 0.6; }
+textarea.form-input { resize: none; min-height: 80px; font-family: inherit; }
+
+.amount-input-wrap {
+  display: flex; align-items: center; gap: 8px;
+}
+.amount-input-wrap .form-input { flex: 1; }
+.max-btn {
+  padding: 8px 16px; background: rgba(247,147,26,0.15);
+  color: var(--accent); border: none; border-radius: 10px;
+  font-weight: 700; font-size: 13px; cursor: pointer;
+}
+
+.coin-selector {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
+}
+.coin-chip {
+  padding: 8px 16px; background: var(--bg3);
+  border: 1px solid var(--border); border-radius: 20px;
+  color: var(--text2); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.coin-chip.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+.primary-btn {
+  width: 100%; padding: 16px; background: var(--accent);
+  color: #000; font-size: 16px; font-weight: 700;
+  border: none; border-radius: 12px; cursor: pointer;
+  transition: all 0.2s; margin-top: 10px;
+}
+.primary-btn:hover { opacity: 0.9; }
+.primary-btn:active { transform: scale(0.98); }
+.primary-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.primary-btn.green { background: var(--green); }
+.primary-btn.blue { background: var(--accent2); color: #fff; }
+
+/* QR Code Area */
+.qr-container {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 30px 20px; margin: 20px 0;
+  background: var(--card); border-radius: var(--radius);
+}
+.qr-code {
+  width: 200px; height: 200px; background: #fff;
+  border-radius: 12px; padding: 12px; margin-bottom: 20px;
+}
+.qr-code canvas { width: 100%; height: 100%; }
+.address-display {
+  word-break: break-all; text-align: center;
+  font-size: 13px; color: var(--text2); line-height: 1.6;
+  padding: 12px 16px; background: var(--bg3);
+  border-radius: 10px; width: 100%; margin-bottom: 16px;
+  font-family: 'Courier New', monospace;
+}
+.copy-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 24px; background: var(--accent);
+  color: #000; font-weight: 700; font-size: 14px;
+  border: none; border-radius: 10px; cursor: pointer;
+}
+
+/* Transaction History */
+.tx-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px; border-bottom: 1px solid rgba(42,58,74,0.5);
+}
+.tx-icon {
+  width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.tx-icon.sent { background: rgba(255,23,68,0.12); color: var(--red); }
+.tx-icon.received { background: rgba(0,200,83,0.12); color: var(--green); }
+.tx-icon.mined { background: rgba(247,147,26,0.12); color: var(--accent); }
+.tx-icon.swapped { background: rgba(98,126,234,0.12); color: var(--accent2); }
+.tx-info { flex: 1; min-width: 0; }
+.tx-type { font-weight: 600; font-size: 14px; }
+.tx-addr { font-size: 11px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tx-right { text-align: right; flex-shrink: 0; }
+.tx-amount { font-weight: 600; font-size: 14px; }
+.tx-amount.sent { color: var(--red); }
+.tx-amount.received { color: var(--green); }
+.tx-amount.mined { color: var(--accent); }
+.tx-date { font-size: 11px; color: var(--text2); }
+
+/* Mining Screen */
+.mining-card {
+  margin: 20px; padding: 24px;
+  background: var(--card); border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+.mining-visual {
+  height: 180px; display: flex; align-items: center; justify-content: center;
+  position: relative; margin-bottom: 20px;
+}
+.hash-display {
+  font-family: 'Courier New', monospace; font-size: 11px;
+  color: var(--accent); word-break: break-all;
+  text-align: center; line-height: 1.8; opacity: 0.7;
+}
+.mining-stats {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin-bottom: 20px;
+}
+.mining-stat {
+  padding: 14px; background: var(--bg3);
+  border-radius: 10px; text-align: center;
+}
+.mining-stat-value { font-size: 20px; font-weight: 800; color: var(--accent); }
+.mining-stat-label { font-size: 11px; color: var(--text2); margin-top: 4px; }
+.mining-progress {
+  height: 6px; background: var(--bg3); border-radius: 3px;
+  margin-bottom: 16px; overflow: hidden;
+}
+.mining-progress-bar {
+  height: 100%; background: linear-gradient(90deg, var(--accent), #ffd54f);
+  border-radius: 3px; transition: width 0.3s; width: 0%;
+}
+
+/* Swap Screen */
+.swap-card {
+  margin: 20px; padding: 24px;
+  background: var(--card); border-radius: var(--radius);
+  border: 1px solid var(--border); position: relative;
+}
+.swap-field {
+  padding: 16px; background: var(--bg3);
+  border-radius: 12px; margin-bottom: 8px;
+}
+.swap-field-header {
+  display: flex; justify-content: space-between; margin-bottom: 10px;
+}
+.swap-field-label { font-size: 12px; color: var(--text2); }
+.swap-field-balance { font-size: 12px; color: var(--text2); }
+.swap-field-row { display: flex; align-items: center; gap: 10px; }
+.swap-amount-input {
+  flex: 1; background: none; border: none; color: var(--text);
+  font-size: 24px; font-weight: 700; outline: none; min-width: 0;
+}
+.swap-coin-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 20px;
+  color: var(--text); font-weight: 600; font-size: 14px;
+  cursor: pointer; flex-shrink: 0;
+}
+.swap-arrow-wrap {
+  display: flex; justify-content: center; margin: -4px 0;
+  position: relative; z-index: 2;
+}
+.swap-arrow-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--accent); color: #000; border: 3px solid var(--card);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: transform 0.3s;
+}
+.swap-arrow-btn:active { transform: rotate(180deg); }
+.swap-rate {
+  text-align: center; padding: 12px; font-size: 13px; color: var(--text2);
+}
+
+/* Settings */
+.settings-group {
+  margin: 20px; background: var(--card);
+  border-radius: var(--radius); overflow: hidden;
+  border: 1px solid var(--border);
+}
+.settings-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background 0.15s;
+}
+.settings-item:last-child { border-bottom: none; }
+.settings-item:hover, .settings-item:active { background: var(--card-hover); }
+.settings-item-left { display: flex; align-items: center; gap: 12px; }
+.settings-item-icon {
+  width: 34px; height: 34px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  display: none; align-items: flex-end; justify-content: center;
+  z-index: 200;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: var(--bg2); border-radius: 20px 20px 0 0;
+  width: 100%; max-width: 480px; max-height: 80vh;
+  padding: 24px; animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.modal-handle {
+  width: 40px; height: 4px; background: var(--border);
+  border-radius: 2px; margin: 0 auto 20px;
+}
+.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; text-align: center; }
+
+/* Toast */
+.toast {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+  padding: 14px 24px; background: var(--card);
+  border: 1px solid var(--border); border-radius: 12px;
+  font-size: 14px; font-weight: 600; z-index: 300;
+  transition: transform 0.3s ease; max-width: 90%;
+  box-shadow: var(--shadow);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: var(--green); }
+.toast.error { border-color: var(--red); }
+
+/* Coin detail modal */
+.coin-detail-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.coin-detail-icon {
+  width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 20px;
+}
+.coin-detail-price { font-size: 28px; font-weight: 800; }
+.coin-detail-actions { display: flex; gap: 10px; margin-top: 20px; }
+.coin-detail-actions button { flex: 1; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 0; }
+
+/* Empty state */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 40px 20px; color: var(--text2);
+}
+.empty-state svg { width: 64px; height: 64px; margin-bottom: 16px; opacity: 0.3; }
+.empty-state p { font-size: 14px; }
+
+@media (min-width: 481px) {
+  .app { border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Header -->
+  <div class="header">
+    <h1><span>Crypto</span>Vault</h1>
+    <div class="header-icons">
+      <button class="header-btn" onclick="showNotifications()" aria-label="Notifications">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      </button>
+      <button class="header-btn" onclick="switchScreen('settings')" aria-label="Settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Dashboard Screen -->
+  <div class="screen active" id="screen-dashboard">
+    <div class="portfolio-card">
+      <div class="portfolio-label">Total Portfolio Value</div>
+      <div class="portfolio-value" id="total-value">$0.00</div>
+      <div class="portfolio-change up" id="portfolio-change">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        <span id="change-text">+2.34%</span>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <button class="quick-btn" onclick="switchScreen('send')">
+        <div class="icon send">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </div>
+        Send
+      </button>
+      <button class="quick-btn" onclick="switchScreen('receive')">
+        <div class="icon receive">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        </div>
+        Receive
+      </button>
+      <button class="quick-btn" onclick="switchScreen('swap')">
+        <div class="icon swap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+        </div>
+        Swap
+      </button>
+      <button class="quick-btn" onclick="switchScreen('mining')">
+        <div class="icon mine">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01M8 12h.01M16 12h.01"/></svg>
+        </div>
+        Mine
+      </button>
+    </div>
+
+    <div class="section-header">
+      <span class="section-title">Your Assets</span>
+    </div>
+    <div id="coin-list"></div>
+
+    <div class="section-header" style="margin-top:24px;">
+      <span class="section-title">Recent Transactions</span>
+      <button class="section-link" onclick="switchScreen('history')">See All</button>
+    </div>
+    <div id="recent-tx"></div>
+  </div>
+
+  <!-- Send Screen -->
+  <div class="screen" id="screen-send">
+    <div class="screen-title-bar">
+      <button class="back-btn" onclick="switchScreen('dashboard')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <span class="screen-title">Send Crypto</span>
+    </div>
+    <div class="screen-content">
+      <div class="form-group">
+        <label class="form-label">Select Currency</label>
+        <div class="coin-selector" id="send-coin-selector"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Recipient Address</label>
+        <input type="text" class="form-input" id="send-address" placeholder="Enter wallet address">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Amount</label>
+        <div class="amount-input-wrap">
+          <input type="number" class="form-input" id="send-amount" placeholder="0.00" step="any" min="0">
+          <button class="max-btn" onclick="sendMax()">MAX</button>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:var(--text2)">
+          Available: <span id="send-available">0.00</span> <span id="send-available-symbol"></span>
+          &nbsp;|&nbsp; USD: $<span id="send-usd-value">0.00</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Network Fee</label>
+        <div style="padding:12px 16px;background:var(--bg3);border-radius:10px;font-size:14px;color:var(--text2);">
+          ~$<span id="send-fee">2.50</span> (estimated)
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Note (optional)</label>
+        <input type="text" class="form-input" id="send-note" placeholder="Add a note...">
+      </div>
+      <button class="primary-btn" onclick="executeSend()" id="send-btn">Send</button>
+    </div>
+  </div>
+
+  <!-- Receive Screen -->
+  <div class="screen" id="screen-receive">
+    <div class="screen-title-bar">
+      <button class="back-btn" onclick="switchScreen('dashboard')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <span class="screen-title">Receive Crypto</span>
+    </div>
+    <div class="screen-content">
+      <div class="form-group">
+        <label class="form-label">Select Currency</label>
+        <div class="coin-selector" id="receive-coin-selector"></div>
+      </div>
+      <div class="qr-container">
+        <div class="qr-code">
+          <canvas id="qr-canvas" width="176" height="176"></canvas>
+        </div>
+        <div class="address-display" id="receive-address"></div>
+        <button class="copy-btn" onclick="copyAddress()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy Address
+        </button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Request Amount (optional)</label>
+        <input type="number" class="form-input" id="receive-amount" placeholder="0.00" step="any" min="0">
+      </div>
+      <button class="primary-btn green" onclick="shareAddress()">Share Address</button>
+    </div>
+  </div>
+
+  <!-- Swap Screen -->
+  <div class="screen" id="screen-swap">
+    <div class="screen-title-bar">
+      <button class="back-btn" onclick="switchScreen('dashboard')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <span class="screen-title">Swap</span>
+    </div>
+    <div class="swap-card">
+      <div class="swap-field">
+        <div class="swap-field-header">
+          <span class="swap-field-label">From</span>
+          <span class="swap-field-balance" id="swap-from-balance">Balance: 0</span>
+        </div>
+        <div class="swap-field-row">
+          <input type="number" class="swap-amount-input" id="swap-from-amount" placeholder="0" oninput="calcSwap()">
+          <button class="swap-coin-btn" id="swap-from-coin" onclick="openSwapCoinPicker('from')">BTC ▾</button>
+        </div>
+      </div>
+      <div class="swap-arrow-wrap">
+        <button class="swap-arrow-btn" onclick="flipSwap()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+        </button>
+      </div>
+      <div class="swap-field">
+        <div class="swap-field-header">
+          <span class="swap-field-label">To</span>
+          <span class="swap-field-balance" id="swap-to-balance">Balance: 0</span>
+        </div>
+        <div class="swap-field-row">
+          <input type="number" class="swap-amount-input" id="swap-to-amount" placeholder="0" readonly>
+          <button class="swap-coin-btn" id="swap-to-coin" onclick="openSwapCoinPicker('to')">ETH ▾</button>
+        </div>
+      </div>
+      <div class="swap-rate" id="swap-rate">1 BTC = -- ETH</div>
+    </div>
+    <div style="padding:0 20px;">
+      <button class="primary-btn blue" onclick="executeSwap()">Swap Now</button>
+    </div>
+  </div>
+
+  <!-- Mining Screen -->
+  <div class="screen" id="screen-mining">
+    <div class="screen-title-bar">
+      <button class="back-btn" onclick="switchScreen('dashboard')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <span class="screen-title">Mining</span>
+    </div>
+    <div class="mining-card">
+      <div class="form-group">
+        <label class="form-label">Select Coin to Mine</label>
+        <div class="coin-selector" id="mine-coin-selector"></div>
+      </div>
+      <div class="mining-visual">
+        <div class="hash-display" id="hash-display">Press Start to begin mining...</div>
+      </div>
+      <div class="mining-progress">
+        <div class="mining-progress-bar" id="mining-progress"></div>
+      </div>
+      <div class="mining-stats">
+        <div class="mining-stat">
+          <div class="mining-stat-value" id="hashrate">0</div>
+          <div class="mining-stat-label">Hash Rate (H/s)</div>
+        </div>
+        <div class="mining-stat">
+          <div class="mining-stat-value" id="blocks-mined">0</div>
+          <div class="mining-stat-label">Blocks Mined</div>
+        </div>
+        <div class="mining-stat">
+          <div class="mining-stat-value" id="mining-earned">0.000000</div>
+          <div class="mining-stat-label">Coins Earned</div>
+        </div>
+        <div class="mining-stat">
+          <div class="mining-stat-value" id="mining-time">00:00</div>
+          <div class="mining-stat-label">Time Elapsed</div>
+        </div>
+      </div>
+      <button class="primary-btn" id="mining-btn" onclick="toggleMining()">Start Mining</button>
+    </div>
+  </div>
+
+  <!-- History Screen -->
+  <div class="screen" id="screen-history">
+    <div class="screen-title-bar">
+      <button class="back-btn" onclick="switchScreen('dashboard')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <span class="screen-title">Transaction History</span>
+    </div>
+    <div id="full-tx-list"></div>
+  </div>
+
+  <!-- Settings Screen -->
+  <div class="screen" id="screen-settings">
+    <div class="screen-title-bar">
+      <button class="back-btn" onclick="switchScreen('dashboard')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <span class="screen-title">Settings</span>
+    </div>
+    <div class="settings-group">
+      <div class="settings-item" onclick="showSenderAddress()">
+        <div class="settings-item-left">
+          <div class="settings-item-icon" style="background:rgba(247,147,26,0.15);color:var(--accent);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg>
+          </div>
+          <div>
+            <div style="font-weight:600;font-size:14px;">Main Wallet Address</div>
+            <div style="font-size:11px;color:var(--text2);">View sender address</div>
+          </div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+      <div class="settings-item" onclick="exportData()">
+        <div class="settings-item-left">
+          <div class="settings-item-icon" style="background:rgba(0,200,83,0.15);color:var(--green);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          </div>
+          <div>
+            <div style="font-weight:600;font-size:14px;">Export Data</div>
+            <div style="font-size:11px;color:var(--text2);">Download transaction history</div>
+          </div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+      <div class="settings-item" onclick="resetWallet()">
+        <div class="settings-item-left">
+          <div class="settings-item-icon" style="background:rgba(255,23,68,0.15);color:var(--red);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+          </div>
+          <div>
+            <div style="font-weight:600;font-size:14px;">Reset Wallet</div>
+            <div style="font-size:11px;color:var(--text2);">Clear all data and start fresh</div>
+          </div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+    </div>
+    <div style="text-align:center;padding:30px;color:var(--text2);font-size:12px;">
+      CryptoVault v1.0.0<br>Simulation Wallet
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-screen="dashboard" onclick="switchScreen('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      Home
+    </button>
+    <button class="nav-item" data-screen="swap" onclick="switchScreen('swap')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+      Swap
+    </button>
+    <button class="nav-item" data-screen="mining" onclick="switchScreen('mining')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01M8 12h.01M16 12h.01"/></svg>
+      Mine
+    </button>
+    <button class="nav-item" data-screen="history" onclick="switchScreen('history')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      History
+    </button>
+  </nav>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============= DATA =============
+const MAIN_ADDRESS = 'bc1qwzrryqr3ja8w7hnja2spmkgfdcgvqwp5swz4af4ngsjecfz0w0pqud7k38';
+
+const COINS = [
+  { id: 'btc', name: 'Bitcoin', symbol: 'BTC', color: '#f7931a', price: 67432.18, change: 2.34 },
+  { id: 'eth', name: 'Ethereum', symbol: 'ETH', color: '#627eea', price: 3521.45, change: -1.12 },
+  { id: 'bnb', name: 'BNB', symbol: 'BNB', color: '#f3ba2f', price: 584.32, change: 0.87 },
+  { id: 'sol', name: 'Solana', symbol: 'SOL', color: '#9945ff', price: 142.67, change: 5.23 },
+  { id: 'xrp', name: 'Ripple', symbol: 'XRP', color: '#00aae4', price: 0.5234, change: -0.45 },
+  { id: 'ada', name: 'Cardano', symbol: 'ADA', color: '#0033ad', price: 0.4521, change: 1.67 },
+  { id: 'doge', name: 'Dogecoin', symbol: 'DOGE', color: '#c2a633', price: 0.1523, change: 3.45 },
+  { id: 'dot', name: 'Polkadot', symbol: 'DOT', color: '#e6007a', price: 7.23, change: -2.10 },
+];
+
+const DEFAULT_BALANCES = {
+  btc: 1.2453, eth: 15.342, bnb: 8.5, sol: 45.23,
+  xrp: 5000, ada: 8500, doge: 25000, dot: 320
+};
+
+const COIN_ADDRESSES = {
+  btc: MAIN_ADDRESS,
+  eth: '0x742d35Cc6634C0532925a3b844Bc9e7595f2bD28',
+  bnb: 'bnb1grpf0955h0ykzq3ar5nmum7y6gdfl6lxfn46h2',
+  sol: '7EcDhSYGxXyscszYEp35KHN8vvw3svAuLKTzXwCFLtV',
+  xrp: 'rN7m3gYRKKsKfcF3HtiJGUBMbqpbFpuf8g',
+  ada: 'addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3n0d3vllmyqwsx5wktcd8cc3sq835lu7drv2xwl2wywfgse35a3lr',
+  doge: 'D7Y55VBhKkrP4cWqSb9JhjGRHqSRjPL2fN',
+  dot: '1FRMM8PEiWXYax7rpS6X4XZX1aAAxSWx1CrKTyrVYhV24fg',
+};
+
+// ============= STATE =============
+let state = loadState();
+
+function defaultState() {
+  return {
+    balances: { ...DEFAULT_BALANCES },
+    transactions: generateInitialTransactions(),
+    miningStats: { totalBlocks: 0, totalEarned: {} },
+    selectedSendCoin: 'btc',
+    selectedReceiveCoin: 'btc',
+    selectedMineCoin: 'btc',
+    swapFrom: 'btc',
+    swapTo: 'eth',
+  };
+}
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('cryptovault_state');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Ensure all coin balances exist
+      COINS.forEach(c => {
+        if (parsed.balances[c.id] === undefined) parsed.balances[c.id] = DEFAULT_BALANCES[c.id] || 0;
+      });
+      return parsed;
+    }
+  } catch(e) {}
+  return defaultState();
+}
+
+function saveState() {
+  localStorage.setItem('cryptovault_state', JSON.stringify(state));
+}
+
+function generateInitialTransactions() {
+  const types = ['sent','received','mined','swapped'];
+  const txs = [];
+  const now = Date.now();
+  for (let i = 0; i < 8; i++) {
+    const type = types[i % 4];
+    const coin = COINS[i % COINS.length];
+    const amt = +(Math.random() * (coin.id === 'btc' ? 0.5 : coin.id === 'doge' ? 1000 : 5)).toFixed(6);
+    txs.push({
+      id: 'tx_' + i,
+      type,
+      coin: coin.id,
+      amount: amt,
+      address: type === 'sent' ? generateFakeAddr(coin.id) : (type === 'received' ? generateFakeAddr(coin.id) : ''),
+      date: now - (i * 3600000 * (6 + Math.random() * 18)),
+      note: '',
+      swapTo: type === 'swapped' ? COINS[(i+1) % COINS.length].id : undefined,
+      swapToAmount: type === 'swapped' ? +(amt * (COINS[(i+1) % COINS.length].price / coin.price) * (0.995)).toFixed(6) : undefined,
+    });
+  }
+  return txs;
+}
+
+function generateFakeAddr(coinId) {
+  const chars = '0123456789abcdef';
+  let addr = '';
+  for (let i = 0; i < 32; i++) addr += chars[Math.floor(Math.random()*16)];
+  const prefixes = { btc:'bc1q', eth:'0x', bnb:'bnb1', sol:'', xrp:'r', ada:'addr1', doge:'D', dot:'1' };
+  return (prefixes[coinId]||'') + addr;
+}
+
+// ============= NAVIGATION =============
+function switchScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const screen = document.getElementById('screen-' + name);
+  if (screen) screen.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('active', n.dataset.screen === name);
+  });
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'send') initSendScreen();
+  if (name === 'receive') initReceiveScreen();
+  if (name === 'swap') initSwapScreen();
+  if (name === 'mining') initMiningScreen();
+  if (name === 'history') renderFullHistory();
+}
+
+// ============= DASHBOARD =============
+function renderDashboard() {
+  let total = 0;
+  COINS.forEach(c => { total += (state.balances[c.id] || 0) * c.price; });
+  document.getElementById('total-value').textContent = formatUSD(total);
+
+  const avgChange = COINS.reduce((s,c) => s + c.change, 0) / COINS.length;
+  const changeEl = document.getElementById('portfolio-change');
+  const changeText = document.getElementById('change-text');
+  changeEl.className = 'portfolio-change ' + (avgChange >= 0 ? 'up' : 'down');
+  changeText.textContent = (avgChange >= 0 ? '+' : '') + avgChange.toFixed(2) + '%';
+  changeEl.querySelector('svg').innerHTML = avgChange >= 0
+    ? '<path d="M12 19V5M5 12l7-7 7 7"/>'
+    : '<path d="M12 5v14M5 12l7 7 7-7"/>';
+
+  renderCoinList();
+  renderRecentTx();
+}
+
+function renderCoinList() {
+  const container = document.getElementById('coin-list');
+  container.innerHTML = COINS.map(c => {
+    const bal = state.balances[c.id] || 0;
+    const val = bal * c.price;
+    return `
+      <div class="coin-item" onclick="showCoinDetail('${c.id}')">
+        <div class="coin-icon" style="background:${c.color}22;color:${c.color};">${c.symbol.charAt(0)}</div>
+        <div class="coin-info">
+          <div class="coin-name">${c.name}</div>
+          <div class="coin-symbol">${c.symbol}</div>
+        </div>
+        <div class="coin-right">
+          <div class="coin-price">${formatUSD(val)}</div>
+          <div class="coin-change ${c.change >= 0 ? 'up' : 'down'}">${c.change >= 0 ? '+' : ''}${c.change.toFixed(2)}%</div>
+          <div class="coin-balance">${formatCrypto(bal)} ${c.symbol}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderRecentTx() {
+  const container = document.getElementById('recent-tx');
+  const txs = state.transactions.slice(0, 5);
+  container.innerHTML = txs.length ? txs.map(renderTxItem).join('') :
+    '<div class="empty-state"><p>No transactions yet</p></div>';
+}
+
+function renderFullHistory() {
+  const container = document.getElementById('full-tx-list');
+  container.innerHTML = state.transactions.length
+    ? state.transactions.map(renderTxItem).join('')
+    : '<div class="empty-state"><p>No transactions yet</p></div>';
+}
+
+function renderTxItem(tx) {
+  const coin = COINS.find(c => c.id === tx.coin);
+  const labels = { sent:'Sent', received:'Received', mined:'Mined', swapped:'Swapped' };
+  const amtClass = tx.type === 'sent' ? 'sent' : tx.type === 'received' ? 'received' : tx.type === 'mined' ? 'mined' : '';
+  const prefix = tx.type === 'sent' ? '-' : tx.type === 'received' || tx.type === 'mined' ? '+' : '';
+  let detail = tx.address ? truncAddr(tx.address) : '';
+  if (tx.type === 'swapped') {
+    const toCoin = COINS.find(c => c.id === tx.swapTo);
+    detail = `${coin.symbol} → ${toCoin ? toCoin.symbol : ''}`;
+  }
+  return `
+    <div class="tx-item">
+      <div class="tx-icon ${tx.type}">
+        ${tx.type === 'sent' ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>' :
+          tx.type === 'received' ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>' :
+          tx.type === 'mined' ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/></svg>' :
+          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>'}
+      </div>
+      <div class="tx-info">
+        <div class="tx-type">${labels[tx.type]} ${coin.symbol}</div>
+        <div class="tx-addr">${detail}</div>
+      </div>
+      <div class="tx-right">
+        <div class="tx-amount ${amtClass}">${prefix}${formatCrypto(tx.amount)} ${coin.symbol}</div>
+        <div class="tx-date">${formatDate(tx.date)}</div>
+      </div>
+    </div>`;
+}
+
+// ============= SEND =============
+function initSendScreen() {
+  renderCoinChips('send-coin-selector', state.selectedSendCoin, (id) => {
+    state.selectedSendCoin = id;
+    saveState();
+    initSendScreen();
+  });
+  const coin = COINS.find(c => c.id === state.selectedSendCoin);
+  const bal = state.balances[state.selectedSendCoin] || 0;
+  document.getElementById('send-available').textContent = formatCrypto(bal);
+  document.getElementById('send-available-symbol').textContent = coin.symbol;
+  document.getElementById('send-btn').textContent = `Send ${coin.symbol}`;
+
+  const amountInput = document.getElementById('send-amount');
+  amountInput.oninput = function() {
+    const val = parseFloat(this.value) || 0;
+    document.getElementById('send-usd-value').textContent = formatNum(val * coin.price);
+  };
+}
+
+function sendMax() {
+  const bal = state.balances[state.selectedSendCoin] || 0;
+  document.getElementById('send-amount').value = bal;
+  document.getElementById('send-amount').dispatchEvent(new Event('input'));
+}
+
+function executeSend() {
+  const coin = COINS.find(c => c.id === state.selectedSendCoin);
+  const address = document.getElementById('send-address').value.trim();
+  const amount = parseFloat(document.getElementById('send-amount').value);
+  const note = document.getElementById('send-note').value.trim();
+
+  if (!address) { showToast('Please enter a recipient address', 'error'); return; }
+  if (!amount || amount <= 0) { showToast('Please enter a valid amount', 'error'); return; }
+  if (amount > (state.balances[state.selectedSendCoin] || 0)) {
+    showToast('Insufficient balance', 'error'); return;
+  }
+
+  state.balances[state.selectedSendCoin] -= amount;
+  state.transactions.unshift({
+    id: 'tx_' + Date.now(),
+    type: 'sent',
+    coin: state.selectedSendCoin,
+    amount,
+    address,
+    date: Date.now(),
+    note,
+  });
+  saveState();
+
+  document.getElementById('send-address').value = '';
+  document.getElementById('send-amount').value = '';
+  document.getElementById('send-note').value = '';
+  document.getElementById('send-usd-value').textContent = '0.00';
+
+  showToast(`Sent ${formatCrypto(amount)} ${coin.symbol} successfully!`, 'success');
+  initSendScreen();
+}
+
+// ============= RECEIVE =============
+function initReceiveScreen() {
+  renderCoinChips('receive-coin-selector', state.selectedReceiveCoin, (id) => {
+    state.selectedReceiveCoin = id;
+    saveState();
+    initReceiveScreen();
+  });
+  const addr = COIN_ADDRESSES[state.selectedReceiveCoin] || MAIN_ADDRESS;
+  document.getElementById('receive-address').textContent = addr;
+  drawQR(addr);
+}
+
+function drawQR(text) {
+  const canvas = document.getElementById('qr-canvas');
+  const ctx = canvas.getContext('2d');
+  const size = 176;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, size, size);
+
+  // Simple QR-like pattern from address data
+  const data = [];
+  for (let i = 0; i < text.length; i++) {
+    data.push(text.charCodeAt(i));
+  }
+
+  const modules = 33;
+  const cellSize = size / modules;
+
+  ctx.fillStyle = '#000000';
+
+  // Finder patterns
+  function drawFinder(x, y) {
+    for (let r = 0; r < 7; r++) {
+      for (let c = 0; c < 7; c++) {
+        if (r === 0 || r === 6 || c === 0 || c === 6 ||
+            (r >= 2 && r <= 4 && c >= 2 && c <= 4)) {
+          ctx.fillRect((x + c) * cellSize, (y + r) * cellSize, cellSize, cellSize);
+        }
+      }
+    }
+  }
+  drawFinder(0, 0);
+  drawFinder(modules - 7, 0);
+  drawFinder(0, modules - 7);
+
+  // Data pattern derived from address
+  let dataIdx = 0;
+  for (let r = 0; r < modules; r++) {
+    for (let c = 0; c < modules; c++) {
+      if ((r < 8 && c < 8) || (r < 8 && c >= modules-8) || (r >= modules-8 && c < 8)) continue;
+      if (r === 6 || c === 6) {
+        if ((r + c) % 2 === 0) ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+        continue;
+      }
+      const byte = data[dataIdx % data.length];
+      const bit = (byte >> ((r * modules + c) % 8)) & 1;
+      if (bit ^ ((r + c) % 3 === 0 ? 1 : 0)) {
+        ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+      }
+      dataIdx++;
+    }
+  }
+}
+
+function copyAddress() {
+  const addr = COIN_ADDRESSES[state.selectedReceiveCoin] || MAIN_ADDRESS;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(addr).then(() => showToast('Address copied!', 'success'));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = addr;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('Address copied!', 'success');
+  }
+}
+
+function shareAddress() {
+  const coin = COINS.find(c => c.id === state.selectedReceiveCoin);
+  const addr = COIN_ADDRESSES[state.selectedReceiveCoin] || MAIN_ADDRESS;
+  const amount = document.getElementById('receive-amount').value;
+  let text = `Send ${coin.symbol} to: ${addr}`;
+  if (amount) text += `\nAmount: ${amount} ${coin.symbol}`;
+
+  if (navigator.share) {
+    navigator.share({ title: `Receive ${coin.symbol}`, text });
+  } else {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => showToast('Address info copied!', 'success'));
+    } else {
+      showToast('Address displayed above', 'success');
+    }
+  }
+}
+
+// ============= SWAP =============
+function initSwapScreen() {
+  updateSwapDisplay();
+}
+
+function updateSwapDisplay() {
+  const fromCoin = COINS.find(c => c.id === state.swapFrom);
+  const toCoin = COINS.find(c => c.id === state.swapTo);
+  document.getElementById('swap-from-coin').textContent = fromCoin.symbol + ' ▾';
+  document.getElementById('swap-to-coin').textContent = toCoin.symbol + ' ▾';
+  document.getElementById('swap-from-balance').textContent = `Balance: ${formatCrypto(state.balances[state.swapFrom] || 0)}`;
+  document.getElementById('swap-to-balance').textContent = `Balance: ${formatCrypto(state.balances[state.swapTo] || 0)}`;
+
+  const rate = fromCoin.price / toCoin.price;
+  document.getElementById('swap-rate').textContent = `1 ${fromCoin.symbol} = ${formatCrypto(rate)} ${toCoin.symbol}`;
+  calcSwap();
+}
+
+function calcSwap() {
+  const fromCoin = COINS.find(c => c.id === state.swapFrom);
+  const toCoin = COINS.find(c => c.id === state.swapTo);
+  const amount = parseFloat(document.getElementById('swap-from-amount').value) || 0;
+  const rate = fromCoin.price / toCoin.price;
+  const result = amount * rate * 0.995; // 0.5% fee
+  document.getElementById('swap-to-amount').value = result > 0 ? result.toFixed(6) : '';
+}
+
+function flipSwap() {
+  const temp = state.swapFrom;
+  state.swapFrom = state.swapTo;
+  state.swapTo = temp;
+  saveState();
+  const fromVal = document.getElementById('swap-from-amount').value;
+  const toVal = document.getElementById('swap-to-amount').value;
+  document.getElementById('swap-from-amount').value = toVal;
+  updateSwapDisplay();
+}
+
+function openSwapCoinPicker(side) {
+  const html = `
+    <div class="modal-handle"></div>
+    <div class="modal-title">Select Coin</div>
+    ${COINS.map(c => `
+      <div class="coin-item" onclick="selectSwapCoin('${side}','${c.id}')">
+        <div class="coin-icon" style="background:${c.color}22;color:${c.color};">${c.symbol.charAt(0)}</div>
+        <div class="coin-info">
+          <div class="coin-name">${c.name}</div>
+          <div class="coin-symbol">${c.symbol} — ${formatUSD(c.price)}</div>
+        </div>
+      </div>
+    `).join('')}
+  `;
+  showModal(html);
+}
+
+function selectSwapCoin(side, id) {
+  if (side === 'from') {
+    if (id === state.swapTo) state.swapTo = state.swapFrom;
+    state.swapFrom = id;
+  } else {
+    if (id === state.swapFrom) state.swapFrom = state.swapTo;
+    state.swapTo = id;
+  }
+  saveState();
+  closeModal();
+  updateSwapDisplay();
+}
+
+function executeSwap() {
+  const fromCoin = COINS.find(c => c.id === state.swapFrom);
+  const toCoin = COINS.find(c => c.id === state.swapTo);
+  const fromAmount = parseFloat(document.getElementById('swap-from-amount').value);
+  const toAmount = parseFloat(document.getElementById('swap-to-amount').value);
+
+  if (!fromAmount || fromAmount <= 0) { showToast('Enter an amount to swap', 'error'); return; }
+  if (fromAmount > (state.balances[state.swapFrom] || 0)) { showToast('Insufficient balance', 'error'); return; }
+  if (state.swapFrom === state.swapTo) { showToast('Select different coins', 'error'); return; }
+
+  state.balances[state.swapFrom] -= fromAmount;
+  state.balances[state.swapTo] = (state.balances[state.swapTo] || 0) + toAmount;
+
+  state.transactions.unshift({
+    id: 'tx_' + Date.now(),
+    type: 'swapped',
+    coin: state.swapFrom,
+    amount: fromAmount,
+    address: '',
+    date: Date.now(),
+    note: '',
+    swapTo: state.swapTo,
+    swapToAmount: toAmount,
+  });
+  saveState();
+
+  document.getElementById('swap-from-amount').value = '';
+  document.getElementById('swap-to-amount').value = '';
+  showToast(`Swapped ${formatCrypto(fromAmount)} ${fromCoin.symbol} → ${formatCrypto(toAmount)} ${toCoin.symbol}`, 'success');
+  updateSwapDisplay();
+}
+
+// ============= MINING =============
+let miningInterval = null;
+let miningStartTime = null;
+let miningProgress = 0;
+let miningHashCount = 0;
+
+function initMiningScreen() {
+  renderCoinChips('mine-coin-selector', state.selectedMineCoin, (id) => {
+    if (miningInterval) { showToast('Stop mining first', 'error'); return; }
+    state.selectedMineCoin = id;
+    saveState();
+    initMiningScreen();
+  });
+  updateMiningDisplay();
+}
+
+function toggleMining() {
+  if (miningInterval) {
+    stopMining();
+  } else {
+    startMining();
+  }
+}
+
+function startMining() {
+  miningStartTime = Date.now();
+  miningHashCount = 0;
+  miningProgress = 0;
+  document.getElementById('mining-btn').textContent = 'Stop Mining';
+  document.getElementById('mining-btn').style.background = 'var(--red)';
+
+  miningInterval = setInterval(() => {
+    miningHashCount += Math.floor(Math.random() * 50 + 20);
+    miningProgress += Math.random() * 3;
+
+    if (miningProgress >= 100) {
+      // Block found!
+      miningProgress = 0;
+      const coin = COINS.find(c => c.id === state.selectedMineCoin);
+      const reward = getReward(state.selectedMineCoin);
+      state.balances[state.selectedMineCoin] = (state.balances[state.selectedMineCoin] || 0) + reward;
+      state.miningStats.totalBlocks++;
+      state.miningStats.totalEarned[state.selectedMineCoin] =
+        (state.miningStats.totalEarned[state.selectedMineCoin] || 0) + reward;
+
+      state.transactions.unshift({
+        id: 'tx_' + Date.now(),
+        type: 'mined',
+        coin: state.selectedMineCoin,
+        amount: reward,
+        address: '',
+        date: Date.now(),
+        note: 'Block reward',
+      });
+      saveState();
+      showToast(`Block found! +${formatCrypto(reward)} ${coin.symbol}`, 'success');
+    }
+
+    updateMiningDisplay();
+    updateHashVisual();
+  }, 200);
+}
+
+function stopMining() {
+  clearInterval(miningInterval);
+  miningInterval = null;
+  document.getElementById('mining-btn').textContent = 'Start Mining';
+  document.getElementById('mining-btn').style.background = '';
+  saveState();
+}
+
+function getReward(coinId) {
+  const rewards = { btc:0.000025, eth:0.0032, bnb:0.005, sol:0.02, xrp:5, ada:8, doge:50, dot:0.15 };
+  return rewards[coinId] || 0.001;
+}
+
+function updateMiningDisplay() {
+  document.getElementById('mining-progress').style.width = miningProgress + '%';
+  document.getElementById('hashrate').textContent = miningInterval ? Math.floor(miningHashCount / ((Date.now() - miningStartTime) / 1000) || 0) : '0';
+  document.getElementById('blocks-mined').textContent = state.miningStats.totalBlocks;
+  const earned = state.miningStats.totalEarned[state.selectedMineCoin] || 0;
+  document.getElementById('mining-earned').textContent = formatCrypto(earned);
+
+  if (miningStartTime && miningInterval) {
+    const elapsed = Math.floor((Date.now() - miningStartTime) / 1000);
+    const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
+    const s = (elapsed % 60).toString().padStart(2, '0');
+    document.getElementById('mining-time').textContent = m + ':' + s;
+  }
+}
+
+function updateHashVisual() {
+  const display = document.getElementById('hash-display');
+  const chars = '0123456789abcdef';
+  let hash = '';
+  for (let i = 0; i < 64; i++) hash += chars[Math.floor(Math.random() * 16)];
+  const lines = [];
+  for (let i = 0; i < 5; i++) {
+    let h = '';
+    for (let j = 0; j < 64; j++) h += chars[Math.floor(Math.random() * 16)];
+    lines.push(h);
+  }
+  display.textContent = lines.join('\n');
+}
+
+// ============= COIN DETAIL =============
+function showCoinDetail(coinId) {
+  const coin = COINS.find(c => c.id === coinId);
+  const bal = state.balances[coinId] || 0;
+  const val = bal * coin.price;
+
+  const html = `
+    <div class="modal-handle"></div>
+    <div class="coin-detail-header">
+      <div class="coin-detail-icon" style="background:${coin.color}22;color:${coin.color};font-size:22px;font-weight:800;">${coin.symbol.charAt(0)}</div>
+      <div>
+        <div style="font-weight:700;font-size:18px;">${coin.name}</div>
+        <div style="color:var(--text2);font-size:13px;">${coin.symbol}</div>
+      </div>
+    </div>
+    <div class="coin-detail-price">${formatUSD(coin.price)}</div>
+    <div class="coin-change ${coin.change >= 0 ? 'up' : 'down'}" style="font-size:15px;margin:8px 0 20px;">
+      ${coin.change >= 0 ? '▲' : '▼'} ${Math.abs(coin.change).toFixed(2)}% today
+    </div>
+    <div style="padding:16px;background:var(--bg3);border-radius:12px;margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <span style="color:var(--text2);font-size:13px;">Your Balance</span>
+        <span style="font-weight:700;">${formatCrypto(bal)} ${coin.symbol}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;">
+        <span style="color:var(--text2);font-size:13px;">Value</span>
+        <span style="font-weight:700;">${formatUSD(val)}</span>
+      </div>
+    </div>
+    <div class="coin-detail-actions">
+      <button class="primary-btn" style="font-size:14px;padding:12px;" onclick="closeModal();state.selectedSendCoin='${coinId}';saveState();switchScreen('send');">Send</button>
+      <button class="primary-btn green" style="font-size:14px;padding:12px;" onclick="closeModal();state.selectedReceiveCoin='${coinId}';saveState();switchScreen('receive');">Receive</button>
+    </div>
+  `;
+  showModal(html);
+}
+
+// ============= SETTINGS ACTIONS =============
+function showSenderAddress() {
+  const html = `
+    <div class="modal-handle"></div>
+    <div class="modal-title">Main Wallet Address</div>
+    <div style="padding:16px;background:var(--bg3);border-radius:12px;margin-bottom:20px;">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:8px;">BTC (Primary Sender)</div>
+      <div style="word-break:break-all;font-family:'Courier New',monospace;font-size:13px;line-height:1.6;">${MAIN_ADDRESS}</div>
+    </div>
+    <button class="copy-btn" style="width:100%;justify-content:center;" onclick="navigator.clipboard&&navigator.clipboard.writeText('${MAIN_ADDRESS}');showToast('Copied!','success');">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      Copy Address
+    </button>
+  `;
+  showModal(html);
+}
+
+function exportData() {
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'cryptovault_export.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Data exported!', 'success');
+}
+
+function resetWallet() {
+  const html = `
+    <div class="modal-handle"></div>
+    <div class="modal-title">Reset Wallet?</div>
+    <p style="text-align:center;color:var(--text2);margin-bottom:24px;">This will clear all your data including balances and transaction history. This cannot be undone.</p>
+    <div style="display:flex;gap:10px;">
+      <button class="primary-btn" style="background:var(--bg3);color:var(--text);" onclick="closeModal()">Cancel</button>
+      <button class="primary-btn" style="background:var(--red);color:#fff;" onclick="confirmReset()">Reset</button>
+    </div>
+  `;
+  showModal(html);
+}
+
+function confirmReset() {
+  if (miningInterval) stopMining();
+  localStorage.removeItem('cryptovault_state');
+  state = defaultState();
+  saveState();
+  closeModal();
+  switchScreen('dashboard');
+  showToast('Wallet has been reset', 'success');
+}
+
+function showNotifications() {
+  const html = `
+    <div class="modal-handle"></div>
+    <div class="modal-title">Notifications</div>
+    <div style="text-align:center;padding:20px;color:var(--text2);">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.3;margin-bottom:12px;"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      <p>No new notifications</p>
+    </div>
+  `;
+  showModal(html);
+}
+
+// ============= UI HELPERS =============
+function renderCoinChips(containerId, selected, onSelect) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = COINS.map(c =>
+    `<button class="coin-chip ${c.id === selected ? 'active' : ''}" onclick="event.stopPropagation()"
+      data-coin="${c.id}">${c.symbol}</button>`
+  ).join('');
+  container.querySelectorAll('.coin-chip').forEach(chip => {
+    chip.addEventListener('click', () => onSelect(chip.dataset.coin));
+  });
+}
+
+function showModal(html) {
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('active');
+}
+
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+function showToast(msg, type) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast ' + (type || '');
+  requestAnimationFrame(() => {
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  });
+}
+
+function formatUSD(n) {
+  if (n >= 1000000) return '$' + (n/1000000).toFixed(2) + 'M';
+  if (n >= 1000) return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return '$' + n.toFixed(2);
+}
+
+function formatCrypto(n) {
+  if (n >= 10000) return n.toFixed(2);
+  if (n >= 100) return n.toFixed(4);
+  if (n >= 1) return n.toFixed(6);
+  return n.toFixed(8);
+}
+
+function formatNum(n) {
+  return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatDate(ts) {
+  const d = new Date(ts);
+  const now = new Date();
+  const diff = now - d;
+  if (diff < 3600000) return Math.floor(diff/60000) + 'm ago';
+  if (diff < 86400000) return Math.floor(diff/3600000) + 'h ago';
+  if (diff < 604800000) return Math.floor(diff/86400000) + 'd ago';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function truncAddr(addr) {
+  if (addr.length <= 16) return addr;
+  return addr.slice(0, 8) + '...' + addr.slice(-6);
+}
+
+// ============= PRICE SIMULATION =============
+function simulatePrices() {
+  COINS.forEach(c => {
+    const volatility = 0.002;
+    const change = (Math.random() - 0.48) * volatility;
+    c.price *= (1 + change);
+    c.change += (Math.random() - 0.5) * 0.1;
+    c.change = Math.max(-15, Math.min(15, c.change));
+  });
+  const activeScreen = document.querySelector('.screen.active');
+  if (activeScreen && activeScreen.id === 'screen-dashboard') {
+    renderDashboard();
+  }
+}
+
+// ============= INIT =============
+renderDashboard();
+setInterval(simulatePrices, 5000);
+
+// Simulate a receive after 30 seconds for demo
+setTimeout(() => {
+  const coin = COINS[Math.floor(Math.random() * 3)];
+  const amount = +(Math.random() * (coin.id === 'btc' ? 0.01 : 0.5)).toFixed(6);
+  state.balances[coin.id] = (state.balances[coin.id] || 0) + amount;
+  state.transactions.unshift({
+    id: 'tx_' + Date.now(),
+    type: 'received',
+    coin: coin.id,
+    amount,
+    address: MAIN_ADDRESS,
+    date: Date.now(),
+    note: 'Incoming transfer',
+  });
+  saveState();
+  showToast(`Received ${formatCrypto(amount)} ${coin.symbol}!`, 'success');
+  const activeScreen = document.querySelector('.screen.active');
+  if (activeScreen && activeScreen.id === 'screen-dashboard') renderDashboard();
+}, 30000);
+</script>
+</body>
+</html>

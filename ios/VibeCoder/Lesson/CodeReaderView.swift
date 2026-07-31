@@ -18,13 +18,19 @@ final class CodeReaderStore: ObservableObject {
     @Published var files: [String] = []
     @Published var selected: String?
     @Published var content: String = ""
-    @Published var edited: [String: String] = [:]   // relative path → edited text
 
     let project: CatalogProject
 
     init(project: CatalogProject) {
         self.project = project
         load()
+    }
+
+    /// Indicates which files have user edits. Read from the shared
+    /// LessonEditStore so it stays in sync across CodeReader presentations
+    /// and the Sandboxed Preview.
+    var editedFiles: Set<String> {
+        Set(LessonEditStore.shared.editedFiles(slug: project.slug))
     }
 
     private func load() {
@@ -34,7 +40,7 @@ final class CodeReaderStore: ObservableObject {
 
     func selectFile(_ rel: String) {
         selected = rel
-        if let override = edited[rel] {
+        if let override = LessonEditStore.shared.edit(slug: project.slug, file: rel) {
             content = override
             return
         }
@@ -45,7 +51,7 @@ final class CodeReaderStore: ObservableObject {
 
     func saveEdit(_ newText: String) {
         guard let rel = selected else { return }
-        edited[rel] = newText
+        LessonEditStore.shared.setEdit(slug: project.slug, file: rel, content: newText)
         content = newText
     }
 }
@@ -54,6 +60,7 @@ struct CodeReaderView: View {
     let project: CatalogProject
     @Environment(\.dismiss) private var dismiss
     @StateObject private var store: CodeReaderStore
+    @ObservedObject private var edits = LessonEditStore.shared
     @State private var editing = false
     @State private var editingBuffer: String = ""
 
@@ -106,7 +113,7 @@ struct CodeReaderView: View {
                                 .font(.caption2)
                             Text(rel)
                                 .font(.caption.monospaced())
-                            if store.edited[rel] != nil {
+                            if edits.edit(slug: project.slug, file: rel) != nil {
                                 Image(systemName: "pencil.circle.fill")
                                     .font(.caption2)
                                     .foregroundStyle(.orange)

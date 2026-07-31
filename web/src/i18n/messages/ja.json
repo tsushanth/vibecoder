@@ -31,7 +31,8 @@
     "allRightsReserved": "All rights reserved.",
     "remove": "削除",
     "add": "追加",
-    "unlimited": "無制限"
+    "unlimited": "無制限",
+    "versions": "バージョン"
   },
   "landing": {
     "availablePlatforms": "Web、iOS、Androidで利用可能",
@@ -54,8 +55,6 @@
     "everythingYouNeedSubtitle": "Webアプリの構築、改善、公開のための完全なプラットフォーム",
     "featurePipeline": "AI搭載パイプライン",
     "featurePipelineDetail": "5段階の生成：ビルド、検証、修正、仕上げ、確認。毎回プロダクション品質の出力。",
-    "featurePreview": "ライブプレビュー＆コードエディタ",
-    "featurePreviewDetail": "アプリが即座に動作する様子を確認。コードを直接編集するか、自然言語で変更を説明。",
     "featureVersions": "バージョン履歴",
     "featureVersionsDetail": "調整のたびにバージョンが作成されます。履歴を閲覧、変更を比較、いつでも元に戻せます。",
     "featureDeploy": "ワンクリックデプロイ",
@@ -87,7 +86,6 @@
     "readyToBuild": "作る準備はできましたか？",
     "readyToBuildSubtitle": "AIでアイデアをアプリに変えている数千人のクリエイターに参加しましょう。",
     "getStartedFree": "無料で始める",
-    "mockCodeComment": "// AI生成、プロダクション対応",
     "mockChatPlaceholder": "アプリの変更内容を説明..."
   },
   "create": {
@@ -210,5 +208,10 @@
     "notFound": "プロジェクトが見つかりません",
     "initialGeneration": "初回生成",
     "changesApplied": "変更を適用済み"
+  },
+  "versions": {
+    "empty": "バージョンはまだありません",
+    "count": "{count} バージョン",
+    "emptyHint": "チャットで変更を加えてバージョンの追跡を開始します。"
   }
 }
