@@ -1,63 +1,38 @@
+//
+//  ContentView.swift
+//  VibeCoder
+//
+//  Tab shell for the redesigned 2.0 app. Auth is optional — users can
+//  browse and read every lesson without signing in. There is no paid
+//  tier: everything in the catalog is free.
+//
+
 import SwiftUI
 
 struct ContentView: View {
-    @EnvironmentObject var authManager: AuthManager
-    @EnvironmentObject var generationManager: ProjectGenerationManager
-    @State private var selectedTab = 1 // Start on Create tab
+    @State private var selectedTab = 0
 
     var body: some View {
-        Group {
-            if authManager.isAuthenticated {
-                TabView(selection: $selectedTab) {
-                    // Apps tab (Projects)
-                    ReplitStyleAppsView()
-                        .tabItem {
-                            Label("Apps", systemImage: "folder")
-                        }
-                        .tag(0)
-                        .onChange(of: selectedTab) { newValue in
-                            generationManager.isOnCreateTab = (newValue == 1)
-                        }
+        TabView(selection: $selectedTab) {
+            CatalogView()
+                .tabItem { Label("Lessons", systemImage: "book.closed.fill") }
+                .tag(0)
 
-                    // Create tab (centered, middle position like Replit)
-                    ReplitStyleCreateView()
-                        .tabItem {
-                            Label("Create", systemImage: "plus")
-                        }
-                        .tag(1)
+            BuildHomeView()
+                .tabItem { Label("Build", systemImage: "sparkles") }
+                .tag(1)
 
-                    // Account tab (Profile)
-                    ReplitStyleAccountView()
-                        .tabItem {
-                            Label("Account", systemImage: "person")
-                        }
-                        .tag(2)
-                }
-                .preferredColorScheme(.dark)
-                .fullScreenCover(isPresented: $generationManager.showPreview) {
-                    if let bundleDir = generationManager.bundleDir {
-                        LivePreviewView(
-                            bundleDir: bundleDir,
-                            bundleBase64: generationManager.bundleBase64,
-                            projectTitle: generationManager.completionPrompt,
-                            initialPrompt: generationManager.completionPrompt
-                        )
-                        .environmentObject(generationManager)
-                        .environmentObject(authManager)
-                    }
-                }
-                .onAppear {
-                    // Set tab bar styling for dark theme
-                    let appearance = UITabBarAppearance()
-                    appearance.configureWithOpaqueBackground()
-                    appearance.backgroundColor = UIColor.black
-
-                    UITabBar.appearance().standardAppearance = appearance
-                    UITabBar.appearance().scrollEdgeAppearance = appearance
-                }
-            } else {
-                SignInView()
-            }
+            ReplitStyleAccountView()
+                .tabItem { Label("Account", systemImage: "person.circle") }
+                .tag(2)
+        }
+        .preferredColorScheme(.dark)
+        .onAppear {
+            let appearance = UITabBarAppearance()
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = UIColor.black
+            UITabBar.appearance().standardAppearance = appearance
+            UITabBar.appearance().scrollEdgeAppearance = appearance
         }
     }
 }
@@ -65,6 +40,4 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environmentObject(AuthManager.shared)
-        .environmentObject(SubscriptionManager.shared)
-        .environmentObject(ProjectGenerationManager.shared)
 }

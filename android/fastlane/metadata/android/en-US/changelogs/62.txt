@@ -1,0 +1,1 @@
+Fixes the Tweak chat: refinements you ask for in chat now reliably show up in the live preview (previously the page would silently keep showing the old version). Project Detail's "Preview App" button is now "Preview & Tweak App" so the tweak surface is easier to find.

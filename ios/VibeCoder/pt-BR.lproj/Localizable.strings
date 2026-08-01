@@ -1,0 +1,210 @@
+/* Localizable.strings (Brazilian Portuguese)
+   VibeBuild iOS App */
+
+/* ==== Tab Bar ==== */
+"Projects" = "Projetos";
+"Create" = "Criar";
+"Account" = "Conta";
+
+/* ==== Sign In View ==== */
+"Learn to code with AI" = "Aprenda a programar com IA";
+"Continue without an account" = "Continuar sem conta";
+"AI Code Generation" = "Geracao de codigo com IA";
+"Describe an idea, get working HTML & CSS code" = "Descreva uma ideia, receba codigo HTML e CSS funcional";
+"Code Editor" = "Editor de codigo";
+"View, edit, and learn from source code" = "Veja e edite os arquivos do projeto";
+"Run in Safari" = "Abrir no Safari";
+"Open your code in Safari to see the result" = "Abra seu site no Safari para ver";
+"Signing in..." = "Entrando...";
+"Sign In Error" = "Erro de login";
+"An unknown error occurred" = "Ocorreu um erro desconhecido";
+"OK" = "OK";
+
+/* ==== Profile View ==== */
+"User" = "Usuario";
+"Subscription" = "Assinatura";
+"Plan" = "Plano";
+"Generations" = "Geracoes";
+"Upgrade to Pro" = "Atualizar para Pro";
+"Manage Subscription" = "Gerenciar assinatura";
+"Settings" = "Configuracoes";
+"Help & Support" = "Ajuda e suporte";
+"About" = "Sobre";
+"Sign Out" = "Sair";
+"Profile" = "Perfil";
+"Are you sure you want to sign out?" = "Tem certeza de que deseja sair?";
+"Cancel" = "Cancelar";
+
+/* ==== Account View ==== */
+"VibeBuild User" = "Usuario VibeBuild";
+"Join VibeBuild Pro" = "Assinar VibeBuild Pro";
+"VibeBuild Pro" = "VibeBuild Pro";
+"LEGAL" = "JURIDICO";
+"Privacy Policy" = "Politica de privacidade";
+"Terms of Service" = "Termos de servico";
+"Sign In with Apple" = "Entrar com Apple";
+"Delete Account" = "Excluir conta";
+"This will permanently delete your account and all your projects. This action cannot be undone." = "Isso excluira permanentemente sua conta e todos os seus projetos. Esta acao nao pode ser desfeita.";
+"Error" = "Erro";
+"Deleting account..." = "Excluindo conta...";
+
+/* ==== Browse View ==== */
+"Explore" = "Explorar";
+"Sort" = "Ordenar";
+"Newest" = "Mais recentes";
+"Popular" = "Populares";
+"Loading projects..." = "Carregando projetos...";
+"No Projects Yet" = "Nenhum projeto ainda";
+"Be the first to create and share" = "Seja o primeiro a criar e compartilhar";
+"by %@" = "por %@";
+"Fork (10 coins)" = "Copiar (10 moedas)";
+"View Code" = "Ver codigo";
+"Fork Project" = "Copiar projeto";
+"Fork for 10 coins" = "Copiar por 10 moedas";
+"Create your own copy of this project to customize" = "Crie sua propria copia deste projeto para personalizar";
+
+/* ==== Create Project View ==== */
+"Create a Coding Project" = "Criar um projeto de codigo";
+"Describe what you want to learn and AI will generate example code" = "Descreva o que voce quer aprender e a IA gerara codigo de exemplo";
+"Free tier limit" = "Limite do plano gratuito";
+"What do you want to learn?" = "O que voce quer aprender?";
+"Be specific! Describe features, colors, and functionality." = "Seja especifico! Descreva funcionalidades, cores e recursos.";
+"Examples:" = "Exemplos:";
+"Generating..." = "Gerando...";
+"Generate Code (Free)" = "Gerar codigo (Gratis)";
+"Generate Code" = "Gerar codigo";
+"~%ds remaining" = "~%ds restantes";
+"Generation Error" = "Erro de geracao";
+"Unknown error occurred" = "Ocorreu um erro desconhecido";
+"Unable to generate. Please try again." = "Nao foi possivel gerar. Tente novamente.";
+
+/* ==== Create View (Replit-style) ==== */
+"Hi %@," = "Oi %@,";
+"there" = "amigo";
+"what do you want to learn today?" = "o que voce quer aprender hoje?";
+"Describe what you want to learn & explore the code..." = "Descreva o que voce quer aprender e explorar o codigo...";
+"Start" = "Iniciar";
+"Start learning to code for free" = "Comece a aprender a programar de graca";
+"Join VibeBuild" = "Assine VibeBuild";
+"Pro" = "Pro";
+"to unlock more usage" = "para desbloquear mais uso";
+
+/* ==== Suggestion Chips ==== */
+"Todo List" = "Lista de tarefas";
+"Weather Page" = "Pagina do clima";
+"Calculator" = "Calculadora";
+"Pomodoro Timer" = "Timer Pomodoro";
+"Color Palette" = "Paleta de cores";
+"Markdown Editor" = "Editor Markdown";
+
+/* ==== Live Preview / Source Code View ==== */
+"Source Code" = "Arquivos";
+"Close" = "Fechar";
+"Save" = "Salvar";
+"Saved!" = "Salvo!";
+"Your project has been saved and is now in your Projects tab" = "Seu projeto foi salvo e esta na aba Projetos";
+"Save Error" = "Erro ao salvar";
+"Unknown error" = "Erro desconhecido";
+"Could Not Open" = "Nao foi possivel abrir";
+"No files found" = "Nenhum arquivo encontrado";
+"Done" = "Concluido";
+"%d chars" = "%d caracteres";
+"No preview available" = "Visualizacao nao disponivel";
+
+/* ==== Subscription Plans View ==== */
+"Subscription Plans" = "Planos de assinatura";
+"Choose Your Plan" = "Escolha seu plano";
+"Restore Purchases" = "Restaurar compras";
+"Current Plan" = "Plano atual";
+"Free" = "Gratis";
+"Subscribe Now" = "Assinar agora";
+
+/* ==== Subscription Plan Features ==== */
+"3 tweaks per project" = "3 ajustes por projeto";
+"Public projects only" = "Apenas projetos publicos";
+"Standard queue" = "Fila padrao";
+"vibebuild.cc subdomain" = "Subdominio vibebuild.cc";
+"per month" = "por mes";
+"per year (save 17%)" = "por ano (economize 17%)";
+"forever" = "para sempre";
+
+/* ==== Subscription Tier Names ==== */
+"Team" = "Equipe";
+"Enterprise" = "Empresarial";
+"Free Plan" = "Plano gratuito";
+"%@ Plan" = "Plano %@";
+
+/* ==== Project List View ==== */
+"My Projects" = "Meus projetos";
+"Create your first web project using AI" = "Crie seu primeiro projeto web usando IA";
+"Create Project" = "Criar projeto";
+"Private" = "Privado";
+"Unknown" = "Desconhecido";
+"Project Details" = "Detalhes do projeto";
+"No projects yet" = "Nenhum projeto ainda";
+"Create your first coding project to see it here" = "Crie seu primeiro projeto de codigo para ve-lo aqui";
+"Code Project" = "Projeto de codigo";
+"Delete" = "Excluir";
+"Delete Project" = "Excluir projeto";
+"Are you sure you want to delete \"%@\"? This cannot be undone." = "Tem certeza de que deseja excluir \"%@\"? Esta acao nao pode ser desfeita.";
+
+/* ==== Custom Domain View ==== */
+"Custom Domain" = "Dominio personalizado";
+"Loading..." = "Carregando...";
+"Connect Your Domain" = "Conecte seu dominio";
+"Use your own domain instead of the default vibebuild.cc subdomain." = "Use seu proprio dominio em vez do subdominio padrao vibebuild.cc.";
+"Domain" = "Dominio";
+"Add Domain" = "Adicionar dominio";
+"DNS Configuration" = "Configuracao DNS";
+"Option 1: CNAME Record" = "Opcao 1: Registro CNAME";
+"Type: CNAME" = "Tipo: CNAME";
+"Value:" = "Valor:";
+"Option 2: TXT Verification" = "Opcao 2: Verificacao TXT";
+"Host: _vibebuilder" = "Host: _vibebuilder";
+"DNS changes can take up to 48 hours to propagate, but usually take a few minutes." = "Alteracoes de DNS podem levar ate 48 horas para propagar, mas geralmente levam apenas alguns minutos.";
+"Verify Domain" = "Verificar dominio";
+"SSL certificate active" = "Certificado SSL ativo";
+"Remove Domain" = "Remover dominio";
+"Domain added! Configure your DNS records below." = "Dominio adicionado! Configure seus registros DNS abaixo.";
+"Domain verified and SSL provisioned!" = "Dominio verificado e SSL provisionado!";
+"DNS verified! SSL provisioning in progress..." = "DNS verificado! Provisionamento de SSL em andamento...";
+"Domain removed" = "Dominio removido";
+"Project must be deployed first" = "O projeto deve ser implantado primeiro";
+
+/* ==== Domain Status Labels ==== */
+"Active" = "Ativo";
+"DNS Verified" = "DNS verificado";
+"Provisioning SSL" = "Provisionando SSL";
+"Failed" = "Falhou";
+"Pending" = "Pendente";
+
+/* ==== Coin Packs ==== */
+"100 Coins" = "100 moedas";
+"500 Coins" = "500 moedas";
+"1,200 Coins" = "1.200 moedas";
+
+/* ==== Usage / Subscription Status ==== */
+"Unlimited" = "Ilimitado";
+"%d of %d today" = "%d de %d hoje";
+"Renews %@" = "Renova em %@";
+
+/* ==== Errors ==== */
+"Failed to verify purchase" = "Falha ao verificar a compra";
+"Product not found" = "Produto nao encontrado";
+"Product not available" = "Produto nao disponivel";
+"Purchase is pending" = "Compra pendente";
+"Unknown result" = "Resultado desconhecido";
+"Failed to load products" = "Falha ao carregar produtos";
+"Invalid URL returned from server" = "URL invalida retornada pelo servidor";
+
+/* ==== Example Prompts ==== */
+"Learn to create a todo list with dark mode and task completion" = "Aprenda a criar uma lista de tarefas com modo escuro e conclusao de tarefas";
+"Explore building a calculator with a modern gradient design" = "Explore a criacao de uma calculadora com design moderno de gradiente";
+"Study how a weather dashboard shows temperature and conditions" = "Estude como um painel meteorologico mostra temperatura e condicoes";
+
+/* ==== Info.plist Strings ==== */
+"NSCameraUsageDescription" = "O VibeBuild precisa de acesso a sua camera para capturar fotos para seus projetos.";
+"NSPhotoLibraryUsageDescription" = "O VibeBuild precisa de acesso a sua biblioteca de fotos para selecionar imagens para seus projetos.";
+"NSPhotoLibraryAddUsageDescription" = "O VibeBuild precisa de permissao para salvar imagens na sua biblioteca de fotos.";
+"NSMicrophoneUsageDescription" = "O VibeBuild precisa de acesso ao seu microfone para usar a entrada de voz ao descrever seus projetos de codigo.";
+"NSSpeechRecognitionUsageDescription" = "O VibeBuild usa reconhecimento de voz para converter sua voz em texto ao criar projetos de codigo.";

@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VibeBuild</string>
+
+    <!-- Common -->
+    <string name="cancel">إلغاء</string>
+    <string name="ok">حسنًا</string>
+    <string name="back">رجوع</string>
+    <string name="refresh">تحديث</string>
+    <string name="share">مشاركة</string>
+    <string name="copy">نسخ</string>
+    <string name="open">فتح</string>
+    <string name="error">خطأ</string>
+    <string name="live">مباشر</string>
+    <string name="publish">نشر</string>
+    <string name="deploy">نشر</string>
+    <string name="close">إغلاق</string>
+    <string name="reload">إعادة تحميل</string>
+    <string name="save">حفظ</string>
+    <string name="saved">تم الحفظ</string>
+    <string name="delete_label">حذف</string>
+    <string name="public_label">عام</string>
+    <string name="private_label">خاص</string>
+    <string name="sign_out">تسجيل الخروج</string>
+
+    <!-- Tabs -->
+    <string name="tab_apps">التطبيقات</string>
+    <string name="tab_create">إنشاء</string>
+    <string name="tab_account">الحساب</string>
+    <string name="tab_browse">استكشاف</string>
+
+    <!-- Landing Screen -->
+    <string name="landing_hero_subtitle">صِفه. الذكاء الاصطناعي يبنيه.\nتطبيقك، جاهز في ثوانٍ.</string>
+    <string name="landing_prompt_example">"أنشئ لي تطبيق طقس بواجهة داكنة أنيقة"</string>
+    <string name="landing_how_it_works_title">كيف يعمل</string>
+    <string name="landing_step_describe_title">صِف</string>
+    <string name="landing_step_describe_desc">أخبر الذكاء الاصطناعي بما تريد بلغة بسيطة</string>
+    <string name="landing_step_generate_title">توليد</string>
+    <string name="landing_step_generate_desc">الذكاء الاصطناعي يكتب الكود في ثوانٍ</string>
+    <string name="landing_step_preview_title">معاينة</string>
+    <string name="landing_step_preview_desc">شاهد تطبيقك يعمل مباشرة فورًا</string>
+    <string name="landing_step_deploy_title">نشر</string>
+    <string name="landing_step_deploy_desc">انشر على الويب بنقرة واحدة</string>
+    <string name="landing_examples_title">ماذا يبني الناس</string>
+    <string name="landing_example_weather_title">لوحة الطقس</string>
+    <string name="landing_example_weather_desc">طقس لحظي مع رسوم بيانية جميلة</string>
+    <string name="landing_example_memory_title">لعبة الذاكرة</string>
+    <string name="landing_example_memory_desc">لعبة مطابقة بطاقات ممتعة مع رسوم متحركة</string>
+    <string name="landing_example_budget_title">متتبع الميزانية</string>
+    <string name="landing_example_budget_desc">تتبع المصاريف مع تصنيفات مفصلة</string>
+    <string name="landing_example_pomodoro_title">مؤقت بومودورو</string>
+    <string name="landing_example_pomodoro_desc">مؤقت تركيز مع إدارة المهام</string>
+    <string name="landing_example_quiz_title">تطبيق اختبارات</string>
+    <string name="landing_example_quiz_desc">أسئلة تفاعلية مع تتبع النتائج</string>
+    <string name="landing_example_workout_title">سجل التمارين</string>
+    <string name="landing_example_workout_desc">سجّل التمارين وتتبع التقدم</string>
+    <string name="landing_cta_get_started">ابدأ الآن — مجانًا</string>
+    <string name="landing_cta_sign_in">لديك حساب بالفعل؟ تسجيل الدخول</string>
+    <string name="landing_trust_badge_instant">فوري</string>
+    <string name="landing_trust_badge_secure">آمن</string>
+    <string name="landing_trust_badge_no_card">بدون بطاقة</string>
+
+    <!-- Sign In Screen -->
+    <string name="sign_in_subtitle">أنشئ تطبيقات بالذكاء الاصطناعي</string>
+    <string name="sign_in_label_display_name">الاسم المعروض</string>
+    <string name="sign_in_label_email">البريد الإلكتروني</string>
+    <string name="sign_in_label_password">كلمة المرور</string>
+    <string name="sign_in_cd_hide_password">إخفاء كلمة المرور</string>
+    <string name="sign_in_cd_show_password">إظهار كلمة المرور</string>
+    <string name="sign_in_btn_creating_account">جارٍ إنشاء الحساب…</string>
+    <string name="sign_in_btn_signing_in">جارٍ تسجيل الدخول…</string>
+    <string name="sign_in_btn_create_account">إنشاء حساب</string>
+    <string name="sign_in_btn_sign_in">تسجيل الدخول</string>
+    <string name="sign_in_toggle_have_account">لديك حساب بالفعل؟ </string>
+    <string name="sign_in_toggle_no_account">ليس لديك حساب؟ </string>
+    <string name="sign_in_toggle_link_sign_in">تسجيل الدخول</string>
+    <string name="sign_in_toggle_link_sign_up">إنشاء حساب</string>
+    <string name="sign_in_divider_or">" أو "</string>
+    <string name="sign_in_with_google">تسجيل الدخول بحساب Google</string>
+    <string name="sign_in_terms_notice">بتسجيل الدخول، فإنك توافق على شروط الخدمة</string>
+
+    <!-- Onboarding Screen -->
+    <string name="onboarding_btn_skip">تخطي</string>
+    <string name="onboarding_page1_title">صِف تطبيقك</string>
+    <string name="onboarding_page1_desc">أخبر الذكاء الاصطناعي بما تريد بناءه بلغة بسيطة. لا حاجة لخبرة برمجية.</string>
+    <string name="onboarding_page2_title">الذكاء الاصطناعي يبنيه</string>
+    <string name="onboarding_page2_desc">شاهد الذكاء الاصطناعي وهو يُنشئ تطبيقًا كاملاً بكود حقيقي في ثوانٍ.</string>
+    <string name="onboarding_page3_title">عدّل وحسّن</string>
+    <string name="onboarding_page3_desc">كرر مع الذكاء الاصطناعي لإتقان تطبيقك. غيّر الألوان والميزات والتصميم فورًا.</string>
+    <string name="onboarding_page4_title">انشر وشارك</string>
+    <string name="onboarding_page4_desc">انشر تطبيقك على الويب بنقرة واحدة. شارك إبداعاتك مع العالم.</string>
+    <string name="onboarding_btn_next">التالي</string>
+    <string name="onboarding_btn_get_started">ابدأ الآن</string>
+
+    <!-- Create Screen -->
+    <string name="create_title">ماذا تريد أن تصنع؟</string>
+    <string name="create_subtitle">صِف فكرة تطبيقك والذكاء الاصطناعي سيبنيه</string>
+    <string name="create_prompt_placeholder">مثال: أنشئ تطبيق طقس يعرض التوقعات لمدينتي…</string>
+    <string name="create_cd_attach_image">إرفاق صورة</string>
+    <string name="create_cd_voice_input">إدخال صوتي</string>
+    <string name="create_cd_remove_image">إزالة الصورة</string>
+    <string name="create_cd_reference_image">صورة مرجعية</string>
+    <string name="create_default_project_title">مشروعي</string>
+    <string name="create_error_generation_failed">فشل التوليد</string>
+    <string name="create_error_extract_failed">فشل استخراج المشروع: %s</string>
+    <string name="create_error_save_failed">فشل الحفظ: %s</string>
+    <string name="create_error_publish_failed">فشل النشر: %s</string>
+    <string name="create_save_dialog_title">تم الحفظ!</string>
+    <string name="create_save_dialog_message">تم حفظ مشروعك. اضغط على زر النشر لجعله مباشرًا!</string>
+
+    <!-- Generation Progress -->
+    <string name="generation_time_remaining">~%d ثانية متبقية</string>
+    <string name="generation_btn_notify">أعلمني عند الانتهاء</string>
+    <string name="generation_notify_confirmation">سيتم إعلامك عندما يكون جاهزًا</string>
+    <string name="generation_notify_leave_hint">يمكنك مغادرة هذه الشاشة</string>
+    <string name="generation_btn_cancel">إلغاء</string>
+    <string name="generation_phase_connecting">جارٍ الاتصال…</string>
+    <string name="generation_phase_complete">اكتمل!</string>
+    <string name="generation_limit_reached">تم الوصول للحد اليومي من التوليد</string>
+    <string name="upgrade_to_pro">الترقية إلى Pro</string>
+    <string name="start_generating">ابدأ</string>
+
+    <!-- Suggestion Chips -->
+    <string name="suggestions_header">جرّب أحد هذه</string>
+    <string name="suggestions_btn_generating">جارٍ توليد الأفكار…</string>
+    <string name="suggestions_btn_suggest_new">⚡ اقترح أفكارًا جديدة</string>
+    <string name="suggestion_label_todo_app">تطبيق مهام</string>
+    <string name="suggestion_label_weather_app">تطبيق طقس</string>
+    <string name="suggestion_label_calculator">آلة حاسبة</string>
+    <string name="suggestion_label_pomodoro_timer">مؤقت بومودورو</string>
+    <string name="suggestion_label_markdown_editor">محرر Markdown</string>
+    <string name="suggestion_label_color_palette">لوحة الألوان</string>
+
+    <!-- Account Screen -->
+    <string name="account_dialog_sign_out_title">تسجيل الخروج</string>
+    <string name="account_dialog_sign_out_message">هل أنت متأكد أنك تريد تسجيل الخروج؟</string>
+    <string name="account_cd_profile_photo">صورة الملف الشخصي</string>
+    <string name="account_default_display_name">مستخدم</string>
+    <string name="account_section_usage">الاستخدام</string>
+    <string name="account_stat_projects">المشاريع</string>
+    <string name="account_stat_todays_gens">توليدات اليوم</string>
+    <string name="account_section_settings">الإعدادات</string>
+    <string name="account_settings_subscription">الاشتراك</string>
+    <string name="account_settings_theme">المظهر</string>
+    <string name="account_settings_theme_value">داكن</string>
+    <string name="account_settings_about">حول</string>
+    <string name="account_settings_version">الإصدار 1.0.0</string>
+    <string name="account_settings_language">اللغة</string>
+
+    <!-- Apps Screen -->
+    <string name="apps_screen_title">تطبيقاتي</string>
+    <string name="apps_empty_title">لا توجد تطبيقات بعد</string>
+    <string name="apps_empty_subtitle">أنشئ أول تطبيق لك بالذكاء الاصطناعي\nأو استكشف ما بناه الآخرون</string>
+    <string name="apps_cd_sort">ترتيب</string>
+
+    <!-- Browse Screen -->
+    <string name="browse_screen_title">استكشاف</string>
+
+    <!-- Preview Screen -->
+    <string name="preview_screen_title">معاينة</string>
+    <string name="preview_deploy_dialog_title">انشر تطبيقك</string>
+    <string name="preview_deploy_dialog_message">اختر نطاقًا فرعيًا لتطبيقك:</string>
+    <string name="preview_deploy_placeholder">تطبيقي-الرائع</string>
+    <string name="preview_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="preview_share_text">شاهد تطبيقي: %s</string>
+
+    <!-- Project Preview Screen -->
+    <string name="project_preview_btn_forked">تم النسخ!</string>
+    <string name="project_preview_btn_fork">نسخ</string>
+    <string name="project_preview_error_title">فشل تحميل المعاينة</string>
+
+    <!-- Project Detail Screen -->
+    <string name="project_detail_deploy_dialog_title">نشر التطبيق</string>
+    <string name="project_detail_deploy_dialog_message">اختر نطاقًا فرعيًا لتطبيقك:</string>
+    <string name="project_detail_deploy_label_subdomain">النطاق الفرعي</string>
+    <string name="project_detail_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="project_detail_screen_title_fallback">المشروع</string>
+    <string name="project_detail_created_at">تم الإنشاء %s</string>
+    <string name="project_detail_btn_preview">معاينة التطبيق</string>
+    <string name="project_detail_badge_deployed">تم النشر</string>
+    <string name="project_detail_btn_deploying">جارٍ النشر…</string>
+    <string name="project_detail_btn_deploy_to_web">نشر على الويب</string>
+    <string name="project_detail_stat_views">المشاهدات</string>
+    <string name="project_detail_stat_forks">النسخ</string>
+    <string name="project_detail_stat_tweaks">التعديلات</string>
+    <string name="project_detail_section_original_prompt">الوصف الأصلي</string>
+    <string name="project_detail_share_text">شاهد تطبيقي: %s</string>
+
+    <!-- Project Card -->
+    <string name="project_card_delete_dialog_title">حذف المشروع</string>
+    <string name="project_card_delete_dialog_message">هل أنت متأكد أنك تريد حذف \"%s\"؟ لا يمكن التراجع عن هذا.</string>
+
+    <!-- Language Picker -->
+    <string name="language_picker_title">اختر اللغة</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese">中文(简体)</string>
+    <string name="language_korean">한국어</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_hindi">हिन्दी</string>
+
+    <!-- Project Card -->
+    <string name="project_card_views">%d مشاهدة</string>
+
+    <!-- Post-Publish Sheet -->
+    <string name="publish_sheet_title">تطبيقك مباشر الآن!</string>
+    <string name="publish_sheet_subtitle">شاركه مع العالم وابدأ في الكسب من إعلانات تطبيقك.</string>
+    <string name="publish_sheet_open_browser">فتح في المتصفح</string>
+    <string name="publish_sheet_share">مشاركة التطبيق</string>
+    <string name="publish_sheet_monetize">تفعيل تحقيق الدخل من الإعلانات →</string>
+    <string name="publish_sheet_done">تم</string>
+    <string name="publish_sheet_share_text">تحقق من التطبيق الذي بنيته مع VibeBuild! %s</string>
+
+    <!-- Monetization -->
+    <string name="monetize_section_title">تحقيق الدخل</string>
+    <string name="monetize_revenue_label">الإيرادات هذا الشهر</string>
+    <string name="monetize_revenue_value">$0.00</string>
+    <string name="monetize_enable_btn">تفعيل تحقيق الدخل من الإعلانات →</string>
+    <string name="monetize_description">اربح المال عندما يستخدم الناس تطبيقك. نضع إعلانات ونوفر لك الدفع شهريًا.</string>
+
+    <!-- Facebook SDK Configuration -->
+    <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
+    <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+</resources>

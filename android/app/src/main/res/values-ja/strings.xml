@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VibeBuild</string>
+
+    <!-- Common -->
+    <string name="cancel">キャンセル</string>
+    <string name="ok">OK</string>
+    <string name="back">戻る</string>
+    <string name="refresh">更新</string>
+    <string name="share">共有</string>
+    <string name="copy">コピー</string>
+    <string name="open">開く</string>
+    <string name="error">エラー</string>
+    <string name="live">公開中</string>
+    <string name="publish">公開</string>
+    <string name="deploy">デプロイ</string>
+    <string name="close">閉じる</string>
+    <string name="reload">再読み込み</string>
+    <string name="save">保存</string>
+    <string name="saved">保存済み</string>
+    <string name="delete_label">削除</string>
+    <string name="public_label">公開</string>
+    <string name="private_label">非公開</string>
+    <string name="sign_out">サインアウト</string>
+
+    <!-- Tabs -->
+    <string name="tab_apps">アプリ</string>
+    <string name="tab_create">作成</string>
+    <string name="tab_account">アカウント</string>
+    <string name="tab_browse">探索</string>
+
+    <!-- Landing Screen -->
+    <string name="landing_hero_subtitle">説明するだけ。AIが作ります。\nあなたのアプリが数秒で完成。</string>
+    <string name="landing_prompt_example">"ダークUIのきれいな天気アプリを作って"</string>
+    <string name="landing_how_it_works_title">使い方</string>
+    <string name="landing_step_describe_title">説明する</string>
+    <string name="landing_step_describe_desc">作りたいものをAIに伝えるだけ</string>
+    <string name="landing_step_generate_title">生成する</string>
+    <string name="landing_step_generate_desc">AIが数秒でコードを書きます</string>
+    <string name="landing_step_preview_title">プレビュー</string>
+    <string name="landing_step_preview_desc">アプリがすぐに動くのを確認</string>
+    <string name="landing_step_deploy_title">デプロイ</string>
+    <string name="landing_step_deploy_desc">ワンタップでウェブに公開</string>
+    <string name="landing_examples_title">みんなが作っているもの</string>
+    <string name="landing_example_weather_title">天気ダッシュボード</string>
+    <string name="landing_example_weather_desc">美しいグラフ付きリアルタイム天気</string>
+    <string name="landing_example_memory_title">神経衰弱ゲーム</string>
+    <string name="landing_example_memory_desc">アニメーション付きカードマッチングゲーム</string>
+    <string name="landing_example_budget_title">家計簿</string>
+    <string name="landing_example_budget_desc">カテゴリ別に支出を管理</string>
+    <string name="landing_example_pomodoro_title">ポモドーロタイマー</string>
+    <string name="landing_example_pomodoro_desc">タスク管理付き集中タイマー</string>
+    <string name="landing_example_quiz_title">クイズアプリ</string>
+    <string name="landing_example_quiz_desc">スコア記録付きインタラクティブクイズ</string>
+    <string name="landing_example_workout_title">ワークアウト記録</string>
+    <string name="landing_example_workout_desc">エクササイズを記録して進捗を追跡</string>
+    <string name="landing_cta_get_started">始めよう — 無料です</string>
+    <string name="landing_cta_sign_in">アカウントをお持ちですか？サインイン</string>
+    <string name="landing_trust_badge_instant">即時</string>
+    <string name="landing_trust_badge_secure">安全</string>
+    <string name="landing_trust_badge_no_card">カード不要</string>
+
+    <!-- Sign In Screen -->
+    <string name="sign_in_subtitle">AIでアプリを作ろう</string>
+    <string name="sign_in_label_display_name">表示名</string>
+    <string name="sign_in_label_email">メールアドレス</string>
+    <string name="sign_in_label_password">パスワード</string>
+    <string name="sign_in_cd_hide_password">パスワードを隠す</string>
+    <string name="sign_in_cd_show_password">パスワードを表示</string>
+    <string name="sign_in_btn_creating_account">アカウント作成中…</string>
+    <string name="sign_in_btn_signing_in">サインイン中…</string>
+    <string name="sign_in_btn_create_account">アカウント作成</string>
+    <string name="sign_in_btn_sign_in">サインイン</string>
+    <string name="sign_in_toggle_have_account">アカウントをお持ちですか？ </string>
+    <string name="sign_in_toggle_no_account">アカウントをお持ちでないですか？ </string>
+    <string name="sign_in_toggle_link_sign_in">サインイン</string>
+    <string name="sign_in_toggle_link_sign_up">サインアップ</string>
+    <string name="sign_in_divider_or">" または "</string>
+    <string name="sign_in_with_google">Googleでサインイン</string>
+    <string name="sign_in_terms_notice">サインインすると利用規約に同意したことになります</string>
+
+    <!-- Onboarding Screen -->
+    <string name="onboarding_btn_skip">スキップ</string>
+    <string name="onboarding_page1_title">アプリを説明</string>
+    <string name="onboarding_page1_desc">作りたいものをAIに伝えるだけ。プログラミング経験は不要です。</string>
+    <string name="onboarding_page2_title">AIが作成</string>
+    <string name="onboarding_page2_desc">AIが数秒で実際のコードを使った完全なアプリを生成するのをご覧ください。</string>
+    <string name="onboarding_page3_title">調整 &amp; 改善</string>
+    <string name="onboarding_page3_desc">AIと一緒にアプリを完璧に。色、機能、レイアウトを即座に変更できます。</string>
+    <string name="onboarding_page4_title">デプロイ &amp; 共有</string>
+    <string name="onboarding_page4_desc">ワンタップでウェブに公開。あなたの作品を世界と共有しましょう。</string>
+    <string name="onboarding_btn_next">次へ</string>
+    <string name="onboarding_btn_get_started">始める</string>
+
+    <!-- Create Screen -->
+    <string name="create_title">何を作りたいですか？</string>
+    <string name="create_subtitle">アプリのアイデアを説明すると、AIが作ります</string>
+    <string name="create_prompt_placeholder">例：自分の街の天気予報を表示する天気アプリを作って…</string>
+    <string name="create_cd_attach_image">画像を添付</string>
+    <string name="create_cd_voice_input">音声入力</string>
+    <string name="create_cd_remove_image">画像を削除</string>
+    <string name="create_cd_reference_image">参考画像</string>
+    <string name="create_default_project_title">マイプロジェクト</string>
+    <string name="create_error_generation_failed">生成に失敗しました</string>
+    <string name="create_error_extract_failed">プロジェクトの抽出に失敗しました: %s</string>
+    <string name="create_error_save_failed">保存に失敗しました: %s</string>
+    <string name="create_error_publish_failed">公開に失敗しました: %s</string>
+    <string name="create_save_dialog_title">保存しました！</string>
+    <string name="create_save_dialog_message">プロジェクトが保存されました。公開ボタンをタップして公開しましょう！</string>
+
+    <!-- Generation Progress -->
+    <string name="generation_time_remaining">残り約%d秒</string>
+    <string name="generation_btn_notify">完了時に通知</string>
+    <string name="generation_notify_confirmation">準備ができたら通知します</string>
+    <string name="generation_notify_leave_hint">この画面を離れても大丈夫です</string>
+    <string name="generation_btn_cancel">キャンセル</string>
+    <string name="generation_phase_connecting">接続中…</string>
+    <string name="generation_phase_complete">完了！</string>
+    <string name="generation_limit_reached">本日の生成回数の上限に達しました</string>
+    <string name="upgrade_to_pro">Proにアップグレード</string>
+    <string name="start_generating">開始</string>
+
+    <!-- Suggestion Chips -->
+    <string name="suggestions_header">こちらを試してみてください</string>
+    <string name="suggestions_btn_generating">アイデア生成中…</string>
+    <string name="suggestions_btn_suggest_new">新しいアイデアを提案</string>
+    <string name="suggestion_label_todo_app">ToDoアプリ</string>
+    <string name="suggestion_label_weather_app">天気アプリ</string>
+    <string name="suggestion_label_calculator">電卓</string>
+    <string name="suggestion_label_pomodoro_timer">ポモドーロタイマー</string>
+    <string name="suggestion_label_markdown_editor">Markdownエディタ</string>
+    <string name="suggestion_label_color_palette">カラーパレット</string>
+
+    <!-- Account Screen -->
+    <string name="account_dialog_sign_out_title">サインアウト</string>
+    <string name="account_dialog_sign_out_message">サインアウトしてもよろしいですか？</string>
+    <string name="account_cd_profile_photo">プロフィール写真</string>
+    <string name="account_default_display_name">ユーザー</string>
+    <string name="account_section_usage">使用状況</string>
+    <string name="account_stat_projects">プロジェクト</string>
+    <string name="account_stat_todays_gens">今日の生成数</string>
+    <string name="account_section_settings">設定</string>
+    <string name="account_settings_subscription">サブスクリプション</string>
+    <string name="account_settings_theme">テーマ</string>
+    <string name="account_settings_theme_value">ダーク</string>
+    <string name="account_settings_about">アプリについて</string>
+    <string name="account_settings_version">バージョン 1.0.0</string>
+    <string name="account_settings_language">言語</string>
+
+    <!-- Apps Screen -->
+    <string name="apps_screen_title">マイアプリ</string>
+    <string name="apps_empty_title">アプリはまだありません</string>
+    <string name="apps_empty_subtitle">AIで最初のアプリを作るか\n他の人の作品を探索しましょう</string>
+    <string name="apps_cd_sort">並べ替え</string>
+
+    <!-- Browse Screen -->
+    <string name="browse_screen_title">探索</string>
+
+    <!-- Preview Screen -->
+    <string name="preview_screen_title">プレビュー</string>
+    <string name="preview_deploy_dialog_title">アプリを公開</string>
+    <string name="preview_deploy_dialog_message">アプリのサブドメインを選択してください：</string>
+    <string name="preview_deploy_placeholder">my-awesome-app</string>
+    <string name="preview_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="preview_share_text">私のアプリをチェックしてね: %s</string>
+
+    <!-- Project Preview Screen -->
+    <string name="project_preview_btn_forked">フォーク済み！</string>
+    <string name="project_preview_btn_fork">フォーク</string>
+    <string name="project_preview_error_title">プレビューの読み込みに失敗しました</string>
+
+    <!-- Project Detail Screen -->
+    <string name="project_detail_deploy_dialog_title">アプリをデプロイ</string>
+    <string name="project_detail_deploy_dialog_message">アプリのサブドメインを選択してください：</string>
+    <string name="project_detail_deploy_label_subdomain">サブドメイン</string>
+    <string name="project_detail_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="project_detail_screen_title_fallback">プロジェクト</string>
+    <string name="project_detail_created_at">作成日 %s</string>
+    <string name="project_detail_btn_preview">アプリをプレビュー</string>
+    <string name="project_detail_badge_deployed">デプロイ済み</string>
+    <string name="project_detail_btn_deploying">デプロイ中…</string>
+    <string name="project_detail_btn_deploy_to_web">ウェブにデプロイ</string>
+    <string name="project_detail_stat_views">閲覧数</string>
+    <string name="project_detail_stat_forks">フォーク数</string>
+    <string name="project_detail_stat_tweaks">調整数</string>
+    <string name="project_detail_section_original_prompt">元のプロンプト</string>
+    <string name="project_detail_share_text">私のアプリをチェックしてね: %s</string>
+
+    <!-- Project Card -->
+    <string name="project_card_delete_dialog_title">プロジェクトを削除</string>
+    <string name="project_card_delete_dialog_message">「%s」を削除してもよろしいですか？この操作は取り消せません。</string>
+
+    <!-- Language Picker -->
+    <string name="language_picker_title">言語を選択</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese">中文(简体)</string>
+    <string name="language_korean">한국어</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_hindi">हिन्दी</string>
+
+    <!-- Project Card -->
+    <string name="project_card_views">%d 回閲覧</string>
+
+    <!-- Post-Publish Sheet -->
+    <string name="publish_sheet_title">アプリが公開されました！</string>
+    <string name="publish_sheet_subtitle">世界と共有して、アプリ内の広告収益を得ましょう。</string>
+    <string name="publish_sheet_open_browser">ブラウザで開く</string>
+    <string name="publish_sheet_share">アプリをシェア</string>
+    <string name="publish_sheet_monetize">広告収益化を有効にする →</string>
+    <string name="publish_sheet_done">完了</string>
+    <string name="publish_sheet_share_text">VibeBuildで作ったアプリを見てください！ %s</string>
+
+    <!-- Monetization -->
+    <string name="monetize_section_title">収益化</string>
+    <string name="monetize_revenue_label">今月の収益</string>
+    <string name="monetize_revenue_value">$0.00</string>
+    <string name="monetize_enable_btn">広告収益化を有効にする →</string>
+    <string name="monetize_description">ユーザーがアプリを使うたびに収益を得ましょう。広告を配置し、毎月お支払いします。</string>
+
+    <!-- Facebook SDK Configuration -->
+    <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
+    <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+</resources>

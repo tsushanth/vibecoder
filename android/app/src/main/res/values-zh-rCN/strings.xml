@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VibeBuild</string>
+
+    <!-- Common -->
+    <string name="cancel">取消</string>
+    <string name="ok">确定</string>
+    <string name="back">返回</string>
+    <string name="refresh">刷新</string>
+    <string name="share">分享</string>
+    <string name="copy">复制</string>
+    <string name="open">打开</string>
+    <string name="error">错误</string>
+    <string name="live">已上线</string>
+    <string name="publish">发布</string>
+    <string name="deploy">部署</string>
+    <string name="close">关闭</string>
+    <string name="reload">重新加载</string>
+    <string name="save">保存</string>
+    <string name="saved">已保存</string>
+    <string name="delete_label">删除</string>
+    <string name="public_label">公开</string>
+    <string name="private_label">私密</string>
+    <string name="sign_out">退出登录</string>
+
+    <!-- Tabs -->
+    <string name="tab_apps">应用</string>
+    <string name="tab_create">创建</string>
+    <string name="tab_account">账户</string>
+    <string name="tab_browse">探索</string>
+
+    <!-- Landing Screen -->
+    <string name="landing_hero_subtitle">描述你的想法，AI来构建。\n你的应用，几秒内上线。</string>
+    <string name="landing_prompt_example">"帮我做一个深色界面的天气应用"</string>
+    <string name="landing_how_it_works_title">使用方法</string>
+    <string name="landing_step_describe_title">描述</string>
+    <string name="landing_step_describe_desc">用简单的语言告诉AI你想要什么</string>
+    <string name="landing_step_generate_title">生成</string>
+    <string name="landing_step_generate_desc">AI在几秒内编写代码</string>
+    <string name="landing_step_preview_title">预览</string>
+    <string name="landing_step_preview_desc">即时查看你的应用运行效果</string>
+    <string name="landing_step_deploy_title">部署</string>
+    <string name="landing_step_deploy_desc">一键发布到网络</string>
+    <string name="landing_examples_title">大家都在做什么</string>
+    <string name="landing_example_weather_title">天气仪表盘</string>
+    <string name="landing_example_weather_desc">精美图表的实时天气</string>
+    <string name="landing_example_memory_title">记忆翻牌游戏</string>
+    <string name="landing_example_memory_desc">带动画的卡片配对游戏</string>
+    <string name="landing_example_budget_title">预算追踪器</string>
+    <string name="landing_example_budget_desc">按类别追踪支出</string>
+    <string name="landing_example_pomodoro_title">番茄钟</string>
+    <string name="landing_example_pomodoro_desc">带任务管理的专注计时器</string>
+    <string name="landing_example_quiz_title">答题应用</string>
+    <string name="landing_example_quiz_desc">带分数记录的互动问答</string>
+    <string name="landing_example_workout_title">健身记录</string>
+    <string name="landing_example_workout_desc">记录运动并追踪进度</string>
+    <string name="landing_cta_get_started">立即开始 — 免费使用</string>
+    <string name="landing_cta_sign_in">已有账户？登录</string>
+    <string name="landing_trust_badge_instant">即时</string>
+    <string name="landing_trust_badge_secure">安全</string>
+    <string name="landing_trust_badge_no_card">无需银行卡</string>
+
+    <!-- Sign In Screen -->
+    <string name="sign_in_subtitle">用AI构建应用</string>
+    <string name="sign_in_label_display_name">显示名称</string>
+    <string name="sign_in_label_email">邮箱</string>
+    <string name="sign_in_label_password">密码</string>
+    <string name="sign_in_cd_hide_password">隐藏密码</string>
+    <string name="sign_in_cd_show_password">显示密码</string>
+    <string name="sign_in_btn_creating_account">正在创建账户…</string>
+    <string name="sign_in_btn_signing_in">正在登录…</string>
+    <string name="sign_in_btn_create_account">创建账户</string>
+    <string name="sign_in_btn_sign_in">登录</string>
+    <string name="sign_in_toggle_have_account">已有账户？ </string>
+    <string name="sign_in_toggle_no_account">还没有账户？ </string>
+    <string name="sign_in_toggle_link_sign_in">登录</string>
+    <string name="sign_in_toggle_link_sign_up">注册</string>
+    <string name="sign_in_divider_or">" 或 "</string>
+    <string name="sign_in_with_google">使用Google登录</string>
+    <string name="sign_in_terms_notice">登录即表示您同意我们的服务条款</string>
+
+    <!-- Onboarding Screen -->
+    <string name="onboarding_btn_skip">跳过</string>
+    <string name="onboarding_page1_title">描述你的应用</string>
+    <string name="onboarding_page1_desc">用简单的语言告诉AI你想构建什么。无需编程经验。</string>
+    <string name="onboarding_page2_title">AI来构建</string>
+    <string name="onboarding_page2_desc">看AI如何在几秒内用真实代码生成一个完整的应用。</string>
+    <string name="onboarding_page3_title">调整 &amp; 优化</string>
+    <string name="onboarding_page3_desc">与AI反复迭代，完善你的应用。即时更改颜色、功能和布局。</string>
+    <string name="onboarding_page4_title">部署 &amp; 分享</string>
+    <string name="onboarding_page4_desc">一键将应用发布到网络。与全世界分享你的作品。</string>
+    <string name="onboarding_btn_next">下一步</string>
+    <string name="onboarding_btn_get_started">开始使用</string>
+
+    <!-- Create Screen -->
+    <string name="create_title">你想做什么？</string>
+    <string name="create_subtitle">描述你的应用创意，AI会帮你构建</string>
+    <string name="create_prompt_placeholder">例如：做一个显示我所在城市天气预报的天气应用…</string>
+    <string name="create_cd_attach_image">添加图片</string>
+    <string name="create_cd_voice_input">语音输入</string>
+    <string name="create_cd_remove_image">移除图片</string>
+    <string name="create_cd_reference_image">参考图片</string>
+    <string name="create_default_project_title">我的项目</string>
+    <string name="create_error_generation_failed">生成失败</string>
+    <string name="create_error_extract_failed">项目提取失败: %s</string>
+    <string name="create_error_save_failed">保存失败: %s</string>
+    <string name="create_error_publish_failed">发布失败: %s</string>
+    <string name="create_save_dialog_title">已保存！</string>
+    <string name="create_save_dialog_message">你的项目已保存。点击发布按钮即可上线！</string>
+
+    <!-- Generation Progress -->
+    <string name="generation_time_remaining">剩余约%d秒</string>
+    <string name="generation_btn_notify">完成时通知我</string>
+    <string name="generation_notify_confirmation">准备好后会通知你</string>
+    <string name="generation_notify_leave_hint">你可以离开此页面</string>
+    <string name="generation_btn_cancel">取消</string>
+    <string name="generation_phase_connecting">连接中…</string>
+    <string name="generation_phase_complete">完成！</string>
+    <string name="generation_limit_reached">已达到每日生成次数上限</string>
+    <string name="upgrade_to_pro">升级到Pro</string>
+    <string name="start_generating">开始</string>
+
+    <!-- Suggestion Chips -->
+    <string name="suggestions_header">试试这些</string>
+    <string name="suggestions_btn_generating">正在生成创意…</string>
+    <string name="suggestions_btn_suggest_new">推荐新创意</string>
+    <string name="suggestion_label_todo_app">待办事项</string>
+    <string name="suggestion_label_weather_app">天气应用</string>
+    <string name="suggestion_label_calculator">计算器</string>
+    <string name="suggestion_label_pomodoro_timer">番茄钟</string>
+    <string name="suggestion_label_markdown_editor">Markdown编辑器</string>
+    <string name="suggestion_label_color_palette">调色板</string>
+
+    <!-- Account Screen -->
+    <string name="account_dialog_sign_out_title">退出登录</string>
+    <string name="account_dialog_sign_out_message">确定要退出登录吗？</string>
+    <string name="account_cd_profile_photo">头像</string>
+    <string name="account_default_display_name">用户</string>
+    <string name="account_section_usage">使用情况</string>
+    <string name="account_stat_projects">项目</string>
+    <string name="account_stat_todays_gens">今日生成数</string>
+    <string name="account_section_settings">设置</string>
+    <string name="account_settings_subscription">订阅</string>
+    <string name="account_settings_theme">主题</string>
+    <string name="account_settings_theme_value">深色</string>
+    <string name="account_settings_about">关于</string>
+    <string name="account_settings_version">版本 1.0.0</string>
+    <string name="account_settings_language">语言</string>
+
+    <!-- Apps Screen -->
+    <string name="apps_screen_title">我的应用</string>
+    <string name="apps_empty_title">还没有应用</string>
+    <string name="apps_empty_subtitle">用AI创建你的第一个应用\n或探索其他人的作品</string>
+    <string name="apps_cd_sort">排序</string>
+
+    <!-- Browse Screen -->
+    <string name="browse_screen_title">探索</string>
+
+    <!-- Preview Screen -->
+    <string name="preview_screen_title">预览</string>
+    <string name="preview_deploy_dialog_title">发布应用</string>
+    <string name="preview_deploy_dialog_message">为你的应用选择一个子域名：</string>
+    <string name="preview_deploy_placeholder">my-awesome-app</string>
+    <string name="preview_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="preview_share_text">看看我做的应用: %s</string>
+
+    <!-- Project Preview Screen -->
+    <string name="project_preview_btn_forked">已复刻！</string>
+    <string name="project_preview_btn_fork">复刻</string>
+    <string name="project_preview_error_title">预览加载失败</string>
+
+    <!-- Project Detail Screen -->
+    <string name="project_detail_deploy_dialog_title">部署应用</string>
+    <string name="project_detail_deploy_dialog_message">为你的应用选择一个子域名：</string>
+    <string name="project_detail_deploy_label_subdomain">子域名</string>
+    <string name="project_detail_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="project_detail_screen_title_fallback">项目</string>
+    <string name="project_detail_created_at">创建于 %s</string>
+    <string name="project_detail_btn_preview">预览应用</string>
+    <string name="project_detail_badge_deployed">已部署</string>
+    <string name="project_detail_btn_deploying">部署中…</string>
+    <string name="project_detail_btn_deploy_to_web">部署到网络</string>
+    <string name="project_detail_stat_views">浏览量</string>
+    <string name="project_detail_stat_forks">复刻数</string>
+    <string name="project_detail_stat_tweaks">调整数</string>
+    <string name="project_detail_section_original_prompt">原始提示词</string>
+    <string name="project_detail_share_text">看看我做的应用: %s</string>
+
+    <!-- Project Card -->
+    <string name="project_card_delete_dialog_title">删除项目</string>
+    <string name="project_card_delete_dialog_message">确定要删除「%s」吗？此操作无法撤消。</string>
+
+    <!-- Language Picker -->
+    <string name="language_picker_title">选择语言</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese">中文(简体)</string>
+    <string name="language_korean">한국어</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_hindi">हिन्दी</string>
+
+    <!-- Project Card -->
+    <string name="project_card_views">%d 次查看</string>
+
+    <!-- Post-Publish Sheet -->
+    <string name="publish_sheet_title">您的应用已上线！</string>
+    <string name="publish_sheet_subtitle">与世界分享，开始通过应用内广告获利。</string>
+    <string name="publish_sheet_open_browser">在浏览器中打开</string>
+    <string name="publish_sheet_share">分享应用</string>
+    <string name="publish_sheet_monetize">启用广告变现 →</string>
+    <string name="publish_sheet_done">完成</string>
+    <string name="publish_sheet_share_text">看看我用VibeBuild做的应用！ %s</string>
+
+    <!-- Monetization -->
+    <string name="monetize_section_title">变现</string>
+    <string name="monetize_revenue_label">本月收益</string>
+    <string name="monetize_revenue_value">$0.00</string>
+    <string name="monetize_enable_btn">启用广告变现 →</string>
+    <string name="monetize_description">当用户使用您的应用时赚钱。我们投放广告并每月付款给您。</string>
+
+    <!-- Facebook SDK Configuration -->
+    <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
+    <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+</resources>

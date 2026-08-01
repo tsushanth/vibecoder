@@ -125,7 +125,7 @@ export function buildFileTree(files: ExtractedFile[]): FileTreeNode[] {
   return root;
 }
 
-export function createPreviewUrl(files: ExtractedFile[]): string | null {
+export function createPreviewHtml(files: ExtractedFile[]): string | null {
   const indexFile = files.find(
     (f) => f.path === 'index.html' || f.path.endsWith('/index.html')
   );
@@ -162,8 +162,7 @@ export function createPreviewUrl(files: ExtractedFile[]): string | null {
     }
   }
 
-  const blob = new Blob([html], { type: 'text/html' });
-  return URL.createObjectURL(blob);
+  return html;
 }
 
 function escapeRegex(str: string): string {

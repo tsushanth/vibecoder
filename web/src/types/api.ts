@@ -49,8 +49,10 @@ export interface ProjectSummary {
   creator_id?: string;
   creator_name: string;
   project_type: string;
+  view_count: number;
   play_count: number;
   fork_count: number;
+  like_count: number;
   created_at: string;
   updated_at?: string;
   is_public: boolean;
@@ -81,8 +83,10 @@ export interface ProjectDetail {
   creatorId: string;
   creatorName: string;
   projectType: string;
+  viewCount: number;
   playCount: number;
   forkCount: number;
+  likeCount: number;
   createdAt: string;
   updatedAt: string;
   isPublic: boolean;

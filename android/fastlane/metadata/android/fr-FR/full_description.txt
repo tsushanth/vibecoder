@@ -1,0 +1,30 @@
+VibeBuild transforme vos idees en applications fonctionnelles grace a l'IA. Decrivez simplement ce que vous voulez creer en quelques mots, et VibeBuild genere une application web entierement fonctionnelle en quelques secondes. Creez et gerez aussi vos apps sur le web sur vibebuild.cc.
+
+Aucune experience en programmation requise. Que vous soyez un debutant explorant le developpement d'applications ou un professionnel creant rapidement des prototypes, VibeBuild rend tout simple.
+
+COMMENT CA MARCHE
+1. Decrivez votre idee d'application en quelques mots ou phrases
+2. Regardez l'IA construire votre app en temps reel avec une vue de progression en direct
+3. Previsualisez votre app instantanement dans l'application
+4. Sauvegardez vos creations et accedez-y a tout moment
+5. Publiez sur le web et partagez votre app sur votreapp.vibebuild.cc
+
+FONCTIONNALITES
+- Generation par IA : Decrivez n'importe quelle idee d'app et obtenez du code fonctionnel genere instantanement
+- Apercu en direct : Voyez votre app fonctionner immediatement apres la generation
+- Publication sur le web : Partagez votre app sur votreapp.vibebuild.cc, accessible depuis n'importe quel navigateur
+- Sauvegarder et gerer : Gardez toutes vos apps generees organisees en un seul endroit
+- Cartes de suggestions : Inspirez-vous avec des idees creatives d'apps a essayer
+- Progression en temps reel : Suivez le processus de creation avec des mises a jour en direct
+- Abonnement Pro : Debloquez des generations illimitees avec VibeBuild Pro
+
+CONCU POUR TOUS
+- Etudiants apprenant a coder
+- Entrepreneurs creant des prototypes d'idees de startups
+- Designers creant des maquettes interactives
+- Developpeurs testant rapidement des concepts
+- Toute personne curieuse de creer des applications
+
+VibeBuild Pro debloque des generations d'apps illimitees. Les utilisateurs gratuits beneficient d'une limite quotidienne de generations pour explorer la plateforme.
+
+Confidentialite : Nous ne collectons que le minimum de donnees necessaires au fonctionnement du service (e-mail pour l'authentification, vos descriptions pour la generation). Nous ne partageons jamais vos donnees avec des tiers.

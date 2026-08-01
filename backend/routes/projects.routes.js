@@ -1,10 +1,9 @@
 import express from 'express';
-import crypto from 'crypto';
-import http2 from 'http2';
 import { supabase } from '../config/database.js';
 import {
     WORKER_URL,
     WORKER_SECRET,
+    DEPLOY_SERVER_URL,
     GENERATION_COST,
     TWEAK_COST,
     FORK_COST,
@@ -17,94 +16,40 @@ import {
     SUGGESTIONS_CACHE_REFRESH_INTERVAL
 } from '../config/constants.js';
 import { checkUsageLimit, recordUsage, ACTION_TYPES } from '../services/subscriptionService.js';
+import { sendPushToUser, sendAPNsPush } from '../services/pushService.js';
 
 const router = express.Router();
 
 // ============================================
-// APNs Push Notifications
+// View tracking deduplication (in-memory, 1hr TTL)
 // ============================================
-const APNS_TEAM_ID = process.env.APNS_TEAM_ID || '7RS696YC75';
-const APNS_KEY_ID = process.env.APNS_KEY_ID || 'KUXKM8UC3P';
-const APNS_BUNDLE_ID = process.env.APNS_BUNDLE_ID || 'com.kreativekoala.vibercoder';
-// PEM key stored in env as single line with \n escaped, or multiline
-const APNS_PRIVATE_KEY = process.env.APNS_PRIVATE_KEY?.replace(/\\n/g, '\n');
+const viewDedup = new Map(); // key: `${ip}:${projectId}` → timestamp
 
-let apnsJWT = null;
-let apnsJWTIssuedAt = 0;
-
-function getAPNsJWT() {
-    const now = Math.floor(Date.now() / 1000);
-    // Reuse token for up to 55 minutes (APNs tokens expire after 60 min)
-    if (apnsJWT && (now - apnsJWTIssuedAt) < 55 * 60) return apnsJWT;
-    if (!APNS_PRIVATE_KEY) return null;
-
-    const header = Buffer.from(JSON.stringify({ alg: 'ES256', kid: APNS_KEY_ID })).toString('base64url');
-    const payload = Buffer.from(JSON.stringify({ iss: APNS_TEAM_ID, iat: now })).toString('base64url');
-    const signingInput = `${header}.${payload}`;
-    const sign = crypto.createSign('SHA256');
-    sign.update(signingInput);
-    const signature = sign.sign({ key: APNS_PRIVATE_KEY, format: 'pem', dsaEncoding: 'ieee-p1363' }).toString('base64url');
-    apnsJWT = `${signingInput}.${signature}`;
-    apnsJWTIssuedAt = now;
-    return apnsJWT;
+function hasRecentView(ip, projectId) {
+    const key = `${ip}:${projectId}`;
+    const last = viewDedup.get(key);
+    if (last && Date.now() - last < 3600000) return true;
+    viewDedup.set(key, Date.now());
+    return false;
 }
 
-async function sendAPNsPush(deviceToken, title, body) {
-    if (!deviceToken || !APNS_PRIVATE_KEY) return;
-    const token = getAPNsJWT();
-    if (!token) return;
+// Play tracking deduplication (in-memory, 1hr TTL)
+const playDedup = new Map();
 
-    return new Promise((resolve) => {
-        try {
-            const client = http2.connect('https://api.push.apple.com');
-            client.on('error', (err) => {
-                console.error('[APNs] Connection error:', err.message);
-                resolve();
-            });
-
-            const pushPayload = JSON.stringify({
-                aps: { alert: { title, body }, sound: 'default', badge: 1 }
-            });
-
-            const req = client.request({
-                ':method': 'POST',
-                ':path': `/3/device/${deviceToken}`,
-                ':scheme': 'https',
-                ':authority': 'api.push.apple.com',
-                'authorization': `bearer ${token}`,
-                'apns-topic': APNS_BUNDLE_ID,
-                'apns-push-type': 'alert',
-                'content-type': 'application/json',
-                'content-length': Buffer.byteLength(pushPayload)
-            });
-
-            req.write(pushPayload);
-            req.end();
-
-            let responseData = '';
-            req.on('data', (chunk) => { responseData += chunk; });
-            req.on('response', (headers) => {
-                const statusCode = headers[':status'];
-                if (statusCode === 200) {
-                    console.log(`[APNs] Push sent to ${deviceToken.substring(0, 8)}...`);
-                } else {
-                    console.error(`[APNs] Push failed: status=${statusCode} body=${responseData}`);
-                }
-                client.close();
-                resolve();
-            });
-
-            req.on('error', (err) => {
-                console.error('[APNs] Request error:', err.message);
-                client.close();
-                resolve();
-            });
-        } catch (err) {
-            console.error('[APNs] Error:', err.message);
-            resolve();
-        }
-    });
+function hasRecentPlay(ip, projectId) {
+    const key = `${ip}:${projectId}`;
+    const last = playDedup.get(key);
+    if (last && Date.now() - last < 3600000) return true;
+    playDedup.set(key, Date.now());
+    return false;
 }
+
+// Clean up dedup caches every 30 minutes
+setInterval(() => {
+    const cutoff = Date.now() - 3600000;
+    for (const [key, ts] of viewDedup) { if (ts < cutoff) viewDedup.delete(key); }
+    for (const [key, ts] of playDedup) { if (ts < cutoff) playDedup.delete(key); }
+}, 1800000);
 
 // ============================================
 // Rate limit tracking (in-memory)
@@ -143,27 +88,57 @@ async function refreshBrowseCache() {
     if (browseCache.isRefreshing) return;
     browseCache.isRefreshing = true;
     try {
-        const [newestResult, popularResult] = await Promise.all([
+        const selectFields = 'id, title, description, creator_id, creator_name, project_type, view_count, play_count, fork_count, like_count, created_at, published_url, preview_url, thumbnail_url, status, initial_prompt';
+        const selectFieldsFallback = 'id, title, description, creator_id, creator_name, project_type, view_count, play_count, fork_count, like_count, created_at, published_url, preview_url, status, initial_prompt';
+
+        let [newestResult, popularResult] = await Promise.all([
             supabase
                 .from('projects')
-                .select('id, title, description, creator_id, creator_name, project_type, play_count, fork_count, created_at, published_url', { count: 'exact' })
+                .select(selectFields, { count: 'exact' })
                 .eq('is_public', true)
+                .eq('status', 'ready')
                 .order('created_at', { ascending: false })
                 .limit(200),
             supabase
                 .from('projects')
-                .select('id, title, description, creator_id, creator_name, project_type, play_count, fork_count, created_at, published_url')
+                .select(selectFields)
                 .eq('is_public', true)
+                .eq('status', 'ready')
                 .order('play_count', { ascending: false })
                 .limit(200),
         ]);
 
+        // Fallback if thumbnail_url column doesn't exist yet
+        if (newestResult.error?.code === '42703' || popularResult.error?.code === '42703') {
+            console.log('[cache] thumbnail_url column not found, falling back without it');
+            [newestResult, popularResult] = await Promise.all([
+                supabase.from('projects').select(selectFieldsFallback, { count: 'exact' })
+                    .eq('is_public', true).eq('status', 'ready')
+                    .order('created_at', { ascending: false }).limit(200),
+                supabase.from('projects').select(selectFieldsFallback)
+                    .eq('is_public', true).eq('status', 'ready')
+                    .order('play_count', { ascending: false }).limit(200),
+            ]);
+        }
+
         if (newestResult.error) throw newestResult.error;
         if (popularResult.error) throw popularResult.error;
 
-        browseCache.newest = newestResult.data || [];
-        browseCache.popular = popularResult.data || [];
-        browseCache.totalCount = newestResult.count || browseCache.newest.length;
+        // Filter out test/junk projects from public browse
+        const isRealProject = (p) => {
+            const name = (p.creator_name || '').toLowerCase();
+            const title = (p.title || '').toLowerCase();
+            if (name === 'anonymous' || name === 'test user') return false;
+            if (p.creator_id?.startsWith('test-')) return false;
+            if (/^test\b/i.test(title) && title.length < 30) return false;
+            if (title === 'prefix-test' || title === 'test') return false;
+            // Must have a visual (preview screenshot or thumbnail) to show in browse
+            if (!p.preview_url && !p.thumbnail_url) return false;
+            return true;
+        };
+        browseCache.newest = (newestResult.data || []).filter(isRealProject);
+        browseCache.popular = (popularResult.data || []).filter(isRealProject);
+        browseCache.totalCount = browseCache.newest.length;
         browseCache.lastRefreshed = Date.now();
 
         console.log(`[cache] Browse cache refreshed: ${browseCache.totalCount} projects`);
@@ -210,9 +185,61 @@ async function refreshSuggestionsCache() {
     }
 }
 
+const BUILT_IN_SUGGESTIONS = [
+    { label: 'Portfolio Site', prompt: 'Build a personal portfolio website with a dark theme, animated hero section, project gallery with hover effects, skills section, and a working contact form' },
+    { label: 'Task Manager', prompt: 'Build a Kanban-style task manager with drag and drop columns (To Do, In Progress, Done), ability to add/edit/delete tasks, priority labels, and local storage persistence' },
+    { label: 'E-Commerce Store', prompt: 'Build a modern e-commerce product page with image gallery, size selector, add to cart button, customer reviews section, and a responsive mobile layout' },
+    { label: 'Analytics Dashboard', prompt: 'Build an analytics dashboard with sidebar navigation, chart cards showing revenue/users/orders metrics, a data table with sorting, and a dark professional theme' },
+    { label: 'Restaurant Menu', prompt: 'Build a restaurant website with a hero image, interactive menu with categories and filtering, reservation form, photo gallery, and Google Maps embed placeholder' },
+    { label: 'Quiz Game', prompt: 'Build an interactive quiz game with multiple choice questions, score tracking, timer, progress bar, results screen with share button, and colorful animations' },
+    { label: 'Recipe Finder', prompt: 'Build a recipe search app with ingredient-based filtering, step-by-step cooking instructions, save favorites, and a warm kitchen-themed design' },
+    { label: 'Weather Dashboard', prompt: 'Build a weather app that shows current conditions and 5-day forecast using geolocation, with temperature, humidity, wind speed, weather icons, and a clean card layout' },
+    { label: 'Habit Tracker', prompt: 'Build a habit tracking app where each habit grows a virtual plant based on consistency, with streak counters, weekly progress charts, and a garden aesthetic' },
+    { label: 'Mood Journal', prompt: 'Build a mood tracking journal where users log daily emotions with color-coded entries, write reflections, view mood trends over time, and export their history' },
+    { label: 'Pomodoro Timer', prompt: 'Build a Pomodoro productivity timer with customizable work/break intervals, session counter, task list integration, ambient sounds, and a minimal focused design' },
+    { label: 'Budget Planner', prompt: 'Build a personal budget planner with income and expense tracking, category breakdowns with pie charts, monthly summaries, savings goals, and a clean modern UI' },
+    { label: 'Flashcard App', prompt: 'Build a spaced repetition flashcard app with deck creation, flip animations, difficulty rating, progress tracking, and a study streak counter' },
+    { label: 'Music Player', prompt: 'Build a music player UI with album art display, playback controls, playlist management, equalizer visualization, and a sleek dark gradient theme' },
+    { label: 'Travel Planner', prompt: 'Build a trip planning app with destination search, itinerary builder with drag-and-drop days, packing checklist, budget tracker, and a map-themed design' },
+    { label: 'Fitness Logger', prompt: 'Build a workout tracker with exercise library, set/rep logging, progress charts, personal records, rest timer, and an energetic sports-themed design' },
+    { label: 'Landing Page', prompt: 'Build a SaaS landing page with animated hero, feature cards, pricing table, testimonial carousel, FAQ accordion, and a call-to-action with email signup' },
+    { label: 'Chat Interface', prompt: 'Build a real-time chat interface with message bubbles, typing indicators, emoji picker, file attachment previews, and a clean WhatsApp-inspired design' },
+    { label: 'Notes App', prompt: 'Build a markdown notes app with sidebar navigation, rich text editing, tag-based organization, search functionality, and a Notion-inspired minimal design' },
+    { label: 'Photo Gallery', prompt: 'Build a photo gallery with masonry grid layout, lightbox viewer, album organization, drag-and-drop upload, and smooth transition animations' },
+    { label: 'Booking System', prompt: 'Build a service booking app with calendar date picker, time slot selection, service menu, booking confirmation, and a professional clean design' },
+    { label: 'Social Feed', prompt: 'Build a social media feed with post cards, like/comment interactions, user avatars, infinite scroll, stories bar at top, and a modern Instagram-inspired layout' },
+    { label: 'Code Playground', prompt: 'Build a live code editor with HTML/CSS/JS tabs, real-time preview panel, syntax highlighting, code sharing, and a VS Code-inspired dark theme' },
+    { label: 'Movie Browser', prompt: 'Build a movie discovery app with trending carousel, genre filtering, movie detail cards with ratings, watchlist feature, and a Netflix-inspired dark theme' },
+    { label: 'Resume Builder', prompt: 'Build a resume builder with form sections for experience, education, and skills, live preview, multiple template choices, and PDF-style export view' },
+    { label: 'Countdown Timer', prompt: 'Build an event countdown app with multiple countdowns, custom background images per event, share functionality, and animated flip-clock style numbers' },
+    { label: 'Drawing Canvas', prompt: 'Build a drawing app with brush tools, color picker, undo/redo, layer support, canvas resize, and the ability to save artwork as PNG' },
+    { label: 'Crypto Tracker', prompt: 'Build a cryptocurrency dashboard with live price cards, sparkline charts, portfolio tracker, watchlist, price alerts setup, and a futuristic dark theme' },
+    { label: 'Survey Builder', prompt: 'Build a form/survey builder with drag-and-drop question types, preview mode, response summary, and a clean Typeform-inspired design' },
+    { label: 'Podcast Player', prompt: 'Build a podcast player with episode list, playback speed controls, chapter markers, queue management, and a minimal audio-focused design' },
+    { label: 'Grocery List', prompt: 'Build a smart grocery list app with category grouping, quantity adjusters, check-off items, frequently bought suggestions, and a fresh produce-themed design' },
+    { label: 'Color Palette', prompt: 'Build a color palette generator with random palette creation, color harmony rules, copy hex codes, save palettes, and smooth gradient previews' },
+    { label: 'Blog Platform', prompt: 'Build a blog with article list, reading time estimates, tag filtering, dark/light mode toggle, and a clean Medium-inspired typography-focused design' },
+    { label: 'Meditation App', prompt: 'Build a meditation timer with guided breathing animation, ambient nature sounds, session history, streak tracking, and a calming zen-inspired design' },
+    { label: 'Typing Speed', prompt: 'Build a typing speed test with random text passages, live WPM counter, accuracy tracking, high score board, and a retro terminal-style design' },
+    { label: 'Event Board', prompt: 'Build a community event board with event cards, date filtering, category tags, RSVP buttons, map location previews, and a vibrant poster-style design' },
+    { label: 'Invoice Maker', prompt: 'Build an invoice generator with client details form, line item table, tax calculations, PDF preview, and a professional business-themed design' },
+    { label: 'Reading List', prompt: 'Build a book tracking app with reading status, star ratings, notes per book, reading stats, and a warm library-themed design' },
+    { label: 'Password Gen', prompt: 'Build a password generator with length slider, character type toggles, strength meter, copy button, password history, and a security-themed dark design' },
+    { label: 'Pet Dashboard', prompt: 'Build a pet care tracker with feeding schedules, vet appointment calendar, medication reminders, photo gallery per pet, and a playful paw-print themed design' },
+    { label: 'Kanban Board', prompt: 'Build a project management board with customizable columns, task cards with labels and due dates, drag and drop, member avatars, and a Trello-inspired design' },
+    { label: 'Language Cards', prompt: 'Build a language learning flashcard app with vocabulary decks, pronunciation guide, spaced repetition, daily goals, and a colorful educational design' },
+    { label: 'Meal Planner', prompt: 'Build a weekly meal planning app with drag-and-drop recipe slots, auto-generated grocery lists, nutritional summaries, and a fresh food-photography inspired design' },
+    { label: 'Pixel Art Editor', prompt: 'Build a pixel art editor with grid canvas, color palette, brush and fill tools, animation frames, export as sprite sheet, and a retro 8-bit themed interface' },
+    { label: 'Expense Splitter', prompt: 'Build a bill splitting app for groups with itemized expenses, equal or custom splits, running balances, settle up tracking, and a friendly social design' },
+    { label: 'Mood Playlist', prompt: 'Build a mood-based playlist maker where users pick emotions from a wheel, get song suggestions with album art, create shareable playlists, and a Spotify-inspired dark UI' },
+    { label: 'Daily Standup', prompt: 'Build a daily standup tracker where team members log yesterday, today, and blockers, with history view, team overview, and a clean Slack-inspired design' },
+    { label: 'Emoji Kitchen', prompt: 'Build a fun emoji mixer app where users combine two emojis to create mashup designs, browse combinations, share results, and a playful colorful interface' },
+    { label: 'Plant Identifier', prompt: 'Build a plant care app with a plant library, watering schedule reminders, growth photo journal, care tips, and a lush botanical green-themed design' },
+    { label: 'Debate Timer', prompt: 'Build a debate/speech timer with configurable rounds, speaker tracking, bell sounds, score cards, and a professional podium-themed dark design' },
+];
+
 function getRandomSuggestions(count = 6) {
-    const pool = suggestionsCache.items;
-    if (pool.length === 0) return [];
+    const pool = suggestionsCache.items.length > 0 ? suggestionsCache.items : BUILT_IN_SUGGESTIONS;
     const shuffled = [...pool].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, Math.min(count, pool.length));
 }
@@ -261,8 +288,7 @@ async function proxyWorkerSSE(workerResponse, res, {
     label = 'proxy'
 } = {}) {
     if (!workerResponse.body) {
-        res.write(`data: ${JSON.stringify({ type: 'error', error: 'Build server connection failed' })}\n\n`);
-        res.end();
+        try { res.write(`data: ${JSON.stringify({ type: 'error', error: 'Build server connection failed' })}\n\n`); res.end(); } catch {}
         return false;
     }
 
@@ -270,6 +296,13 @@ async function proxyWorkerSSE(workerResponse, res, {
     const decoder = new TextDecoder();
     let buffer = '';
     let resultReceived = false;
+    let clientConnected = true;
+    res.on('close', () => { clientConnected = false; });
+
+    const safeWrite = (data) => {
+        if (!clientConnected) return;
+        try { res.write(data); } catch { clientConnected = false; }
+    };
 
     try {
         while (true) {
@@ -283,14 +316,21 @@ async function proxyWorkerSSE(workerResponse, res, {
             buffer = lines.pop() || ''; // Keep incomplete line in buffer
 
             for (const line of lines) {
+                // Forward SSE comments (keepalives) from worker to client
+                if (line.startsWith(':')) {
+                    safeWrite(line + '\n\n');
+                    continue;
+                }
                 if (line.startsWith('data: ')) {
                     const eventData = line.substring(6);
                     try {
                         const parsed = JSON.parse(eventData);
+                        if (parsed.type !== 'status') {
+                            console.log(`[${label}] SSE event type=${parsed.type} dataLen=${eventData.length}`);
+                        }
 
                         if (parsed.type === 'status') {
-                            // Forward status to client (including progress fields)
-                            res.write(`data: ${JSON.stringify({
+                            safeWrite(`data: ${JSON.stringify({
                                 type: 'status',
                                 phase: parsed.phase,
                                 message: parsed.message,
@@ -303,22 +343,20 @@ async function proxyWorkerSSE(workerResponse, res, {
                         } else if (parsed.type === 'result') {
                             resultReceived = true;
                             if (onResult) {
+                                // Always call onResult to save to DB, even if client disconnected
                                 await onResult(parsed, res);
                             } else {
-                                res.write(`data: ${JSON.stringify(parsed)}\n\n`);
+                                safeWrite(`data: ${JSON.stringify(parsed)}\n\n`);
                             }
                         } else if (parsed.type === 'error') {
                             if (onError) {
                                 await onError(parsed, res);
                             } else {
-                                res.write(`data: ${JSON.stringify({
-                                    type: 'error',
-                                    error: parsed.error
-                                })}\n\n`);
+                                safeWrite(`data: ${JSON.stringify({ type: 'error', error: parsed.error })}\n\n`);
                             }
                         }
-                    } catch {
-                        // Malformed event, skip
+                    } catch (parseErr) {
+                        console.log(`[${label}] SSE parse error: ${parseErr.message} dataLen=${eventData.length} preview=${eventData.substring(0, 100)}`);
                     }
                 }
             }
@@ -326,7 +364,7 @@ async function proxyWorkerSSE(workerResponse, res, {
     } catch (streamError) {
         console.error(`[${label}] Stream error:`, streamError.message);
         if (!resultReceived) {
-            res.write(`data: ${JSON.stringify({ type: 'error', error: 'Connection to build server lost' })}\n\n`);
+            safeWrite(`data: ${JSON.stringify({ type: 'error', error: 'Connection to build server lost' })}\n\n`);
         }
     }
 
@@ -354,8 +392,12 @@ function setupSSE(res) {
 // Streaming endpoint — proxies SSE status events from the worker to the client
 // ============================================
 router.post('/generate', async (req, res) => {
+    // Declared outside the try block so the catch handler can reference it.
+    // `let` inside the try is scoped to the try only, which caused a
+    // ReferenceError → process crash whenever the outer catch fired.
+    let placeholderProjectId = null;
     try {
-        const { prompt, userId, userName, framework, referenceImage, deviceToken } = req.body;
+        const { prompt, userId, userName, framework, referenceImage, deviceToken, source } = req.body;
 
         if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
             return res.status(400).json({ error: 'Project description is required' });
@@ -365,54 +407,106 @@ router.post('/generate', async (req, res) => {
             return res.status(400).json({ error: 'Description must be under 2000 characters' });
         }
 
+        // Block code injection and malicious prompts
+        const lowerPrompt = prompt.toLowerCase();
+        const codePatterns = [
+            'import os', 'import subprocess', 'import asyncio', 'import sys',
+            'require(', 'eval(', 'exec(', 'system(',
+            'subprocess.', 'os.system', 'os.popen',
+            'child_process', 'puppeteer', 'selenium',
+            'websocket.server', 'websockets.connect',
+            '#!/', 'bash -c',
+            'rm -rf', 'chmod ', 'chown ',
+            'def __', 'if __name__',
+            'document.cookie', 'window.location.href='
+        ];
+        if (codePatterns.some(p => lowerPrompt.includes(p))) {
+            console.warn(`[generate] BLOCKED malicious prompt from ${userId}: "${prompt.substring(0, 100)}"`);
+            return res.status(400).json({ error: 'Please describe your app idea in plain language instead of pasting code.' });
+        }
+
+        // Block prompts with URLs
+        if (/https?:\/\/\S+/i.test(prompt)) {
+            console.warn(`[generate] BLOCKED URL prompt from ${userId}: "${prompt.substring(0, 100)}"`);
+            return res.status(400).json({ error: 'Please describe your app idea in your own words instead of pasting URLs.' });
+        }
+
         if (!checkRateLimit(userId)) {
             return res.status(429).json({ error: 'Rate limit exceeded. Try again in an hour.' });
         }
 
-        // Check subscription usage limit for generation
-        if (userId) {
-            const limitCheck = await checkUsageLimit(userId, ACTION_TYPES.generation);
-            if (!limitCheck.allowed) {
-                return res.status(403).json({
-                    error: limitCheck.error,
-                    used: limitCheck.used,
-                    limit: limitCheck.limit,
-                    remaining: limitCheck.remaining,
-                    requiresTier: limitCheck.requiresTier,
-                    currentTier: limitCheck.currentTier
-                });
-            }
-        }
+        // Subscription usage check disabled until tables are created
+        // TODO: Re-enable when user_subscriptions and subscription_usage tables exist
 
         console.log(`[generate] User ${userId}: "${prompt.substring(0, 80)}"${referenceImage ? ' (with reference image)' : ''}`);
+
+        // Create placeholder project in "building" state so it shows in My Projects immediately
+        try {
+            let title = prompt.trim()
+                .replace(/^(build|create|make|design|develop)\s+(a|an|the|me\s+a|me\s+an)?\s*/i, '')
+                .replace(/\s+(with|that|where|which|for|using|featuring|including|and\s+a)\s+.*/i, '')
+                .split(/\s+/).slice(0, 5).join(' ')
+                .substring(0, 50) || 'My App';
+            title = title.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+            const { data: placeholder, error: phErr } = await supabase
+                .from('projects')
+                .insert({
+                    title,
+                    description: prompt,
+                    creator_id: userId,
+                    creator_name: userName || 'VibeBuild User',
+                    initial_prompt: prompt,
+                    is_public: true,
+                    project_type: 'web_app',
+                    creation_method: source === 'telegram' ? 'telegram' : 'ai_generated',
+                    status: 'building'
+                })
+                .select('id')
+                .single();
+
+            if (!phErr && placeholder) {
+                placeholderProjectId = placeholder.id;
+                console.log(`[generate] Placeholder project created: ${placeholderProjectId}`);
+            }
+        } catch (e) {
+            console.error(`[generate] Placeholder creation failed: ${e.message}`);
+        }
 
         // Set up SSE
         setupSSE(res);
 
-        // Build worker request body
+        // Send projectId immediately so client can poll if connection drops
+        if (placeholderProjectId) {
+            res.write(`data: ${JSON.stringify({ type: 'queued', projectId: placeholderProjectId })}\n\n`);
+        }
+
+        // Use async callback path — close SSE after queued event, app polls for result
+        // Old app versions (stream:true) still get the SSE proxy path for compatibility
+        const clientWantsStream = req.body.stream === true;
+        const callbackUrl = `${process.env.SELF_URL || 'https://vibecoder-api.fly.dev'}/api/projects/${placeholderProjectId}/build-complete`;
         const workerBody = {
             prompt: prompt.trim(),
             userId,
             framework: framework || 'react',
-            stream: true
+            stream: clientWantsStream,
+            projectId: placeholderProjectId,
+            ...(!clientWantsStream && { callbackUrl, callbackSecret: WORKER_SECRET })
         };
         if (referenceImage && typeof referenceImage === 'string') {
             workerBody.referenceImage = referenceImage;
         }
 
-        // Request streaming from the worker
         const workerResponse = await fetch(`${WORKER_URL}/generate`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-worker-secret': WORKER_SECRET
-            },
+            headers: { 'Content-Type': 'application/json', 'x-worker-secret': WORKER_SECRET },
             body: JSON.stringify(workerBody),
-            signal: AbortSignal.timeout(600000) // 10 min timeout
+            signal: AbortSignal.timeout(clientWantsStream ? 600000 : 30000)
         });
 
         if (!workerResponse.ok) {
             let errorMsg = `Build server error (${workerResponse.status})`;
+            let systemBusy = false;
             try {
                 if (workerResponse.headers.get('content-type')?.includes('application/json')) {
                     const err = await workerResponse.json();
@@ -420,34 +514,51 @@ router.post('/generate', async (req, res) => {
                     if (err.quotaExhausted) {
                         res.write(`data: ${JSON.stringify({ type: 'error', error: errorMsg, quotaExhausted: true, resetTime: err.resetTime })}\n\n`);
                         res.end();
+                        if (placeholderProjectId) supabase.from('projects').update({ status: 'failed' }).eq('id', placeholderProjectId).then(() => {});
                         return;
+                    }
+                    if (workerResponse.status === 429) {
+                        systemBusy = true;
+                        errorMsg = 'Our builders are at full capacity right now. Pro users get priority access — upgrade to skip the queue.';
                     }
                 }
             } catch {}
-            res.write(`data: ${JSON.stringify({ type: 'error', error: errorMsg })}\n\n`);
-            res.end();
+            if (placeholderProjectId && !systemBusy) {
+                supabase.from('projects').update({ status: 'failed' }).eq('id', placeholderProjectId).then(() => {});
+                const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
+                if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', `"${shortPrompt}..." is queued. Pro users skip the line — upgrade for priority builds.`).catch(() => {});
+            }
+            safeWrite(`data: ${JSON.stringify({ type: 'error', error: errorMsg, systemBusy, projectId: placeholderProjectId })}\n\n`);
+            try { res.end(); } catch {}
             return;
         }
 
-        // Stream SSE from worker to client
+        // Async callback path (new app, stream:false) — close SSE now, app polls
+        if (!clientWantsStream) {
+            console.log(`[generate] Dispatched async build for ${placeholderProjectId}, closing SSE`);
+            recordGeneration(userId);
+            if (userId) recordUsage(userId, ACTION_TYPES.generation).catch(() => {});
+            try { res.end(); } catch {}
+            return;
+        }
+
+        // SSE proxy path (old app, stream:true) — keep connection open, proxy worker events
         const resultReceived = await proxyWorkerSSE(workerResponse, res, {
             label: 'generate',
             onResult: async (parsed, res) => {
                 recordGeneration(userId);
 
-                // Record usage for subscription tracking
-                if (userId) {
-                    await recordUsage(userId, ACTION_TYPES.generation);
-                }
-
-                const generationId = `gen-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
+                const generationId = `gen-${Date.now()}-${crypto.randomUUID().split('-')[0]}`;
+                const savedProjectId = placeholderProjectId;
 
                 console.log(`[generate] Complete: ${generationId} (${parsed.files?.length} files, ${((parsed.bundleSize || 0) / 1024).toFixed(1)}KB, ${parsed.generationTime}s)`);
 
+                // Send result to client immediately — don't block on DB/deploy ops
                 res.write(`data: ${JSON.stringify({
                     type: 'result',
                     success: true,
                     generationId,
+                    projectId: savedProjectId,
                     bundle: parsed.bundle,
                     bundleSize: parsed.bundleSize,
                     files: parsed.files,
@@ -455,22 +566,125 @@ router.post('/generate', async (req, res) => {
                     quality: parsed.quality
                 })}\n\n`);
 
-                // Send APNs push notification (fire-and-forget)
-                if (deviceToken) {
+                // All backend work runs in background after client gets bundle
+                (async () => {
+                    try {
+                        // Record usage for subscription tracking
+                        if (userId) await recordUsage(userId, ACTION_TYPES.generation);
+
+                        let finalProjectId = savedProjectId;
+                        if (finalProjectId) {
+                            await supabase.from('projects').update({ bundle: parsed.bundle, status: 'ready' }).eq('id', finalProjectId);
+                            console.log(`[generate] Updated project ${finalProjectId} with bundle`);
+                        } else {
+                            // Fallback: create new project if placeholder wasn't created
+                            let title = prompt.trim()
+                                .replace(/^(build|create|make|design|develop)\s+(a|an|the|me\s+a|me\s+an)?\s*/i, '')
+                                .replace(/\s+(with|that|where|which|for|using|featuring|including|and\s+a)\s+.*/i, '')
+                                .split(/\s+/).slice(0, 5).join(' ')
+                                .substring(0, 50) || 'My App';
+                            title = title.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                            const { data: saved } = await supabase.from('projects').insert({
+                                title, description: prompt, bundle: parsed.bundle,
+                                creator_id: userId, creator_name: userName || 'VibeBuild User',
+                                initial_prompt: prompt, is_public: true,
+                                project_type: 'web_app', creation_method: 'ai_generated', status: 'ready'
+                            }).select('id').single();
+                            if (saved) finalProjectId = saved.id;
+                        }
+
+                        if (finalProjectId) {
+                            console.log(`[generate] Project ready: ${finalProjectId}`);
+
+                            // Auto-deploy preview
+                            try {
+                                const previewSubdomain = `preview-${finalProjectId.substring(0, 12)}`;
+                                const deployRes = await fetch(`${DEPLOY_SERVER_URL}/deploy`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ subdomain: previewSubdomain, bundle: parsed.bundle }),
+                                    signal: AbortSignal.timeout(30000)
+                                });
+                                if (deployRes.ok) {
+                                    const previewUrl = `https://${previewSubdomain}.${process.env.BASE_DOMAIN || 'vibebuild.cc'}`;
+                                    await supabase.from('projects').update({ preview_url: previewUrl }).eq('id', finalProjectId);
+                                    console.log(`[generate] Preview deployed: ${previewUrl}`);
+
+                                    // Thumbnail capture in background
+                                    const screenshotServiceUrl = process.env.SCREENSHOT_SERVICE_URL || 'http://178.156.231.255:3465';
+                                    fetch(`${screenshotServiceUrl}/screenshot?url=${encodeURIComponent(previewUrl)}&width=390&height=844`)
+                                        .then(async (sr) => {
+                                            if (sr.ok) {
+                                                const imgBuffer = await sr.arrayBuffer();
+                                                const fileName = `thumbnails/${finalProjectId}.jpg`;
+                                                const { error: uploadErr } = await supabase.storage
+                                                    .from('project-assets')
+                                                    .upload(fileName, Buffer.from(imgBuffer), { contentType: 'image/jpeg', upsert: true });
+                                                if (!uploadErr) {
+                                                    const { data: { publicUrl } } = supabase.storage.from('project-assets').getPublicUrl(fileName);
+                                                    await supabase.from('projects').update({ thumbnail_url: publicUrl }).eq('id', finalProjectId);
+                                                    console.log(`[generate] Thumbnail captured: ${publicUrl}`);
+                                                } else {
+                                                    const thumbnailUrl = `${screenshotServiceUrl}/screenshot?url=${encodeURIComponent(previewUrl)}&width=390&height=844`;
+                                                    await supabase.from('projects').update({ thumbnail_url: thumbnailUrl }).eq('id', finalProjectId);
+                                                }
+                                            }
+                                        })
+                                        .catch(e => console.error(`[generate] Thumbnail capture failed: ${e.message}`));
+                                }
+                            } catch (e) {
+                                console.error(`[generate] Preview deploy failed: ${e.message}`);
+                            }
+
+                            // Init git repo in background
+                            fetch(`${WORKER_URL}/init-repo`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'x-worker-secret': WORKER_SECRET },
+                                body: JSON.stringify({ projectId: finalProjectId, bundle: parsed.bundle })
+                            }).then(async (r) => {
+                                if (r.ok) {
+                                    const result = await r.json();
+                                    if (result.repoName) {
+                                        await supabase.from('projects').update({ github_repo: result.repoName }).eq('id', finalProjectId);
+                                        console.log(`[generate] Git repo linked: ${result.repoName}`);
+                                    }
+                                }
+                            }).catch(e => console.error(`[generate] Init repo failed: ${e.message}`));
+                        }
+                    } catch (e) {
+                        console.error(`[generate] Auto-save failed: ${e.message}`);
+                    }
+
+                    // Push notification
                     const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
-                    sendAPNsPush(deviceToken, 'Project Ready!', `"${shortPrompt}" has been built. Tap to view!`).catch(() => {});
-                }
+                    if (userId) sendPushToUser(userId, 'Project Ready!', `"${shortPrompt}" has been built. Tap to view!`, { projectId: projectId }).catch(() => {});
+                    else if (deviceToken) sendAPNsPush(deviceToken, 'Project Ready!', `"${shortPrompt}" has been built. Tap to view!`, { projectId: projectId }).catch(() => {});
+                })();
             }
         });
 
-        res.end();
+        // If stream ended without a result, mark placeholder failed
+        if (!resultReceived && placeholderProjectId) {
+            supabase.from('projects').update({ status: 'failed' }).eq('id', placeholderProjectId).then(() => {
+                console.log(`[generate] Marked ${placeholderProjectId} as failed (no result received)`);
+            });
+            const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
+            if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', `"${shortPrompt}..." hit a snag. Pro users get priority — upgrade to skip the queue.`).catch(() => {});
+        }
+        try { res.end(); } catch {}
 
     } catch (error) {
         console.error('[generate] Error:', error.message);
 
+        // Mark placeholder failed on exception
+        if (placeholderProjectId) {
+            supabase.from('projects').update({ status: 'failed' }).eq('id', placeholderProjectId).then(() => {});
+            const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
+            if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', `"${shortPrompt}..." hit a snag. Pro users get priority — upgrade to skip the queue.`).catch(() => {});
+        }
+
         if (res.headersSent) {
-            res.write(`data: ${JSON.stringify({ type: 'error', error: 'Server error. Please try again.' })}\n\n`);
-            res.end();
+            try { res.write(`data: ${JSON.stringify({ type: 'error', error: 'Server error. Please try again.' })}\n\n`); res.end(); } catch {}
         } else {
             if (error.name === 'TimeoutError') {
                 return res.status(504).json({ error: 'Project generation timed out. Try a simpler idea.' });
@@ -627,6 +841,491 @@ router.get('/browse', (req, res) => {
 });
 
 // ============================================
+// POST /api/projects/:id/feedback
+// Record thumbs up/down feedback for a generated project
+// ============================================
+// POST /api/projects/:id/retry
+// Re-dispatches a failed build without creating a new project
+router.post('/:id/retry', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { userId } = req.body;
+        if (!userId) return res.status(400).json({ error: 'userId is required' });
+
+        const { data: project, error: fetchErr } = await supabase
+            .from('projects')
+            .select('id, initial_prompt, status, creator_id')
+            .eq('id', id)
+            .single();
+
+        if (fetchErr || !project) return res.status(404).json({ error: 'Project not found' });
+        if (project.creator_id !== userId) return res.status(403).json({ error: 'Forbidden' });
+        if (project.status !== 'failed') return res.status(400).json({ error: 'Project is not in failed state' });
+        if (!project.initial_prompt) return res.status(400).json({ error: 'No prompt to retry' });
+
+        // Reset to building
+        await supabase.from('projects').update({ status: 'building' }).eq('id', id);
+
+        // Fire-and-forget dispatch to worker — worker result updates this same project
+        res.json({ success: true, projectId: id });
+
+        // Dispatch to worker with callback URL — worker POSTs result back when done
+        // This avoids Cloud Run killing the long-running SSE stream after response is sent
+        const callbackUrl = `${process.env.SELF_URL || 'https://vibecoder-api.fly.dev'}/api/projects/${id}/build-complete`;
+        const workerBody = { prompt: project.initial_prompt, userId, framework: 'react', stream: false, projectId: id, callbackUrl, callbackSecret: WORKER_SECRET };
+        console.log(`[retry] Dispatching to worker for ${id}`);
+        fetch(`${WORKER_URL}/generate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-worker-secret': WORKER_SECRET },
+            body: JSON.stringify(workerBody),
+            signal: AbortSignal.timeout(30000)
+        }).then(async (workerRes) => {
+            console.log(`[retry] Worker accepted: ${workerRes.status} for ${id}`);
+            if (!workerRes.ok) {
+                const errText = await workerRes.text().catch(() => '');
+                if (workerRes.status === 429) {
+                    console.log(`[retry] Worker busy for ${id} — build stays in building state, will poll`);
+                    // Leave as building — cleanup cron will reset if it gets stuck
+                    return;
+                }
+                console.error(`[retry] Worker error ${workerRes.status}: ${errText.substring(0, 200)}`);
+                await supabase.from('projects').update({ status: 'failed' }).eq('id', id);
+            }
+        }).catch(async (err) => {
+            console.error(`[retry] Worker fetch error: ${err.message}`);
+            await supabase.from('projects').update({ status: 'failed' }).eq('id', id);
+        });
+
+    } catch (error) {
+        console.error('[retry] Error:', error.message);
+        res.status(500).json({ error: 'Failed to retry project' });
+    }
+});
+
+router.post('/:id/feedback', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { userId, rating } = req.body; // rating: 'up' | 'down'
+        if (!userId || !['up', 'down'].includes(rating)) {
+            return res.status(400).json({ error: 'userId and rating (up/down) required' });
+        }
+
+        const { error } = await supabase
+            .from('project_feedback')
+            .upsert({
+                project_id: id,
+                user_id: userId,
+                rating,
+                created_at: new Date().toISOString(),
+            }, { onConflict: 'project_id,user_id' });
+
+        if (error) throw error;
+        console.log(`[feedback] Project ${id}: ${rating} by ${userId}`);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('[feedback] Error:', error.message);
+        res.status(500).json({ error: 'Failed to save feedback' });
+    }
+});
+
+// ============================================
+// POST /api/projects/:id/build-complete
+// Callback from worker when a retry build finishes
+// ============================================
+router.post('/:id/build-complete', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { bundle, status, error, userId, secret } = req.body;
+
+        if (secret !== WORKER_SECRET) return res.status(401).json({ error: 'Unauthorized' });
+        if (!id) return res.status(400).json({ error: 'Missing id' });
+
+        if (bundle && status === 'ready') {
+            await supabase.from('projects').update({ bundle, status: 'ready' }).eq('id', id);
+            console.log(`[build-complete] Project ${id} ready`);
+
+            // Auto-deploy preview + capture thumbnail
+            try {
+                const previewSubdomain = `prev-${id.substring(0, 8)}`;
+                const deployRes = await fetch(`${DEPLOY_SERVER_URL}/deploy`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ subdomain: previewSubdomain, bundle }),
+                    signal: AbortSignal.timeout(30000)
+                });
+                if (!deployRes.ok) {
+                    const body = await deployRes.text().catch(() => '');
+                    console.error(`[build-complete] Deploy failed for ${id}: HTTP ${deployRes.status} ${body.substring(0, 200)}`);
+                }
+                if (deployRes.ok) {
+                    const previewUrl = `https://${previewSubdomain}.${process.env.BASE_DOMAIN || 'vibebuild.cc'}`;
+                    await supabase.from('projects').update({ preview_url: previewUrl }).eq('id', id);
+                    console.log(`[build-complete] Preview deployed for ${id}: ${previewUrl}`);
+                    // Capture thumbnail in background
+                    const screenshotServiceUrl = process.env.SCREENSHOT_SERVICE_URL || 'http://178.156.231.255:3465';
+                    fetch(`${screenshotServiceUrl}/screenshot?url=${encodeURIComponent(previewUrl)}&width=390&height=844`)
+                        .then(async (sr) => {
+                            if (!sr.ok) return;
+                            const imgBuffer = await sr.arrayBuffer();
+                            const fileName = `thumbnails/${id}.jpg`;
+                            const { error: uploadErr } = await supabase.storage
+                                .from('project-assets')
+                                .upload(fileName, Buffer.from(imgBuffer), { contentType: 'image/jpeg', upsert: true });
+                            if (!uploadErr) {
+                                const { data: { publicUrl } } = supabase.storage.from('project-assets').getPublicUrl(fileName);
+                                await supabase.from('projects').update({ thumbnail_url: publicUrl }).eq('id', id);
+                                console.log(`[build-complete] Thumbnail captured: ${publicUrl}`);
+                            } else {
+                                const thumbnailUrl = `${screenshotServiceUrl}/screenshot?url=${encodeURIComponent(previewUrl)}&width=390&height=844`;
+                                await supabase.from('projects').update({ thumbnail_url: thumbnailUrl }).eq('id', id);
+                            }
+                        })
+                        .catch(e => console.error(`[build-complete] Thumbnail failed: ${e.message}`));
+                }
+            } catch (e) {
+                console.error(`[build-complete] Preview/thumbnail error: ${e.message}`);
+            }
+
+            if (userId) {
+                const { data: proj } = await supabase.from('projects').select('initial_prompt').eq('id', id).single();
+                const shortPrompt = (proj?.initial_prompt || '').substring(0, 40);
+                sendPushToUser(userId, `"${shortPrompt}" is ready!`, 'Tap to open your app', { projectId: id }).catch(() => {});
+            }
+        } else {
+            await supabase.from('projects').update({ status: 'failed' }).eq('id', id);
+            console.log(`[build-complete] Project ${id} failed: ${error}`);
+            if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', 'Retry failed. Pro users get priority — upgrade to skip the queue.').catch(() => {});
+        }
+        res.json({ success: true });
+    } catch (err) {
+        console.error('[build-complete] Error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ============================================
+// POST /api/projects/:id/view
+// Track a view (deduplicated by IP+projectId, 1hr window)
+// ============================================
+router.post('/:id/view', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const ip = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+
+        if (hasRecentView(ip, id)) {
+            return res.json({ success: true, deduplicated: true });
+        }
+
+        // Increment view_count
+        const { data } = await supabase
+            .from('projects')
+            .select('view_count')
+            .eq('id', id)
+            .single();
+
+        if (data) {
+            await supabase
+                .from('projects')
+                .update({ view_count: (data.view_count || 0) + 1 })
+                .eq('id', id);
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('[view] Error:', error.message);
+        res.status(500).json({ error: 'Failed to track view' });
+    }
+});
+
+// ============================================
+// POST /api/projects/:id/play
+// Track a play (deduplicated by IP+projectId, 1hr window)
+// ============================================
+router.post('/:id/play', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const ip = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+
+        if (hasRecentPlay(ip, id)) {
+            return res.json({ success: true, deduplicated: true });
+        }
+
+        const { data } = await supabase
+            .from('projects')
+            .select('play_count')
+            .eq('id', id)
+            .single();
+
+        if (data) {
+            await supabase
+                .from('projects')
+                .update({ play_count: (data.play_count || 0) + 1 })
+                .eq('id', id);
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('[play] Error:', error.message);
+        res.status(500).json({ error: 'Failed to track play' });
+    }
+});
+
+// ============================================
+// POST /api/projects/:id/like
+// Like a project (requires userId)
+// ============================================
+router.post('/:id/like', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { userId } = req.body;
+        if (!userId) return res.status(400).json({ error: 'userId is required' });
+
+        // Check if already liked
+        const { data: existing } = await supabase
+            .from('project_likes')
+            .select('id')
+            .eq('project_id', id)
+            .eq('user_id', userId)
+            .single();
+
+        if (existing) {
+            return res.json({ success: true, liked: true, message: 'Already liked' });
+        }
+
+        // Insert like
+        const { error: insertError } = await supabase
+            .from('project_likes')
+            .insert({ project_id: id, user_id: userId });
+
+        if (insertError) throw insertError;
+
+        // Increment like_count on projects table
+        const { data: project } = await supabase
+            .from('projects')
+            .select('like_count')
+            .eq('id', id)
+            .single();
+
+        if (project) {
+            await supabase
+                .from('projects')
+                .update({ like_count: (project.like_count || 0) + 1 })
+                .eq('id', id);
+        }
+
+        // Get updated count
+        const { count } = await supabase
+            .from('project_likes')
+            .select('id', { count: 'exact', head: true })
+            .eq('project_id', id);
+
+        res.json({ success: true, liked: true, likeCount: count || 0 });
+    } catch (error) {
+        console.error('[like] Error:', error.message);
+        res.status(500).json({ error: 'Failed to like project' });
+    }
+});
+
+// ============================================
+// DELETE /api/projects/:id/like
+// Unlike a project (requires userId)
+// ============================================
+router.delete('/:id/like', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { userId } = req.body;
+        if (!userId) return res.status(400).json({ error: 'userId is required' });
+
+        const { error: deleteError } = await supabase
+            .from('project_likes')
+            .delete()
+            .eq('project_id', id)
+            .eq('user_id', userId);
+
+        if (deleteError) throw deleteError;
+
+        // Decrement like_count on projects table
+        const { data: project } = await supabase
+            .from('projects')
+            .select('like_count')
+            .eq('id', id)
+            .single();
+
+        if (project && (project.like_count || 0) > 0) {
+            await supabase
+                .from('projects')
+                .update({ like_count: (project.like_count || 0) - 1 })
+                .eq('id', id);
+        }
+
+        // Get updated count
+        const { count } = await supabase
+            .from('project_likes')
+            .select('id', { count: 'exact', head: true })
+            .eq('project_id', id);
+
+        res.json({ success: true, liked: false, likeCount: count || 0 });
+    } catch (error) {
+        console.error('[unlike] Error:', error.message);
+        res.status(500).json({ error: 'Failed to unlike project' });
+    }
+});
+
+// ============================================
+// GET /api/projects/:id/like-status
+// Check if current user has liked a project
+// ============================================
+router.get('/:id/like-status', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { userId } = req.query;
+
+        if (!userId) return res.json({ success: true, liked: false, likeCount: 0 });
+
+        const [likeResult, countResult] = await Promise.all([
+            supabase
+                .from('project_likes')
+                .select('id')
+                .eq('project_id', id)
+                .eq('user_id', userId)
+                .single(),
+            supabase
+                .from('project_likes')
+                .select('id', { count: 'exact', head: true })
+                .eq('project_id', id),
+        ]);
+
+        res.json({
+            success: true,
+            liked: !!likeResult.data,
+            likeCount: countResult.count || 0,
+        });
+    } catch (error) {
+        console.error('[like-status] Error:', error.message);
+        res.status(500).json({ error: 'Failed to check like status' });
+    }
+});
+
+// ============================================
+// POST /api/projects/track-play
+// Internal endpoint for deploy server to track plays by subdomain
+// ============================================
+router.post('/track-play', async (req, res) => {
+    try {
+        const { subdomain, ip } = req.body;
+        if (!subdomain) return res.status(400).json({ error: 'subdomain is required' });
+
+        // Find project by subdomain via deployments table
+        const { data: deployment } = await supabase
+            .from('deployments')
+            .select('project_id')
+            .eq('subdomain', subdomain)
+            .eq('status', 'active')
+            .single();
+
+        if (!deployment) return res.json({ success: true, message: 'No active deployment found' });
+
+        const projectId = deployment.project_id;
+        const clientIp = ip || 'unknown';
+
+        if (hasRecentPlay(clientIp, projectId)) {
+            return res.json({ success: true, deduplicated: true });
+        }
+
+        const { data: project } = await supabase
+            .from('projects')
+            .select('play_count')
+            .eq('id', projectId)
+            .single();
+
+        if (project) {
+            await supabase
+                .from('projects')
+                .update({ play_count: (project.play_count || 0) + 1 })
+                .eq('id', projectId);
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('[track-play] Error:', error.message);
+        res.status(500).json({ error: 'Failed to track play' });
+    }
+});
+
+// ============================================
+// POST /api/projects/suggest-ideas
+// Generate fresh app ideas using Claude API
+// ============================================
+router.post('/suggest-ideas', async (req, res) => {
+    const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+    if (!ANTHROPIC_API_KEY) {
+        // Fallback to built-in if no API key
+        const shuffled = [...BUILT_IN_SUGGESTIONS].sort(() => Math.random() - 0.5);
+        return res.json({ success: true, suggestions: shuffled.slice(0, 6) });
+    }
+
+    try {
+        // Pick 3 random existing suggestions as examples of the format
+        const examples = [...BUILT_IN_SUGGESTIONS].sort(() => Math.random() - 0.5).slice(0, 3);
+        const examplesText = examples.map(s => `- label: "${s.label}", prompt: "${s.prompt}"`).join('\n');
+
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': ANTHROPIC_API_KEY,
+                'anthropic-version': '2023-06-01'
+            },
+            body: JSON.stringify({
+                model: 'claude-haiku-4-5-20251001',
+                max_tokens: 1024,
+                messages: [{
+                    role: 'user',
+                    content: `Generate 6 creative, unique app ideas for VibeBuild — a platform where users describe an app and AI builds it as a self-contained web app (HTML/CSS/JS, no backend needed).
+
+Each idea needs a short label (2-3 words) and a detailed prompt (1-2 sentences describing what to build, including specific features and design direction).
+
+Ideas should be diverse — mix utility apps, creative tools, games, dashboards, and fun interactive experiences. Be creative and surprising — avoid generic ideas like "todo list" or "calculator".
+
+Here are examples of the format (DO NOT repeat these):
+${examplesText}
+
+Output ONLY a JSON array of 6 objects with "label" and "prompt" keys. No markdown, no explanation.`
+                }]
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Anthropic API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const text = data.content?.[0]?.text || '';
+
+        // Parse JSON from response
+        const jsonMatch = text.match(/\[[\s\S]*\]/);
+        if (!jsonMatch) throw new Error('No JSON array in response');
+
+        const suggestions = JSON.parse(jsonMatch[0]);
+        if (!Array.isArray(suggestions) || suggestions.length === 0) throw new Error('Empty suggestions');
+
+        // Validate each suggestion has label and prompt
+        const valid = suggestions
+            .filter(s => s.label && s.prompt)
+            .slice(0, 6);
+
+        if (valid.length === 0) throw new Error('No valid suggestions');
+
+        res.json({ success: true, suggestions: valid });
+    } catch (error) {
+        console.error('[suggest-ideas] LLM generation failed:', error.message);
+        // Fallback to built-in
+        const shuffled = [...BUILT_IN_SUGGESTIONS].sort(() => Math.random() - 0.5);
+        res.json({ success: true, suggestions: shuffled.slice(0, 6) });
+    }
+});
+
+// ============================================
 // GET /api/projects/suggestions
 // Returns random project idea prompts from the pre-generated pool.
 // No DB hit — served instantly from memory.
@@ -653,7 +1352,7 @@ router.get('/my', async (req, res) => {
 
         const { data, error, count } = await supabase
             .from('projects')
-            .select('id, title, description, creator_name, project_type, play_count, fork_count, created_at, updated_at, is_public, published_url', { count: 'exact' })
+            .select('id, title, description, creator_id, creator_name, project_type, view_count, play_count, fork_count, like_count, created_at, updated_at, is_public, published_url, preview_url, thumbnail_url, github_repo, status, initial_prompt, creation_method', { count: 'exact' })
             .eq('creator_id', userId)
             .order('updated_at', { ascending: false })
             .range(parsedOffset, parsedOffset + parsedLimit - 1);
@@ -676,21 +1375,97 @@ router.get('/my', async (req, res) => {
 // GET /api/projects/:id
 // Returns project metadata + base64 bundle
 // ============================================
+// POST /api/projects/:id/export-apk
+// Build an Android APK from the project's web bundle
+// ============================================
+router.post('/:id/export-apk', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { userId, bundle: clientBundle } = req.body;
+
+        if (!userId) return res.status(400).json({ error: 'userId is required' });
+
+        // Get project
+        const { data: project, error } = await supabase
+            .from('projects')
+            .select('id, title, github_repo, creator_id')
+            .eq('id', id)
+            .single();
+
+        if (error || !project) return res.status(404).json({ error: 'Project not found' });
+
+        // Get bundle: try client-provided bundle first, then DB bundle, then github repo
+        let bundle = clientBundle || null;
+        if (!bundle) {
+            const { data: fullProject } = await supabase.from('projects').select('bundle').eq('id', id).single();
+            if (fullProject?.bundle) bundle = fullProject.bundle;
+        }
+        if (!bundle && project.github_repo) {
+            try {
+                const bundleRes = await fetch(`${WORKER_URL}/bundle/${project.github_repo}`, {
+                    headers: { 'x-worker-secret': WORKER_SECRET },
+                    signal: AbortSignal.timeout(30000)
+                });
+                if (bundleRes.ok) {
+                    const result = await bundleRes.json();
+                    bundle = result.bundle;
+                }
+            } catch (e) {
+                console.error(`[export-apk] Bundle fetch failed: ${e.message}`);
+            }
+        }
+
+        if (!bundle) {
+            return res.status(400).json({ error: 'Could not retrieve project bundle. Try previewing the project first.' });
+        }
+
+        console.log(`[export-apk] Building APK for project ${id}: "${project.title}"`);
+
+        // Forward to worker for APK build (long timeout - Gradle takes ~60s)
+        const workerRes = await fetch(`${WORKER_URL}/build-apk`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-worker-secret': WORKER_SECRET
+            },
+            body: JSON.stringify({
+                projectId: id,
+                bundle,
+                appName: project.title || 'VibeBuild App'
+            }),
+            signal: AbortSignal.timeout(180000) // 3 min timeout
+        });
+
+        if (!workerRes.ok) {
+            const err = await workerRes.json().catch(() => ({}));
+            return res.status(500).json({ error: err.error || 'APK build failed' });
+        }
+
+        const result = await workerRes.json();
+        console.log(`[export-apk] APK built: ${result.apkSize} bytes in ${result.buildTime}s`);
+        res.json(result);
+    } catch (error) {
+        console.error(`[export-apk] Error:`, error.message);
+        res.status(500).json({ error: `Export failed: ${error.message}` });
+    }
+});
+
+// ============================================
 router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
 
         const { data, error } = await supabase
             .from('projects')
-            .select('id, title, description, github_repo, creator_id, creator_name, project_type, play_count, fork_count, created_at, updated_at, is_public, published_url, free_tweaks_remaining, initial_prompt')
+            .select('id, title, description, bundle, github_repo, creator_id, creator_name, project_type, view_count, play_count, fork_count, like_count, created_at, updated_at, is_public, published_url, free_tweaks_remaining, initial_prompt')
             .eq('id', id)
             .single();
 
         if (error) throw error;
         if (!data) return res.status(404).json({ error: 'Project not found' });
 
-        // Fetch bundle from GitHub
-        let bundle = null;
+        // Fetch bundle: prefer GitHub repo, fallback to DB bundle column
+        let bundle = data.bundle || null;
         if (data.github_repo) {
             try {
                 const workerRes = await fetch(`${WORKER_URL}/bundle/${data.github_repo}`, {
@@ -722,8 +1497,10 @@ router.get('/:id', async (req, res) => {
                 creatorId: data.creator_id,
                 creatorName: data.creator_name,
                 projectType: data.project_type,
+                viewCount: data.view_count,
                 playCount: data.play_count,
                 forkCount: data.fork_count,
+                likeCount: data.like_count,
                 createdAt: data.created_at,
                 updatedAt: data.updated_at,
                 isPublic: data.is_public,
@@ -949,6 +1726,43 @@ router.post('/:id/tweak', async (req, res) => {
 
                 console.log(`[tweak] Bundle updated for project ${id} (commit: ${parsed.commitSha || 'none'})`);
 
+                // Re-push the new bundle to the deploy-server so the live URL
+                // serves the updated content. Without this step the DB row
+                // moves forward but `prev-{id}.vibebuild.cc` keeps serving
+                // the original generate-time bundle.
+                try {
+                    const { data: proj } = await supabase
+                        .from('projects')
+                        .select('preview_url, published_url')
+                        .eq('id', id)
+                        .single();
+                    const subdomains = [];
+                    for (const u of [proj?.preview_url, proj?.published_url]) {
+                        if (!u) continue;
+                        const sub = u.replace(/^https?:\/\//, '').split('.')[0];
+                        if (sub && !subdomains.includes(sub)) subdomains.push(sub);
+                    }
+                    for (const sub of subdomains) {
+                        try {
+                            const dr = await fetch(`${DEPLOY_SERVER_URL}/deploy`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ subdomain: sub, bundle: parsed.bundle }),
+                                signal: AbortSignal.timeout(30000),
+                            });
+                            if (dr.ok) {
+                                console.log(`[tweak] Redeployed bundle to ${sub}`);
+                            } else {
+                                console.error(`[tweak] Redeploy ${sub} returned ${dr.status}`);
+                            }
+                        } catch (e) {
+                            console.error(`[tweak] Redeploy ${sub} failed: ${e.message}`);
+                        }
+                    }
+                } catch (e) {
+                    console.error(`[tweak] Could not look up project URLs for redeploy: ${e.message}`);
+                }
+
                 res.write(`data: ${JSON.stringify({
                     type: 'result',
                     success: true,
@@ -1109,6 +1923,42 @@ router.post('/:id/revert/:sha', async (req, res) => {
 
         console.log(`[revert] Project ${id} reverted to ${sha.substring(0, 7)}`);
 
+        // Re-push the bundle to the deploy-server so the live preview URL
+        // serves the reverted content. Without this the live URL keeps
+        // serving the last-tweaked bundle even though the DB row moved back.
+        try {
+            const { data: proj } = await supabase
+                .from('projects')
+                .select('preview_url, published_url')
+                .eq('id', id)
+                .single();
+            const subdomains = [];
+            for (const u of [proj?.preview_url, proj?.published_url]) {
+                if (!u) continue;
+                const sub = u.replace(/^https?:\/\//, '').split('.')[0];
+                if (sub && !subdomains.includes(sub)) subdomains.push(sub);
+            }
+            for (const sub of subdomains) {
+                try {
+                    const dr = await fetch(`${DEPLOY_SERVER_URL}/deploy`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ subdomain: sub, bundle: revertData.bundle }),
+                        signal: AbortSignal.timeout(30000),
+                    });
+                    if (dr.ok) {
+                        console.log(`[revert] Redeployed bundle to ${sub}`);
+                    } else {
+                        console.error(`[revert] Redeploy ${sub} returned ${dr.status}`);
+                    }
+                } catch (e) {
+                    console.error(`[revert] Redeploy ${sub} failed: ${e.message}`);
+                }
+            }
+        } catch (e) {
+            console.error(`[revert] Could not look up project URLs for redeploy: ${e.message}`);
+        }
+
         res.json({
             success: true,
             commitSha: sha,
@@ -1119,6 +1969,50 @@ router.post('/:id/revert/:sha', async (req, res) => {
     } catch (error) {
         console.error('[revert] Error:', error.message);
         res.status(500).json({ error: 'Failed to revert project' });
+    }
+});
+
+// ============================================
+// PATCH /api/projects/:id
+// Update editable project fields. Currently only `title` is whitelisted.
+// Verifies the caller is the project's creator before mutating.
+// ============================================
+router.patch('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { userId, title } = req.body;
+
+        if (!userId) return res.status(400).json({ error: 'userId is required' });
+        if (typeof title !== 'string') return res.status(400).json({ error: 'title (string) is required' });
+        const trimmed = title.trim();
+        if (trimmed.length === 0) return res.status(400).json({ error: 'title cannot be empty' });
+        if (trimmed.length > 180) return res.status(400).json({ error: 'title must be 180 chars or fewer' });
+
+        // Ownership check
+        const { data: project, error: projectError } = await supabase
+            .from('projects')
+            .select('id, creator_id')
+            .eq('id', id)
+            .single();
+        if (projectError || !project) return res.status(404).json({ error: 'Project not found' });
+        if (project.creator_id !== userId) return res.status(403).json({ error: 'Only the project creator can rename' });
+
+        const { data, error } = await supabase
+            .from('projects')
+            .update({ title: trimmed, updated_at: new Date().toISOString() })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error(`[patch] DB update failed for ${id}: ${error.message}`);
+            return res.status(500).json({ error: 'Could not save the new title' });
+        }
+        console.log(`[patch] Project ${id} renamed to "${trimmed}"`);
+        res.json({ success: true, project: data });
+    } catch (err) {
+        console.error('[patch] Error:', err.message);
+        res.status(500).json({ error: err.message });
     }
 });
 
@@ -1278,6 +2172,46 @@ router.delete('/:id', async (req, res) => {
     } catch (error) {
         console.error('[delete] Error:', error.message);
         res.status(500).json({ error: 'Failed to delete project' });
+    }
+});
+
+// ============================================
+// Cleanup stuck builds (called by Cloud Scheduler every 10 min)
+// ============================================
+router.post('/api/admin/cleanup-stuck-builds', async (req, res) => {
+    const secret = req.headers['x-admin-secret'];
+    if (secret !== process.env.WORKER_SECRET) return res.status(401).json({ error: 'Unauthorized' });
+
+    try {
+        const cutoff = new Date(Date.now() - 20 * 60 * 1000).toISOString(); // 20 min ago
+
+        const { data: stuckProjects, error } = await supabase
+            .from('projects')
+            .select('id, creator_id, initial_prompt, created_at')
+            .eq('status', 'building')
+            .lt('created_at', cutoff);
+
+        if (error) throw error;
+        if (!stuckProjects?.length) return res.json({ cleaned: 0 });
+
+        // Mark all as failed
+        const ids = stuckProjects.map(p => p.id);
+        await supabase.from('projects').update({ status: 'failed' }).in('id', ids);
+
+        // Send push notifications
+        for (const project of stuckProjects) {
+            if (project.creator_id) {
+                const shortPrompt = (project.initial_prompt || 'Your app').substring(0, 40);
+                sendPushToUser(project.creator_id, 'Builders are overloaded 🔥', `"${shortPrompt}..." is in queue. Upgrade to Pro for priority builds that skip the line.`).catch(() => {});
+            }
+        }
+
+        console.log(`[cleanup] Marked ${stuckProjects.length} stuck builds as failed: ${ids.join(', ')}`);
+        res.json({ cleaned: stuckProjects.length, ids });
+
+    } catch (err) {
+        console.error('[cleanup] Error:', err.message);
+        res.status(500).json({ error: err.message });
     }
 });
 

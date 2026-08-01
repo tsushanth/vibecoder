@@ -35,6 +35,7 @@ export interface SSEErrorEvent {
   error: string;
   quotaExhausted?: boolean;
   resetTime?: string;
+  systemBusy?: boolean;
 }
 
 export interface SSEProjectFile {

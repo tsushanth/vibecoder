@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Addon Creator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .input-section {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .examples {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .examples strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #667eea;
+        }
+
+        .examples div {
+            margin: 5px 0;
+            padding: 5px 10px;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .examples div:hover {
+            background: #e8ebff;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            min-width: 140px;
+            padding: 15px 25px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            touch-action: manipulation;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #555;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-download {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .output-section {
+            margin-top: 25px;
+            display: none;
+        }
+
+        .output-section.active {
+            display: block;
+        }
+
+        .addon-info {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .addon-info h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .addon-info p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .file-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .file-content {
+            display: none;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .file-content.active {
+            display: block;
+        }
+
+        .file-content pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .history-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .history-section h2 {
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .history-item {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 4px solid #667eea;
+        }
+
+        .history-item:hover {
+            background: #e8ebff;
+            transform: translateX(5px);
+        }
+
+        .history-item strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .history-item small {
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 30px;
+        }
+
+        .success-message {
+            background: #10b981;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .subtitle {
+                font-size: 1em;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .file-content {
+                font-size: 12px;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⛏️ Minecraft Addon Creator</h1>
+            <p class="subtitle">Create custom Minecraft Bedrock addons by describing what you want</p>
+        </header>
+
+        <div class="main-content">
+            <div class="input-section">
+                <label for="addonDescription">Describe Your Addon:</label>
+                <textarea
+                    id="addonDescription"
+                    placeholder="Example: Create a diamond hammer that mines blocks faster than a pickaxe and has 2000 durability"
+                ></textarea>
+
+                <div class="examples">
+                    <strong>Try these examples:</strong>
+                    <div onclick="useExample(this)">Create a ruby sword that deals 10 damage</div>
+                    <div onclick="useExample(this)">Add a glowing emerald block that emits light</div>
+                    <div onclick="useExample(this)">Make a golden apple that gives regeneration and speed</div>
+                    <div onclick="useExample(this)">Create an iron hammer tool with 500 durability</div>
+                    <div onclick="useExample(this)">Add a zombie king mob with 100 health</div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="generateAddon()">🎮 Generate Addon</button>
+                <button class="btn-secondary" onclick="clearInput()">🗑️ Clear</button>
+            </div>
+
+            <div id="outputSection" class="output-section">
+                <div id="successMessage"></div>
+
+                <div class="addon-info">
+                    <h3 id="addonName">Addon Name</h3>
+                    <p id="addonDescription">Description</p>
+                    <p><strong>Type:</strong> <span id="addonType">-</span></p>
+                </div>
+
+                <div class="file-tabs" id="fileTabs"></div>
+                <div id="fileContents"></div>
+
+                <div class="button-group">
+                    <button class="btn-download" onclick="downloadAddon()">📦 Download Addon (.mcaddon)</button>
+                    <button class="btn-secondary" onclick="createNew()">➕ Create New</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <h2>📜 Recent Addons</h2>
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <script src="addon-generator.js"></script>
+</body>
+</html>

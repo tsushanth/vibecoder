@@ -1,15 +1,19 @@
 package com.kreativekoala.vibecoder.ui.apps
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kreativekoala.vibecoder.data.model.Project
 import com.kreativekoala.vibecoder.data.repository.AuthRepository
 import com.kreativekoala.vibecoder.data.repository.ProjectRepository
+import com.kreativekoala.vibecoder.util.NotificationHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import android.util.Log
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,6 +26,7 @@ data class AppsUiState(
 
 @HiltViewModel
 class AppsViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val projectRepository: ProjectRepository,
     private val authRepository: AuthRepository
 ) : ViewModel() {
@@ -41,6 +46,20 @@ class AppsViewModel @Inject constructor(
 
             try {
                 val projects = projectRepository.getMyProjects(userId)
+                Log.d("Apps", "Loaded ${projects.size} projects: ${projects.map { "${it.title.take(20)}(${it.status})" }}")
+
+                // Notify if any previously-building project is now ready
+                val previousBuildingIds = _uiState.value.projects
+                    .filter { it.status == "building" }.map { it.id }.toSet()
+                val newlyReady = projects.filter { it.id in previousBuildingIds && it.status == "ready" }
+                if (newlyReady.isNotEmpty()) {
+                    NotificationHelper.showGenerationComplete(
+                        appContext,
+                        title = "\"${newlyReady.first().title}\" is ready!",
+                        body = "Tap to open your app"
+                    )
+                }
+
                 _uiState.update {
                     it.copy(
                         projects = projects,
@@ -58,6 +77,71 @@ class AppsViewModel @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    fun retryProject(project: Project) {
+        val userId = authRepository.currentUser?.uid ?: return
+        viewModelScope.launch {
+            // Optimistically flip card to building by updating the status in-list
+            updateProjectStatus(project.id, "building")
+            try {
+                projectRepository.retryProject(project.id, userId)
+                // Poll until the build completes (backend uses async callback mode)
+                pollProjectUntilReady(project.id)
+            } catch (e: Exception) {
+                updateProjectStatus(project.id, "failed")
+            }
+        }
+    }
+
+    private fun pollProjectUntilReady(projectId: String) {
+        viewModelScope.launch {
+            val maxAttempts = 36 // 6 minutes at 10s intervals
+            for (attempt in 1..maxAttempts) {
+                kotlinx.coroutines.delay(10_000)
+                try {
+                    val project = projectRepository.getProject(projectId)
+                    if (project != null && project.status != "building") {
+                        // Update this project's status in the list
+                        updateProjectStatus(projectId, project.status ?: "failed")
+                        if (project.status == "ready") {
+                            NotificationHelper.showGenerationComplete(
+                                appContext,
+                                title = "\"${project.title}\" is ready!",
+                                body = "Tap to open your app"
+                            )
+                        }
+                        return@launch
+                    }
+                } catch (e: Exception) {
+                    Log.d("Apps", "Poll attempt $attempt failed: ${e.message}")
+                }
+            }
+            // Timed out — reload full list to get accurate state
+            loadProjects()
+        }
+    }
+
+    private fun updateProjectStatus(projectId: String, status: String) {
+        _uiState.update { state ->
+            state.copy(projects = state.projects.map { p ->
+                if (p.id == projectId) Project(
+                    id = p.id, title = p.title, description = p.description,
+                    creatorId = p.creatorId, creatorName = p.creatorName,
+                    projectType = p.projectType, isPublic = p.isPublic,
+                    isFeatured = p.isFeatured, playCount = p.playCount,
+                    viewCount = p.viewCount, forkCount = p.forkCount,
+                    rating = p.rating, initialPrompt = p.initialPrompt,
+                    githubRepo = p.githubRepo, tweakCount = p.tweakCount,
+                    freeTweaksRemaining = p.freeTweaksRemaining,
+                    publishedUrl = p.publishedUrl, previewUrl = p.previewUrl,
+                    thumbnailUrl = p.thumbnailUrl, status = status,
+                    parentProjectId = p.parentProjectId,
+                    creationMethod = p.creationMethod,
+                    createdAt = p.createdAt, updatedAt = p.updatedAt
+                ) else p
+            })
         }
     }
 

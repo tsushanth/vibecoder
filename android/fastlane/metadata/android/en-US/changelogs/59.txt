@@ -1,0 +1,4 @@
+• Faster project generation — bigger multi-file apps complete sooner
+• Cleaner subscription flow with unified plans screen
+• Improved community gallery — easier to browse and fork others' projects
+• Polish and bug fixes

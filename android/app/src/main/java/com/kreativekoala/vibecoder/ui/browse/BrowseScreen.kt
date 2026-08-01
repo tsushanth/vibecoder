@@ -12,15 +12,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BrowseScreen(
-    onBack: () -> Unit,
     onProjectClick: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    onBack: (() -> Unit)? = null,
     viewModel: BrowseViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -30,21 +33,23 @@ fun BrowseScreen(
         containerColor = DarkBackground,
         topBar = {
             TopAppBar(
-                title = { Text("Explore") },
+                title = { Text(stringResource(R.string.browse_screen_title)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = TextPrimary
-                        )
+                    if (onBack != null) {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.back),
+                                tint = TextPrimary
+                            )
+                        }
                     }
                 },
                 actions = {
                     IconButton(onClick = { viewModel.loadProjects() }) {
                         Icon(
                             Icons.Default.Refresh,
-                            contentDescription = "Refresh",
+                            contentDescription = stringResource(R.string.refresh),
                             tint = TextSecondary
                         )
                     }
@@ -52,7 +57,7 @@ fun BrowseScreen(
                         IconButton(onClick = { showSortMenu = true }) {
                             Icon(
                                 Icons.AutoMirrored.Filled.Sort,
-                                contentDescription = "Sort",
+                                contentDescription = stringResource(R.string.apps_cd_sort),
                                 tint = TextPrimary
                             )
                         }

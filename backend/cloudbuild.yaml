@@ -27,6 +27,7 @@ steps:
       - 'us-central1'
       - '--platform'
       - 'managed'
+      - '--timeout=3600'
       - '--update-secrets'
       - 'SUPABASE_URL=VIBECODER_SUPABASE_URL:latest,SUPABASE_ANON_KEY=VIBECODER_SUPABASE_ANON_KEY:latest,WORKER_SECRET=VIBECODER_WORKER_SECRET:latest'
 
