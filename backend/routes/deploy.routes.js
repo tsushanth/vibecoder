@@ -61,7 +61,7 @@ router.post('/:projectId/deploy', async (req, res) => {
 
         if (existing) return res.status(409).json({ error: 'This subdomain is already taken by another project. If it\'s yours, remove it first from that project, then try again.' });
 
-        // Get project bundle
+        // Get project
         const { data: project, error: projectError } = await supabase
             .from('projects')
             .select('bundle, creator_id, github_repo')
@@ -71,29 +71,31 @@ router.post('/:projectId/deploy', async (req, res) => {
         if (projectError || !project) return res.status(404).json({ error: 'Project not found' });
         if (project.creator_id !== userId) return res.status(403).json({ error: 'Not authorized' });
 
-        // Bundle may not be in DB if it was never tweaked (initial save goes to GitHub only).
-        // Fall back to fetching it from the worker via GitHub.
+        // Always fetch latest bundle from git if repo exists, fallback to DB bundle
         let bundle = project.bundle;
-        if (!bundle && project.github_repo) {
+        if (project.github_repo) {
             try {
                 const workerRes = await fetch(`${WORKER_URL}/bundle/${project.github_repo}`, {
                     headers: { 'x-worker-secret': WORKER_SECRET },
-                    signal: AbortSignal.timeout(30000)
+                    signal: AbortSignal.timeout(60000)
                 });
                 if (workerRes.ok) {
                     const result = await workerRes.json();
                     bundle = result.bundle;
-                    // Cache it back to DB so future deploys are instant
+                    console.log(`[deploy] Fetched latest bundle from git for ${projectId} (commit: ${result.commitSha?.substring(0, 7)})`);
+                    // Cache it back to DB so future deploys are instant even if the worker is unreachable
                     if (bundle) {
                         await supabase.from('projects').update({ bundle }).eq('id', projectId);
                     }
+                } else {
+                    console.warn(`[deploy] Worker bundle fetch failed (${workerRes.status}), falling back to DB bundle`);
                 }
-            } catch (workerErr) {
-                console.error('[deploy] Worker bundle fetch failed:', workerErr.message);
+            } catch (err) {
+                console.warn(`[deploy] Worker bundle fetch error: ${err.message}, falling back to DB bundle`);
             }
         }
 
-        if (!bundle) return res.status(400).json({ error: 'Your app has not been built yet. Please generate your app first before publishing.' });
+        if (!bundle) return res.status(400).json({ error: 'No bundle available for this project' });
 
         // Send to deploy server
         const deployResponse = await fetch(`${DEPLOY_SERVER_URL}/deploy`, {
@@ -112,6 +114,7 @@ router.post('/:projectId/deploy', async (req, res) => {
             project_id: projectId,
             user_id: userId,
             subdomain,
+            bundle,
             status: 'active',
             deployed_at: new Date().toISOString()
         }, { onConflict: 'subdomain' });
