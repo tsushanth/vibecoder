@@ -1,0 +1,30 @@
+VibeBuild turns your ideas into working apps using AI. Just describe what you want to build in plain English, and VibeBuild generates a fully functional web app in seconds. Also build and manage your apps on the web at vibebuild.cc.
+
+No coding experience needed. Whether you are a beginner exploring app development or a pro rapidly prototyping ideas, VibeBuild makes it effortless.
+
+HOW IT WORKS
+1. Describe your app idea in a few words or sentences
+2. Watch as AI builds your app in real-time with a live progress view
+3. Preview your app instantly right in the app
+4. Save your creations and access them anytime
+5. Publish to the web and share your app at yourapp.vibebuild.cc
+
+FEATURES
+- AI-Powered Generation: Describe any app idea and get working code generated instantly
+- Live Preview: See your app running immediately after generation
+- Publish to the Web: Share your app live at yourapp.vibebuild.cc — accessible from any browser
+- Save and Manage: Keep all your generated apps organized in one place
+- Suggestion Cards: Get inspired with creative app ideas to try
+- Real-Time Progress: Watch the build process with live status updates
+- Pro Subscription: Unlock unlimited generations with VibeBuild Pro
+
+BUILT FOR EVERYONE
+- Students learning to code
+- Entrepreneurs prototyping startup ideas
+- Designers creating interactive mockups
+- Developers rapidly testing concepts
+- Anyone curious about building apps
+
+VibeBuild Pro unlocks unlimited app generations. Free users get a daily generation limit to explore the platform.
+
+Privacy: We only collect the minimum data needed to run the service (email for auth, your prompts for generation). We never share your data with third parties.

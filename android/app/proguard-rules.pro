@@ -57,3 +57,8 @@
     public static int d(...);
     public static int v(...);
 }
+
+# TikTok SDK
+-dontwarn com.android.installreferrer.api.InstallReferrerClient$Builder
+-dontwarn com.android.installreferrer.api.InstallReferrerClient
+-dontwarn com.android.installreferrer.api.InstallReferrerStateListener

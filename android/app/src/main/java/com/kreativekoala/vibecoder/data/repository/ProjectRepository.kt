@@ -37,6 +37,10 @@ class ProjectRepository @Inject constructor(
         api.deleteProject(id, DeleteRequest(userId))
     }
 
+    suspend fun retryProject(id: String, userId: String) {
+        api.retryProject(id, DeleteRequest(userId))
+    }
+
     suspend fun browseProjects(
         sort: String = "newest",
         limit: Int = 50,
@@ -48,6 +52,11 @@ class ProjectRepository @Inject constructor(
 
     suspend fun getSuggestions(): List<Suggestion> {
         val response = api.getSuggestions()
+        return response.suggestions
+    }
+
+    suspend fun suggestNewIdeas(): List<Suggestion> {
+        val response = api.suggestNewIdeas()
         return response.suggestions
     }
 
@@ -120,5 +129,22 @@ class ProjectRepository @Inject constructor(
             url = "${Constants.BASE_URL}api/projects/$projectId/tweak",
             jsonBody = jsonBody
         )
+    }
+
+    suspend fun sendFeedback(projectId: String, userId: String, rating: String) {
+        api.sendFeedback(projectId, FeedbackRequest(userId, rating))
+    }
+
+    suspend fun getVersions(projectId: String): List<AppVersion> {
+        val response = api.getVersions(projectId)
+        return response.versions
+    }
+
+    suspend fun revertToVersion(projectId: String, sha: String, userId: String): RevertResponse {
+        return api.revertToVersion(projectId, sha, RevertRequest(userId))
+    }
+
+    suspend fun exportApk(projectId: String, userId: String, bundle: String? = null): ExportApkResponse {
+        return api.exportApk(projectId, ExportApkRequest(userId, bundle))
     }
 }

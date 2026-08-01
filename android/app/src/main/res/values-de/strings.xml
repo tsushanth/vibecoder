@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VibeBuild</string>
+
+    <!-- Common -->
+    <string name="cancel">Abbrechen</string>
+    <string name="ok">OK</string>
+    <string name="back">Zurück</string>
+    <string name="refresh">Aktualisieren</string>
+    <string name="share">Teilen</string>
+    <string name="copy">Kopieren</string>
+    <string name="open">Öffnen</string>
+    <string name="error">Fehler</string>
+    <string name="live">Live</string>
+    <string name="publish">Veröffentlichen</string>
+    <string name="deploy">Bereitstellen</string>
+    <string name="close">Schließen</string>
+    <string name="reload">Neu laden</string>
+    <string name="save">Speichern</string>
+    <string name="saved">Gespeichert</string>
+    <string name="delete_label">Löschen</string>
+    <string name="public_label">Öffentlich</string>
+    <string name="private_label">Privat</string>
+    <string name="sign_out">Abmelden</string>
+
+    <!-- Tabs -->
+    <string name="tab_apps">Apps</string>
+    <string name="tab_create">Erstellen</string>
+    <string name="tab_account">Konto</string>
+    <string name="tab_browse">Entdecken</string>
+
+    <!-- Landing Screen -->
+    <string name="landing_hero_subtitle">Beschreibe es. KI baut es.\nDeine App, sofort live.</string>
+    <string name="landing_prompt_example">"Erstelle eine Wetter-App mit einer schönen dunklen Oberfläche"</string>
+    <string name="landing_how_it_works_title">So funktioniert\'s</string>
+    <string name="landing_step_describe_title">Beschreiben</string>
+    <string name="landing_step_describe_desc">Sage der KI, was du möchtest — ganz einfach auf Deutsch</string>
+    <string name="landing_step_generate_title">Generieren</string>
+    <string name="landing_step_generate_desc">KI schreibt den Code in Sekunden</string>
+    <string name="landing_step_preview_title">Vorschau</string>
+    <string name="landing_step_preview_desc">Sieh deine App sofort in Aktion</string>
+    <string name="landing_step_deploy_title">Bereitstellen</string>
+    <string name="landing_step_deploy_desc">Mit einem Tipp im Web veröffentlichen</string>
+    <string name="landing_examples_title">Was andere erstellen</string>
+    <string name="landing_example_weather_title">Wetter-Dashboard</string>
+    <string name="landing_example_weather_desc">Echtzeit-Wetter mit ansprechenden Diagrammen</string>
+    <string name="landing_example_memory_title">Memory-Spiel</string>
+    <string name="landing_example_memory_desc">Kartenpaare finden mit Animationen</string>
+    <string name="landing_example_budget_title">Budgetplaner</string>
+    <string name="landing_example_budget_desc">Ausgaben mit Kategorieübersicht verfolgen</string>
+    <string name="landing_example_pomodoro_title">Pomodoro-Timer</string>
+    <string name="landing_example_pomodoro_desc">Fokus-Timer mit Aufgabenverwaltung</string>
+    <string name="landing_example_quiz_title">Quiz-App</string>
+    <string name="landing_example_quiz_desc">Interaktives Quiz mit Punkteverfolgung</string>
+    <string name="landing_example_workout_title">Trainingsprotokoll</string>
+    <string name="landing_example_workout_desc">Übungen protokollieren und Fortschritte verfolgen</string>
+    <string name="landing_cta_get_started">Loslegen — Kostenlos</string>
+    <string name="landing_cta_sign_in">Bereits ein Konto? Anmelden</string>
+    <string name="landing_trust_badge_instant">Sofort</string>
+    <string name="landing_trust_badge_secure">Sicher</string>
+    <string name="landing_trust_badge_no_card">Ohne Karte</string>
+
+    <!-- Sign In Screen -->
+    <string name="sign_in_subtitle">Erstelle Apps mit KI</string>
+    <string name="sign_in_label_display_name">Anzeigename</string>
+    <string name="sign_in_label_email">E-Mail</string>
+    <string name="sign_in_label_password">Passwort</string>
+    <string name="sign_in_cd_hide_password">Passwort verbergen</string>
+    <string name="sign_in_cd_show_password">Passwort anzeigen</string>
+    <string name="sign_in_btn_creating_account">Konto wird erstellt…</string>
+    <string name="sign_in_btn_signing_in">Anmeldung…</string>
+    <string name="sign_in_btn_create_account">Konto erstellen</string>
+    <string name="sign_in_btn_sign_in">Anmelden</string>
+    <string name="sign_in_toggle_have_account">Bereits ein Konto? </string>
+    <string name="sign_in_toggle_no_account">Noch kein Konto? </string>
+    <string name="sign_in_toggle_link_sign_in">Anmelden</string>
+    <string name="sign_in_toggle_link_sign_up">Registrieren</string>
+    <string name="sign_in_divider_or">" oder "</string>
+    <string name="sign_in_with_google">Mit Google anmelden</string>
+    <string name="sign_in_terms_notice">Mit der Anmeldung akzeptierst du unsere Nutzungsbedingungen</string>
+
+    <!-- Onboarding Screen -->
+    <string name="onboarding_btn_skip">Überspringen</string>
+    <string name="onboarding_page1_title">Beschreibe deine App</string>
+    <string name="onboarding_page1_desc">Sage der KI, was du erstellen möchtest — ganz einfach auf Deutsch. Keine Programmierkenntnisse nötig.</string>
+    <string name="onboarding_page2_title">KI baut sie</string>
+    <string name="onboarding_page2_desc">Schau zu, wie die KI in Sekunden eine voll funktionsfähige App mit echtem Code generiert.</string>
+    <string name="onboarding_page3_title">Anpassen und verfeinern</string>
+    <string name="onboarding_page3_desc">Iteriere mit der KI, um deine App zu perfektionieren. Ändere Farben, Funktionen und Layout sofort.</string>
+    <string name="onboarding_page4_title">Bereitstellen und teilen</string>
+    <string name="onboarding_page4_desc">Veröffentliche deine App mit einem Tipp im Web. Teile deine Kreationen mit der Welt.</string>
+    <string name="onboarding_btn_next">Weiter</string>
+    <string name="onboarding_btn_get_started">Loslegen</string>
+
+    <!-- Create Screen -->
+    <string name="create_title">Was möchtest du erstellen?</string>
+    <string name="create_subtitle">Beschreibe deine App-Idee und die KI baut sie</string>
+    <string name="create_prompt_placeholder">Z.B., Erstelle eine Wetter-App, die die Vorhersage für meine Stadt anzeigt…</string>
+    <string name="create_cd_attach_image">Bild anhängen</string>
+    <string name="create_cd_voice_input">Spracheingabe</string>
+    <string name="create_cd_remove_image">Bild entfernen</string>
+    <string name="create_cd_reference_image">Referenzbild</string>
+    <string name="create_default_project_title">Mein Projekt</string>
+    <string name="create_error_generation_failed">Generierung fehlgeschlagen</string>
+    <string name="create_error_extract_failed">Projekt konnte nicht extrahiert werden: %s</string>
+    <string name="create_error_save_failed">Speichern fehlgeschlagen: %s</string>
+    <string name="create_error_publish_failed">Veröffentlichung fehlgeschlagen: %s</string>
+    <string name="create_save_dialog_title">Gespeichert!</string>
+    <string name="create_save_dialog_message">Dein Projekt wurde gespeichert. Tippe auf Veröffentlichen, um es live zu schalten!</string>
+
+    <!-- Generation Progress -->
+    <string name="generation_time_remaining">~%ds verbleibend</string>
+    <string name="generation_btn_notify">Benachrichtigen, wenn fertig</string>
+    <string name="generation_notify_confirmation">Du wirst benachrichtigt, wenn es fertig ist</string>
+    <string name="generation_notify_leave_hint">Du kannst diesen Bildschirm verlassen</string>
+    <string name="generation_btn_cancel">Abbrechen</string>
+    <string name="generation_phase_connecting">Verbindung wird hergestellt…</string>
+    <string name="generation_phase_complete">Fertig!</string>
+    <string name="generation_limit_reached">Tägliches Generierungslimit erreicht</string>
+    <string name="upgrade_to_pro">Auf Pro upgraden</string>
+    <string name="start_generating">Starten</string>
+
+    <!-- Suggestion Chips -->
+    <string name="suggestions_header">Probiere eine davon</string>
+    <string name="suggestions_btn_generating">Ideen werden generiert…</string>
+    <string name="suggestions_btn_suggest_new">Neue Ideen vorschlagen</string>
+    <string name="suggestion_label_todo_app">Aufgaben-App</string>
+    <string name="suggestion_label_weather_app">Wetter-App</string>
+    <string name="suggestion_label_calculator">Taschenrechner</string>
+    <string name="suggestion_label_pomodoro_timer">Pomodoro-Timer</string>
+    <string name="suggestion_label_markdown_editor">Markdown-Editor</string>
+    <string name="suggestion_label_color_palette">Farbpalette</string>
+
+    <!-- Account Screen -->
+    <string name="account_dialog_sign_out_title">Abmelden</string>
+    <string name="account_dialog_sign_out_message">Möchtest du dich wirklich abmelden?</string>
+    <string name="account_cd_profile_photo">Profilbild</string>
+    <string name="account_default_display_name">Benutzer</string>
+    <string name="account_section_usage">Nutzung</string>
+    <string name="account_stat_projects">Projekte</string>
+    <string name="account_stat_todays_gens">Gens. heute</string>
+    <string name="account_section_settings">Einstellungen</string>
+    <string name="account_settings_subscription">Abonnement</string>
+    <string name="account_settings_theme">Design</string>
+    <string name="account_settings_theme_value">Dunkel</string>
+    <string name="account_settings_about">Über</string>
+    <string name="account_settings_version">Version 1.0.0</string>
+    <string name="account_settings_language">Sprache</string>
+
+    <!-- Apps Screen -->
+    <string name="apps_screen_title">Meine Apps</string>
+    <string name="apps_empty_title">Noch keine Apps</string>
+    <string name="apps_empty_subtitle">Erstelle deine erste App mit KI\noder entdecke, was andere erstellt haben</string>
+    <string name="apps_cd_sort">Sortieren</string>
+
+    <!-- Browse Screen -->
+    <string name="browse_screen_title">Entdecken</string>
+
+    <!-- Preview Screen -->
+    <string name="preview_screen_title">Vorschau</string>
+    <string name="preview_deploy_dialog_title">App veröffentlichen</string>
+    <string name="preview_deploy_dialog_message">Wähle eine Subdomain für deine App:</string>
+    <string name="preview_deploy_placeholder">meine-tolle-app</string>
+    <string name="preview_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="preview_share_text">Schau dir meine App an: %s</string>
+
+    <!-- Project Preview Screen -->
+    <string name="project_preview_btn_forked">Geforkt!</string>
+    <string name="project_preview_btn_fork">Forken</string>
+    <string name="project_preview_error_title">Vorschau konnte nicht geladen werden</string>
+
+    <!-- Project Detail Screen -->
+    <string name="project_detail_deploy_dialog_title">App bereitstellen</string>
+    <string name="project_detail_deploy_dialog_message">Wähle eine Subdomain für deine App:</string>
+    <string name="project_detail_deploy_label_subdomain">Subdomain</string>
+    <string name="project_detail_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="project_detail_screen_title_fallback">Projekt</string>
+    <string name="project_detail_created_at">Erstellt %s</string>
+    <string name="project_detail_btn_preview">App-Vorschau</string>
+    <string name="project_detail_badge_deployed">Bereitgestellt</string>
+    <string name="project_detail_btn_deploying">Wird bereitgestellt…</string>
+    <string name="project_detail_btn_deploy_to_web">Im Web bereitstellen</string>
+    <string name="project_detail_stat_views">Aufrufe</string>
+    <string name="project_detail_stat_forks">Forks</string>
+    <string name="project_detail_stat_tweaks">Anpassungen</string>
+    <string name="project_detail_section_original_prompt">Ursprünglicher Prompt</string>
+    <string name="project_detail_share_text">Schau dir meine App an: %s</string>
+
+    <!-- Project Card -->
+    <string name="project_card_delete_dialog_title">Projekt löschen</string>
+    <string name="project_card_delete_dialog_message">Möchtest du \"%s\" wirklich löschen? Dies kann nicht rückgängig gemacht werden.</string>
+
+    <!-- Language Picker -->
+    <string name="language_picker_title">Sprache auswählen</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese">中文(简体)</string>
+    <string name="language_korean">한국어</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_hindi">हिन्दी</string>
+
+    <!-- Project Card -->
+    <string name="project_card_views">%d Aufrufe</string>
+
+    <!-- Post-Publish Sheet -->
+    <string name="publish_sheet_title">Deine App ist live!</string>
+    <string name="publish_sheet_subtitle">Teile es mit der Welt und verdiene durch Werbeplatzierungen in deiner App.</string>
+    <string name="publish_sheet_open_browser">Im Browser öffnen</string>
+    <string name="publish_sheet_share">App teilen</string>
+    <string name="publish_sheet_monetize">Werbemonetarisierung aktivieren →</string>
+    <string name="publish_sheet_done">Fertig</string>
+    <string name="publish_sheet_share_text">Schau dir die App an, die ich mit VibeBuild gebaut habe! %s</string>
+
+    <!-- Monetization -->
+    <string name="monetize_section_title">Monetarisierung</string>
+    <string name="monetize_revenue_label">Umsatz diesen Monat</string>
+    <string name="monetize_revenue_value">$0.00</string>
+    <string name="monetize_enable_btn">Werbemonetarisierung aktivieren →</string>
+    <string name="monetize_description">Verdiene Geld, wenn Leute deine App nutzen. Wir schalten Anzeigen und zahlen dir monatlich.</string>
+
+    <!-- Facebook SDK Configuration -->
+    <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
+    <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+</resources>

@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VibeBuild</string>
+
+    <!-- Common -->
+    <string name="cancel">İptal</string>
+    <string name="ok">Tamam</string>
+    <string name="back">Geri</string>
+    <string name="refresh">Yenile</string>
+    <string name="share">Paylaş</string>
+    <string name="copy">Kopyala</string>
+    <string name="open">Aç</string>
+    <string name="error">Hata</string>
+    <string name="live">Canlı</string>
+    <string name="publish">Yayınla</string>
+    <string name="deploy">Dağıt</string>
+    <string name="close">Kapat</string>
+    <string name="reload">Yeniden Yükle</string>
+    <string name="save">Kaydet</string>
+    <string name="saved">Kaydedildi</string>
+    <string name="delete_label">Sil</string>
+    <string name="public_label">Herkese Açık</string>
+    <string name="private_label">Özel</string>
+    <string name="sign_out">Çıkış Yap</string>
+
+    <!-- Tabs -->
+    <string name="tab_apps">Uygulamalar</string>
+    <string name="tab_create">Oluştur</string>
+    <string name="tab_account">Hesap</string>
+    <string name="tab_browse">Keşfet</string>
+
+    <!-- Landing Screen -->
+    <string name="landing_hero_subtitle">Tanımlayın. Yapay zeka oluştursun.\nUygulamanız, saniyeler içinde hazır.</string>
+    <string name="landing_prompt_example">"Bana temiz koyu arayüzlü bir hava durumu uygulaması yap"</string>
+    <string name="landing_how_it_works_title">Nasıl Çalışır</string>
+    <string name="landing_step_describe_title">Tanımlayın</string>
+    <string name="landing_step_describe_desc">Yapay zekaya ne istediğinizi sade bir dille anlatın</string>
+    <string name="landing_step_generate_title">Oluşturun</string>
+    <string name="landing_step_generate_desc">Yapay zeka saniyeler içinde kodu yazar</string>
+    <string name="landing_step_preview_title">Önizleme</string>
+    <string name="landing_step_preview_desc">Uygulamanızı anında çalışırken görün</string>
+    <string name="landing_step_deploy_title">Dağıtın</string>
+    <string name="landing_step_deploy_desc">Tek dokunuşla web\'e yayınlayın</string>
+    <string name="landing_examples_title">İnsanlar Neler Yapıyor</string>
+    <string name="landing_example_weather_title">Hava Durumu Paneli</string>
+    <string name="landing_example_weather_desc">Güzel grafiklerle gerçek zamanlı hava durumu</string>
+    <string name="landing_example_memory_title">Hafıza Oyunu</string>
+    <string name="landing_example_memory_desc">Animasyonlu eğlenceli kart eşleştirme oyunu</string>
+    <string name="landing_example_budget_title">Bütçe Takipçisi</string>
+    <string name="landing_example_budget_desc">Kategori bazlı harcama takibi</string>
+    <string name="landing_example_pomodoro_title">Pomodoro Zamanlayıcı</string>
+    <string name="landing_example_pomodoro_desc">Görev yönetimli odaklanma zamanlayıcısı</string>
+    <string name="landing_example_quiz_title">Bilgi Yarışması</string>
+    <string name="landing_example_quiz_desc">Skor takipli interaktif bilgi yarışması</string>
+    <string name="landing_example_workout_title">Antrenman Günlüğü</string>
+    <string name="landing_example_workout_desc">Egzersizleri kaydedin ve ilerlemenizi takip edin</string>
+    <string name="landing_cta_get_started">Başlayın — Ücretsiz</string>
+    <string name="landing_cta_sign_in">Zaten hesabınız var mı? Giriş Yapın</string>
+    <string name="landing_trust_badge_instant">Anında</string>
+    <string name="landing_trust_badge_secure">Güvenli</string>
+    <string name="landing_trust_badge_no_card">Kart Gerekmez</string>
+
+    <!-- Sign In Screen -->
+    <string name="sign_in_subtitle">Yapay zeka ile uygulama oluşturun</string>
+    <string name="sign_in_label_display_name">Görünen Ad</string>
+    <string name="sign_in_label_email">E-posta</string>
+    <string name="sign_in_label_password">Şifre</string>
+    <string name="sign_in_cd_hide_password">Şifreyi gizle</string>
+    <string name="sign_in_cd_show_password">Şifreyi göster</string>
+    <string name="sign_in_btn_creating_account">Hesap oluşturuluyor…</string>
+    <string name="sign_in_btn_signing_in">Giriş yapılıyor…</string>
+    <string name="sign_in_btn_create_account">Hesap Oluştur</string>
+    <string name="sign_in_btn_sign_in">Giriş Yap</string>
+    <string name="sign_in_toggle_have_account">Zaten hesabınız var mı? </string>
+    <string name="sign_in_toggle_no_account">Hesabınız yok mu? </string>
+    <string name="sign_in_toggle_link_sign_in">Giriş Yap</string>
+    <string name="sign_in_toggle_link_sign_up">Kaydol</string>
+    <string name="sign_in_divider_or">" veya "</string>
+    <string name="sign_in_with_google">Google ile giriş yap</string>
+    <string name="sign_in_terms_notice">Giriş yaparak Hizmet Şartlarını kabul etmiş olursunuz</string>
+
+    <!-- Onboarding Screen -->
+    <string name="onboarding_btn_skip">Atla</string>
+    <string name="onboarding_page1_title">Uygulamanızı Tanımlayın</string>
+    <string name="onboarding_page1_desc">Yapay zekaya ne oluşturmak istediğinizi sade bir dille anlatın. Kodlama deneyimi gerekmez.</string>
+    <string name="onboarding_page2_title">Yapay Zeka Oluşturur</string>
+    <string name="onboarding_page2_desc">Yapay zekanın saniyeler içinde gerçek kodla tam işlevsel bir uygulama oluşturmasını izleyin.</string>
+    <string name="onboarding_page3_title">Düzenleyin ve İyileştirin</string>
+    <string name="onboarding_page3_desc">Uygulamanızı mükemmelleştirmek için yapay zeka ile çalışın. Renkleri, özellikleri ve düzeni anında değiştirin.</string>
+    <string name="onboarding_page4_title">Dağıtın ve Paylaşın</string>
+    <string name="onboarding_page4_desc">Uygulamanızı tek dokunuşla web\'e yayınlayın. Eserlerinizi dünyayla paylaşın.</string>
+    <string name="onboarding_btn_next">İleri</string>
+    <string name="onboarding_btn_get_started">Başlayın</string>
+
+    <!-- Create Screen -->
+    <string name="create_title">Ne yapmak istiyorsunuz?</string>
+    <string name="create_subtitle">Uygulama fikrinizi tanımlayın, yapay zeka oluştursun</string>
+    <string name="create_prompt_placeholder">Örn: Şehrim için hava durumu gösteren bir uygulama yap…</string>
+    <string name="create_cd_attach_image">Resim ekle</string>
+    <string name="create_cd_voice_input">Sesli giriş</string>
+    <string name="create_cd_remove_image">Resmi kaldır</string>
+    <string name="create_cd_reference_image">Referans resmi</string>
+    <string name="create_default_project_title">Projem</string>
+    <string name="create_error_generation_failed">Oluşturma başarısız</string>
+    <string name="create_error_extract_failed">Proje çıkarılamadı: %s</string>
+    <string name="create_error_save_failed">Kaydedilemedi: %s</string>
+    <string name="create_error_publish_failed">Yayınlama başarısız: %s</string>
+    <string name="create_save_dialog_title">Kaydedildi!</string>
+    <string name="create_save_dialog_message">Projeniz kaydedildi. Canlıya almak için yayınla düğmesine dokunun!</string>
+
+    <!-- Generation Progress -->
+    <string name="generation_time_remaining">~%d sn kaldı</string>
+    <string name="generation_btn_notify">Bitince beni bilgilendir</string>
+    <string name="generation_notify_confirmation">Hazır olduğunda bilgilendirileceksiniz</string>
+    <string name="generation_notify_leave_hint">Bu ekrandan ayrılabilirsiniz</string>
+    <string name="generation_btn_cancel">İptal</string>
+    <string name="generation_phase_connecting">Bağlanıyor…</string>
+    <string name="generation_phase_complete">Tamamlandı!</string>
+    <string name="generation_limit_reached">Günlük oluşturma sınırına ulaşıldı</string>
+    <string name="upgrade_to_pro">Pro\'ya Yükselt</string>
+    <string name="start_generating">Başla</string>
+
+    <!-- Suggestion Chips -->
+    <string name="suggestions_header">Bunlardan birini deneyin</string>
+    <string name="suggestions_btn_generating">Fikirler oluşturuluyor…</string>
+    <string name="suggestions_btn_suggest_new">⚡ Yeni Fikirler Öner</string>
+    <string name="suggestion_label_todo_app">Yapılacaklar Uygulaması</string>
+    <string name="suggestion_label_weather_app">Hava Durumu Uygulaması</string>
+    <string name="suggestion_label_calculator">Hesap Makinesi</string>
+    <string name="suggestion_label_pomodoro_timer">Pomodoro Zamanlayıcı</string>
+    <string name="suggestion_label_markdown_editor">Markdown Düzenleyici</string>
+    <string name="suggestion_label_color_palette">Renk Paleti</string>
+
+    <!-- Account Screen -->
+    <string name="account_dialog_sign_out_title">Çıkış Yap</string>
+    <string name="account_dialog_sign_out_message">Çıkış yapmak istediğinizden emin misiniz?</string>
+    <string name="account_cd_profile_photo">Profil fotoğrafı</string>
+    <string name="account_default_display_name">Kullanıcı</string>
+    <string name="account_section_usage">Kullanım</string>
+    <string name="account_stat_projects">Projeler</string>
+    <string name="account_stat_todays_gens">Bugünkü Oluşturmalar</string>
+    <string name="account_section_settings">Ayarlar</string>
+    <string name="account_settings_subscription">Abonelik</string>
+    <string name="account_settings_theme">Tema</string>
+    <string name="account_settings_theme_value">Koyu</string>
+    <string name="account_settings_about">Hakkında</string>
+    <string name="account_settings_version">Sürüm 1.0.0</string>
+    <string name="account_settings_language">Dil</string>
+
+    <!-- Apps Screen -->
+    <string name="apps_screen_title">Uygulamalarım</string>
+    <string name="apps_empty_title">Henüz uygulama yok</string>
+    <string name="apps_empty_subtitle">Yapay zeka ile ilk uygulamanızı oluşturun\nveya başkalarının neler yaptığını keşfedin</string>
+    <string name="apps_cd_sort">Sırala</string>
+
+    <!-- Browse Screen -->
+    <string name="browse_screen_title">Keşfet</string>
+
+    <!-- Preview Screen -->
+    <string name="preview_screen_title">Önizleme</string>
+    <string name="preview_deploy_dialog_title">Uygulamanızı Yayınlayın</string>
+    <string name="preview_deploy_dialog_message">Uygulamanız için bir alt alan adı seçin:</string>
+    <string name="preview_deploy_placeholder">harika-uygulamam</string>
+    <string name="preview_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="preview_share_text">Uygulamamı inceleyin: %s</string>
+
+    <!-- Project Preview Screen -->
+    <string name="project_preview_btn_forked">Kopyalandı!</string>
+    <string name="project_preview_btn_fork">Kopyala</string>
+    <string name="project_preview_error_title">Önizleme yüklenemedi</string>
+
+    <!-- Project Detail Screen -->
+    <string name="project_detail_deploy_dialog_title">Uygulamayı Dağıt</string>
+    <string name="project_detail_deploy_dialog_message">Uygulamanız için bir alt alan adı seçin:</string>
+    <string name="project_detail_deploy_label_subdomain">Alt Alan Adı</string>
+    <string name="project_detail_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="project_detail_screen_title_fallback">Proje</string>
+    <string name="project_detail_created_at">Oluşturulma: %s</string>
+    <string name="project_detail_btn_preview">Uygulamayı Önizle</string>
+    <string name="project_detail_badge_deployed">Dağıtıldı</string>
+    <string name="project_detail_btn_deploying">Dağıtılıyor…</string>
+    <string name="project_detail_btn_deploy_to_web">Web\'e Dağıt</string>
+    <string name="project_detail_stat_views">Görüntülenme</string>
+    <string name="project_detail_stat_forks">Kopyalar</string>
+    <string name="project_detail_stat_tweaks">Düzenlemeler</string>
+    <string name="project_detail_section_original_prompt">Orijinal Açıklama</string>
+    <string name="project_detail_share_text">Uygulamamı inceleyin: %s</string>
+
+    <!-- Project Card -->
+    <string name="project_card_delete_dialog_title">Projeyi Sil</string>
+    <string name="project_card_delete_dialog_message">\"%s\" projesini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</string>
+
+    <!-- Language Picker -->
+    <string name="language_picker_title">Dil Seçin</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese">中文(简体)</string>
+    <string name="language_korean">한국어</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_hindi">हिन्दी</string>
+
+    <!-- Project Card -->
+    <string name="project_card_views">%d görüntüleme</string>
+
+    <!-- Post-Publish Sheet -->
+    <string name="publish_sheet_title">Uygulamanız yayında!</string>
+    <string name="publish_sheet_subtitle">Dünyayla paylaşın ve uygulamanızdaki reklamlardan kazanmaya başlayın.</string>
+    <string name="publish_sheet_open_browser">Tarayıcıda Aç</string>
+    <string name="publish_sheet_share">App\'i Paylaş</string>
+    <string name="publish_sheet_monetize">Reklam Monetizasyonunu Etkinleştir →</string>
+    <string name="publish_sheet_done">Tamam</string>
+    <string name="publish_sheet_share_text">VibeBuild ile oluşturduğum uygulamaya bakın! %s</string>
+
+    <!-- Monetization -->
+    <string name="monetize_section_title">Monetizasyon</string>
+    <string name="monetize_revenue_label">Bu ayki gelir</string>
+    <string name="monetize_revenue_value">$0.00</string>
+    <string name="monetize_enable_btn">Reklam Monetizasyonunu Etkinleştir →</string>
+    <string name="monetize_description">İnsanlar uygulamanızı kullandığında para kazanın. Reklam yerleştiriyor ve aylık ödeme yapıyoruz.</string>
+
+    <!-- Facebook SDK Configuration -->
+    <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
+    <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+</resources>

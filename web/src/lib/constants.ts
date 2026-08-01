@@ -1,6 +1,6 @@
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
-  'https://vibecoder-api-917362189743.us-central1.run.app';
+  'https://vibecoder-api.fly.dev';
 
 export const SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL ||

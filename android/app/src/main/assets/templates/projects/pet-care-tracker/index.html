@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawCare - Pet Care Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <h1>🐾 PawCare</h1>
+            <button id="addPetBtn" class="btn-add-pet">+ Add Pet</button>
+        </header>
+
+        <!-- Pet Selection -->
+        <div id="petSelector" class="pet-selector">
+            <div id="petList" class="pet-list"></div>
+        </div>
+
+        <!-- No Pets State -->
+        <div id="noPetsState" class="no-pets-state">
+            <div class="paw-icon">🐾</div>
+            <h2>No Pets Yet!</h2>
+            <p>Add your first pet to start tracking their care</p>
+        </div>
+
+        <!-- Pet Details View -->
+        <div id="petDetails" class="pet-details hidden">
+            <div class="pet-header">
+                <div id="petInfo" class="pet-info"></div>
+                <div class="pet-actions">
+                    <button id="editPetBtn" class="btn-icon">✏️</button>
+                    <button id="deletePetBtn" class="btn-icon">🗑️</button>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="schedule">🍽️ Schedule</button>
+                <button class="tab-btn" data-tab="appointments">📅 Appointments</button>
+                <button class="tab-btn" data-tab="medications">💊 Medications</button>
+                <button class="tab-btn" data-tab="gallery">📸 Gallery</button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Feeding Schedule Tab -->
+                <div id="scheduleTab" class="tab-panel active">
+                    <button id="addFeedingBtn" class="btn-add">+ Add Feeding Time</button>
+                    <div id="feedingList" class="feeding-list"></div>
+                </div>
+
+                <!-- Appointments Tab -->
+                <div id="appointmentsTab" class="tab-panel">
+                    <button id="addAppointmentBtn" class="btn-add">+ Add Appointment</button>
+                    <div id="appointmentList" class="appointment-list"></div>
+                </div>
+
+                <!-- Medications Tab -->
+                <div id="medicationsTab" class="tab-panel">
+                    <button id="addMedicationBtn" class="btn-add">+ Add Medication</button>
+                    <div id="medicationList" class="medication-list"></div>
+                </div>
+
+                <!-- Gallery Tab -->
+                <div id="galleryTab" class="tab-panel">
+                    <button id="addPhotoBtn" class="btn-add">+ Add Photo</button>
+                    <input type="file" id="photoInput" accept="image/*" style="display: none;">
+                    <div id="photoGallery" class="photo-gallery"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Pet Modal -->
+    <div id="petModal" class="modal">
+        <div class="modal-content">
+            <h2 id="petModalTitle">Add Pet</h2>
+            <form id="petForm">
+                <label>Pet Name *</label>
+                <input type="text" id="petName" required>
+
+                <label>Pet Type *</label>
+                <select id="petType" required>
+                    <option value="">Select Type</option>
+                    <option value="dog">🐕 Dog</option>
+                    <option value="cat">🐈 Cat</option>
+                    <option value="bird">🐦 Bird</option>
+                    <option value="rabbit">🐰 Rabbit</option>
+                    <option value="fish">🐠 Fish</option>
+                    <option value="other">🐾 Other</option>
+                </select>
+
+                <label>Breed/Species</label>
+                <input type="text" id="petBreed">
+
+                <label>Age</label>
+                <input type="text" id="petAge" placeholder="e.g., 2 years">
+
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-primary">Save</button>
+                    <button type="button" class="btn-secondary" id="cancelPetBtn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Feeding Modal -->
+    <div id="feedingModal" class="modal">
+        <div class="modal-content">
+            <h2>Add Feeding Time</h2>
+            <form id="feedingForm">
+                <label>Time *</label>
+                <input type="time" id="feedingTime" required>
+
+                <label>Food Type *</label>
+                <input type="text" id="foodType" required placeholder="e.g., Dry food, Wet food">
+
+                <label>Amount</label>
+                <input type="text" id="foodAmount" placeholder="e.g., 1 cup, 100g">
+
+                <label>Notes</label>
+                <textarea id="feedingNotes" rows="2"></textarea>
+
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-primary">Add</button>
+                    <button type="button" class="btn-secondary" id="cancelFeedingBtn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Appointment Modal -->
+    <div id="appointmentModal" class="modal">
+        <div class="modal-content">
+            <h2>Add Vet Appointment</h2>
+            <form id="appointmentForm">
+                <label>Date *</label>
+                <input type="date" id="appointmentDate" required>
+
+                <label>Time *</label>
+                <input type="time" id="appointmentTime" required>
+
+                <label>Vet/Clinic *</label>
+                <input type="text" id="appointmentVet" required placeholder="e.g., Happy Paws Clinic">
+
+                <label>Reason</label>
+                <input type="text" id="appointmentReason" placeholder="e.g., Annual checkup">
+
+                <label>Notes</label>
+                <textarea id="appointmentNotes" rows="2"></textarea>
+
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-primary">Add</button>
+                    <button type="button" class="btn-secondary" id="cancelAppointmentBtn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Medication Modal -->
+    <div id="medicationModal" class="modal">
+        <div class="modal-content">
+            <h2>Add Medication</h2>
+            <form id="medicationForm">
+                <label>Medication Name *</label>
+                <input type="text" id="medicationName" required>
+
+                <label>Dosage *</label>
+                <input type="text" id="medicationDosage" required placeholder="e.g., 1 tablet, 5ml">
+
+                <label>Frequency *</label>
+                <select id="medicationFrequency" required>
+                    <option value="">Select Frequency</option>
+                    <option value="once-daily">Once Daily</option>
+                    <option value="twice-daily">Twice Daily</option>
+                    <option value="three-times-daily">Three Times Daily</option>
+                    <option value="every-other-day">Every Other Day</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="as-needed">As Needed</option>
+                </select>
+
+                <label>Start Date *</label>
+                <input type="date" id="medicationStartDate" required>
+
+                <label>End Date</label>
+                <input type="date" id="medicationEndDate">
+
+                <label>Notes</label>
+                <textarea id="medicationNotes" rows="2"></textarea>
+
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-primary">Add</button>
+                    <button type="button" class="btn-secondary" id="cancelMedicationBtn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

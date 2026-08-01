@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ResumeForge — Professional Resume Builder</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Top Navigation -->
+  <header class="top-bar">
+    <div class="logo">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <rect x="2" y="1" width="24" height="26" rx="3" fill="#6C63FF"/>
+        <rect x="6" y="6" width="10" height="2" rx="1" fill="#fff"/>
+        <rect x="6" y="10" width="16" height="1.5" rx=".75" fill="#fff" opacity=".7"/>
+        <rect x="6" y="13.5" width="16" height="1.5" rx=".75" fill="#fff" opacity=".7"/>
+        <rect x="6" y="17" width="12" height="1.5" rx=".75" fill="#fff" opacity=".5"/>
+        <rect x="6" y="20.5" width="14" height="1.5" rx=".75" fill="#fff" opacity=".5"/>
+      </svg>
+      <span>ResumeForge</span>
+    </div>
+    <nav class="top-nav">
+      <button class="nav-btn active" data-view="editor">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path d="M2 13.5V16h2.5l9.37-9.37-2.5-2.5L2 13.5zm11.71-10.21a.664.664 0 000-.94l-1.56-1.56a.664.664 0 00-.94 0l-1.22 1.22 2.5 2.5 1.22-1.22z" fill="currentColor"/></svg>
+        <span>Editor</span>
+      </button>
+      <button class="nav-btn" data-view="preview">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path d="M9 3.5C5.41 3.5 2.33 5.72 1 9c1.33 3.28 4.41 5.5 8 5.5s6.67-2.22 8-5.5c-1.33-3.28-4.41-5.5-8-5.5zM9 12.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7zM9 7a2 2 0 100 4 2 2 0 000-4z" fill="currentColor"/></svg>
+        <span>Preview</span>
+      </button>
+      <button class="nav-btn" data-view="export">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path d="M14 2H4a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V4a2 2 0 00-2-2zm-3 12H5v-2h6v2zm2-4H5V8h8v2zm0-4H5V4h8v2z" fill="currentColor"/></svg>
+        <span>Export</span>
+      </button>
+    </nav>
+    <div class="top-actions">
+      <button class="btn-icon" id="btnDarkMode" title="Toggle dark mode">
+        <svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 3a7 7 0 000 14 7 7 0 007-7 5 5 0 01-7-7z" fill="currentColor"/></svg>
+      </button>
+      <button class="btn-primary" id="btnSave">Save</button>
+    </div>
+  </header>
+
+  <!-- EDITOR VIEW -->
+  <main class="app-container" id="editorView">
+    <div class="editor-layout">
+      <!-- Left: Form Panel -->
+      <div class="form-panel">
+        <!-- Section tabs -->
+        <div class="section-tabs">
+          <button class="section-tab active" data-section="personal">Personal</button>
+          <button class="section-tab" data-section="experience">Experience</button>
+          <button class="section-tab" data-section="education">Education</button>
+          <button class="section-tab" data-section="skills">Skills</button>
+          <button class="section-tab" data-section="summary">Summary</button>
+        </div>
+
+        <!-- Personal Info Section -->
+        <div class="form-section active" id="section-personal">
+          <h2>Personal Information</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="fullName">Full Name *</label>
+              <input type="text" id="fullName" placeholder="John Doe" required>
+            </div>
+            <div class="form-group">
+              <label for="jobTitle">Job Title</label>
+              <input type="text" id="jobTitle" placeholder="Senior Software Engineer">
+            </div>
+            <div class="form-group">
+              <label for="email">Email *</label>
+              <input type="email" id="email" placeholder="john@example.com" required>
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone</label>
+              <input type="tel" id="phone" placeholder="+1 (555) 123-4567">
+            </div>
+            <div class="form-group">
+              <label for="location">Location</label>
+              <input type="text" id="location" placeholder="San Francisco, CA">
+            </div>
+            <div class="form-group">
+              <label for="website">Website / LinkedIn</label>
+              <input type="url" id="website" placeholder="https://linkedin.com/in/johndoe">
+            </div>
+          </div>
+        </div>
+
+        <!-- Experience Section -->
+        <div class="form-section" id="section-experience">
+          <div class="section-header">
+            <h2>Work Experience</h2>
+            <button class="btn-add" id="addExperience">+ Add Position</button>
+          </div>
+          <div id="experienceList" class="entry-list"></div>
+        </div>
+
+        <!-- Education Section -->
+        <div class="form-section" id="section-education">
+          <div class="section-header">
+            <h2>Education</h2>
+            <button class="btn-add" id="addEducation">+ Add Education</button>
+          </div>
+          <div id="educationList" class="entry-list"></div>
+        </div>
+
+        <!-- Skills Section -->
+        <div class="form-section" id="section-skills">
+          <h2>Skills</h2>
+          <div class="skills-input-row">
+            <input type="text" id="skillInput" placeholder="Type a skill and press Enter">
+            <button class="btn-add" id="addSkillBtn">Add</button>
+          </div>
+          <div class="skill-categories">
+            <div class="skill-category">
+              <label>Category (optional)</label>
+              <select id="skillCategory">
+                <option value="">General</option>
+                <option value="Technical">Technical</option>
+                <option value="Languages">Languages</option>
+                <option value="Frameworks">Frameworks</option>
+                <option value="Tools">Tools</option>
+                <option value="Soft Skills">Soft Skills</option>
+              </select>
+            </div>
+            <div class="skill-level-picker">
+              <label>Proficiency</label>
+              <select id="skillLevel">
+                <option value="5">Expert</option>
+                <option value="4">Advanced</option>
+                <option value="3" selected>Intermediate</option>
+                <option value="2">Beginner</option>
+                <option value="1">Novice</option>
+              </select>
+            </div>
+          </div>
+          <div id="skillsList" class="skills-display"></div>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="form-section" id="section-summary">
+          <h2>Professional Summary</h2>
+          <div class="form-group full-width">
+            <label for="summary">Write a brief summary about yourself</label>
+            <textarea id="summary" rows="6" placeholder="Experienced software engineer with 5+ years of expertise in building scalable web applications..."></textarea>
+            <div class="char-count"><span id="summaryCount">0</span>/500</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Live Preview (Desktop) -->
+      <div class="preview-panel" id="livePreview">
+        <div class="preview-toolbar">
+          <span class="preview-label">Live Preview</span>
+          <div class="template-switcher">
+            <button class="template-btn active" data-template="modern" title="Modern">
+              <svg width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="3" width="4" height="4" rx="1" fill="currentColor"/><line x1="9" y1="4" x2="13" y2="4" stroke="currentColor" stroke-width="1"/><line x1="9" y1="6" x2="12" y2="6" stroke="currentColor" stroke-width="1"/><line x1="3" y1="9" x2="13" y2="9" stroke="currentColor" stroke-width="1"/><line x1="3" y1="11" x2="11" y2="11" stroke="currentColor" stroke-width="1"/></svg>
+            </button>
+            <button class="template-btn" data-template="classic" title="Classic">
+              <svg width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="14" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="3" y1="4" x2="13" y2="4" stroke="currentColor" stroke-width="1.5"/><line x1="3" y1="7" x2="13" y2="7" stroke="currentColor" stroke-width=".8"/><line x1="3" y1="9" x2="11" y2="9" stroke="currentColor" stroke-width=".8"/><line x1="3" y1="11" x2="13" y2="11" stroke="currentColor" stroke-width=".8"/><line x1="3" y1="13" x2="9" y2="13" stroke="currentColor" stroke-width=".8"/></svg>
+            </button>
+            <button class="template-btn" data-template="minimal" title="Minimal">
+              <svg width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="14" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="4" y1="4" x2="12" y2="4" stroke="currentColor" stroke-width="1"/><line x1="4" y1="7" x2="10" y2="7" stroke="currentColor" stroke-width=".7"/><line x1="4" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width=".7"/><line x1="4" y1="12" x2="8" y2="12" stroke="currentColor" stroke-width=".7"/></svg>
+            </button>
+            <button class="template-btn" data-template="creative" title="Creative">
+              <svg width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="5" cy="5" r="2" fill="currentColor"/><line x1="9" y1="4" x2="13" y2="4" stroke="currentColor" stroke-width="1"/><line x1="9" y1="6" x2="12" y2="6" stroke="currentColor" stroke-width=".7"/><line x1="3" y1="10" x2="13" y2="10" stroke="currentColor" stroke-width=".7"/><line x1="3" y1="12" x2="10" y2="12" stroke="currentColor" stroke-width=".7"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="resume-page" id="resumePreview">
+          <div class="resume-placeholder">
+            <svg width="64" height="64" viewBox="0 0 64 64" opacity=".3"><rect x="8" y="4" width="48" height="56" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><rect x="16" y="12" width="20" height="4" rx="2" fill="currentColor"/><rect x="16" y="20" width="32" height="2" rx="1" fill="currentColor" opacity=".5"/><rect x="16" y="26" width="32" height="2" rx="1" fill="currentColor" opacity=".5"/><rect x="16" y="32" width="24" height="2" rx="1" fill="currentColor" opacity=".3"/><rect x="16" y="40" width="32" height="2" rx="1" fill="currentColor" opacity=".5"/><rect x="16" y="46" width="28" height="2" rx="1" fill="currentColor" opacity=".3"/></svg>
+            <p>Start filling in your details to see a live preview</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- PREVIEW VIEW (Mobile full-screen preview) -->
+  <main class="app-container hidden" id="previewView">
+    <div class="preview-full">
+      <div class="preview-toolbar">
+        <span class="preview-label">Resume Preview</span>
+        <div class="template-switcher" id="previewTemplateSwitcher">
+          <!-- Cloned from editor -->
+        </div>
+      </div>
+      <div class="resume-page" id="resumePreviewFull"></div>
+    </div>
+  </main>
+
+  <!-- EXPORT VIEW -->
+  <main class="app-container hidden" id="exportView">
+    <div class="export-container">
+      <div class="export-sidebar">
+        <h2>Export Options</h2>
+        <div class="export-option-group">
+          <h3>Template</h3>
+          <div class="template-cards" id="exportTemplateCards">
+            <div class="template-card active" data-template="modern">
+              <div class="template-card-preview modern-mini"></div>
+              <span>Modern</span>
+            </div>
+            <div class="template-card" data-template="classic">
+              <div class="template-card-preview classic-mini"></div>
+              <span>Classic</span>
+            </div>
+            <div class="template-card" data-template="minimal">
+              <div class="template-card-preview minimal-mini"></div>
+              <span>Minimal</span>
+            </div>
+            <div class="template-card" data-template="creative">
+              <div class="template-card-preview creative-mini"></div>
+              <span>Creative</span>
+            </div>
+          </div>
+        </div>
+        <div class="export-option-group">
+          <h3>Accent Color</h3>
+          <div class="color-picker">
+            <button class="color-swatch active" data-color="#6C63FF" style="background:#6C63FF"></button>
+            <button class="color-swatch" data-color="#2D9CDB" style="background:#2D9CDB"></button>
+            <button class="color-swatch" data-color="#27AE60" style="background:#27AE60"></button>
+            <button class="color-swatch" data-color="#EB5757" style="background:#EB5757"></button>
+            <button class="color-swatch" data-color="#F2994A" style="background:#F2994A"></button>
+            <button class="color-swatch" data-color="#333333" style="background:#333333"></button>
+          </div>
+        </div>
+        <div class="export-option-group">
+          <h3>Font Size</h3>
+          <div class="font-size-control">
+            <button class="btn-icon" id="fontDecrease">A-</button>
+            <span id="fontSizeDisplay">100%</span>
+            <button class="btn-icon" id="fontIncrease">A+</button>
+          </div>
+        </div>
+        <div class="export-actions">
+          <button class="btn-primary btn-large" id="btnPrint">
+            <svg width="18" height="18" viewBox="0 0 18 18"><path d="M15 6H3a2 2 0 00-2 2v4h3v3h10v-3h3V8a2 2 0 00-2-2zm-2 8H5v-3h8v3zm2-5a1 1 0 110-2 1 1 0 010 2zM5 2h8v3H5V2z" fill="currentColor"/></svg>
+            Print / Save PDF
+          </button>
+          <button class="btn-secondary btn-large" id="btnDownloadHTML">
+            <svg width="18" height="18" viewBox="0 0 18 18"><path d="M14 10v3H4v-3H2v3a2 2 0 002 2h10a2 2 0 002-2v-3h-2zm-5 .17l2.59-2.58L13 9l-4 4-4-4 1.41-1.41L9 10.17V2h2v8.17z" fill="currentColor"/></svg>
+            Download HTML
+          </button>
+        </div>
+      </div>
+      <div class="export-preview">
+        <div class="resume-page export-page" id="resumeExportPreview"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
