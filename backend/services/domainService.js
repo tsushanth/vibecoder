@@ -5,7 +5,7 @@ import { supabase } from '../config/database.js';
 const FLY_API_TOKEN = process.env.FLY_API_TOKEN;
 const FLY_APP_NAME = process.env.FLY_DEPLOY_APP_NAME || 'vibecoder-deploy';
 const FLY_API_BASE = 'https://api.machines.dev/v1';
-const BASE_DOMAIN = process.env.BASE_DOMAIN || 'vibecoder.app';
+const BASE_DOMAIN = process.env.BASE_DOMAIN || 'vibebuild.cc';
 
 // ─── Domain validation ────────────────────────────────────────────────
 

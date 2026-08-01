@@ -3,6 +3,10 @@ package com.kreativekoala.vibecoder.data.model
 import com.google.gson.annotations.SerializedName
 
 sealed class SseEvent {
+    data class Queued(
+        @SerializedName("projectId") val projectId: String
+    ) : SseEvent()
+
     data class Status(
         val phase: String = "",
         val message: String = "",
@@ -23,6 +27,8 @@ sealed class SseEvent {
     data class Result(
         val success: Boolean = true,
         val bundle: String = "",
+        @SerializedName("projectId") val projectId: String? = null,
+        @SerializedName("previewUrl") val previewUrl: String? = null,
         @SerializedName("bundle_size") val bundleSize: Int? = null,
         @SerializedName("bundleSize") val bundleSizeAlt: Int? = null,
         val files: List<ProjectFile>? = null,
@@ -30,5 +36,8 @@ sealed class SseEvent {
         @SerializedName("generationTime") val generationTimeAlt: String? = null
     ) : SseEvent()
 
-    data class Error(val error: String) : SseEvent()
+    data class Error(
+        val error: String,
+        @SerializedName("systemBusy") val systemBusy: Boolean = false
+    ) : SseEvent()
 }

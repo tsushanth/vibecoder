@@ -1,0 +1,210 @@
+/* Localizable.strings (Japanese)
+   VibeBuild iOS App */
+
+/* ==== Tab Bar ==== */
+"Projects" = "プロジェクト";
+"Create" = "作成";
+"Account" = "アカウント";
+
+/* ==== Sign In View ==== */
+"Learn to code with AI" = "AIでプログラミングを学ぼう";
+"Continue without an account" = "アカウントなしで続ける";
+"AI Code Generation" = "AIコード生成";
+"Describe an idea, get working HTML & CSS code" = "アイデアを説明すると、動くHTML & CSSコードを取得";
+"Code Editor" = "コードエディタ";
+"View, edit, and learn from source code" = "プロジェクトのファイルを表示・編集";
+"Run in Safari" = "Safariで開く";
+"Open your code in Safari to see the result" = "Safariでウェブサイトを開く";
+"Signing in..." = "サインイン中...";
+"Sign In Error" = "サインインエラー";
+"An unknown error occurred" = "不明なエラーが発生しました";
+"OK" = "OK";
+
+/* ==== Profile View ==== */
+"User" = "ユーザー";
+"Subscription" = "サブスクリプション";
+"Plan" = "プラン";
+"Generations" = "生成回数";
+"Upgrade to Pro" = "Proにアップグレード";
+"Manage Subscription" = "サブスクリプションを管理";
+"Settings" = "設定";
+"Help & Support" = "ヘルプとサポート";
+"About" = "アプリについて";
+"Sign Out" = "サインアウト";
+"Profile" = "プロフィール";
+"Are you sure you want to sign out?" = "サインアウトしてもよろしいですか？";
+"Cancel" = "キャンセル";
+
+/* ==== Account View ==== */
+"VibeBuild User" = "VibeBuildユーザー";
+"Join VibeBuild Pro" = "VibeBuild Proに参加";
+"VibeBuild Pro" = "VibeBuild Pro";
+"LEGAL" = "法的情報";
+"Privacy Policy" = "プライバシーポリシー";
+"Terms of Service" = "利用規約";
+"Sign In with Apple" = "Appleでサインイン";
+"Delete Account" = "アカウントを削除";
+"This will permanently delete your account and all your projects. This action cannot be undone." = "アカウントとすべてのプロジェクトが完全に削除されます。この操作は元に戻せません。";
+"Error" = "エラー";
+"Deleting account..." = "アカウントを削除中...";
+
+/* ==== Browse View ==== */
+"Explore" = "探索";
+"Sort" = "並べ替え";
+"Newest" = "最新";
+"Popular" = "人気";
+"Loading projects..." = "プロジェクトを読み込み中...";
+"No Projects Yet" = "プロジェクトはまだありません";
+"Be the first to create and share" = "最初に作成して共有しましょう";
+"by %@" = "%@ 作成";
+"Fork (10 coins)" = "フォーク（10コイン）";
+"View Code" = "コードを表示";
+"Fork Project" = "プロジェクトをフォーク";
+"Fork for 10 coins" = "10コインでフォーク";
+"Create your own copy of this project to customize" = "このプロジェクトのコピーを作成してカスタマイズ";
+
+/* ==== Create Project View ==== */
+"Create a Coding Project" = "コーディングプロジェクトを作成";
+"Describe what you want to learn and AI will generate example code" = "学びたいことを説明すると、AIがサンプルコードを生成します";
+"Free tier limit" = "無料プランの制限";
+"What do you want to learn?" = "何を学びたいですか？";
+"Be specific! Describe features, colors, and functionality." = "具体的に！機能、色、動作を説明してください。";
+"Examples:" = "例：";
+"Generating..." = "生成中...";
+"Generate Code (Free)" = "コードを生成（無料）";
+"Generate Code" = "コードを生成";
+"~%ds remaining" = "残り約%d秒";
+"Generation Error" = "生成エラー";
+"Unknown error occurred" = "不明なエラーが発生しました";
+"Unable to generate. Please try again." = "生成できませんでした。もう一度お試しください。";
+
+/* ==== Create View (Replit-style) ==== */
+"Hi %@," = "こんにちは %@さん、";
+"there" = "";
+"what do you want to learn today?" = "今日は何を学びたいですか？";
+"Describe what you want to learn & explore the code..." = "学びたいことを説明してコードを探索...";
+"Start" = "開始";
+"Start learning to code for free" = "無料でプログラミング学習を始めよう";
+"Join VibeBuild" = "VibeBuildに参加";
+"Pro" = "Pro";
+"to unlock more usage" = "でもっと利用できるように";
+
+/* ==== Suggestion Chips ==== */
+"Todo List" = "ToDoリスト";
+"Weather Page" = "天気ページ";
+"Calculator" = "電卓";
+"Pomodoro Timer" = "ポモドーロタイマー";
+"Color Palette" = "カラーパレット";
+"Markdown Editor" = "Markdownエディタ";
+
+/* ==== Live Preview / Source Code View ==== */
+"Source Code" = "ファイル";
+"Close" = "閉じる";
+"Save" = "保存";
+"Saved!" = "保存しました！";
+"Your project has been saved and is now in your Projects tab" = "プロジェクトが保存され、プロジェクトタブに表示されます";
+"Save Error" = "保存エラー";
+"Unknown error" = "不明なエラー";
+"Could Not Open" = "開けませんでした";
+"No files found" = "ファイルが見つかりません";
+"Done" = "完了";
+"%d chars" = "%d文字";
+"No preview available" = "プレビューはありません";
+
+/* ==== Subscription Plans View ==== */
+"Subscription Plans" = "サブスクリプションプラン";
+"Choose Your Plan" = "プランを選択";
+"Restore Purchases" = "購入を復元";
+"Current Plan" = "現在のプラン";
+"Free" = "無料";
+"Subscribe Now" = "今すぐ登録";
+
+/* ==== Subscription Plan Features ==== */
+"3 tweaks per project" = "プロジェクトごとに3回の調整";
+"Public projects only" = "公開プロジェクトのみ";
+"Standard queue" = "標準キュー";
+"vibebuild.cc subdomain" = "vibebuild.ccサブドメイン";
+"per month" = "月額";
+"per year (save 17%)" = "年額（17%お得）";
+"forever" = "永久";
+
+/* ==== Subscription Tier Names ==== */
+"Team" = "チーム";
+"Enterprise" = "エンタープライズ";
+"Free Plan" = "無料プラン";
+"%@ Plan" = "%@プラン";
+
+/* ==== Project List View ==== */
+"My Projects" = "マイプロジェクト";
+"Create your first web project using AI" = "AIを使って最初のWebプロジェクトを作成";
+"Create Project" = "プロジェクトを作成";
+"Private" = "非公開";
+"Unknown" = "不明";
+"Project Details" = "プロジェクト詳細";
+"No projects yet" = "プロジェクトはまだありません";
+"Create your first coding project to see it here" = "最初のコーディングプロジェクトを作成してここに表示";
+"Code Project" = "コードプロジェクト";
+"Delete" = "削除";
+"Delete Project" = "プロジェクトを削除";
+"Are you sure you want to delete \"%@\"? This cannot be undone." = "「%@」を削除してもよろしいですか？この操作は元に戻せません。";
+
+/* ==== Custom Domain View ==== */
+"Custom Domain" = "カスタムドメイン";
+"Loading..." = "読み込み中...";
+"Connect Your Domain" = "ドメインを接続";
+"Use your own domain instead of the default vibebuild.cc subdomain." = "デフォルトのvibebuild.ccサブドメインの代わりに独自のドメインを使用。";
+"Domain" = "ドメイン";
+"Add Domain" = "ドメインを追加";
+"DNS Configuration" = "DNS設定";
+"Option 1: CNAME Record" = "オプション1: CNAMEレコード";
+"Type: CNAME" = "タイプ: CNAME";
+"Value:" = "値:";
+"Option 2: TXT Verification" = "オプション2: TXT検証";
+"Host: _vibebuilder" = "ホスト: _vibebuilder";
+"DNS changes can take up to 48 hours to propagate, but usually take a few minutes." = "DNSの変更は反映に最大48時間かかる場合がありますが、通常は数分です。";
+"Verify Domain" = "ドメインを検証";
+"SSL certificate active" = "SSL証明書が有効";
+"Remove Domain" = "ドメインを削除";
+"Domain added! Configure your DNS records below." = "ドメインが追加されました！以下でDNSレコードを設定してください。";
+"Domain verified and SSL provisioned!" = "ドメインが検証され、SSLがプロビジョニングされました！";
+"DNS verified! SSL provisioning in progress..." = "DNS検証済み！SSLプロビジョニング中...";
+"Domain removed" = "ドメインが削除されました";
+"Project must be deployed first" = "プロジェクトを先にデプロイする必要があります";
+
+/* ==== Domain Status Labels ==== */
+"Active" = "有効";
+"DNS Verified" = "DNS検証済み";
+"Provisioning SSL" = "SSLプロビジョニング中";
+"Failed" = "失敗";
+"Pending" = "保留中";
+
+/* ==== Coin Packs ==== */
+"100 Coins" = "100コイン";
+"500 Coins" = "500コイン";
+"1,200 Coins" = "1,200コイン";
+
+/* ==== Usage / Subscription Status ==== */
+"Unlimited" = "無制限";
+"%d of %d today" = "今日 %d/%d";
+"Renews %@" = "%@に更新";
+
+/* ==== Errors ==== */
+"Failed to verify purchase" = "購入の検証に失敗しました";
+"Product not found" = "製品が見つかりません";
+"Product not available" = "製品は利用できません";
+"Purchase is pending" = "購入は保留中です";
+"Unknown result" = "不明な結果";
+"Failed to load products" = "製品の読み込みに失敗しました";
+"Invalid URL returned from server" = "サーバーから無効なURLが返されました";
+
+/* ==== Example Prompts ==== */
+"Learn to create a todo list with dark mode and task completion" = "ダークモードとタスク完了機能のあるToDoリストの作成を学ぶ";
+"Explore building a calculator with a modern gradient design" = "モダンなグラデーションデザインの電卓の作成を探索する";
+"Study how a weather dashboard shows temperature and conditions" = "天気ダッシュボードが温度と状況をどう表示するか学ぶ";
+
+/* ==== Info.plist Strings ==== */
+"NSCameraUsageDescription" = "VibeBuildはプロジェクト用の写真を撮影するためにカメラへのアクセスが必要です。";
+"NSPhotoLibraryUsageDescription" = "VibeBuildはプロジェクト用の画像を選択するためにフォトライブラリへのアクセスが必要です。";
+"NSPhotoLibraryAddUsageDescription" = "VibeBuildはフォトライブラリに画像を保存する許可が必要です。";
+"NSMicrophoneUsageDescription" = "VibeBuildはコーディングプロジェクトの説明時に音声入力を使用するためにマイクへのアクセスが必要です。";
+"NSSpeechRecognitionUsageDescription" = "VibeBuildはコーディングプロジェクト作成時に音声をテキストに変換するために音声認識を使用します。";

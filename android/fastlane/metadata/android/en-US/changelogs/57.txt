@@ -1,0 +1,3 @@
+• Unified paywall design across the app for a more consistent experience
+• Stronger free-tier limit enforcement at the build attempt
+• Performance polish and bug fixes

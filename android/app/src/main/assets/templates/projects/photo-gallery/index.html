@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Gallery</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <h1>📷 Photo Gallery</h1>
+            <div class="header-actions">
+                <button class="btn btn-primary" id="uploadBtn">
+                    <span class="icon">+</span> Upload
+                </button>
+                <button class="btn btn-secondary" id="manageAlbumsBtn">
+                    <span class="icon">📁</span> Albums
+                </button>
+            </div>
+        </header>
+
+        <div class="albums-bar" id="albumsBar">
+            <button class="album-tab active" data-album="all">All Photos</button>
+        </div>
+
+        <div class="upload-zone" id="uploadZone">
+            <div class="upload-content">
+                <div class="upload-icon">📤</div>
+                <p class="upload-text">Drag & Drop Photos Here</p>
+                <p class="upload-subtext">or click to browse</p>
+                <input type="file" id="fileInput" accept="image/*" multiple hidden>
+            </div>
+        </div>
+
+        <div class="gallery-container">
+            <div class="masonry-grid" id="gallery"></div>
+            <div class="empty-state" id="emptyState">
+                <div class="empty-icon">🖼️</div>
+                <h2>No photos yet</h2>
+                <p>Upload your first photo to get started</p>
+            </div>
+        </div>
+
+        <div class="lightbox" id="lightbox">
+            <div class="lightbox-overlay"></div>
+            <div class="lightbox-content">
+                <button class="lightbox-close" id="lightboxClose">×</button>
+                <button class="lightbox-nav lightbox-prev" id="lightboxPrev">‹</button>
+                <button class="lightbox-nav lightbox-next" id="lightboxNext">›</button>
+                <img class="lightbox-image" id="lightboxImage" src="" alt="">
+                <div class="lightbox-info">
+                    <div class="lightbox-album" id="lightboxAlbum"></div>
+                    <div class="lightbox-actions">
+                        <button class="lightbox-btn" id="changeAlbumBtn">
+                            <span class="icon">📁</span> Change Album
+                        </button>
+                        <button class="lightbox-btn delete-btn" id="deletePhotoBtn">
+                            <span class="icon">🗑️</span> Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="albumModal">
+            <div class="modal-overlay"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Manage Albums</h2>
+                    <button class="modal-close" id="closeAlbumModal">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="create-album">
+                        <input type="text" id="newAlbumInput" placeholder="New album name" maxlength="30">
+                        <button class="btn btn-primary" id="createAlbumBtn">Create</button>
+                    </div>
+                    <div class="albums-list" id="albumsList"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="selectAlbumModal">
+            <div class="modal-overlay"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Select Album</h2>
+                    <button class="modal-close" id="closeSelectAlbumModal">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="albums-select" id="albumsSelect"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

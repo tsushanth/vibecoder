@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#4F46E5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>BookEase — Service Booking</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <button class="header-back hidden" aria-label="Go back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <span class="header-title">Select Service</span>
+      <!-- Logo -->
+      <svg class="header-logo" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="rgba(255,255,255,0.15)"/>
+        <path d="M12 14h16M12 20h10M12 26h14" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+        <circle cx="28" cy="26" r="4" fill="#10B981" stroke="white" stroke-width="1.5"/>
+        <path d="M26.5 26l1 1 2-2" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </header>
+
+    <!-- Progress Stepper -->
+    <div class="stepper">
+      <div class="step-item">
+        <div class="step-circle active">1</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item">
+        <div class="step-circle">2</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item">
+        <div class="step-circle">3</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item">
+        <div class="step-circle">4</div>
+      </div>
+    </div>
+
+    <!-- Screens -->
+    <div class="screens">
+      <!-- Step 1: Services -->
+      <div class="screen active" id="screen-services">
+        <div class="section-title">What would you like?</div>
+        <div class="section-subtitle">Choose a service to get started</div>
+        <div id="services-list"></div>
+      </div>
+
+      <!-- Step 2: Date & Time -->
+      <div class="screen" id="screen-datetime">
+        <div class="section-title">Pick a Date</div>
+        <div id="calendar" class="calendar-container"></div>
+        <div id="time-slots"></div>
+      </div>
+
+      <!-- Step 3: Details -->
+      <div class="screen" id="screen-details"></div>
+
+      <!-- Step 4: Confirmation -->
+      <div class="screen" id="screen-confirm"></div>
+    </div>
+
+    <!-- Bottom Action Bar -->
+    <div class="bottom-bar" id="bottom-bar"></div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

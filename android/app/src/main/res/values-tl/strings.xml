@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VibeBuild</string>
+
+    <!-- Common -->
+    <string name="cancel">Kanselahin</string>
+    <string name="ok">OK</string>
+    <string name="back">Bumalik</string>
+    <string name="refresh">I-refresh</string>
+    <string name="share">Ibahagi</string>
+    <string name="copy">Kopyahin</string>
+    <string name="open">Buksan</string>
+    <string name="error">Error</string>
+    <string name="live">Live</string>
+    <string name="publish">I-publish</string>
+    <string name="deploy">I-deploy</string>
+    <string name="close">Isara</string>
+    <string name="reload">I-reload</string>
+    <string name="save">I-save</string>
+    <string name="saved">Na-save</string>
+    <string name="delete_label">I-delete</string>
+    <string name="public_label">Pampubliko</string>
+    <string name="private_label">Pribado</string>
+    <string name="sign_out">Mag-sign Out</string>
+
+    <!-- Tabs -->
+    <string name="tab_apps">Mga App</string>
+    <string name="tab_create">Gumawa</string>
+    <string name="tab_account">Account</string>
+    <string name="tab_browse">Mag-explore</string>
+
+    <!-- Landing Screen -->
+    <string name="landing_hero_subtitle">Ilarawan. AI ang gagawa.\nAng iyong app, live sa ilang segundo.</string>
+    <string name="landing_prompt_example">"Gawan mo ako ng weather app na may malinis na dark na UI"</string>
+    <string name="landing_how_it_works_title">Paano Ito Gumagana</string>
+    <string name="landing_step_describe_title">Ilarawan</string>
+    <string name="landing_step_describe_desc">Sabihin sa AI ang gusto mo sa simpleng salita</string>
+    <string name="landing_step_generate_title">I-generate</string>
+    <string name="landing_step_generate_desc">Sinusulat ng AI ang code sa ilang segundo</string>
+    <string name="landing_step_preview_title">I-preview</string>
+    <string name="landing_step_preview_desc">Makita ang iyong app na gumagana agad-agad</string>
+    <string name="landing_step_deploy_title">I-deploy</string>
+    <string name="landing_step_deploy_desc">I-publish sa web sa isang tap lang</string>
+    <string name="landing_examples_title">Ano ang Ginagawa ng mga Tao</string>
+    <string name="landing_example_weather_title">Weather Dashboard</string>
+    <string name="landing_example_weather_desc">Real-time na panahon na may magagandang chart</string>
+    <string name="landing_example_memory_title">Memory Game</string>
+    <string name="landing_example_memory_desc">Masayang card-matching game na may animation</string>
+    <string name="landing_example_budget_title">Budget Tracker</string>
+    <string name="landing_example_budget_desc">I-track ang mga gastos na may category breakdown</string>
+    <string name="landing_example_pomodoro_title">Pomodoro Timer</string>
+    <string name="landing_example_pomodoro_desc">Focus timer na may task management</string>
+    <string name="landing_example_quiz_title">Quiz App</string>
+    <string name="landing_example_quiz_desc">Interactive na trivia na may score tracking</string>
+    <string name="landing_example_workout_title">Workout Logger</string>
+    <string name="landing_example_workout_desc">I-log ang mga exercise at i-track ang progress</string>
+    <string name="landing_cta_get_started">Magsimula — Libre</string>
+    <string name="landing_cta_sign_in">May account na? Mag-sign In</string>
+    <string name="landing_trust_badge_instant">Agaran</string>
+    <string name="landing_trust_badge_secure">Ligtas</string>
+    <string name="landing_trust_badge_no_card">Walang Card</string>
+
+    <!-- Sign In Screen -->
+    <string name="sign_in_subtitle">Gumawa ng mga app gamit ang AI</string>
+    <string name="sign_in_label_display_name">Display Name</string>
+    <string name="sign_in_label_email">Email</string>
+    <string name="sign_in_label_password">Password</string>
+    <string name="sign_in_cd_hide_password">Itago ang password</string>
+    <string name="sign_in_cd_show_password">Ipakita ang password</string>
+    <string name="sign_in_btn_creating_account">Gumagawa ng account…</string>
+    <string name="sign_in_btn_signing_in">Nagsa-sign in…</string>
+    <string name="sign_in_btn_create_account">Gumawa ng Account</string>
+    <string name="sign_in_btn_sign_in">Mag-sign In</string>
+    <string name="sign_in_toggle_have_account">May account na? </string>
+    <string name="sign_in_toggle_no_account">Wala pang account? </string>
+    <string name="sign_in_toggle_link_sign_in">Mag-sign In</string>
+    <string name="sign_in_toggle_link_sign_up">Mag-sign Up</string>
+    <string name="sign_in_divider_or">" o "</string>
+    <string name="sign_in_with_google">Mag-sign in gamit ang Google</string>
+    <string name="sign_in_terms_notice">Sa pag-sign in, sumasang-ayon ka sa aming Mga Tuntunin ng Serbisyo</string>
+
+    <!-- Onboarding Screen -->
+    <string name="onboarding_btn_skip">Laktawan</string>
+    <string name="onboarding_page1_title">Ilarawan ang Iyong App</string>
+    <string name="onboarding_page1_desc">Sabihin sa AI ang gusto mong gawin sa simpleng salita. Hindi kailangan ng coding experience.</string>
+    <string name="onboarding_page2_title">AI ang Gagawa</string>
+    <string name="onboarding_page2_desc">Panoorin ang AI na gumawa ng fully functional na app na may totoong code sa ilang segundo.</string>
+    <string name="onboarding_page3_title">I-tweak at I-refine</string>
+    <string name="onboarding_page3_desc">Pagbutihin ang iyong app kasama ang AI. Baguhin ang mga kulay, feature, at layout agad-agad.</string>
+    <string name="onboarding_page4_title">I-deploy at Ibahagi</string>
+    <string name="onboarding_page4_desc">I-publish ang iyong app sa web sa isang tap. Ibahagi ang iyong mga gawa sa buong mundo.</string>
+    <string name="onboarding_btn_next">Susunod</string>
+    <string name="onboarding_btn_get_started">Magsimula</string>
+
+    <!-- Create Screen -->
+    <string name="create_title">Ano ang gusto mong gawin?</string>
+    <string name="create_subtitle">Ilarawan ang iyong app idea at gagawin ito ng AI</string>
+    <string name="create_prompt_placeholder">hal., Gumawa ng weather app na nagpapakita ng forecast para sa aking lungsod…</string>
+    <string name="create_cd_attach_image">Mag-attach ng larawan</string>
+    <string name="create_cd_voice_input">Voice input</string>
+    <string name="create_cd_remove_image">Alisin ang larawan</string>
+    <string name="create_cd_reference_image">Reference na larawan</string>
+    <string name="create_default_project_title">Aking Proyekto</string>
+    <string name="create_error_generation_failed">Hindi nagtagumpay ang paggawa</string>
+    <string name="create_error_extract_failed">Hindi na-extract ang proyekto: %s</string>
+    <string name="create_error_save_failed">Hindi na-save: %s</string>
+    <string name="create_error_publish_failed">Hindi na-publish: %s</string>
+    <string name="create_save_dialog_title">Na-save!</string>
+    <string name="create_save_dialog_message">Na-save na ang iyong proyekto. I-tap ang publish button para gawing live!</string>
+
+    <!-- Generation Progress -->
+    <string name="generation_time_remaining">~%ds na lang</string>
+    <string name="generation_btn_notify">Ipaalam sa akin kapag tapos na</string>
+    <string name="generation_notify_confirmation">Ipaaalam sa iyo kapag handa na</string>
+    <string name="generation_notify_leave_hint">Maaari kang umalis sa screen na ito</string>
+    <string name="generation_btn_cancel">Kanselahin</string>
+    <string name="generation_phase_connecting">Kumokonekta…</string>
+    <string name="generation_phase_complete">Kumpleto!</string>
+    <string name="generation_limit_reached">Naabot na ang pang-araw-araw na limitasyon</string>
+    <string name="upgrade_to_pro">Mag-upgrade sa Pro</string>
+    <string name="start_generating">Simulan</string>
+
+    <!-- Suggestion Chips -->
+    <string name="suggestions_header">Subukan ang isa sa mga ito</string>
+    <string name="suggestions_btn_generating">Gumagawa ng mga ideya…</string>
+    <string name="suggestions_btn_suggest_new">⚡ Magmungkahi ng Bagong Ideya</string>
+    <string name="suggestion_label_todo_app">Todo App</string>
+    <string name="suggestion_label_weather_app">Weather App</string>
+    <string name="suggestion_label_calculator">Calculator</string>
+    <string name="suggestion_label_pomodoro_timer">Pomodoro Timer</string>
+    <string name="suggestion_label_markdown_editor">Markdown Editor</string>
+    <string name="suggestion_label_color_palette">Color Palette</string>
+
+    <!-- Account Screen -->
+    <string name="account_dialog_sign_out_title">Mag-sign Out</string>
+    <string name="account_dialog_sign_out_message">Sigurado ka bang gusto mong mag-sign out?</string>
+    <string name="account_cd_profile_photo">Profile photo</string>
+    <string name="account_default_display_name">User</string>
+    <string name="account_section_usage">Paggamit</string>
+    <string name="account_stat_projects">Mga Proyekto</string>
+    <string name="account_stat_todays_gens">Mga Gawa Ngayon</string>
+    <string name="account_section_settings">Mga Setting</string>
+    <string name="account_settings_subscription">Subscription</string>
+    <string name="account_settings_theme">Tema</string>
+    <string name="account_settings_theme_value">Madilim</string>
+    <string name="account_settings_about">Tungkol</string>
+    <string name="account_settings_version">Bersyon 1.0.0</string>
+    <string name="account_settings_language">Wika</string>
+
+    <!-- Apps Screen -->
+    <string name="apps_screen_title">Mga App Ko</string>
+    <string name="apps_empty_title">Wala pang mga app</string>
+    <string name="apps_empty_subtitle">Gumawa ng iyong unang app gamit ang AI\no mag-explore ng ginawa ng iba</string>
+    <string name="apps_cd_sort">Ayusin</string>
+
+    <!-- Browse Screen -->
+    <string name="browse_screen_title">Mag-explore</string>
+
+    <!-- Preview Screen -->
+    <string name="preview_screen_title">Preview</string>
+    <string name="preview_deploy_dialog_title">I-publish ang Iyong App</string>
+    <string name="preview_deploy_dialog_message">Pumili ng subdomain para sa iyong app:</string>
+    <string name="preview_deploy_placeholder">magaling-kong-app</string>
+    <string name="preview_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="preview_share_text">Tignan ang app ko: %s</string>
+
+    <!-- Project Preview Screen -->
+    <string name="project_preview_btn_forked">Na-fork na!</string>
+    <string name="project_preview_btn_fork">Fork</string>
+    <string name="project_preview_error_title">Hindi na-load ang preview</string>
+
+    <!-- Project Detail Screen -->
+    <string name="project_detail_deploy_dialog_title">I-deploy ang App</string>
+    <string name="project_detail_deploy_dialog_message">Pumili ng subdomain para sa iyong app:</string>
+    <string name="project_detail_deploy_label_subdomain">Subdomain</string>
+    <string name="project_detail_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="project_detail_screen_title_fallback">Proyekto</string>
+    <string name="project_detail_created_at">Ginawa noong %s</string>
+    <string name="project_detail_btn_preview">I-preview ang App</string>
+    <string name="project_detail_badge_deployed">Na-deploy</string>
+    <string name="project_detail_btn_deploying">Nagde-deploy…</string>
+    <string name="project_detail_btn_deploy_to_web">I-deploy sa Web</string>
+    <string name="project_detail_stat_views">Mga View</string>
+    <string name="project_detail_stat_forks">Mga Fork</string>
+    <string name="project_detail_stat_tweaks">Mga Tweak</string>
+    <string name="project_detail_section_original_prompt">Orihinal na Prompt</string>
+    <string name="project_detail_share_text">Tignan ang app ko: %s</string>
+
+    <!-- Project Card -->
+    <string name="project_card_delete_dialog_title">I-delete ang Proyekto</string>
+    <string name="project_card_delete_dialog_message">Sigurado ka bang gusto mong i-delete ang \"%s\"? Hindi na ito mababawi.</string>
+
+    <!-- Language Picker -->
+    <string name="language_picker_title">Pumili ng Wika</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese">中文(简体)</string>
+    <string name="language_korean">한국어</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_hindi">हिन्दी</string>
+
+    <!-- Project Card -->
+    <string name="project_card_views">%d panonood</string>
+
+    <!-- Post-Publish Sheet -->
+    <string name="publish_sheet_title">Live na ang iyong app!</string>
+    <string name="publish_sheet_subtitle">Ibahagi sa mundo at simulan ang pagkita mula sa mga ad sa iyong app.</string>
+    <string name="publish_sheet_open_browser">Buksan sa Browser</string>
+    <string name="publish_sheet_share">Ibahagi ang App</string>
+    <string name="publish_sheet_monetize">I-enable ang Ad Monetization →</string>
+    <string name="publish_sheet_done">Tapos</string>
+    <string name="publish_sheet_share_text">Tingnan ang app na ginawa ko gamit ang VibeBuild! %s</string>
+
+    <!-- Monetization -->
+    <string name="monetize_section_title">Monetization</string>
+    <string name="monetize_revenue_label">Kita ngayong buwan</string>
+    <string name="monetize_revenue_value">$0.00</string>
+    <string name="monetize_enable_btn">I-enable ang Ad Monetization →</string>
+    <string name="monetize_description">Kumita ng pera kapag ginagamit ng mga tao ang iyong app. Naglalagay kami ng mga ad at nagbabayad sa iyo bawat buwan.</string>
+
+    <!-- Facebook SDK Configuration -->
+    <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
+    <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+</resources>

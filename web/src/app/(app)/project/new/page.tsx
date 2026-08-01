@@ -2,6 +2,7 @@
 
 import { useRef, useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/stores/authStore';
 import { useGenerationStore } from '@/stores/generationStore';
 import { useProjectStore } from '@/stores/projectStore';
@@ -9,11 +10,12 @@ import { PromptInput } from '@/components/builder/PromptInput';
 import { GenerationProgress } from '@/components/builder/GenerationProgress';
 import { PreviewPane } from '@/components/builder/PreviewPane';
 import { streamSSE } from '@/lib/sse';
-import { extractBundle, buildFileTree, createPreviewUrl } from '@/lib/zip';
-import { api } from '@/lib/api';
+import { extractBundle, buildFileTree, createPreviewHtml } from '@/lib/zip';
+import { api, ApiError } from '@/lib/api';
 import type { SaveProjectResponse } from '@/types/api';
 
 export default function NewProjectPage() {
+  const t = useTranslations();
   const { user } = useAuthStore();
   const router = useRouter();
   const {
@@ -23,25 +25,61 @@ export default function NewProjectPage() {
     updateProgress,
     setResult,
     setError,
+    stopGeneration,
     reset,
   } = useGenerationStore();
   const {
     setExtractedFiles,
     setBundle,
-    setPreviewUrl,
-    previewUrl,
+    setPreviewHtml,
+    previewHtml,
   } = useProjectStore();
   const abortRef = useRef<AbortController | null>(null);
   const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [usageLimitError, setUsageLimitError] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
+
+  async function sendFeedback(rating: 'up' | 'down') {
+    if (!savedProjectId || !user) return;
+    setFeedback(rating);
+    try {
+      await api.post(`/api/projects/${savedProjectId}/feedback`, {
+        userId: user.id,
+        rating,
+      });
+    } catch {}
+  }
 
   const handleGenerate = useCallback(
     async (prompt: string, referenceImage?: string) => {
       if (!user) return;
 
+      // Flip generating-state immediately so the UI swaps to the progress
+      // indicator BEFORE the usage-check round trip. Otherwise users tap
+      // Generate and see no feedback for ~1–2 seconds.
       setSavedProjectId(null);
       setSaveError(null);
+      setUsageLimitError(null);
       startGeneration();
+
+      // Check usage limits before kicking off the (more expensive) generation.
+      try {
+        await api.post('/api/subscriptions/usage', {
+          userId: user.id,
+          actionType: 'generation',
+        });
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 403) {
+          const data = err.data as { remaining?: number; limit?: number; currentTier?: string };
+          setUsageLimitError(
+            `Daily generation limit reached (${data.limit || 3}/day on ${data.currentTier || 'Free'} plan). Upgrade to Pro for unlimited generations.`
+          );
+          stopGeneration();
+          return;
+        }
+      }
+
       abortRef.current = new AbortController();
 
       try {
@@ -83,8 +121,8 @@ export default function NewProjectPage() {
               const tree = buildFileTree(files);
               setExtractedFiles(files, tree);
               setBundle(event.bundle);
-              const url = createPreviewUrl(files);
-              setPreviewUrl(url);
+              const url = createPreviewHtml(files);
+              setPreviewHtml(url);
             } catch (extractErr) {
               console.error('Bundle extraction failed:', extractErr);
               // Still set the bundle so the preview screen shows
@@ -118,7 +156,7 @@ export default function NewProjectPage() {
               setSaveError(err instanceof Error ? err.message : 'Save failed');
             }
           } else if (event.type === 'error') {
-            setError(event.error);
+            setError(event.error, event.systemBusy);
           }
         }
       } catch (err) {
@@ -127,9 +165,11 @@ export default function NewProjectPage() {
             err instanceof Error ? err.message : 'Generation failed'
           );
         }
+      } finally {
+        stopGeneration();
       }
     },
-    [user, startGeneration, updateProgress, setResult, setError, setExtractedFiles, setBundle, setPreviewUrl]
+    [user, startGeneration, updateProgress, setResult, setError, stopGeneration, setExtractedFiles, setBundle, setPreviewHtml]
   );
 
   // Show preview + action buttons after generation completes
@@ -140,8 +180,32 @@ export default function NewProjectPage() {
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
             <p className="text-sm text-success font-medium">
-              App generated successfully!
+              {t('project.generatedSuccess')}
             </p>
+            {/* Thumbs feedback */}
+            {savedProjectId && (
+              <div className="flex items-center gap-1 ml-2">
+                <span className="text-xs text-muted mr-1">{t('project.howDidWeDo')}</span>
+                <button
+                  onClick={() => sendFeedback('up')}
+                  className={`p-1 rounded transition ${feedback === 'up' ? 'bg-success/20 text-success scale-110' : 'hover:bg-surface text-subtle hover:text-success'}`}
+                  title={t('project.goodResult')}
+                >
+                  <svg className="w-4 h-4" fill={feedback === 'up' ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => sendFeedback('down')}
+                  className={`p-1 rounded transition ${feedback === 'down' ? 'bg-danger/20 text-danger scale-110' : 'hover:bg-surface text-subtle hover:text-danger'}`}
+                  title={t('project.needsImprovement')}
+                >
+                  <svg className="w-4 h-4" fill={feedback === 'down' ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z" />
+                  </svg>
+                </button>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             {saveError && (
@@ -153,20 +217,21 @@ export default function NewProjectPage() {
                 useProjectStore.getState().reset();
                 setSavedProjectId(null);
                 setSaveError(null);
+                setFeedback(null);
               }}
               className="px-3 py-1.5 text-sm bg-surface hover:bg-surface-hover border border-border rounded-lg transition"
             >
-              Build Another
+              {t('common.buildAnother')}
             </button>
             {savedProjectId ? (
               <button
                 onClick={() => router.push(`/project/${savedProjectId}`)}
                 className="px-4 py-1.5 text-sm bg-accent hover:bg-accent-hover text-white font-semibold rounded-lg transition"
               >
-                Open in Builder
+                {t('common.openInBuilder')}
               </button>
             ) : !saveError ? (
-              <span className="text-xs text-muted">Saving...</span>
+              <span className="text-xs text-muted">{t('common.saving')}</span>
             ) : null}
           </div>
         </div>
@@ -179,6 +244,33 @@ export default function NewProjectPage() {
 
   return (
     <div className="h-full flex items-center justify-center p-6">
+      {/* Usage limit modal */}
+      {usageLimitError && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => setUsageLimitError(null)}>
+          <div className="bg-card border border-border rounded-2xl p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-2">{t('project.limitReached')}</h3>
+            <p className="text-sm text-muted mb-6">{usageLimitError}</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setUsageLimitError(null)}
+                className="flex-1 px-4 py-2 border border-border hover:bg-surface rounded-xl text-sm font-medium transition"
+              >
+                {t('common.ok')}
+              </button>
+              <button
+                onClick={() => {
+                  setUsageLimitError(null);
+                  router.push('/settings');
+                }}
+                className="flex-1 px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-semibold transition"
+              >
+                {t('common.upgrade')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isGenerating ? (
         <div className="w-full max-w-md">
           <GenerationProgress />
@@ -187,7 +279,7 @@ export default function NewProjectPage() {
               onClick={() => abortRef.current?.abort()}
               className="px-4 py-2 text-sm text-subtle hover:text-foreground border border-border rounded-lg transition"
             >
-              Cancel
+              {t('common.cancel')}
             </button>
           </div>
         </div>

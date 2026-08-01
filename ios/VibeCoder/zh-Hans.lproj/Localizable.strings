@@ -1,0 +1,210 @@
+/* Localizable.strings (Simplified Chinese)
+   VibeBuild iOS App */
+
+/* ==== Tab Bar ==== */
+"Projects" = "项目";
+"Create" = "创建";
+"Account" = "账户";
+
+/* ==== Sign In View ==== */
+"Learn to code with AI" = "用AI学编程";
+"Continue without an account" = "不登录继续使用";
+"AI Code Generation" = "AI代码生成";
+"Describe an idea, get working HTML & CSS code" = "描述一个想法，获得可运行的HTML和CSS代码";
+"Code Editor" = "代码编辑器";
+"View, edit, and learn from source code" = "查看和编辑项目文件";
+"Run in Safari" = "在 Safari 中打开";
+"Open your code in Safari to see the result" = "在 Safari 中打开你的网站查看";
+"Signing in..." = "登录中...";
+"Sign In Error" = "登录错误";
+"An unknown error occurred" = "发生未知错误";
+"OK" = "确定";
+
+/* ==== Profile View ==== */
+"User" = "用户";
+"Subscription" = "订阅";
+"Plan" = "方案";
+"Generations" = "生成次数";
+"Upgrade to Pro" = "升级到Pro";
+"Manage Subscription" = "管理订阅";
+"Settings" = "设置";
+"Help & Support" = "帮助与支持";
+"About" = "关于";
+"Sign Out" = "退出登录";
+"Profile" = "个人资料";
+"Are you sure you want to sign out?" = "确定要退出登录吗？";
+"Cancel" = "取消";
+
+/* ==== Account View ==== */
+"VibeBuild User" = "VibeBuild用户";
+"Join VibeBuild Pro" = "加入VibeBuild Pro";
+"VibeBuild Pro" = "VibeBuild Pro";
+"LEGAL" = "法律信息";
+"Privacy Policy" = "隐私政策";
+"Terms of Service" = "服务条款";
+"Sign In with Apple" = "通过Apple登录";
+"Delete Account" = "删除账户";
+"This will permanently delete your account and all your projects. This action cannot be undone." = "这将永久删除您的账户和所有项目。此操作无法撤消。";
+"Error" = "错误";
+"Deleting account..." = "正在删除账户...";
+
+/* ==== Browse View ==== */
+"Explore" = "探索";
+"Sort" = "排序";
+"Newest" = "最新";
+"Popular" = "热门";
+"Loading projects..." = "正在加载项目...";
+"No Projects Yet" = "暂无项目";
+"Be the first to create and share" = "成为第一个创建和分享的人";
+"by %@" = "由 %@ 创建";
+"Fork (10 coins)" = "复制（10金币）";
+"View Code" = "查看代码";
+"Fork Project" = "复制项目";
+"Fork for 10 coins" = "花10金币复制";
+"Create your own copy of this project to customize" = "创建此项目的副本以进行自定义";
+
+/* ==== Create Project View ==== */
+"Create a Coding Project" = "创建编程项目";
+"Describe what you want to learn and AI will generate example code" = "描述你想学习的内容，AI将生成示例代码";
+"Free tier limit" = "免费版限制";
+"What do you want to learn?" = "你想学什么？";
+"Be specific! Describe features, colors, and functionality." = "请具体描述！说明功能、颜色和特性。";
+"Examples:" = "示例：";
+"Generating..." = "生成中...";
+"Generate Code (Free)" = "生成代码（免费）";
+"Generate Code" = "生成代码";
+"~%ds remaining" = "剩余约%d秒";
+"Generation Error" = "生成错误";
+"Unknown error occurred" = "发生未知错误";
+"Unable to generate. Please try again." = "无法生成。请重试。";
+
+/* ==== Create View (Replit-style) ==== */
+"Hi %@," = "你好 %@，";
+"there" = "";
+"what do you want to learn today?" = "今天想学点什么？";
+"Describe what you want to learn & explore the code..." = "描述你想学习和探索的代码...";
+"Start" = "开始";
+"Start learning to code for free" = "免费开始学习编程";
+"Join VibeBuild" = "加入VibeBuild";
+"Pro" = "Pro";
+"to unlock more usage" = "解锁更多使用次数";
+
+/* ==== Suggestion Chips ==== */
+"Todo List" = "待办清单";
+"Weather Page" = "天气页面";
+"Calculator" = "计算器";
+"Pomodoro Timer" = "番茄钟";
+"Color Palette" = "调色板";
+"Markdown Editor" = "Markdown编辑器";
+
+/* ==== Live Preview / Source Code View ==== */
+"Source Code" = "文件";
+"Close" = "关闭";
+"Save" = "保存";
+"Saved!" = "已保存！";
+"Your project has been saved and is now in your Projects tab" = "您的项目已保存，现在显示在项目标签页中";
+"Save Error" = "保存错误";
+"Unknown error" = "未知错误";
+"Could Not Open" = "无法打开";
+"No files found" = "未找到文件";
+"Done" = "完成";
+"%d chars" = "%d字符";
+"No preview available" = "无可用预览";
+
+/* ==== Subscription Plans View ==== */
+"Subscription Plans" = "订阅方案";
+"Choose Your Plan" = "选择你的方案";
+"Restore Purchases" = "恢复购买";
+"Current Plan" = "当前方案";
+"Free" = "免费";
+"Subscribe Now" = "立即订阅";
+
+/* ==== Subscription Plan Features ==== */
+"3 tweaks per project" = "每个项目3次调整";
+"Public projects only" = "仅公开项目";
+"Standard queue" = "标准队列";
+"vibebuild.cc subdomain" = "vibebuild.cc子域名";
+"per month" = "每月";
+"per year (save 17%)" = "每年（节省17%）";
+"forever" = "永久";
+
+/* ==== Subscription Tier Names ==== */
+"Team" = "团队";
+"Enterprise" = "企业";
+"Free Plan" = "免费方案";
+"%@ Plan" = "%@方案";
+
+/* ==== Project List View ==== */
+"My Projects" = "我的项目";
+"Create your first web project using AI" = "使用AI创建你的第一个Web项目";
+"Create Project" = "创建项目";
+"Private" = "私有";
+"Unknown" = "未知";
+"Project Details" = "项目详情";
+"No projects yet" = "暂无项目";
+"Create your first coding project to see it here" = "创建你的第一个编程项目即可在这里看到";
+"Code Project" = "代码项目";
+"Delete" = "删除";
+"Delete Project" = "删除项目";
+"Are you sure you want to delete \"%@\"? This cannot be undone." = "确定要删除「%@」吗？此操作无法撤消。";
+
+/* ==== Custom Domain View ==== */
+"Custom Domain" = "自定义域名";
+"Loading..." = "加载中...";
+"Connect Your Domain" = "连接你的域名";
+"Use your own domain instead of the default vibebuild.cc subdomain." = "使用自己的域名替代默认的vibebuild.cc子域名。";
+"Domain" = "域名";
+"Add Domain" = "添加域名";
+"DNS Configuration" = "DNS配置";
+"Option 1: CNAME Record" = "选项1：CNAME记录";
+"Type: CNAME" = "类型：CNAME";
+"Value:" = "值：";
+"Option 2: TXT Verification" = "选项2：TXT验证";
+"Host: _vibebuilder" = "主机：_vibebuilder";
+"DNS changes can take up to 48 hours to propagate, but usually take a few minutes." = "DNS更改可能需要48小时才能生效，但通常只需几分钟。";
+"Verify Domain" = "验证域名";
+"SSL certificate active" = "SSL证书已激活";
+"Remove Domain" = "移除域名";
+"Domain added! Configure your DNS records below." = "域名已添加！请在下方配置DNS记录。";
+"Domain verified and SSL provisioned!" = "域名已验证，SSL已配置！";
+"DNS verified! SSL provisioning in progress..." = "DNS已验证！SSL配置进行中...";
+"Domain removed" = "域名已移除";
+"Project must be deployed first" = "项目必须先部署";
+
+/* ==== Domain Status Labels ==== */
+"Active" = "活跃";
+"DNS Verified" = "DNS已验证";
+"Provisioning SSL" = "SSL配置中";
+"Failed" = "失败";
+"Pending" = "待处理";
+
+/* ==== Coin Packs ==== */
+"100 Coins" = "100金币";
+"500 Coins" = "500金币";
+"1,200 Coins" = "1,200金币";
+
+/* ==== Usage / Subscription Status ==== */
+"Unlimited" = "无限";
+"%d of %d today" = "今天 %d/%d";
+"Renews %@" = "%@续订";
+
+/* ==== Errors ==== */
+"Failed to verify purchase" = "购买验证失败";
+"Product not found" = "未找到产品";
+"Product not available" = "产品不可用";
+"Purchase is pending" = "购买待处理";
+"Unknown result" = "未知结果";
+"Failed to load products" = "产品加载失败";
+"Invalid URL returned from server" = "服务器返回了无效的URL";
+
+/* ==== Example Prompts ==== */
+"Learn to create a todo list with dark mode and task completion" = "学习创建带暗色模式和任务完成功能的待办清单";
+"Explore building a calculator with a modern gradient design" = "探索创建具有现代渐变设计的计算器";
+"Study how a weather dashboard shows temperature and conditions" = "学习天气仪表盘如何显示温度和天气状况";
+
+/* ==== Info.plist Strings ==== */
+"NSCameraUsageDescription" = "VibeBuild需要访问您的相机来为项目拍摄照片。";
+"NSPhotoLibraryUsageDescription" = "VibeBuild需要访问您的照片库来为项目选择图片。";
+"NSPhotoLibraryAddUsageDescription" = "VibeBuild需要权限将图片保存到您的照片库。";
+"NSMicrophoneUsageDescription" = "VibeBuild需要访问您的麦克风，以便在描述编程项目时使用语音输入。";
+"NSSpeechRecognitionUsageDescription" = "VibeBuild使用语音识别在创建编程项目时将语音转换为文字。";

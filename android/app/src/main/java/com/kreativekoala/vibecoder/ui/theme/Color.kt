@@ -9,6 +9,7 @@ val VibeBlue = Color(0xFF4285F4)
 val VibeTeal = Color(0xFF00BCD4)
 val VibeGreen = Color(0xFF4CAF50)
 val VibeOrange = Color(0xFFFF9800)
+val VibeYellow = Color(0xFFFFD700)
 
 val DarkBackground = Color(0xFF000000)
 val DarkSurface = Color(0xFF0D0D0D)

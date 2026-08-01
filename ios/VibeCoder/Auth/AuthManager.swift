@@ -2,13 +2,14 @@
 //  AuthManager.swift
 //  VibeCoder
 //
-//  Supabase authentication with Apple Sign In
+//  Supabase authentication with Apple, Google, and Email/Password
 //
 
 import Foundation
 import UIKit
 import AuthenticationServices
 import CryptoKit
+import GoogleSignIn
 
 class AuthManager: ObservableObject {
     static let shared = AuthManager()
@@ -39,7 +40,31 @@ class AuthManager: ObservableObject {
             self.userId = session.user.id
             self.email = session.user.email
             self.displayName = session.user.userMetadata?["full_name"] as? String
+        } else {
+            // No signed-in session — default to guest so first-launch users land
+            // directly in the gallery (no registration required to browse public websites).
+            // Sign-in remains available from the Account tab. Compliance: 5.1.1(v).
+            UserDefaults.standard.set(true, forKey: "isGuestUser")
+            self.userId = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+            self.displayName = "Guest"
+            self.isAuthenticated = true
         }
+    }
+
+    // MARK: - Guest Mode
+
+    func continueAsGuest() {
+        let guestId = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+        DispatchQueue.main.async {
+            self.userId = guestId
+            self.displayName = "Guest"
+            self.isAuthenticated = true
+        }
+        UserDefaults.standard.set(true, forKey: "isGuestUser")
+    }
+
+    var isGuest: Bool {
+        UserDefaults.standard.bool(forKey: "isGuestUser")
     }
 
     // MARK: - Sign In with Apple
@@ -103,6 +128,22 @@ class AuthManager: ObservableObject {
         }
     }
 
+    // Public method for use with SignInWithAppleButton
+    func signInWithIdToken(idToken: String, fullName: String? = nil) async throws {
+        // When called from SignInWithAppleButton, nonce was already set via prepareNonce()
+        guard let nonce = currentNonce else {
+            throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Missing nonce"])
+        }
+        try await signInWithIdToken(provider: "apple", idToken: idToken, nonce: nonce)
+    }
+
+    /// Generate and store a nonce, returning its SHA256 hash for Apple's request
+    func prepareNonce() -> String {
+        let nonce = generateNonce()
+        currentNonce = nonce
+        return sha256(nonce)
+    }
+
     private func signInWithIdToken(provider: String, idToken: String, nonce: String) async throws {
         guard let url = URL(string: "\(supabaseURL)/auth/v1/token?grant_type=id_token") else {
             throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid auth URL"])
@@ -131,17 +172,88 @@ class AuthManager: ObservableObject {
         }
 
         let session = try JSONDecoder().decode(SupabaseSession.self, from: data)
+        try saveSession(session)
+    }
 
-        // Save session
+    // MARK: - Sign In with Google
+
+    func signInWithGoogle() async throws {
+        guard let rootViewController = await UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .flatMap({ $0.windows })
+            .first(where: { $0.isKeyWindow })?.rootViewController else {
+            throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "No root view controller"])
+        }
+
+        let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController)
+        guard let idToken = result.user.idToken?.tokenString else {
+            throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Missing Google ID token"])
+        }
+
+        try await signInWithIdToken(provider: "google", idToken: idToken, nonce: "")
+    }
+
+    // MARK: - Sign In with Email
+
+    func signInWithEmail(email: String, password: String) async throws {
+        guard let url = URL(string: "\(supabaseURL)/auth/v1/token?grant_type=password") else {
+            throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid auth URL"])
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+
+        let body: [String: Any] = ["email": email, "password": password]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            let msg = (try? JSONDecoder().decode([String: String].self, from: data))?["error_description"]
+                ?? String(data: data, encoding: .utf8)
+                ?? "Sign in failed"
+            throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: msg])
+        }
+
+        let session = try JSONDecoder().decode(SupabaseSession.self, from: data)
+        try saveSession(session)
+    }
+
+    func signUpWithEmail(email: String, password: String) async throws {
+        guard let url = URL(string: "\(supabaseURL)/auth/v1/signup") else {
+            throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid auth URL"])
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+
+        let body: [String: Any] = ["email": email, "password": password]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            let msg = (try? JSONDecoder().decode([String: String].self, from: data))?["error_description"]
+                ?? String(data: data, encoding: .utf8)
+                ?? "Sign up failed"
+            throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: msg])
+        }
+
+        let session = try JSONDecoder().decode(SupabaseSession.self, from: data)
+        try saveSession(session)
+    }
+
+    private func saveSession(_ session: SupabaseSession) throws {
         let sessionData = try JSONEncoder().encode(session)
         UserDefaults.standard.set(sessionData, forKey: "supabase_session")
-
         DispatchQueue.main.async {
             self.session = session
             self.isAuthenticated = true
             self.userId = session.user.id
             self.email = session.user.email
             self.displayName = session.user.userMetadata?["full_name"] as? String
+            // Push token registration removed in v2.0 — no live feed, no push.
+            _ = DeviceTokenManager.shared.deviceToken
         }
     }
 
@@ -149,6 +261,7 @@ class AuthManager: ObservableObject {
 
     func signOut() {
         UserDefaults.standard.removeObject(forKey: "supabase_session")
+        UserDefaults.standard.removeObject(forKey: "isGuestUser")
 
         DispatchQueue.main.async {
             self.session = nil
@@ -158,6 +271,42 @@ class AuthManager: ObservableObject {
             self.isAuthenticated = false
             self.errorMessage = nil
         }
+    }
+
+    // MARK: - Delete Account
+
+    func deleteAccount() async throws {
+        // Apple Guideline 5.1.1(v) requires real account deletion — local
+        // sign-out alone is "insufficient." We call Supabase's user
+        // self-deletion endpoint with the user's access token, which removes
+        // the auth row server-side. On success (or hard 4xx confirming the
+        // row no longer exists) we drop the local session as well.
+        guard let session = session else {
+            // Nothing to delete server-side — just ensure local state is clean.
+            signOut()
+            return
+        }
+
+        guard let url = URL(string: "\(supabaseURL)/auth/v1/user") else {
+            throw NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid Supabase URL"])
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+        // Supabase returns 204 on success. 401/403/404 here means the row is
+        // already unreachable for this token — also acceptable since we're
+        // throwing away the session next anyway.
+        guard (200...299).contains(status) || [401, 403, 404].contains(status) else {
+            let body = String(data: data, encoding: .utf8) ?? ""
+            throw NSError(domain: "AuthManager", code: status, userInfo: [
+                NSLocalizedDescriptionKey: "Account deletion failed (\(status)): \(body)",
+            ])
+        }
+        signOut()
     }
 
     // MARK: - Helper Methods

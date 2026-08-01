@@ -1,0 +1,28 @@
+default_platform(:android)
+
+platform :android do
+  lane :deploy do
+    upload_to_play_store(
+      track: "production",
+      aab: "app/build/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: false,
+      release_status: "completed"
+    )
+  end
+
+  desc "Push current AAB to Open Testing (beta) track. Pre-req: Play Console > Testing > Open testing must be enabled for this app."
+  lane :promote_to_open_testing do
+    upload_to_play_store(
+      track: "beta",
+      aab: "app/build/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: true,
+      release_status: "completed"
+    )
+  end
+end

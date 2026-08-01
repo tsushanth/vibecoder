@@ -1,0 +1,4 @@
+• 30 new starter templates — tap any card on Create to seed your prompt
+• Templates span Beginner → Advanced across layouts, games, mobile UIs, productivity, and creative tools
+• Same curated catalog as the iOS app, now bundled offline
+• Polish and bug fixes

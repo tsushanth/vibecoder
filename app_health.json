@@ -1,0 +1,33 @@
+{
+  "app_name": "VibeBuild",
+  "bundle_id": "com.kreativekoala.vibecoder",
+  "platform": "android",
+  "health_score": 0,
+  "health_tier": "unknown",
+  "marketing_readiness": 0,
+  "last_updated": "2026-03-07",
+  "metrics": {
+    "impressions_7d": 0,
+    "units_7d": 0,
+    "revenue_7d": 0,
+    "sessions_7d": 0,
+    "ad_spend_7d": 0,
+    "active_subscribers": 0,
+    "roas": 0,
+    "rating": 0,
+    "rating_count": 0
+  },
+  "suggested_actions": {
+    "coding": [
+      "Integrate AI-Powered Coding Assistance",
+      "Develop Structured Learning Paths",
+      "Add RevenueCat",
+      "Add Firebase Analytics",
+      "Add Facebook SDK"
+    ],
+    "marketing": [
+      "Launch an Awareness Campaign",
+      "Implement Analytics and Attribution SDKs"
+    ]
+  }
+}

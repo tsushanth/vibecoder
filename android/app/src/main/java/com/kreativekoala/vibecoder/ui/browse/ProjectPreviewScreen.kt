@@ -10,9 +10,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.kreativekoala.vibecoder.R
+import com.kreativekoala.vibecoder.ui.preview.UrlWebViewComposable
 import com.kreativekoala.vibecoder.ui.preview.WebViewComposable
 import com.kreativekoala.vibecoder.ui.theme.*
 
@@ -33,12 +36,12 @@ fun ProjectPreviewScreen(
         containerColor = DarkBackground,
         topBar = {
             TopAppBar(
-                title = { Text(uiState.project?.title ?: "Preview") },
+                title = { Text(uiState.project?.title ?: stringResource(R.string.preview_screen_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                             tint = TextPrimary
                         )
                     }
@@ -60,7 +63,7 @@ fun ProjectPreviewScreen(
                                     strokeWidth = 2.dp
                                 )
                             } else if (uiState.forkedProjectId != null) {
-                                Text("Forked!", fontWeight = FontWeight.SemiBold)
+                                Text(stringResource(R.string.project_preview_btn_forked), fontWeight = FontWeight.SemiBold)
                             } else {
                                 Icon(
                                     Icons.Default.ForkRight,
@@ -68,7 +71,7 @@ fun ProjectPreviewScreen(
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("Fork", fontWeight = FontWeight.SemiBold)
+                                Text(stringResource(R.string.project_preview_btn_fork), fontWeight = FontWeight.SemiBold)
                             }
                         }
                         Spacer(modifier = Modifier.width(8.dp))
@@ -103,6 +106,14 @@ fun ProjectPreviewScreen(
                     )
                 }
 
+                // Fallback: load deployed URL if bundle is unavailable
+                uiState.project?.publishedUrl != null -> {
+                    UrlWebViewComposable(
+                        url = uiState.project!!.publishedUrl!!,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
                 uiState.errorMessage != null -> {
                     Column(
                         modifier = Modifier
@@ -112,13 +123,36 @@ fun ProjectPreviewScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "Failed to load preview",
+                            text = stringResource(R.string.project_preview_error_title),
                             style = MaterialTheme.typography.titleMedium,
                             color = ErrorRed
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = uiState.errorMessage ?: "",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextSecondary
+                        )
+                    }
+                }
+
+                uiState.project != null -> {
+                    // Project loaded but bundle and published URL unavailable
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "Preview unavailable",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = TextSecondary
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "This app's preview could not be loaded.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = TextSecondary
                         )

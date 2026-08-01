@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudSync - Your Data, Everywhere</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            z-index: 2;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            margin-bottom: 2rem;
+            opacity: 0.95;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .hero-cta {
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            margin: 0.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        /* Floating animation background */
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            top: 70%;
+            left: 80%;
+            animation-delay: 2s;
+        }
+
+        .shape:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            top: 40%;
+            left: 90%;
+            animation-delay: 4s;
+        }
+
+        .shape:nth-child(4) {
+            width: 100px;
+            height: 100px;
+            top: 80%;
+            left: 15%;
+            animation-delay: 6s;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+            }
+            25% {
+                transform: translateY(-30px) translateX(20px);
+            }
+            50% {
+                transform: translateY(-60px) translateX(-20px);
+            }
+            75% {
+                transform: translateY(-30px) translateX(20px);
+            }
+        }
+
+        /* Features Section */
+        .features {
+            padding: 5rem 2rem;
+            background: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            margin-bottom: 3rem;
+            color: #333;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.8;
+        }
+
+        /* Pricing Section */
+        .pricing {
+            padding: 5rem 2rem;
+            background: white;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .pricing-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .pricing-card:hover {
+            border-color: #667eea;
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
+        }
+
+        .pricing-card.featured {
+            border-color: #667eea;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .pricing-badge {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .pricing-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .pricing-price {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #667eea;
+            margin: 1rem 0;
+        }
+
+        .pricing-price span {
+            font-size: 1rem;
+            color: #666;
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .pricing-features li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            color: #666;
+        }
+
+        .pricing-features li:before {
+            content: "✓ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .pricing-card .btn {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .pricing-card.featured .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        /* Testimonials Section */
+        .testimonials {
+            padding: 5rem 2rem;
+            background: #f8f9fa;
+        }
+
+        .carousel {
+            position: relative;
+            max-width: 800px;
+            margin: 3rem auto;
+            overflow: hidden;
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .testimonial {
+            min-width: 100%;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .testimonial-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .testimonial-text {
+            font-size: 1.125rem;
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .author-info h4 {
+            font-size: 1rem;
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+
+        .author-info p {
+            font-size: 0.875rem;
+            color: #999;
+        }
+
+        .carousel-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .carousel-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ddd;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: #667eea;
+            width: 30px;
+            border-radius: 5px;
+        }
+
+        /* FAQ Section */
+        .faq {
+            padding: 5rem 2rem;
+            background: white;
+        }
+
+        .faq-list {
+            max-width: 800px;
+            margin: 3rem auto;
+        }
+
+        .faq-item {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item.active {
+            border-color: #667eea;
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: #333;
+            user-select: none;
+        }
+
+        .faq-question:hover {
+            background: #f8f9fa;
+        }
+
+        .faq-toggle {
+            font-size: 1.5rem;
+            color: #667eea;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-toggle {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+            padding: 0 1.5rem 1.5rem 1.5rem;
+        }
+
+        /* CTA Section */
+        .cta {
+            padding: 5rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .cta h2 {
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            margin-bottom: 1rem;
+        }
+
+        .cta p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        .email-signup {
+            max-width: 500px;
+            margin: 2rem auto;
+        }
+
+        .signup-form {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .email-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .signup-form .btn-primary {
+            background: #333;
+            color: white;
+        }
+
+        .signup-form .btn-primary:hover {
+            background: #222;
+        }
+
+        .signup-message {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .signup-message.success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid rgba(40, 167, 69, 0.5);
+            display: block;
+        }
+
+        .signup-message.error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid rgba(220, 53, 69, 0.5);
+            display: block;
+        }
+
+        /* Footer */
+        .footer {
+            background: #1a1a1a;
+            color: #999;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .footer p {
+            margin: 0.5rem 0;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .hero {
+                min-height: 80vh;
+            }
+
+            .features,
+            .pricing,
+            .testimonials,
+            .faq,
+            .cta {
+                padding: 3rem 1rem;
+            }
+
+            .signup-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .email-input {
+                min-width: 100%;
+            }
+
+            .btn {
+                padding: 0.875rem 1.5rem;
+            }
+        }
+
+        /* Touch-friendly */
+        @media (hover: none) {
+            .btn,
+            .carousel-btn,
+            .faq-question {
+                -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+        <div class="hero-content">
+            <h1>Sync Your Data Seamlessly Across All Devices</h1>
+            <p>CloudSync keeps your files, photos, and documents perfectly synchronized. Access your content anywhere, anytime, on any device.</p>
+            <div class="hero-cta">
+                <a href="#pricing" class="btn btn-primary">Start Free Trial</a>
+                <a href="#features" class="btn btn-secondary">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">Powerful Features for Modern Teams</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Lightning Fast Sync</h3>
+                    <p>Experience instant synchronization across all your devices with our optimized delta-sync technology. Changes appear everywhere in milliseconds.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Bank-Grade Security</h3>
+                    <p>Your data is encrypted end-to-end with AES-256 encryption. We can't see your files, and neither can anyone else.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Global Access</h3>
+                    <p>Access your files from anywhere in the world. Our global CDN ensures fast access no matter where you are.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3>Team Collaboration</h3>
+                    <p>Share folders and collaborate with your team in real-time. Set permissions and track changes effortlessly.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Mobile First</h3>
+                    <p>Native mobile apps for iOS and Android. Upload photos automatically and access files offline.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Version History</h3>
+                    <p>Never lose work again. We keep 30 days of version history, so you can restore any previous version.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <h2 class="section-title">Simple, Transparent Pricing</h2>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Starter</h3>
+                    <div class="pricing-price">$0<span>/month</span></div>
+                    <ul class="pricing-features">
+                        <li>5 GB Storage</li>
+                        <li>Up to 2 Devices</li>
+                        <li>Basic File Sync</li>
+                        <li>Mobile Apps</li>
+                        <li>Email Support</li>
+                    </ul>
+                    <button class="btn btn-secondary" onclick="selectPlan('Starter')">Get Started</button>
+                </div>
+                <div class="pricing-card featured">
+                    <div class="pricing-badge">Most Popular</div>
+                    <h3>Professional</h3>
+                    <div class="pricing-price">$12<span>/month</span></div>
+                    <ul class="pricing-features">
+                        <li>100 GB Storage</li>
+                        <li>Unlimited Devices</li>
+                        <li>Advanced Sync</li>
+                        <li>Team Sharing</li>
+                        <li>Version History</li>
+                        <li>Priority Support</li>
+                    </ul>
+                    <button class="btn btn-primary" onclick="selectPlan('Professional')">Start Free Trial</button>
+                </div>
+                <div class="pricing-card">
+                    <h3>Enterprise</h3>
+                    <div class="pricing-price">$49<span>/month</span></div>
+                    <ul class="pricing-features">
+                        <li>1 TB Storage</li>
+                        <li>Unlimited Everything</li>
+                        <li>Advanced Security</li>
+                        <li>Admin Controls</li>
+                        <li>API Access</li>
+                        <li>24/7 Support</li>
+                        <li>Custom Branding</li>
+                    </ul>
+                    <button class="btn btn-secondary" onclick="selectPlan('Enterprise')">Contact Sales</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <div class="container">
+            <h2 class="section-title">What Our Customers Say</h2>
+            <div class="carousel">
+                <div class="carousel-track" id="testimonialTrack">
+                    <div class="testimonial">
+                        <div class="testimonial-content">
+                            <p class="testimonial-text">"CloudSync has transformed how our team collaborates. The seamless sync across devices means we never miss a beat, even when working remotely."</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">SM</div>
+                                <div class="author-info">
+                                    <h4>Sarah Martinez</h4>
+                                    <p>CEO, TechStart Inc</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial">
+                        <div class="testimonial-content">
+                            <p class="testimonial-text">"I've tried every cloud storage service out there. CloudSync is the only one that just works. Fast, reliable, and the security features give me peace of mind."</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">JC</div>
+                                <div class="author-info">
+                                    <h4>James Chen</h4>
+                                    <p>Freelance Designer</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial">
+                        <div class="testimonial-content">
+                            <p class="testimonial-text">"The mobile app is fantastic. I can access all my files on the go, and the automatic photo backup is a lifesaver. Highly recommend!"</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">EP</div>
+                                <div class="author-info">
+                                    <h4>Emily Parker</h4>
+                                    <p>Marketing Director</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial">
+                        <div class="testimonial-content">
+                            <p class="testimonial-text">"Switching to CloudSync was the best decision for our startup. The team collaboration features and version control have saved us countless times."</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">DK</div>
+                                <div class="author-info">
+                                    <h4>David Kim</h4>
+                                    <p>CTO, InnovateLabs</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-controls">
+                    <button class="carousel-btn" onclick="previousTestimonial()">‹</button>
+                    <button class="carousel-btn" onclick="nextTestimonial()">›</button>
+                </div>
+                <div class="carousel-dots" id="carouselDots"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>How secure is my data?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Your data is encrypted end-to-end with AES-256 encryption, the same standard used by banks and government agencies. We implement zero-knowledge architecture, meaning we can't access your files even if we wanted to. All data transfers use TLS 1.3 encryption.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>Can I cancel my subscription anytime?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Absolutely! You can cancel your subscription at any time with no penalties or fees. Your data will remain accessible for 30 days after cancellation, giving you plenty of time to download everything you need.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>What happens if I exceed my storage limit?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        We'll send you a notification when you reach 80% of your storage limit. If you exceed your limit, you can upgrade to a higher plan or delete some files. Your existing files remain safe and accessible.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>Do you offer a free trial?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Yes! All paid plans come with a 14-day free trial. No credit card required to start. You can experience all premium features before making a commitment.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>How does team collaboration work?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        You can create shared folders and invite team members via email. Set granular permissions (view, edit, or admin) for each member. All changes sync in real-time, and you can see who made what changes with our activity log.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>Is there a file size limit?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Individual files can be up to 5GB on the free plan and 50GB on paid plans. For larger files, we recommend using our chunked upload feature which breaks files into smaller pieces for reliable transfer.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <h2>Ready to Transform Your Workflow?</h2>
+            <p>Join over 50,000 users who trust CloudSync with their data</p>
+            <div class="email-signup">
+                <form class="signup-form" onsubmit="handleSignup(event)">
+                    <input
+                        type="email"
+                        class="email-input"
+                        placeholder="Enter your email address"
+                        required
+                        id="emailInput"
+                    >
+                    <button type="submit" class="btn btn-primary">Start Free Trial</button>
+                </form>
+                <div class="signup-message" id="signupMessage"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 CloudSync. All rights reserved.</p>
+            <p>Your data, your privacy, your control.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Testimonial Carousel
+        let currentTestimonial = 0;
+        const testimonials = document.querySelectorAll('.testimonial');
+        const track = document.getElementById('testimonialTrack');
+        const dotsContainer = document.getElementById('carouselDots');
+
+        // Create dots
+        testimonials.forEach((_, index) => {
+            const dot = document.createElement('div');
+            dot.className = 'dot';
+            if (index === 0) dot.classList.add('active');
+            dot.onclick = () => goToTestimonial(index);
+            dotsContainer.appendChild(dot);
+        });
+
+        function updateCarousel() {
+            track.style.transform = `translateX(-${currentTestimonial * 100}%)`;
+
+            // Update dots
+            document.querySelectorAll('.dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentTestimonial);
+            });
+        }
+
+        function nextTestimonial() {
+            currentTestimonial = (currentTestimonial + 1) % testimonials.length;
+            updateCarousel();
+        }
+
+        function previousTestimonial() {
+            currentTestimonial = (currentTestimonial - 1 + testimonials.length) % testimonials.length;
+            updateCarousel();
+        }
+
+        function goToTestimonial(index) {
+            currentTestimonial = index;
+            updateCarousel();
+        }
+
+        // Auto-advance carousel every 5 seconds
+        let carouselInterval = setInterval(nextTestimonial, 5000);
+
+        // Pause on hover
+        const carousel = document.querySelector('.carousel');
+        carousel.addEventListener('mouseenter', () => {
+            clearInterval(carouselInterval);
+        });
+
+        carousel.addEventListener('mouseleave', () => {
+            carouselInterval = setInterval(nextTestimonial, 5000);
+        });
+
+        // FAQ Accordion
+        function toggleFaq(element) {
+            const faqItem = element.parentElement;
+            const wasActive = faqItem.classList.contains('active');
+
+            // Close all FAQ items
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Open clicked item if it wasn't already open
+            if (!wasActive) {
+                faqItem.classList.add('active');
+            }
+        }
+
+        // Email Signup
+        function handleSignup(event) {
+            event.preventDefault();
+
+            const emailInput = document.getElementById('emailInput');
+            const email = emailInput.value.trim();
+            const messageDiv = document.getElementById('signupMessage');
+
+            // Validate email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showMessage('Please enter a valid email address.', 'error');
+                return;
+            }
+
+            // Check if email already registered
+            const registeredEmails = JSON.parse(localStorage.getItem('registeredEmails') || '[]');
+
+            if (registeredEmails.includes(email)) {
+                showMessage('This email is already registered! Check your inbox for login instructions.', 'error');
+                return;
+            }
+
+            // Save email to localStorage
+            registeredEmails.push(email);
+            localStorage.setItem('registeredEmails', JSON.stringify(registeredEmails));
+
+            // Save registration timestamp
+            const registrations = JSON.parse(localStorage.getItem('registrations') || '{}');
+            registrations[email] = new Date().toISOString();
+            localStorage.setItem('registrations', JSON.stringify(registrations));
+
+            // Show success message
+            showMessage(`Success! Welcome aboard, ${email}. Check your inbox to get started!`, 'success');
+
+            // Clear form
+            emailInput.value = '';
+
+            // Track conversion
+            trackConversion(email);
+        }
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('signupMessage');
+            messageDiv.textContent = text;
+            messageDiv.className = `signup-message ${type}`;
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                messageDiv.className = 'signup-message';
+            }, 5000);
+        }
+
+        function trackConversion(email) {
+            const conversions = JSON.parse(localStorage.getItem('conversions') || '[]');
+            conversions.push({
+                email: email,
+                timestamp: new Date().toISOString(),
+                source: 'landing-page'
+            });
+            localStorage.setItem('conversions', JSON.stringify(conversions));
+
+            // Log for demo purposes
+            console.log('Conversion tracked:', email);
+        }
+
+        // Pricing Plan Selection
+        function selectPlan(planName) {
+            const selectedPlans = JSON.parse(localStorage.getItem('selectedPlans') || '[]');
+
+            const selection = {
+                plan: planName,
+                timestamp: new Date().toISOString()
+            };
+
+            selectedPlans.push(selection);
+            localStorage.setItem('selectedPlans', JSON.stringify(selectedPlans));
+
+            alert(`Great choice! You've selected the ${planName} plan. Redirecting to signup...`);
+
+            // Scroll to email signup
+            document.querySelector('.cta').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('emailInput').focus();
+        }
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Log page visit
+        (function logVisit() {
+            const visits = JSON.parse(localStorage.getItem('pageVisits') || '[]');
+            visits.push({
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent
+            });
+            localStorage.setItem('pageVisits', JSON.stringify(visits));
+        })();
+
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe feature cards
+        document.querySelectorAll('.feature-card, .pricing-card, .faq-item').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

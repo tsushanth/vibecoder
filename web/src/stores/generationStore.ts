@@ -10,6 +10,7 @@ interface GenerationState {
   phaseDurationSeconds: number;
   estimatedSecondsRemaining: number | null;
   error: string | null;
+  systemBusy: boolean;
   bundle: string | null;
   bundleSize: number;
   generationTime: string | null;
@@ -31,7 +32,8 @@ interface GenerationState {
     generationTime?: string;
     generationId?: string;
   }) => void;
-  setError: (error: string) => void;
+  setError: (error: string, systemBusy?: boolean) => void;
+  stopGeneration: () => void;
   reset: () => void;
 }
 
@@ -45,6 +47,7 @@ const initialState = {
   phaseDurationSeconds: 0,
   estimatedSecondsRemaining: null as number | null,
   error: null as string | null,
+  systemBusy: false,
   bundle: null as string | null,
   bundleSize: 0,
   generationTime: null as string | null,
@@ -81,11 +84,14 @@ export const useGenerationStore = create<GenerationState>((set) => ({
       progressPercent: 100,
     }),
 
-  setError: (error) =>
+  setError: (error, systemBusy = false) =>
     set({
       isGenerating: false,
       error,
+      systemBusy,
     }),
+
+  stopGeneration: () => set({ isGenerating: false }),
 
   reset: () => set(initialState),
 }));

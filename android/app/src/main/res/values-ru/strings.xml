@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VibeBuild</string>
+
+    <!-- Common -->
+    <string name="cancel">Отмена</string>
+    <string name="ok">ОК</string>
+    <string name="back">Назад</string>
+    <string name="refresh">Обновить</string>
+    <string name="share">Поделиться</string>
+    <string name="copy">Копировать</string>
+    <string name="open">Открыть</string>
+    <string name="error">Ошибка</string>
+    <string name="live">Онлайн</string>
+    <string name="publish">Опубликовать</string>
+    <string name="deploy">Развернуть</string>
+    <string name="close">Закрыть</string>
+    <string name="reload">Перезагрузить</string>
+    <string name="save">Сохранить</string>
+    <string name="saved">Сохранено</string>
+    <string name="delete_label">Удалить</string>
+    <string name="public_label">Публичный</string>
+    <string name="private_label">Приватный</string>
+    <string name="sign_out">Выйти</string>
+
+    <!-- Tabs -->
+    <string name="tab_apps">Приложения</string>
+    <string name="tab_create">Создать</string>
+    <string name="tab_account">Аккаунт</string>
+    <string name="tab_browse">Обзор</string>
+
+    <!-- Landing Screen -->
+    <string name="landing_hero_subtitle">Опишите. ИИ создаст.\nВаше приложение — за секунды.</string>
+    <string name="landing_prompt_example">"Создай приложение погоды с тёмным интерфейсом"</string>
+    <string name="landing_how_it_works_title">Как это работает</string>
+    <string name="landing_step_describe_title">Опишите</string>
+    <string name="landing_step_describe_desc">Расскажите ИИ, что вы хотите, простым языком</string>
+    <string name="landing_step_generate_title">Генерация</string>
+    <string name="landing_step_generate_desc">ИИ пишет код за секунды</string>
+    <string name="landing_step_preview_title">Просмотр</string>
+    <string name="landing_step_preview_desc">Увидьте своё приложение в работе мгновенно</string>
+    <string name="landing_step_deploy_title">Публикация</string>
+    <string name="landing_step_deploy_desc">Опубликуйте в интернете одним нажатием</string>
+    <string name="landing_examples_title">Что создают люди</string>
+    <string name="landing_example_weather_title">Панель погоды</string>
+    <string name="landing_example_weather_desc">Погода в реальном времени с красивыми графиками</string>
+    <string name="landing_example_memory_title">Игра на память</string>
+    <string name="landing_example_memory_desc">Весёлая игра с карточками и анимациями</string>
+    <string name="landing_example_budget_title">Трекер бюджета</string>
+    <string name="landing_example_budget_desc">Отслеживание расходов по категориям</string>
+    <string name="landing_example_pomodoro_title">Таймер Помодоро</string>
+    <string name="landing_example_pomodoro_desc">Таймер концентрации с управлением задачами</string>
+    <string name="landing_example_quiz_title">Викторина</string>
+    <string name="landing_example_quiz_desc">Интерактивные вопросы с отслеживанием результатов</string>
+    <string name="landing_example_workout_title">Журнал тренировок</string>
+    <string name="landing_example_workout_desc">Записывайте упражнения и следите за прогрессом</string>
+    <string name="landing_cta_get_started">Начать — Бесплатно</string>
+    <string name="landing_cta_sign_in">Уже есть аккаунт? Войти</string>
+    <string name="landing_trust_badge_instant">Мгновенно</string>
+    <string name="landing_trust_badge_secure">Безопасно</string>
+    <string name="landing_trust_badge_no_card">Без карты</string>
+
+    <!-- Sign In Screen -->
+    <string name="sign_in_subtitle">Создавайте приложения с ИИ</string>
+    <string name="sign_in_label_display_name">Отображаемое имя</string>
+    <string name="sign_in_label_email">Эл. почта</string>
+    <string name="sign_in_label_password">Пароль</string>
+    <string name="sign_in_cd_hide_password">Скрыть пароль</string>
+    <string name="sign_in_cd_show_password">Показать пароль</string>
+    <string name="sign_in_btn_creating_account">Создание аккаунта…</string>
+    <string name="sign_in_btn_signing_in">Вход…</string>
+    <string name="sign_in_btn_create_account">Создать аккаунт</string>
+    <string name="sign_in_btn_sign_in">Войти</string>
+    <string name="sign_in_toggle_have_account">Уже есть аккаунт? </string>
+    <string name="sign_in_toggle_no_account">Нет аккаунта? </string>
+    <string name="sign_in_toggle_link_sign_in">Войти</string>
+    <string name="sign_in_toggle_link_sign_up">Зарегистрироваться</string>
+    <string name="sign_in_divider_or">" или "</string>
+    <string name="sign_in_with_google">Войти через Google</string>
+    <string name="sign_in_terms_notice">Входя, вы соглашаетесь с Условиями использования</string>
+
+    <!-- Onboarding Screen -->
+    <string name="onboarding_btn_skip">Пропустить</string>
+    <string name="onboarding_page1_title">Опишите ваше приложение</string>
+    <string name="onboarding_page1_desc">Расскажите ИИ, что хотите создать, простым языком. Опыт программирования не нужен.</string>
+    <string name="onboarding_page2_title">ИИ создаёт</string>
+    <string name="onboarding_page2_desc">Наблюдайте, как ИИ генерирует полнофункциональное приложение с реальным кодом за секунды.</string>
+    <string name="onboarding_page3_title">Настройте и улучшите</string>
+    <string name="onboarding_page3_desc">Улучшайте приложение с помощью ИИ. Меняйте цвета, функции и макет мгновенно.</string>
+    <string name="onboarding_page4_title">Публикуйте и делитесь</string>
+    <string name="onboarding_page4_desc">Опубликуйте приложение в интернете одним нажатием. Делитесь своими творениями со всем миром.</string>
+    <string name="onboarding_btn_next">Далее</string>
+    <string name="onboarding_btn_get_started">Начать</string>
+
+    <!-- Create Screen -->
+    <string name="create_title">Что вы хотите создать?</string>
+    <string name="create_subtitle">Опишите идею приложения, и ИИ его создаст</string>
+    <string name="create_prompt_placeholder">Например: Создай приложение погоды, показывающее прогноз для моего города…</string>
+    <string name="create_cd_attach_image">Прикрепить изображение</string>
+    <string name="create_cd_voice_input">Голосовой ввод</string>
+    <string name="create_cd_remove_image">Удалить изображение</string>
+    <string name="create_cd_reference_image">Справочное изображение</string>
+    <string name="create_default_project_title">Мой проект</string>
+    <string name="create_error_generation_failed">Ошибка генерации</string>
+    <string name="create_error_extract_failed">Не удалось извлечь проект: %s</string>
+    <string name="create_error_save_failed">Не удалось сохранить: %s</string>
+    <string name="create_error_publish_failed">Не удалось опубликовать: %s</string>
+    <string name="create_save_dialog_title">Сохранено!</string>
+    <string name="create_save_dialog_message">Ваш проект сохранён. Нажмите кнопку публикации, чтобы запустить!</string>
+
+    <!-- Generation Progress -->
+    <string name="generation_time_remaining">~%d сек. осталось</string>
+    <string name="generation_btn_notify">Уведомить по завершении</string>
+    <string name="generation_notify_confirmation">Вы получите уведомление, когда будет готово</string>
+    <string name="generation_notify_leave_hint">Можете покинуть этот экран</string>
+    <string name="generation_btn_cancel">Отмена</string>
+    <string name="generation_phase_connecting">Подключение…</string>
+    <string name="generation_phase_complete">Готово!</string>
+    <string name="generation_limit_reached">Достигнут дневной лимит генераций</string>
+    <string name="upgrade_to_pro">Перейти на Pro</string>
+    <string name="start_generating">Начать</string>
+
+    <!-- Suggestion Chips -->
+    <string name="suggestions_header">Попробуйте одно из этих</string>
+    <string name="suggestions_btn_generating">Генерация идей…</string>
+    <string name="suggestions_btn_suggest_new">⚡ Предложить новые идеи</string>
+    <string name="suggestion_label_todo_app">Список дел</string>
+    <string name="suggestion_label_weather_app">Приложение погоды</string>
+    <string name="suggestion_label_calculator">Калькулятор</string>
+    <string name="suggestion_label_pomodoro_timer">Таймер Помодоро</string>
+    <string name="suggestion_label_markdown_editor">Редактор Markdown</string>
+    <string name="suggestion_label_color_palette">Цветовая палитра</string>
+
+    <!-- Account Screen -->
+    <string name="account_dialog_sign_out_title">Выйти</string>
+    <string name="account_dialog_sign_out_message">Вы уверены, что хотите выйти?</string>
+    <string name="account_cd_profile_photo">Фото профиля</string>
+    <string name="account_default_display_name">Пользователь</string>
+    <string name="account_section_usage">Использование</string>
+    <string name="account_stat_projects">Проекты</string>
+    <string name="account_stat_todays_gens">Генерации за сегодня</string>
+    <string name="account_section_settings">Настройки</string>
+    <string name="account_settings_subscription">Подписка</string>
+    <string name="account_settings_theme">Тема</string>
+    <string name="account_settings_theme_value">Тёмная</string>
+    <string name="account_settings_about">О приложении</string>
+    <string name="account_settings_version">Версия 1.0.0</string>
+    <string name="account_settings_language">Язык</string>
+
+    <!-- Apps Screen -->
+    <string name="apps_screen_title">Мои приложения</string>
+    <string name="apps_empty_title">Пока нет приложений</string>
+    <string name="apps_empty_subtitle">Создайте первое приложение с ИИ\nили посмотрите, что создали другие</string>
+    <string name="apps_cd_sort">Сортировка</string>
+
+    <!-- Browse Screen -->
+    <string name="browse_screen_title">Обзор</string>
+
+    <!-- Preview Screen -->
+    <string name="preview_screen_title">Просмотр</string>
+    <string name="preview_deploy_dialog_title">Опубликовать приложение</string>
+    <string name="preview_deploy_dialog_message">Выберите поддомен для вашего приложения:</string>
+    <string name="preview_deploy_placeholder">моё-приложение</string>
+    <string name="preview_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="preview_share_text">Посмотрите моё приложение: %s</string>
+
+    <!-- Project Preview Screen -->
+    <string name="project_preview_btn_forked">Скопировано!</string>
+    <string name="project_preview_btn_fork">Копировать</string>
+    <string name="project_preview_error_title">Не удалось загрузить предпросмотр</string>
+
+    <!-- Project Detail Screen -->
+    <string name="project_detail_deploy_dialog_title">Развернуть приложение</string>
+    <string name="project_detail_deploy_dialog_message">Выберите поддомен для вашего приложения:</string>
+    <string name="project_detail_deploy_label_subdomain">Поддомен</string>
+    <string name="project_detail_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="project_detail_screen_title_fallback">Проект</string>
+    <string name="project_detail_created_at">Создано %s</string>
+    <string name="project_detail_btn_preview">Просмотр приложения</string>
+    <string name="project_detail_badge_deployed">Развёрнуто</string>
+    <string name="project_detail_btn_deploying">Развёртывание…</string>
+    <string name="project_detail_btn_deploy_to_web">Опубликовать в интернете</string>
+    <string name="project_detail_stat_views">Просмотры</string>
+    <string name="project_detail_stat_forks">Копии</string>
+    <string name="project_detail_stat_tweaks">Изменения</string>
+    <string name="project_detail_section_original_prompt">Исходное описание</string>
+    <string name="project_detail_share_text">Посмотрите моё приложение: %s</string>
+
+    <!-- Project Card -->
+    <string name="project_card_delete_dialog_title">Удалить проект</string>
+    <string name="project_card_delete_dialog_message">Вы уверены, что хотите удалить \"%s\"? Это нельзя отменить.</string>
+
+    <!-- Language Picker -->
+    <string name="language_picker_title">Выбрать язык</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese">中文(简体)</string>
+    <string name="language_korean">한국어</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_hindi">हिन्दी</string>
+
+    <!-- Project Card -->
+    <string name="project_card_views">%d просмотров</string>
+
+    <!-- Post-Publish Sheet -->
+    <string name="publish_sheet_title">Ваше приложение запущено!</string>
+    <string name="publish_sheet_subtitle">Поделитесь с миром и начните зарабатывать на рекламе в вашем приложении.</string>
+    <string name="publish_sheet_open_browser">Открыть в Браузере</string>
+    <string name="publish_sheet_share">Поделиться App</string>
+    <string name="publish_sheet_monetize">Включить Монетизацию Рекламы →</string>
+    <string name="publish_sheet_done">Готово</string>
+    <string name="publish_sheet_share_text">Посмотрите на приложение, которое я создал с VibeBuild! %s</string>
+
+    <!-- Monetization -->
+    <string name="monetize_section_title">Монетизация</string>
+    <string name="monetize_revenue_label">Доход в этом месяце</string>
+    <string name="monetize_revenue_value">$0.00</string>
+    <string name="monetize_enable_btn">Включить Монетизацию Рекламы →</string>
+    <string name="monetize_description">Зарабатывайте, когда люди используют ваше приложение. Мы размещаем рекламу и платим вам ежемесячно.</string>
+
+    <!-- Facebook SDK Configuration -->
+    <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
+    <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+</resources>

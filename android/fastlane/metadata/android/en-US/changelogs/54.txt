@@ -1,0 +1,1 @@
+App generation is back online — fixes for the recent backend migration that left create and project list broken. New apps now save to "My Apps" the moment you tap generate, and previews load reliably on the new domain.

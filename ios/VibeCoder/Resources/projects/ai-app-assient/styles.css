@@ -1,0 +1,804 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #6366f1;
+    --primary-dark: #4f46e5;
+    --secondary-color: #8b5cf6;
+    --background: #0f172a;
+    --surface: #1e293b;
+    --surface-light: #334155;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border: #334155;
+    --success: #10b981;
+    --error: #ef4444;
+    --warning: #f59e0b;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    background: var(--background);
+    color: var(--text-primary);
+    overflow-x: hidden;
+}
+
+.app-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.app-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.app-header h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.menu-btn {
+    background: var(--primary-color);
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.menu-btn:active {
+    background: var(--primary-dark);
+}
+
+/* Side Menu */
+.side-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100vh;
+    background: var(--surface);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+    transition: right 0.3s ease;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+}
+
+.side-menu.open {
+    right: 0;
+}
+
+.menu-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close-menu {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+}
+
+.menu-nav {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.menu-item {
+    width: 100%;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    text-align: left;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.menu-item:active,
+.menu-item.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.menu-footer {
+    padding: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.clear-data-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--error);
+    border: none;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.view {
+    display: none;
+}
+
+.view.active {
+    display: block;
+}
+
+/* Chat View */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 140px);
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.message {
+    max-width: 85%;
+    padding: 1rem;
+    border-radius: 16px;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message.user {
+    background: var(--primary-color);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+
+.message.assistant {
+    background: var(--surface);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+.message-time {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    margin-top: 0.5rem;
+}
+
+.chat-suggestions {
+    padding: 0.5rem 1rem;
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    flex-wrap: wrap;
+}
+
+.suggestion-chip {
+    padding: 0.5rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    border-radius: 20px;
+    white-space: nowrap;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.suggestion-chip:active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.chat-input-container {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: var(--surface);
+    border-radius: 12px;
+    margin-top: 0.5rem;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 0.75rem;
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.send-btn {
+    background: var(--primary-color);
+    border: none;
+    color: white;
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: background 0.2s;
+}
+
+.send-btn:active {
+    background: var(--primary-dark);
+}
+
+/* Calculator */
+.calculator {
+    max-width: 400px;
+    margin: 2rem auto;
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 1.5rem;
+}
+
+.calc-display {
+    background: var(--background);
+    padding: 2rem 1.5rem;
+    border-radius: 12px;
+    text-align: right;
+    font-size: 2.5rem;
+    font-weight: 300;
+    margin-bottom: 1rem;
+    min-height: 80px;
+    word-wrap: break-word;
+    overflow-x: auto;
+}
+
+.calc-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+}
+
+.calc-btn {
+    padding: 1.5rem;
+    font-size: 1.5rem;
+    border: none;
+    border-radius: 12px;
+    background: var(--surface-light);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.calc-btn:active {
+    transform: scale(0.95);
+    background: var(--border);
+}
+
+.calc-fn {
+    background: var(--surface-light);
+    color: var(--warning);
+}
+
+.calc-op {
+    background: var(--primary-color);
+    color: white;
+}
+
+.calc-equals {
+    background: var(--success);
+    color: white;
+}
+
+.calc-zero {
+    grid-column: span 2;
+}
+
+/* Notes */
+.notes-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.notes-header {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.note-title-input {
+    flex: 1;
+    padding: 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.add-note-btn {
+    padding: 0.75rem 1.5rem;
+    background: var(--primary-color);
+    border: none;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.note-content {
+    width: 100%;
+    min-height: 200px;
+    padding: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    resize: vertical;
+    font-family: inherit;
+    margin-bottom: 1rem;
+}
+
+.save-note-btn {
+    width: 100%;
+    padding: 1rem;
+    background: var(--success);
+    border: none;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-bottom: 2rem;
+}
+
+.notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.note-item {
+    background: var(--surface);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.note-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.note-item-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.note-item-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.note-btn {
+    padding: 0.5rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.note-btn.delete {
+    color: var(--error);
+    border-color: var(--error);
+}
+
+.note-item-content {
+    color: var(--text-secondary);
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.note-item-date {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+/* Tasks */
+.tasks-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.task-input-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.task-input {
+    flex: 1;
+    padding: 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.add-task-btn {
+    width: 48px;
+    height: 48px;
+    background: var(--primary-color);
+    border: none;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.5rem;
+}
+
+.task-filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.filter-btn {
+    flex: 1;
+    padding: 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--surface);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.task-checkbox {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    accent-color: var(--success);
+}
+
+.task-text {
+    flex: 1;
+    color: var(--text-primary);
+}
+
+.task-item.completed .task-text {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+}
+
+.task-delete {
+    background: transparent;
+    border: none;
+    color: var(--error);
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0.5rem;
+}
+
+.tasks-stats {
+    padding: 1rem;
+    background: var(--surface);
+    border-radius: 8px;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+/* Timer */
+.timer-container {
+    max-width: 500px;
+    margin: 2rem auto;
+}
+
+.timer-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.timer-tab {
+    flex: 1;
+    padding: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.timer-tab.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.timer-mode {
+    display: none;
+}
+
+.timer-mode.active {
+    display: block;
+}
+
+.time-display {
+    font-size: 3.5rem;
+    font-weight: 300;
+    text-align: center;
+    padding: 2rem;
+    background: var(--surface);
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.time-inputs {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.time-input {
+    width: 80px;
+    padding: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.time-separator {
+    font-size: 2rem;
+    color: var(--text-secondary);
+}
+
+.timer-controls {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.timer-btn {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.start-btn {
+    background: var(--success);
+    color: white;
+    flex: 1;
+}
+
+.reset-btn {
+    background: var(--error);
+    color: white;
+}
+
+.lap-btn {
+    background: var(--warning);
+    color: white;
+}
+
+.timer-btn:active {
+    transform: scale(0.95);
+}
+
+.laps-list {
+    margin-top: 2rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.lap-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background: var(--surface);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+/* Converter */
+.converter-container {
+    max-width: 600px;
+    margin: 2rem auto;
+}
+
+.converter-type-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.converter-tab {
+    padding: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.converter-tab.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.converter-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.converter-group {
+    background: var(--surface);
+    padding: 1.5rem;
+    border-radius: 12px;
+}
+
+.converter-group label {
+    display: block;
+    margin-bottom: 0.75rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.unit-select {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.converter-input {
+    width: 100%;
+    padding: 1rem;
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+}
+
+.swap-btn {
+    align-self: center;
+    width: 48px;
+    height: 48px;
+    background: var(--primary-color);
+    border: none;
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.5rem;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .time-display {
+        font-size: 2.5rem;
+    }
+
+    .calc-display {
+        font-size: 2rem;
+    }
+
+    .converter-type-tabs {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--surface-light);
+}

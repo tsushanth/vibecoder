@@ -12,14 +12,14 @@ const DEVICE_WIDTHS = {
 };
 
 export function PreviewPane() {
-  const { previewUrl } = useProjectStore();
+  const { previewHtml } = useProjectStore();
   const { previewDevice, setPreviewDevice } = useUIStore();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     setRefreshKey((k) => k + 1);
-  }, [previewUrl]);
+  }, [previewHtml]);
 
   return (
     <div className="flex flex-col h-full bg-card">
@@ -57,7 +57,7 @@ export function PreviewPane() {
 
       {/* iframe */}
       <div className="flex-1 flex items-start justify-center overflow-auto bg-[#1a1a1a] p-4">
-        {previewUrl ? (
+        {previewHtml ? (
           <div
             className="bg-white rounded-lg overflow-hidden shadow-2xl transition-all duration-300"
             style={{
@@ -69,9 +69,9 @@ export function PreviewPane() {
             <iframe
               key={refreshKey}
               ref={iframeRef}
-              src={previewUrl}
+              srcDoc={previewHtml}
               className="w-full h-full border-0"
-              sandbox="allow-scripts allow-same-origin"
+              sandbox="allow-scripts"
               title="App Preview"
             />
           </div>

@@ -73,12 +73,17 @@ function findClaudeCLI() {
 
 const QUOTA_PATTERNS = [
     "You're out of extra usage",
+    "You've hit your limit",
+    'hit your limit',
     'out of extra usage',
     'usage limit',
     'rate limit exceeded',
     'quota exceeded',
     'resets 8am',
+    'resets 7am',
     'resets at',
+    'resets 5am',
+    'resets 6am',
 ];
 
 // ============================================
@@ -263,6 +268,16 @@ function getQuotaErrorMessage() {
 }
 
 let activeGenerations = 0;
+
+// ntfy.sh alerts for critical worker events
+const NTFY_TOPIC = 'vibebuild';
+function sendAlert(title, message, priority = 'high') {
+    fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+        method: 'POST',
+        headers: { 'Title': title, 'Priority': priority, 'Tags': 'warning' },
+        body: message
+    }).catch(() => {}); // fire and forget
+}
 const MAX_CONCURRENT = 2;
 
 // ============================================
@@ -307,11 +322,36 @@ assets/             <- Generated assets (SVG, data URIs)
 - Dark mode support where appropriate
 - Accessible: proper contrast ratios, semantic HTML
 
-## CRITICAL: No Placeholder Code
-- Do NOT leave TODO comments, placeholder functions, or stub implementations
-- Every function must be fully implemented
-- Every visual element must be fully designed
-- Every feature must actually work
+## CRITICAL: Fully Functional Code — Zero Shortcuts
+
+### What "fully functional" means:
+- Every button must have a working click handler that does something visible
+- Every form must validate input, process it, and show results
+- Every list must support add, display, and delete operations
+- Every game must have working win/lose conditions and score tracking
+- Every calculator must compute correct results for ALL operations shown
+- Every timer/clock must actually count and update the display
+- Navigation between screens/tabs/pages must all work
+- Data must persist using localStorage where appropriate
+
+### Common mistakes to AVOID:
+- Buttons that look clickable but do nothing
+- Functions that are defined but never called
+- Event listeners that are missing or attached to wrong elements
+- Variables referenced before they are defined
+- Game logic that doesn't track state correctly (scores, turns, game over)
+- Modals/dialogs that can't be closed or don't appear
+- Forms that submit but don't process or display the data
+- CSS animations that reference non-existent keyframes
+- JavaScript that errors silently and breaks the entire app
+
+### Self-verification checklist (mentally walk through BEFORE finishing):
+1. Load the page — does it render without blank areas?
+2. Click EVERY button — does each one produce a visible result?
+3. Fill EVERY form — does it validate and process correctly?
+4. Check ALL interactive elements — do they respond to user input?
+5. Test edge cases — empty input, rapid clicking, screen resize
+6. Verify all state changes — do counters count, toggles toggle, filters filter?
 `;
 
 // ============================================
@@ -808,11 +848,31 @@ app.get('/health', (req, res) => {
 });
 
 // ============================================
+// Credentials endpoint — lets VM pull fresh tokens from this machine
+// Protected by worker secret. macOS only (reads from Keychain).
+// ============================================
+
+app.get('/credentials', authMiddleware, (req, res) => {
+    try {
+        const raw = execSync(
+            'security find-generic-password -s "Claude Code-credentials" -w 2>/dev/null',
+            { encoding: 'utf8' }
+        ).trim();
+        if (!raw) return res.status(404).json({ error: 'No credentials found' });
+        const parsed = JSON.parse(raw);
+        res.json(parsed);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// ============================================
 // SSE Generate Endpoint (streaming status)
 // ============================================
 
 app.post('/generate', authMiddleware, async (req, res) => {
-    const { prompt, userId, stream, referenceImage } = req.body;
+    const { prompt, userId, stream, referenceImage, callbackUrl, callbackSecret } = req.body;
+    console.log(`[ENTRY] /generate called: userId=${userId}, stream=${stream}, hasCallback=${!!callbackUrl}, promptLen=${prompt?.length}`);
 
     if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
         return res.status(400).json({ error: 'App description is required' });
@@ -835,6 +895,12 @@ app.post('/generate', authMiddleware, async (req, res) => {
     const requestId = `app-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
     let projectDir = null;
     let account = getActiveAccount();
+
+    // If callbackUrl is provided (fire-and-forget mode), respond immediately
+    // so Cloud Run doesn't kill the connection before the build completes
+    if (callbackUrl && !stream) {
+        res.status(202).json({ success: true, requestId, message: 'Build started, result will be POSTed to callbackUrl' });
+    }
 
     // If streaming requested, set up SSE
     const isSSE = stream === true;
@@ -876,18 +942,20 @@ app.post('/generate', authMiddleware, async (req, res) => {
         if (isSSE) {
             res.write(`data: ${JSON.stringify({ type: 'error', error })}\n\n`);
             res.end();
-        } else {
+        } else if (!callbackUrl) {
             res.status(503).json({ error });
         }
+        // If callbackUrl mode: 202 already sent, error goes via callback
     }
 
     function sendResult(data) {
         if (isSSE) {
             res.write(`data: ${JSON.stringify({ type: 'result', ...data })}\n\n`);
             res.end();
-        } else {
+        } else if (!callbackUrl) {
             res.json(data);
         }
+        // If callbackUrl mode: 202 already sent, result goes via callback
     }
 
     console.log(`[${requestId}] Starting multi-phase build for ${userId}: "${prompt}"`);
@@ -932,6 +1000,11 @@ IMPORTANT RULES:
 - The application must be COMPLETE and fully functional
 - All assets must be created inline (SVG, CSS art, canvas) — no external resources
 - Make it professional with clean design and smooth interactions
+- Wire up EVERY button, link, and interactive element with working event handlers
+- If the app has game logic, implement the COMPLETE game loop (start, play, score, win/lose, restart)
+- If the app has forms, implement full validation, processing, and result display
+- Use localStorage to persist user data where it makes sense
+- Test your logic mentally: trace through each user action and confirm it works end-to-end
 
 Start building now. Create the files.`;
 
@@ -941,13 +1014,24 @@ Start building now. Create the files.`;
         account = getActiveAccount() || account;
 
         if (!genResult.success) {
-            activeGenerations--;
+            console.log(`[${requestId}] Generate phase failed: ${genResult.error || 'unknown error'}`);
             if (genResult.quotaError) {
+                activeGenerations = Math.max(0, activeGenerations - 1);
                 const msg = getQuotaErrorMessage();
                 console.log(`[${requestId}] All accounts exhausted: ${msg}`);
                 return sendError(msg);
             }
-            return sendError('Failed to generate app. Please try again.');
+            // Claude CLI sometimes exits with non-zero even when files were created.
+            // Check if index.html exists — if so, treat as success and continue.
+            const hasIndex = fs.existsSync(path.join(projectDir, 'index.html'));
+            const htmlFiles = hasIndex ? [] : fs.readdirSync(projectDir).filter(f => f.endsWith('.html') && f !== 'CLAUDE.md');
+            if (hasIndex || htmlFiles.length > 0) {
+                console.log(`[${requestId}] Non-zero exit but files exist — continuing build`);
+            } else {
+                activeGenerations = Math.max(0, activeGenerations - 1);
+                if (callbackUrl) fetch(callbackUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'failed', error: 'Failed to generate app', userId, secret: callbackSecret }), signal: AbortSignal.timeout(10000) }).catch(() => {});
+                return sendError('Failed to generate app. Please try again.');
+            }
         }
 
         // Check index.html exists
@@ -956,7 +1040,7 @@ Start building now. Create the files.`;
             if (htmlFiles.length > 0) {
                 fs.renameSync(path.join(projectDir, htmlFiles[0]), path.join(projectDir, 'index.html'));
             } else {
-                activeGenerations--;
+                activeGenerations = Math.max(0, activeGenerations - 1);
                 return sendError('No app files were created. Please try again with a different description.');
             }
         }
@@ -1017,19 +1101,25 @@ Fix all these issues now by editing the files directly.`;
 
         // Only do polish pass if no critical issues remain (don't waste turns polishing broken code)
         if (remainingCritical === 0) {
-            const polishPrompt = `Review the web application and make final improvements:
+            const polishPrompt = `Review the web application by reading EVERY file. Your primary job is to ensure the app ACTUALLY WORKS, then polish the design.
 
-1. COMPLETENESS: Walk through every feature. Fix logic gaps, undefined variables, broken flows.
+1. FUNCTIONAL VERIFICATION (most important):
+   - Read all JavaScript code. Trace the logic for every user interaction.
+   - Click mentally through every button — does the handler exist and do something visible?
+   - Check every addEventListener — is it attached to the correct element with the correct selector?
+   - Verify all DOM queries (getElementById, querySelector) reference elements that actually exist in the HTML.
+   - Check for undefined variables, functions called before defined, missing return values.
+   - If there's game logic: verify score tracking, win/lose conditions, and restart all work.
+   - If there's a form: verify validation, submission handling, and result display.
+   - Fix ANY broken functionality you find.
 
-2. DESIGN: Is it visually appealing? Improve typography, spacing, colors, transitions.
+2. DESIGN: Improve typography, spacing, colors, transitions where needed.
 
-3. RESPONSIVENESS: Does it work on small phones and large tablets?
+3. RESPONSIVENESS: Ensure it works on small phones (320px) and tablets.
 
-4. POLISH: Add micro-interactions, hover effects, loading states, empty states.
+4. POLISH: Add micro-interactions, hover/active states, empty states.
 
-5. EDGE CASES: Handle edge cases gracefully.
-
-Make targeted improvements — don't rewrite everything.`;
+Make targeted fixes — don't rewrite everything. Focus on making broken things work.`;
 
             const polishResult = await runClaudeCommand(claudePath, polishPrompt, projectDir, requestId, 8, account.homeDir);
 
@@ -1084,7 +1174,7 @@ Fix them now. The app will not load at all if these aren't resolved.`;
 
         console.log(`[${requestId}] App complete in ${elapsed}s (${files.length} files, ${(zip.sizeBytes / 1024).toFixed(1)}KB)`);
 
-        sendResult({
+        const resultData = {
             success: true,
             bundle: zip.base64,
             bundleSize: zip.sizeBytes,
@@ -1095,13 +1185,33 @@ Fix them now. The app will not load at all if these aren't resolved.`;
                 warnings: warningsLeft,
                 phasesCompleted: criticalLeft === 0 ? 5 : 3,
             }
-        });
+        };
+        sendResult(resultData);
+
+        // If a callback URL was provided, POST the result back
+        if (callbackUrl) {
+            fetch(callbackUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bundle: zip.base64, status: 'ready', userId, secret: callbackSecret }),
+                signal: AbortSignal.timeout(30000)
+            }).then(() => console.log(`[${requestId}] Callback sent to ${callbackUrl}`))
+              .catch(err => console.error(`[${requestId}] Callback failed: ${err.message}`));
+        }
 
     } catch (error) {
         console.error(`[${requestId}] Error:`, error.message);
+        if (callbackUrl) {
+            fetch(callbackUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'failed', error: error.message, userId, secret: callbackSecret }),
+                signal: AbortSignal.timeout(10000)
+            }).catch(() => {});
+        }
         sendError('Internal worker error. Please try again.');
     } finally {
-        activeGenerations--;
+        activeGenerations = Math.max(0, activeGenerations - 1);
         if (projectDir) {
             setTimeout(() => cleanupProjectFolder(projectDir), 120000);
         }
@@ -1119,10 +1229,16 @@ function runClaudeCommand(claudePath, prompt, cwd, requestId, maxTurns = 10, hom
             '--dangerously-skip-permissions',
             '--output-format', 'stream-json',
             '--max-turns', String(maxTurns),
-            '--verbose'
+            '--verbose',
+            '--model', 'claude-sonnet-4-5'
         ];
 
         console.log(`[${requestId}] Claude CLI starting (maxTurns: ${maxTurns}, account: ${homeDir})...`);
+
+        // Try primary account, fall back to secondary if auth fails
+        const primaryHome = os.homedir();
+        const fallbackHome = '/home/vibecoder2';
+        const homeDir = global._useBackupAccount ? fallbackHome : primaryHome;
 
         const proc = spawn(claudePath, args, {
             cwd,
@@ -1144,6 +1260,7 @@ function runClaudeCommand(claudePath, prompt, cwd, requestId, maxTurns = 10, hom
             resolve({ success: false, output: assistantBlocks.join(''), error: 'Timeout', quotaError: false });
         }, 480000);
 
+        let rateLimitedFromStdout = false;
         proc.stdout?.on('data', (data) => {
             for (const line of data.toString().split('\n').filter(l => l.trim())) {
                 try {
@@ -1152,6 +1269,9 @@ function runClaudeCommand(claudePath, prompt, cwd, requestId, maxTurns = 10, hom
                         assistantBlocks.push(event.delta.text || '');
                     } else if (event.type === 'result') {
                         console.log(`[${requestId}] Claude finished`);
+                    } else if (event.type === 'rate_limit_event' && event.rate_limit_info?.status === 'rejected') {
+                        console.log(`[${requestId}] Rate limit rejected — quota exhausted`);
+                        rateLimitedFromStdout = true;
                     }
                 } catch {}
             }
@@ -1184,7 +1304,13 @@ function runClaudeCommand(claudePath, prompt, cwd, requestId, maxTurns = 10, hom
             if (code === 0 && !isQuotaError) {
                 clearAccountQuota(homeDir);
                 resolve({ success: true, output, quotaError: false });
-            } else if (isQuotaError) {
+            } else if (isAuthError && global._useBackupAccount) {
+                // Both accounts failed
+                sendAlert('VibeBuild: BOTH Accounts Failed', 'Both primary and backup Claude accounts have expired. Builds will fail until one is re-authenticated.', 'urgent');
+            }
+
+            if (isQuotaError) {
+                sendAlert('VibeBuild: Quota Exhausted', `Claude quota hit. Resets at ${resetTime || 'unknown'}. Builds paused.`);
                 resolve({ success: false, output, error: 'Quota exhausted', quotaError: true, resetTime });
             } else if (isAuthError) {
                 console.error(`[${requestId}] Auth failure on account ${homeDir} — re-authentication needed`);
@@ -1357,7 +1483,7 @@ Modify the existing files now to apply the customization.`;
         const genResult = await runClaudeWithRotation(claudePath, customizePrompt, projectDir, requestId, 15);
 
         if (!genResult.success) {
-            activeGenerations--;
+            activeGenerations = Math.max(0, activeGenerations - 1);
             if (genResult.quotaError) {
                 return sendError(getQuotaErrorMessage());
             }
@@ -1434,7 +1560,7 @@ Make any small fixes needed. Don't rewrite — just polish.`;
         console.error(`[${requestId}] Error:`, error.message);
         sendError('Internal worker error during customization.');
     } finally {
-        activeGenerations--;
+        activeGenerations = Math.max(0, activeGenerations - 1);
         if (projectDir) {
             setTimeout(() => cleanupProjectFolder(projectDir), 120000);
         }
@@ -1891,7 +2017,7 @@ app.post('/tweak', authMiddleware, async (req, res) => {
             fs.renameSync(path.join(repoDir, '.git'), path.join(projectDir, '.git'));
             fs.rmSync(repoDir, { recursive: true, force: true });
         } catch (cloneErr) {
-            activeGenerations--;
+            activeGenerations = Math.max(0, activeGenerations - 1);
             return sendError(`Failed to clone project repo: ${cloneErr.message}`);
         }
 
@@ -1921,7 +2047,7 @@ Apply the changes now.`;
         const tweakResult = await runClaudeWithRotation(claudePath, tweakPrompt, projectDir, requestId, 12);
 
         if (!tweakResult.success) {
-            activeGenerations--;
+            activeGenerations = Math.max(0, activeGenerations - 1);
             if (tweakResult.quotaError) {
                 return sendError(getQuotaErrorMessage());
             }
@@ -1996,7 +2122,7 @@ Fix them now. Do NOT add TODO comments — implement actual fixes.`;
         console.error(`[${requestId}] Tweak error:`, error.message);
         sendError('Internal worker error during tweak.');
     } finally {
-        activeGenerations--;
+        activeGenerations = Math.max(0, activeGenerations - 1);
         if (projectDir) {
             setTimeout(() => cleanupProjectFolder(projectDir), 120000);
         }
@@ -2064,6 +2190,184 @@ app.get('/versions/:repoName', authMiddleware, async (req, res) => {
 });
 
 // ============================================
+// ============================================
+// GET /bundle/:repoName — Fetch project bundle from GitHub repo
+// ============================================
+
+app.get('/bundle/:repoName', authMiddleware, async (req, res) => {
+    const { repoName } = req.params;
+
+    if (!repoName) {
+        return res.status(400).json({ error: 'repoName is required' });
+    }
+
+    if (!GITHUB_PAT) {
+        return res.status(503).json({ error: 'Git integration not configured' });
+    }
+
+    const tmpDir = path.join(os.tmpdir(), `bundle-${crypto.randomUUID()}`);
+
+    try {
+        fs.mkdirSync(tmpDir, { recursive: true });
+
+        // Clone the repo
+        const repoUrl = `https://x-access-token:${GITHUB_PAT}@github.com/${GITHUB_ORG}/${repoName}.git`;
+        execSync(`git clone --depth 1 ${repoUrl} ${tmpDir}/project`, {
+            stdio: ['pipe', 'pipe', 'pipe'],
+            timeout: 30000
+        });
+
+        const projectDir = path.join(tmpDir, 'project');
+
+        // Remove .git directory
+        const gitDir = path.join(projectDir, '.git');
+        if (fs.existsSync(gitDir)) {
+            fs.rmSync(gitDir, { recursive: true, force: true });
+        }
+
+        // Zip and encode
+        const zip = await zipProjectFolder(projectDir);
+
+        res.json({
+            success: true,
+            bundle: zip.base64,
+            bundleSize: zip.sizeBytes
+        });
+    } catch (error) {
+        console.error(`[bundle] Error fetching bundle for ${repoName}:`, error.message);
+        res.status(500).json({ error: `Failed to fetch bundle: ${error.message}` });
+    } finally {
+        // Clean up
+        try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
+    }
+});
+
+// ============================================
+// POST /build-apk — Build Android APK from web bundle
+// ============================================
+
+/**
+ * Derive a clean app name from a prompt-style title.
+ * "Build a resume builder with form sections for experience, ed..." → "Resume Builder"
+ * "Create a weather app that shows current conditions" → "Weather App"
+ */
+function deriveAppName(rawName) {
+    let name = rawName.trim();
+
+    // Remove common prompt prefixes
+    name = name.replace(/^(build|create|make|design|develop)\s+(a|an|the|me\s+a|me\s+an)?\s*/i, '');
+
+    // Remove everything after common connectors
+    name = name.replace(/\s+(with|that|where|which|for|using|featuring|including|and\s+a)\s+.*/i, '');
+
+    // Capitalize each word
+    name = name.split(/\s+/)
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ');
+
+    // Trim to reasonable length
+    name = name.substring(0, 30).trim();
+
+    // Fallback
+    if (!name || name.length < 2) name = 'My App';
+
+    // Sanitize for XML
+    return name.replace(/[<>&"']/g, '');
+}
+
+const APK_TEMPLATE_DIR = path.join(path.dirname(new URL(import.meta.url).pathname), 'apk-template');
+let activeApkBuilds = 0;
+const MAX_APK_BUILDS = 1;
+
+app.post('/build-apk', authMiddleware, async (req, res) => {
+    const { projectId, bundle, appName } = req.body;
+
+    if (!bundle || typeof bundle !== 'string') {
+        return res.status(400).json({ error: 'bundle (base64) is required' });
+    }
+    if (!appName || typeof appName !== 'string') {
+        return res.status(400).json({ error: 'appName is required' });
+    }
+
+    if (activeApkBuilds >= MAX_APK_BUILDS) {
+        return res.status(429).json({ error: 'APK build queue is full. Try again in a minute.' });
+    }
+
+    activeApkBuilds++;
+    const buildId = `apk-${(projectId || 'unknown').substring(0, 8)}`;
+    console.log(`[${buildId}] Starting APK build for "${appName}"`);
+
+    const tmpDir = path.join(os.tmpdir(), `apk-build-${crypto.randomUUID()}`);
+
+    try {
+        // Copy template
+        fs.mkdirSync(tmpDir, { recursive: true });
+        execSync(`cp -r ${APK_TEMPLATE_DIR}/. ${tmpDir}/`, { stdio: 'pipe' });
+
+        // Inject web bundle into assets
+        const assetsDir = path.join(tmpDir, 'app', 'src', 'main', 'assets');
+        fs.mkdirSync(assetsDir, { recursive: true });
+        unzipBundle(bundle, assetsDir);
+        console.log(`[${buildId}] Bundle extracted to assets/`);
+
+        // Set app name — derive a clean name from the prompt/title
+        const stringsPath = path.join(tmpDir, 'app', 'src', 'main', 'res', 'values', 'strings.xml');
+        const cleanAppName = deriveAppName(appName);
+        const stringsXml = fs.readFileSync(stringsPath, 'utf-8');
+        fs.writeFileSync(stringsPath, stringsXml.replace('VibeBuild App', cleanAppName));
+        console.log(`[${buildId}] App name: "${cleanAppName}"`);
+
+        // Set unique applicationId (must start with letter, not digit)
+        const appGradle = path.join(tmpDir, 'app', 'build.gradle.kts');
+        const gradleContent = fs.readFileSync(appGradle, 'utf-8');
+        const appIdSuffix = 'a' + (projectId || 'app').replace(/[^a-zA-Z0-9]/g, '').substring(0, 20).toLowerCase();
+        fs.writeFileSync(appGradle, gradleContent.replace(
+            'applicationId = "com.vibebuild.export"',
+            `applicationId = "com.vibebuild.app.${appIdSuffix}"`
+        ));
+
+        // Build APK
+        console.log(`[${buildId}] Running Gradle build...`);
+        const startTime = Date.now();
+        execSync('./gradlew assembleRelease', {
+            cwd: tmpDir,
+            stdio: ['pipe', 'pipe', 'pipe'],
+            timeout: 180000,
+            env: {
+                ...process.env,
+                ANDROID_HOME: '/opt/android-sdk',
+                JAVA_HOME: '/usr/lib/jvm/java-17-openjdk-amd64',
+                PATH: `${process.env.PATH}:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools`
+            }
+        });
+        const buildTime = ((Date.now() - startTime) / 1000).toFixed(1);
+        console.log(`[${buildId}] Gradle build complete in ${buildTime}s`);
+
+        // Read APK
+        const apkPath = path.join(tmpDir, 'app', 'build', 'outputs', 'apk', 'release', 'app-release.apk');
+        if (!fs.existsSync(apkPath)) {
+            throw new Error('APK not found after build');
+        }
+        const apkBuffer = fs.readFileSync(apkPath);
+        const apkBase64 = apkBuffer.toString('base64');
+
+        console.log(`[${buildId}] APK ready: ${(apkBuffer.length / 1024 / 1024).toFixed(1)}MB`);
+
+        res.json({
+            success: true,
+            apk: apkBase64,
+            apkSize: apkBuffer.length,
+            buildTime: parseFloat(buildTime)
+        });
+    } catch (error) {
+        console.error(`[${buildId}] APK build failed:`, error.message);
+        res.status(500).json({ error: `APK build failed: ${error.message}` });
+    } finally {
+        activeApkBuilds--;
+        try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
+    }
+});
+
 // Start
 // ============================================
 

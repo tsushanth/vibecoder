@@ -1,0 +1,4 @@
+• Build apps via Telegram! Message @Vibebuilder_bot to generate apps with text
+• Push notifications: get notified when your build is ready
+• Maintenance banner: see real-time build availability status
+• Bug fixes and performance improvements

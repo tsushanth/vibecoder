@@ -118,6 +118,20 @@ data class PlansResponse(
     val plans: List<SubscriptionPlan> = emptyList()
 )
 
+// --- Export APK ---
+data class ExportApkRequest(
+    val userId: String,
+    val bundle: String? = null
+)
+
+data class ExportApkResponse(
+    val success: Boolean,
+    val apk: String? = null,
+    @SerializedName("apkSize") val apkSize: Int? = null,
+    @SerializedName("buildTime") val buildTime: Double? = null,
+    val error: String? = null
+)
+
 // --- Deploy ---
 data class DeployRequest(
     val userId: String,
@@ -134,7 +148,18 @@ data class DeployStatusResponse(
     val deployed: Boolean = false,
     val subdomain: String? = null,
     val url: String? = null,
-    @SerializedName("deployedAt") val deployedAt: String? = null
+    @SerializedName("deployedAt") val deployedAt: String? = null,
+    @SerializedName("adsEnabled") val adsEnabled: Boolean = false
+)
+
+data class AdsToggleRequest(
+    val userId: String,
+    val enabled: Boolean
+)
+
+data class AdsToggleResponse(
+    val success: Boolean,
+    @SerializedName("adsEnabled") val adsEnabled: Boolean = false
 )
 
 // --- Generation ---
@@ -148,4 +173,44 @@ data class GenerateRequest(
 data class TweakRequest(
     val userId: String,
     val tweakDescription: String
+)
+
+data class FeedbackRequest(
+    val userId: String,
+    val rating: String
+)
+
+// --- Versions ---
+data class VersionsResponse(
+    val success: Boolean,
+    val versions: List<AppVersion> = emptyList()
+)
+
+data class AppVersion(
+    val sha: String,
+    @SerializedName("shortSha") val shortSha: String = "",
+    val message: String = "",
+    val date: String = "",
+    val author: String = ""
+)
+
+data class RevertRequest(val userId: String)
+
+data class RevertResponse(
+    val success: Boolean,
+    @SerializedName("commitSha") val commitSha: String? = null,
+    val bundle: String? = null,
+    @SerializedName("bundleSize") val bundleSize: Int? = null
+)
+
+data class PushTokenRequest(
+    @SerializedName("userId") val userId: String,
+    @SerializedName("token") val token: String,
+    @SerializedName("platform") val platform: String = "android"
+)
+
+data class SystemStatusResponse(
+    val operational: Boolean,
+    val message: String? = null,
+    @SerializedName("activeBuildCount") val activeBuildCount: Int = 0
 )
