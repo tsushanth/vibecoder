@@ -1,5 +1,10 @@
 plugins {
     id("com.android.application")
+    // Kept (not removed like ReadAloudAI) — this app opts OUT of AGP 9's
+    // built-in Kotlin instead (android.builtInKotlin=false in
+    // gradle.properties), same bridge pattern as RiddleVerse, because the
+    // shared library modules still apply this plugin directly and other
+    // apps depending on those repos are still on AGP 8.x.
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.dagger.hilt.android")
@@ -10,12 +15,12 @@ plugins {
 
 android {
     namespace = "com.kreativekoala.vibecoder"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.kreativekoala.vibecoder"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 63
         versionName = "2.3.3"
 
@@ -51,10 +56,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
     buildFeatures {
         compose = true
         buildConfig = true
@@ -64,6 +65,14 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+// Replaces the deprecated android { kotlinOptions { jvmTarget = "17" } }
+// block — hard compile error under AGP 9's Kotlin DSL script compilation.
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
@@ -90,8 +99,8 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.5")
 
     // Hilt DI
-    implementation("com.google.dagger:hilt-android:2.52")
-    kapt("com.google.dagger:hilt-compiler:2.52")
+    implementation("com.google.dagger:hilt-android:2.60.1")
+    kapt("com.google.dagger:hilt-compiler:2.60.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     // Supabase
