@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
         private const val TAG = "MainActivity"
         private const val PREFS_NAME = "vibebuild_paywall_prefs"
         private const val KEY_GENERATION_COUNT = "generation_count"
-        const val FREE_GENERATION_LIMIT = 3
+        const val FREE_GENERATION_LIMIT = 10
 
         fun incrementGenerationCount(context: Context) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
