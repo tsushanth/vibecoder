@@ -33,7 +33,6 @@ import com.revenuecat.purchases.PurchaseParams
 import com.revenuecat.purchases.Purchases
 import com.revenuecat.purchases.PurchasesError
 import com.revenuecat.purchases.getOfferingsWith
-import com.revenuecat.purchases.interfaces.ReceiveCustomerInfoCallback
 import com.revenuecat.purchases.purchaseWith
 import com.revenuecat.purchases.restorePurchasesWith
 import dagger.hilt.android.AndroidEntryPoint
@@ -90,25 +89,32 @@ class MainActivity : AppCompatActivity() {
         var packages by remember { mutableStateOf<List<Package>>(emptyList()) }
         var productsLoaded by remember { mutableStateOf(false) }
 
-        // Check subscription status via RevenueCat
+        // Check subscription status via RevenueCat. Uses restorePurchasesWith
+        // rather than a plain getCustomerInfo() — RevenueCat's local
+        // appUserID is anonymous (no logIn() call anywhere in this app), so
+        // a reinstall or cleared app data starts as a brand-new anonymous
+        // user with no purchase history even though Google Play Billing
+        // still knows the account owns an active subscription. restore
+        // re-syncs Play Store purchases to the current RC user before
+        // reporting entitlements, so a real purchaser doesn't see the
+        // paywall again after a reinstall without manually finding the
+        // Restore button. Confirmed bug 2026-08-04, not hypothetical: this
+        // is exactly what happens after any app-data-clearing device event.
         LaunchedEffect(Unit) {
-            Purchases.sharedInstance.getCustomerInfo(
-                callback = object : ReceiveCustomerInfoCallback {
-                    override fun onReceived(customerInfo: CustomerInfo) {
-                        val hasPro = customerInfo.entitlements["pro"]?.isActive == true
-                        val hasTeam = customerInfo.entitlements["team"]?.isActive == true
-                        val hasAny = customerInfo.entitlements.active.isNotEmpty()
-                        val isActive = hasPro || hasTeam || hasAny
-                        isPremium = isActive
-                        setPremiumUser(this@MainActivity, isActive)
-                        Log.d(TAG, "RC entitlements: active=${customerInfo.entitlements.active.keys}, isPremium=$isActive")
-                    }
-
-                    override fun onError(error: PurchasesError) {
-                        Log.e(TAG, "Error checking entitlements: ${error.message}")
-                        // Don't downgrade — use cached value so offline purchase still works
-                        isPremium = isPremiumUser(this@MainActivity)
-                    }
+            Purchases.sharedInstance.restorePurchasesWith(
+                onError = { error ->
+                    Log.e(TAG, "Error restoring/checking entitlements: ${error.message}")
+                    // Don't downgrade — use cached value so offline purchase still works
+                    isPremium = isPremiumUser(this@MainActivity)
+                },
+                onSuccess = { customerInfo ->
+                    val hasPro = customerInfo.entitlements["pro"]?.isActive == true
+                    val hasTeam = customerInfo.entitlements["team"]?.isActive == true
+                    val hasAny = customerInfo.entitlements.active.isNotEmpty()
+                    val isActive = hasPro || hasTeam || hasAny
+                    isPremium = isActive
+                    setPremiumUser(this@MainActivity, isActive)
+                    Log.d(TAG, "RC entitlements after restore: active=${customerInfo.entitlements.active.keys}, isPremium=$isActive")
                 }
             )
         }
