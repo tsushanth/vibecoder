@@ -419,6 +419,31 @@ function cleanupProjectFolder(projectDir) {
 }
 
 /**
+ * Final safety check before packaging: does projectDir actually contain a
+ * real app? Only the FIRST phase of each pipeline (generate/customize/tweak)
+ * uses the quota-safe rotation wrapper -- later phases (fix, polish) call
+ * Claude directly and, on hitting quota mid-phase, deliberately continue
+ * rather than fail ("Quota hit during fix phase, continuing with current
+ * state"). Those phases are agentic edits that can leave index.html deleted
+ * or truncated if interrupted mid-rewrite, and nothing re-checked afterward
+ * -- real incident: a project published as 'ready' with a bundle containing
+ * only .git scaffolding and zero actual app files. This check runs
+ * immediately before every zip step, regardless of which phase quota was
+ * exhausted in.
+ */
+function hasRealAppContent(projectDir) {
+    const indexPath = path.join(projectDir, 'index.html');
+    if (!fs.existsSync(indexPath)) return false;
+    let content;
+    try {
+        content = fs.readFileSync(indexPath, 'utf8');
+    } catch {
+        return false;
+    }
+    return content.trim().length > 200;
+}
+
+/**
  * Create a zip file from a directory using Node.js built-in zlib (no system zip needed).
  * Builds a valid ZIP archive with local file headers, data, and central directory.
  */
@@ -1167,6 +1192,13 @@ Fix them now. The app will not load at all if these aren't resolved.`;
         // ========================
         // Package & Return
         // ========================
+        if (!hasRealAppContent(projectDir)) {
+            console.log(`[${requestId}] Final content check failed before packaging — index.html missing or trivial`);
+            activeGenerations = Math.max(0, activeGenerations - 1);
+            if (callbackUrl) fetch(callbackUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'failed', error: 'Generation did not produce a working app', userId, secret: callbackSecret }), signal: AbortSignal.timeout(10000) }).catch(() => {});
+            return sendError('Generation did not produce a working app. Please try again.');
+        }
+
         sendStatus('package', 'Packaging app', 'Creating downloadable bundle');
 
         const zip = await zipProjectFolder(projectDir);
@@ -1537,6 +1569,12 @@ Make any small fixes needed. Don't rewrite — just polish.`;
         console.log(`[${requestId}] Final: ${files.length} files, ${finalValidation.critical.length} critical, ${finalValidation.warnings.length} warnings`);
 
         // Package
+        if (!hasRealAppContent(projectDir)) {
+            console.log(`[${requestId}] Final content check failed before packaging — index.html missing or trivial`);
+            activeGenerations = Math.max(0, activeGenerations - 1);
+            return sendError('Customization did not produce a working app. Please try again.');
+        }
+
         sendStatus('package', 'Packaging app', 'Creating downloadable bundle');
 
         const zip = await zipProjectFolder(projectDir);
@@ -2086,6 +2124,12 @@ Fix them now. Do NOT add TODO comments — implement actual fixes.`;
         console.log(`[${requestId}] Final: ${files.length} files, ${finalValidation.critical.length} critical, ${finalValidation.warnings.length} warnings`);
 
         // Phase 6: Commit and push
+        if (!hasRealAppContent(projectDir)) {
+            console.log(`[${requestId}] Final content check failed before commit — index.html missing or trivial`);
+            activeGenerations = Math.max(0, activeGenerations - 1);
+            return sendError('Tweak left the app without a working index.html. Please try again.');
+        }
+
         sendStatus('package', 'Saving changes', 'Committing to version history');
 
         let commitSha = null;
