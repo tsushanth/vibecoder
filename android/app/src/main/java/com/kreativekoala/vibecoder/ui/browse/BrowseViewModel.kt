@@ -24,8 +24,13 @@ data class BrowseUiState(
     val isRefreshing: Boolean = false,
     val sortOption: SortOption = SortOption.NEWEST,
     val errorMessage: String? = null,
-    val isForkingId: String? = null
-)
+    val isForkingId: String? = null,
+    val category: ProjectCategory = ProjectCategory.ALL
+) {
+    val visibleProjects: List<Project>
+        get() = if (category == ProjectCategory.ALL) projects
+        else projects.filter { classify(it) == category }
+}
 
 @HiltViewModel
 class BrowseViewModel @Inject constructor(
@@ -100,6 +105,10 @@ class BrowseViewModel @Inject constructor(
     fun changeSortOption(option: SortOption) {
         _uiState.update { it.copy(sortOption = option) }
         loadProjects()
+    }
+
+    fun selectCategory(category: ProjectCategory) {
+        _uiState.update { it.copy(category = category) }
     }
 
     fun forkProject(projectId: String) {

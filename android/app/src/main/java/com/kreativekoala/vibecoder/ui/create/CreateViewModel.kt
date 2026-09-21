@@ -5,6 +5,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.kreativekoala.vibecoder.MainActivity
 import androidx.lifecycle.viewModelScope
+import com.kreativekoala.vibecoder.data.model.BuildPlan
+import com.kreativekoala.vibecoder.data.model.ProgressEvent
 import com.kreativekoala.vibecoder.data.model.Project
 import com.kreativekoala.vibecoder.data.model.SseEvent
 import com.kreativekoala.vibecoder.data.model.Suggestion
@@ -25,8 +27,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.File
 import javax.inject.Inject
+
+enum class ChatStage { Idle, Planning, PlanReady, Building, Ready, Failed }
+
+/** A follow-up tweak in the chat thread. `done` = null while running, true/false when finished. */
+data class TweakTurn(val text: String, val done: Boolean? = null)
 
 data class CreateUiState(
     val isGenerating: Boolean = false,
@@ -54,7 +66,18 @@ data class CreateUiState(
     val feedbackSent: String? = null,
     val versionNumber: Int = 0,
     val showRatingPrompt: Boolean = false,
-    val showBuildingConfirmation: Boolean = false,
+    // ---- Chat build thread (state lives here so it survives tab switches) ----
+    val chatStage: ChatStage = ChatStage.Idle,
+    val chatPrompt: String = "",
+    val chatImageBase64: String? = null,
+    val buildPlan: BuildPlan? = null,
+    val buildProjectId: String? = null,
+    val buildStartedAtMs: Long = 0L,
+    val buildFinishedAtMs: Long? = null,
+    val buildEvents: List<ProgressEvent> = emptyList(),
+    val buildFailure: String? = null,
+    val previewUrl: String? = null,
+    val tweakTurns: List<TweakTurn> = emptyList(),
     val showSystemBusyDialog: Boolean = false,
     /** True when the user attempted generation past the free limit. Triggers a
      * non-dismissible paywall inside CreateScreen until they subscribe. */
@@ -146,9 +169,104 @@ class CreateViewModel @Inject constructor(
         return allSuggestions.shuffled().take(count)
     }
 
+    // Must be declared before init: init calls restoreChatSnapshot(), and Kotlin initializes
+    // properties in declaration order, so a later declaration would still be null there.
+    private val snapshotPrefs = appContext.getSharedPreferences("chat_snapshot", Context.MODE_PRIVATE)
+    private var ratingArmed = false
+    private var previewOpened = false
+    private var planJob: Job? = null
+    private var progressJob: Job? = null
+
     init {
         loadSuggestions()
         checkPendingGeneration()
+        restoreChatSnapshot()
+    }
+
+    // ---- Chat snapshot (survives process death / activity recreation) ----
+
+    /** Building snapshots are recovered by [checkPendingGeneration]; Ready snapshots are reloaded here. */
+    private fun saveChatSnapshot(stage: ChatStage, projectId: String?) {
+        val s = _uiState.value
+        snapshotPrefs.edit()
+            .putString("stage", stage.name)
+            .putString("userId", authRepository.currentUser?.uid)
+            .putString("projectId", projectId)
+            .putString("prompt", s.chatPrompt)
+            .putString("planSummary", s.buildPlan?.summary)
+            .apply()
+    }
+
+    private fun clearChatSnapshot() {
+        snapshotPrefs.edit().clear().apply()
+    }
+
+    private fun restoreChatSnapshot() {
+        if (snapshotPrefs.getString("stage", null) != ChatStage.Ready.name) return
+        val projectId = snapshotPrefs.getString("projectId", null)
+        val userId = authRepository.currentUser?.uid
+        if (projectId == null || userId == null || snapshotPrefs.getString("userId", null) != userId) {
+            clearChatSnapshot()
+            return
+        }
+        val prompt = snapshotPrefs.getString("prompt", "") ?: ""
+        val summary = snapshotPrefs.getString("planSummary", null)
+        viewModelScope.launch {
+            val project = try {
+                projectRepository.getProject(projectId)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: retrofit2.HttpException) {
+                if (e.code() == 404) clearChatSnapshot()
+                return@launch
+            } catch (e: Exception) {
+                Log.w("Create", "Restoring chat failed: ${e.message}")
+                return@launch // transient (offline) — keep snapshot, stay on the composer
+            }
+            if (project == null) { clearChatSnapshot(); return@launch }
+            // Something else (new build, pending recovery) took over while we were loading.
+            if (_uiState.value.chatStage != ChatStage.Idle) return@launch
+            val bundle = project.bundle?.takeIf { it.isNotBlank() }
+            val dir = bundle?.let {
+                try {
+                    withContext(Dispatchers.IO) { ZipExtractor.extractBundle(base64Bundle = it, cacheDir = appContext.cacheDir) }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.w("Create", "Bundle extract failed: ${e.message}")
+                    null
+                }
+            }
+            _uiState.update {
+                if (it.chatStage != ChatStage.Idle) it else it.copy(
+                    chatStage = ChatStage.Ready,
+                    chatPrompt = prompt,
+                    buildPlan = summary?.let { s -> BuildPlan(summary = s) },
+                    buildProjectId = projectId,
+                    savedProjectId = projectId,
+                    bundleDir = dir,
+                    bundleBase64 = bundle,
+                    previewUrl = project.previewUrl,
+                    progressPercent = 100.0,
+                    buildPhase = "Complete",
+                    buildFinishedAtMs = System.currentTimeMillis()
+                )
+            }
+        }
+    }
+
+    // Rating prompt is armed when a build finishes but only shown once the user has
+    // looked at the result (opened + closed the preview) or moved on (tweak / new chat).
+
+    private fun maybeShowRatingPrompt() {
+        if (!ratingArmed || _uiState.value.showPreview) return
+        ratingArmed = false
+        viewModelScope.launch {
+            if (!userPreferences.hasShownRatingPrompt.first()) {
+                userPreferences.markRatingPromptShown()
+                _uiState.update { it.copy(showRatingPrompt = true) }
+            }
+        }
     }
 
     private fun checkPendingGeneration() {
@@ -164,11 +282,12 @@ class CreateViewModel @Inject constructor(
                     Log.d("Create", "Found pending generation: \"${pendingPrompt.take(50)}\" (${elapsedMinutes}m ago)")
                     _uiState.update {
                         it.copy(
-                            isGenerating = true,
-                            prompt = pendingPrompt,
+                            chatStage = ChatStage.Building,
+                            chatPrompt = pendingPrompt,
+                            buildStartedAtMs = pendingTime,
                             buildPhase = "Checking for your app...",
                             buildDetail = "Your app may still be building",
-                            progressPercent = 80.0
+                            progressPercent = 0.0
                         )
                     }
                     pollForCompletedProject(userId)
@@ -289,183 +408,352 @@ class CreateViewModel @Inject constructor(
         }
         val userName = authRepository.currentUser?.displayName ?: "VibeBuild User"
 
-        viewModelScope.launch {
-            // Persist generation state so we can recover if app is killed
-            userPreferences.savePendingGeneration(prompt)
+        val image = currentState.referenceImageBase64
+        val stage = currentState.chatStage
+        if (stage == ChatStage.Planning || stage == ChatStage.PlanReady || stage == ChatStage.Building) return
 
-            // Track generation count for paywall
-            MainActivity.incrementGenerationCount(appContext)
-
-            // Show confirmation and reset Create screen (fire-and-forget)
-            _uiState.update {
-                it.copy(
-                    isGenerating = false,
-                    prompt = "",
-                    referenceImageBase64 = null,
-                    showPreview = false,
-                    showBuildingConfirmation = true
-                )
-            }
-
-            // Run generation in background
-            generationJob = viewModelScope.launch {
-                var queuedProjectId: String? = null
-                try {
-                    projectRepository.generate(
-                        prompt = prompt,
-                        userId = userId,
-                        userName = userName,
-                        referenceImage = currentState.referenceImageBase64
-                    ).collect { event ->
-                        when (event) {
-                            is SseEvent.Queued -> {
-                                queuedProjectId = event.projectId
-                                Log.d("Create", "Build queued: projectId=${event.projectId}")
-                            }
-                            is SseEvent.Status -> {
-                                // Silently track progress in background
-                            }
-                            is SseEvent.Result -> {
-                                handleGenerationResult(event)
-                            }
-                            is SseEvent.Error -> {
-                                Log.w("Create", "SSE error during generation: ${event.error}")
-                                if (event.systemBusy) {
-                                    _uiState.update {
-                                        it.copy(isGenerating = false, showSystemBusyDialog = true)
-                                    }
-                                } else {
-                                    // Start polling if we have a projectId — build may still be running
-                                    val pid = queuedProjectId
-                                    if (pid != null) {
-                                        pollForProjectById(pid)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } catch (e: Exception) {
-                    Log.w("Create", "SSE stream dropped: ${e.message}")
-                    val pid = queuedProjectId
-                    if (pid != null) {
-                        pollForProjectById(pid)
-                    }
-                }
-                // SSE closed (normally or via error) — poll if we have a projectId and no result yet
-                // In callback mode, server closes SSE after dispatching so build continues async
-                val pid = queuedProjectId
-                if (pid != null) {
-                    pollForProjectById(pid)
-                }
-            }
-        }
-    }
-
-    private fun pollForProjectById(projectId: String) {
-        viewModelScope.launch {
-            // Poll every 10 seconds for up to 5 minutes
-            val maxAttempts = 30
-            for (attempt in 1..maxAttempts) {
-                kotlinx.coroutines.delay(10_000)
-
-                try {
-                    val project = projectRepository.getProject(projectId)
-                    if (project != null && project.status == "ready") {
-                        Log.d("Create", "Project $projectId ready via polling")
-                        userPreferences.clearPendingGeneration()
-                        NotificationHelper.showGenerationComplete(appContext)
-                        return@launch
-                    }
-                } catch (e: Exception) {
-                    Log.d("Create", "Poll attempt $attempt failed: ${e.message}")
-                }
-            }
-            userPreferences.clearPendingGeneration()
-        }
-    }
-
-    private fun pollForCompletedProject(userId: String) {
+        finishing = false
         _uiState.update {
             it.copy(
-                buildPhase = "Still building...",
-                buildDetail = "Connection lost — checking for your project",
-                progressPercent = 80.0
+                chatStage = ChatStage.Planning,
+                chatPrompt = prompt,
+                chatImageBase64 = image,
+                prompt = "",
+                referenceImageBase64 = null,
+                buildPlan = null,
+                buildProjectId = null,
+                buildStartedAtMs = System.currentTimeMillis(),
+                buildFinishedAtMs = null,
+                buildEvents = emptyList(),
+                buildFailure = null,
+                buildPhase = "",
+                buildDetail = "",
+                progressPercent = 0.0,
+                showPreview = false,
+                bundleDir = null,
+                bundleBase64 = null,
+                savedProjectId = null,
+                previewUrl = null,
+                tweakTurns = emptyList(),
+                versionNumber = 0,
+                feedbackSent = null,
+                deployedUrl = null
             )
         }
 
-        viewModelScope.launch {
-            // Poll every 10 seconds for up to 5 minutes
-            val maxAttempts = 30
-            val prompt = _uiState.value.prompt
-            for (attempt in 1..maxAttempts) {
-                kotlinx.coroutines.delay(10_000)
+        // Optional plan step: if the endpoint is missing/slow/fails, go straight to building.
+        planJob = viewModelScope.launch {
+            val plan = withTimeoutOrNull(10_000) { projectRepository.plan(prompt) }
+            if (_uiState.value.chatStage != ChatStage.Planning) return@launch
+            if (plan != null) {
+                _uiState.update { it.copy(chatStage = ChatStage.PlanReady, buildPlan = plan) }
+            } else {
+                beginBuild()
+            }
+        }
+    }
 
-                if (!_uiState.value.isGenerating) return@launch // Cancelled
+    fun confirmPlan() {
+        if (_uiState.value.chatStage != ChatStage.PlanReady) return
+        beginBuild()
+    }
 
-                _uiState.update {
-                    it.copy(buildDetail = "Checking for your project... (${attempt * 10}s)")
+    /** Back to the idle composer with the original prompt restored for editing. */
+    fun editPrompt() {
+        cancelJobs()
+        _uiState.update {
+            it.copy(
+                chatStage = ChatStage.Idle,
+                prompt = it.chatPrompt,
+                referenceImageBase64 = it.chatImageBase64,
+                buildPlan = null,
+                buildFailure = null
+            )
+        }
+    }
+
+    private fun beginBuild() {
+        val s = _uiState.value
+        val prompt = s.chatPrompt
+        val image = s.chatImageBase64
+        val userId = authRepository.currentUser?.uid ?: run {
+            _uiState.update { it.copy(chatStage = ChatStage.Idle, prompt = prompt, errorMessage = "Please sign in to generate projects") }
+            return
+        }
+        val userName = authRepository.currentUser?.displayName ?: "VibeBuild User"
+
+        finishing = false
+        ratingArmed = false
+        previewOpened = false
+        saveChatSnapshot(ChatStage.Building, null)
+        _uiState.update {
+            it.copy(
+                chatStage = ChatStage.Building,
+                buildStartedAtMs = System.currentTimeMillis(),
+                buildPhase = "Generate",
+                buildDetail = "Starting your build...",
+                progressPercent = 0.0
+            )
+        }
+
+        generationJob = viewModelScope.launch {
+            // Persist generation state so we can recover if app is killed
+            userPreferences.savePendingGeneration(prompt)
+            // Track generation count for paywall
+            MainActivity.incrementGenerationCount(appContext)
+
+            var queuedProjectId: String? = null
+            try {
+                projectRepository.generate(
+                    prompt = prompt,
+                    userId = userId,
+                    userName = userName,
+                    referenceImage = image
+                ).collect { event ->
+                    when (event) {
+                        is SseEvent.Queued -> {
+                            queuedProjectId = event.projectId
+                            _uiState.update { it.copy(buildProjectId = event.projectId) }
+                            Log.d("Create", "Build queued: projectId=${event.projectId}")
+                            startProgressPolling(event.projectId)
+                        }
+                        is SseEvent.Status -> applySseStatus(event)
+                        is SseEvent.Result -> {
+                            val pid = event.projectId ?: queuedProjectId
+                            if (pid != null) {
+                                finishReady(pid, event.bundle, event.previewUrl)
+                            }
+                        }
+                        is SseEvent.Error -> {
+                            Log.w("Create", "SSE error during generation: ${event.error}")
+                            if (event.systemBusy) {
+                                userPreferences.clearPendingGeneration()
+                                cancelJobs()
+                                _uiState.update {
+                                    it.copy(
+                                        chatStage = ChatStage.Idle,
+                                        prompt = it.chatPrompt,
+                                        referenceImageBase64 = it.chatImageBase64,
+                                        showSystemBusyDialog = true
+                                    )
+                                }
+                            } else if (queuedProjectId == null) {
+                                failBuild(event.error)
+                            }
+                            // else: build may still be running; the progress poller decides
+                        }
+                    }
                 }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w("Create", "SSE stream dropped: ${e.message}")
+            }
+            // Stream closed. Without a projectId we can never learn the outcome.
+            if (queuedProjectId == null && _uiState.value.chatStage == ChatStage.Building) {
+                failBuild("Couldn't start your build. Please try again.")
+            }
+        }
+    }
 
+    @Volatile private var finishing = false
+
+    private fun cancelJobs() {
+        planJob?.cancel()
+        generationJob?.cancel()
+        progressJob?.cancel()
+    }
+
+    private fun applySseStatus(event: SseEvent.Status) {
+        _uiState.update {
+            val msg = event.message.ifEmpty { event.detail }
+            val events = if (msg.isNotEmpty() && it.buildEvents.lastOrNull()?.message != msg)
+                it.buildEvents + ProgressEvent(phase = event.phase, message = msg) else it.buildEvents
+            it.copy(
+                buildPhase = event.phase.ifEmpty { it.buildPhase },
+                buildDetail = event.detail.ifEmpty { event.message },
+                progressPercent = maxOf(it.progressPercent, event.resolvedProgress()),
+                buildEvents = events
+            )
+        }
+    }
+
+    /**
+     * Polls GET api/projects/{id}/progress every ~2s. If the endpoint 404s twice, degrades to
+     * checking project status every ~10s (the old behavior).
+     */
+    private fun startProgressPolling(projectId: String) {
+        if (progressJob?.isActive == true) return
+        progressJob = viewModelScope.launch {
+            val started = System.currentTimeMillis()
+            var unsupported = 0
+            var tick = 0
+            while (_uiState.value.chatStage == ChatStage.Building) {
+                if (System.currentTimeMillis() - started > 12 * 60_000L) {
+                    failBuild("Your app may still be building. Check My Projects in a minute.")
+                    return@launch
+                }
+                delay(2_000)
+                tick++
+                if (_uiState.value.chatStage != ChatStage.Building) return@launch
+                try {
+                    val p = if (unsupported < 2) {
+                        projectRepository.getProgress(projectId).also { if (it == null) unsupported++ }
+                    } else null
+                    if (p != null) {
+                        _uiState.update {
+                            it.copy(
+                                buildPhase = p.phase.ifEmpty { it.buildPhase },
+                                buildDetail = p.detail.ifEmpty { it.buildDetail },
+                                progressPercent = maxOf(it.progressPercent, p.percent),
+                                buildEvents = p.events?.takeIf { e -> e.isNotEmpty() } ?: it.buildEvents
+                            )
+                        }
+                        when (p.status.lowercase()) {
+                            "ready" -> { finishReady(projectId, null, null); return@launch }
+                            "failed" -> { failBuild(p.error ?: "The build failed. Please try again."); return@launch }
+                        }
+                    } else if (tick % 5 == 0) {
+                        val project = projectRepository.getProject(projectId)
+                        when (project?.status?.lowercase()) {
+                            "ready" -> { finishReady(projectId, null, null); return@launch }
+                            "failed" -> { failBuild("The build failed. Please try again."); return@launch }
+                        }
+                    }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.d("Create", "Progress poll failed: ${e.message}")
+                }
+            }
+        }
+    }
+
+    /** Recovery path: no projectId known, so find the project by prompt, then track it. */
+    private fun pollForCompletedProject(userId: String) {
+        progressJob = viewModelScope.launch {
+            val prompt = _uiState.value.chatPrompt
+            for (attempt in 1..30) {
+                delay(10_000)
+                if (_uiState.value.chatStage != ChatStage.Building) return@launch
+                _uiState.update { it.copy(buildDetail = "Checking for your project... (${attempt * 10}s)") }
                 try {
                     val projects = projectRepository.getMyProjects(userId)
-                    // Find a recently created project matching our prompt
                     val match = projects.firstOrNull { p ->
                         p.description == prompt || p.title.lowercase().startsWith(
                             prompt.trim().split("\\s+".toRegex()).take(4).joinToString(" ").lowercase().take(30)
                         )
                     }
-
                     if (match != null) {
-                        Log.d("Create", "Found completed project via polling: ${match.id}")
-                        userPreferences.clearPendingGeneration()
-                        _uiState.update {
-                            it.copy(
-                                isGenerating = false,
-                                progressPercent = 100.0,
-                                buildPhase = appContext.getString(R.string.generation_phase_complete),
-                                savedProjectId = match.id,
-                                showPreview = false,
-                                errorMessage = "Your app is ready! Check 'My Projects' to view it."
-                            )
+                        _uiState.update { it.copy(buildProjectId = match.id) }
+                        if (match.status?.lowercase() == "ready") {
+                            finishReady(match.id, null, null)
+                        } else {
+                            progressJob = null
+                            startProgressPolling(match.id)
                         }
-                        NotificationHelper.showGenerationComplete(appContext)
                         return@launch
                     }
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     Log.d("Create", "Poll attempt $attempt failed: ${e.message}")
                 }
             }
-
-            // Timed out
-            userPreferences.clearPendingGeneration()
-            _uiState.update {
-                it.copy(
-                    isGenerating = false,
-                    errorMessage = "Your app may still be building. Check 'My Projects' in a minute."
-                )
-            }
+            failBuild("Your app may still be building. Check 'My Projects' in a minute.")
         }
     }
 
-    private fun handleGenerationResult(result: SseEvent.Result) {
+    private fun failBuild(message: String) {
+        clearChatSnapshot()
         viewModelScope.launch { userPreferences.clearPendingGeneration() }
-
-        // Project is auto-saved server-side. Just notify the user.
-        Log.d("Create", "Generation complete: projectId=${result.projectId}, previewUrl=${result.previewUrl}")
-        NotificationHelper.showGenerationComplete(appContext)
-
-        // Show rating prompt on first successful generation
-        viewModelScope.launch {
-            val alreadyShown = userPreferences.hasShownRatingPrompt.first()
-            if (!alreadyShown) {
-                userPreferences.markRatingPromptShown()
-                _uiState.update { it.copy(showRatingPrompt = true) }
-            }
+        _uiState.update {
+            if (it.chatStage == ChatStage.Ready) it
+            else it.copy(chatStage = ChatStage.Failed, buildFailure = message, buildFinishedAtMs = System.currentTimeMillis())
         }
     }
 
-    fun dismissBuildingConfirmation() {
-        _uiState.update { it.copy(showBuildingConfirmation = false) }
+    private suspend fun finishReady(projectId: String, inlineBundle: String?, inlinePreview: String?) {
+        if (finishing) return
+        finishing = true
+        var bundle = inlineBundle?.takeIf { it.isNotBlank() }
+        var previewUrl = inlinePreview
+        if (bundle == null) {
+            try {
+                val p = projectRepository.getProject(projectId)
+                bundle = p?.bundle?.takeIf { it.isNotBlank() }
+                previewUrl = previewUrl ?: p?.previewUrl
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w("Create", "Fetching finished project failed: ${e.message}")
+            }
+        }
+        val dir = bundle?.let {
+            try {
+                withContext(Dispatchers.IO) { ZipExtractor.extractBundle(base64Bundle = it, cacheDir = appContext.cacheDir) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w("Create", "Bundle extract failed: ${e.message}")
+                null
+            }
+        }
+        userPreferences.clearPendingGeneration()
+        NotificationHelper.showGenerationComplete(appContext)
+        _uiState.update {
+            it.copy(
+                chatStage = ChatStage.Ready,
+                buildProjectId = projectId,
+                savedProjectId = projectId,   // server auto-saves builds
+                bundleDir = dir,
+                bundleBase64 = bundle,
+                previewUrl = previewUrl,
+                progressPercent = 100.0,
+                buildPhase = "Complete",
+                buildFinishedAtMs = System.currentTimeMillis()
+            )
+        }
+        saveChatSnapshot(ChatStage.Ready, projectId)
+        // Don't pop the rating dialog over the completion card; arm it for later.
+        if (!userPreferences.hasShownRatingPrompt.first()) {
+            ratingArmed = true
+            previewOpened = false
+        }
+    }
+
+    /** Leave the finished/failed thread and return to a blank composer. */
+    fun newChat() {
+        cancelJobs()
+        finishing = false
+        clearChatSnapshot()
+        _uiState.update {
+            it.copy(
+                chatStage = ChatStage.Idle, chatPrompt = "", chatImageBase64 = null, buildPlan = null,
+                buildProjectId = null, buildEvents = emptyList(), buildFailure = null, buildPhase = "",
+                buildDetail = "", progressPercent = 0.0, previewUrl = null, tweakTurns = emptyList(),
+                showPreview = false, bundleDir = null, bundleBase64 = null, savedProjectId = null,
+                deployedUrl = null, showDeployDialog = false, isTweaking = false, tweakPhase = "",
+                feedbackSent = null, versionNumber = 0, buildFinishedAtMs = null
+            )
+        }
+        maybeShowRatingPrompt()
+    }
+
+    fun openPreview() {
+        previewOpened = true
+        _uiState.update { it.copy(showPreview = true) }
+    }
+
+    /** Close the preview overlay but keep the chat thread intact. */
+    fun closePreview() {
+        _uiState.update { it.copy(showPreview = false, showDeployDialog = false) }
+        if (previewOpened) maybeShowRatingPrompt()
+    }
+
+    fun openPublish() {
+        previewOpened = true
+        _uiState.update { it.copy(showPreview = true, showDeployDialog = true) }
     }
 
     /** Called after a successful purchase from the hard paywall — re-checks the
@@ -479,19 +767,27 @@ class CreateViewModel @Inject constructor(
     }
 
     fun cancelGeneration() {
-        generationJob?.cancel()
+        cancelJobs()
+        clearChatSnapshot()
+        viewModelScope.launch { userPreferences.clearPendingGeneration() }
         _uiState.update {
             it.copy(
+                chatStage = ChatStage.Idle,
+                prompt = it.chatPrompt,
+                referenceImageBase64 = it.chatImageBase64,
                 isGenerating = false,
                 progressPercent = 0.0,
                 buildPhase = "",
-                buildDetail = ""
+                buildDetail = "",
+                buildEvents = emptyList(),
+                buildPlan = null
             )
         }
     }
 
     fun saveProject() {
         val currentState = _uiState.value
+        if (currentState.savedProjectId != null) return // already saved (server auto-saves builds)
         val bundleBase64 = currentState.bundleBase64 ?: return
         val userId = authRepository.currentUser?.uid ?: return
         val userName = authRepository.currentUser?.displayName ?: "VibeBuild User"
@@ -580,6 +876,12 @@ class CreateViewModel @Inject constructor(
         }
         val userName = authRepository.currentUser?.displayName ?: "VibeBuild User"
 
+        if (_uiState.value.isTweaking) return
+        maybeShowRatingPrompt()
+        if (_uiState.value.chatStage == ChatStage.Ready) {
+            _uiState.update { it.copy(tweakTurns = it.tweakTurns + TweakTurn(desc)) }
+        }
+
         viewModelScope.launch {
             // Auto-save if not already saved
             var projectId = _uiState.value.savedProjectId
@@ -641,6 +943,7 @@ class CreateViewModel @Inject constructor(
                                 it.copy(
                                     isTweaking = false,
                                     tweakPhase = "",
+                                    tweakTurns = markLastTweak(it.tweakTurns, true),
                                     bundleDir = bundleDir,
                                     bundleBase64 = event.bundle,
                                     versionNumber = it.versionNumber + 1
@@ -649,17 +952,22 @@ class CreateViewModel @Inject constructor(
                         }
                         is SseEvent.Error -> {
                             _uiState.update {
-                                it.copy(isTweaking = false, tweakPhase = "", errorMessage = event.error)
+                                it.copy(isTweaking = false, tweakPhase = "", errorMessage = event.error, tweakTurns = markLastTweak(it.tweakTurns, false))
                             }
                         }
                     }
                 }
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(isTweaking = false, tweakPhase = "", errorMessage = "Tweak failed: ${e.message}")
+                    it.copy(isTweaking = false, tweakPhase = "", errorMessage = "Tweak failed: ${e.message}", tweakTurns = markLastTweak(it.tweakTurns, false))
                 }
             }
         }
+    }
+
+    private fun markLastTweak(turns: List<TweakTurn>, ok: Boolean): List<TweakTurn> {
+        val i = turns.indexOfLast { it.done == null }
+        return if (i < 0) turns else turns.toMutableList().also { it[i] = it[i].copy(done = ok) }
     }
 
     fun sendFeedback(rating: String) {

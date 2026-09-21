@@ -75,7 +75,7 @@ fun AccountScreen(
                 PaywallFeature("\uD83D\uDCF1", "All Templates"),
                 PaywallFeature("\uD83D\uDCBE", "Cloud Storage")
             ),
-            theme = PaywallTheme(accent = Color(0xFF6C63FF), accent2 = Color(0xFF9C27B0)),
+            theme = PaywallTheme(accent = VibePurple, accent2 = Color(0xFF9C27B0)),
             onDone = { showPaywallPreview = false }
         )
         return
@@ -157,7 +157,6 @@ fun AccountScreen(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .statusBarsPadding()
             .padding(20.dp)
     ) {
         Spacer(modifier = Modifier.height(8.dp))
@@ -243,7 +242,7 @@ fun AccountScreen(
             Button(
                 onClick = onSubscriptionsClick,
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = VibePurple),
                 contentPadding = PaddingValues(vertical = 16.dp)
             ) {
@@ -260,7 +259,8 @@ fun AccountScreen(
 
         // Usage stats
         Card(
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(12.dp),
+            border = androidx.compose.foundation.BorderStroke(1.dp, DarkBorder),
             colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
@@ -274,6 +274,8 @@ fun AccountScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 val limit = uiState.subscriptionStatus?.limits
+                // Pro/Team limits are Infinity on the server, which JSON turns into null.
+                val paidTier = (uiState.subscriptionStatus?.tier ?: uiState.user?.subscriptionTier ?: "free") != "free"
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -285,7 +287,7 @@ fun AccountScreen(
                     UsageStat(
                         label = stringResource(R.string.account_stat_todays_gens),
                         value = "${uiState.user?.dailyGenerationCount ?: 0}" +
-                                if (limit?.unlimited == true) "" else "/${limit?.dailyGenerations ?: 3}"
+                                if (paidTier || limit?.unlimited == true) "" else "/${limit?.dailyGenerations ?: 3}"
                     )
                 }
             }
@@ -304,7 +306,8 @@ fun AccountScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Card(
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(12.dp),
+            border = androidx.compose.foundation.BorderStroke(1.dp, DarkBorder),
             colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant)
         ) {
             Column {

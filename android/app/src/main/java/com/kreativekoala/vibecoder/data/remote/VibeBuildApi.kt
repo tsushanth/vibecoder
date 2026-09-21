@@ -43,6 +43,14 @@ interface VibeBuildApi {
     @POST("api/projects/suggest-ideas")
     suspend fun suggestNewIdeas(): SuggestionsResponse
 
+    /** Live build progress. Backend may not implement this yet (404 -> caller falls back to polling). */
+    @GET("api/projects/{id}/progress")
+    suspend fun getProgress(@Path("id") id: String): ProjectProgress
+
+    /** Optional "plan before build" step. */
+    @POST("api/projects/plan")
+    suspend fun planProject(@Body body: PlanRequest): PlanResponse
+
     @POST("api/projects/save")
     suspend fun saveProject(@Body body: SaveProjectRequest): SaveProjectResponse
 
