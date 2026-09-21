@@ -33,7 +33,7 @@ body {
 }
 
 ::selection {
-  background: rgba(59, 130, 246, 0.4);
+  background: rgba(91, 76, 255, 0.4);
   color: white;
 }
 
@@ -52,8 +52,8 @@ textarea::placeholder {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(59, 130, 246, 0.3); }
-  50% { box-shadow: 0 0 16px rgba(59, 130, 246, 0.6); }
+  0%, 100% { box-shadow: 0 0 8px rgba(91, 76, 255, 0.3); }
+  50% { box-shadow: 0 0 16px rgba(91, 76, 255, 0.6); }
 }
 
 .animate-fade-in {
