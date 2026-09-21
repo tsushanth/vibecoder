@@ -92,6 +92,12 @@ export default function NewProjectPage() {
               user.user_metadata?.full_name || user.email?.split('@')[0],
             framework: 'react',
             referenceImage,
+            // The backend now defaults to an async queued+poll flow (the
+            // mobile app's model); this client only understands the older
+            // held-open SSE stream, which the backend still proxies when
+            // asked. Without this, generate silently returns to idle after
+            // a single "queued" event with no progress and no error.
+            stream: true,
           },
           abortRef.current.signal
         );
