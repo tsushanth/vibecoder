@@ -1,0 +1,8 @@
+A new look and a smarter builder:
+- Redesigned dark interface across the app
+- Chat-style builder: see a plan first, then watch your app build step by step, preview it and tweak it right there
+- Browse now has categories: Games, Tools, Sites and Trackers
+- Use your own domain: connect one from any published app
+- Account shows your real name and project count
+- Higher free generation limit
+- Fixes and stability improvements
