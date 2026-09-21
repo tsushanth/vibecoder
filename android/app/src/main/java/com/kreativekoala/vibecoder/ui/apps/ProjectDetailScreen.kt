@@ -198,6 +198,10 @@ fun ProjectDetailScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
+                        // Edge-to-edge: adjustResize no longer resizes the window, so pad for the
+                        // keyboard here or it covers the fields near the bottom.
+                        .consumeWindowInsets(innerPadding)
+                        .imePadding()
                         .verticalScroll(rememberScrollState())
                         .padding(20.dp)
                 ) {

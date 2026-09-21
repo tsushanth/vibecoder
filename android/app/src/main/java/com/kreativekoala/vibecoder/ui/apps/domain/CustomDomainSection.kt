@@ -2,6 +2,16 @@ package com.kreativekoala.vibecoder.ui.apps.domain
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntSize
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -61,6 +71,7 @@ fun CustomDomainSection(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun AddDomain(s: CustomDomainState, c: CustomDomainController, onUpgrade: () -> Unit) {
     if (s.upgradeRequired) {
@@ -73,10 +84,25 @@ private fun AddDomain(s: CustomDomainState, c: CustomDomainController, onUpgrade
         return
     }
     Text("Use your own address, like www.yourbrand.com.", color = TextSecondary, style = MaterialTheme.typography.bodySmall)
+    // When the field gains focus, scroll it (plus the Add button below it) above the keyboard.
+    val requester = remember { BringIntoViewRequester() }
+    val scope = rememberCoroutineScope()
+    val density = LocalDensity.current
+    var fieldSize by remember { mutableStateOf(IntSize.Zero) }
     OutlinedTextField(
         value = s.input,
         onValueChange = c::onInputChanged,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .onSizeChanged { fieldSize = it }
+            .bringIntoViewRequester(requester)
+            .onFocusEvent { focus ->
+                if (focus.isFocused) scope.launch {
+                    delay(350) // let the keyboard animation finish before measuring
+                    val extra = with(density) { 72.dp.toPx() }
+                    requester.bringIntoView(Rect(0f, 0f, fieldSize.width.toFloat(), fieldSize.height + extra))
+                }
+            },
         singleLine = true,
         placeholder = { Text("www.example.com") },
         isError = s.error is DomainError.Validation,
