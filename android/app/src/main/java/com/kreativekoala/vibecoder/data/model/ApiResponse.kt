@@ -146,6 +146,7 @@ data class DeployResponse(
 data class DeployStatusResponse(
     val success: Boolean,
     val deployed: Boolean = false,
+    @SerializedName("deploymentId") val deploymentId: String? = null,
     val subdomain: String? = null,
     val url: String? = null,
     @SerializedName("deployedAt") val deployedAt: String? = null,
