@@ -131,6 +131,31 @@ interface VibeBuildApi {
         @Body body: DeleteRequest
     ): SuccessResponse
 
+    // Custom domains (Pro)
+    @POST("api/domains/{deploymentId}/add")
+    suspend fun addDomain(
+        @Path("deploymentId") id: String,
+        @Body body: AddDomainRequest
+    ): AddDomainResponse
+
+    @POST("api/domains/{deploymentId}/verify")
+    suspend fun verifyDomain(
+        @Path("deploymentId") id: String,
+        @Body body: VerifyDomainRequest
+    ): VerifyDomainResponse
+
+    @GET("api/domains/{deploymentId}")
+    suspend fun getDomain(
+        @Path("deploymentId") id: String,
+        @Query("userId") userId: String
+    ): DomainInfoResponse
+
+    @HTTP(method = "DELETE", path = "api/domains/{deploymentId}", hasBody = true)
+    suspend fun removeDomain(
+        @Path("deploymentId") id: String,
+        @Body body: VerifyDomainRequest
+    ): RemoveDomainResponse
+
     // Push token registration
     @POST("api/auth/push-token")
     suspend fun registerPushToken(@Body body: PushTokenRequest): SuccessResponse
