@@ -34,6 +34,7 @@ import com.kreativekoala.ratingkit.RatingKit
 import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.preview.LivePreviewScreen
 import com.kreativekoala.vibecoder.ui.preview.VersionHistorySheet
+import com.kreativekoala.vibecoder.ui.apps.domain.CustomDomainSection
 import com.kreativekoala.vibecoder.ui.theme.*
 import com.kreativekoala.vibecoder.util.DateUtil
 
@@ -42,6 +43,7 @@ import com.kreativekoala.vibecoder.util.DateUtil
 fun ProjectDetailScreen(
     projectId: String,
     onBack: () -> Unit,
+    onUpgrade: () -> Unit = {},
     viewModel: ProjectDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -360,6 +362,10 @@ fun ProjectDetailScreen(
                                     }
                                 }
                             }
+                        }
+                        uiState.deploymentId?.let { depId ->
+                            Spacer(modifier = Modifier.height(12.dp))
+                            CustomDomainSection(deploymentId = depId, onUpgrade = onUpgrade)
                         }
                     } else {
                         // Not deployed — show deploy button

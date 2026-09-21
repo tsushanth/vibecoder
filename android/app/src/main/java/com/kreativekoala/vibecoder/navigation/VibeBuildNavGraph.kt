@@ -143,7 +143,8 @@ fun VibeBuildNavGraph() {
             val projectId = backStackEntry.arguments?.getString("projectId") ?: return@composable
             ProjectDetailScreen(
                 projectId = projectId,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onUpgrade = { navController.navigate(Screen.SubscriptionPlans.route) }
             )
         }
 

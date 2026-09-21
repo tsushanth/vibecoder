@@ -44,6 +44,7 @@ data class ProjectDetailUiState(
     val isExportingApk: Boolean = false,
     val apkExportProgress: String = "",
     val adsEnabled: Boolean = false,
+    val deploymentId: String? = null,
     val previewUrl: String? = null
 )
 
@@ -72,7 +73,7 @@ class ProjectDetailViewModel @Inject constructor(
                     try {
                         val status = deployRepository.getDeployStatus(project.id)
                         if (status.deployed && status.url != null) {
-                            _uiState.update { it.copy(deployedUrl = status.url, adsEnabled = status.adsEnabled) }
+                            _uiState.update { it.copy(deployedUrl = status.url, adsEnabled = status.adsEnabled, deploymentId = status.deploymentId) }
                         }
                     } catch (e: Exception) {
                         Log.d("ProjectDetail", "Deploy status check failed: ${e.message}")
@@ -198,7 +199,7 @@ class ProjectDetailViewModel @Inject constructor(
             try {
                 val status = deployRepository.getDeployStatus(project.id)
                 if (status.deployed && status.url != null) {
-                    _uiState.update { it.copy(deployedUrl = status.url) }
+                    _uiState.update { it.copy(deployedUrl = status.url, deploymentId = status.deploymentId) }
                 }
             } catch (e: Exception) {
                 Log.d("ProjectDetail", "Deploy status check failed: ${e.message}")

@@ -161,13 +161,14 @@ router.delete('/:projectId/deploy', async (req, res) => {
 router.get('/:projectId/deploy', async (req, res) => {
     try {
         const { projectId } = req.params;
-        const { data } = await supabase.from('deployments').select('subdomain, status, deployed_at, ads_enabled').eq('project_id', projectId).single();
+        const { data } = await supabase.from('deployments').select('id, subdomain, status, deployed_at, ads_enabled').eq('project_id', projectId).single();
 
         if (!data) return res.json({ success: true, deployed: false });
 
         res.json({
             success: true,
             deployed: data.status === 'active',
+            deploymentId: data.id,
             subdomain: data.subdomain,
             url: `https://${data.subdomain}.vibebuild.cc`,
             deployedAt: data.deployed_at,
