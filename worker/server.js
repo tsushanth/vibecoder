@@ -21,6 +21,7 @@ import * as path from 'path';
 import * as os from 'os';
 import crypto from 'crypto';
 import zlib from 'zlib';
+import { checkExternalDeps, readVibedataSdk } from './validators.js';
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -298,10 +299,10 @@ assets/             <- Generated assets (SVG, data URIs)
 \`\`\`
 
 ## Absolute Rules
-- **No external dependencies**: No CDNs, no fetch calls to external APIs, no external fonts/images. Everything must be local or inline.
+- **No external dependencies**: No CDNs, no fetch calls to external APIs, no external fonts/images. Everything must be local or inline. The ONLY exception is the bundled \`vibedata.js\` SDK described under "Shared / persistent data".
 - **No node_modules**: Pure browser project. No npm, no bundlers.
 - **Mobile-first**: Responsive design required. Touch-friendly. Viewport meta required.
-- **Self-contained**: Must work offline when loaded from local files.
+- **Self-contained**: Must work offline when loaded from local files (apps using vibedata must still work offline via the localStorage fallback).
 
 ## Required in index.html
 1. \`<meta name="viewport" content="width=device-width, initial-scale=1.0">\`
@@ -321,6 +322,24 @@ assets/             <- Generated assets (SVG, data URIs)
 - Professional UI/UX
 - Dark mode support where appropriate
 - Accessible: proper contrast ratios, semantic HTML
+
+## Shared / persistent data (optional)
+Some apps need data that survives across devices and users (guestbooks, leaderboards, polls, shared todo lists, sign-ups). The file \`vibedata.js\` is already in the project. Do NOT edit or recreate it. Include it with \`<script src="vibedata.js"></script>\` BEFORE your own script. It defines \`window.vibedata\`, all promise-based:
+
+    await vibedata.get(collection, key)              // value, or null if missing
+    await vibedata.set(collection, key, value)       // value = any JSON, max 32KB
+    await vibedata.remove(collection, key)
+    const { items, next } = await vibedata.list(collection, { prefix, limit, after })
+        // items = [{ key, value, updatedAt }], limit <= 100, pass \`after: next\` to page
+
+Rules:
+- collection: letters, digits, _ or - (max 64). key: letters, digits, . _ : - (max 128).
+- Limits per app: 1000 keys, 5MB total. Handle rejected promises (err.status 413 quota, 429 rate limit, 503 unavailable, 403 when previewing) with a friendly message.
+- ALWAYS keep working when vibedata fails (it only works on the published site, not in previews, WebViews or offline): wrap every call in try/catch and fall back to localStorage. Never block first render on a network call.
+- Store one small record per key (e.g. key = Date.now()+'-'+Math.random().toString(36).slice(2,8)), not one giant array under a single key.
+- Anyone who can open the app can read AND write this data. NEVER store secrets, passwords, API keys, or private personal data (emails, phone numbers, addresses). There is no per-user auth; do not rely on client-sent identity.
+- Use it only when shared/persistent data is actually needed; single-user state stays in localStorage only.
+- Do not call any other network API and never write fetch()/XMLHttpRequest to any URL yourself.
 
 ## CRITICAL: Fully Functional Code — Zero Shortcuts
 
@@ -407,10 +426,19 @@ const PHASE_ORDER = ['generate', 'validate', 'fix', 'polish', 'verify', 'package
 // Project Folder Management
 // ============================================
 
+// Copy the vibedata SDK (worker/assets/vibedata.js, kept in sync with backend/public/vibedata.js)
+// into the project so it ships in the bundle.
+function installVibedata(projectDir) {
+    const sdk = readVibedataSdk();
+    if (sdk) fs.writeFileSync(path.join(projectDir, 'vibedata.js'), sdk);
+    else console.warn('[vibedata] worker/assets/vibedata.js missing; SDK not installed');
+}
+
 function setupProjectFolder(requestId) {
     const projectDir = path.join(PROJECTS_DIR, requestId);
     fs.mkdirSync(projectDir, { recursive: true });
     fs.writeFileSync(path.join(projectDir, 'CLAUDE.md'), CLAUDE_MD);
+    installVibedata(projectDir);
     return projectDir;
 }
 
@@ -690,33 +718,6 @@ function checkStructure(projectDir, sources) {
 }
 
 /**
- * Check for external dependencies (CDN links, external URLs)
- */
-function checkExternalDeps(sources) {
-    const issues = [];
-    for (const [filePath, content] of Object.entries(sources)) {
-        // Check src/href pointing to external URLs
-        const externalMatches = content.match(/(?:src|href)\s*=\s*["'](https?:\/\/[^"']+)["']/gi);
-        if (externalMatches) {
-            for (const match of externalMatches) {
-                issues.push({
-                    severity: 'critical',
-                    issue: `External URL in ${filePath}: ${match.substring(0, 80)}. All resources must be local.`
-                });
-            }
-        }
-        // Check for fetch/XMLHttpRequest to external
-        if (/fetch\s*\(\s*["']https?:\/\//i.test(content)) {
-            issues.push({
-                severity: 'critical',
-                issue: `External fetch() call in ${filePath}. App must work offline.`
-            });
-        }
-    }
-    return issues;
-}
-
-/**
  * Check for responsive design (viewport meta tag)
  */
 function checkResponsiveDesign(sources) {
@@ -952,6 +953,20 @@ app.post('/generate', authMiddleware, async (req, res) => {
         }
 
         console.log(`[${requestId}] [${phase}] ${message}${detail ? ': ' + detail : ''} (${progress.startPct}-${progress.endPct}%, ~${estimatedRemaining}s remaining)`);
+        // Best-effort progress report to the backend (callback mode only). Never blocks or throws.
+        if (callbackUrl && !isSSE) {
+            try {
+                const progressUrl = callbackUrl.replace(/\/build-complete\/?$/, '/progress');
+                if (progressUrl !== callbackUrl) {
+                    fetch(progressUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'x-worker-secret': callbackSecret || WORKER_SECRET },
+                        body: JSON.stringify({ phase, message, detail, percent: progress.startPct, secret: callbackSecret }),
+                        signal: AbortSignal.timeout(5000)
+                    }).catch(() => {});
+                }
+            } catch {}
+        }
         if (isSSE) {
             res.write(`data: ${JSON.stringify({
                 type: 'status', phase, message, detail,
@@ -1493,6 +1508,7 @@ app.post('/customize', authMiddleware, async (req, res) => {
 
         // Write CLAUDE.md with base + customization instructions
         fs.writeFileSync(path.join(projectDir, 'CLAUDE.md'), CLAUDE_MD + CUSTOMIZE_CLAUDE_MD_APPEND);
+        installVibedata(projectDir); // refresh in case the parent bundle has an older SDK
 
         const customizePrompt = `A user wants the following customization to this web application "${appTitle}":
 "${customizeDescription.trim()}"
@@ -2061,6 +2077,7 @@ app.post('/tweak', authMiddleware, async (req, res) => {
 
         // Write CLAUDE.md with tweak instructions
         fs.writeFileSync(path.join(projectDir, 'CLAUDE.md'), CLAUDE_MD + TWEAK_CLAUDE_MD_APPEND);
+        installVibedata(projectDir); // refresh SDK from the cloned repo's copy
 
         // Phase 2: Apply tweak via Claude
         sendStatus('generate', 'Applying your changes', `"${tweakDescription.substring(0, 60)}"`);
