@@ -57,7 +57,7 @@ export default function DashboardPage() {
         </div>
         <button
           onClick={() => router.push('/project/new')}
-          className="px-4 py-2 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition flex items-center gap-2"
+          className="px-4 py-2 bg-accent hover:bg-accent-hover text-white font-semibold rounded-full transition flex items-center gap-2"
         >
           <span>+</span> {t('common.newProject')}
         </button>
@@ -68,13 +68,13 @@ export default function DashboardPage() {
           <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
         </div>
       ) : projects.length === 0 ? (
-        <div className="text-center py-20">
+        <div className="rounded-2xl border border-border bg-card py-20 text-center">
           <div className="text-6xl mb-4 opacity-30">📱</div>
           <h2 className="text-xl font-semibold mb-2">{t('dashboard.noAppsYet')}</h2>
           <p className="text-muted mb-6">{t('dashboard.noAppsHint')}</p>
           <button
             onClick={() => router.push('/project/new')}
-            className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition"
+            className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-full transition"
           >
             {t('dashboard.createFirstApp')}
           </button>

@@ -9,8 +9,11 @@
   --color-surface: rgba(255, 255, 255, 0.05);
   --color-surface-hover: rgba(255, 255, 255, 0.08);
   --color-card: #0a0a0a;
-  --color-accent: #3B82F6;
-  --color-accent-hover: #2563EB;
+  /* VibeBuild's own violet (matches the marketing site's #5B4CFF and
+     Android's VibePurple) — was a generic SaaS blue, inconsistent with
+     every other surface of the product. */
+  --color-accent: #5B4CFF;
+  --color-accent-hover: #4638D6;
   --color-success: #22C55E;
   --color-warning: #F59E0B;
   --color-danger: #EF4444;

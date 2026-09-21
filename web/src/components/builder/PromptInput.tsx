@@ -166,49 +166,68 @@ export function PromptInput({ onSubmit, isGenerating }: PromptInputProps) {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="relative">
+        {/* Composer: input, attachments and send all live in one card, same
+            pattern as the mobile app and marketing site. */}
+        <div className="rounded-2xl border border-border bg-card p-2 focus-within:border-accent transition">
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder={t('create.placeholder')}
             maxLength={2000}
-            rows={4}
-            className="w-full px-4 py-3 pr-28 bg-surface border border-border rounded-xl text-foreground resize-none focus:outline-none focus:border-accent transition"
+            rows={3}
+            className="w-full resize-none bg-transparent px-3 py-2.5 text-foreground outline-none"
             disabled={isGenerating}
           />
-          <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
-            <span className="text-xs text-subtle">{prompt.length}/2000</span>
+          <div className="flex items-center justify-between px-1.5 pb-1">
+            <div className="flex items-center gap-1">
+              {/* Voice input */}
+              {hasVoiceSupport && (
+                <button
+                  type="button"
+                  onClick={toggleVoiceInput}
+                  className={`rounded-lg p-1.5 transition ${
+                    isListening
+                      ? 'animate-pulse bg-danger/20 text-danger'
+                      : 'text-muted hover:bg-surface-hover'
+                  }`}
+                  title={isListening ? t('create.stopRecording') : t('create.voiceInput')}
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                  </svg>
+                </button>
+              )}
 
-            {/* Voice input */}
-            {hasVoiceSupport && (
-              <button
-                type="button"
-                onClick={toggleVoiceInput}
-                className={`p-1.5 rounded-lg transition ${
-                  isListening
-                    ? 'bg-danger/20 text-danger animate-pulse'
-                    : 'hover:bg-surface-hover text-muted'
-                }`}
-                title={isListening ? t('create.stopRecording') : t('create.voiceInput')}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+              {/* Image attachment */}
+              <label className="cursor-pointer rounded-lg p-1.5 text-muted transition hover:bg-surface-hover" title={t('create.attachImage')}>
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-              </button>
-            )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />
+              </label>
 
-            {/* Image attachment */}
-            <label className="cursor-pointer p-1.5 hover:bg-surface-hover rounded-lg transition text-muted" title={t('create.attachImage')}>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-              />
-            </label>
+              <span className="text-xs text-subtle">{prompt.length}/2000</span>
+            </div>
+
+            <button
+              type="submit"
+              disabled={!prompt.trim() || isGenerating}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-white transition hover:bg-accent-hover disabled:opacity-40"
+              title={t('create.startBuilding')}
+            >
+              {isGenerating ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              ) : (
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19V5m0 0l-7 7m7-7l7 7" />
+                </svg>
+              )}
+            </button>
           </div>
         </div>
 
@@ -236,36 +255,21 @@ export function PromptInput({ onSubmit, isGenerating }: PromptInputProps) {
             </button>
           </div>
         )}
-
-        <button
-          type="submit"
-          disabled={!prompt.trim() || isGenerating}
-          className="w-full px-4 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition disabled:opacity-50 flex items-center justify-center gap-2"
-        >
-          {isGenerating ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              {t('create.building')}
-            </>
-          ) : (
-            t('create.startBuilding')
-          )}
-        </button>
       </form>
 
       {/* Sample prompts */}
       {!isGenerating && (
         <div className="mt-8">
           <p className="text-xs text-subtle mb-3 text-center">{t('create.tryIdeas')}</p>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             {suggestions.map((s, i) => (
               <button
                 key={i}
                 onClick={() => setPrompt(s.prompt)}
-                className="flex items-center gap-2 px-3 py-2.5 bg-surface hover:bg-surface-hover border border-border rounded-xl text-left transition group"
+                className="flex items-center gap-1.5 rounded-full border border-border px-3.5 py-1.5 text-sm text-muted transition hover:border-accent/40 hover:text-foreground"
               >
-                <span className="text-lg">{s.icon}</span>
-                <span className="text-xs text-muted group-hover:text-foreground truncate">{s.label}</span>
+                <span>{s.icon}</span>
+                {s.label}
               </button>
             ))}
           </div>
@@ -274,7 +278,7 @@ export function PromptInput({ onSubmit, isGenerating }: PromptInputProps) {
               type="button"
               onClick={handleSuggestNewIdeas}
               disabled={isLoadingSuggestions}
-              className="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-accent hover:text-accent-hover bg-accent/5 hover:bg-accent/10 border border-accent/20 rounded-xl transition disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-accent hover:text-accent-hover bg-accent/5 hover:bg-accent/10 border border-accent/20 rounded-full transition disabled:opacity-50"
             >
               {isLoadingSuggestions ? (
                 <>

@@ -51,7 +51,7 @@ export function Sidebar() {
       <div className="p-4">
         <button
           onClick={() => router.push('/project/new')}
-          className="w-full px-4 py-2.5 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition flex items-center justify-center gap-2"
+          className="w-full px-4 py-2.5 bg-accent hover:bg-accent-hover text-white font-semibold rounded-full transition flex items-center justify-center gap-2"
         >
           <span className="text-lg">+</span>
           {t('common.newProject')}
@@ -65,7 +65,7 @@ export function Sidebar() {
             key={item.href}
             href={item.href}
             className={cn(
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition text-sm',
+              'flex items-center gap-3 px-3 py-2.5 rounded-full mb-1 transition text-sm',
               isActive(item.href)
                 ? 'bg-accent/15 text-accent font-semibold'
                 : 'text-muted hover:text-foreground hover:bg-surface'
