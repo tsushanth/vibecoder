@@ -16,6 +16,9 @@ const MAX_BUNDLE_SIZE = parseInt(
 );
 const STORAGE_BUCKET = process.env.STORAGE_BUCKET || "deployments";
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8080";
+// The custom-domain map must come from the live API. BACKEND_URL still points at an older
+// Cloud Run copy that has no such route, so it has its own setting.
+const DOMAIN_MAP_URL = process.env.DOMAIN_MAP_URL || "https://vibecoder-api.fly.dev";
 const INTERNAL_SECRET = process.env.INTERNAL_SECRET || "vibecoder-internal-secret";
 
 const supabase = createClient(
@@ -31,10 +34,13 @@ const domainMap = new Map();
 
 async function syncDomainMap() {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/deploy/internal/domain-map`, {
+    const response = await fetch(`${DOMAIN_MAP_URL}/api/deploy/internal/domain-map`, {
       headers: { "x-internal-secret": INTERNAL_SECRET },
     });
-    if (!response.ok) return;
+    if (!response.ok) {
+      console.warn(`Domain map sync failed: backend returned ${response.status}`);
+      return;
+    }
     const data = await response.json();
     domainMap.clear();
     for (const { domain, subdomain } of data.mappings || []) {

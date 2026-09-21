@@ -2,20 +2,37 @@ import express from 'express';
 import {
     isValidDomain,
     addDomain,
+    resolveDeploymentId,
     verifyDomain,
     getDomainStatus,
     removeDomain,
+    normalizeDomain,
+    DomainConfigError,
 } from '../services/domainService.js';
 import { getSubscriptionStatus } from '../services/subscriptionService.js';
 
 const router = express.Router();
+
+// Maps service errors to HTTP statuses so clients can tell "fix your input" from "try later".
+function sendError(res, error, what) {
+    console.error(`${what} error:`, error.message);
+    if (error instanceof DomainConfigError) {
+        return res.status(503).json({ error: 'Custom domains are temporarily unavailable. Please try again later.' });
+    }
+    const msg = error.message || '';
+    const status = /already (registered|has a custom domain)/i.test(msg) ? 409
+        : /not found|not owned/i.test(msg) ? 404
+        : 500;
+    return res.status(status).json({ error: msg });
+}
 
 // ─── POST /:deploymentId/add — Add a custom domain ───────────────────
 
 router.post('/:deploymentId/add', async (req, res) => {
     try {
         const { deploymentId } = req.params;
-        const { userId, domain } = req.body;
+        const { userId } = req.body;
+        const domain = normalizeDomain(req.body.domain);
 
         if (!userId || !domain) {
             return res.status(400).json({ error: 'userId and domain are required' });
@@ -38,7 +55,7 @@ router.post('/:deploymentId/add', async (req, res) => {
             });
         }
 
-        const result = await addDomain(deploymentId, userId, domain);
+        const result = await addDomain(await resolveDeploymentId(deploymentId, userId), userId, domain);
 
         res.json({
             success: true,
@@ -46,16 +63,15 @@ router.post('/:deploymentId/add', async (req, res) => {
             status: result.verification_status,
             instructions: {
                 step1: `Add a CNAME record for "${result.domain}" pointing to "${result.cnameTarget}"`,
-                step2: `Or add a TXT record at "${result.txtRecord}" with value "${result.txtValue}"`,
+                step2: `For a root domain (no www), add A and AAAA records instead, using the values in apexRecords. Or add a TXT record at "${result.txtRecord}" with value "${result.txtValue}"`,
                 step3: 'Click "Verify Domain" once DNS records are set (may take a few minutes to propagate)',
             },
             cnameTarget: result.cnameTarget,
+            apexRecords: result.apexRecords,
             verificationToken: result.txtValue,
         });
     } catch (error) {
-        console.error('Add domain error:', error);
-        const status = error.message.includes('already registered') ? 409 : 500;
-        res.status(status).json({ error: error.message });
+        sendError(res, error, 'Add domain');
     }
 });
 
@@ -70,15 +86,14 @@ router.post('/:deploymentId/verify', async (req, res) => {
             return res.status(400).json({ error: 'userId is required' });
         }
 
-        const result = await verifyDomain(deploymentId, userId);
+        const result = await verifyDomain(await resolveDeploymentId(deploymentId, userId), userId);
 
         res.json({
             success: true,
             ...result,
         });
     } catch (error) {
-        console.error('Verify domain error:', error);
-        res.status(500).json({ error: error.message });
+        sendError(res, error, 'Verify domain');
     }
 });
 
@@ -93,7 +108,7 @@ router.get('/:deploymentId', async (req, res) => {
             return res.status(400).json({ error: 'userId query parameter is required' });
         }
 
-        const domainInfo = await getDomainStatus(deploymentId, userId);
+        const domainInfo = await getDomainStatus(await resolveDeploymentId(deploymentId, userId), userId);
 
         if (!domainInfo) {
             return res.json({ success: true, hasDomain: false });
@@ -105,8 +120,7 @@ router.get('/:deploymentId', async (req, res) => {
             ...domainInfo,
         });
     } catch (error) {
-        console.error('Get domain status error:', error);
-        res.status(500).json({ error: error.message });
+        sendError(res, error, 'Get domain status');
     }
 });
 
@@ -121,15 +135,14 @@ router.delete('/:deploymentId', async (req, res) => {
             return res.status(400).json({ error: 'userId is required' });
         }
 
-        const result = await removeDomain(deploymentId, userId);
+        const result = await removeDomain(await resolveDeploymentId(deploymentId, userId), userId);
 
         res.json({
             success: true,
             ...result,
         });
     } catch (error) {
-        console.error('Remove domain error:', error);
-        res.status(500).json({ error: error.message });
+        sendError(res, error, 'Remove domain');
     }
 });
 
