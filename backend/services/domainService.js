@@ -1,21 +1,45 @@
-import dns from 'dns/promises';
+import dnsPromises from 'dns/promises';
 import crypto from 'crypto';
-import { supabase } from '../config/database.js';
+import net from 'net';
+import { supabase as defaultSupabase } from '../config/database.js';
 
-const FLY_API_TOKEN = process.env.FLY_API_TOKEN;
-const FLY_APP_NAME = process.env.FLY_DEPLOY_APP_NAME || 'vibecoder-deploy';
 const FLY_API_BASE = 'https://api.machines.dev/v1';
-const BASE_DOMAIN = process.env.BASE_DOMAIN || 'vibebuild.cc';
+const STALE_CLAIM_MS = 60 * 60 * 1000; // an unverified claim older than this can be taken over
 
-// ─── Domain validation ────────────────────────────────────────────────
+// Custom domains are served by the vibecoder-deploy Fly app. These are its public
+// traffic addresses, used for apex-domain (A/AAAA) instructions and verification.
+const split = (v, fallback) => (v || fallback).split(',').map((s) => s.trim()).filter(Boolean);
 
-const DOMAIN_REGEX = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
+export class DomainConfigError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'DomainConfigError';
+        this.code = 'DOMAINS_NOT_CONFIGURED';
+    }
+}
 
-export function isValidDomain(domain) {
+// ─── Pure helpers ─────────────────────────────────────────────────────
+
+const DOMAIN_REGEX = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i;
+
+/** Accepts what users paste ("https://www.Example.com/"), returns a bare lowercase hostname. */
+export function normalizeDomain(input) {
+    if (typeof input !== 'string') return '';
+    return input
+        .trim()
+        .toLowerCase()
+        .replace(/^[a-z][a-z0-9+.-]*:\/\//, '')
+        .replace(/[/?#].*$/, '')
+        .replace(/:\d+$/, '')
+        .replace(/\.$/, '');
+}
+
+export function isValidDomain(domain, baseDomain = process.env.BASE_DOMAIN || 'vibebuild.cc') {
     if (!domain || typeof domain !== 'string') return false;
     const cleaned = domain.toLowerCase().trim();
     if (cleaned.length > 253) return false;
-    if (cleaned.endsWith(`.${BASE_DOMAIN}`)) return false; // can't use our own domain
+    if (cleaned === baseDomain || cleaned.endsWith(`.${baseDomain}`)) return false; // can't use our own domain
+    if (cleaned.endsWith('.fly.dev') || cleaned.endsWith('.internal')) return false;
     return DOMAIN_REGEX.test(cleaned);
 }
 
@@ -23,284 +47,302 @@ export function generateVerificationToken() {
     return `vibe-verify-${crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`;
 }
 
-// ─── DNS verification ─────────────────────────────────────────────────
+/** Canonical form so '2A09:8280:1::117:24DA:0' and '2a09:8280:1:0:0:117:24da:0' compare equal. */
+export function normalizeIp(ip) {
+    const v = net.isIP(ip);
+    if (v === 4) return ip;
+    if (v === 6) {
+        try { return new URL(`http://[${ip}]`).hostname.slice(1, -1); } catch { return ip.toLowerCase(); }
+    }
+    return String(ip).toLowerCase();
+}
 
-export async function verifyCNAME(domain, expectedSubdomain) {
-    try {
-        const records = await dns.resolveCname(domain);
-        const target = `${expectedSubdomain}.${BASE_DOMAIN}`;
-        return records.some(r => r.toLowerCase() === target.toLowerCase());
-    } catch (err) {
-        // CNAME may not exist — try A record pointing to our IP
-        if (err.code === 'ENODATA' || err.code === 'ENOTFOUND') {
+/** True when a Fly certificate object describes a served, unexpired certificate. */
+export function isCertReady(cert, now = Date.now()) {
+    if (!cert) return false;
+    const issued = (cert.certificates || []).flatMap((c) => c.issued || []);
+    const live = issued.some((i) => !i.expires_at || new Date(i.expires_at).getTime() > now);
+    return Boolean(cert.configured) && live;
+}
+
+// ─── Service factory (dependencies injectable for tests) ──────────────
+
+export function createDomainService({
+    supabase = defaultSupabase,
+    dns = dnsPromises,
+    fetchFn = (...args) => fetch(...args),
+    env = process.env,
+    now = () => Date.now(),
+} = {}) {
+    const BASE_DOMAIN = env.BASE_DOMAIN || 'vibebuild.cc';
+    const FLY_APP_NAME = env.FLY_DEPLOY_APP_NAME || 'vibecoder-deploy';
+    const trafficA = split(env.DEPLOY_IPV4, '66.241.125.51');
+    const trafficAAAA = split(env.DEPLOY_IPV6, '2a09:8280:1::117:24da:0');
+
+    // ── DNS ──
+    async function verifyCNAME(domain, expectedSubdomain) {
+        try {
+            const records = await dns.resolveCname(domain);
+            const target = `${expectedSubdomain}.${BASE_DOMAIN}`.toLowerCase();
+            return records.some((r) => r.toLowerCase().replace(/\.$/, '') === target);
+        } catch (err) {
+            if (['ENODATA', 'ENOTFOUND', 'ENOENT', 'ESERVFAIL', 'ETIMEOUT'].includes(err.code)) return false;
+            throw err;
+        }
+    }
+
+    /** Apex domains cannot CNAME, so accept A/AAAA records that point at our servers. */
+    async function verifyAddressRecords(domain) {
+        const want4 = new Set(trafficA.map(normalizeIp));
+        const want6 = new Set(trafficAAAA.map(normalizeIp));
+        const safe = async (fn) => { try { return await fn(domain); } catch { return []; } };
+        const [a, aaaa] = await Promise.all([safe(dns.resolve4), safe(dns.resolve6)]);
+        const okA = a.some((ip) => want4.has(normalizeIp(ip)));
+        const okAAAA = aaaa.some((ip) => want6.has(normalizeIp(ip)));
+        return okA || okAAAA;
+    }
+
+    async function verifyTXTToken(domain, expectedToken) {
+        try {
+            const records = await dns.resolveTxt(`_vibebuilder.${domain}`);
+            return records.some((chunks) => chunks.join('').trim() === expectedToken);
+        } catch {
             return false;
         }
-        throw err;
-    }
-}
-
-export async function verifyTXTToken(domain, expectedToken) {
-    try {
-        const prefix = '_vibebuilder';
-        const records = await dns.resolveTxt(`${prefix}.${domain}`);
-        // TXT records come as arrays of strings
-        return records.some(chunks => chunks.join('').trim() === expectedToken);
-    } catch {
-        return false;
-    }
-}
-
-// ─── Fly.io SSL certificate management ────────────────────────────────
-
-async function flyRequest(path, method = 'GET', body = null) {
-    if (!FLY_API_TOKEN) {
-        console.warn('FLY_API_TOKEN not set — skipping Fly.io API call');
-        return { simulated: true };
     }
 
-    const options = {
-        method,
-        headers: {
-            'Authorization': `Bearer ${FLY_API_TOKEN}`,
-            'Content-Type': 'application/json',
-        },
-    };
-    if (body) options.body = JSON.stringify(body);
+    // ── Fly certificates (Machines API) ──
+    function flyHeaders() {
+        const token = env.FLY_API_TOKEN;
+        if (!token) throw new DomainConfigError('Custom domains are not configured on this server');
+        // `fly tokens create` emits macaroon tokens that already start with "FlyV1 ".
+        const authorization = token.startsWith('FlyV1 ') ? token : `Bearer ${token}`;
+        return { Authorization: authorization, 'Content-Type': 'application/json' };
+    }
 
-    const response = await fetch(`${FLY_API_BASE}${path}`, options);
-
-    if (!response.ok) {
+    async function flyRequest(path, method = 'GET', body = null) {
+        const options = { method, headers: flyHeaders(), signal: AbortSignal.timeout(20_000) };
+        if (body) options.body = JSON.stringify(body);
+        const response = await fetchFn(`${FLY_API_BASE}${path}`, options);
+        if (!response.ok) {
+            const text = await response.text();
+            const err = new Error(`Fly.io API error (${response.status}): ${text}`);
+            err.status = response.status;
+            throw err;
+        }
         const text = await response.text();
-        throw new Error(`Fly.io API error (${response.status}): ${text}`);
+        return text ? JSON.parse(text) : {};
     }
 
-    return response.json();
-}
+    const certPath = (domain) => `/apps/${FLY_APP_NAME}/certificates/${encodeURIComponent(domain)}`;
 
-export async function provisionSSLCert(domain) {
-    return flyRequest(`/apps/${FLY_APP_NAME}/certificates`, 'POST', {
-        hostname: domain,
-    });
-}
-
-export async function getSSLCertStatus(domain) {
-    return flyRequest(`/apps/${FLY_APP_NAME}/certificates/${domain}`);
-}
-
-export async function deleteSSLCert(domain) {
-    return flyRequest(`/apps/${FLY_APP_NAME}/certificates/${domain}`, 'DELETE');
-}
-
-// ─── Database operations ──────────────────────────────────────────────
-
-export async function addDomain(deploymentId, userId, domain) {
-    const cleanDomain = domain.toLowerCase().trim();
-    const token = generateVerificationToken();
-
-    // Get the deployment's subdomain for CNAME target
-    const { data: deployment, error: depError } = await supabase
-        .from('deployments')
-        .select('subdomain')
-        .eq('id', deploymentId)
-        .eq('user_id', userId)
-        .eq('status', 'active')
-        .single();
-
-    if (depError || !deployment) {
-        throw new Error('Deployment not found or not owned by user');
-    }
-
-    // Check if domain is already registered
-    const { data: existing } = await supabase
-        .from('custom_domains')
-        .select('id')
-        .eq('domain', cleanDomain)
-        .single();
-
-    if (existing) {
-        throw new Error('Domain is already registered');
-    }
-
-    const { data, error } = await supabase
-        .from('custom_domains')
-        .insert({
-            deployment_id: deploymentId,
-            user_id: userId,
-            domain: cleanDomain,
-            verification_token: token,
-            verification_status: 'pending',
-        })
-        .select()
-        .single();
-
-    if (error) throw error;
-
-    return {
-        ...data,
-        cnameTarget: `${deployment.subdomain}.${BASE_DOMAIN}`,
-        txtRecord: `_vibebuilder.${cleanDomain}`,
-        txtValue: token,
-    };
-}
-
-export async function verifyDomain(deploymentId, userId) {
-    // Fetch the domain record
-    const { data: domainRecord, error } = await supabase
-        .from('custom_domains')
-        .select('*, deployments!inner(subdomain)')
-        .eq('deployment_id', deploymentId)
-        .eq('user_id', userId)
-        .single();
-
-    if (error || !domainRecord) {
-        throw new Error('Domain record not found');
-    }
-
-    if (domainRecord.verification_status === 'active') {
-        return { status: 'active', message: 'Domain already verified and active' };
-    }
-
-    const subdomain = domainRecord.deployments.subdomain;
-
-    // Check CNAME
-    const cnameValid = await verifyCNAME(domainRecord.domain, subdomain);
-
-    // Also accept TXT verification as an alternative
-    const txtValid = await verifyTXTToken(domainRecord.domain, domainRecord.verification_token);
-
-    if (!cnameValid && !txtValid) {
-        await supabase
-            .from('custom_domains')
-            .update({ last_checked_at: new Date().toISOString() })
-            .eq('id', domainRecord.id);
-
-        return {
-            status: 'pending',
-            message: 'DNS verification failed',
-            cnameExpected: `${subdomain}.${BASE_DOMAIN}`,
-            cnameFound: cnameValid,
-            txtExpected: domainRecord.verification_token,
-            txtFound: txtValid,
-        };
-    }
-
-    // DNS verified — provision SSL
-    await supabase
-        .from('custom_domains')
-        .update({
-            verification_status: 'ssl_provisioning',
-            last_checked_at: new Date().toISOString(),
-        })
-        .eq('id', domainRecord.id);
-
-    try {
-        const certResult = await provisionSSLCert(domainRecord.domain);
-        const certId = certResult.id || certResult.hostname || domainRecord.domain;
-
-        await supabase
-            .from('custom_domains')
-            .update({
-                verification_status: 'active',
-                ssl_certificate_id: certId,
-                updated_at: new Date().toISOString(),
-            })
-            .eq('id', domainRecord.id);
-
-        // Also update the deployments table custom_domain column
-        await supabase
-            .from('deployments')
-            .update({ custom_domain: domainRecord.domain })
-            .eq('id', deploymentId);
-
-        return { status: 'active', message: 'Domain verified and SSL provisioned' };
-    } catch (sslErr) {
-        await supabase
-            .from('custom_domains')
-            .update({
-                verification_status: 'dns_verified',
-                last_checked_at: new Date().toISOString(),
-            })
-            .eq('id', domainRecord.id);
-
-        return {
-            status: 'dns_verified',
-            message: `DNS verified but SSL provisioning failed: ${sslErr.message}`,
-        };
-    }
-}
-
-export async function getDomainStatus(deploymentId, userId) {
-    const { data, error } = await supabase
-        .from('custom_domains')
-        .select('*, deployments!inner(subdomain)')
-        .eq('deployment_id', deploymentId)
-        .eq('user_id', userId)
-        .single();
-
-    if (error || !data) return null;
-
-    return {
-        id: data.id,
-        domain: data.domain,
-        status: data.verification_status,
-        cnameTarget: `${data.deployments.subdomain}.${BASE_DOMAIN}`,
-        txtRecord: `_vibebuilder.${data.domain}`,
-        txtValue: data.verification_token,
-        sslCertificateId: data.ssl_certificate_id,
-        lastCheckedAt: data.last_checked_at,
-        createdAt: data.created_at,
-    };
-}
-
-export async function removeDomain(deploymentId, userId) {
-    const { data: domainRecord, error } = await supabase
-        .from('custom_domains')
-        .select('domain, ssl_certificate_id')
-        .eq('deployment_id', deploymentId)
-        .eq('user_id', userId)
-        .single();
-
-    if (error || !domainRecord) {
-        throw new Error('Domain record not found');
-    }
-
-    // Revoke SSL cert if it exists
-    if (domainRecord.ssl_certificate_id) {
+    async function provisionSSLCert(domain) {
         try {
-            await deleteSSLCert(domainRecord.domain);
+            return await flyRequest(`/apps/${FLY_APP_NAME}/certificates/acme`, 'POST', { hostname: domain });
         } catch (err) {
-            console.warn(`Failed to revoke SSL cert for ${domainRecord.domain}:`, err.message);
+            // Re-verifying after a partial failure must be safe to repeat.
+            if (err.status === 409 || err.status === 422 || /already/i.test(err.message)) {
+                return getSSLCertStatus(domain);
+            }
+            throw err;
         }
     }
+    const getSSLCertStatus = (domain) => flyRequest(certPath(domain));
+    const checkSSLCert = (domain) => flyRequest(`${certPath(domain)}/check`, 'POST');
+    const deleteSSLCert = (domain) => flyRequest(certPath(domain), 'DELETE');
 
-    // Delete the record
-    await supabase
-        .from('custom_domains')
-        .delete()
-        .eq('deployment_id', deploymentId)
-        .eq('user_id', userId);
+    // ── Database ──
+    const instructionsFor = (domain, subdomain, token) => ({
+        cnameTarget: `${subdomain}.${BASE_DOMAIN}`,
+        txtRecord: `_vibebuilder.${domain}`,
+        txtValue: token,
+        apexRecords: { a: trafficA, aaaa: trafficAAAA },
+    });
 
-    // Clear custom_domain on the deployment
-    await supabase
-        .from('deployments')
-        .update({ custom_domain: null })
-        .eq('id', deploymentId);
+    async function ownedActiveDeployment(deploymentId, userId) {
+        const { data, error } = await supabase
+            .from('deployments')
+            .select('id, subdomain')
+            .eq('id', deploymentId)
+            .eq('user_id', userId)
+            .eq('status', 'active')
+            .maybeSingle();
+        if (error || !data) throw new Error('Deployment not found or not owned by user');
+        return data;
+    }
 
-    return { removed: true, domain: domainRecord.domain };
+    /** Clients may send either the deployment id or the project id (the website sends the latter). */
+    async function resolveDeploymentId(idOrProjectId, userId) {
+        const { data: byId } = await supabase
+            .from('deployments').select('id').eq('id', idOrProjectId).eq('user_id', userId).maybeSingle();
+        if (byId) return byId.id;
+        const { data: byProject } = await supabase
+            .from('deployments').select('id').eq('project_id', idOrProjectId).eq('user_id', userId).eq('status', 'active').maybeSingle();
+        return byProject ? byProject.id : idOrProjectId; // unknown: downstream reports "not found"
+    }
+
+    async function addDomain(deploymentId, userId, domain) {
+        const cleanDomain = normalizeDomain(domain);
+        const deployment = await ownedActiveDeployment(deploymentId, userId);
+
+        const { data: mine } = await supabase
+            .from('custom_domains').select('*').eq('deployment_id', deploymentId).maybeSingle();
+        if (mine) {
+            if (mine.domain === cleanDomain) {
+                return { ...mine, ...instructionsFor(mine.domain, deployment.subdomain, mine.verification_token) };
+            }
+            throw new Error('This app already has a custom domain. Remove it before adding another');
+        }
+
+        const { data: existing } = await supabase
+            .from('custom_domains').select('id, verification_status, updated_at').eq('domain', cleanDomain).maybeSingle();
+        if (existing) {
+            const stale = existing.verification_status !== 'active'
+                && now() - new Date(existing.updated_at).getTime() > STALE_CLAIM_MS;
+            if (!stale) throw new Error('Domain is already registered');
+            // An unverified claim nobody completed must not lock the real owner out.
+            await supabase.from('custom_domains').delete().eq('id', existing.id);
+        }
+
+        const token = generateVerificationToken();
+        const { data, error } = await supabase
+            .from('custom_domains')
+            .insert({
+                deployment_id: deploymentId,
+                user_id: userId,
+                domain: cleanDomain,
+                verification_token: token,
+                verification_status: 'pending',
+            })
+            .select()
+            .single();
+        if (error) {
+            if (error.code === '23505') throw new Error('Domain is already registered');
+            throw error;
+        }
+        return { ...data, ...instructionsFor(cleanDomain, deployment.subdomain, token) };
+    }
+
+    async function verifyDomain(deploymentId, userId) {
+        const { data: record, error } = await supabase
+            .from('custom_domains')
+            .select('*, deployments!inner(subdomain)')
+            .eq('deployment_id', deploymentId)
+            .eq('user_id', userId)
+            .maybeSingle();
+        if (error || !record) throw new Error('Domain record not found');
+
+        const touch = (fields) => supabase
+            .from('custom_domains')
+            .update({ last_checked_at: new Date(now()).toISOString(), ...fields })
+            .eq('id', record.id);
+
+        if (record.verification_status === 'active') {
+            return { status: 'active', domain: record.domain, message: 'Domain is live' };
+        }
+
+        const subdomain = record.deployments.subdomain;
+        const [cnameOk, addressOk, txtOk] = await Promise.all([
+            verifyCNAME(record.domain, subdomain),
+            verifyAddressRecords(record.domain),
+            verifyTXTToken(record.domain, record.verification_token),
+        ]);
+
+        if (!cnameOk && !addressOk && !txtOk) {
+            await touch({ verification_status: 'pending' });
+            return {
+                status: 'pending',
+                message: 'DNS records not found yet. They can take a few minutes to spread.',
+                cnameExpected: `${subdomain}.${BASE_DOMAIN}`,
+                apexExpected: { a: trafficA, aaaa: trafficAAAA },
+                txtExpected: record.verification_token,
+                cnameFound: cnameOk,
+                addressFound: addressOk,
+                txtFound: txtOk,
+            };
+        }
+
+        // Ownership proven: request (or re-check) the certificate. Both calls are idempotent.
+        await provisionSSLCert(record.domain);
+        try { await checkSSLCert(record.domain); } catch { /* status read below decides */ }
+        const cert = await getSSLCertStatus(record.domain);
+
+        if (isCertReady(cert, now())) {
+            await touch({ verification_status: 'active', ssl_certificate_id: record.domain, updated_at: new Date(now()).toISOString() });
+            return { status: 'active', domain: record.domain, message: 'Domain verified and certificate issued' };
+        }
+
+        await touch({ verification_status: 'ssl_provisioning', ssl_certificate_id: record.domain });
+        const pointsHere = cnameOk || addressOk;
+        return {
+            status: 'ssl_provisioning',
+            message: pointsHere
+                ? 'DNS verified. Issuing the certificate, which usually takes a minute or two.'
+                : 'Ownership verified, but the domain does not point at VibeBuild yet. Add the CNAME (or A and AAAA) records so the certificate can be issued.',
+            flyStatus: cert.status ?? null,
+        };
+    }
+
+    async function getDomainStatus(deploymentId, userId) {
+        const { data, error } = await supabase
+            .from('custom_domains')
+            .select('*, deployments!inner(subdomain)')
+            .eq('deployment_id', deploymentId)
+            .eq('user_id', userId)
+            .maybeSingle();
+        if (error || !data) return null;
+        return {
+            id: data.id,
+            domain: data.domain,
+            status: data.verification_status,
+            ...instructionsFor(data.domain, data.deployments.subdomain, data.verification_token),
+            sslCertificateId: data.ssl_certificate_id,
+            lastCheckedAt: data.last_checked_at,
+            createdAt: data.created_at,
+        };
+    }
+
+    async function removeDomain(deploymentId, userId) {
+        const { data: record, error } = await supabase
+            .from('custom_domains')
+            .select('domain, ssl_certificate_id')
+            .eq('deployment_id', deploymentId)
+            .eq('user_id', userId)
+            .maybeSingle();
+        if (error || !record) throw new Error('Domain record not found');
+
+        if (record.ssl_certificate_id) {
+            try {
+                await deleteSSLCert(record.domain);
+            } catch (err) {
+                console.warn(`Failed to remove certificate for ${record.domain}:`, err.message);
+            }
+        }
+        await supabase.from('custom_domains').delete().eq('deployment_id', deploymentId).eq('user_id', userId);
+        return { removed: true, domain: record.domain };
+    }
+
+    async function getActiveDomainMap() {
+        const { data, error } = await supabase
+            .from('custom_domains')
+            .select('domain, deployments!inner(subdomain)')
+            .eq('verification_status', 'active');
+        if (error || !data) return [];
+        return data.map((d) => ({ domain: d.domain, subdomain: d.deployments.subdomain }));
+    }
+
+    return {
+        verifyCNAME, verifyAddressRecords, verifyTXTToken,
+        provisionSSLCert, getSSLCertStatus, checkSSLCert, deleteSSLCert,
+        resolveDeploymentId, addDomain, verifyDomain, getDomainStatus, removeDomain, getActiveDomainMap,
+    };
 }
 
-// ─── Domain map for deploy server ─────────────────────────────────────
+// ─── Default instance used by the routes ──────────────────────────────
 
-export async function getActiveDomainMap() {
-    const { data, error } = await supabase
-        .from('custom_domains')
-        .select('domain, deployments!inner(subdomain)')
-        .eq('verification_status', 'active');
-
-    if (error || !data) return [];
-
-    return data.map(d => ({
-        domain: d.domain,
-        subdomain: d.deployments.subdomain,
-    }));
-}
+const service = createDomainService();
+export const {
+    verifyCNAME, verifyAddressRecords, verifyTXTToken,
+    provisionSSLCert, getSSLCertStatus, checkSSLCert, deleteSSLCert,
+    resolveDeploymentId, addDomain, verifyDomain, getDomainStatus, removeDomain, getActiveDomainMap,
+} = service;
