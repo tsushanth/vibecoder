@@ -70,7 +70,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       <h1 className="text-2xl font-bold text-center mb-2">
         {mode === 'login' ? 'Welcome back' : 'Create your account'}
       </h1>
-      <p className="text-center text-muted mb-8">
+      <p className="text-center text-[#17140F]/62 mb-8">
         {mode === 'login'
           ? 'Sign in to continue building'
           : 'Start building apps with AI'}
@@ -91,39 +91,39 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       <div className="relative mb-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border" />
+          <div className="w-full border-t border-[#17140F]/12" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-4 bg-background text-subtle">or</span>
+          <span className="px-4 bg-[#FAF6F1] text-[#17140F]/40">or</span>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {mode === 'signup' && (
           <div>
-            <label className="block text-sm text-muted mb-1.5">Name</label>
+            <label className="block text-sm text-[#17140F]/62 mb-1.5">Name</label>
             <input
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Your name"
-              className="w-full px-4 py-3 bg-surface border border-border rounded-xl text-foreground focus:outline-none focus:border-accent transition"
+              className="w-full px-4 py-3 bg-[#17140F]/4 border border-[#17140F]/12 rounded-xl text-[#17140F] focus:outline-none focus:border-[#5B4CFF] transition"
             />
           </div>
         )}
         <div>
-          <label className="block text-sm text-muted mb-1.5">Email</label>
+          <label className="block text-sm text-[#17140F]/62 mb-1.5">Email</label>
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full px-4 py-3 bg-surface border border-border rounded-xl text-foreground focus:outline-none focus:border-accent transition"
+            className="w-full px-4 py-3 bg-[#17140F]/4 border border-[#17140F]/12 rounded-xl text-[#17140F] focus:outline-none focus:border-[#5B4CFF] transition"
           />
         </div>
         <div>
-          <label className="block text-sm text-muted mb-1.5">Password</label>
+          <label className="block text-sm text-[#17140F]/62 mb-1.5">Password</label>
           <input
             type="password"
             required
@@ -131,12 +131,12 @@ export function AuthForm({ mode }: AuthFormProps) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="At least 6 characters"
-            className="w-full px-4 py-3 bg-surface border border-border rounded-xl text-foreground focus:outline-none focus:border-accent transition"
+            className="w-full px-4 py-3 bg-[#17140F]/4 border border-[#17140F]/12 rounded-xl text-[#17140F] focus:outline-none focus:border-[#5B4CFF] transition"
           />
         </div>
 
         {error && (
-          <div className="px-4 py-3 bg-danger/10 border border-danger/20 rounded-xl text-danger text-sm">
+          <div className="px-4 py-3 bg-[#C43B3B]/10 border border-[#C43B3B]/20 rounded-xl text-[#C43B3B] text-sm">
             {error}
           </div>
         )}
@@ -144,22 +144,22 @@ export function AuthForm({ mode }: AuthFormProps) {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full px-4 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition disabled:opacity-50"
+          className="w-full px-4 py-3 bg-[#5B4CFF] hover:bg-[#4638D6] text-white font-semibold rounded-xl transition disabled:opacity-50"
         >
           {isLoading ? 'Loading...' : mode === 'login' ? 'Sign In' : 'Create Account'}
         </button>
       </form>
 
-      <p className="text-center text-sm text-muted mt-6">
+      <p className="text-center text-sm text-[#17140F]/62 mt-6">
         {mode === 'login' ? (
           <>
             Don&apos;t have an account?{' '}
-            <a href="/signup" className="text-accent hover:underline">Sign up</a>
+            <a href="/signup" className="text-[#5B4CFF] hover:underline">Sign up</a>
           </>
         ) : (
           <>
             Already have an account?{' '}
-            <a href="/login" className="text-accent hover:underline">Sign in</a>
+            <a href="/login" className="text-[#5B4CFF] hover:underline">Sign in</a>
           </>
         )}
       </p>

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ContentHeader, ContentFooter } from '@/components/landing/ContentLayout';
+import { MarketingHeader, MarketingFooter } from '@/components/landing/MarketingChrome';
 
 export const metadata: Metadata = {
   title: 'FAQ - VibeBuild | Frequently Asked Questions',
@@ -60,40 +60,40 @@ const faqs = [
 
 export default function FAQPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <ContentHeader />
+    <div className="theme-paper min-h-screen bg-[#FAF6F1] text-[#17140F]">
+      <MarketingHeader />
 
       <div className="max-w-3xl mx-auto px-6 py-12">
         <h1 className="text-4xl font-bold mb-3">Frequently Asked Questions</h1>
-        <p className="text-muted text-lg mb-10">
+        <p className="text-[#17140F]/62 text-lg mb-10">
           Everything you need to know about VibeBuild.
         </p>
 
         <div className="space-y-6">
           {faqs.map((faq, i) => (
-            <div key={i} className="p-5 bg-card border border-border rounded-xl">
+            <div key={i} className="p-5 bg-white border border-[#17140F]/12 rounded-xl">
               <h2 className="text-base font-semibold mb-2">{faq.q}</h2>
-              <p className="text-sm text-muted leading-relaxed">{faq.a}</p>
+              <p className="text-sm text-[#17140F]/62 leading-relaxed">{faq.a}</p>
             </div>
           ))}
         </div>
 
-        <div className="mt-12 text-center py-10 border-t border-border">
+        <div className="mt-12 text-center py-10 border-t border-[#17140F]/12">
           <h2 className="text-xl font-bold mb-3">Still have questions?</h2>
-          <p className="text-muted mb-4">
-            Email us at <a href="mailto:support@vibebuild.cc" className="text-accent hover:underline">support@vibebuild.cc</a> and
+          <p className="text-[#17140F]/62 mb-4">
+            Email us at <a href="mailto:support@vibebuild.cc" className="text-[#5B4CFF] hover:underline">support@vibebuild.cc</a> and
             we'll get back to you.
           </p>
           <Link
             href="/signup"
-            className="inline-block px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition"
+            className="inline-block px-6 py-3 bg-[#5B4CFF] hover:bg-[#4638D6] text-white font-semibold rounded-xl transition"
           >
             Get Started Free
           </Link>
         </div>
       </div>
 
-      <ContentFooter />
+      <MarketingFooter />
     </div>
   );
 }

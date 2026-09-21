@@ -1,218 +1,116 @@
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
 import { PricingCTA } from '@/components/landing/PricingCTA';
+import { PromptHero } from '@/components/landing/PromptHero';
+import { BuildPreviewCard } from '@/components/landing/BuildPreviewCard';
+import { MarketingHeader, MarketingFooter } from '@/components/landing/MarketingChrome';
+import { API_URL, SUBSCRIPTION_TIERS } from '@/lib/constants';
 
-export default function LandingPage() {
-  const t = useTranslations();
+async function getBrowseCount(): Promise<number | null> {
+  try {
+    const res = await fetch(`${API_URL}/api/projects/browse?limit=1`, { next: { revalidate: 3600 } });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return typeof data.totalCount === 'number' ? data.totalCount : null;
+  } catch {
+    return null;
+  }
+}
 
-  const steps = [
-    { num: '1', title: t('landing.stepDescribe'), description: t('landing.stepDescribeDetail') },
-    { num: '2', title: t('landing.stepGenerate'), description: t('landing.stepGenerateDetail') },
-    { num: '3', title: t('landing.stepIterate'), description: t('landing.stepIterateDetail') },
-    { num: '4', title: t('landing.stepPublish'), description: t('landing.stepPublishDetail') },
-  ];
+const PIPELINE = [
+  { n: '1', title: 'Describe', detail: 'Say what you want in plain English, or start from a template.' },
+  { n: '2', title: 'Generate', detail: 'A five-phase pipeline writes, checks, and fixes the code — no prompt engineering needed.' },
+  { n: '3', title: 'Preview', detail: 'Your app runs live in seconds. Ask for changes the same way you asked for the app.' },
+  { n: '4', title: 'Publish', detail: 'One tap gives it a real URL, or your own domain on Pro.' },
+];
 
-  const features = [
-    {
-      title: t('landing.featurePipeline'),
-      description: t('landing.featurePipelineDetail'),
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-      ),
-    },
-    {
-      title: t('landing.featureVersions'),
-      description: t('landing.featureVersionsDetail'),
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-    },
-    {
-      title: t('landing.featureDeploy'),
-      description: t('landing.featureDeployDetail'),
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-        </svg>
-      ),
-    },
-    {
-      title: t('landing.featureCommunity'),
-      description: t('landing.featureCommunityDetail'),
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      ),
-    },
-    {
-      title: t('landing.featureCrossPlatform'),
-      description: t('landing.featureCrossPlatformDetail'),
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-        </svg>
-      ),
-    },
-  ];
+const FEATURES = [
+  { title: 'Chat-style building', detail: 'See the plan before it builds, then keep tweaking in the same thread.' },
+  { title: 'Version history', detail: 'Every generation and tweak is saved. Revert to any earlier version.' },
+  { title: 'Instant deploys', detail: 'Published apps get a live URL immediately, with your own domain on Pro.' },
+  { title: 'Community browse', detail: 'Explore what other people are building, and remix any public app.' },
+  { title: 'Android, iOS & web', detail: 'Build from your phone or your laptop. Your projects follow you.' },
+];
 
-  const freePlanFeatures = [
-    t('landing.planFreeGen'), t('landing.planFreeTweaks'), t('landing.planFreePublic'),
-    t('landing.planFreeDeploy'), t('landing.planFreeBrowse'),
-  ];
-
-  const proPlanFeatures = [
-    t('landing.planProGen'), t('landing.planProTweaks'), t('landing.planProPrivate'),
-    t('landing.planProDomains'), t('landing.planProPriority'), t('landing.planProNoExpiry'),
-  ];
-
-  const pricingPlans = [
-    {
-      name: t('landing.planFree'), price: '$0', period: t('landing.planFreePeriod'),
-      features: freePlanFeatures, cta: t('landing.startFree'), ctaLink: '/signup', highlighted: false,
-    },
-    {
-      name: t('landing.planPro'), price: '$9.99', period: t('landing.planProPeriod'),
-      features: proPlanFeatures, cta: t('landing.upgradeToPro'), ctaLink: '/signup', highlighted: true,
-    },
-  ];
+export default async function LandingPage() {
+  const browseCount = await getBrowseCount();
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border/50 backdrop-blur-md sticky top-0 z-40 bg-background/80">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-lg font-bold">
-            <img src="/favicon-32x32.png" alt="VibeBuild" className="w-7 h-7 rounded-lg" />
-            <span>{t('common.vibebuild')}</span>
-          </div>
-          <nav className="flex items-center gap-6">
-            <Link href="/browse" className="text-sm text-muted hover:text-foreground transition">
-              {t('common.browse')}
-            </Link>
-            <Link href="/blog" className="text-sm text-muted hover:text-foreground transition">
-              Blog
-            </Link>
-            <Link href="/login" className="text-sm text-muted hover:text-foreground transition">
-              {t('common.signIn')}
-            </Link>
-            <Link
-              href="/signup"
-              className="px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition"
-            >
-              {t('common.getStarted')}
-            </Link>
-          </nav>
-        </div>
-      </header>
+    <div className="theme-paper min-h-screen bg-[#FAF6F1] text-[#17140F]">
+      <MarketingHeader />
 
       {/* Hero */}
-      <section className="relative py-28 px-6 overflow-hidden">
-        <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-accent/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-[-100px] right-[-100px] w-[400px] h-[400px] bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
-
-        <div className="relative max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-accent/10 border border-accent/20 rounded-full text-xs text-accent font-medium mb-8">
-            <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
-            {t('landing.availablePlatforms')}
-          </div>
-          <h1 className="text-5xl sm:text-6xl font-bold leading-[1.1] mb-6 tracking-tight">
-            {t('landing.heroTitle1')}
-            <br />
-            <span className="bg-gradient-to-r from-accent to-blue-400 bg-clip-text text-transparent">
-              {t('landing.heroTitle2')}
-            </span>
-          </h1>
-          <p className="text-lg sm:text-xl text-muted mb-10 max-w-2xl mx-auto leading-relaxed">
-            {t('landing.heroDescription')}
+      <section className="px-6 pb-16 pt-20 sm:pt-28">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="mb-6 inline-flex items-center gap-2 text-sm text-[#17140F]/62">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#5B4CFF]" />
+            Free to start &middot; Android, iOS &amp; web
           </p>
-          <div className="flex items-center justify-center gap-4 flex-wrap">
-            <Link
-              href="/signup"
-              className="px-8 py-3.5 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition text-lg shadow-lg shadow-accent/20"
-            >
-              {t('landing.startBuildingFree')}
-            </Link>
-            <Link
-              href="/browse"
-              className="px-8 py-3.5 border border-border hover:bg-surface text-foreground font-semibold rounded-xl transition text-lg"
-            >
-              {t('landing.browseApps')}
-            </Link>
-          </div>
+          <h1 className="text-5xl font-semibold leading-[1.08] tracking-tight sm:text-6xl">
+            Describe an app.
+            <br />
+            Watch it build.
+          </h1>
+          <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-[#17140F]/62">
+            One sentence in, a working app out. VibeBuild plans it, builds it, and gives it a
+            live link you can share — usually in under a minute.
+          </p>
+        </div>
+
+        <div className="mt-10">
+          <PromptHero />
         </div>
       </section>
 
-      {/* Demo Mockup */}
+      {/* Product mockup */}
       <section className="px-6 pb-20">
-        <div className="max-w-5xl mx-auto">
-          <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-2xl shadow-black/40">
-            <div className="flex items-center gap-2 px-4 py-3 bg-surface border-b border-border">
-              <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
-                <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-                <div className="w-3 h-3 rounded-full bg-[#28ca41]" />
-              </div>
-              <div className="flex-1 text-center">
-                <span className="text-xs text-subtle font-mono">vibebuild.com/project/new</span>
-              </div>
-            </div>
-
-            <div className="min-h-[320px] bg-white flex flex-col items-center justify-center text-center px-6 py-12">
-              <div className="text-black text-2xl font-bold mb-2">Welcome to my app</div>
-              <div className="text-gray-500 text-sm mb-6">Built with VibeBuild</div>
-              <div className="px-6 py-2.5 bg-blue-500 text-white text-sm rounded-lg font-medium">Get Started</div>
-            </div>
-
-            <div className="border-t border-border px-4 py-3 flex items-center gap-3 bg-surface">
-              <div className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-xs text-subtle">
-                {t('landing.mockChatPlaceholder')}
-              </div>
-              <div className="px-3 py-2 bg-accent rounded-lg text-xs text-white font-medium">{t('common.send')}</div>
-            </div>
-          </div>
+        <div className="mx-auto max-w-3xl">
+          <BuildPreviewCard />
         </div>
       </section>
 
-      {/* Steps */}
-      <section className="py-20 px-6 border-t border-border">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-4">{t('landing.howItWorks')}</h2>
-          <p className="text-muted text-center mb-14 max-w-xl mx-auto">{t('landing.howItWorksSubtitle')}</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {steps.map((step) => (
-              <div key={step.num} className="relative">
-                <div className="w-8 h-8 bg-accent/10 border border-accent/20 rounded-lg flex items-center justify-center text-accent text-sm font-bold mb-3">
-                  {step.num}
-                </div>
-                <h3 className="text-base font-semibold mb-1">{step.title}</h3>
-                <p className="text-sm text-muted leading-relaxed">{step.description}</p>
-              </div>
-            ))}
+      {/* Stats */}
+      <section className="border-y border-[#17140F]/12 bg-white px-6 py-8">
+        <div className="mx-auto flex max-w-4xl flex-col items-center justify-center gap-3 text-center text-sm text-[#17140F]/62 sm:flex-row sm:gap-10">
+          <span><strong className="font-semibold text-[#17140F]">800+</strong> people building</span>
+          <span className="hidden text-[#17140F]/20 sm:inline">&middot;</span>
+          <span>
+            <strong className="font-semibold text-[#17140F]">{browseCount ? browseCount.toLocaleString() : '1,400+'}</strong> apps you can browse and remix
+          </span>
+          <span className="hidden text-[#17140F]/20 sm:inline">&middot;</span>
+          <span><strong className="font-semibold text-[#17140F]">3</strong> platforms, one account</span>
+        </div>
+      </section>
+
+      {/* Pipeline */}
+      <section className="px-6 py-24">
+        <div className="mx-auto max-w-4xl">
+          <div className="max-w-lg">
+            <h2 className="text-3xl font-semibold tracking-tight">From idea to live app</h2>
+            <p className="mt-3 text-[#17140F]/62">No setup, no separate hosting to configure, no code to read unless you want to.</p>
           </div>
+          <ol className="mt-12 space-y-8">
+            {PIPELINE.map((step) => (
+              <li key={step.n} className="flex gap-5 border-t border-[#17140F]/12 pt-6 first:border-t-0 first:pt-0 sm:gap-8">
+                <span className="font-mono text-sm text-[#17140F]/40">{step.n}</span>
+                <div>
+                  <h3 className="text-lg font-semibold">{step.title}</h3>
+                  <p className="mt-1 max-w-md text-[#17140F]/62">{step.detail}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
       {/* Features */}
-      <section className="py-20 px-6 border-t border-border">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-4">{t('landing.everythingYouNeed')}</h2>
-          <p className="text-muted text-center mb-14 max-w-xl mx-auto">{t('landing.everythingYouNeedSubtitle')}</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((f) => (
-              <div
-                key={f.title}
-                className="p-5 bg-card border border-border rounded-xl hover:border-accent/20 transition group"
-              >
-                <div className="w-9 h-9 bg-accent/10 rounded-lg flex items-center justify-center text-accent mb-3 group-hover:bg-accent/15 transition">
-                  {f.icon}
-                </div>
-                <h3 className="text-sm font-semibold mb-1.5">{f.title}</h3>
-                <p className="text-xs text-muted leading-relaxed">{f.description}</p>
+      <section className="border-t border-[#17140F]/12 px-6 py-24">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="text-3xl font-semibold tracking-tight">Everything you need to ship it</h2>
+          <div className="mt-12 grid grid-cols-1 gap-x-12 gap-y-10 sm:grid-cols-2">
+            {FEATURES.map((f) => (
+              <div key={f.title}>
+                <h3 className="text-base font-semibold">{f.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-[#17140F]/62">{f.detail}</p>
               </div>
             ))}
           </div>
@@ -220,80 +118,65 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing */}
-      <section className="py-20 px-6 border-t border-border">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-4">{t('landing.pricing')}</h2>
-          <p className="text-muted text-center mb-14 max-w-xl mx-auto">{t('landing.pricingSubtitle')}</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {pricingPlans.map((plan) => (
-              <div
-                key={plan.name}
-                className={`p-6 rounded-xl border ${
-                  plan.highlighted ? 'border-accent bg-accent/5 relative' : 'border-border bg-card'
-                }`}
-              >
-                {plan.highlighted && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-accent text-white text-[10px] font-semibold rounded-full">
-                    {t('landing.mostPopular')}
-                  </div>
-                )}
-                <h3 className="text-lg font-semibold mb-1">{plan.name}</h3>
-                <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-3xl font-bold">{plan.price}</span>
-                  <span className="text-sm text-muted">{plan.period}</span>
-                </div>
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feat) => (
-                    <li key={feat} className="flex items-center gap-2 text-sm text-muted">
-                      <svg className="w-4 h-4 text-success shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      {feat}
-                    </li>
-                  ))}
-                </ul>
-                <PricingCTA tier={plan.name.toLowerCase()} label={plan.cta} highlighted={plan.highlighted} />
+      <section id="pricing" className="border-t border-[#17140F]/12 px-6 py-24">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="text-3xl font-semibold tracking-tight">Simple pricing</h2>
+          <p className="mt-3 max-w-md text-[#17140F]/62">Start free. Upgrade when the ten-a-day limit is the only thing slowing you down.</p>
+
+          <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div className="rounded-2xl border border-[#17140F]/12 bg-white p-7">
+              <h3 className="text-lg font-semibold">{SUBSCRIPTION_TIERS.free.name}</h3>
+              <div className="mt-2 mb-6 flex items-baseline gap-1">
+                <span className="text-3xl font-semibold">$0</span>
+                <span className="text-sm text-[#17140F]/62">forever</span>
               </div>
-            ))}
+              <ul className="mb-8 space-y-3 text-sm text-[#17140F]/62">
+                <li>10 generations a day</li>
+                <li>3 tweaks per project</li>
+                <li>Public projects</li>
+                <li>One-click deploy</li>
+                <li>Browse and remix the community</li>
+              </ul>
+              <PricingCTA tier="free" label="Start free" highlighted={false} />
+            </div>
+
+            <div className="relative rounded-2xl border border-[#5B4CFF] bg-white p-7">
+              <span className="absolute -top-3 left-7 rounded-full bg-[#5B4CFF] px-3 py-1 text-xs font-semibold text-white">
+                Most popular
+              </span>
+              <h3 className="text-lg font-semibold">{SUBSCRIPTION_TIERS.pro.name}</h3>
+              <div className="mt-2 mb-6 flex items-baseline gap-1">
+                <span className="text-3xl font-semibold">$9.99</span>
+                <span className="text-sm text-[#17140F]/62">/month</span>
+              </div>
+              <ul className="mb-8 space-y-3 text-sm text-[#17140F]/62">
+                <li>Unlimited generations</li>
+                <li>Unlimited tweaks</li>
+                <li>Private projects</li>
+                <li>Your own domain</li>
+                <li>Priority build queue</li>
+              </ul>
+              <PricingCTA tier="pro" label="Upgrade to Pro" highlighted={true} />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20 px-6 border-t border-border">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">{t('landing.readyToBuild')}</h2>
-          <p className="text-muted mb-8">{t('landing.readyToBuildSubtitle')}</p>
+      {/* Final CTA */}
+      <section className="border-t border-[#17140F]/12 px-6 py-24">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">What are you going to build?</h2>
+          <p className="mt-3 text-[#17140F]/62">No credit card, no setup. Just describe it.</p>
           <Link
             href="/signup"
-            className="inline-block px-8 py-3.5 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition text-lg shadow-lg shadow-accent/20"
+            className="mt-8 inline-block rounded-full bg-[#5B4CFF] px-8 py-3.5 text-lg font-semibold text-white transition hover:bg-[#4638D6]"
           >
-            {t('landing.getStartedFree')}
+            Start building free
           </Link>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border py-8 px-6">
-        <div className="max-w-6xl mx-auto flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-2 text-sm text-muted">
-            <img src="/favicon-32x32.png" alt="VibeBuild" className="w-5 h-5 rounded" />
-            <span>{t('common.vibebuild')}</span>
-          </div>
-          <div className="flex items-center gap-6 text-xs text-subtle">
-            <Link href="/browse" className="hover:text-foreground transition">{t('common.browse')}</Link>
-            <Link href="/blog" className="hover:text-foreground transition">Blog</Link>
-            <Link href="/about" className="hover:text-foreground transition">About</Link>
-            <Link href="/faq" className="hover:text-foreground transition">FAQ</Link>
-            <Link href="/terms" className="hover:text-foreground transition">Terms</Link>
-            <Link href="/privacy" className="hover:text-foreground transition">Privacy</Link>
-            <Link href="/login" className="hover:text-foreground transition">{t('common.signIn')}</Link>
-          </div>
-          <p className="text-xs text-subtle">
-            &copy; {new Date().getFullYear()} {t('common.vibebuild')}. {t('common.allRightsReserved')}
-          </p>
-        </div>
-      </footer>
+      <MarketingFooter />
     </div>
   );
 }

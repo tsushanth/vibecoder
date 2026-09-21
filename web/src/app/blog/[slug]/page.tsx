@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ContentHeader, ContentFooter } from '@/components/landing/ContentLayout';
+import { MarketingHeader, MarketingFooter } from '@/components/landing/MarketingChrome';
 
 const articles: Record<string, { title: string; date: string; readTime: string; content: string }> = {
   'what-is-vibe-coding': {
@@ -374,16 +374,16 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
   if (!article) notFound();
 
   return (
-    <div className="min-h-screen bg-background">
-      <ContentHeader />
+    <div className="theme-paper min-h-screen bg-[#FAF6F1] text-[#17140F]">
+      <MarketingHeader />
 
       <article className="max-w-3xl mx-auto px-6 py-12">
-        <Link href="/blog" className="text-sm text-accent hover:underline mb-6 inline-block">
+        <Link href="/blog" className="text-sm text-[#5B4CFF] hover:underline mb-6 inline-block">
           ← Back to Blog
         </Link>
 
         <h1 className="text-4xl font-bold mb-4 leading-tight">{article.title}</h1>
-        <div className="flex items-center gap-4 text-sm text-muted mb-10">
+        <div className="flex items-center gap-4 text-sm text-[#17140F]/62 mb-10">
           <span>{article.date}</span>
           <span>{article.readTime}</span>
         </div>
@@ -392,12 +392,12 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           className="prose prose-invert prose-lg max-w-none
             [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-10 [&_h2]:mb-4
             [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-8 [&_h3]:mb-3
-            [&_p]:text-muted [&_p]:leading-relaxed [&_p]:mb-4
+            [&_p]:text-[#17140F]/62 [&_p]:leading-relaxed [&_p]:mb-4
             [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-4 [&_ul]:space-y-1
-            [&_li]:text-muted
-            [&_strong]:text-foreground [&_strong]:font-semibold
-            [&_a]:text-accent [&_a]:underline
-            [&_blockquote]:border-l-2 [&_blockquote]:border-accent [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted"
+            [&_li]:text-[#17140F]/62
+            [&_strong]:text-[#17140F] [&_strong]:font-semibold
+            [&_a]:text-[#5B4CFF] [&_a]:underline
+            [&_blockquote]:border-l-2 [&_blockquote]:border-[#5B4CFF] [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-[#17140F]/62"
           dangerouslySetInnerHTML={{
             __html: article.content
               .replace(/^## (.+)$/gm, '<h2>$1</h2>')
@@ -413,19 +413,19 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
         />
 
         {/* CTA */}
-        <div className="mt-12 p-8 bg-card border border-border rounded-xl text-center">
+        <div className="mt-12 p-8 bg-white border border-[#17140F]/12 rounded-xl text-center">
           <h3 className="text-xl font-bold mb-2">Ready to start building?</h3>
-          <p className="text-muted mb-4">Try VibeBuild free — describe your app and watch it come to life.</p>
+          <p className="text-[#17140F]/62 mb-4">Try VibeBuild free — describe your app and watch it come to life.</p>
           <Link
             href="/signup"
-            className="inline-block px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition"
+            className="inline-block px-6 py-3 bg-[#5B4CFF] hover:bg-[#4638D6] text-white font-semibold rounded-xl transition"
           >
             Get Started Free
           </Link>
         </div>
       </article>
 
-      <ContentFooter />
+      <MarketingFooter />
     </div>
   );
 }

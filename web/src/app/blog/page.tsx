@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ContentHeader, ContentFooter } from '@/components/landing/ContentLayout';
+import { MarketingHeader, MarketingFooter } from '@/components/landing/MarketingChrome';
 
 export const metadata: Metadata = {
   title: 'Blog - VibeBuild | AI App Building Tips & Tutorials',
@@ -52,12 +52,12 @@ const posts = [
 
 export default function BlogPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <ContentHeader />
+    <div className="theme-paper min-h-screen bg-[#FAF6F1] text-[#17140F]">
+      <MarketingHeader />
 
       <div className="max-w-4xl mx-auto px-6 py-12">
         <h1 className="text-4xl font-bold mb-3">Blog</h1>
-        <p className="text-muted text-lg mb-10">
+        <p className="text-[#17140F]/62 text-lg mb-10">
           Insights on AI app building, vibe coding, and the future of no-code development.
         </p>
 
@@ -66,25 +66,25 @@ export default function BlogPage() {
             <Link
               key={post.slug}
               href={`/blog/${post.slug}`}
-              className="block group p-6 bg-card border border-border rounded-xl hover:border-accent/30 transition"
+              className="block group p-6 bg-white border border-[#17140F]/12 rounded-xl hover:border-[#5B4CFF]/30 transition"
             >
               <div className="flex items-center gap-3 mb-3">
-                <span className="px-2 py-0.5 bg-accent/10 text-accent text-xs font-medium rounded-full">
+                <span className="px-2 py-0.5 bg-[#5B4CFF]/10 text-[#5B4CFF] text-xs font-medium rounded-full">
                   {post.category}
                 </span>
-                <span className="text-xs text-subtle">{post.date}</span>
-                <span className="text-xs text-subtle">{post.readTime}</span>
+                <span className="text-xs text-[#17140F]/40">{post.date}</span>
+                <span className="text-xs text-[#17140F]/40">{post.readTime}</span>
               </div>
-              <h2 className="text-xl font-semibold mb-2 group-hover:text-accent transition">
+              <h2 className="text-xl font-semibold mb-2 group-hover:text-[#5B4CFF] transition">
                 {post.title}
               </h2>
-              <p className="text-muted text-sm leading-relaxed">{post.excerpt}</p>
+              <p className="text-[#17140F]/62 text-sm leading-relaxed">{post.excerpt}</p>
             </Link>
           ))}
         </div>
       </div>
 
-      <ContentFooter />
+      <MarketingFooter />
     </div>
   );
 }
