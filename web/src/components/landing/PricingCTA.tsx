@@ -13,10 +13,13 @@ export function PricingCTA({ tier, label, highlighted }: {
   const { user } = useAuthStore();
   const [loading, setLoading] = useState(false);
 
-  const className = `block w-full text-center px-4 py-2.5 rounded-xl font-semibold text-sm transition ${
+  // Literal colors, not the app's semantic bg-accent/border-border/etc.:
+  // this only renders on the paper-themed marketing page (see the note in
+  // globals.css on why those semantic classes can't be scoped here).
+  const className = `block w-full text-center px-4 py-2.5 rounded-full font-semibold text-sm transition ${
     highlighted
-      ? 'bg-accent hover:bg-accent-hover text-white shadow-lg shadow-accent/20'
-      : 'border border-border hover:bg-surface text-foreground'
+      ? 'bg-[#5B4CFF] hover:bg-[#4638D6] text-white'
+      : 'border border-[#17140F]/12 hover:bg-[#17140F]/[0.04] text-[#17140F]'
   }`;
 
   // Not logged in or free/team: link to signup

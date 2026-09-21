@@ -4,12 +4,12 @@ export const dynamic = 'force-dynamic';
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="theme-paper flex min-h-screen items-center justify-center bg-[#FAF6F1] p-4 text-[#17140F]">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <a href="/" className="inline-flex items-center gap-2 text-xl font-bold">
-            <span className="text-2xl">⚡</span>
-            <span>VibeBuild</span>
+        <div className="mb-8 text-center">
+          <a href="/" className="inline-flex items-center gap-2 text-xl font-semibold">
+            <img src="/favicon-32x32.png" alt="" className="h-8 w-8 rounded-lg" />
+            VibeBuild
           </a>
         </div>
         <AuthForm mode="login" />
