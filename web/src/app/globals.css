@@ -60,3 +60,32 @@ textarea::placeholder {
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
 }
+
+/* ── Marketing theme ──────────────────────────────────────────────────
+ * Scoped look for the public site (landing, about, faq, blog, browse,
+ * login/signup). The authenticated builder keeps the dark theme above,
+ * which matches the mobile app's dark builder UI.
+ *
+ * This does NOT redeclare --color-* tokens: the block above uses
+ * "@theme inline", which Tailwind resolves to a literal value inside every
+ * utility class at build time (e.g. ".bg-background{background-color:#000}"
+ * — no var() left to override, including the opacity-modifier variants like
+ * bg-background/80, which need the literal color to compute color-mix()).
+ * So a nested selector redeclaring the tokens has no effect on utilities.
+ * Marketing components therefore use literal arbitrary-value utilities
+ * (bg-[#FAF6F1], text-[#17140F]/62, etc.) instead of the semantic
+ * bg-background/text-muted/border-border classes. This class only sets the
+ * font. */
+.theme-paper {
+  --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
+}
+
+.theme-paper ::selection {
+  background: rgba(91, 76, 255, 0.18);
+  color: #17140F;
+}
+
+.theme-paper input::placeholder,
+.theme-paper textarea::placeholder {
+  color: rgba(23, 20, 15, 0.4);
+}

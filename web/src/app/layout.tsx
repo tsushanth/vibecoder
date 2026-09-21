@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Sans } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { AuthProvider } from "@/components/auth/AuthProvider";
@@ -13,6 +13,14 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Public marketing pages only (see .theme-paper in globals.css) — the
+// authenticated builder keeps Geist.
+const instrumentSans = Instrument_Sans({
+  variable: "--font-instrument",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -47,7 +55,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
+        className={`${geistSans.variable} ${geistMono.variable} ${instrumentSans.variable} antialiased bg-background text-foreground`}
       >
         <NextIntlClientProvider messages={messages}>
           <AuthProvider>{children}</AuthProvider>
