@@ -59,14 +59,14 @@ fun VersionHistorySheet(
                     Text(stringResource(R.string.cancel), color = TextSecondary)
                 }
             },
-            containerColor = DarkSurfaceElevated
+            containerColor = DarkSurfaceVariant
         )
     }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = DarkSurfaceElevated
+        containerColor = DarkSurfaceVariant
     ) {
         Column(
             modifier = Modifier
@@ -160,6 +160,7 @@ fun VersionHistorySheet(
 
                             Card(
                                 shape = RoundedCornerShape(12.dp),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, DarkBorder),
                                 colors = CardDefaults.cardColors(
                                     containerColor = if (isCurrent)
                                         VibePurple.copy(alpha = 0.1f)

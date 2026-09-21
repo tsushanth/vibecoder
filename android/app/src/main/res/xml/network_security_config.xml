@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stopgap: the screenshot service that renders browse thumbnails only serves
+     plain HTTP. Cleartext is allowed for that one host and nothing else.
+     Remove once it has HTTPS. -->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">178.156.231.255</domain>
+    </domain-config>
+</network-security-config>

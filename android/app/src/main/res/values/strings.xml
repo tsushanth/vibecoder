@@ -93,7 +93,7 @@
     <string name="onboarding_btn_get_started">Get Started</string>
 
     <!-- Create Screen -->
-    <string name="create_title">What do you want to make?</string>
+    <string name="create_title">What do you want to build?</string>
     <string name="create_subtitle">Describe your app idea and AI will build it</string>
     <string name="create_prompt_placeholder">e.g., Build a weather app that shows the forecast for my city…</string>
     <string name="create_cd_attach_image">Attach image</string>

@@ -1,6 +1,9 @@
 package com.kreativekoala.vibecoder.ui.browse
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items as rowItems
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -33,6 +36,7 @@ fun BrowseScreen(
         containerColor = DarkBackground,
         topBar = {
             TopAppBar(
+                windowInsets = if (onBack != null) TopAppBarDefaults.windowInsets else WindowInsets(0, 0, 0, 0),
                 title = { Text(stringResource(R.string.browse_screen_title)) },
                 navigationIcon = {
                     if (onBack != null) {
@@ -84,21 +88,57 @@ fun BrowseScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = DarkSurface,
+                    containerColor = DarkBackground,
                     titleContentColor = TextPrimary
                 )
             )
         }
     ) { innerPadding ->
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            rowItems(ProjectCategory.entries.toList()) { cat ->
+                val selected = uiState.category == cat
+                FilterChip(
+                    selected = selected,
+                    onClick = { viewModel.selectCategory(cat) },
+                    label = { Text(cat.label) },
+                    colors = FilterChipDefaults.filterChipColors(
+                        containerColor = DarkSurfaceVariant,
+                        labelColor = TextSecondary,
+                        selectedContainerColor = VibePurple.copy(alpha = 0.2f),
+                        selectedLabelColor = VibePurple
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        enabled = true,
+                        selected = selected,
+                        borderColor = DarkBorder,
+                        selectedBorderColor = VibePurple
+                    )
+                )
+            }
+        }
+        val visible = uiState.visibleProjects
         when {
             uiState.isLoading -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(innerPadding),
+                        .weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = VibePurple)
+                }
+            }
+
+            visible.isEmpty() -> {
+                Box(
+                    modifier = Modifier.fillMaxSize().weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("No apps in this category yet", color = TextSecondary)
                 }
             }
 
@@ -110,10 +150,9 @@ fun BrowseScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(innerPadding)
                 ) {
                     items(
-                        items = uiState.projects,
+                        items = visible,
                         key = { it.id }
                     ) { project ->
                         BrowseProjectCard(
@@ -123,6 +162,7 @@ fun BrowseScreen(
                     }
                 }
             }
+        }
         }
     }
 }

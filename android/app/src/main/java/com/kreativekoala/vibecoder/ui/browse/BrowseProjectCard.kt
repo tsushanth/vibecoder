@@ -1,12 +1,12 @@
 package com.kreativekoala.vibecoder.ui.browse
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ForkRight
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,7 +17,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import com.kreativekoala.vibecoder.data.model.Project
 import com.kreativekoala.vibecoder.ui.theme.*
 
@@ -31,8 +31,9 @@ fun BrowseProjectCard(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant)
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant),
+        border = BorderStroke(1.dp, DarkBorder)
     ) {
         Column {
             // Thumbnail
@@ -40,36 +41,21 @@ fun BrowseProjectCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(140.dp)
-                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                    .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
             ) {
                 if (project.thumbnailUrl != null) {
-                    AsyncImage(
+                    // The screenshot service can be slow or down; keep the fallback
+                    // visible while loading and on failure instead of an empty box.
+                    SubcomposeAsyncImage(
                         model = project.thumbnailUrl,
                         contentDescription = project.title,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Crop,
+                        loading = { ThumbnailFallback(project.title) },
+                        error = { ThumbnailFallback(project.title) }
                     )
                 } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.linearGradient(
-                                    colors = listOf(
-                                        VibePurple.copy(alpha = 0.4f),
-                                        VibeTeal.copy(alpha = 0.3f)
-                                    )
-                                )
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = project.title.take(2).uppercase(),
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = TextPrimary.copy(alpha = 0.4f),
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    ThumbnailFallback(project.title)
                 }
             }
 
@@ -83,36 +69,38 @@ fun BrowseProjectCard(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                Text(
-                    text = project.creatorName ?: "Unknown",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextTertiary,
-                    maxLines = 1
-                )
+                val prompt = project.initialPrompt?.trim().orEmpty()
+                if (prompt.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = prompt,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.Visibility,
-                            contentDescription = null,
-                            modifier = Modifier.size(14.dp),
-                            tint = TextTertiary
-                        )
-                        Text(
-                            text = "${project.viewCount}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = TextTertiary
-                        )
-                    }
+                    Text(
+                        text = project.creatorName ?: "Unknown",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextTertiary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
 
                     Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(DarkSurfaceElevated)
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
@@ -120,16 +108,40 @@ fun BrowseProjectCard(
                             Icons.Default.ForkRight,
                             contentDescription = null,
                             modifier = Modifier.size(14.dp),
-                            tint = TextTertiary
+                            tint = TextPrimary
                         )
                         Text(
-                            text = "${project.forkCount}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = TextTertiary
+                            text = if (project.forkCount > 0) "Remix ${project.forkCount}" else "Remix",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = TextPrimary
                         )
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ThumbnailFallback(title: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(
+                        VibePurple.copy(alpha = 0.4f),
+                        VibeTeal.copy(alpha = 0.3f)
+                    )
+                )
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = title.take(2).uppercase(),
+            style = MaterialTheme.typography.headlineMedium,
+            color = TextPrimary.copy(alpha = 0.4f),
+            fontWeight = FontWeight.Bold
+        )
     }
 }

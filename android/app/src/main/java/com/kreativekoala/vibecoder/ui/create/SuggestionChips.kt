@@ -13,7 +13,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.data.model.Suggestion
-import com.kreativekoala.vibecoder.ui.theme.DarkSurfaceElevated
+import com.kreativekoala.vibecoder.ui.theme.DarkBorder
+import com.kreativekoala.vibecoder.ui.theme.DarkSurfaceVariant
 import com.kreativekoala.vibecoder.ui.theme.TextPrimary
 import com.kreativekoala.vibecoder.ui.theme.VibePurple
 
@@ -102,12 +103,12 @@ private fun SuggestionChipButton(
         },
         shape = RoundedCornerShape(20.dp),
         colors = SuggestionChipDefaults.suggestionChipColors(
-            containerColor = DarkSurfaceElevated,
+            containerColor = DarkSurfaceVariant,
             labelColor = TextPrimary
         ),
         border = SuggestionChipDefaults.suggestionChipBorder(
             enabled = true,
-            borderColor = VibePurple.copy(alpha = 0.3f)
+            borderColor = DarkBorder
         )
     )
 }

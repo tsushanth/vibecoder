@@ -50,8 +50,8 @@ fun LandingScreen(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF1A1040).copy(alpha = 0.6f + animatedOffset * 0.4f),
-                        Color(0xFF0D0D1A),
+                        DarkSurfaceVariant.copy(alpha = 0.6f + animatedOffset * 0.4f),
+                        DarkSurface,
                         DarkBackground
                     )
                 )
@@ -377,7 +377,7 @@ private fun CTASection(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(10.dp),
             colors = ButtonDefaults.buttonColors(containerColor = VibePurple)
         ) {
             Icon(

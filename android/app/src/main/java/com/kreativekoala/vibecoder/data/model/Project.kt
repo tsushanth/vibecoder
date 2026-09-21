@@ -19,7 +19,7 @@ data class Project(
     @SerializedName("initial_prompt") val initialPrompt: String? = null,
     @SerializedName("github_repo") val githubRepo: String? = null,
     @SerializedName("tweak_count") val tweakCount: Int = 0,
-    @SerializedName("free_tweaks_remaining") val freeTweaksRemaining: Int = 5,
+    @SerializedName("free_tweaks_remaining") val freeTweaksRemaining: Int = 3,
     @SerializedName("published_url") val publishedUrl: String? = null,
     @SerializedName("preview_url") val previewUrl: String? = null,
     @SerializedName("thumbnail_url") val thumbnailUrl: String? = null,
