@@ -13,7 +13,7 @@ export const SUBSCRIPTION_TIERS = {
   free: {
     name: 'Free',
     price: '$0',
-    dailyGenerations: 3,
+    dailyGenerations: 10,
     tweaksPerProject: 3,
     canCreatePrivateProjects: false,
   },
