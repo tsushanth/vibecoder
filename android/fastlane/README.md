@@ -23,6 +23,14 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 
 
+### android promote_to_open_testing
+
+```sh
+[bundle exec] fastlane android promote_to_open_testing
+```
+
+Push current AAB to Open Testing (beta) track. Pre-req: Play Console > Testing > Open testing must be enabled for this app.
+
 ----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.
