@@ -94,7 +94,24 @@ fun BrowseScreen(
             )
         }
     ) { innerPadding ->
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+        BrowseContent(
+            uiState = uiState,
+            onSelectCategory = { viewModel.selectCategory(it) },
+            onProjectClick = onProjectClick,
+            modifier = Modifier.padding(innerPadding)
+        )
+    }
+}
+
+/** Stateless Browse body (category chips + grid/empty/loading). Extracted so it can be UI-tested without a ViewModel. */
+@Composable
+fun BrowseContent(
+    uiState: BrowseUiState,
+    onSelectCategory: (ProjectCategory) -> Unit,
+    onProjectClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+        Column(modifier = modifier.fillMaxSize()) {
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -103,7 +120,7 @@ fun BrowseScreen(
                 val selected = uiState.category == cat
                 FilterChip(
                     selected = selected,
-                    onClick = { viewModel.selectCategory(cat) },
+                    onClick = { onSelectCategory(cat) },
                     label = { Text(cat.label) },
                     colors = FilterChipDefaults.filterChipColors(
                         containerColor = DarkSurfaceVariant,
@@ -164,5 +181,4 @@ fun BrowseScreen(
             }
         }
         }
-    }
 }

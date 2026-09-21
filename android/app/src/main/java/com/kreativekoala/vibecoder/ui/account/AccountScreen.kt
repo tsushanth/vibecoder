@@ -273,9 +273,6 @@ fun AccountScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                val limit = uiState.subscriptionStatus?.limits
-                // Pro/Team limits are Infinity on the server, which JSON turns into null.
-                val paidTier = (uiState.subscriptionStatus?.tier ?: uiState.user?.subscriptionTier ?: "free") != "free"
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -286,8 +283,7 @@ fun AccountScreen(
                     )
                     UsageStat(
                         label = stringResource(R.string.account_stat_todays_gens),
-                        value = "${uiState.user?.dailyGenerationCount ?: 0}" +
-                                if (paidTier || limit?.unlimited == true) "" else "/${limit?.dailyGenerations ?: 3}"
+                        value = todaysGenerationsText(uiState)
                     )
                 }
             }
@@ -393,4 +389,12 @@ private fun UsageStat(label: String, value: String) {
             color = TextTertiary
         )
     }
+}
+
+/** "N" for paid/unlimited tiers, "N/limit" for free (default limit 3). Pro/Team limits are Infinity on the server, which JSON turns into null. */
+internal fun todaysGenerationsText(uiState: AccountUiState): String {
+    val limit = uiState.subscriptionStatus?.limits
+    val paidTier = (uiState.subscriptionStatus?.tier ?: uiState.user?.subscriptionTier ?: "free") != "free"
+    return "${uiState.user?.dailyGenerationCount ?: 0}" +
+        if (paidTier || limit?.unlimited == true) "" else "/${limit?.dailyGenerations ?: 3}"
 }
