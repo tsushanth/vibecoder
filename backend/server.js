@@ -10,11 +10,15 @@ import authRoutes from './routes/auth.routes.js';
 import deployRoutes from './routes/deploy.routes.js';
 import domainsRoutes from './routes/domains.routes.js';
 import telegramRoutes from './routes/telegram.routes.js';
+import githubRoutes from './routes/github.routes.js';
+import appdataRoutes from './routes/appdata.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { WORKER_URL } from './config/constants.js';
 
 const app = express();
 app.set('trust proxy', 1);
+// Mounted BEFORE global cors(): appdata does its own per-app CORS (generated-app origins).
+app.use('/api/appdata', appdataRoutes);
 app.use(cors({
     origin: [
         'https://vibebuild.cc',
@@ -73,6 +77,7 @@ app.use('/api/subscriptions', subscriptionsRoutes);
 app.use('/api/deploy', deployRoutes);
 app.use('/api/domains', domainsRoutes);
 app.use('/api/telegram', telegramRoutes);
+app.use('/api/github', githubRoutes);
 
 // Error handler
 app.use(errorHandler);

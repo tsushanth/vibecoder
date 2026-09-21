@@ -4,7 +4,7 @@ import { supabase } from '../config/database.js';
 const SUBSCRIPTION_TIERS = {
     free: {
         name: 'Free',
-        dailyGenerations: 3,
+        dailyGenerations: 10,
         tweaksPerProject: 3,
         canCreatePrivateProjects: false,
         priorityQueue: false,

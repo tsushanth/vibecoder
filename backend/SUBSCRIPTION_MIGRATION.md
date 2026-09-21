@@ -9,7 +9,7 @@ The backend has been updated to use subscription tiers (Free, Pro, Team) instead
 ## Subscription Tiers
 
 ### Free Tier
-- 3 generations per day
+- 10 generations per day
 - 3 tweaks per project
 - Public projects only
 - No priority queue
@@ -247,7 +247,7 @@ When a user exceeds their subscription limits, the API now returns:
 
 ```json
 {
-    "error": "Free tier limited to 3 generations per day",
+    "error": "Free tier limited to 10 generations per day",
     "used": 3,
     "limit": 3,
     "remaining": 0,
