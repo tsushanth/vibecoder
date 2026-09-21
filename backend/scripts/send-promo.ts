@@ -244,7 +244,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="body">
 <p>Hey ${firstName(name)},</p>
 <p>This is our last email about upgrading. If VibeBuild Pro isn't right for you right now, no worries at all.</p>
-<p>But if you've been on the fence — the free tier caps you at ${3} generations per day and ${3} tweaks per project. Pro removes every limit so you can actually build and ship what you're imagining.</p>
+<p>But if you've been on the fence — the free tier caps you at ${10} generations per day and ${3} tweaks per project. Pro removes every limit so you can actually build and ship what you're imagining.</p>
 <a class="cta" href="${UPGRADE_URL}">Take Another Look at Pro →</a>
 <p style="font-size:13px;color:#8e8e93">This is the last email we'll send about upgrading. You'll still get important account emails.</p>
 </div>

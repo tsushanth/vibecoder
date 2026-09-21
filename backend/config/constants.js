@@ -13,7 +13,7 @@ export const GENERATION_COST = 20;
 export const TWEAK_COST = 10;
 export const FORK_COST = 10;
 export const CREATOR_SHARE_PCT = 55;
-export const FREE_TWEAKS_DEFAULT = 5;
+export const FREE_TWEAKS_DEFAULT = 3;
 export const FREE_GENERATIONS_PER_DAY = 3;
 
 // Rate limits
