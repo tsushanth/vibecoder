@@ -10,18 +10,51 @@ const LOCALE_BCP47: Record<string, string> = {
   zh: 'zh-CN', ko: 'ko-KR', pt: 'pt-BR', it: 'it-IT', hi: 'hi-IN',
 };
 
+// Weighted toward patterns that show up repeatedly and independently in real
+// production prompts (trading/signal tracking, local service booking, drawing tools),
+// not just generic app-category guesses — see the data review that drove this change.
+// "Trading Signal Tracker" is deliberately scoped to a logging/tracking dashboard, not
+// a broker-connected autonomous bot — that's outside what a generated web app can do,
+// and promising it would just produce another failed/misleading generation.
 const SAMPLE_PROMPTS = [
   { icon: '🎨', label: 'Portfolio Site', prompt: 'Build a personal portfolio website with a dark theme, animated hero section, project gallery with hover effects, skills section, and a working contact form' },
   { icon: '📋', label: 'Task Manager', prompt: 'Build a Kanban-style task manager with drag and drop columns (To Do, In Progress, Done), ability to add/edit/delete tasks, priority labels, and local storage persistence' },
-  { icon: '🛒', label: 'E-Commerce Store', prompt: 'Build a modern e-commerce product page with image gallery, size selector, add to cart button, customer reviews section, and a responsive mobile layout' },
+  { icon: '📈', label: 'Trading Signal Tracker', prompt: 'Build a trading signal tracker dashboard where I can log entry/exit prices for trades, see win-rate and P&L stats, filter by symbol, and view a running watchlist — a tracking tool, not a live-execution bot' },
   { icon: '📊', label: 'Dashboard', prompt: 'Build an analytics dashboard with sidebar navigation, chart cards showing revenue/users/orders metrics, a data table with sorting, and a dark professional theme' },
-  { icon: '🍕', label: 'Restaurant Menu', prompt: 'Build a restaurant website with a hero image, interactive menu with categories and filtering, reservation form, photo gallery, and Google Maps embed placeholder' },
-  { icon: '🎮', label: 'Quiz Game', prompt: 'Build an interactive quiz game with multiple choice questions, score tracking, timer, progress bar, results screen with share button, and colorful animations' },
+  { icon: '🧰', label: 'Service Booking App', prompt: 'Build a local service booking app for home services (plumbing, cleaning, gardening) with service category cards, a calendar-based time slot picker, and a customer request form' },
+  { icon: '🖌️', label: 'Drawing Studio', prompt: 'Build a drawing app using HTML canvas with brush size and color picker, an eraser, multiple layers, and undo/redo support' },
 ];
 
 interface PromptInputProps {
   onSubmit: (prompt: string, referenceImage?: string) => void;
   isGenerating: boolean;
+}
+
+const QUESTION_STARTERS = [
+  'what', 'who', 'how', 'why', 'where', 'when', 'can you', 'could you',
+  'is it', 'are there', 'does', 'do you', 'will it',
+];
+const APP_SIGNAL_WORDS = [
+  'build', 'app', 'website', 'web app', 'page', 'dashboard', 'tool', 'tracker',
+  'game', 'form', 'site', 'calculator', 'manager', 'store', 'shop', 'booking',
+  'wallet', 'bot', 'signal', 'chat app', 'quiz', 'landing',
+];
+
+/** Heuristic only — used to gently nudge, never to block submission. A meaningful
+ * share of real prompts are general chat/image questions rather than app descriptions
+ * (confirmed from production data), so this catches the common shapes of that without
+ * being a hard gate. */
+function looksOffTopic(prompt: string): boolean {
+  const t = prompt.trim().toLowerCase();
+  if (t.length === 0) return false;
+  const wordCount = t.split(/\s+/).length;
+  const endsWithQuestion = t.endsWith('?');
+  const startsWithQuestionWord = QUESTION_STARTERS.some((q) => t.startsWith(q));
+  const hasAppSignal = APP_SIGNAL_WORDS.some((w) => t.includes(w));
+  if (hasAppSignal) return false;
+  if (endsWithQuestion || startsWithQuestionWord) return true;
+  if (wordCount <= 3) return true;
+  return false;
 }
 
 export function PromptInput({ onSubmit, isGenerating }: PromptInputProps) {
@@ -127,6 +160,9 @@ export function PromptInput({ onSubmit, isGenerating }: PromptInputProps) {
         <p className="text-muted">
           {t('create.subtitle')}
         </p>
+        <p className="text-xs text-subtle mt-2 max-w-lg mx-auto">
+          {t('create.scopeHint')}
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -175,6 +211,12 @@ export function PromptInput({ onSubmit, isGenerating }: PromptInputProps) {
             </label>
           </div>
         </div>
+
+        {!isGenerating && looksOffTopic(prompt) && (
+          <p className="px-3 py-2 text-xs text-warning bg-warning/10 border border-warning/20 rounded-lg">
+            {t('create.offTopicNudge')}
+          </p>
+        )}
 
         {imagePreview && (
           <div className="flex items-center gap-3 px-3 py-2 bg-surface border border-border rounded-lg">

@@ -304,8 +304,27 @@ export default function ProjectBuilderPage() {
 
   const [showPublish, setShowPublish] = useState(false);
   const [usageLimitError, setUsageLimitError] = useState<string | null>(null);
+  const [showPublishNudge, setShowPublishNudge] = useState(false);
 
   const isOwner = store.project?.creatorId === user?.id;
+
+  // Surface a one-time nudge right after a successful generation finishes,
+  // if the project isn't published yet. Most successful builds never get
+  // published — the Publish button is small and easy to miss, and nothing
+  // prompts the user at the moment they'd be most likely to act on it.
+  const wasGenerating = useRef(false);
+  useEffect(() => {
+    if (
+      wasGenerating.current &&
+      !genStore.isGenerating &&
+      !genStore.error &&
+      isOwner &&
+      !store.project?.publishedUrl
+    ) {
+      setShowPublishNudge(true);
+    }
+    wasGenerating.current = genStore.isGenerating;
+  }, [genStore.isGenerating, genStore.error, isOwner, store.project?.publishedUrl]);
 
   if (store.isLoadingProject) {
     return (
@@ -376,6 +395,31 @@ export default function ProjectBuilderPage() {
           )}
         </div>
       </div>
+
+      {showPublishNudge && isOwner && !store.project.publishedUrl && (
+        <div className="flex items-center justify-between gap-3 px-3 py-2 bg-accent/10 border-b border-accent/20 text-xs">
+          <span className="text-foreground">
+            {t('publish.nudgeText')}
+          </span>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => { setShowPublishNudge(false); setShowPublish(true); }}
+              className="px-3 py-1.5 font-medium bg-accent hover:bg-accent-hover text-white rounded-lg transition"
+            >
+              {t('common.publish')}
+            </button>
+            <button
+              onClick={() => setShowPublishNudge(false)}
+              className="text-subtle hover:text-foreground transition p-1"
+              aria-label={t('common.dismiss')}
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Main builder area — desktop: preview top, chat bottom.
           Chat input lives at the top of the chat panel, so a larger default

@@ -125,7 +125,7 @@ All without writing a single line of code.
 
 ## Getting Started
 
-Ready to build? Head to [VibeBuild](https://vibebuild.cc/signup) and create your free account. You get 3 app generations per day on the free plan — enough to prototype and experiment. When you're ready for unlimited generations and custom domains, upgrade to Pro.
+Ready to build? Head to [VibeBuild](https://vibebuild.cc/signup) and create your free account. You get 10 app generations per day on the free plan — enough to prototype and experiment. When you're ready for unlimited generations and custom domains, upgrade to Pro.
 
 The barrier between having an idea and having a live app has never been lower. What will you build?
     `,
@@ -168,7 +168,7 @@ Lovable (formerly GPT Engineer) specializes in creating React applications with 
 - **Lovable**: Discord community, but no in-app sharing.
 
 ### Pricing
-- **VibeBuild**: Free tier (3 generations/day), Pro at $9.99/month (unlimited)
+- **VibeBuild**: Free tier (10 generations/day), Pro at $9.99/month (unlimited)
 - **Bolt**: Free tier with limited tokens, Pro at $20/month
 - **Lovable**: Free tier with limited credits, paid plans start at $20/month
 

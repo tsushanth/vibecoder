@@ -32,7 +32,8 @@
     "remove": "Remove",
     "add": "Add",
     "unlimited": "Unlimited",
-    "versions": "Versions"
+    "versions": "Versions",
+    "dismiss": "Dismiss"
   },
   "landing": {
     "availablePlatforms": "Now available on Web, iOS & Android",
@@ -67,7 +68,7 @@
     "pricingSubtitle": "Start free, upgrade when you need more",
     "planFree": "Free",
     "planFreePeriod": "forever",
-    "planFreeGen": "3 generations / day",
+    "planFreeGen": "10 generations / day",
     "planFreeTweaks": "3 tweaks / project",
     "planFreePublic": "Public projects only",
     "planFreeDeploy": "Deploy to yourapp.vibebuild.cc",
@@ -91,6 +92,8 @@
   "create": {
     "title": "What do you want to build?",
     "subtitle": "Describe your app and our AI will build it in minutes",
+    "scopeHint": "I build working web apps — not chat answers or images. Describe features you want (\"a calculator with a history log\"), not just a topic or question.",
+    "offTopicNudge": "This reads more like a question or a one-word topic than an app description. Try describing what the app should DO — e.g. \"a trading signal tracker that logs entries and shows win rate\" instead of \"trading bot\".",
     "placeholder": "Build a personal portfolio with a dark theme, project gallery, and contact form...",
     "startBuilding": "Start Building",
     "building": "Building...",
@@ -173,6 +176,7 @@
   },
   "publish": {
     "title": "Publish to Web",
+    "nudgeText": "Your app is ready. Publish it to get a live URL you can share.",
     "chooseSubdomain": "Choose a subdomain to publish your app on the web.",
     "domainSuffix": ".vibebuild.cc",
     "publishing": "Publishing...",
