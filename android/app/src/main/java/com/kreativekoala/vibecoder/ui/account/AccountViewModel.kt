@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.kreativekoala.vibecoder.data.model.SubscriptionStatusResponse
 import com.kreativekoala.vibecoder.data.model.User
 import com.kreativekoala.vibecoder.data.repository.AuthRepository
+import com.kreativekoala.vibecoder.data.repository.ProjectRepository
 import com.kreativekoala.vibecoder.data.repository.SubscriptionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +24,8 @@ data class AccountUiState(
 @HiltViewModel
 class AccountViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val subscriptionRepository: SubscriptionRepository
+    private val subscriptionRepository: SubscriptionRepository,
+    private val projectRepository: ProjectRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AccountUiState())
@@ -39,9 +41,21 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
+            // The backend has no profile endpoint, so fetchUserProfile 404s. Fall back
+            // to the local session so the screen shows the real name and email.
+            val fetched = try { authRepository.fetchUserProfile(userId) } catch (_: Exception) { null }
+            val local = authRepository.currentUser
+            val base = fetched ?: User(
+                userId = userId,
+                email = local?.email,
+                displayName = local?.displayName ?: local?.email?.substringBefore('@'),
+                avatarUrl = local?.avatarUrl
+            )
+            _uiState.update { it.copy(user = base) }
+
             try {
-                val user = authRepository.fetchUserProfile(userId)
-                _uiState.update { it.copy(user = user) }
+                val count = projectRepository.countMyProjects(userId)
+                _uiState.update { state -> state.copy(user = state.user?.copy(totalProjects = count)) }
             } catch (_: Exception) {}
 
             try {

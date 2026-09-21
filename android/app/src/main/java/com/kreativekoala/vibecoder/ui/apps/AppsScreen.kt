@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FolderOpen
@@ -32,31 +33,32 @@ private fun ProUpsellBanner(onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(Brush.horizontalGradient(listOf(Color(0xFF6366F1), Color(0xFF8B5CF6))))
+            .clip(RoundedCornerShape(12.dp))
+            .background(DarkSurfaceVariant)
+            .border(1.dp, DarkBorder, RoundedCornerShape(12.dp))
             .padding(16.dp)
     ) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFD700), modifier = Modifier.size(18.dp))
+                Icon(Icons.Default.Star, contentDescription = null, tint = VibeYellow, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
-                Text("Pro users never wait", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                Text("Pro users never wait", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 15.sp)
             }
             Spacer(Modifier.height(4.dp))
             Text(
                 "Free builders are shared — Pro gets you priority queue, faster builds, and no failures.",
-                color = Color.White.copy(alpha = 0.85f),
+                color = TextSecondary,
                 fontSize = 13.sp,
                 lineHeight = 18.sp
             )
             Spacer(Modifier.height(12.dp))
             Button(
                 onClick = onClick,
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                colors = ButtonDefaults.buttonColors(containerColor = VibePurple),
                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text("Upgrade to Pro", color = Color(0xFF6366F1), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                Text("Upgrade to Pro", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
             }
         }
     }
@@ -92,7 +94,6 @@ fun AppsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .statusBarsPadding()
     ) {
         // Header
         Row(

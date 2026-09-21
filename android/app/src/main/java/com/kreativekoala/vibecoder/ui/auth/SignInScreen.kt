@@ -63,8 +63,8 @@ fun SignInScreen(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF1A1A33),
-                        Color(0xFF0D0D1A),
+                        DarkSurfaceVariant,
+                        DarkSurface,
                         DarkBackground
                     )
                 )
@@ -230,7 +230,7 @@ fun SignInScreen(
                     .fillMaxWidth()
                     .height(52.dp),
                 enabled = !isLoading && email.isNotBlank() && password.length >= 6,
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = VibePurple,
                     disabledContainerColor = VibePurple.copy(alpha = 0.3f)
@@ -307,7 +307,7 @@ fun SignInScreen(
                     .fillMaxWidth()
                     .height(52.dp),
                 enabled = !isLoading,
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = TextPrimary
                 ),

@@ -9,11 +9,13 @@ import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Mic
@@ -150,20 +152,24 @@ fun CreateScreen(
     }
 
     // Show save success alert when project is saved
-    LaunchedEffect(uiState.savedProjectId) {
-        if (uiState.savedProjectId != null) {
+    var prevSaving by remember { mutableStateOf(false) }
+    LaunchedEffect(uiState.isSaving) {
+        if (prevSaving && !uiState.isSaving && uiState.savedProjectId != null) {
             showSaveSuccess = true
         }
+        prevSaving = uiState.isSaving
     }
 
     // Show preview overlay
     var showClosePublishPrompt by remember { mutableStateOf(false) }
 
-    if (uiState.showPreview && uiState.bundleDir != null) {
+    if (uiState.showPreview && (uiState.bundleDir != null || uiState.previewUrl != null)) {
         Box(modifier = Modifier.fillMaxSize()) {
             LivePreviewScreen(
-                bundleDir = uiState.bundleDir!!,
+                bundleDir = uiState.bundleDir,
+                previewUrl = if (uiState.bundleDir == null) uiState.previewUrl else null,
                 onClose = {
+                    if (uiState.chatStage != ChatStage.Idle) { viewModel.closePreview(); return@LivePreviewScreen }
                     // If already published or saved, just close
                     if (uiState.deployedUrl != null || uiState.savedProjectId != null) {
                         viewModel.dismissPreview()
@@ -232,52 +238,6 @@ fun CreateScreen(
         return
     }
 
-    // Building confirmation dialog — with upsell on 2nd generation for free users
-    if (uiState.showBuildingConfirmation) {
-        val generationCount = remember { MainActivity.getGenerationCount(context) }
-        val isPremium = MainActivity.isPremiumUser(context)
-        val isLastFree = !isPremium && generationCount >= MainActivity.FREE_GENERATION_LIMIT - 1
-
-        AlertDialog(
-            onDismissRequest = { viewModel.dismissBuildingConfirmation() },
-            title = { Text("Your app is being built! 🎉", color = TextPrimary) },
-            text = {
-                Column {
-                    Text("We'll notify you when it's ready. Check My Projects in about 5 minutes.", color = TextSecondary)
-                    if (isLastFree) {
-                        Spacer(Modifier.height(12.dp))
-                        Card(
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFF6366F1).copy(alpha = 0.15f)),
-                            shape = RoundedCornerShape(10.dp)
-                        ) {
-                            Column(Modifier.padding(12.dp)) {
-                                Text("⚡ This is your last free build", color = Color(0xFF818CF8), fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                                Spacer(Modifier.height(4.dp))
-                                Text("Upgrade to Pro for unlimited apps, priority builds, and no wait times.", color = TextSecondary, fontSize = 12.sp)
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                if (isLastFree) {
-                    Button(
-                        onClick = { viewModel.dismissBuildingConfirmation(); onNavigateToSubscriptions() },
-                        colors = ButtonDefaults.buttonColors(containerColor = VibePurple)
-                    ) { Text("Upgrade to Pro") }
-                } else {
-                    TextButton(onClick = { viewModel.dismissBuildingConfirmation() }) {
-                        Text("Got it", color = VibePurple)
-                    }
-                }
-            },
-            dismissButton = if (isLastFree) {
-                { TextButton(onClick = { viewModel.dismissBuildingConfirmation() }) { Text("Later", color = TextSecondary) } }
-            } else null,
-            containerColor = DarkSurfaceVariant
-        )
-    }
-
     // Error snackbar
     if (uiState.errorMessage != null) {
         AlertDialog(
@@ -318,13 +278,31 @@ fun CreateScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        // Input mode (generation runs in background — no progress screen)
+        if (uiState.chatStage != ChatStage.Idle) {
+            val showUpsell = remember(uiState.chatStage) {
+                !MainActivity.isPremiumUser(context) &&
+                    MainActivity.getGenerationCount(context) >= MainActivity.FREE_GENERATION_LIMIT - 1
+            }
+            BuildChatThread(
+                state = uiState,
+                showUpsell = showUpsell,
+                onConfirmPlan = { viewModel.confirmPlan() },
+                onEditPrompt = { viewModel.editPrompt() },
+                onCancel = { viewModel.cancelGeneration() },
+                onOpenPreview = { viewModel.openPreview() },
+                onPublish = { viewModel.openPublish() },
+                onNewApp = { viewModel.newChat() },
+                onTweak = { viewModel.tweakProject(it) },
+                onUpgrade = onNavigateToSubscriptions,
+                modifier = Modifier
+            )
+        } else {
+        // Input mode
         Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 20.dp)
-                    .statusBarsPadding()
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -346,109 +324,108 @@ fun CreateScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Prompt input
-                OutlinedTextField(
-                    value = uiState.prompt,
-                    onValueChange = { viewModel.updatePrompt(it) },
+                // Composer: input, attachments and send live in one card
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 160.dp),
-                    placeholder = {
-                        Text(
-                            text = stringResource(R.string.create_prompt_placeholder),
-                            color = TextTertiary
-                        )
-                    },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = VibePurple,
-                        unfocusedBorderColor = DarkBorder,
-                        focusedContainerColor = DarkSurfaceVariant,
-                        unfocusedContainerColor = DarkSurfaceVariant,
-                        cursorColor = VibePurple,
-                        focusedTextColor = TextPrimary,
-                        unfocusedTextColor = TextPrimary
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                )
-
-                // Reference image preview
-                if (uiState.referenceImageBase64 != null) {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Box(
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(DarkSurfaceVariant)
+                        .border(1.dp, DarkBorder, RoundedCornerShape(16.dp))
+                        .padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 8.dp)
+                ) {
+                    TextField(
+                        value = uiState.prompt,
+                        onValueChange = { viewModel.updatePrompt(it) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(120.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(DarkSurfaceVariant)
-                    ) {
-                        val bytes = Base64.decode(uiState.referenceImageBase64, Base64.DEFAULT)
-                        val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                        if (bitmap != null) {
-                            androidx.compose.foundation.Image(
-                                bitmap = bitmap.asImageBitmap(),
-                                contentDescription = stringResource(R.string.create_cd_reference_image),
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Fit
+                            .heightIn(min = 120.dp),
+                        placeholder = {
+                            Text(
+                                text = stringResource(R.string.create_prompt_placeholder),
+                                color = TextTertiary
                             )
-                        }
-                        IconButton(
-                            onClick = { viewModel.setReferenceImage(null) },
-                            modifier = Modifier.align(Alignment.TopEnd)
-                        ) {
-                            Icon(
-                                Icons.Default.Close,
-                                contentDescription = stringResource(R.string.create_cd_remove_image),
-                                tint = TextPrimary
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Action row
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row {
-                        // Attach image
-                        IconButton(
-                            onClick = { imagePickerLauncher.launch("image/*") }
-                        ) {
-                            Icon(
-                                Icons.Default.AttachFile,
-                                contentDescription = stringResource(R.string.create_cd_attach_image),
-                                tint = TextSecondary
-                            )
-                        }
-
-                        // Mic button (placeholder for Phase 3)
-                        IconButton(onClick = { /* Phase 3 */ }) {
-                            Icon(
-                                Icons.Default.Mic,
-                                contentDescription = stringResource(R.string.create_cd_voice_input),
-                                tint = TextSecondary
-                            )
-                        }
-                    }
-
-                    // Generate button
-                    Button(
-                        onClick = { viewModel.startGeneration() },
-                        enabled = uiState.prompt.isNotBlank(),
-                        shape = RoundedCornerShape(24.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = VibePurple,
-                            disabledContainerColor = VibePurple.copy(alpha = 0.3f)
-                        ),
-                        contentPadding = PaddingValues(horizontal = 32.dp, vertical = 12.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.start_generating),
-                            fontWeight = FontWeight.SemiBold
+                        },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            cursorColor = VibePurple,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary
                         )
+                    )
+
+                    // Reference image preview
+                    if (uiState.referenceImageBase64 != null) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(DarkBackground)
+                        ) {
+                            val bytes = Base64.decode(uiState.referenceImageBase64, Base64.DEFAULT)
+                            val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                            if (bitmap != null) {
+                                androidx.compose.foundation.Image(
+                                    bitmap = bitmap.asImageBitmap(),
+                                    contentDescription = stringResource(R.string.create_cd_reference_image),
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Fit
+                                )
+                            }
+                            IconButton(
+                                onClick = { viewModel.setReferenceImage(null) },
+                                modifier = Modifier.align(Alignment.TopEnd)
+                            ) {
+                                Icon(
+                                    Icons.Default.Close,
+                                    contentDescription = stringResource(R.string.create_cd_remove_image),
+                                    tint = TextPrimary
+                                )
+                            }
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row {
+                            IconButton(onClick = { imagePickerLauncher.launch("image/*") }) {
+                                Icon(
+                                    Icons.Default.AttachFile,
+                                    contentDescription = stringResource(R.string.create_cd_attach_image),
+                                    tint = TextSecondary
+                                )
+                            }
+
+                            // Mic button (placeholder for Phase 3)
+                            IconButton(onClick = { /* Phase 3 */ }) {
+                                Icon(
+                                    Icons.Default.Mic,
+                                    contentDescription = stringResource(R.string.create_cd_voice_input),
+                                    tint = TextSecondary
+                                )
+                            }
+                        }
+
+                        FilledIconButton(
+                            onClick = { viewModel.startGeneration() },
+                            enabled = uiState.prompt.isNotBlank(),
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = VibePurple,
+                                disabledContainerColor = DarkSurfaceElevated
+                            )
+                        ) {
+                            Icon(
+                                Icons.Default.ArrowUpward,
+                                contentDescription = stringResource(R.string.start_generating),
+                                tint = if (uiState.prompt.isNotBlank()) TextPrimary else TextTertiary
+                            )
+                        }
                     }
                 }
 
@@ -476,5 +453,6 @@ fun CreateScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
             }
+        }
     }
 }

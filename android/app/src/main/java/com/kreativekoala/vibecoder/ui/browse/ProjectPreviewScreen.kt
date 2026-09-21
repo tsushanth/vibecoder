@@ -52,7 +52,7 @@ fun ProjectPreviewScreen(
                         Button(
                             onClick = { viewModel.forkProject() },
                             enabled = !uiState.isForkingProject && uiState.forkedProjectId == null,
-                            shape = RoundedCornerShape(20.dp),
+                            shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = VibePurple),
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                         ) {

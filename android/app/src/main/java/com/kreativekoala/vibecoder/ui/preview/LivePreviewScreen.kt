@@ -120,7 +120,7 @@ fun LivePreviewScreen(
         ModalBottomSheet(
             onDismissRequest = { showPublishSheet = false },
             sheetState = sheetState,
-            containerColor = DarkSurfaceElevated
+            containerColor = DarkSurfaceVariant
         ) {
             Column(
                 modifier = Modifier
@@ -161,7 +161,7 @@ fun LivePreviewScreen(
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(deployedUrl)))
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
+                    shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = VibePurple),
                     contentPadding = PaddingValues(vertical = 14.dp)
                 ) {
@@ -264,7 +264,7 @@ fun LivePreviewScreen(
                     Text(stringResource(R.string.cancel), color = TextSecondary)
                 }
             },
-            containerColor = DarkSurfaceElevated
+            containerColor = DarkSurfaceVariant
         )
     }
 
@@ -483,7 +483,7 @@ fun LivePreviewScreen(
                     Icon(
                         if (feedbackSent == "down") Icons.Filled.ThumbDown else Icons.Outlined.ThumbDown,
                         contentDescription = "Thumbs down",
-                        tint = if (feedbackSent == "down") Color(0xFFEF5350) else TextSecondary,
+                        tint = if (feedbackSent == "down") ErrorRed else TextSecondary,
                         modifier = Modifier.size(20.dp)
                     )
                 }

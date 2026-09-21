@@ -80,8 +80,8 @@ fun OnboardingScreen(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF1A1040),
-                        Color(0xFF0D0D1A),
+                        DarkSurfaceVariant,
+                        DarkSurface,
                         DarkBackground
                     )
                 )
@@ -155,7 +155,7 @@ fun OnboardingScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = currentAccent)
             ) {
                 Text(

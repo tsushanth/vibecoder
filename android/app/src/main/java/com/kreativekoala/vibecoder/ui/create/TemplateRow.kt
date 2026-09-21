@@ -13,6 +13,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kreativekoala.vibecoder.data.model.Template
+import com.kreativekoala.vibecoder.ui.theme.DarkBorder
+import com.kreativekoala.vibecoder.ui.theme.DarkSurfaceElevated
+import com.kreativekoala.vibecoder.ui.theme.DarkSurfaceVariant
 import com.kreativekoala.vibecoder.ui.theme.TextPrimary
 import com.kreativekoala.vibecoder.ui.theme.VibePurple
 
@@ -51,8 +54,9 @@ fun TemplateRow(
 private fun TemplateCard(template: Template, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(14.dp),
-        color = Color.White.copy(alpha = 0.06f),
+        shape = RoundedCornerShape(12.dp),
+        color = DarkSurfaceVariant,
+        border = androidx.compose.foundation.BorderStroke(1.dp, DarkBorder),
         modifier = Modifier
             .width(220.dp)
             .height(120.dp),
@@ -65,7 +69,7 @@ private fun TemplateCard(template: Template, onClick: () -> Unit) {
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Badge(text = template.difficulty, color = colorFor(template.difficulty))
-                Badge(text = template.category, color = Color.White.copy(alpha = 0.12f))
+                Badge(text = template.category, color = DarkSurfaceElevated)
             }
             Column {
                 Text(

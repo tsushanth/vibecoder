@@ -28,9 +28,43 @@ class ProjectRepository @Inject constructor(
         return response.projects
     }
 
+    /** Real total for the user, paging /my (max 100 per page) until exhausted. */
+    suspend fun countMyProjects(userId: String): Int {
+        val pageSize = 100
+        var offset = 0
+        var seen = 0
+        while (true) {
+            val page = api.getMyProjects(userId, limit = pageSize, offset = offset)
+            seen += page.projects.size
+            if (!page.hasMore || page.projects.isEmpty()) return maxOf(seen, page.totalCount)
+            offset += page.projects.size
+        }
+    }
+
     suspend fun getProject(id: String): Project? {
         val response = api.getProject(id)
         return response.project
+    }
+
+    /** Returns null when the endpoint doesn't exist (404); throws on other failures. */
+    suspend fun getProgress(id: String): ProjectProgress? {
+        return try {
+            api.getProgress(id)
+        } catch (e: retrofit2.HttpException) {
+            if (e.code() == 404) null else throw e
+        }
+    }
+
+    /** Optional plan step. Returns null on any failure so callers skip straight to building. */
+    suspend fun plan(prompt: String): BuildPlan? {
+        return try {
+            val r = api.planProject(PlanRequest(prompt))
+            if (r.success) r.plan?.takeIf { it.summary.isNotBlank() || !it.features.isNullOrEmpty() } else null
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            null
+        }
     }
 
     suspend fun deleteProject(id: String, userId: String) {

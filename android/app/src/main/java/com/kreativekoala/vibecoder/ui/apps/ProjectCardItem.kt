@@ -1,5 +1,6 @@
 package com.kreativekoala.vibecoder.ui.apps
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -62,8 +63,9 @@ fun ProjectCardItem(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant)
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant),
+        border = BorderStroke(1.dp, DarkBorder)
     ) {
         Column {
             // Thumbnail
@@ -71,7 +73,7 @@ fun ProjectCardItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(140.dp)
-                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
+                    .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 if (project.thumbnailUrl != null) {

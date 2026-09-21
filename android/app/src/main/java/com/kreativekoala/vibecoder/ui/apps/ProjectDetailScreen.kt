@@ -255,7 +255,7 @@ fun ProjectDetailScreen(
                     Button(
                         onClick = { viewModel.loadPreview() },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(10.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = VibePurple),
                         contentPadding = PaddingValues(vertical = 16.dp),
                         enabled = !uiState.isLoadingPreview
@@ -280,7 +280,8 @@ fun ProjectDetailScreen(
                     if (liveUrl != null) {
                         // Already deployed — show URL + actions
                         Card(
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, DarkBorder),
                             colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant)
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
@@ -371,7 +372,7 @@ fun ProjectDetailScreen(
                                 viewModel.showDeployDialog()
                             },
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = VibeBlue),
                             contentPadding = PaddingValues(vertical = 16.dp),
                             enabled = !uiState.isDeploying
@@ -398,7 +399,7 @@ fun ProjectDetailScreen(
                     Button(
                         onClick = { viewModel.exportApk() },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(10.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = VibeGreen),
                         contentPadding = PaddingValues(vertical = 16.dp),
                         enabled = !uiState.isExportingApk
@@ -463,7 +464,8 @@ fun ProjectDetailScreen(
                     if (liveUrl != null) {
                         Spacer(modifier = Modifier.height(24.dp))
                         Card(
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, DarkBorder),
                             colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant)
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
@@ -522,6 +524,7 @@ fun ProjectDetailScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         Card(
                             shape = RoundedCornerShape(12.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, DarkBorder),
                             colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant)
                         ) {
                             Text(

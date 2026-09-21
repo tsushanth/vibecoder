@@ -34,7 +34,7 @@ import com.kreativekoala.vibecoder.ui.apps.AppsScreen
 import com.kreativekoala.vibecoder.ui.browse.BrowseScreen
 import com.kreativekoala.vibecoder.ui.create.CreateScreen
 import com.kreativekoala.vibecoder.ui.theme.DarkBackground
-import com.kreativekoala.vibecoder.ui.theme.DarkSurface
+import com.kreativekoala.vibecoder.ui.theme.DarkBorder
 import com.kreativekoala.vibecoder.ui.theme.TextSecondary
 import com.kreativekoala.vibecoder.ui.theme.VibePurple
 
@@ -77,9 +77,12 @@ fun MainScreen(
     Scaffold(
         containerColor = DarkBackground,
         bottomBar = {
+            Column {
+            HorizontalDivider(color = DarkBorder)
             NavigationBar(
-                containerColor = DarkSurface,
-                contentColor = TextSecondary
+                containerColor = DarkBackground,
+                contentColor = TextSecondary,
+                tonalElevation = 0.dp
             ) {
                 tabs.forEachIndexed { index, tab ->
                     NavigationBarItem(
@@ -97,10 +100,11 @@ fun MainScreen(
                             selectedTextColor = VibePurple,
                             unselectedIconColor = TextSecondary,
                             unselectedTextColor = TextSecondary,
-                            indicatorColor = VibePurple.copy(alpha = 0.15f)
+                            indicatorColor = Color.Transparent
                         )
                     )
                 }
+            }
             }
         }
     ) { innerPadding ->
