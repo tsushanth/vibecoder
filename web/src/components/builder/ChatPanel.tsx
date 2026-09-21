@@ -51,14 +51,17 @@ export function ChatPanel({ onTweak, disabled }: ChatPanelProps) {
           onChange={(e) => setInput(e.target.value)}
           placeholder={disabled ? t('chat.readOnlyPlaceholder') : t('chat.placeholder')}
           disabled={isGenerating || disabled || isReverting}
-          className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-sm focus:outline-none focus:border-accent transition disabled:opacity-50"
+          className="flex-1 rounded-full border border-border bg-surface px-4 py-2 text-sm outline-none transition focus:border-accent disabled:opacity-50"
         />
         <button
           type="submit"
           disabled={!input.trim() || isGenerating || disabled || isReverting}
-          className="px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-medium rounded-lg transition disabled:opacity-50"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-white transition hover:bg-accent-hover disabled:opacity-40"
+          title={t('common.send')}
         >
-          {t('common.send')}
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19V5m0 0l-7 7m7-7l7 7" />
+          </svg>
         </button>
       </form>
 
@@ -110,7 +113,7 @@ export function ChatPanel({ onTweak, disabled }: ChatPanelProps) {
             return (
               <div
                 key={msg.id}
-                className="text-xs rounded-lg px-3 py-2 bg-danger/10 text-danger border border-danger/20"
+                className="max-w-[85%] rounded-2xl rounded-tl-sm border border-danger/20 bg-danger/10 px-3 py-2 text-xs text-danger"
               >
                 {msg.content}
               </div>
@@ -122,7 +125,7 @@ export function ChatPanel({ onTweak, disabled }: ChatPanelProps) {
             return (
               <div
                 key={msg.id}
-                className="text-xs rounded-lg px-3 py-2 bg-surface text-foreground"
+                className="max-w-[85%] rounded-2xl rounded-tl-sm bg-surface px-3 py-2 text-xs text-foreground"
               >
                 {msg.content}
               </div>
@@ -133,7 +136,7 @@ export function ChatPanel({ onTweak, disabled }: ChatPanelProps) {
           return (
             <div
               key={msg.id}
-              className="text-xs rounded-lg px-3 py-2 max-w-[85%] bg-accent/10 text-accent ml-auto"
+              className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-accent px-3 py-2 text-xs text-white"
             >
               {msg.content}
             </div>
