@@ -160,8 +160,9 @@ function progressRecord(projectId, { phase, message, detail, percent }) {
 
 // Pure: builds the client payload from project row + optional stored entry.
 function buildProgressPayload({ status, createdAt, entry, now = Date.now() }) {
-    const startedMs = entry?.startedAt || (createdAt ? new Date(createdAt).getTime() : now);
-    const startedAt = new Date(Number.isFinite(startedMs) ? startedMs : now).toISOString();
+    let startedMs = entry?.startedAt || (createdAt ? new Date(createdAt).getTime() : now);
+    if (!Number.isFinite(startedMs)) startedMs = now; // invalid created_at must not yield NaN percent
+    const startedAt = new Date(startedMs).toISOString();
     if (status === 'failed') {
         return { success: true, status: 'failed', phase: entry?.phase || 'failed', detail: 'Build failed', percent: entry?.percent || 0, startedAt, events: entry?.events || [], error: 'Build failed. Please retry.' };
     }
@@ -178,10 +179,11 @@ function buildProgressPayload({ status, createdAt, entry, now = Date.now() }) {
     return { success: true, status: 'building', phase: cur.phase, detail: cur.detail, percent, startedAt, events: [] };
 }
 
-setInterval(() => {
-    const cutoff = Date.now() - PROGRESS_TTL_MS;
+function sweepProgress(now = Date.now()) {
+    const cutoff = now - PROGRESS_TTL_MS;
     for (const [id, e] of buildProgress) { if (e.updatedAt < cutoff) buildProgress.delete(id); }
-}, 10 * 60 * 1000).unref();
+}
+setInterval(() => sweepProgress(), 10 * 60 * 1000).unref();
 
 // ============================================
 // Plan rate limit (in-memory, per user or IP)
@@ -2460,5 +2462,11 @@ router.post('/api/admin/cleanup-stuck-builds', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+// Exposed for unit tests only (no runtime use).
+export const _internals = {
+    buildProgress, progressStart, progressRecord, buildProgressPayload, sweepProgress, normalizePlan,
+    PROGRESS_TTL_MS, PROGRESS_MAX_EVENTS, DERIVED_PHASES,
+};
 
 export default router;
