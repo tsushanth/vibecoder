@@ -61,6 +61,11 @@ android {
         buildConfig = true
     }
 
+    testOptions {
+        // android.util.Log etc. return defaults instead of throwing in JVM unit tests.
+        unitTests.isReturnDefaultValues = true
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -164,6 +169,19 @@ dependencies {
 
     // RatingKit
     implementation(project(":ratingkit"))
+
+    // ---- Tests ----
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("io.mockk:mockk:1.13.13")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+    // Must match the OkHttp that actually resolves at runtime: :paywallkit pulls 5.0.0-alpha.14,
+    // which wins conflict resolution over the 4.12.0 declared above (mockwebserver 4.x -> NoClassDefFoundError).
+    testImplementation("com.squareup.okhttp3:mockwebserver:5.0.0-alpha.14")
+
+    androidTestImplementation(composeBom)
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
 }
 
 kapt {
