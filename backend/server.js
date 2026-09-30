@@ -10,6 +10,7 @@ import authRoutes from './routes/auth.routes.js';
 import deployRoutes from './routes/deploy.routes.js';
 import domainsRoutes from './routes/domains.routes.js';
 import telegramRoutes from './routes/telegram.routes.js';
+import { reportCrash } from './lib/failureReporter.js';
 import githubRoutes from './routes/github.routes.js';
 import appdataRoutes from './routes/appdata.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -83,6 +84,14 @@ app.use('/api/github', githubRoutes);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 8080;
+// Process-level failures: log, report (awaited so the email goes out), then exit like Node's default.
+for (const evt of ['uncaughtException', 'unhandledRejection']) {
+    process.on(evt, (err) => {
+        console.error(evt, err);
+        reportCrash(evt, err).finally(() => process.exit(1));
+    });
+}
+
 app.listen(PORT, () => {
     console.log(`VibeCoder backend running on http://localhost:${PORT}`);
 });
