@@ -105,7 +105,19 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">9. Cookies</h2>
+            <h2 className="text-xl font-semibold text-[#17140F] mb-3">9. SMS / Text Messaging</h2>
+            <p>
+              If you text VibeBuild to generate an app or link your account, we collect your phone number and
+              message content to operate that feature. No mobile information will be shared with third parties
+              or affiliates for marketing or promotional purposes. Message and data rates may apply, and message
+              frequency varies. Reply STOP to opt out at any time, or HELP for help. See{' '}
+              <a href="/sms" className="text-[#5B4CFF] hover:underline">vibebuild.cc/sms</a> for details on how
+              to opt in and out.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-[#17140F] mb-3">10. Cookies</h2>
             <p>
               We use essential cookies for authentication and session management. We may use analytics cookies
               to understand how users interact with the Service. You can control cookie preferences through
@@ -114,7 +126,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">10. Children's Privacy</h2>
+            <h2 className="text-xl font-semibold text-[#17140F] mb-3">11. Children's Privacy</h2>
             <p>
               VibeBuild is not intended for children under 13. We do not knowingly collect personal information
               from children under 13. If you believe a child has provided us with personal information, please
@@ -123,7 +135,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">11. Changes to This Policy</h2>
+            <h2 className="text-xl font-semibold text-[#17140F] mb-3">12. Changes to This Policy</h2>
             <p>
               We may update this Privacy Policy from time to time. We will notify you of material changes via
               email or in-app notification. Your continued use of the Service constitutes acceptance of the
@@ -132,7 +144,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">12. Contact Us</h2>
+            <h2 className="text-xl font-semibold text-[#17140F] mb-3">13. Contact Us</h2>
             <p>
               For privacy-related questions or concerns, contact us at{' '}
               <a href="mailto:support@vibebuild.cc" className="text-[#5B4CFF] hover:underline">support@vibebuild.cc</a>.

@@ -50,6 +50,7 @@ export function MarketingFooter() {
           <Link href="/blog" className="transition hover:text-[#17140F]">Blog</Link>
           <Link href="/about" className="transition hover:text-[#17140F]">About</Link>
           <Link href="/faq" className="transition hover:text-[#17140F]">FAQ</Link>
+          <Link href="/sms" className="transition hover:text-[#17140F]">Text to Build</Link>
           <Link href="/terms" className="transition hover:text-[#17140F]">Terms</Link>
           <Link href="/privacy" className="transition hover:text-[#17140F]">Privacy</Link>
           <Link href="/login" className="transition hover:text-[#17140F]">Sign in</Link>
