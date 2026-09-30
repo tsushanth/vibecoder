@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import "./globals.css";
+import WebFailureReporter from '@/components/WebFailureReporter'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,6 +58,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${instrumentSans.variable} antialiased bg-background text-foreground`}
       >
+        <WebFailureReporter />
         <NextIntlClientProvider messages={messages}>
           <AuthProvider>{children}</AuthProvider>
         </NextIntlClientProvider>
