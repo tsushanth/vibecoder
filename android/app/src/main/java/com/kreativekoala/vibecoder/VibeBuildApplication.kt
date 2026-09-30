@@ -18,6 +18,7 @@ import dagger.hilt.android.HiltAndroidApp
 class VibeBuildApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        FailureReporter.init(this, "vibebuild", "afr_271ab956be760e9f9b82ef912577ed22", BuildConfig.VERSION_NAME)
         NotificationHelper.createChannel(this)
 
         // Initialize Facebook SDK for Meta Ads attribution
