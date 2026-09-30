@@ -18,6 +18,7 @@ import {
 import { checkUsageLimit, recordUsage, ACTION_TYPES } from '../services/subscriptionService.js';
 import { sendPushToUser, sendAPNsPush } from '../services/pushService.js';
 import { filterBrowseProjects } from '../services/browseFilter.js';
+import { reportFailure } from '../lib/failureReporter.js';
 
 const router = express.Router();
 
@@ -1418,6 +1419,7 @@ router.post('/plan', async (req, res) => {
 
         const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
         if (!ANTHROPIC_API_KEY) {
+            reportFailure('plan:config', new Error('ANTHROPIC_API_KEY is not set'));
             return res.status(503).json({ error: 'Planning is temporarily unavailable' });
         }
 
@@ -1443,6 +1445,7 @@ router.post('/plan', async (req, res) => {
             if (!plan) throw new Error('Plan failed validation');
         } catch (err) {
             console.error('[plan] LLM call failed:', err.message);
+            reportFailure('plan:llm', err); // say WHY (upstream status/timeout); the route degrades gracefully to a 503
             return res.status(503).json({ error: 'Planning is temporarily unavailable. You can still build directly.' });
         }
         res.json({ success: true, plan });
