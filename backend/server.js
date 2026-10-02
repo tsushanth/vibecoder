@@ -14,7 +14,7 @@ import { reportCrash } from './lib/failureReporter.js';
 import githubRoutes from './routes/github.routes.js';
 import appdataRoutes from './routes/appdata.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
-import { WORKER_URL } from './config/constants.js';
+import { WORKER_URL, WORKER_SECRET } from './config/constants.js';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -42,6 +42,23 @@ app.use((req, res, next) => {
 // Health
 app.get('/api/health', (req, res) => {
     res.json({ healthy: true, uptime: process.uptime(), timestamp: new Date().toISOString() });
+});
+
+// Deep health: can a build actually run? Checks the build worker and, through it, that the Claude broker has a usable
+// login. /api/health only proves this API is up, which stayed green through a multi-day outage where every build failed.
+// Probed every few minutes by the failure reporter, which emails when this stays non-200.
+app.get('/api/health/deep', async (req, res) => {
+    const fail = (reason, extra = {}) => res.status(503).json({ ready: false, reason, ...extra });
+    let r;
+    try {
+        r = await fetch(`${WORKER_URL}/ready`, { headers: { 'x-worker-secret': WORKER_SECRET }, signal: AbortSignal.timeout(10000) });
+    } catch {
+        return fail('build worker unreachable');
+    }
+    let body = null;
+    try { body = await r.json(); } catch { /* non-JSON body */ }
+    if (r.ok && body?.ready) return res.json({ ready: true, mode: body.mode });
+    return fail(body?.reason || `build worker returned ${r.status}`, { status: r.status });
 });
 
 // System status — mobile apps poll this to show maintenance banners
