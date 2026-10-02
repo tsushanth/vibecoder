@@ -484,6 +484,9 @@ async function proxyWorkerSSE(workerResponse, res, {
                                 safeWrite(`data: ${JSON.stringify(parsed)}\n\n`);
                             }
                         } else if (parsed.type === 'error') {
+                            // A build the user asked for failed on the worker. Without this the only trace was a log line,
+                            // so a multi-day outage (every build dying at startup) went unnoticed.
+                            reportFailure(`${label}:worker_error`, new Error(String(parsed.error || 'worker reported an error').slice(0, 300)));
                             if (onError) {
                                 await onError(parsed, res);
                             } else {
@@ -811,6 +814,7 @@ router.post('/generate', async (req, res) => {
 
         // If stream ended without a result, mark placeholder failed
         if (!resultReceived && placeholderProjectId) {
+            reportFailure('generate:no_result', new Error('Build ended without a result; project marked failed'));
             supabase.from('projects').update({ status: 'failed' }).eq('id', placeholderProjectId).then(() => {
                 console.log(`[generate] Marked ${placeholderProjectId} as failed (no result received)`);
             });
