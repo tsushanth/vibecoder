@@ -22,6 +22,7 @@ import * as os from 'os';
 import crypto from 'crypto';
 import zlib from 'zlib';
 import { checkExternalDeps, readVibedataSdk } from './validators.js';
+import { checkBrokerReady } from './brokerReady.js';
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -849,6 +850,12 @@ function authMiddleware(req, res, next) {
     }
     next();
 }
+
+// Readiness of the build path (can the Claude wrapper get a token from the broker). Authenticated: it reveals the broker's state.
+app.get('/ready', authMiddleware, async (req, res) => {
+    const out = await checkBrokerReady();
+    res.status(out.ready ? 200 : 503).json(out);
+});
 
 app.get('/health', (req, res) => {
     let cliAvailable = false;
