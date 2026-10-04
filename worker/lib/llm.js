@@ -21,7 +21,7 @@ export class OpenRouterClient {
         dailyBudgetUsd = Infinity,
         breakerFailures = 3,
         breakerMs = 5 * 60 * 1000,
-        maxAttempts = 4,
+        maxAttempts = 3,
     } = {}) {
         this.apiKey = apiKey;
         this.baseUrl = baseUrl;
@@ -54,15 +54,18 @@ export class OpenRouterClient {
     }
 
     /** Returns { text, finish, costUsd, usage }. Throws ProviderError or BudgetExceededError. */
-    async chat({ model, messages, maxTokens = 24000, temperature = 0.4, timeoutMs = 240000 }) {
+    async chat({ model, messages, maxTokens = 24000, temperature = 0.4, timeoutMs = 150000, deadline = Infinity }) {
         this.rollDay();
         if (this.spentToday > this.dailyBudgetUsd) throw new BudgetExceededError(`daily budget of $${this.dailyBudgetUsd} reached`);
         let tokens = maxTokens;
         let lastErr = new ProviderError('no attempt made', { retryable: true });
         for (let i = 0; i < this.maxAttempts; i++) {
             const last = i === this.maxAttempts - 1;
+            // overall build deadline: never start (or keep waiting on) a call past it
+            const remaining = deadline - this.now();
+            if (remaining < 3000) { const e = new ProviderError('deadline exceeded', { retryable: false }); e.deadline = true; throw e; }
             const ctrl = new AbortController();
-            const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+            const timer = setTimeout(() => ctrl.abort(), Math.min(timeoutMs, remaining));
             try {
                 const res = await this.fetchImpl(`${this.baseUrl}/chat/completions`, {
                     method: 'POST',
@@ -93,7 +96,7 @@ export class OpenRouterClient {
                 this.recordSuccess(model);
                 return { text, finish: c.finish_reason, costUsd: cost, usage: j.usage || {} };
             } catch (e) {
-                if (e instanceof ProviderError && !e.retryable) throw e;
+                if (e instanceof ProviderError && (!e.retryable || e.deadline)) throw e;
                 lastErr = e instanceof ProviderError ? e : new ProviderError(e?.name === 'AbortError' ? 'timeout' : String(e?.message || e), { retryable: true });
                 if (!last) { await this.sleep(this.backoffMs(i)); continue; }
             } finally {
