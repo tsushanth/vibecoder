@@ -189,3 +189,31 @@ test('scrubSecrets redacts pasted credentials but leaves ordinary prompts alone'
     }
     assert.equal(PLACEHOLDER, '[REDACTED_SECRET]');
 });
+
+// ---------- overall build deadline
+test('llm stops waiting at the build deadline instead of retrying past it', async () => {
+    const hang = (url, opts) => new Promise((_, rej) => { opts.signal.addEventListener('abort', () => { const e = new Error('aborted'); e.name = 'AbortError'; rej(e); }); });
+    const c = new OpenRouterClient({ apiKey: 'k', fetchImpl: hang, sleep: async () => {} });
+    const t0 = Date.now();
+    await assert.rejects(c.chat({ model: 'm', messages: [], timeoutMs: 60000, deadline: Date.now() + 3300 }), (e) => e.deadline === true);
+    assert.equal(Date.now() - t0 < 6000, true, `took ${Date.now() - t0}ms`);
+    assert.equal(c.isOpen('m'), false); // running out of build time is not the model's health problem
+});
+test('generate: a spent time budget stops the chain with cause timeout', async () => {
+    const llm = { isOpen: () => false, chat: async () => { const e = new Error('deadline exceeded'); e.deadline = true; throw e; } };
+    const r = await generateApp({ prompt: 'x', llm, models: ['a', 'b', 'c'], rules: 'r' });
+    assert.equal(r.ok, false);
+    assert.equal(r.cause, 'timeout');
+    assert.equal(r.attempts.length, 1); // did not try the other models
+    const t = await generateApp({ prompt: 'x', llm, models: ['a'], rules: 'r', deadlineMs: 1000 });
+    assert.equal(t.cause, 'timeout');
+});
+
+test('generate: a per-build call limit stops a fallthrough storm', async () => {
+    const bad = block('index.html', '<p>blank</p>');
+    const llm = fakeLlm({ a: [bad, bad], b: [bad, bad], c: [bad, bad] });
+    const r = await generateApp({ prompt: 'x', llm, models: ['a', 'b', 'c'], rules: RULES, maxCalls: 3 });
+    assert.equal(r.ok, false);
+    assert.equal(llm.calls.length, 3); // a (draft + fix), then b (draft) and no more
+    assert.equal(r.attempts.at(-1).cause === 'budget' || r.attempts.at(-1).cause === 'check_failed', true);
+});
