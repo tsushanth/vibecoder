@@ -168,3 +168,24 @@ test('outcome logger writes one JSON line and coerces unknown results', () => {
     assert.equal(a.result, 'ok');
     assert.equal(JSON.parse(lines[1]).result, 'provider_error');
 });
+
+// ---------- secret scrubber
+import { scrubSecrets, PLACEHOLDER } from '../../lib/scrub.js';
+test('scrubSecrets redacts pasted credentials but leaves ordinary prompts alone', () => {
+    const a = scrubSecrets('Build a real-time chat Ai Agent interface and add provider adapter Gemini - API key -AQ.Zz9FAKEfakeFAKEfakeFAKEfakeFAKEfakeFAKEfakeFAKE12');
+    assert.equal(a.count >= 1, true);
+    assert.equal(a.text.includes('AQ.Zz9'), false);
+    assert.match(a.text, /REDACTED_SECRET/);
+    const known = [
+        'use AIza' + 'SyA1234567890abcdefghijklmnopqrstuvw for maps', 'my key sk-' + 'proj-abcdefghijklmnopqrstuvwxyz123456', 'token gh' + 'p_abcdefghijklmnopqrstuvwxyz0123456789',
+        'aws AK' + 'IAABCDEFGHIJKLMNOP', 'stripe sk_' + 'live_abcdefghijklmnopqrstuv1234', 'password: Sup3rSecretValue1234567890',
+        'jwt ey' + 'JhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSJ9.abcdefghijklmnop',
+    ];
+    for (const k of known) { const r = scrubSecrets(k); assert.equal(r.count >= 1, true, k); assert.match(r.text, /REDACTED_SECRET/, k); }
+    for (const clean of ['Build a tiny todo list app with add and delete', 'a weather app with a 5-day forecast and an api key input field', 'password strength meter with a show password toggle', 'token bucket rate limiter visualizer', 'https://example.com/some/really/long/path-with-no-secrets-at-all']) {
+        const r = scrubSecrets(clean);
+        assert.equal(r.count, 0, clean);
+        assert.equal(r.text, clean);
+    }
+    assert.equal(PLACEHOLDER, '[REDACTED_SECRET]');
+});
