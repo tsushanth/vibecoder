@@ -2,14 +2,8 @@
   "name": "vibecoder-worker",
   "version": "1.0.0",
   "type": "module",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js",
-    "test": "node --test --test-force-exit test/",
-    "test:unit": "node --test --test-force-exit test/",
-    "test:e2e": "node ../backend/test/e2e-smoke.mjs"
-  },
   "dependencies": {
+    "dotenv": "^17.4.2",
     "express": "^4.18.2"
   }
 }
