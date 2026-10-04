@@ -15,6 +15,8 @@ Owner constraints:
 - Claude is reached only through the OAuth CLI. No Claude call goes through OpenRouter or any API key.
 - Full replacement of Claude is a possible later step (config only), not a goal now.
 
+Decision update 2026-10-03: if a non-Claude model performs acceptably in the bake-off, any such model reachable through the owner's OpenRouter credits is kept as the backup for when Claude OAuth fails, for now. Groq, Gemini and Cerebras stay optional later links. Reliable detection of Claude OAuth failure (4.7) is a hard requirement.
+
 ## 2. Current state (verified 2026-10-03)
 
 The deployed worker is NOT the repo's `worker/server.js`.
@@ -59,6 +61,123 @@ Findings:
 - Failure modes were format failures (`index.html` missing or truncated) and rate limits. These are catchable by validation and fallthrough.
 - Quality is basic. Reviewed screenshots showed logic flaws the automated checks do not catch (a timer that starts on the wrong mode, a clipped progress ring, an output area empty on load). Pass rates are an upper bound.
 - Not tested: `/customize`, `/tweak`, image-reference builds, a Claude baseline, and the direct providers (Groq, Gemini, Cerebras).
+
+### 3.1 Correctness bake-off (2026-10-04)
+
+The owner's criterion is correctness, not looks. 8 prompts (the first 6 plus a habit tracker and a drawing app); 10 models through OpenRouter, then the best three repeated twice more; the real Claude CLI (the production single-pass agent, no fix pass) as the baseline, run twice. Functional tests drive each app like a user: calculator results (7x8=56, (2+3)x4=20, precedence, keyboard), snake (moves, game over at a wall, restart, direction changes measured on the canvas), expense tracker (add, exact total 19.75, reload persistence, delete one), pomodoro (25:00, countdown, pause, reset, work-to-break switch and session counter on a 60x clock), guestbook (post, newest first, persistence), habit tracker (add, delete, persistence), drawing (mouse and touch strokes, undo, redo, clear, eraser, color, size, PNG download) and image generator (non-blank, differs per prompt). Each app runs in an isolated browser profile. The harness was checked against a deliberately broken calculator. Six flaws in the tests themselves were found by inspecting what the apps actually did and fixed (modal forms, confirm dialogs, a canvas below the fold, a wrong ink metric, a row locator confused by a new page element, and a label check that included tooltip text); all numbers below come from the corrected tests, applied identically to every run. A streak test and an empty-submit test are advisory only. A model that produced no usable index.html counts as incorrect for that prompt.
+
+Fully correct apps out of 8 per run:
+
+| Model | Run 1 | Run 2 | Run 3 | Total | Cost per app (run 1) |
+|---|---|---|---|---|---|
+| openai/gpt-5.6-luna | 6 | 7 | 6 | 19/24 (79%) | about $0.02 |
+| claude (real CLI, baseline) | 5 | 7 | not run | 12/16 (75%) | n/a (OAuth) |
+| moonshotai/kimi-k2.7-code | 6 | 5 | 6 | 17/24 (71%) | about $0.08 |
+| deepseek/deepseek-v4-pro | 7 | 4 | 4 | 15/24 (63%) | about $0.09 |
+
+Apps that produced nothing usable or failed the load and click check, over all runs: Claude 5 of 16, kimi 6 of 24, deepseek-pro 5 of 24, luna 1 of 24. Claude's misses include my 8-minute cap and one run where it asked a clarifying question instead of building, which a fixed harness setting could change.
+
+Reading it:
+
+- The models are indistinguishable on this evidence. Run to run, each model moves by 1 to 3 apps (DeepSeek went 7, 4, 4; Claude 5, 7), which is as large as the gaps between models. The first-round 7/8 for DeepSeek was not repeated. Do not rank them by these numbers.
+- No model beats the Claude baseline reliably, and none is clearly worse. For a failover, that is the relevant finding: an acceptable app on most prompts.
+- The habit tracker was the weakest prompt for every model (luna 0/3, kimi 1/3, deepseek 1/3, Claude 1/2). Luna's habit app throws a ReferenceError (`_ is not defined`). Kimi failed the calculator in all three runs, DeepSeek failed the image generator in all three.
+- Editing an existing app (the `/tweak` flow): all four models implemented all three edits (an Ans button that recalls the previous result after AC, a "Highest expense" line that follows adds and deletes, a 140-character limit with a live counter) and none broke any existing feature, 12 of 12. Small sample: three edits, one base app, one run each. The fix pass was used for two of them.
+- Not tested: image-reference builds, `/customize`, larger apps, repeat runs of the edit flow.
+- Fix pass: many first attempts passed only after the validator-driven re-prompt, which supports building it in.
+
+Chosen backup order for the OpenRouter-only phase: gpt-5.6-luna (cheapest, fastest, most consistent), then kimi-k2.7-code, then deepseek-v4-pro (slowest and the most expensive per app, least consistent). All three use the dedicated capped OpenRouter key from section 4.3, and no Claude model is used through OpenRouter. OpenRouter is a single point of dependency for the backup, accepted for now.
+
+Spend on OpenRouter for these tests was about $7.13 (the shared key's lifetime counter rose more because other sessions use it).
+
+### 3.2 Decision analysis: keep Claude CLI + backup, or move to direct generation (2026-10-04)
+
+Production evidence from the deployed worker log (May 9 to Oct 3, 2026; the owner's own infra, aggregates only):
+
+| Month | Builds started | Completed | Completion | Unique users |
+|---|---|---|---|---|
+| May | 53 | 47 | 89% | 16 |
+| June | 255 | 192 | 75% | 52 |
+| July | 190 | 111 | 58% | 81 |
+| August | 74 | 52 | 70% | 29 |
+| September | 39 | 14 | 36% | 15 |
+| Oct 1 to 3 | 7 | 1 | 14% | 6 |
+
+- Volume is down about 85% from the July peak: about 1.3 builds a day in the last 30 days. VibeBuild was already wound down in June (sms-bot, build-monitor and telegram-bot removed).
+- The log cannot name the cause of a failed build, because failure paths call `sendError` without logging. What it does show: since August, 24 builds had a CLI that never produced a result, clustered on known credential and quota days (Aug 3, Aug 19, Sep 2, Sep 6, Sep 30 to Oct 2), and the rest of the non-completions are "Claude finished but no app was produced" (a quota or auth message, or the agent asking a clarifying question, which also happened once in 16 baseline builds). Attribution to Claude auth and quota is strong circumstantial evidence, not proof. Post-reseed (account A restored 2026-10-04) completion should be re-measured.
+- APK builds logged: 115 (not Claude dependent; they need Java and the Android SDK on the VM).
+- VM: Hetzner cpx31 at EUR 20.49 a month, load average 0.00, 1.3 of 7.7 GB memory used, 27% of 150 GB disk. Heavily oversized for this volume. A cx32 is EUR 9.99 (saves about EUR 10.50 a month); any resize needs the audit the Hetzner guardrail in the owner's notes requires.
+
+Cost per month at today's volume (about 40 builds): direct generation with gpt-5.6-luna about $0.80; even at the June peak (256) about $5. Claude CLI has no marginal cash cost but shares two Max quotas with the Mac mini harnesses and Audexa. Cash is trivial either way; the difference is reliability and operational burden.
+
+| | A. Claude CLI primary + direct backup | B. Direct generation only (Luna, then kimi, then deepseek) |
+|---|---|---|
+| Reliability evidence | The Claude path completed 36% of builds in September | In the bake-off, 23 of 24 luna builds loaded and passed the click check, and 79% were fully correct |
+| Latency | 93 to 150 s; a hung CLI burns up to the 8 minute timeout before any fallback | 63 s median |
+| Dependencies kept alive | CLI, broker, keychain, mini keepalive, OAuth lineage, detection, reseed, plus the direct path (two paths; the unprobed fallback problem seen on Audexa) | One path; OpenRouter is the single dependency (accepted; add a second provider later) |
+| Quality on real prompts | Unmeasured for both; Claude may handle vague prompts better | Unmeasured on real prompts; bake-off prompts were clean and simple |
+| Engineering | Everything in this spec | Direct generator plus probes; the Claude pieces are not needed for VibeBuild |
+
+Audexa keeps the broker regardless, so retiring the CLI for VibeBuild does not retire that infrastructure; it only removes VibeBuild's exposure to it and its small quota draw.
+
+Recommendation (pending the owner): B. Move VibeBuild to direct generation with luna first, kimi-k2.7-code second, deepseek-v4-pro third, with the validator-driven fix pass and per-link probes. The bar to beat is low: the current path completed 36% of September builds, and even a direct path at 70% is a large improvement. Keep the Claude CLI code available for a short trial period (30 days) only as a manual switch, not as a monitored fallback, and remove it afterwards, because an unmonitored fallback silently rots. Do the following before cutover:
+
+1. Log the outcome and cause of every build (the silent failure paths), so completion rate is measurable. This is needed under either option.
+2. Compare luna against recent real prompts before and during cutover. The owner must confirm that real user prompts may go to OpenRouter.
+3. Roll out gradually (a share of traffic first), tracking completion rate against the Claude path.
+4. Separately decide the VM: downsize to cx32 now, or later move APK builds to an on-demand job and delete the VM.
+
+Open question for the owner: at about 1.3 builds a day and 15 users in September, is VibeBuild worth ongoing investment at all? Option B is the smallest change that fixes reliability. It is deliberately cheap to build.
+
+### 3.3 Demand gap and how other builders handle it (2026-10-04)
+
+Real prompts (27 distinct, Sept 1 to Oct 3), classified by an LLM (approximate): 15 of 27 (56%) require at least one capability beyond a static browser app, 12 (44%) have essentially no useful static version and 2 more can only be mock-ups. Needs, by number of prompts: live external data or third-party API 10; real-money or regulated actions 3; native device features 3; user accounts and login 2; background jobs and scheduling 2; file upload and storage 2; an AI model inside the app 2; shared backend database 1; multi-user realtime 1. Of the 13 prompts where Claude finished but produced no app in production, 8 needed something beyond static; 3 of the 6 that completed also did (they got mock-ups). Claude in agent mode sometimes answers with text offering a simpler alternative instead of building.
+
+How competitors handle the same needs (from vendor docs and comparison articles, not hands-on testing):
+
+- Replit Agent: Secrets store (encrypted, injected as environment variables; the Agent asks the user for an API key when it needs one), Connectors and Integrations that handle OAuth for third-party services, built-in Replit Auth, Google OAuth or Firebase Auth, provisioned databases (Replit Database or PostgreSQL, with the Agent inferring schema and migrations), Replit AI Integrations (model access without managing keys), one-click deployment to a public URL, an agent that tests its own app, and Plan Mode that asks clarifying questions and changes no code until the user approves. Multi-language, runs real server processes.
+- Lovable: front end in React wired to Supabase as the managed backend: auth (email, social, magic link), Postgres with generated schema and row-level security, file storage, and Supabase Edge Functions (serverless) for payments (Stripe), emails, AI features, scheduled tasks and external API calls. Secrets live in the Supabase secret store and never reach the browser. Chat Mode for planning and debugging.
+- Bolt: Node or Deno full-stack, bring your own auth (Clerk, Auth0) and database (Supabase).
+- v0: Next.js front end with no backend of its own (Vercel ecosystem).
+- Common pattern: the builder asks the user for credentials and keeps them server-side, the app calls a backend (container or serverless function), not the third party from the browser, and there are managed primitives for auth, database, storage, payments and jobs.
+
+What this implies for VibeBuild (a small team, so the cheaper pattern matters): the Lovable model (generated front end plus a managed backend with auth, Postgres, storage, serverless functions with secrets, scheduled jobs, and an AI proxy) covers most of the 15 beyond-static prompts without running arbitrary user server processes, which is the expensive and risky part of the Replit model. VibeBuild already has a mini version of this (the vibedata shared key-value store behind vibecoder-api). Candidate backend: Supabase, or the owner's Basely project, or extending vibedata. A free keyless-API proxy with an allowlist, cache and rate limits would cover the many "show live data" prompts (prices, weather) without secrets. Real-money and regulated requests need an explicit policy (build a simulator or paper-trading version and say so) and not a silent decline. Replit-style Plan Mode maps to the spec-first normalizer in the permutation test, with a question only when something truly blocks the build (such as a missing API key).
+
+Third-party API keys, the Lovable pattern (from Lovable's docs): when a feature needs a key, the agent asks for it through a secure input in the project chat (a key pasted into plain chat is recognized, and a reusable connector is offered); secrets are encrypted, stored only in the backend, write-only after saving (never shown again, only replaced or deleted), and injected into serverless functions at runtime so they never reach the browser; frontend variables (the `VITE_` prefix) are explicitly public and the secret store rejects that prefix; every server function must check who is calling because server-side alone is not private; a security view flags problems before publishing. Replit does the equivalent with its Secrets store (environment variables), Connectors that handle OAuth, and an Agent that asks for the key when needed. For VibeBuild this means tier 1 needs: a per-app secret vault, a serverless function runtime that injects secrets, generated apps that call those functions and never the third party directly (a key inside an APK or web bundle is extractable), a pre-publish scan that blocks hardcoded keys, and a secure chat input for keys.
+
+Proposed capability tiers: tier 0 static prototype (cents, seconds; fits about 44% of real prompts fully); tier 1 static front end plus managed backend primitives (the target for parity); tier 2 full container runtime (Replit-style; later, expensive, needs sandboxing). Tier 1 needs an agent loop that can provision backend resources and verify with a real browser, which Option B's one-shot generator cannot do alone.
+
+### 3.4 Pipeline permutations on the real prompts (2026-10-04)
+
+Method: the 27 distinct real prompts since Sept 1, each run through nine pipelines. Each produced app was loaded in headless Chrome (load, console errors, every button clicked) and then judged by two different models (deepseek-v4-pro and kimi-k2.7-code) against 3 to 6 requirements extracted from the real prompt; the score is the mean requirement coverage from 0 to 1, with a missing app counted as 0. The two judges agree moderately (correlation 0.67, 83% of apps within 0.2), so differences under about 0.1 are noise. Spend on OpenRouter about $7.6; Claude CLI 54 builds in total on the owner's account. The owner spot-checks 10 apps by hand (page `out_perm/spot.html` in the scratch folder); that calibration is pending.
+
+| Pipeline | Apps built (of 27) | Pass automated checks | Mean coverage (missing = 0) |
+|---|---|---|---|
+| A. Claude CLI alone (production today) | 21 | 18 | 0.55 |
+| B. Luna alone (one shot plus one fix pass) | 27 | 27 | 0.68 |
+| C. Spec-first, then Luna | 27 | 25 | 0.64 |
+| D. Spec-first, then Claude | 27 | 20 | 0.60 |
+| F. Claude, then Luna fixes or builds when Claude fails | 27 | 27 | 0.68 |
+| G. Best of luna, kimi-k2.7-code, deepseek-v4-flash (an automated check picks) | 27 | 27 | 0.65 |
+| H1. Router: simple prompts to Luna, complex to Claude | 23 | 20 | 0.57 |
+| H2. Luna first, Claude only if checks fail | 27 | 27 | 0.68 (identical to B: Luna never failed the checks) |
+| I. Luna, then Luna reviews and corrects its own app | 27 | 25 | 0.61 |
+| E. Luna, then Claude fixes failures | not run | n/a | would equal B (Luna never failed the checks) |
+
+Findings:
+
+- Where Claude built an app (21 prompts), Luna alone is level with Claude alone: mean 0.69 vs 0.71, Luna better on 5, Claude better on 6, 10 ties (within 0.1). There is no quality edge for Claude on these prompts.
+- Claude in agent mode built nothing on 6 of 27 (22%) real prompts: it replied with text, a question, or a safer alternative (for example real-money trading) and wrote no files. Luna built an app on all 6 (mean coverage 0.62). Counting those failures, Luna alone scores higher than Claude alone on the judge table (0.68 vs 0.55), but see the judge reliability finding below; the objective part holds regardless: Luna produced a loadable app on 27 of 27 prompts and passed the automated checks 27 of 27, against 21 and 18 for Claude. This is a large share of the production failures seen in the worker log.
+- Spec-first (a normalizer that rewrites the prompt into a concrete spec) made Claude build every prompt (21 to 27) but lowered quality on the prompts it already handled (0.71 to 0.57), and did not help Luna (0.64 vs 0.68). Not worth making the default.
+- Self-review (I) hurt (0.61 vs 0.68): Luna correcting its own app introduced errors, and 2 more apps failed the load checks. Best-of-three (G) and difficulty routing (H1) gave no gain; G costs about three times more. Verification should come from tools (load, console errors, click tests), not from another model pass.
+- Prompts that need something beyond a static app (14 of 27) score lower for every pipeline (0.43 to 0.63), which is the tier-1 capability gap, not a model gap.
+- Caveats: 27 prompts, one run each; scores are model judgments of source code plus runtime facts, not tests of each app; Claude ran in the same non-interactive mode the deployed worker uses.
+
+Owner spot check (10 apps, models hidden, judged by whether the requested features work): of 7 paired prompts chosen for the largest score gaps and judge disagreements, the owner picked Luna 4 times, Claude once and called 2 both fine; on the 3 prompts where Claude built nothing, Luna's app was acceptable in 3 of 3. These were deliberately the most disputed cases, not a random sample.
+
+Judge reliability finding: the two judge models agreed with the owner on only 1 of the 5 decisive picks (3 clear disagreements, 1 judge tie). In two cases the judges scored Claude's app far higher (0.90 vs 0.40, 0.95 vs 0.45) and the owner preferred Luna's. Reading source code plus load facts does not reliably predict whether features work in the browser. So the coverage-score table above must not be used to rank pipelines; it is kept as a record. The conclusions that stand are the objective ones (apps built, automated load and click checks, Claude building nothing on 22% of prompts) and the owner's hands-on calls. For tier-1 verification, replace model judging with executed tests: generate a browser script per requirement and run it, as the earlier hand-written functional tests did.
+
+Recommendation (supersedes the Option A versus B discussion): use direct generation with Luna as the primary path (one shot, automated checks, one fix pass), keep kimi-k2.7-code and deepseek-v4-pro as fallbacks for provider outages, retire the Claude CLI for VibeBuild, and do not add spec-first, self-review, best-of-N or routing at tier 0. Revisit a stronger model only for the tier-1 agent loop.
 
 ## 4. Design
 
@@ -120,6 +239,30 @@ direct chain: [groq, gemini, cerebras, openrouter-free (optional), openrouter-pa
 3. Enable the probes only, to confirm each link works end to end with real keys.
 4. Turn the failover on. It affects only requests that Claude fails.
 5. Force a Claude failure on a test project (set the quota flag, or run a test with the CLI path pointed at a failing stub) to confirm the failover end to end before relying on it.
+
+### 4.6 Quality gate: apps that load but are bad
+
+The spike showed apps that pass every check yet have logic flaws (wrong default mode, clipped ring, empty output area). Static checks cannot catch these. Layers:
+
+- Behavioral smoke test (via the screenshot service or headless Chrome): click every control and require that the DOM or canvas changes for most of them. A page where clicks change nothing fails.
+- Screenshot sanity: reject blank or near-uniform screenshots.
+- Optional vision-judge on the screenshot against the user's prompt (free multimodal model). A signal only, never the sole gate.
+- Failover builds are a stopgap, not a final product. The result carries `generator: direct:...`. When Claude recovers, the worker re-runs the build with Claude in the background and replaces or offers the upgrade (needs a small `vibecoder-api` change, to be scoped in the plan).
+- Decision rule: if a task type's smoke-test failure rate or owner-rated garbage rate in the bake-off is above the owner's threshold, that task gets no failover and returns the existing queue-and-retry error instead.
+- Quality breaker: a link whose smoke-test failures exceed a threshold over the last N builds opens, with an alert.
+
+### 4.7 Claude OAuth health: know when it fails, and why (high priority)
+
+Claude OAuth is in active production use for VibeBuild, so failures must be detected reliably and alerted with a cause and a fix hint. The failover keeps users unblocked and must never hide that Claude is down. Same design as the Audexa spec (section 3.9), applied to the worker on 231.255:
+
+1. Canary every 5 minutes on 231.255 through the real path (`claude-multi -p "reply ok" --model haiku`, 30 s timeout, same wrapper and broker), independent of user builds.
+2. A deterministic classifier shared by canary and real calls: `ok`, `quota`, `auth`, `broker_unreachable`, `timeout`, `empty_output`, `other`. No AI in the alert path.
+3. Replace the one-hour `quotaExhausted` flag with `claude: {state, cause, since, lastOk, failoverCount}` on `/health`. The worker keeps re-probing every few minutes, so one bad run no longer disables Claude for an hour.
+4. Alerts via the existing Resend path (plus a push channel the owner picks): immediately on a new cause, reminders every 6 h, a recovery notice. Each alert includes cause, since when, number of builds served by failover, and a fix hint (for example `auth: credentials unreadable -> re-sync creds / check broker`, `quota: spend limit -> raise at claude.ai/settings`, `broker_unreachable: check claude-broker on 192:3460 and network path from 231.255`).
+5. Escalate severity when Claude is down and every failover link is also down.
+6. The monitor does not depend on Claude or the broker for diagnosis.
+7. The stale backup account (`/home/vibecoder2`, creds from 2026-04-05) is reported as a dead link instead of being silently kept in code.
+8. Build on the existing credential mitigations described in the Audexa spec (3.9): the Mac mini keepalive and sync into broker slot B, the broker as single refresher, the laptop push cron disabled since 2026-08-03, and the 231 legacy chain (laptop tunnel on `0.0.0.0:3471`, `claude-token-refresh.sh` every 4 min, `claude-health.sh` Telegram and Twilio alerts every 15 min). VibeBuild's `claude-multi` fetches tokens from the 192 broker, so the 192 monitor, the mini heartbeat and the re-seed script cover VibeBuild too. The 231 canary should additionally check that the broker is reachable from 231, since the worker depends on that hop.
 
 ## 5. Testing
 
