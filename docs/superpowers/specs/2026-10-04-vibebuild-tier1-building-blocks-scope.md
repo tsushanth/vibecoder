@@ -149,3 +149,20 @@ Proposed parity policy: allow read-only financial data, simulators and paper tra
 ### 11.4 Spike (desk part done; hands-on part needs approval)
 
 Desk findings are above. Hands-on spike, about half a day, needing a throwaway Supabase project created through the Management API (a paid micro project costs about $0.0134 an hour, so a few hours is cents, but creating a project is a spend commitment and needs the owner's go-ahead): (1) time to create a project and deploy a function by API; (2) confirm the shared-environment secret exposure with two functions; (3) measure `vibe-proxy` latency, cold start, CPU limit and the SSRF guard; (4) test Vault-based per-app secrets in a shared project; (5) check pause behavior and Management API limits; (6) ask Supabase about platform pricing and scale-to-zero for many small projects.
+
+### 11.5 Hands-on spike results (2026-10-04, Replitor project, all test objects named `spike-*` / `vibe_spike`)
+
+What was run: three JWT-protected Edge Functions (an environment-names probe, a prototype of the slice-1 `vibe-proxy`, a CPU and memory limit probe), a throwaway schema with a connector table, and two dummy Vault secrets (`SPIKE-DUMMY-...`, not real keys). No existing table was read or modified. Environment values were never printed.
+
+Findings:
+
+- JWT enforcement works: a call without an Authorization header returned 401.
+- Isolation: every function in the project can read 12 environment variables, including `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_SECRET_KEYS` and `SUPABASE_DB_URL` (direct database access). Confirmed that a shared project can only ever run trusted platform code; a customer's code needs its own project.
+- The proxy design works: the function looked up an app's connector, decrypted that app's Vault secret, injected it into the upstream request (the upstream echoed the dummy value back to the function) and never returned it. Two apps used their own secrets. Isolation between apps in a shared project rests entirely on our app-identity check, so the app id must come from a verified token or the Origin of a published app, never from a request parameter.
+- Latency from this laptop: first (cold) call 1.14 s; 20 warm calls min 0.51 s, p50 0.85 s, p90 0.94 s, max 1.03 s, for a database lookup (about 340 ms including connect) plus one upstream call (about 340 ms).
+- In-memory cache is unreliable: three consecutive calls were all cache misses because each ran in a fresh worker. Response caching must live in the database or an external store, not in function memory.
+- SSRF guard: 17 test URLs were decided correctly without making any request to a blocked target, including loopback, link-local metadata, private ranges, IPv6, credentials in the URL, a non-443 port, suffix tricks and decimal, hex and octal IP forms (the URL parser normalizes these). DNS resolution works inside the runtime (`Deno.resolveDns`) and flagged a hostname that resolves to 127.0.0.1, so records can be pre-checked; a small gap remains because `fetch` resolves again afterwards.
+- Limits: a 6 second busy loop was killed with HTTP 546 `WORKER_RESOURCE_LIMIT` after about 5.4 s; a memory allocation failed at 240 MB, consistent with the documented 256 MB cap.
+- Not tested: creating a project through the Management API (a spend commitment), free-project pausing, Management API rate limits, and the runtime's own outbound network policy (deliberately not probed, to avoid scanning the provider's internal addresses).
+
+Cleanup state: all three functions deleted and verified (the project lists no functions). Still present, pending approval to drop: schema `vibe_spike` (one table, 2 dummy rows, not exposed through the API) and 2 dummy Vault secrets named `vibe_spike/app1/demo` and `vibe_spike/app2/demo`. A cleanup statement was declined by the permission layer and has not been retried.
