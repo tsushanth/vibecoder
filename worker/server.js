@@ -510,7 +510,7 @@ app.post('/generate', authMiddleware, async (req, res) => {
         if (callbackUrl) fetch(callbackUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ bundle: data.bundle, status: 'ready', userId, secret: callbackSecret }), signal: AbortSignal.timeout(30000) }).then(() => console.log(`[${requestId}] Callback sent`)).catch(err => console.error(`[${requestId}] Callback failed: ${err.message}`));
     }
 
-    console.log(`[${requestId}] Building for ${userId}: "${prompt}"`);
+    console.log(`[${requestId}] Building for ${userId}: "${scrubSecrets(String(prompt)).text.slice(0, 200)}"`);
 
     try {
         const claudePath = direct ? null : findClaudeCLI();
@@ -635,7 +635,7 @@ app.post('/customize', authMiddleware, async (req, res) => {
         else { res.json(data); }
     }
 
-    console.log(`[${requestId}] Customize: "${customizeDescription.substring(0, 80)}"`);
+    console.log(`[${requestId}] Customize: "${scrubSecrets(customizeDescription).text.substring(0, 80)}"`);
 
     try {
         const claudePath = direct ? null : findClaudeCLI();
@@ -821,7 +821,7 @@ app.post('/tweak', authMiddleware, async (req, res) => {
         else { res.json(data); }
     }
 
-    console.log(`[${requestId}] Tweak: "${tweakDescription.substring(0, 100)}"`);
+    console.log(`[${requestId}] Tweak: "${scrubSecrets(tweakDescription).text.substring(0, 100)}"`);
 
     try {
         const claudePath = direct ? null : findClaudeCLI();
