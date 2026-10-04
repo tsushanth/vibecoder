@@ -56,7 +56,7 @@ async function runDirect({ kind, prompt, projectDir }) {
     }
     // credentials pasted into a prompt must never reach a model provider or be copied into the app
     const { text: safePrompt, count: scrubbed } = scrubSecrets(prompt);
-    const r = await generateApp({ prompt: safePrompt, kind, existing, llm: directLlm, models: DIRECT_MODELS, rules: CLAUDE_MD });
+    const r = await generateApp({ prompt: safePrompt, kind, existing, llm: directLlm, models: DIRECT_MODELS, rules: CLAUDE_MD, deadlineMs: parseInt(process.env.DIRECT_DEADLINE_MS || '480000', 10) });
     if (!r.ok) return { success: false, cause: r.cause, attempts: r.attempts, costUsd: r.costUsd, scrubbed };
     writeFiles(projectDir, r.files);
     return { success: true, model: r.model, attempts: r.attempts, costUsd: r.costUsd, fixes: r.fixes, scrubbed };
@@ -72,7 +72,7 @@ function makeOutcome(requestId, kind, direct) {
         const r = ctx.run;
         let result;
         if (ctx.delivered) result = 'ok';
-        else if (direct) result = ['no_files', 'check_failed', 'provider_error', 'declined_text', 'budget'].includes(r?.cause) ? r.cause : 'provider_error';
+        else if (direct) result = ['no_files', 'check_failed', 'provider_error', 'declined_text', 'budget', 'timeout'].includes(r?.cause) ? r.cause : 'provider_error';
         else if (r?.quotaError) result = 'cli_failed';
         else if (r?.error === 'Timeout') result = 'timeout';
         else if (r && !r.success) result = 'cli_no_app';

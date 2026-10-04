@@ -50,30 +50,37 @@ function evaluate({ text, kind, existing, check }) {
  * Returns { ok:true, files, model, attempts, costUsd, fixes } or { ok:false, cause, attempts, costUsd }.
  * `files` is the full project (existing files merged with the model's changes for edits).
  */
-export async function generateApp({ prompt, kind = 'generate', existing = null, llm, models, rules, check = staticChecks, maxFixPasses = 1 }) {
+export async function generateApp({ prompt, kind = 'generate', existing = null, llm, models, rules, check = staticChecks, maxFixPasses = 1, deadlineMs = 480000, maxCalls = 4, now = () => Date.now() }) {
     const attempts = [];
     let costUsd = 0;
+    let calls = 0;
+    const deadline = now() + deadlineMs;
     for (const model of models) {
+        if (deadline - now() < 15000) { attempts.push({ model, cause: 'timeout', error: 'build time budget used up' }); break; }
+        if (calls >= maxCalls) { attempts.push({ model, cause: 'budget', error: 'call limit reached for this build' }); break; }
         if (llm.isOpen?.(model)) { attempts.push({ model, skipped: 'breaker open' }); continue; }
         const messages = buildMessages({ rules, kind, prompt, existing });
         let res;
         try {
-            res = await llm.chat({ model, messages });
+            calls += 1;
+            res = await llm.chat({ model, messages, deadline });
         } catch (e) {
-            attempts.push({ model, cause: e?.name === 'BudgetExceededError' ? 'budget' : 'provider_error', error: String(e.message).slice(0, 120) });
-            if (e?.name === 'BudgetExceededError') break;
+            const cause = e?.name === 'BudgetExceededError' ? 'budget' : e?.deadline ? 'timeout' : 'provider_error';
+            attempts.push({ model, cause, error: String(e.message).slice(0, 120) });
+            if (cause === 'budget' || cause === 'timeout') break;
             continue;
         }
         costUsd += res.costUsd || 0;
         let outcome = evaluate({ text: res.text, kind, existing, check });
         let fixes = 0;
-        while (!outcome.ok && outcome.cause !== 'declined_text' && fixes < maxFixPasses) {
+        while (!outcome.ok && outcome.cause !== 'declined_text' && fixes < maxFixPasses && calls < maxCalls) {
             fixes += 1;
+            calls += 1;
             messages.push({ role: 'assistant', content: res.text }, { role: 'user', content: fixPrompt(outcome.problems) });
             try {
-                res = await llm.chat({ model, messages });
+                res = await llm.chat({ model, messages, deadline });
             } catch (e) {
-                outcome = { ok: false, cause: 'provider_error', problems: [String(e.message).slice(0, 120)] };
+                outcome = { ok: false, cause: e?.deadline ? 'timeout' : 'provider_error', problems: [String(e.message).slice(0, 120)] };
                 break;
             }
             costUsd += res.costUsd || 0;
@@ -84,6 +91,6 @@ export async function generateApp({ prompt, kind = 'generate', existing = null, 
     }
     const causes = attempts.map((a) => a.cause);
     const cause = causes.includes('check_failed') ? 'check_failed' : causes.includes('declined_text') ? 'declined_text'
-        : causes.includes('no_files') ? 'no_files' : causes.includes('budget') ? 'budget' : 'provider_error';
+        : causes.includes('no_files') ? 'no_files' : causes.includes('timeout') ? 'timeout' : causes.includes('budget') ? 'budget' : 'provider_error';
     return { ok: false, cause, attempts, costUsd };
 }
