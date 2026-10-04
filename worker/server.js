@@ -14,6 +14,10 @@ import * as os from 'os';
 import crypto from 'crypto';
 import zlib from 'zlib';
 import { checkBrokerReady } from './brokerReady.js';
+import { OpenRouterClient } from './lib/llm.js';
+import { generateApp } from './lib/generate.js';
+import { readProject, writeFiles } from './lib/files.js';
+import { makeOutcomeLogger } from './lib/outcome.js';
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -25,6 +29,55 @@ const GITHUB_PAT = process.env.GITHUB_PAT || '';
 const GITHUB_ORG = process.env.GITHUB_ORG || 'Kreative-Koala-LLC';
 
 fs.mkdirSync(PROJECTS_DIR, { recursive: true });
+
+// ============================================
+// Direct generation (OpenRouter), behind a flag.
+// DIRECT_PERCENT=0 (default) keeps every build on the Claude CLI exactly as before.
+// ============================================
+const OPENROUTER_BASE_URL = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1';
+const DIRECT_PERCENT = process.env.OPENROUTER_API_KEY ? Math.max(0, Math.min(100, parseInt(process.env.DIRECT_PERCENT || '0', 10) || 0)) : 0;
+const DIRECT_MODELS = (process.env.DIRECT_MODELS || 'openai/gpt-5.6-luna,moonshotai/kimi-k2.7-code,deepseek/deepseek-v4-pro').split(',').map((m) => m.trim()).filter(Boolean);
+const directLlm = process.env.OPENROUTER_API_KEY
+    ? new OpenRouterClient({ apiKey: process.env.OPENROUTER_API_KEY, baseUrl: OPENROUTER_BASE_URL, dailyBudgetUsd: parseFloat(process.env.DIRECT_DAILY_BUDGET_USD || '5') })
+    : null;
+const logOutcome = makeOutcomeLogger({ file: process.env.OUTCOME_LOG || path.join(path.dirname(new URL(import.meta.url).pathname), 'outcomes.jsonl') });
+
+function useDirect() {
+    return !!directLlm && DIRECT_PERCENT > 0 && Math.random() * 100 < DIRECT_PERCENT;
+}
+
+async function runDirect({ kind, prompt, projectDir }) {
+    let existing = null;
+    if (kind !== 'generate') {
+        const p = readProject(projectDir);
+        if (p.tooLarge) return { success: false, cause: 'no_files', error: 'project too large for a direct edit' };
+        existing = p.files;
+    }
+    const r = await generateApp({ prompt, kind, existing, llm: directLlm, models: DIRECT_MODELS, rules: CLAUDE_MD });
+    if (!r.ok) return { success: false, cause: r.cause, attempts: r.attempts, costUsd: r.costUsd };
+    writeFiles(projectDir, r.files);
+    return { success: true, model: r.model, attempts: r.attempts, costUsd: r.costUsd, fixes: r.fixes };
+}
+
+// One outcome line per build, logged exactly once on every exit path (including the silent error paths).
+function makeOutcome(requestId, kind, direct) {
+    const t0 = Date.now();
+    const ctx = { run: null, delivered: false, done: false };
+    ctx.finish = () => {
+        if (ctx.done) return;
+        ctx.done = true;
+        const r = ctx.run;
+        let result;
+        if (ctx.delivered) result = 'ok';
+        else if (direct) result = ['no_files', 'check_failed', 'provider_error', 'declined_text', 'budget'].includes(r?.cause) ? r.cause : 'provider_error';
+        else if (r?.quotaError) result = 'cli_failed';
+        else if (r?.error === 'Timeout') result = 'timeout';
+        else if (r && !r.success) result = 'cli_no_app';
+        else result = 'provider_error';
+        logOutcome({ requestId, kind, generator: direct ? 'direct' : 'claude', model: r?.model, result, attempts: r?.attempts, costUsd: r?.costUsd, fixes: r?.fixes, latencyMs: Date.now() - t0 });
+    };
+    return ctx;
+}
 
 // ============================================
 // Claude CLI Discovery
@@ -388,7 +441,7 @@ app.get('/ready', authMiddleware, async (req, res) => {
 app.get('/health', (req, res) => {
     let cliAvailable = false, cliPath = '';
     try { cliPath = findClaudeCLI(); cliAvailable = true; } catch {}
-    res.json({ healthy: true, cliAvailable, cliPath, activeGenerations, maxConcurrent: MAX_CONCURRENT, quotaExhausted, quotaResetTime, uptime: process.uptime() });
+    res.json({ healthy: true, cliAvailable, cliPath, activeGenerations, maxConcurrent: MAX_CONCURRENT, quotaExhausted, quotaResetTime, uptime: process.uptime(), direct: { enabled: !!directLlm, percent: DIRECT_PERCENT, models: DIRECT_MODELS, breakersOpen: DIRECT_MODELS.filter((m) => directLlm?.isOpen(m)) } });
 });
 
 // ============================================
@@ -407,13 +460,15 @@ app.post('/generate', authMiddleware, async (req, res) => {
         return res.status(429).json({ error: 'Worker busy. Try again in a moment.' });
     }
 
-    if (quotaExhausted) {
+    const direct = useDirect();
+    if (!direct && quotaExhausted) {
         return res.status(503).json({ error: getQuotaErrorMessage(), quotaExhausted: true, resetTime: quotaResetTime });
     }
 
     activeGenerations++;
     const startTime = Date.now();
     const requestId = `app-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
+    const outcome = makeOutcome(requestId, 'generate', direct);
     let projectDir = null;
 
     // Fire-and-forget mode — respond immediately, POST result to callbackUrl when done
@@ -455,7 +510,7 @@ app.post('/generate', authMiddleware, async (req, res) => {
     console.log(`[${requestId}] Building for ${userId}: "${prompt}"`);
 
     try {
-        const claudePath = findClaudeCLI();
+        const claudePath = direct ? null : findClaudeCLI();
         projectDir = setupProjectFolder(requestId);
 
         // Save reference image if provided
@@ -477,7 +532,10 @@ Read CLAUDE.md for all requirements and constraints.
 Build the full app now. Create index.html as the entry point plus any needed CSS/JS files.
 Every feature must be fully implemented and working. No TODOs, no placeholders, no stubs.`;
 
-        const result = await runClaudeCommand(claudePath, buildPrompt, projectDir, requestId, 20);
+        const result = direct
+            ? await runDirect({ kind: 'generate', prompt, projectDir })
+            : await runClaudeCommand(claudePath, buildPrompt, projectDir, requestId, 20);
+        outcome.run = result;
 
         if (!result.success) {
             activeGenerations = Math.max(0, activeGenerations - 1);
@@ -512,19 +570,23 @@ Every feature must be fully implemented and working. No TODOs, no placeholders, 
 
         console.log(`[${requestId}] App complete in ${elapsed}s (${files.length} files, ${(zip.sizeBytes / 1024).toFixed(1)}KB)`);
 
+        outcome.delivered = true;
         sendResult({
             success: true,
             bundle: zip.base64,
             bundleSize: zip.sizeBytes,
             files,
             generationTime: elapsed,
-            quality: { criticalIssues: 0, warnings: 0, phasesCompleted: 1 }
+            quality: { criticalIssues: 0, warnings: 0, phasesCompleted: 1 },
+            generator: direct ? 'direct' : 'claude',
+            model: result.model || null
         });
 
     } catch (error) {
         console.error(`[${requestId}] Error:`, error.message);
         sendError('Internal worker error. Please try again.');
     } finally {
+        outcome.finish();
         activeGenerations = Math.max(0, activeGenerations - 1);
         if (projectDir) setTimeout(() => cleanupProjectFolder(projectDir), 120000);
     }
@@ -540,11 +602,13 @@ app.post('/customize', authMiddleware, async (req, res) => {
     if (!parentBundle) return res.status(400).json({ error: 'parentBundle is required' });
     if (!customizeDescription) return res.status(400).json({ error: 'customizeDescription is required' });
     if (activeGenerations >= MAX_CONCURRENT) return res.status(429).json({ error: 'Worker busy.' });
-    if (quotaExhausted) return res.status(503).json({ error: getQuotaErrorMessage(), quotaExhausted: true });
+    const direct = useDirect();
+    if (!direct && quotaExhausted) return res.status(503).json({ error: getQuotaErrorMessage(), quotaExhausted: true });
 
     activeGenerations++;
     const startTime = Date.now();
     const requestId = `cust-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
+    const outcome = makeOutcome(requestId, 'customize', direct);
     let projectDir = null;
 
     const isSSE = stream === true;
@@ -571,7 +635,7 @@ app.post('/customize', authMiddleware, async (req, res) => {
     console.log(`[${requestId}] Customize: "${customizeDescription.substring(0, 80)}"`);
 
     try {
-        const claudePath = findClaudeCLI();
+        const claudePath = direct ? null : findClaudeCLI();
         projectDir = path.join(PROJECTS_DIR, requestId);
         fs.mkdirSync(projectDir, { recursive: true });
         unzipBundle(parentBundle, projectDir);
@@ -587,8 +651,15 @@ Customization request: "${customizeDescription.trim()}"
 
 Read all existing files first, then apply the changes. Keep all features working.`;
 
-        const result = await runClaudeCommand(claudePath, customizePrompt, projectDir, requestId, 15);
+        const result = direct
+            ? await runDirect({ kind: 'customize', prompt: customizePrompt, projectDir })
+            : await runClaudeCommand(claudePath, customizePrompt, projectDir, requestId, 15);
+        outcome.run = result;
 
+        if (direct && !result.success) {
+            activeGenerations = Math.max(0, activeGenerations - 1);
+            return sendError('Could not apply the customization. Please try again.');
+        }
         if (!result.success && result.quotaError) {
             activeGenerations = Math.max(0, activeGenerations - 1);
             return sendError(getQuotaErrorMessage());
@@ -599,11 +670,13 @@ Read all existing files first, then apply the changes. Keep all features working
         const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
         console.log(`[${requestId}] Customize complete in ${elapsed}s`);
 
-        sendResult({ success: true, bundle: zip.base64, bundleSize: zip.sizeBytes, files, generationTime: elapsed });
+        outcome.delivered = true;
+        sendResult({ success: true, bundle: zip.base64, bundleSize: zip.sizeBytes, files, generationTime: elapsed, generator: direct ? 'direct' : 'claude', model: result.model || null });
     } catch (error) {
         console.error(`[${requestId}] Customize error:`, error.message);
         sendError('Internal error during customization.');
     } finally {
+        outcome.finish();
         activeGenerations = Math.max(0, activeGenerations - 1);
         if (projectDir) setTimeout(() => cleanupProjectFolder(projectDir), 120000);
     }
@@ -715,11 +788,13 @@ app.post('/tweak', authMiddleware, async (req, res) => {
     if (!repoName) return res.status(400).json({ error: 'repoName is required' });
     if (!GITHUB_PAT) return res.status(503).json({ error: 'Git not configured' });
     if (activeGenerations >= MAX_CONCURRENT) return res.status(429).json({ error: 'Worker busy.' });
-    if (quotaExhausted) return res.status(503).json({ error: getQuotaErrorMessage(), quotaExhausted: true });
+    const direct = useDirect();
+    if (!direct && quotaExhausted) return res.status(503).json({ error: getQuotaErrorMessage(), quotaExhausted: true });
 
     activeGenerations++;
     const startTime = Date.now();
     const requestId = `tweak-${(projectId || 'x').substring(0, 8)}-${Date.now()}`;
+    const outcome = makeOutcome(requestId, 'tweak', direct);
     let projectDir = null;
 
     const isSSE = stream === true;
@@ -746,7 +821,7 @@ app.post('/tweak', authMiddleware, async (req, res) => {
     console.log(`[${requestId}] Tweak: "${tweakDescription.substring(0, 100)}"`);
 
     try {
-        const claudePath = findClaudeCLI();
+        const claudePath = direct ? null : findClaudeCLI();
         projectDir = path.join(PROJECTS_DIR, requestId);
         fs.mkdirSync(projectDir, { recursive: true });
 
@@ -773,8 +848,15 @@ app.post('/tweak', authMiddleware, async (req, res) => {
 
         const tweakPrompt = `The creator wants this change to their web app:\n\n"${tweakDescription.trim()}"\n\nRead all existing files first, then make ONLY the changes needed. Keep everything working.`;
 
-        const result = await runClaudeCommand(claudePath, tweakPrompt, projectDir, requestId, 12);
+        const result = direct
+            ? await runDirect({ kind: 'tweak', prompt: tweakPrompt, projectDir })
+            : await runClaudeCommand(claudePath, tweakPrompt, projectDir, requestId, 12);
+        outcome.run = result;
 
+        if (direct && !result.success) {
+            activeGenerations = Math.max(0, activeGenerations - 1);
+            return sendError('Could not apply the change. Please try again.');
+        }
         if (!result.success && result.quotaError) {
             activeGenerations = Math.max(0, activeGenerations - 1);
             return sendError(getQuotaErrorMessage());
@@ -790,11 +872,13 @@ app.post('/tweak', authMiddleware, async (req, res) => {
         const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
         console.log(`[${requestId}] Tweak complete in ${elapsed}s`);
 
-        sendResult({ success: true, bundle: zip.base64, bundleSize: zip.sizeBytes, files, commitSha, generationTime: elapsed });
+        outcome.delivered = true;
+        sendResult({ success: true, bundle: zip.base64, bundleSize: zip.sizeBytes, files, commitSha, generationTime: elapsed, generator: direct ? 'direct' : 'claude', model: result.model || null });
     } catch (error) {
         console.error(`[${requestId}] Tweak error:`, error.message);
         sendError('Internal error during tweak.');
     } finally {
+        outcome.finish();
         activeGenerations = Math.max(0, activeGenerations - 1);
         if (projectDir) setTimeout(() => cleanupProjectFolder(projectDir), 120000);
     }
