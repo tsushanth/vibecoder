@@ -44,6 +44,22 @@ Rollback: `cp server.js.bak.before-direct.1791157045 server.js && cp .env.bak.be
 
 Rollout note: at about 1.3 builds a day a 10% canary produces roughly one direct build every eight days, too few to measure completion. Gate on the replay set and synthetic probes instead, then move quickly with a daily review of `outcomes.jsonl` and the Claude path one environment change away.
 
+## Dependency found 2026-10-04: RiddleVerse game creation uses the 192 worker (OWNER DECISION OPEN)
+
+Reported by the session auditing Hetzner 192 and partly verified by me (read-only, 2026-10-04):
+
+- RiddleVerse's backend (`RiddleVerse/web/backend/routes/gameCreation.routes.js`) sends game creation to `GAME_WORKER_URL`. Verified calls in that file: `/generate`, `/generate-harder`, `/generate-next-level`, `/init-repo`, `/tweak`, `/customize`, `/versions/:repo`. The value of `GAME_WORKER_URL` is a Fly secret that I have not read; the other session says it points at the 192 worker (`/home/vibecoder/worker/server.js`, pm2 `vibecoder-worker`, port 3456), which generates through `claude-multi` and so depends on the Claude broker.
+- The 231 worker (the direct-generation one) has `/generate`, `/customize`, `/init-repo`, `/tweak`, `/versions/:repo`, `/bundle/:repo`, `/build-apk`, `/revert`, `/ready` and `/health`. It does NOT have `/generate-harder` or `/generate-next-level`. The other session also says the 192 worker has async `/jobs/*`; I did not find `/jobs` calls in the RiddleVerse file and have not verified that.
+- Consequence: when 192 and the Claude broker retire, RiddleVerse game creation (create, harder, next level) breaks unless `GAME_WORKER_URL` moves to a worker that has those endpoints and no Claude CLI dependency. Reported usage is low and none since 2026-08-19.
+- These are different products: RiddleVerse game generation has its own prompts and a three-stage flow, so adding two endpoints to the 231 worker is a design task, not a copy. It is not planned or built.
+
+Options for the owner (none chosen):
+1. Drop RiddleVerse game creation and retire the 192 worker with the broker.
+2. Port the missing endpoints to a direct-generation worker, using the same chain and checks as VibeBuild, then repoint `GAME_WORKER_URL`.
+3. Keep the 192 worker and the broker for RiddleVerse only. This keeps the box and the Claude dependency alive.
+
+Until the owner decides: do not retire the broker or the 192 worker, and do not change `GAME_WORKER_URL`. I have not touched RiddleVerse, 192 or any Fly secret.
+
 ## Security findings from this work
 
 - A real user pasted a live Gemini API key into a prompt. The Claude agent copied it into the generated app's `index.html` (three scratch outputs), which in production would have published a live key inside a public app. The key also sits in plaintext in the worker's pm2 log on the box and was sent to model providers during the replay and permutation tests before the scrubber existed. Recommended: the owner decides whether to contact that user to rotate it; redact that line in the box's log; scan published bundles for key patterns. The 1,460 stored `projects.initial_prompt` values match none of the common key patterns (count-only check).
