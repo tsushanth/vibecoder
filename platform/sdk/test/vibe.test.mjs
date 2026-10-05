@@ -27,7 +27,7 @@ function load({ host = 'myapp.vibebuild.cc', win = {}, reply } = {}) {
 const jsonRes = (status, obj, headers = {}) => new Response(JSON.stringify(obj), { status, headers: { 'content-type': 'application/json', ...headers } });
 
 test('exposes only api, ai, auth, db and version', () => {
-    assert.deepEqual(Object.keys(load().vibe).sort(), ['ai', 'api', 'auth', 'db', 'pay', 'storage', 'version']);
+    assert.deepEqual(Object.keys(load().vibe).sort(), ['ai', 'api', 'auth', 'db', 'notify', 'pay', 'storage', 'version']);
     assert.deepEqual(Object.keys(load().vibe.ai).sort(), ['ask', 'chat']);
 });
 
