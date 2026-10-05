@@ -32,3 +32,10 @@ test('bad input is refused', () => {
 });
 
 test('the secret never appears in the URL', () => assert.equal(presignUrl(AWS).includes(AWS.secretAccessKey), false));
+
+test('query parameters are emitted in sorted order (SigV4 canonical form), including extra ones; the signature comes last', () => {
+    const keys = [...new URL(presignUrl({ ...AWS, query: { 'response-content-type': 'image/png', 'a-extra': '1' } })).searchParams.keys()];
+    assert.equal(keys.at(-1), 'X-Amz-Signature');
+    const signed = keys.slice(0, -1);
+    assert.deepEqual(signed, [...signed].sort()); assert.ok(signed.includes('a-extra') && signed.includes('response-content-type'));
+});
