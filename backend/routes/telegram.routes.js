@@ -232,4 +232,15 @@ export function createTelegramRouter({ supabase = defaultSupabase, workerSecret 
     return router;
 }
 
-export default createTelegramRouter({ workerSecret: WORKER_SECRET });
+// Telegram linking is switched off by default (nearly unused). Set TELEGRAM_ROUTES_ENABLED=true (exactly) to serve it again.
+function createDisabledRouter() {
+    const router = express.Router();
+    router.use((req, res) => res.status(503).json({ error: 'disabled' }));
+    return router;
+}
+
+export function selectTelegramRouter(env = process.env, deps = {}) {
+    return env.TELEGRAM_ROUTES_ENABLED === 'true' ? createTelegramRouter({ workerSecret: WORKER_SECRET, ...deps }) : createDisabledRouter();
+}
+
+export default selectTelegramRouter();

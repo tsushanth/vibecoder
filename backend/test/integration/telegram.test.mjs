@@ -151,3 +151,41 @@ test('verify: expired-code attempts count toward the lockout like wrong codes do
     for (const code of codes) assert.equal((await req(s, 'POST', '/verify', { body: { code, telegramId: 1 }, ip: '17.0.0.2' })).status, 410);
     assert.equal((await req(s, 'POST', '/verify', { body: { code: 'WRONG1', telegramId: 1 }, ip: '17.0.0.2' })).status, 429);
 });
+
+// ---- routes are disabled unless explicitly switched on
+const { selectTelegramRouter } = await import('../../routes/telegram.routes.js');
+async function mountSelected(env) {
+    const queries = [];
+    stubSupabase(supabase, (q) => { queries.push(q.table); return { data: null, error: { code: 'PGRST116' } }; });
+    const app = express(); app.set('trust proxy', true); app.use(express.json());
+    app.use('/api/telegram', selectTelegramRouter(env, { supabase, workerSecret: SECRET, now: clock.now }));
+    const s = await listen(app); servers.push(s);
+    return { s, queries };
+}
+const ALL = [['GET', '/connect?tg_id=1&user_id=u1'], ['POST', '/link', { userId: 'u1' }], ['POST', '/verify', { code: 'ABCDEF', telegramId: 1 }], ['GET', '/user/111'], ['POST', '/notify', { userId: 'u1', message: 'x' }]];
+
+test('by default every Telegram route answers 503 disabled and never touches the database', async () => {
+    for (const env of [{}, { TELEGRAM_ROUTES_ENABLED: 'false' }, { TELEGRAM_ROUTES_ENABLED: '1' }, { TELEGRAM_ROUTES_ENABLED: 'TRUE ' }, { TELEGRAM_ROUTES_ENABLED: '' }]) {
+        const { s, queries } = await mountSelected(env);
+        for (const [m, p, body] of ALL) {
+            const r = await req(s, m, p, { body, headers: { 'x-worker-secret': SECRET } });
+            assert.equal(r.status, 503, `${JSON.stringify(env)} ${m} ${p}`);
+            assert.deepEqual(await r.json(), { error: 'disabled' });
+        }
+        assert.deepEqual(queries, [], 'a disabled router must not query the database');
+    }
+});
+
+test('with TELEGRAM_ROUTES_ENABLED exactly "true" the real routes are served', async () => {
+    const { s } = await mountSelected({ TELEGRAM_ROUTES_ENABLED: 'true' });
+    const r = await req(s, 'POST', '/link', { body: { userId: 'u1' } });
+    assert.equal(r.status, 200); assert.match((await r.json()).code, /^[0-9A-F]{6}$/);
+});
+
+test('the module default export is the disabled router when the flag is unset', async () => {
+    const { default: def } = await import('../../routes/telegram.routes.js');
+    const app = express(); app.use(express.json()); app.use('/api/telegram', def);
+    const s = await listen(app); servers.push(s);
+    const r = await req(s, 'POST', '/link', { body: { userId: 'u1' } });
+    assert.equal(r.status, process.env.TELEGRAM_ROUTES_ENABLED === 'true' ? 200 : 503);
+});
