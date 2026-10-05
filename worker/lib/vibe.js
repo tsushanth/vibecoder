@@ -52,7 +52,7 @@ export function injectSdk(files, { sdk, enabled }) {
 
 export const VIBE_RULES = `
 ## Live data and AI without API keys (vibe.js)
-The platform provides a small SDK. Use it ONLY when the app really needs live data or AI text generation; otherwise build the app fully offline as usual.
+This section overrides the earlier no-external-APIs rule for vibe.api and vibe.ai only; every other rule still applies.\nThe platform provides a small SDK. Use it ONLY when the app really needs live data or AI text generation; otherwise build the app fully offline as usual.
 Load it first in index.html: <script src="vibe.js"></script> (do not write vibe.js yourself; the platform adds it).
 - vibe.api(connector, path, { query }) returns a Promise of parsed JSON. The only connector is "nws" (US National Weather Service, United States locations only, needs latitude and longitude, no key):
   1. const point = await vibe.api("nws", "/points/" + lat + "," + lon); read point.properties.gridId, gridX and gridY.

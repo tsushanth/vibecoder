@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { writeFiles } from './files.js';
 import { staticChecks } from './checks.js';
+import { injectSdk, loadVibeSdk } from './vibe.js';
 
 const CONTROLS = 'button,[role=button],input[type=submit],a[href^="#"],[onclick]';
 
@@ -20,6 +21,8 @@ export async function runtimeProblems(files, { chrome = process.env.CHROME_PATH,
         browser = await puppeteer.launch({ executablePath: chrome, headless: true, args: ['--allow-file-access-from-files', '--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu'] });
         const page = await browser.newPage();
         page.on('pageerror', (e) => errs.push(String(e.message).slice(0, 120)));
+        // unhandled promise rejections from the vibe SDK (e.g. an unguarded vibe.ai.ask) are real bugs; other rejections (audio.play and friends) are not reported
+        await page.evaluateOnNewDocument(() => { window.__vbRej = []; window.addEventListener('unhandledrejection', (e) => { window.__vbRej.push(String((e.reason && e.reason.message) || e.reason).slice(0, 120)); }); });
         page.on('dialog', (d) => d.dismiss().catch(() => {}));
         const work = (async () => {
             await page.goto('file://' + path.join(dir, 'index.html'), { waitUntil: 'load', timeout: 12000 });
@@ -37,6 +40,15 @@ export async function runtimeProblems(files, { chrome = process.env.CHROME_PATH,
                 await page.evaluate((sel, i) => { const e = document.querySelectorAll(sel)[i]; const r = e && e.getBoundingClientRect(); if (r && r.width && r.height) e.click(); }, CONTROLS, i).catch(() => {});
                 await new Promise((r) => setTimeout(r, 50));
             }
+            if (files['vibe.js']) {
+                await new Promise((r) => setTimeout(r, 900)); // let in-flight SDK calls settle
+                for (const m of await page.evaluate(() => window.__vbRej || [])) {
+                    if (!/^vibe/i.test(m)) continue;
+                    const hinted = `unhandled promise rejection from the vibe SDK: ${m}. Catch errors from vibe.api and vibe.ai and show a friendly message`;
+                    const dup = errs.findIndex((e) => e.includes(m)); // Chrome may already have reported it as a page error
+                    if (dup >= 0) errs[dup] = hinted; else errs.push(hinted);
+                }
+            }
         })();
         await Promise.race([work, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), timeoutMs))]);
     } catch (e) {
@@ -48,10 +60,13 @@ export async function runtimeProblems(files, { chrome = process.env.CHROME_PATH,
     return [...new Set(errs)].slice(0, 3).map((m) => `runtime error when the page loads or a control is clicked: ${m}`);
 }
 
-/** Static checks first (cheap), then the browser check. Async; usable as generateApp's `check`. */
-export async function fullChecks(files, opts) {
-    const s = staticChecks(files);
+/** Static checks first (cheap), then the browser check. Async; usable as generateApp's `check`.
+ *  opts.vibe: the vibe proxy SDK is enabled. The browser check then runs the app with the real vibe.js injected. */
+export async function fullChecks(files, opts = {}) {
+    const { vibe = false, ...runtimeOpts } = opts;
+    const s = staticChecks(files, { vibe });
     if (!s.ok) return s;
-    const problems = await runtimeProblems(files, opts);
+    const runFiles = injectSdk(files, { sdk: loadVibeSdk(), enabled: vibe });
+    const problems = await runtimeProblems(runFiles, runtimeOpts);
     return problems.length ? { ok: false, hasApp: true, problems } : s;
 }
