@@ -153,6 +153,18 @@ test('a limiter store failure fails closed with no send', async () => {
     assert.equal(r.sent.length, 0);
 });
 
+test('a counter failure (reads fine, incr throws) also fails closed with no send', async () => {
+    const r = rig(); r.limiterStore.incr = async () => { throw new Error('db down'); };
+    assert.deepEqual(await send(r), { ok: false, reason: 'unavailable' });
+    assert.equal(r.sent.length, 0);
+});
+
+test('a recipient lookup failure fails closed with no send', async () => {
+    const r = rig(); r.store.getRecipient = async () => { throw new Error('db down'); };
+    assert.deepEqual(await send(r), { ok: false, reason: 'unavailable' });
+    assert.equal(r.sent.length, 0);
+});
+
 test('a mail provider failure is send_failed and the error text is not exposed', async () => {
     const r = rig(); r.mailFails = true;
     const x = await send(r); assert.deepEqual(x, { ok: false, reason: 'send_failed' });
