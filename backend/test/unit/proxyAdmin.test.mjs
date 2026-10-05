@@ -66,5 +66,22 @@ test('redirects are not followed and the base URL must be https', async () => {
 test('the client never exposes the token or a way to read a secret value', () => {
     const { admin } = rig(res(204));
     assert.equal(JSON.stringify(admin).includes(TOKEN), false);
-    assert.deepEqual(Object.keys(admin).sort(), ['configured', 'deleteSecret', 'listSecrets', 'registerApp', 'setSecret']);
+    assert.deepEqual(Object.keys(admin).sort(), ['configured', 'deleteSecret', 'ensureApp', 'listSecrets', 'registerApp', 'setEnabled', 'setSecret']);
+});
+
+test('ensureApp posts to the ensure endpoint with no body, and setEnabled posts the flag', async () => {
+    const a = rig(res(204)); await a.admin.ensureApp('my-app');
+    assert.equal(a.calls[0].url, 'https://proxy.test/admin/apps/my-app/ensure'); assert.equal(a.calls[0].init.method, 'POST'); assert.equal(a.calls[0].init.body, undefined);
+    const b = rig(res(204)); await b.admin.setEnabled('my-app', false);
+    assert.equal(b.calls[0].url, 'https://proxy.test/admin/apps/my-app/enabled'); assert.equal(b.calls[0].init.method, 'POST'); assert.deepEqual(b.calls[0].body, { enabled: false });
+    assert.equal(new Headers(b.calls[0].init.headers).get('authorization'), `Bearer ${TOKEN}`);
+});
+
+test('ensureApp and setEnabled encode the app id and report errors like the other calls', async () => {
+    const a = rig(res(204)); await a.admin.ensureApp('a/../b'); assert.ok(a.calls[0].url.includes('a%2F..%2Fb'));
+    const b = rig(res(404, { error: 'unknown_app' }));
+    await assert.rejects(() => b.admin.setEnabled('x', true), (e) => e instanceof ProxyAdminError && e.status === 404 && e.code === 'unknown_app');
+    const c = createProxyAdmin({ baseUrl: '', token: '' });
+    await assert.rejects(() => c.ensureApp('x'), (e) => e.code === 'not_configured');
+    await assert.rejects(() => c.setEnabled('x', true), (e) => e.code === 'not_configured');
 });

@@ -42,6 +42,8 @@ export function createProxyAdmin({ baseUrl, token, fetchImpl = globalThis.fetch,
         registerApp: (appId, { manifest = null, domains = [], enabled = true } = {}) => call('PUT', `/admin/apps/${enc(appId)}`, { manifest, domains, enabled }),
         setSecret: (appId, name, value) => call('PUT', `/admin/apps/${enc(appId)}/secrets/${enc(name)}`, { value }),
         deleteSecret: (appId, name) => call('DELETE', `/admin/apps/${enc(appId)}/secrets/${enc(name)}`),
+        ensureApp: (appId) => call('POST', `/admin/apps/${enc(appId)}/ensure`),
+        setEnabled: (appId, enabled) => call('POST', `/admin/apps/${enc(appId)}/enabled`, { enabled: !!enabled }),
         listSecrets: async (appId) => (await call('GET', `/admin/apps/${enc(appId)}/secrets`))?.secrets ?? [],
     };
 }

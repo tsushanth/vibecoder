@@ -4,6 +4,7 @@ import { supabase } from '../config/database.js';
 import { getActiveDomainMap } from '../services/domainService.js';
 import { WORKER_URL, WORKER_SECRET } from '../config/constants.js';
 import { requireSecret } from '../lib/requireSecret.js';
+import { registerDeployedApp, disableDeployedApp } from '../services/appRegistry.js';
 
 const DEPLOY_SERVER_URL = process.env.DEPLOY_SERVER_URL || 'http://localhost:4000';
 const INTERNAL_SECRET = requireSecret('INTERNAL_SECRET');
@@ -137,6 +138,9 @@ router.post('/:projectId/deploy', async (req, res) => {
             console.log(`[deploy] Cleaned up preview: ${previewSubdomain}`);
         }
 
+        // Make the app known to the platform proxy (vibe.api / vibe.ai). Best effort: never fails the deploy.
+        await registerDeployedApp(req.app.locals.proxyAdmin, subdomain);
+
         res.json({ success: true, url });
     } catch (error) {
         console.error('Deploy error:', error);
@@ -149,8 +153,11 @@ router.delete('/:projectId/deploy', async (req, res) => {
         const { projectId } = req.params;
         const { userId } = req.body;
 
+        const { data: deployed } = await supabase.from('deployments').select('subdomain').eq('project_id', projectId).eq('user_id', userId);
         await supabase.from('deployments').update({ status: 'deleted' }).eq('project_id', projectId).eq('user_id', userId);
         await supabase.from('projects').update({ published_url: null }).eq('id', projectId);
+
+        for (const d of deployed || []) await disableDeployedApp(req.app.locals.proxyAdmin, d.subdomain);
 
         res.json({ success: true });
     } catch (error) {
