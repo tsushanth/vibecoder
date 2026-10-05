@@ -25,7 +25,7 @@ const { default: router } = await import('../../routes/projects.routes.js');
 const realFetch = globalThis.fetch;
 let deployOk = true;
 const calls = []; let behavior = {};
-const fakeProxy = () => ({ configured: true, ensureApp: async (a) => { calls.push(['ensure', a]); if (behavior.ensure) throw behavior.ensure; }, setEnabled: async (a, e) => { calls.push(['enabled', a, e]); if (behavior.enabled) throw behavior.enabled; }, setManifest: async (a, m) => { calls.push(['manifest', a, m]); }, copySecrets: async (to, from, o) => { calls.push(['copy', to, from, o]); return { copied: 0 }; } });
+const fakeProxy = () => ({ configured: true, ensureApp: async (a) => { calls.push(['ensure', a]); if (behavior.ensure) throw behavior.ensure; }, setEnabled: async (a, e) => { calls.push(['enabled', a, e]); if (behavior.enabled) throw behavior.enabled; }, setManifest: async (a, m) => { calls.push(['manifest', a, m]); }, copySecrets: async (to, from, o) => { calls.push(['copy', to, from, o]); return { copied: 0 }; }, setJobs: async (a, spec) => { calls.push(['jobs', a, spec]); if (behavior.jobs) throw behavior.jobs; return { jobs: 1, warnings: [] }; } });
 const sseResult = (extra = {}) => `data: ${JSON.stringify({ type: 'result', success: true, bundle: workerBundle, bundleSize: 3, files: [{ path: 'index.html', size: 3 }], generationTime: '1.0', quality: { criticalIssues: 0 }, ...extra })}\n\n`;
 let srv;
 before(async () => {
@@ -124,4 +124,17 @@ test('revert: a failed redeploy registers nothing', async () => {
     reset(); revertMode = true; workerBundle = MANIFEST_BUNDLE; deployOk = false;
     const r = await quiet(() => realFetch(`${srv.base}/api/projects/${PID}/revert/abc1234`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ userId: 'owner-1' }) }));
     assert.equal(r.status, 200); assert.deepEqual(calls, []);
+});
+
+test('build-complete: a vibe.jobs.json in the preview bundle is pushed to the preview subdomain app (not the project-id app) before it is enabled; a failure never fails the callback', async () => {
+    const JOBS = { version: 1, jobs: [{ id: 'cleanup', schedule: { every: '1h' }, action: { type: 'prune', table: 'todos', olderThanDays: 30 } }] };
+    reset();
+    const r = await quiet(() => buildComplete({ bundle: zip([file('index.html', 'x'), file('vibe.jobs.json', JOBS)]), status: 'ready' }));
+    assert.equal(r.status, 200);
+    const sub = `prev-${PID.substring(0, 8)}`;
+    assert.ok(await waitFor(() => calls.length >= 5), JSON.stringify(calls));
+    assert.deepEqual(calls.filter((c) => c[0] !== 'manifest'), [['ensure', sub], ['jobs', sub, JOBS], ['enabled', sub, true]]);
+    reset(); behavior.jobs = new ProxyAdminError(0, 'unreachable');
+    assert.equal((await quiet(() => buildComplete({ bundle: zip([file('vibe.jobs.json', JOBS)]), status: 'ready' }))).status, 200);
+    assert.ok(await waitFor(() => calls.some((c) => c[0] === 'enabled')), JSON.stringify(calls));
 });
