@@ -60,6 +60,20 @@ test('sendMessage refuses CR or LF in the recipient, subject or any header, and 
     assert.equal(r.calls.length, 0);
 });
 
+test('sendMessage refuses a bare CR, and anything but exactly one plain address', async () => {
+    const r = rig(); const m = createResendMailer({ apiKey: 're_testkey12345', from: 'login@mail.vibebuild.cc', fetchImpl: r.fetchImpl });
+    for (const b of [
+        { to: 'a@example.com', subject: 's\rX', text: 't' },
+        { to: 'a@example.com', subject: 's', text: 't', headers: { 'X-A': 'v\rX' } },
+        { to: 'a b@example.com', subject: 's', text: 't' },
+        { to: 'a@example.com,b@example.com', subject: 's', text: 't' },
+        { to: 'A <a@example.com>', subject: 's', text: 't' },
+        { to: 'a@example.com;b@example.com', subject: 's', text: 't' },
+        { to: 'nobody', subject: 's', text: 't' },
+    ]) await assert.rejects(() => m.sendMessage(b), JSON.stringify(b));
+    assert.equal(r.calls.length, 0);
+});
+
 test('sendMessage: a provider refusal rejects without leaking the key or the message', async () => {
     const m = createResendMailer({ apiKey: 're_testkey12345', from: 'login@mail.vibebuild.cc', fetchImpl: rig(500).fetchImpl });
     await assert.rejects(() => m.sendMessage({ to: 'a@example.com', subject: 's', text: 'PRIVATEBODY' }), (e) => /500/.test(e.message) && !/PRIVATEBODY|re_testkey/.test(e.message));

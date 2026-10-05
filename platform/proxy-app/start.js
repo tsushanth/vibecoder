@@ -14,6 +14,9 @@ import { createStorageService } from '../storage/service.js';
 import { createNotifyStore } from '../notify/pgStore.js';
 import { createNotifyService } from '../notify/service.js';
 import { createNotifyHttp } from '../notify/http.js';
+import { createPayService } from '../pay/service.js';
+import { createPayHttp } from '../pay/http.js';
+import { createOrderStore } from '../pay/orderStore.js';
 
 async function dnsResolve(host) {
     const [a, b] = await Promise.allSettled([dns.resolve4(host), dns.resolve6(host)]);
@@ -51,8 +54,9 @@ export async function startServer(config, { pool: injected, listenPort, resolve 
         store: createStorageStore({ pool }), fetchImpl,
         r2: { host: `${r2.accountId}.r2.cloudflarestorage.com`, bucket: r2.bucket, accessKeyId: r2.accessKeyId, secretAccessKey: r2.secretAccessKey },
     }) : undefined;
+    const payService = createPayService({ secretStore: stores.secretStore, limiter, limiterStore: stores.limiterStore, orderStore: createOrderStore({ pool }), auth: authService, fetchImpl, baseDomain: config.baseDomain });
     const handler = createHandler({
-        storageService, authService, notifyHttp: createNotifyHttp({ svc: notifyService, auth: authService, appStore: stores.appStore, limiter, baseDomain: config.baseDomain }),
+        storageService, authService, notifyHttp: createNotifyHttp({ svc: notifyService, auth: authService, appStore: stores.appStore, limiter, baseDomain: config.baseDomain }), payHttp: createPayHttp({ service: payService, appStore: stores.appStore, baseDomain: config.baseDomain }),
         appStore: stores.appStore, secretStore: stores.secretStore, limiter, globalAiLimiter,
         meter: createMeter({ sink: stores.usageSink }), fetchImpl, resolve,
         openRouterKey: config.secrets.openRouterKey, log, baseDomain: config.baseDomain,
