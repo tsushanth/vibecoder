@@ -1,6 +1,6 @@
 # Slice 1, step 2: built-in connectors and the AI proxy (decision record)
 
-Date: 2026-10-04. Owner: Sushanth. Status: decided, provider terms still being verified (see table).
+Date: 2026-10-04. Owner: Sushanth. Status: decided; provider terms verified for four candidates, one qualifies (see table).
 
 ## Decisions (owner)
 
@@ -15,11 +15,19 @@ Date: 2026-10-04. Owner: Sushanth. Status: decided, provider terms still being v
 |---|---|---|---|
 | Open-Meteo free API | weather | "You may only use the free API services for non-commercial purposes." Commercial use needs a paid plan. | EXCLUDED on the free tier |
 | US National Weather Service (api.weather.gov) | weather, US | "open data, free to use for any purpose", no fees. A unique User-Agent header is required and "will be replaced with an API key in the future". Rate limit not published. US-focused. | INCLUDE for US weather; send a unique User-Agent; expect an API key later |
-| Nager.Date (nagerholidays.com) | public holidays | Redirects from date.nager.at; terms not yet read | PENDING |
-| Binance public market data (data-api.binance.vision) | crypto prices | Keyless market data only. The page states no commercial-use or redistribution terms and points to Binance's general terms, which have not been read. | PENDING, not included until the terms are read |
+| Nager.Date hosted API (nagerholidays.com) | public holidays | Terms of Service: "The Web API can be used for private or non-profit projects. For commercial purposes we require active sponsorship." Also bars using the data to operate your own holiday portal. The code is MIT on GitHub (self-hosting is possible, not done). | EXCLUDED unless we sponsor or self-host |
+| Binance public market data (data-api.binance.vision) | crypto prices | Keyless market data only. The page states no commercial-use or redistribution terms and points to Binance's general terms, which have not been read. | NOT INCLUDED: the terms page could not be read through the fetch tool, so commercial use is unverified. Do not ship a crypto-price connector until someone reads Binance's API terms or a different source is checked. |
+
+## Result
+
+Only one candidate is verified for commercial use: US National Weather Service. Open-Meteo and the hosted Nager API are excluded. Binance is unverified. Crypto prices and public holidays have no approved built-in source yet.
 
 ## Consequences
 
 - Global weather has no keyless commercial source in this list. Options: US-only via NWS, a paid Open-Meteo plan, or a creator-supplied key through the secrets connector. This is open.
 - Every built-in connector must carry its terms review date and source URL in code, so a stale review is visible.
 - Revisit all providers' terms before launch; they can change.
+
+- Built-in connectors are platform-defined only. App-declared manifests may not set fixed headers (the proxy would otherwise let an untrusted app set arbitrary request headers); built-ins set a unique User-Agent as the NWS requires.
+- App-declared connectors may not reuse a built-in name.
+- AI proxy: platform picks the model allowlist (default `openai/gpt-5.6-luna`, the model used for direct generation); apps cannot choose arbitrary models; output and input sizes are capped; cost is read from the provider's reported usage, not guessed.
