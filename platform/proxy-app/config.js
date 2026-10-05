@@ -24,6 +24,10 @@ export function loadConfig(env = process.env) {
     const resendKey = env.RESEND_API_KEY?.trim() || null;
     const authMailFrom = env.AUTH_MAIL_FROM?.trim() || null;
     if (resendKey && !authMailFrom) throw new Error('missing required setting AUTH_MAIL_FROM (needed when RESEND_API_KEY is set)');
+    const r2 = ['R2_ACCOUNT_ID', 'R2_BUCKET', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY'].map((k) => env[k]?.trim() || null);
+    if (r2.some(Boolean) && !r2.every(Boolean)) throw new Error('invalid storage settings: set all of R2_ACCOUNT_ID, R2_BUCKET, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY or none');
+    if (r2[0] && !/^[0-9a-f]{32}$/i.test(r2[0])) throw new Error('invalid setting R2_ACCOUNT_ID: expected 32 hex characters');
+    if (r2[1] && !/^[a-z0-9][a-z0-9-]{2,62}$/.test(r2[1])) throw new Error('invalid setting R2_BUCKET');
     const config = {
         port: int(env, 'PORT', 8080, { min: 1, max: 65535 }),
         dbPoolMax: int(env, 'DB_POOL_MAX', 5, { min: 1, max: 20 }),
@@ -38,6 +42,6 @@ export function loadConfig(env = process.env) {
         platformAiDailyMicros: int(env, 'PLATFORM_AI_DAILY_MICROS', 2_000_000, { min: 0, max: 1_000_000_000 }),
     };
     // non-enumerable so JSON.stringify and console.log of the config never print secrets
-    Object.defineProperty(config, 'secrets', { value: { databaseUrl, masterKey, openRouterKey, adminToken, resendKey }, enumerable: false });
+    Object.defineProperty(config, 'secrets', { value: { databaseUrl, masterKey, openRouterKey, adminToken, resendKey, r2: r2.every(Boolean) ? { accountId: r2[0], bucket: r2[1], accessKeyId: r2[2], secretAccessKey: r2[3] } : null }, enumerable: false });
     return config;
 }
