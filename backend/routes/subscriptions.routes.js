@@ -83,7 +83,7 @@ router.post('/verify', async (req, res) => {
         const result = await verifyReceipt(platform, receiptData, userId);
 
         if (!result.success) {
-            return res.status(400).json({
+            return res.status(result.unavailable ? 501 : 400).json({
                 error: result.error
             });
         }
