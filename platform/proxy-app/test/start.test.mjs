@@ -125,3 +125,14 @@ t('without an injected pool startServer builds its own from the config: DATABASE
     await s.close();
     assert.equal(s.pool.ended, true);
 });
+
+t('the started server wires ensure and enabled: an app can be created and switched off with the admin token', async () => {
+    const s = await boot();
+    const admin = (path, body) => fetch(url(s, path), { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${ADMIN_T}`, 'fly-client-ip': '2.2.2.2' }, body: body && JSON.stringify(body) });
+    assert.equal((await admin('/admin/apps/wired-ensure/ensure')).status, 204);
+    const stores = createPgStores({ pool: db.pool, masterKey: MK });
+    assert.equal((await stores.appStore.get('wired-ensure')).enabled, true);
+    assert.equal((await admin('/admin/apps/wired-ensure/enabled', { enabled: false })).status, 204);
+    assert.equal((await stores.appStore.get('wired-ensure')).enabled, false);
+    await s.close();
+});

@@ -26,8 +26,8 @@ async function readJson(req, max = MAX_BODY) {
     try { const v = JSON.parse(Buffer.concat(chunks).toString('utf8') || 'null'); return v && typeof v === 'object' && !Array.isArray(v) ? { value: v } : { error: 400 }; } catch { return { error: 400 }; }
 }
 
-export function createHandler({ appStore, secretStore, limiter, globalAiLimiter, meter, fetchImpl, resolve, openRouterKey, log = () => {}, baseDomain, adminToken, upsertApp, limiterStore }) {
-    const admin = adminToken ? createAdmin({ token: adminToken, appStore, upsertApp, secretStore, limiterStore, baseDomain }) : null;
+export function createHandler({ appStore, secretStore, limiter, globalAiLimiter, meter, fetchImpl, resolve, openRouterKey, log = () => {}, baseDomain, adminToken, upsertApp, ensureApp, setEnabled, limiterStore }) {
+    const admin = adminToken ? createAdmin({ token: adminToken, appStore, upsertApp, ensureApp, setEnabled, secretStore, limiterStore, baseDomain }) : null;
     const aiLimiter = {
         async check(a) {
             const r = await limiter.check(a);
