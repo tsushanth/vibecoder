@@ -1,12 +1,38 @@
 // Keeps the platform proxy's app registry in step with deployments: a deployed app is registered (created if missing,
 // never overwritten) and enabled; an undeployed app is switched off. Best effort: a proxy problem is logged by error code
 // only and never fails a deploy.
+import { manifestFromBundle } from '../lib/bundleManifest.js';
+
 const SUBDOMAIN = /^[a-z0-9][a-z0-9-]{1,60}[a-z0-9]$/;
 
-export async function registerDeployedApp(proxyAdmin, subdomain, log = console.warn) {
+// With `source` = { projectId, bundle } it also carries the project's connector manifest and keys over:
+//   - the manifest in the bundle (vibe.manifest.json) is registered on the subdomain app and on the project-id app, which is the
+//     canonical holder of the project's manifest and keys (the key-entry routes write there) and is never enabled for calls;
+//   - the project's keys are copied onto the subdomain app, replacing whatever it held, so a reused subdomain cannot keep a
+//     previous owner's keys.
+// A bundle that cannot be read leaves the registered manifest alone. Manifest or key failures are logged by code and never stop
+// the app from being enabled.
+const PROJECT_ID = /^[A-Za-z0-9-]{8,64}$/;
+const UUID_LIKE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+export async function registerDeployedApp(proxyAdmin, subdomain, log = console.warn, source = {}) {
     if (!proxyAdmin?.configured || typeof subdomain !== 'string' || !SUBDOMAIN.test(subdomain)) return false;
+    if (UUID_LIKE.test(subdomain)) return false; // project ids are the platform's own app ids
+    const projectId = typeof source?.projectId === 'string' && PROJECT_ID.test(source.projectId) ? source.projectId : null;
+    const found = projectId && source.bundle ? manifestFromBundle(source.bundle) : { status: 'unreadable' };
+    const step = async (what, fn) => {
+        try { await fn(); } catch (e) { if (e?.code !== 'unknown_app' || what !== 'clear') log(`[proxy] ${what} failed app=${subdomain} code=${e?.code || 'error'}`); }
+    };
     try {
         await proxyAdmin.ensureApp(subdomain);
+        if (found.status === 'found') {
+            await step('project app', async () => { await proxyAdmin.ensureApp(projectId); await proxyAdmin.setEnabled(projectId, false); });
+            await step('manifest', async () => { await proxyAdmin.setManifest(projectId, found.manifest); await proxyAdmin.setManifest(subdomain, found.manifest); });
+            await step('keys', () => proxyAdmin.copySecrets(subdomain, projectId, { replace: true }));
+        } else if (found.status === 'none') {
+            await step('clear', async () => { await proxyAdmin.setManifest(subdomain, null); });
+            await step('clear', async () => { await proxyAdmin.setManifest(projectId, null); });
+        }
         await proxyAdmin.setEnabled(subdomain, true);
         return true;
     } catch (e) {
