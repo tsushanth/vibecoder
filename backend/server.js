@@ -13,6 +13,8 @@ import telegramRoutes from './routes/telegram.routes.js';
 import { reportCrash } from './lib/failureReporter.js';
 import githubRoutes from './routes/github.routes.js';
 import appdataRoutes from './routes/appdata.routes.js';
+import { createSecretsRouter } from './routes/secrets.routes.js';
+import { createProxyAdmin } from './services/proxyAdmin.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { WORKER_URL, WORKER_SECRET } from './config/constants.js';
 
@@ -20,6 +22,12 @@ const app = express();
 app.set('trust proxy', 1);
 // Mounted BEFORE global cors(): appdata does its own per-app CORS (generated-app origins).
 app.use('/api/appdata', appdataRoutes);
+// Key entry for generated apps. Mounted BEFORE the global json parser (50 MB) so its own 8 KB limit applies, and with its own CORS
+// (the VibeBuild web origins only). Identity is the verified Supabase token, never a client-supplied userId. Returns 503 until
+// PROXY_ADMIN_URL (https) and PROXY_ADMIN_TOKEN (32+ characters) are set.
+const WEB_ORIGINS = ['https://vibebuild.cc', 'https://www.vibebuild.cc', 'https://vibebuild-web.fly.dev', 'http://localhost:3000'];
+const proxyAdmin = createProxyAdmin({ baseUrl: process.env.PROXY_ADMIN_URL, token: process.env.PROXY_ADMIN_TOKEN });
+app.use('/api/projects/:id/secrets', cors({ origin: WEB_ORIGINS }), createSecretsRouter({ proxyAdmin }));
 app.use(cors({
     origin: [
         'https://vibebuild.cc',
