@@ -62,6 +62,10 @@ export function createPgStores({ pool, masterKey, now = () => Date.now() }) {
             const { rowCount } = await pool.query('select 1 from platform.app_secrets where app_id = $1 and name = $2', [appId, name]);
             return rowCount > 0;
         },
+        async list(appId) {
+            const { rows } = await pool.query('select name, updated_at from platform.app_secrets where app_id = $1 order by name', [appId]);
+            return rows.map((r) => ({ name: r.name, updatedAt: r.updated_at }));
+        },
         async delete(appId, name) { await pool.query('delete from platform.app_secrets where app_id = $1 and name = $2', [appId, name]); },
     };
 

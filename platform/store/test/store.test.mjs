@@ -87,6 +87,17 @@ t('secretStore.has reports presence and delete removes', async () => {
     assert.equal(await stores.secretStore.get('app1', 'API_KEY'), undefined);
 });
 
+t('secretStore.list returns names and update times only, sorted, scoped to the app', async () => {
+    await stores.upsertApp({ appId: 'listapp', manifest, enabled: true }); await stores.upsertApp({ appId: 'otherapp', manifest, enabled: true });
+    await stores.secretStore.set('listapp', 'ZED_KEY', 'ListSecretValueZZZ111'); await stores.secretStore.set('listapp', 'ALPHA_KEY', 'ListSecretValueAAA222'); await stores.secretStore.set('otherapp', 'OTHER_KEY', 'OtherAppSecret333');
+    const rows = await stores.secretStore.list('listapp');
+    assert.deepEqual(rows.map((r) => r.name), ['ALPHA_KEY', 'ZED_KEY']);
+    for (const r of rows) { assert.deepEqual(Object.keys(r).sort(), ['name', 'updatedAt']); assert.ok(r.updatedAt instanceof Date || typeof r.updatedAt === 'string'); }
+    const text = JSON.stringify(rows);
+    for (const bad of ['ListSecretValueZZZ111', 'ListSecretValueAAA222', 'OtherAppSecret333', 'OTHER_KEY']) assert.equal(text.includes(bad), false, bad);
+    assert.deepEqual(await stores.secretStore.list('nobody'), []);
+});
+
 t('secret names must be UPPER_SNAKE and values non-empty and bounded', async () => {
     await assert.rejects(() => stores.secretStore.set('app1', 'bad name', 'v'), /^Error: invalid secret name$/);
     await assert.rejects(() => stores.secretStore.set('app1', 'GOOD_NAME', ''), /value/i);
