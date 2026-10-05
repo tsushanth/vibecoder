@@ -47,6 +47,10 @@ export function createProxyAdmin({ baseUrl, token, fetchImpl = globalThis.fetch,
         setDomains: (appId, domains) => call('POST', `/admin/apps/${enc(appId)}/domains`, { domains }),
         getApp: (appId) => call('GET', `/admin/apps/${enc(appId)}`),
         setManifest: (appId, manifest) => call('POST', `/admin/apps/${enc(appId)}/manifest`, { manifest }),
+        // Applies a vibe.schema.json spec to the app's own database. Resolves { version, applied }; rejects with code invalid_schema,
+        // destructive_change_needs_confirmation (nothing changed), migration_failed or unknown_app.
+        setSchema: (appId, spec, { allowDestructive = false } = {}) => call('POST', `/admin/apps/${enc(appId)}/schema`, { spec, allowDestructive: allowDestructive === true }),
+        getSchema: (appId) => call('GET', `/admin/apps/${enc(appId)}/schema`),
         copySecrets: (toAppId, fromAppId, { replace = false } = {}) => call('POST', `/admin/apps/${enc(toAppId)}/copy-secrets`, { from: fromAppId, replace }),
         listSecrets: async (appId) => (await call('GET', `/admin/apps/${enc(appId)}/secrets`))?.secrets ?? [],
     };
