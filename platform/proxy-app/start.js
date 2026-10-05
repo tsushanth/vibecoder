@@ -33,7 +33,7 @@ export async function startServer(config, { pool: injected, listenPort, resolve 
         appStore: stores.appStore, secretStore: stores.secretStore, limiter, globalAiLimiter,
         meter: createMeter({ sink: stores.usageSink }), fetchImpl, resolve,
         openRouterKey: config.secrets.openRouterKey, log, baseDomain: config.baseDomain,
-        adminToken: config.secrets.adminToken, upsertApp: stores.upsertApp, ensureApp: stores.ensureApp, setEnabled: stores.setEnabled, limiterStore: stores.limiterStore,
+        adminToken: config.secrets.adminToken, upsertApp: stores.upsertApp, ensureApp: stores.ensureApp, setEnabled: stores.setEnabled, setDomains: stores.setDomains, limiterStore: stores.limiterStore,
     });
     const server = http.createServer(handler);
     await new Promise((ok, bad) => { server.once('error', bad); server.listen(listenPort ?? config.port, '0.0.0.0', ok); });
