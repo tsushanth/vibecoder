@@ -51,6 +51,10 @@ export function createProxyAdmin({ baseUrl, token, fetchImpl = globalThis.fetch,
         // destructive_change_needs_confirmation (nothing changed), migration_failed or unknown_app.
         setSchema: (appId, spec, { allowDestructive = false } = {}) => call('POST', `/admin/apps/${enc(appId)}/schema`, { spec, allowDestructive: allowDestructive === true }),
         getSchema: (appId) => call('GET', `/admin/apps/${enc(appId)}/schema`),
+        // Replaces the app's scheduled jobs with the contents of vibe.jobs.json ({ version?, jobs: [...] }, sent as is). Resolves
+        // { jobs, warnings }; rejects with invalid_jobs (nothing changed), request_too_large, bad_app_manifest or unknown_app.
+        setJobs: (appId, spec) => call('POST', `/admin/apps/${enc(appId)}/jobs`, spec),
+        getJobs: (appId) => call('GET', `/admin/apps/${enc(appId)}/jobs`),
         copySecrets: (toAppId, fromAppId, { replace = false } = {}) => call('POST', `/admin/apps/${enc(toAppId)}/copy-secrets`, { from: fromAppId, replace }),
         listSecrets: async (appId) => (await call('GET', `/admin/apps/${enc(appId)}/secrets`))?.secrets ?? [],
     };

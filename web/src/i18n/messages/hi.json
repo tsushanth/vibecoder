@@ -247,7 +247,18 @@
       "tooLong": "That key is too long.",
       "empty": "Paste a key first.",
       "network": "Could not reach the server. Check your connection and paste the key again.",
-      "unknown": "Something went wrong. Paste the key again to retry."
+      "unknown": "Something went wrong. Paste the key again to retry.",
+      "stripePublishable": "यह पब्लिशेबल की (pk_) है। इसके बजाय सीक्रेट की (sk_ या rk_) पेस्ट करें।",
+      "stripeWebhookFormat": "यह वेबहुक साइनिंग सीक्रेट जैसा नहीं दिखता। यह whsec_ से शुरू होना चाहिए।",
+      "stripeKeyFormat": "यह Stripe सीक्रेट की जैसी नहीं दिखती। यह sk_ या rk_ से शुरू होनी चाहिए (जैसे sk_test_...)।"
+    },
+    "pay": {
+      "secretKeyHelp": "आपकी Stripe सीक्रेट की। यह sk_ या rk_ से शुरू होती है (टेस्ट की sk_test_ से शुरू होती हैं)। पब्लिशेबल की (pk_) कभी इस्तेमाल न करें।",
+      "webhookSecretHelp": "Stripe में बनाए गए वेबहुक एंडपॉइंट का साइनिंग सीक्रेट। यह whsec_ से शुरू होता है।",
+      "testFirst": "पहले Stripe टेस्ट की इस्तेमाल करें (वे sk_test_ से शुरू होती हैं)। असली भुगतान लेने के लिए तैयार होने पर ही लाइव की पर जाएँ। सेव की गई की केवल लिखने योग्य होती हैं, इसलिए यह पैनल नहीं बता सकता कि सेव की गई की किस मोड में है।",
+      "webhookUrlLabel": "Stripe (Developers > Webhooks) में इस URL के साथ एक एंडपॉइंट जोड़ें, फिर उसका साइनिंग सीक्रेट नीचे पेस्ट करें:",
+      "webhookUrlPending": "अपने ऐप का वेबहुक URL पाने के लिए उसका प्रीव्यू करें या उसे पब्लिश करें।",
+      "copyUrl": "URL कॉपी करें"
     }
   }
 }
