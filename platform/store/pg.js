@@ -33,6 +33,16 @@ export function createPgStores({ pool, masterKey, now = () => Date.now() }) {
         );
     }
 
+    async function ensureApp({ appId }) {
+        if (!APP_ID.test(String(appId))) throw new Error('invalid app id');
+        await pool.query('insert into platform.apps (app_id) values ($1) on conflict (app_id) do nothing', [appId]);
+    }
+
+    async function setEnabled(appId, enabled) {
+        const { rowCount } = await pool.query('update platform.apps set enabled = $2, updated_at = now() where app_id = $1', [appId, !!enabled]);
+        return rowCount > 0;
+    }
+
     const secretStore = {
         async set(appId, name, value) {
             if (!SECRET_NAME.test(String(name))) throw new Error('invalid secret name');
@@ -105,5 +115,5 @@ export function createPgStores({ pool, masterKey, now = () => Date.now() }) {
         return Object.fromEntries(rows.map((r) => [r.connector, { calls: r.calls, errors: r.errors, responseBytes: r.bytes }]));
     }
 
-    return { appStore, upsertApp, secretStore, limiterStore, usageSink, usageSummary };
+    return { appStore, upsertApp, ensureApp, setEnabled, secretStore, limiterStore, usageSink, usageSummary };
 }
