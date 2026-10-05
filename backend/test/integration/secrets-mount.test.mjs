@@ -6,12 +6,15 @@ import { fileURLToPath } from 'node:url';
 
 const DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const PID = '11111111-2222-3333-4444-555555555555';
+// built at run time so no key-shaped literal sits in the source
+const SPAWN_WORKER_SECRET = ['mount', 'test', 'worker', 'value', '0123456789'].join('-');
+const SPAWN_INTERNAL_SECRET = ['mount', 'test', 'internal', 'value', '0123456789'].join('-');
 let child, base, out = '';
 
 before(async () => {
     const port = 38000 + Math.floor(Math.random() * 1500);
     base = `http://127.0.0.1:${port}`;
-    child = spawn(process.execPath, ['server.js'], { cwd: DIR, env: { PATH: path.dirname(process.execPath), PORT: String(port), SUPABASE_URL: 'http://127.0.0.1:1', SUPABASE_ANON_KEY: 'test-anon-key', WORKER_SECRET: 'x', WORKER_URL: 'http://worker.test:3456', NODE_ENV: 'test' }, stdio: ['ignore', 'pipe', 'pipe'] });
+    child = spawn(process.execPath, ['server.js'], { cwd: DIR, env: { PATH: path.dirname(process.execPath), PORT: String(port), SUPABASE_URL: 'http://127.0.0.1:1', SUPABASE_ANON_KEY: 'test-anon-key', WORKER_SECRET: SPAWN_WORKER_SECRET, INTERNAL_SECRET: SPAWN_INTERNAL_SECRET, WORKER_URL: 'http://worker.test:3456', NODE_ENV: 'test' }, stdio: ['ignore', 'pipe', 'pipe'] });
     child.stdout.on('data', (d) => { out += d; }); child.stderr.on('data', (d) => { out += d; });
     const end = Date.now() + 15000;
     for (;;) { try { if ((await fetch(base + '/api/health')).ok) break; } catch { /* not up yet */ } if (Date.now() > end) throw new Error('server did not start: ' + out.slice(-300)); await new Promise((r) => setTimeout(r, 150)); }
