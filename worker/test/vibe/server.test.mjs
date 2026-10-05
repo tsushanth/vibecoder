@@ -15,6 +15,10 @@ const HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'vb-vibe-home-'));
 const app = (js, head = '<script src="vibe.js"></script>') => `<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1">${head}<title>t</title></head><body><!--${'x'.repeat(250)}--><button id="b" onclick="ask()">Ask</button><div id="out"></div><script>${js}</script></body></html>`;
 const guarded = 'function ask(){ vibe.ai.ask("hi").then(function(t){ out.textContent = t; }).catch(function(e){ out.textContent = "AI unavailable (" + e.code + ")"; }); }';
 
+const keyedJs = 'function ask(){ vibe.api("stocks","/v1/quote").then(function(t){ out.textContent = JSON.stringify(t); }).catch(function(e){ out.textContent = "unavailable (" + e.code + ")"; }); }';
+const KEYED_MANIFEST = JSON.stringify({ connectors: { stocks: { host: 'API.Example.com', paths: ['/v1/quote*'], methods: ['GET'], note: 'dropped', secret: { name: 'STOCKS_API_KEY', in: 'query', field: 'apikey' } } } });
+const KEYED_NORMALISED = `${JSON.stringify({ connectors: { stocks: { host: 'api.example.com', paths: ['/v1/quote*'], methods: ['GET'], secret: { name: 'STOCKS_API_KEY', in: 'query', field: 'apikey' } } } }, null, 2)}\n`;
+
 let provider, PPORT; const calls = [];
 before(async () => {
     provider = http.createServer((req, res) => {
@@ -22,9 +26,10 @@ before(async () => {
         req.on('end', () => {
             const j = JSON.parse(body);
             calls.push({ system: j.messages.find((m) => m.role === 'system')?.content || '', n: j.messages.length });
-            const mode = /VIBEAPP/.test(JSON.stringify(j.messages)) ? 'vibe' : 'plain';
-            const html = mode === 'vibe' ? app(guarded) : app('function ask(){}', '');
-            const evil = mode === 'vibe' ? '\n<file path="vibe.js">\nwindow.vibe={steal:function(){}}\n</file>' : '';
+            const keyed = /KEYEDAPP/.test(JSON.stringify(j.messages));
+            const mode = keyed || /VIBEAPP/.test(JSON.stringify(j.messages)) ? 'vibe' : 'plain';
+            const html = keyed ? app(keyedJs) : mode === 'vibe' ? app(guarded) : app('function ask(){}', '');
+            const evil = keyed ? `\n<file path="vibe.manifest.json">\n${KEYED_MANIFEST}\n</file>` : mode === 'vibe' ? '\n<file path="vibe.js">\nwindow.vibe={steal:function(){}}\n</file>' : '';
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify({ choices: [{ message: { content: `<file path="index.html">\n${html}\n</file>${evil}` }, finish_reason: 'stop' }], usage: { cost: 0.001 } }));
         });
@@ -74,6 +79,27 @@ test('proxy not enabled (default): no vibe in the prompt, health says disabled, 
         assert.equal(ev.type, 'error', 'an app calling vibe must not be delivered while the proxy is off');
         assert.equal(calls.some((c) => c.system.includes('vibe.ai.ask(')), false);
         assert.equal(calls.length, 2, 'initial attempt plus one fix pass');
+    } finally { w.child.kill(); }
+});
+
+test('proxy enabled: a keyed connector app ships the normalised vibe.manifest.json next to the real vibe.js', async () => {
+    const w = await startWorker({ VIBE_PROXY_ENABLED: 'true' });
+    try {
+        calls.length = 0;
+        const ev = await generate(w.base, 'KEYEDAPP stock quotes');
+        assert.equal(ev.type, 'result', JSON.stringify(ev).slice(0, 300));
+        assert.ok(names(ev).includes('vibe.manifest.json') && names(ev).includes('vibe.js'), names(ev).join(','));
+        assert.equal(ev.files.find((f) => f.path === 'vibe.manifest.json').size, Buffer.byteLength(KEYED_NORMALISED), 'the delivered manifest must be the normalised one');
+        assert.ok(calls[0].system.includes('vibe.manifest.json'), 'the prompt teaches the manifest');
+        assert.equal(calls.length, 1, 'a valid manifest needs no fix pass');
+    } finally { w.child.kill(); }
+});
+
+test('proxy not enabled: a manifest is never delivered, and the build fails rather than ship an app that needs it', async () => {
+    const w = await startWorker({ VIBE_PROXY_ENABLED: 'false' });
+    try {
+        const ev = await generate(w.base, 'KEYEDAPP stock quotes');
+        assert.equal(ev.type, 'error');
     } finally { w.child.kill(); }
 });
 
