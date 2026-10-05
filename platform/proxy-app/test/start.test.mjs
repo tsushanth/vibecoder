@@ -2,7 +2,7 @@ import test, { before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import pg from 'pg';
 import { scratchDb, masterKey } from '../../store/test/helpers.mjs';
-import { startServer } from '../start.js';
+import { startServer, makePool } from '../start.js';
 import { createPgStores } from '../../store/pg.js';
 import { loadConfig } from '../config.js';
 
@@ -106,4 +106,22 @@ t('the admin API is wired from PROXY_ADMIN_TOKEN: a secret set over HTTP is stor
     assert.equal((await put(ADMIN_T)).status, 204);
     assert.equal(await stores.secretStore.get('wiredapp', 'WIRED_KEY'), 'WiredSecretValue123456');
     await s.close();
+});
+
+test('makePool builds a pool limited to the configured size with timeouts, without connecting', async () => {
+    const pool = makePool(cfg({ DB_POOL_MAX: '3' }));
+    try {
+        assert.equal(pool.options.max, 3);
+        assert.ok(pool.options.connectionTimeoutMillis > 0 && pool.options.connectionTimeoutMillis <= 10000);
+        assert.ok(pool.options.idleTimeoutMillis > 0);
+        assert.equal(pool.totalCount, 0);
+    } finally { await pool.end(); }
+});
+
+t('without an injected pool startServer builds its own from the config: DATABASE_URL, the configured size, and closes it on close', async () => {
+    const s = await startServer(cfg({ DATABASE_URL: `postgres://${process.env.USER}@localhost/${db.name}`, DB_POOL_MAX: '2' }), { listenPort: 0, resolve: async () => ['93.184.216.34'] });
+    assert.equal(s.pool.options.max, 2);
+    assert.equal((await fetch(url(s, '/health'))).status, 200);
+    await s.close();
+    assert.equal(s.pool.ended, true);
 });
