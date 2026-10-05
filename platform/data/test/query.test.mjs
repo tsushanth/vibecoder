@@ -92,14 +92,14 @@ test('every where operator renders the right SQL', () => {
   }
 });
 
-test('insert fills defaults, NULLs, and sets user_id from the session', () => {
+test('insert leaves absent columns to the database DEFAULT and sets user_id from the session', () => {
   const r = good({ op: 'insert', table: 'todos', rows: [{ title: 'a', priority: 2 }] }, U1);
   assert.equal(r.kind, 'insert');
   assert.equal(
     r.text,
-    `INSERT INTO ${S}."todos" ("title", "done", "priority", "score", "due", "meta", "note", "user_id") VALUES ($1, $2, $3, NULL, NULL, NULL, $4, $5) RETURNING "id", "user_id", "created_at", "title", "done", "priority", "score", "due", "meta", "note"`,
+    `INSERT INTO ${S}."todos" ("title", "done", "priority", "score", "due", "meta", "note", "user_id") VALUES ($1, DEFAULT, $2, DEFAULT, DEFAULT, DEFAULT, DEFAULT, $3) RETURNING "id", "user_id", "created_at", "title", "done", "priority", "score", "due", "meta", "note"`,
   );
-  assert.deepEqual(r.values, ['a', false, 2, 'none', U1]);
+  assert.deepEqual(r.values, ['a', 2, U1]);
 });
 
 test('insert multiple rows numbers placeholders across rows and uses explicit null', () => {
@@ -401,7 +401,8 @@ test('a required column with a default does not need to be supplied, and may not
   const spec = { version: 1, tables: { t: { access: 'owner', columns: { a: { type: 'integer', required: true, default: 7 } } } } };
   const r = run({ op: 'insert', table: 't', rows: [{}] }, U1, spec);
   assert.equal(r.ok, true);
-  assert.deepEqual(r.values, [7, U1]);
+  assert.deepEqual(r.values, [U1]);
+  assert.ok(r.text.includes('VALUES (DEFAULT, $1)'));
   assert.deepEqual(run({ op: 'insert', table: 't', rows: [{ a: null }] }, U1, spec), { ok: false, status: 400, code: 'null_not_allowed' });
   assert.deepEqual(run({ op: 'update', table: 't', set: { a: null }, where: [{ col: 'id', op: 'eq', val: U2 }] }, U1, spec), { ok: false, status: 400, code: 'null_not_allowed' });
 });
@@ -671,9 +672,6 @@ test('bad specs are refused, not trusted', () => {
   assert.equal(run(rq, U1, mk({ access: 'owner', columns: { ['a'.repeat(41)]: { type: 'text' } } })).ok, true);
   // a spec table name that fails the name pattern is unreachable
   assert.equal(run({ op: 'select', table: 'Bad' }, U1, { version: 1, tables: { Bad: { access: 'owner', columns: {} } } }).ok, false);
-  // a valid default type is not required by the builder, but a wrong-typed default is refused
-  const badDefault = { version: 1, tables: { t: { access: 'owner', columns: { a: { type: 'integer', default: 'x' } } } } };
-  assert.deepEqual(run({ op: 'insert', table: 't', rows: [{}] }, U1, badDefault), { ok: false, status: 400, code: 'bad_value' });
 });
 
 test('builder does not mutate the request or spec, and is deterministic', () => {
@@ -723,7 +721,7 @@ function mulberry32(seed) {
 }
 
 const MARK = 'ZZMARKZZ';
-const KEYWORDS = new Set(['SELECT', 'INSERT', 'INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE', 'FROM', 'WHERE', 'AND', 'ORDER', 'BY', 'ASC', 'DESC', 'LIMIT', 'OFFSET', 'RETURNING', 'IN', 'IS', 'NOT', 'NULL', 'LIKE', 'ILIKE']);
+const KEYWORDS = new Set(['SELECT', 'INSERT', 'INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE', 'FROM', 'WHERE', 'AND', 'ORDER', 'BY', 'ASC', 'DESC', 'LIMIT', 'OFFSET', 'RETURNING', 'IN', 'IS', 'NOT', 'NULL', 'LIKE', 'ILIKE', 'DEFAULT']);
 
 function allowedIdents(spec, schemaName) {
   const s = new Set([schemaName, 'id', 'user_id', 'created_at']);
@@ -901,4 +899,13 @@ test('property: well-formed random valid requests always succeed and bind every 
     for (const b of expectedBound) assert.ok(r.values.includes(b), 'bound value missing');
     assert.ok(r.values.includes(U1));
   }
+});
+
+test('spec defaults that the schema planner allows (now, strings, booleans) never reach the builder as values', () => {
+  const spec = { version: 1, tables: { t: { access: 'owner', columns: { at: { type: 'timestamp', default: 'now' }, s: { type: 'text', default: "it's" }, b: { type: 'boolean', default: false }, n: { type: 'integer', required: true, default: 0 } } } } };
+  const r = run({ op: 'insert', table: 't', rows: [{}, { s: 'x' }] }, U1, spec);
+  assert.equal(r.ok, true);
+  assert.equal(r.text, `INSERT INTO ${S}."t" ("at", "s", "b", "n", "user_id") VALUES (DEFAULT, DEFAULT, DEFAULT, DEFAULT, $1), (DEFAULT, $2, DEFAULT, DEFAULT, $3) RETURNING "id", "user_id", "created_at", "at", "s", "b", "n"`);
+  assert.deepEqual(r.values, [U1, 'x', U1]);
+  assert.equal(r.text.includes("it's"), false);
 });

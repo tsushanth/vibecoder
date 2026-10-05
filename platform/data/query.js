@@ -65,7 +65,7 @@ function describeTable(spec, table) {
   for (const name of Object.keys(t.columns)) {
     const c = t.columns[name];
     if (!NAME_RE.test(name) || RESERVED.includes(name) || !isPlain(c) || !TYPES.includes(c.type)) refuse(400, 'bad_spec');
-    cols.set(name, { type: c.type, required: has(c, 'required') && c.required === true, default: has(c, 'default') ? c.default : undefined });
+    cols.set(name, { type: c.type, required: has(c, 'required') && c.required === true, hasDefault: has(c, 'default') && c.default !== undefined });
   }
   return { name: table, access: t.access, cols };
 }
@@ -272,11 +272,12 @@ function buildInsert(tbl, req, target, userId) {
     }
     const cells = names.map((n) => {
       const c = tbl.cols.get(n);
-      let v;
-      if (has(row, n)) v = row[n];
-      else if (c.default !== undefined) v = c.default;
-      else if (c.required) return refuse(400, 'missing_required');
-      else v = null;
+      if (!has(row, n)) {
+        // Absent: the database applies the column default its migration created (spec defaults can be 'now'), else NULL.
+        if (c.required && !c.hasDefault) refuse(400, 'missing_required');
+        return 'DEFAULT';
+      }
+      const v = row[n];
       if (v === null) { if (c.required) refuse(400, 'null_not_allowed'); return 'NULL'; }
       return p.add(coerce(c.type, v));
     });
