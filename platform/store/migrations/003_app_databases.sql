@@ -26,7 +26,8 @@ begin
     if not exists (select 1 from platform.apps a where a.app_id = p_app_id) then raise exception 'unknown app'; end if;
     select d.role_name, d.schema_name into r, s from platform.app_dbs d where d.app_id = p_app_id;
     if r is null then
-        h := substr(md5(p_app_id), 1, 20);
+        -- the database name is part of the hash so that roles (which are cluster-wide) never collide between databases, e.g. test databases
+        h := substr(md5(current_database() || ':' || p_app_id), 1, 20);
         r := 'appr_' || h;
         s := 'apps_' || h;
         if not exists (select 1 from pg_roles where rolname = r) then execute format('create role %I nologin', r); end if;
