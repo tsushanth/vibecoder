@@ -9,6 +9,8 @@ import { createMeter } from '../vibe-proxy/meter.js';
 import { createAuthStore } from '../auth/pgStore.js';
 import { createAuthService } from '../auth/service.js';
 import { createResendMailer } from '../auth/mailer.js';
+import { createStorageStore } from '../storage/pgStore.js';
+import { createStorageService } from '../storage/service.js';
 
 async function dnsResolve(host) {
     const [a, b] = await Promise.allSettled([dns.resolve4(host), dns.resolve6(host)]);
@@ -38,8 +40,13 @@ export async function startServer(config, { pool: injected, listenPort, resolve 
         mailer: createResendMailer({ apiKey: config.secrets.resendKey, from: config.authMailFrom, fetchImpl }),
         linkFor: async (appId, token) => { const app = await stores.appStore.get(appId); return `https://${app?.domains?.[0] || `${appId}.${config.baseDomain}`}/?vibe_login=${token}`; },
     }) : undefined;
+    const r2 = config.secrets.r2;
+    const storageService = r2 ? createStorageService({
+        store: createStorageStore({ pool }), fetchImpl,
+        r2: { host: `${r2.accountId}.r2.cloudflarestorage.com`, bucket: r2.bucket, accessKeyId: r2.accessKeyId, secretAccessKey: r2.secretAccessKey },
+    }) : undefined;
     const handler = createHandler({
-        authService,
+        storageService, authService,
         appStore: stores.appStore, secretStore: stores.secretStore, limiter, globalAiLimiter,
         meter: createMeter({ sink: stores.usageSink }), fetchImpl, resolve,
         openRouterKey: config.secrets.openRouterKey, log, baseDomain: config.baseDomain,
