@@ -252,7 +252,18 @@
       "tooLong": "That key is too long.",
       "empty": "Paste a key first.",
       "network": "Could not reach the server. Check your connection and paste the key again.",
-      "unknown": "Something went wrong. Paste the key again to retry."
+      "unknown": "Something went wrong. Paste the key again to retry.",
+      "stripePublishable": "That is a publishable key (pk_). Paste the secret key (sk_ or rk_) instead.",
+      "stripeWebhookFormat": "That does not look like a webhook signing secret. It should start with whsec_.",
+      "stripeKeyFormat": "That does not look like a Stripe secret key. It should start with sk_ or rk_ (for example sk_test_...)."
+    },
+    "pay": {
+      "secretKeyHelp": "Your Stripe secret key. It starts with sk_ or rk_ (test keys start with sk_test_). Never use the publishable key (pk_).",
+      "webhookSecretHelp": "The signing secret of the webhook endpoint you create in Stripe. It starts with whsec_.",
+      "testFirst": "Use Stripe test keys first (they start with sk_test_). Switch to live keys only when you are ready to take real payments. Saved keys are write-only, so this panel cannot tell you which mode a saved key is in.",
+      "webhookUrlLabel": "In Stripe (Developers > Webhooks), add an endpoint with this URL, then paste its signing secret below:",
+      "webhookUrlPending": "Preview or publish your app to get its webhook URL.",
+      "copyUrl": "Copy URL"
     }
   }
 }
