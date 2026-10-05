@@ -61,6 +61,7 @@ Load it first in index.html: <script src="vibe.js"></script> (do not write vibe.
 - vibe.ai.ask(prompt, { system }) returns a Promise of the reply text. vibe.ai.chat(messages, { maxTokens, temperature }) takes [{ role: "user" | "assistant" | "system", content }] and returns { text, usage }. Keep prompts short (under 8000 characters in total); replies are short. You cannot choose the model.
 - Every call can fail. Always catch errors and show a friendly message: err.status 429 means slow down (err.retryAfter seconds), err.status 0 means offline or timed out, err.code names the reason. The rest of the app must keep working.
 - Never ask the user for an API key and never put a key in the code. The platform adds keys on the server. No other network calls: no other fetch, no CDNs, no external scripts.
+- A [SECRET:NAME] placeholder in the request means the creator stored that credential in the platform vault and the proxy injects it into upstream requests on the server. The app must never contain the value, and must not contain the placeholder text in its code either; never ask the user for the key. Only connectors that exist can use it, so do not invent a call that needs it.
 - The only connector that exists is "nws". Do not invent other connectors (stocks, crypto, news, maps and so on); if the idea needs one, build a clearly labelled demo or simulator with built-in sample data instead.
 `;
 
