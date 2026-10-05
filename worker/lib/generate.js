@@ -36,13 +36,13 @@ export function buildMessages({ rules, kind = 'generate', prompt, existing = nul
 
 const fixPrompt = (problems) => `Automated checks found these problems:\n- ${problems.join('\n- ')}\n\nReturn the COMPLETE corrected project in the same <file> block format. Emit all files in full.`;
 
-function evaluate({ text, kind, existing, check }) {
+async function evaluate({ text, kind, existing, check }) {
     const { files } = parseFiles(text);
     if (!Object.keys(files).length) {
         return { ok: false, cause: /<file\b/i.test(text || '') ? 'no_files' : 'declined_text', problems: ['no usable file blocks in the reply'], files };
     }
     const merged = kind === 'generate' ? files : { ...(existing || {}), ...files };
-    const c = check(merged);
+    const c = await check(merged);
     return c.ok ? { ok: true, files, merged } : { ok: false, cause: 'check_failed', problems: c.problems, files, merged };
 }
 
@@ -71,7 +71,7 @@ export async function generateApp({ prompt, kind = 'generate', existing = null, 
             continue;
         }
         costUsd += res.costUsd || 0;
-        let outcome = evaluate({ text: res.text, kind, existing, check });
+        let outcome = await evaluate({ text: res.text, kind, existing, check });
         let fixes = 0;
         while (!outcome.ok && outcome.cause !== 'declined_text' && fixes < maxFixPasses && calls < maxCalls) {
             fixes += 1;
@@ -84,7 +84,7 @@ export async function generateApp({ prompt, kind = 'generate', existing = null, 
                 break;
             }
             costUsd += res.costUsd || 0;
-            outcome = evaluate({ text: res.text, kind, existing, check });
+            outcome = await evaluate({ text: res.text, kind, existing, check });
         }
         attempts.push({ model, ok: outcome.ok, cause: outcome.ok ? 'ok' : outcome.cause, problems: (outcome.problems || []).slice(0, 3), fixes });
         if (outcome.ok) return { ok: true, files: outcome.merged || outcome.files, model, attempts, costUsd, fixes };
