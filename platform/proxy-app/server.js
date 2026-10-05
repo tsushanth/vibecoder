@@ -4,6 +4,7 @@ import { guardedProxy } from '../vibe-proxy/guarded.js';
 import { aiChat } from '../vibe-proxy/ai.js';
 import { resolveManifest } from '../vibe-proxy/builtins.js';
 import { validateManifest } from '../vibe-proxy/manifest.js';
+import { createAdmin } from './admin.js';
 
 const MAX_BODY = 200_000;
 const ROUTE = /^\/([a-z0-9][a-z0-9-]{0,62})\/(api|ai)$/;
@@ -14,18 +15,19 @@ function originAllowed(origin, appId, app, baseDomain) {
     return u.protocol === 'https:' && (u.hostname === `${appId}.${baseDomain}` || (app.domains || []).includes(u.hostname));
 }
 
-async function readJson(req) {
+async function readJson(req, max = MAX_BODY) {
     let size = 0; const chunks = [];
     for await (const c of req) {
         size += c.length;
         if (size > 5_000_000) { req.destroy(); break; }
-        if (size <= MAX_BODY) chunks.push(c);
+        if (size <= max) chunks.push(c);
     }
-    if (size > MAX_BODY) return { error: 413 };
+    if (size > max) return { error: 413 };
     try { const v = JSON.parse(Buffer.concat(chunks).toString('utf8') || 'null'); return v && typeof v === 'object' && !Array.isArray(v) ? { value: v } : { error: 400 }; } catch { return { error: 400 }; }
 }
 
-export function createHandler({ appStore, secretStore, limiter, globalAiLimiter, meter, fetchImpl, resolve, openRouterKey, log = () => {}, baseDomain }) {
+export function createHandler({ appStore, secretStore, limiter, globalAiLimiter, meter, fetchImpl, resolve, openRouterKey, log = () => {}, baseDomain, adminToken, upsertApp, limiterStore }) {
+    const admin = adminToken ? createAdmin({ token: adminToken, appStore, upsertApp, secretStore, limiterStore, baseDomain }) : null;
     const aiLimiter = {
         async check(a) {
             const r = await limiter.check(a);
@@ -48,6 +50,14 @@ export function createHandler({ appStore, secretStore, limiter, globalAiLimiter,
         try {
             const url = new URL(req.url, 'http://x');
             if (url.pathname === '/health' && req.method === 'GET') return sendJson(200, { ok: true });
+            if (url.pathname === '/admin' || url.pathname.startsWith('/admin/')) {
+                route = 'admin';
+                appId = /^\/admin\/apps\/([^/]+)/.exec(url.pathname)?.[1]?.slice(0, 63) || '-';
+                if (!admin) return sendJson(404, { error: 'not_found' });
+                const ip = req.headers['fly-client-ip'] || req.socket.remoteAddress || '';
+                const out = await admin({ method: req.method, pathname: url.pathname, headers: req.headers, ip, readBody: (limit) => readJson(req, limit) });
+                return out.body === undefined ? send(out.status, '') : sendJson(out.status, out.body);
+            }
             const m = ROUTE.exec(url.pathname);
             if (!m) return sendJson(404, { error: 'not_found' });
             [, appId, route] = m;

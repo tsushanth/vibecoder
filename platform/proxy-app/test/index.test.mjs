@@ -17,7 +17,7 @@ function run(env) {
     const exited = new Promise((r) => child.on('exit', (code, signal) => r({ code, signal })));
     return { child, exited, out: () => out, err: () => err };
 }
-const goodEnv = (port) => ({ DATABASE_URL: `postgres://${process.env.USER}@localhost/${db.name}`, VIBE_MASTER_KEY: masterKey(), OPENROUTER_API_KEY: 'sk-or-v1-FAKEINDEX', BASE_DOMAIN: 'vibebuild.cc', PORT: String(port) });
+const goodEnv = (port) => ({ DATABASE_URL: `postgres://${process.env.USER}@localhost/${db.name}`, VIBE_MASTER_KEY: masterKey(), OPENROUTER_API_KEY: 'sk-or-v1-FAKEINDEX', BASE_DOMAIN: 'vibebuild.cc', PROXY_ADMIN_TOKEN: 'admin-' + 'i'.repeat(40), PORT: String(port) });
 const until = async (fn, ms = 8000) => { const end = Date.now() + ms; for (;;) { try { const v = await fn(); if (v) return v; } catch { /* retry */ } if (Date.now() > end) throw new Error('timed out'); await new Promise((r) => setTimeout(r, 100)); } };
 
 t('exits 1 naming the missing setting and never printing secrets', async () => {

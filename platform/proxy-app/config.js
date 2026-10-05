@@ -18,6 +18,8 @@ export function loadConfig(env = process.env) {
     const masterKey = need(env, 'VIBE_MASTER_KEY');
     const openRouterKey = need(env, 'OPENROUTER_API_KEY');
     const baseDomain = need(env, 'BASE_DOMAIN').toLowerCase();
+    const adminToken = need(env, 'PROXY_ADMIN_TOKEN');
+    if (adminToken.length < 32) throw new Error('invalid setting PROXY_ADMIN_TOKEN: expected at least 32 characters');
     if (!/^[0-9a-f]{64}$/i.test(masterKey)) throw new Error('invalid setting VIBE_MASTER_KEY: expected 64 hex characters (32 bytes)');
     const config = {
         port: int(env, 'PORT', 8080, { min: 1, max: 65535 }),
@@ -31,6 +33,6 @@ export function loadConfig(env = process.env) {
         platformAiDailyMicros: int(env, 'PLATFORM_AI_DAILY_MICROS', 2_000_000, { min: 0, max: 1_000_000_000 }),
     };
     // non-enumerable so JSON.stringify and console.log of the config never print secrets
-    Object.defineProperty(config, 'secrets', { value: { databaseUrl, masterKey, openRouterKey }, enumerable: false });
+    Object.defineProperty(config, 'secrets', { value: { databaseUrl, masterKey, openRouterKey, adminToken }, enumerable: false });
     return config;
 }
