@@ -58,6 +58,11 @@ export function createDataExecutor({ pool, timeoutMs = 5000, ddlTimeoutMs = 3000
         /** Creates the app's schema and role if needed. Returns the schema name. */
         async ensure(appId) { return (await locate(appId)).schema; },
 
+        /** Like currentSpec but never provisions: an app with no database yet reads as { spec: null, version: 0 }. */
+        async peekSpec(appId) {
+            return (await pool.query('select spec, version from platform.app_dbs where app_id = $1', [appId])).rows[0] || { spec: null, version: 0 };
+        },
+
         async currentSpec(appId) {
             await locate(appId);
             return (await pool.query('select spec, version from platform.app_dbs where app_id = $1', [appId])).rows[0] || { spec: null, version: 0 };

@@ -11,6 +11,7 @@ import { createAuthService } from '../auth/service.js';
 import { createResendMailer } from '../auth/mailer.js';
 import { createStorageStore } from '../storage/pgStore.js';
 import { createStorageService } from '../storage/service.js';
+import { createDataExecutor } from '../data/executor.js';
 
 async function dnsResolve(host) {
     const [a, b] = await Promise.allSettled([dns.resolve4(host), dns.resolve6(host)]);
@@ -47,6 +48,7 @@ export async function startServer(config, { pool: injected, listenPort, resolve 
     }) : undefined;
     const handler = createHandler({
         storageService, authService,
+        dataExecutor: createDataExecutor({ pool }), // same pool: each statement runs inside a transaction that switches into the app's own role
         appStore: stores.appStore, secretStore: stores.secretStore, limiter, globalAiLimiter,
         meter: createMeter({ sink: stores.usageSink }), fetchImpl, resolve,
         openRouterKey: config.secrets.openRouterKey, log, baseDomain: config.baseDomain,
