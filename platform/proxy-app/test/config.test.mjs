@@ -75,3 +75,9 @@ test('mail sending is optional; a key without a from address is refused; the key
     const d = loadConfig({ ...base(), RESEND_API_KEY: 're_testkey12345', AUTH_MAIL_FROM: 'Vibe <login@mail.vibebuild.cc>' });
     assert.equal(d.secrets.resendKey, 're_testkey12345'); assert.equal(d.authMailFrom, 'Vibe <login@mail.vibebuild.cc>'); assert.equal(JSON.stringify(d).includes('re_testkey'), false);
 });
+
+test('notification settings are part of the config and a bad one refuses to start by name', () => {
+    assert.equal(loadConfig(base()).notify.baseUrl, 'https://vibe-proxy.vibebuild.cc');
+    assert.equal(loadConfig({ ...base(), NOTIFY_GLOBAL_PER_DAY: '77' }).notify.limits.globalPerDay, 77);
+    assert.throws(() => loadConfig({ ...base(), NOTIFY_USER_PER_HOUR: 'x' }), (err) => err.message.includes('NOTIFY_USER_PER_HOUR'));
+});
