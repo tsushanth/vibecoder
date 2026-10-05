@@ -19,7 +19,7 @@ before(async () => {
     const handler = createHandler({
         appStore: stores.appStore, secretStore: stores.secretStore, limiter, globalAiLimiter, meter: createMeter({ sink: stores.usageSink }),
         fetchImpl: async () => new Response('{}'), resolve: async () => ['93.184.216.34'], openRouterKey: 'sk-or-v1-FAKE', baseDomain: 'vibebuild.cc',
-        log: (l) => logs.push(l), adminToken: TOKEN, upsertApp: stores.upsertApp, limiterStore: stores.limiterStore,
+        log: (l) => logs.push(l), adminToken: TOKEN, upsertApp: stores.upsertApp, ensureApp: stores.ensureApp, setEnabled: stores.setEnabled, limiterStore: stores.limiterStore,
     });
     server = http.createServer(handler);
     await new Promise((r) => server.listen(0, '127.0.0.1', r)); port = server.address().port;
@@ -149,4 +149,39 @@ t('without an admin token configured every /admin path is a plain 404, never a c
             assert.equal(r.status, 404, `${m} ${p}`);
         }
     } finally { noAdmin.close(); }
+});
+
+t('POST /admin/apps/:app/ensure creates a missing app and leaves an existing one untouched', async () => {
+    assert.equal(await stores.appStore.get('ensureme'), null);
+    assert.equal((await call('POST', '/admin/apps/ensureme/ensure')).status, 204);
+    assert.deepEqual(await stores.appStore.get('ensureme'), { enabled: true, domains: [], manifest: null });
+    const m = { connectors: { keyed: { host: 'api.example.com', paths: ['/v1/x'], methods: ['GET'] } } };
+    await stores.upsertApp({ appId: 'ensure-keep', manifest: m, domains: ['k.example.com'], enabled: false });
+    assert.equal((await call('POST', '/admin/apps/ensure-keep/ensure', { body: { manifest: null, enabled: true, domains: [] } })).status, 204);
+    assert.deepEqual(await stores.appStore.get('ensure-keep'), { enabled: false, domains: ['k.example.com'], manifest: m }, 'a body must not change an existing app');
+});
+
+t('ensure needs the admin token, a valid app id and POST', async () => {
+    assert.equal((await call('POST', '/admin/apps/ensure-x/ensure', { token: null })).status, 401);
+    assert.equal((await call('POST', '/admin/apps/Bad_App/ensure')).status, 404);
+    assert.equal((await call('PUT', '/admin/apps/ensure-y/ensure')).status, 405);
+    assert.equal(await stores.appStore.get('ensure-x'), null);
+});
+
+t('POST /admin/apps/:app/enabled flips the flag and keeps the manifest, 404 for an unknown app, 400 for a bad body', async () => {
+    const m = { connectors: { keyed: { host: 'api.example.com', paths: ['/v1/x'], methods: ['GET'] } } };
+    await stores.upsertApp({ appId: 'toggle-app', manifest: m, domains: [], enabled: true });
+    assert.equal((await call('POST', '/admin/apps/toggle-app/enabled', { body: { enabled: false } })).status, 204);
+    assert.deepEqual(await stores.appStore.get('toggle-app'), { enabled: false, domains: [], manifest: m });
+    assert.equal((await call('POST', '/admin/apps/toggle-app/enabled', { body: { enabled: true } })).status, 204);
+    assert.equal((await stores.appStore.get('toggle-app')).enabled, true);
+    assert.equal((await call('POST', '/admin/apps/no-such-app/enabled', { body: { enabled: false } })).status, 404);
+    for (const body of [{}, { enabled: 'yes' }, { enabled: 1 }, '{nope']) assert.equal((await call('POST', '/admin/apps/toggle-app/enabled', { body })).status, 400, JSON.stringify(body));
+    assert.equal((await call('POST', '/admin/apps/toggle-app/enabled', { token: null, body: { enabled: false } })).status, 401);
+});
+
+t('ensure and enabled reject extra path segments', async () => {
+    assert.equal((await call('POST', '/admin/apps/ensure-z/ensure/extra')).status, 404);
+    assert.equal((await call('POST', '/admin/apps/toggle-app/enabled/extra', { body: { enabled: false } })).status, 404);
+    assert.equal(await stores.appStore.get('ensure-z'), null);
 });
