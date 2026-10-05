@@ -1,3 +1,4 @@
+import { injectAppId } from "./appId.js";
 import express from "express";
 import { Buffer } from "buffer";
 import zlib from "zlib";
@@ -340,7 +341,7 @@ setInterval(() => {
     }
 }, 1800000);
 
-async function serveFromStorage(subdomain, reqPath, res) {
+async function serveFromStorage(subdomain, reqPath, res, { presetAppId = false } = {}) {
   const normalized = reqPath === "/" || reqPath === ""
     ? "index.html"
     : path.normalize(reqPath).replace(/^\/+/, "");
@@ -375,7 +376,9 @@ async function serveFromStorage(subdomain, reqPath, res) {
     // Inject promo banner into all HTML pages
     // When AdSense is approved, switch to: const adMode = await getAdMode(subdomain);
     if (ext === ".html" || ext === ".htm") {
-      body = Buffer.from(injectAds(body.toString("utf-8"), "promo"));
+      let html = injectAds(body.toString("utf-8"), "promo");
+      if (presetAppId) html = injectAppId(html, subdomain);
+      body = Buffer.from(html);
     }
 
     res.send(body);
@@ -624,7 +627,7 @@ app.get("*", async (req, res) => {
     if (!req.path || req.path === "/" || req.path.endsWith(".html")) {
       trackPlay(customSubdomain, ip);
     }
-    return await serveFromStorage(customSubdomain, req.path, res);
+    return await serveFromStorage(customSubdomain, req.path, res, { presetAppId: true });
   }
 
   const subdomain = subdomainFromHost(rawHost);
