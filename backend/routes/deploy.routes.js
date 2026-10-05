@@ -146,7 +146,7 @@ router.post('/:projectId/deploy', async (req, res) => {
         const result = {};
         await registerDeployedApp(req.app.locals.proxyAdmin, subdomain, undefined, { projectId, bundle, allowDestructive: req.body.allowDestructiveSchema === true, result });
 
-        res.json({ success: true, url, ...(result.schemaStatus ? { schemaStatus: result.schemaStatus } : {}) });
+        res.json({ success: true, url, ...(result.schemaStatus ? { schemaStatus: result.schemaStatus } : {}), ...(result.jobsStatus ? { jobsStatus: result.jobsStatus } : {}) });
     } catch (error) {
         console.error('Deploy error:', error);
         res.status(500).json({ error: 'Deployment failed' });
