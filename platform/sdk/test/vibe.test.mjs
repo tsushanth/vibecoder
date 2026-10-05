@@ -11,7 +11,7 @@ function load({ host = 'myapp.vibebuild.cc', win = {}, reply } = {}) {
     const ctx = {
         location: { hostname: host },
         fetch: async (url, init) => {
-            calls.push({ url, init, body: init?.body ? JSON.parse(init.body) : undefined });
+            calls.push({ url, init, body: typeof init?.body === 'string' ? JSON.parse(init.body) : undefined });
             if (reply === 'network') throw new TypeError('Failed to fetch');
             if (typeof reply === 'function') return reply(url, init);
             return new Response(JSON.stringify({ ok: 1 }), { status: 200, headers: { 'content-type': 'application/json' } });
@@ -27,7 +27,7 @@ function load({ host = 'myapp.vibebuild.cc', win = {}, reply } = {}) {
 const jsonRes = (status, obj, headers = {}) => new Response(JSON.stringify(obj), { status, headers: { 'content-type': 'application/json', ...headers } });
 
 test('exposes only api, ai, auth, db and version', () => {
-    assert.deepEqual(Object.keys(load().vibe).sort(), ['ai', 'api', 'auth', 'db', 'version']);
+    assert.deepEqual(Object.keys(load().vibe).sort(), ['ai', 'api', 'auth', 'db', 'pay', 'storage', 'version']);
     assert.deepEqual(Object.keys(load().vibe.ai).sort(), ['ask', 'chat']);
 });
 
@@ -135,7 +135,7 @@ const loadWithLocation = ({ search = '', ls = store(), reply } = {}) => {
     const hist = []; const calls = [];
     const ctx = {
         location: { hostname: 'myapp.vibebuild.cc', search, pathname: '/play', hash: '#h' },
-        fetch: async (url, init) => { calls.push({ url, init, body: init?.body ? JSON.parse(init.body) : undefined }); return reply(url, init, calls.length); },
+        fetch: async (url, init) => { calls.push({ url, init, body: typeof init?.body === 'string' ? JSON.parse(init.body) : undefined }); return reply(url, init, calls.length); },
         AbortController, setTimeout, clearTimeout, JSON, Promise, Error, encodeURIComponent, Object, Array, Number, String, URLSearchParams,
         localStorage: ls, history: { replaceState: (...a) => hist.push(a) }, VIBE_BASE: 'https://proxy.test',
     };
@@ -437,4 +437,44 @@ test('db insert of an empty row is allowed (all defaults) and is sent as one row
     const { vibe, calls } = loadDb();
     await vibe.db.from('todos').insert({});
     assert.deepEqual(calls[0].body, { op: 'insert', table: 'todos', rows: [{}] });
+});
+
+// ---- vibe.storage ----------------------------------------------------------------
+const signedIn = (reply) => { const ls = store(); ls.setItem('vibe:session:myapp', 'tok-s'); return loadAuth({ ls, reply }); };
+const fileLike = (o = {}) => ({ size: 100, type: 'image/png', name: 'a b.png', ...o });
+const rawOk = (obj) => () => jsonRes(200, obj);
+
+test('storage.upload posts the file itself with its type, name and the bearer, and returns the file record', async () => {
+    const { vibe, calls } = signedIn(rawOk({ file: { id: 'f1', name: 'a b.png' } }));
+    const f = fileLike();
+    const r = await vibe.storage.upload(f, { public: true });
+    assert.equal(r.id, 'f1');
+    assert.equal(calls[0].url, 'https://proxy.test/myapp/storage/upload?name=a%20b.png&public=1');
+    assert.equal(calls[0].init.headers['Content-Type'], 'image/png'); assert.equal(calls[0].init.headers.Authorization, 'Bearer tok-s'); assert.equal(calls[0].init.body, f);
+    await vibe.storage.upload(fileLike({ name: undefined })); assert.equal(calls[1].url, 'https://proxy.test/myapp/storage/upload?name=file');
+});
+
+test('storage.upload refuses bad files and a signed-out user without any request', async () => {
+    const { vibe, calls } = signedIn(rawOk({ file: {} }));
+    for (const bad of [null, undefined, 'x', {}, fileLike({ type: '' }), fileLike({ size: 0 }), fileLike({ size: 5 * 1024 * 1024 + 1 }), fileLike({ size: '5' })]) await assert.rejects(() => vibe.storage.upload(bad), (e) => e.code === 'bad_request');
+    assert.equal(calls.length, 0);
+    const out = loadAuth({ reply: rawOk({}) });
+    await assert.rejects(() => out.vibe.storage.upload(fileLike()), (e) => e.status === 401); await assert.rejects(() => out.vibe.storage.list(), (e) => e.status === 401);
+    assert.equal(out.calls.length, 0);
+    assert.equal((await signedIn(rawOk({ file: {} })).vibe.storage.upload(fileLike({ size: 5 * 1024 * 1024 }))) !== undefined, true);
+});
+
+test('storage.list, url and remove post the right bodies and unwrap results', async () => {
+    const { vibe, calls } = signedIn((u) => jsonRes(200, String(u).endsWith('/list') ? { files: [{ id: 'f1' }] } : String(u).endsWith('/url') ? { url: 'https://r2.test/x', expiresInSec: 300 } : { ok: true }));
+    assert.equal((await vibe.storage.list())[0].id, 'f1');
+    assert.equal(await vibe.storage.url('f1'), 'https://r2.test/x'); assert.deepEqual(calls[1].body, { id: 'f1' }); assert.equal(calls[1].init.headers.Authorization, 'Bearer tok-s');
+    assert.equal((await vibe.storage.remove('f1')).ok, true); assert.equal(calls[2].url, 'https://proxy.test/myapp/storage/delete'); assert.deepEqual(calls[2].body, { id: 'f1' });
+    const n = calls.length;
+    for (const bad of [undefined, '', 5]) { await assert.rejects(() => vibe.storage.url(bad), (e) => e.code === 'bad_request'); await assert.rejects(() => vibe.storage.remove(bad), (e) => e.code === 'bad_request'); }
+    assert.equal(calls.length, n);
+});
+
+test('storage errors from the server propagate with status and code', async () => {
+    const { vibe } = signedIn(() => jsonRes(415, { error: 'type_not_allowed' }));
+    await assert.rejects(() => vibe.storage.upload(fileLike()), (e) => e.status === 415 && e.code === 'type_not_allowed');
 });
