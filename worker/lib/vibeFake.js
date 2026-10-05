@@ -34,22 +34,29 @@ export function installFake(w) {
         return (filters || []).every(function (f) {
             var a = row[f.col], b = f.val;
             switch (f.op) {
-                case '=': case 'eq': return a === b;
-                case '!=': case 'neq': return a !== b;
-                case '>': case 'gt': return a > b;
-                case '>=': case 'gte': return a >= b;
-                case '<': case 'lt': return a < b;
-                case '<=': case 'lte': return a <= b;
-                case 'in': return Array.isArray(b) && b.indexOf(a) >= 0;
-                default: return true; // an operator this fake does not model matches everything
+                case 'eq': return a === b;
+                case 'neq': return a !== b;
+                case 'gt': return a > b;
+                case 'gte': return a >= b;
+                case 'lt': return a < b;
+                case 'lte': return a <= b;
+                case 'in': return b.indexOf(a) >= 0;
+                case 'like': case 'ilike': return String(a).indexOf(String(b).replace(/%/g, '')) >= 0;
+                case 'is_null': return a === null || a === undefined;
+                default: return false;
             }
         });
     };
+    var OPS = ['eq', 'neq', 'lt', 'lte', 'gt', 'gte', 'like', 'ilike', 'in', 'is_null'];
     var copy = function (r) { return JSON.parse(JSON.stringify(r)); };
-    var checkWhere = function (where) {
-        if (where === undefined || where === null) return [];
-        if (!Array.isArray(where)) throw fail('where must be an array of { col, op, val }', 0, 'bad_request');
-        where.forEach(function (f) { if (!f || typeof f.col !== 'string' || typeof f.op !== 'string') throw fail('each where entry needs a col and an op', 0, 'bad_request'); });
+    var checkWhere = function (where, required) {
+        if (where === undefined && !required) return [];
+        if (!Array.isArray(where) || (required && !where.length)) throw fail('where must be ' + (required ? 'a non-empty ' : 'an ') + 'array of { col, op, val }', 0, 'bad_request');
+        where.forEach(function (f) {
+            if (!f || typeof f.col !== 'string' || typeof f.op !== 'string') throw fail('each where entry needs a col and an op', 0, 'bad_request');
+            if (OPS.indexOf(f.op) < 0) throw fail('bad operator "' + f.op.slice(0, 12) + '"; use one of ' + OPS.join(', '), 400, 'bad_operator');
+            if (f.op === 'in' && !Array.isArray(f.val)) throw fail('in needs an array value', 400, 'bad_request');
+        });
         return where;
     };
     var checkSet = function (obj) {
@@ -65,19 +72,21 @@ export function installFake(w) {
                 select: function (o) {
                     return q(function () {
                         o = o || {};
-                        var w1 = checkWhere(o.where);
+                        var w1 = checkWhere(o.where, false);
                         var out = rows.filter(function (r) { return match(r, w1); });
                         (o.order || []).slice().reverse().forEach(function (ord) {
                             var sign = ord.dir === 'desc' ? -1 : 1;
                             out.sort(function (a, b) { return a[ord.col] === b[ord.col] ? 0 : (a[ord.col] > b[ord.col] ? sign : -sign); });
                         });
-                        if (typeof o.limit === 'number') out = out.slice(0, o.limit);
-                        return out.map(copy);
+                        out = out.slice(o.offset || 0);
+                        out = out.slice(0, typeof o.limit === 'number' ? Math.min(o.limit, 100) : 50);
+                        return { rows: out.map(copy) };
                     });
                 },
                 insert: function (rowOrRows) {
                     return q(function () {
                         var list = Array.isArray(rowOrRows) ? rowOrRows : [rowOrRows];
+                        if (!list.length || list.length > 50) throw fail('insert: pass one row object or an array of 1 to 50 rows', 0, 'bad_request');
                         list.forEach(checkSet);
                         var made = list.map(function (r) {
                             seq += 1;
@@ -86,24 +95,25 @@ export function installFake(w) {
                             rows.push(row);
                             return copy(row);
                         });
-                        return Array.isArray(rowOrRows) ? made : made[0];
+                        return { rows: made, count: made.length };
                     });
                 },
                 update: function (set, where) {
                     return q(function () {
                         checkSet(set);
-                        var w2 = checkWhere(where);
+                        if (!Object.keys(set).length) throw fail('update: set must not be empty', 0, 'bad_request');
+                        var w2 = checkWhere(where, true);
                         var hit = rows.filter(function (r) { return match(r, w2); });
                         hit.forEach(function (r) { Object.keys(set).forEach(function (k) { r[k] = set[k]; }); });
-                        return { count: hit.length };
+                        return { rows: hit.map(copy), count: hit.length };
                     });
                 },
                 delete: function (where) {
                     return q(function () {
-                        var w3 = checkWhere(where);
-                        var n = 0;
-                        for (var i = rows.length - 1; i >= 0; i--) if (match(rows[i], w3)) { rows.splice(i, 1); n += 1; }
-                        return { count: n };
+                        var w3 = checkWhere(where, true);
+                        var gone = [];
+                        for (var i = rows.length - 1; i >= 0; i--) if (match(rows[i], w3)) gone.push({ id: rows.splice(i, 1)[0].id });
+                        return { rows: gone, count: gone.length };
                     });
                 }
             };
