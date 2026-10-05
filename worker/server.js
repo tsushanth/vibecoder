@@ -21,6 +21,7 @@ import { readProject, writeFiles } from './lib/files.js';
 import { makeOutcomeLogger } from './lib/outcome.js';
 import { scrubSecrets } from './lib/scrub.js';
 import { loadVibeSdk, injectSdk, withVibeRules } from './lib/vibe.js';
+import { scanGenerated, allowedHostsFor, userMessageForCause } from './lib/scan.js';
 import { requireSecret } from './lib/requireSecret.js';
 
 const app = express();
@@ -54,7 +55,7 @@ function useDirect() {
     return !!directLlm && DIRECT_PERCENT > 0 && Math.random() * 100 < DIRECT_PERCENT;
 }
 
-async function runDirect({ kind, prompt, projectDir }) {
+async function runDirect({ kind, prompt, projectDir, projectId }) {
     let existing = null;
     if (kind !== 'generate') {
         const p = readProject(projectDir);
@@ -63,7 +64,7 @@ async function runDirect({ kind, prompt, projectDir }) {
     }
     // credentials pasted into a prompt must never reach a model provider or be copied into the app
     const { text: safePrompt, count: scrubbed } = scrubSecrets(prompt);
-    const r = await generateApp({ prompt: safePrompt, kind, existing, llm: directLlm, models: DIRECT_MODELS, rules: withVibeRules(CLAUDE_MD, VIBE_ON), check: (files) => fullChecks(files, { vibe: VIBE_ON }), deadlineMs: parseInt(process.env.DIRECT_DEADLINE_MS || '480000', 10) });
+    const r = await generateApp({ prompt: safePrompt, kind, existing, llm: directLlm, models: DIRECT_MODELS, rules: withVibeRules(CLAUDE_MD, VIBE_ON), check: (files) => fullChecks(files, { vibe: VIBE_ON }), scan: (files) => scanGenerated(files, { allowedHosts: allowedHostsFor(projectId) }), deadlineMs: parseInt(process.env.DIRECT_DEADLINE_MS || '480000', 10) });
     if (!r.ok) return { success: false, cause: r.cause, attempts: r.attempts, costUsd: r.costUsd, scrubbed };
     writeFiles(projectDir, injectSdk(r.files, { sdk: VIBE_SDK, enabled: VIBE_ON }));
     return { success: true, model: r.model, attempts: r.attempts, costUsd: r.costUsd, fixes: r.fixes, scrubbed };
@@ -79,7 +80,7 @@ function makeOutcome(requestId, kind, direct) {
         const r = ctx.run;
         let result;
         if (ctx.delivered) result = 'ok';
-        else if (direct) result = ['no_files', 'check_failed', 'provider_error', 'declined_text', 'budget', 'timeout'].includes(r?.cause) ? r.cause : 'provider_error';
+        else if (direct) result = ['no_files', 'check_failed', 'scan_failed', 'provider_error', 'declined_text', 'budget', 'timeout'].includes(r?.cause) ? r.cause : 'provider_error';
         else if (r?.quotaError) result = 'cli_failed';
         else if (r?.error === 'Timeout') result = 'timeout';
         else if (r && !r.success) result = 'cli_no_app';
@@ -459,7 +460,7 @@ app.get('/health', (req, res) => {
 // ============================================
 
 app.post('/generate', authMiddleware, async (req, res) => {
-    const { prompt, userId, stream, referenceImage, callbackUrl, callbackSecret } = req.body;
+    const { prompt, userId, stream, referenceImage, callbackUrl, callbackSecret, projectId } = req.body;
     console.log(`[ENTRY] /generate: userId=${userId}, hasCallback=${!!callbackUrl}, promptLen=${prompt?.length}`);
 
     if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
@@ -543,13 +544,14 @@ Build the full app now. Create index.html as the entry point plus any needed CSS
 Every feature must be fully implemented and working. No TODOs, no placeholders, no stubs.`;
 
         const result = direct
-            ? await runDirect({ kind: 'generate', prompt, projectDir })
+            ? await runDirect({ kind: 'generate', prompt, projectDir, projectId })
             : await runClaudeCommand(claudePath, buildPrompt, projectDir, requestId, 20);
         outcome.run = result;
 
         if (!result.success) {
             activeGenerations = Math.max(0, activeGenerations - 1);
             if (result.quotaError) return sendError(getQuotaErrorMessage());
+            if (direct && result.cause === 'scan_failed') return sendError(userMessageForCause('scan_failed'));
             // Check if files were created despite non-zero exit
             if (!fs.existsSync(path.join(projectDir, 'index.html'))) {
                 const htmlFiles = fs.readdirSync(projectDir).filter(f => f.endsWith('.html') && f !== 'CLAUDE.md');
@@ -662,13 +664,13 @@ Customization request: "${customizeDescription.trim()}"
 Read all existing files first, then apply the changes. Keep all features working.`;
 
         const result = direct
-            ? await runDirect({ kind: 'customize', prompt: customizePrompt, projectDir })
+            ? await runDirect({ kind: 'customize', prompt: customizePrompt, projectDir, projectId: req.body.projectId })
             : await runClaudeCommand(claudePath, customizePrompt, projectDir, requestId, 15);
         outcome.run = result;
 
         if (direct && !result.success) {
             activeGenerations = Math.max(0, activeGenerations - 1);
-            return sendError('Could not apply the customization. Please try again.');
+            return sendError(userMessageForCause(result.cause, 'Could not apply the customization. Please try again.'));
         }
         if (!result.success && result.quotaError) {
             activeGenerations = Math.max(0, activeGenerations - 1);
@@ -859,13 +861,13 @@ app.post('/tweak', authMiddleware, async (req, res) => {
         const tweakPrompt = `The creator wants this change to their web app:\n\n"${tweakDescription.trim()}"\n\nRead all existing files first, then make ONLY the changes needed. Keep everything working.`;
 
         const result = direct
-            ? await runDirect({ kind: 'tweak', prompt: tweakPrompt, projectDir })
+            ? await runDirect({ kind: 'tweak', prompt: tweakPrompt, projectDir, projectId })
             : await runClaudeCommand(claudePath, tweakPrompt, projectDir, requestId, 12);
         outcome.run = result;
 
         if (direct && !result.success) {
             activeGenerations = Math.max(0, activeGenerations - 1);
-            return sendError('Could not apply the change. Please try again.');
+            return sendError(userMessageForCause(result.cause, 'Could not apply the change. Please try again.'));
         }
         if (!result.success && result.quotaError) {
             activeGenerations = Math.max(0, activeGenerations - 1);
