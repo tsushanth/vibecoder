@@ -70,7 +70,7 @@ export async function startServer(config, { pool: injected, listenPort, jobsTick
     const payService = createPayService({ secretStore: stores.secretStore, limiter, limiterStore: stores.limiterStore, orderStore: createOrderStore({ pool }), auth: authService, fetchImpl, baseDomain: config.baseDomain });
     const handler = createHandler({
         jobsAdmin: createJobsAdmin({ store: jobsStore, appStore: stores.appStore }),
-        storageService, authService, payHttp: createPayHttp({ service: payService, appStore: stores.appStore, baseDomain: config.baseDomain }),
+        dataExecutor: authService ? createDataExecutor({ pool }) : undefined, storageService, authService, payHttp: createPayHttp({ service: payService, appStore: stores.appStore, baseDomain: config.baseDomain }),
         appStore: stores.appStore, secretStore: stores.secretStore, limiter, globalAiLimiter,
         meter, fetchImpl, resolve,
         openRouterKey: config.secrets.openRouterKey, log, baseDomain: config.baseDomain,

@@ -8,6 +8,7 @@ COPY vibe-proxy ./vibe-proxy
 COPY proxy-app ./proxy-app
 COPY store ./store
 COPY auth ./auth
+COPY data ./data
 COPY storage ./storage
 COPY data ./data
 COPY jobs ./jobs
