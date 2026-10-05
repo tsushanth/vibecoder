@@ -87,9 +87,10 @@ export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled,
             const body = await req.readBody(ADMIN_BODY_LIMIT);
             if (body.error) return json(body.error, { error: body.error === 413 ? 'request_too_large' : 'bad_json' });
             const from = body.value.from;
-            if (typeof from !== 'string' || !APP_ID.test(from) || from === appId) return json(400, { error: 'invalid_source' });
+            const replace = body.value.replace ?? false;
+            if (typeof from !== 'string' || !APP_ID.test(from) || from === appId || typeof replace !== 'boolean') return json(400, { error: 'invalid_source' });
             if (!(await appStore.get(appId)) || !(await appStore.get(from))) return json(404, { error: 'unknown_app' });
-            return json(200, { copied: await copySecrets(from, appId) });
+            return json(200, { copied: await copySecrets(from, appId, { replace }) });
         }
 
         if (sub === 'ensure' || sub === 'enabled' || sub === 'domains') {
