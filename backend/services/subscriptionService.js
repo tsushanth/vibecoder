@@ -377,129 +377,16 @@ export async function recordUsage(userId, actionType, projectId = null) {
 }
 
 /**
- * Verify App Store or Play Store receipt
- * @param {string} platform - 'ios' or 'android'
- * @param {string} receiptData - Receipt data from the store
- * @param {string} userId - User ID
- * @returns {object} Verification result
+ * Store receipt verification is NOT implemented: no App Store or Play Store check exists, so a receipt string must never
+ * grant a tier. Paid access is granted only by the signature-verified Stripe webhook (and, for mobile, by the purchase
+ * provider the clients use). This always refuses, without reading or writing anything.
+ * @returns {object} { success: false, unavailable: true, error }
  */
 export async function verifyReceipt(platform, receiptData, userId) {
-    try {
-        if (!platform || !receiptData || !userId) {
-            return {
-                success: false,
-                error: 'platform, receiptData, and userId are required'
-            };
-        }
-
-        // Check for duplicate transaction
-        const { data: existing, error: checkError } = await supabase
-            .from('user_subscriptions')
-            .select('id')
-            .eq('user_id', userId)
-            .eq('receipt_data', receiptData)
-            .single();
-
-        if (!checkError && existing) {
-            console.log(`[subscription] Duplicate receipt for user ${userId}`);
-            return {
-                success: true,
-                duplicate: true,
-                message: 'Receipt already processed'
-            };
-        }
-
-        // In production, verify with App Store or Play Store
-        // For now, we'll accept the receipt and extract product info
-        let productId, tier, expiresAt;
-
-        if (platform === 'ios') {
-            // iOS receipt validation would go here
-            // For now, parse the product ID from receipt
-            productId = receiptData.split('_')[0]; // e.g., "com.vibecoder.pro.monthly"
-
-            if (productId.includes('pro')) {
-                tier = 'pro';
-            } else if (productId.includes('team')) {
-                tier = 'team';
-            } else {
-                return {
-                    success: false,
-                    error: 'Invalid product ID'
-                };
-            }
-
-            // Set expiration to 30 days from now (monthly subscription)
-            expiresAt = new Date();
-            expiresAt.setDate(expiresAt.getDate() + 30);
-
-        } else if (platform === 'android') {
-            // Android receipt validation would go here
-            productId = receiptData.split('_')[0];
-
-            if (productId.includes('pro')) {
-                tier = 'pro';
-            } else if (productId.includes('team')) {
-                tier = 'team';
-            } else {
-                return {
-                    success: false,
-                    error: 'Invalid product ID'
-                };
-            }
-
-            expiresAt = new Date();
-            expiresAt.setDate(expiresAt.getDate() + 30);
-
-        } else {
-            return {
-                success: false,
-                error: 'Invalid platform. Must be "ios" or "android"'
-            };
-        }
-
-        // Update or create subscription record
-        const { data, error } = await supabase
-            .from('user_subscriptions')
-            .upsert({
-                user_id: userId,
-                tier,
-                status: 'active',
-                platform,
-                product_id: productId,
-                receipt_data: receiptData,
-                expires_at: expiresAt.toISOString(),
-                updated_at: new Date().toISOString()
-            }, {
-                onConflict: 'user_id'
-            })
-            .select()
-            .single();
-
-        if (error) {
-            console.error('[subscription] Error updating subscription:', error);
-            return {
-                success: false,
-                error: 'Failed to update subscription'
-            };
-        }
-
-        console.log(`[subscription] Verified receipt: user=${userId}, tier=${tier}, platform=${platform}`);
-
-        return {
-            success: true,
-            tier,
-            expiresAt: expiresAt.toISOString(),
-            productId
-        };
-
-    } catch (error) {
-        console.error('[subscription] verifyReceipt error:', error);
-        return {
-            success: false,
-            error: 'Internal server error'
-        };
+    if (!platform || !receiptData || !userId) {
+        return { success: false, error: 'platform, receiptData, and userId are required' };
     }
+    return { success: false, unavailable: true, error: 'Store receipt verification is not available' };
 }
 
 export { SUBSCRIPTION_TIERS, ACTION_TYPES };
