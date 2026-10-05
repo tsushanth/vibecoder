@@ -18,6 +18,16 @@ test('a manifest in a subfolder is ignored', () => {
     assert.deepEqual(manifestFromBundle(zip([file('app/vibe.manifest.json', M)])), { status: 'none' });
     assert.deepEqual(manifestFromBundle(zip([file('./vibe.manifest.json', M)])), { status: 'none' });
 });
+// A creator-keyed payments app declares only a pay catalog: no connectors at all.
+const PAY = { catalog: [{ id: 'pro', name: 'Pro', amountCents: 500, currency: 'usd', mode: 'payment' }] };
+test('a pay-only manifest (no connectors key, or an empty one) is found, so its catalog reaches the proxy', () => {
+    assert.deepEqual(manifestFromBundle(zip([file('vibe.manifest.json', { pay: PAY })])), { status: 'found', manifest: { pay: PAY } });
+    assert.deepEqual(manifestFromBundle(zip([file('vibe.manifest.json', { connectors: {}, pay: PAY })])), { status: 'found', manifest: { connectors: {}, pay: PAY } });
+});
+test('a malformed pay section does not make a manifest found', () => {
+    for (const m of [{ pay: null }, { pay: [] }, { pay: 'x' }, { connectors: {}, pay: 5 }]) assert.notEqual(manifestFromBundle(zip([file('vibe.manifest.json', m)])).status, 'found', JSON.stringify(m));
+    assert.deepEqual(manifestFromBundle(zip([file('vibe.manifest.json', { pay: PAY, connectors: [] })])), { status: 'unreadable' });
+});
 test('an empty connectors object is none', () => {
     assert.deepEqual(manifestFromBundle(zip([file('vibe.manifest.json', { connectors: {} })])), { status: 'none' });
 });

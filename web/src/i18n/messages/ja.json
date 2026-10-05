@@ -247,7 +247,18 @@
       "tooLong": "That key is too long.",
       "empty": "Paste a key first.",
       "network": "Could not reach the server. Check your connection and paste the key again.",
-      "unknown": "Something went wrong. Paste the key again to retry."
+      "unknown": "Something went wrong. Paste the key again to retry.",
+      "stripePublishable": "これは公開可能キー（pk_）です。代わりにシークレットキー（sk_ または rk_）を貼り付けてください。",
+      "stripeWebhookFormat": "Webhook の署名シークレットではないようです。whsec_ で始まる必要があります。",
+      "stripeKeyFormat": "Stripe のシークレットキーではないようです。sk_ または rk_ で始まる必要があります（例：sk_test_...）。"
+    },
+    "pay": {
+      "secretKeyHelp": "Stripe のシークレットキーです。sk_ または rk_ で始まります（テストキーは sk_test_ で始まります）。公開可能キー（pk_）は使わないでください。",
+      "webhookSecretHelp": "Stripe で作成した Webhook エンドポイントの署名シークレットです。whsec_ で始まります。",
+      "testFirst": "まず Stripe のテストキー（sk_test_ で始まります）を使ってください。実際の決済を受け付ける準備ができてから本番キーに切り替えます。保存したキーは書き込み専用のため、このパネルでは保存済みキーがどちらのモードか確認できません。",
+      "webhookUrlLabel": "Stripe（開発者 > Webhook）でこの URL のエンドポイントを追加し、その署名シークレットを下に貼り付けてください：",
+      "webhookUrlPending": "Webhook URL を取得するには、アプリをプレビューまたは公開してください。",
+      "copyUrl": "URL をコピー"
     }
   }
 }

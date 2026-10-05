@@ -247,7 +247,18 @@
       "tooLong": "That key is too long.",
       "empty": "Paste a key first.",
       "network": "Could not reach the server. Check your connection and paste the key again.",
-      "unknown": "Something went wrong. Paste the key again to retry."
+      "unknown": "Something went wrong. Paste the key again to retry.",
+      "stripePublishable": "这是可公开密钥（pk_）。请改为粘贴密钥（sk_ 或 rk_）。",
+      "stripeWebhookFormat": "这看起来不是 Webhook 签名密钥。它应以 whsec_ 开头。",
+      "stripeKeyFormat": "这看起来不是 Stripe 密钥。它应以 sk_ 或 rk_ 开头（例如 sk_test_...）。"
+    },
+    "pay": {
+      "secretKeyHelp": "你的 Stripe 密钥。它以 sk_ 或 rk_ 开头（测试密钥以 sk_test_ 开头）。切勿使用可公开密钥（pk_）。",
+      "webhookSecretHelp": "你在 Stripe 中创建的 Webhook 端点的签名密钥。它以 whsec_ 开头。",
+      "testFirst": "请先使用 Stripe 测试密钥（以 sk_test_ 开头）。准备好收取真实付款后再切换到正式密钥。已保存的密钥只能写入，因此此面板无法告诉你已保存的密钥属于哪种模式。",
+      "webhookUrlLabel": "在 Stripe（开发者 > Webhooks）中用此 URL 添加一个端点，然后把它的签名密钥粘贴到下方：",
+      "webhookUrlPending": "预览或发布你的应用即可获得它的 Webhook URL。",
+      "copyUrl": "复制 URL"
     }
   }
 }

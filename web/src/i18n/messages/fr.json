@@ -247,7 +247,18 @@
       "tooLong": "That key is too long.",
       "empty": "Paste a key first.",
       "network": "Could not reach the server. Check your connection and paste the key again.",
-      "unknown": "Something went wrong. Paste the key again to retry."
+      "unknown": "Something went wrong. Paste the key again to retry.",
+      "stripePublishable": "Il s'agit d'une clé publiable (pk_). Collez plutôt la clé secrète (sk_ ou rk_).",
+      "stripeWebhookFormat": "Cela ne ressemble pas à un secret de signature de webhook. Il doit commencer par whsec_.",
+      "stripeKeyFormat": "Cela ne ressemble pas à une clé secrète Stripe. Elle doit commencer par sk_ ou rk_ (par exemple sk_test_...)."
+    },
+    "pay": {
+      "secretKeyHelp": "Votre clé secrète Stripe. Elle commence par sk_ ou rk_ (les clés de test commencent par sk_test_). N'utilisez jamais la clé publiable (pk_).",
+      "webhookSecretHelp": "Le secret de signature du point de terminaison webhook que vous créez dans Stripe. Il commence par whsec_.",
+      "testFirst": "Utilisez d'abord les clés de test Stripe (elles commencent par sk_test_). Passez aux clés live seulement quand vous êtes prêt à encaisser de vrais paiements. Les clés enregistrées sont en écriture seule : ce panneau ne peut pas indiquer dans quel mode se trouve une clé enregistrée.",
+      "webhookUrlLabel": "Dans Stripe (Développeurs > Webhooks), ajoutez un point de terminaison avec cette URL, puis collez ci-dessous son secret de signature :",
+      "webhookUrlPending": "Lancez un aperçu ou publiez votre app pour obtenir son URL de webhook.",
+      "copyUrl": "Copier l'URL"
     }
   }
 }
