@@ -65,6 +65,7 @@ export async function handleProxy({ req, manifest, secrets = {}, fetchImpl, reso
     for (const [k, v] of Object.entries(req.query || {})) url.searchParams.set(k, String(v));
     const headers = new Headers();
     for (const [k, v] of Object.entries(req.headers || {})) if (FORWARDED_HEADERS.has(k.toLowerCase())) headers.set(k, String(v));
+    for (const [k, v] of Object.entries(c.headers || {})) headers.set(k, String(v)); // platform-set, never from the caller
     let body = rawBody;
     if (c.secret?.in === 'query') url.searchParams.set(c.secret.field, secretValue);
     else if (c.secret?.in === 'header') headers.set(c.secret.field, secretValue);

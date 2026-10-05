@@ -16,7 +16,7 @@ function pathProblem(p) {
     return null;
 }
 
-export function validateManifest(m) {
+export function validateManifest(m, { allowHeaders = false } = {}) {
     const problems = [];
     if (!m || typeof m !== 'object' || !m.connectors || typeof m.connectors !== 'object' || Array.isArray(m.connectors)) {
         return { ok: false, problems: ['manifest must be an object with a connectors object'] };
@@ -33,6 +33,7 @@ export function validateManifest(m) {
         if (!Array.isArray(c.paths) || !c.paths.length) problems.push(`${at}: paths must be a non-empty list`);
         else for (const p of c.paths) { const e = pathProblem(p); if (e) problems.push(`${at}: path ${JSON.stringify(String(p).slice(0, 60))} ${e}`); }
         if (!Array.isArray(c.methods) || !c.methods.length || c.methods.some((x) => !METHODS.has(x))) problems.push(`${at}: methods must be a non-empty list of GET, POST, PUT, PATCH, DELETE`);
+        if (c.headers !== undefined && !allowHeaders) problems.push(`${at}: fixed headers are only allowed on platform built-ins`);
         if (c.secret !== undefined) {
             const s = c.secret;
             if (!s || typeof s !== 'object') problems.push(`${at}: secret must be an object`);
