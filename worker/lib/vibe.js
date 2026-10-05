@@ -4,16 +4,18 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { KNOWN_CONNECTORS, MANIFEST_FILE, parseManifestFile, rawConnectorNames } from './connectors.js';
+import { KNOWN_CONNECTORS, MANIFEST_FILE, declaredCatalog, parseManifestFile, rawConnectorNames } from './connectors.js';
 import { SCHEMA_FILE, normalisedSchema, schemaProblems } from './dataschema.js';
+import { JOBS_FILE, jobConnectorNames, jobsProblems, normalisedJobs } from './jobsfile.js';
+import { notifyProblems, payProblems } from './paynotify.js';
 
 // Built-in connector names the proxy offers every app (see platform/vibe-proxy/builtins.js). Keep in sync (lib/connectors.js).
 export { KNOWN_CONNECTORS };
 
 const isVibeSdkFile = (p) => path.basename(p) === 'vibe.js';
 const TEXT_FILE = /\.(html?|js|mjs)$/i;
-const BACKEND_USES = /\bvibe\.(?:auth|db|storage)\b/;
-const USES = /\bvibe\.(?:api|ai|auth|db|storage)\b/;
+const BACKEND_USES = /\bvibe\.(?:auth|db|storage|pay|notify)\b/;
+const USES = /\bvibe\.(?:api|ai|auth|db|storage|pay|notify)\b/;
 
 export function loadVibeSdk() {
     try { return fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'assets', 'vibe.js'), 'utf8'); } catch { return null; }
@@ -32,13 +34,15 @@ export function usesBackendSdk(files) {
 export function vibeProblems(files, { enabled }) {
     const manifestPaths = Object.keys(files).filter((p) => path.basename(p) === MANIFEST_FILE);
     const schemaPaths = Object.keys(files).filter((p) => path.basename(p) === SCHEMA_FILE);
+    const jobsPaths = Object.keys(files).filter((p) => path.basename(p) === JOBS_FILE);
     const uses = usesVibe(files);
-    if (!uses && !manifestPaths.length && !schemaPaths.length) return [];
+    if (!uses && !manifestPaths.length && !schemaPaths.length && !jobsPaths.length) return [];
     const problems = [];
     if (!enabled) {
-        if (uses) problems.push('the vibe SDK (vibe.api, vibe.ai, vibe.auth, vibe.db, vibe.storage) is not available here: remove every vibe call and make the app work without it (keep data in localStorage)');
+        if (uses) problems.push('the vibe SDK (vibe.api, vibe.ai, vibe.auth, vibe.db, vibe.storage, vibe.pay, vibe.notify) is not available here: remove every vibe call and make the app work without it (keep data in localStorage)');
         if (schemaPaths.length) problems.push(`${SCHEMA_FILE} is not available here: do not write it, and keep the app's data in localStorage`);
-        if (manifestPaths.length) problems.push(`${MANIFEST_FILE} is not available here: do not write it, and make the app work without any connector`);
+        if (manifestPaths.length) problems.push(`${MANIFEST_FILE} is not available here: do not write it, and make the app work without any connector or payment`);
+        if (jobsPaths.length) problems.push(`${JOBS_FILE} is not available here: do not write it, and make the app work without scheduled jobs`);
         return problems;
     }
     for (const p of manifestPaths) if (p !== MANIFEST_FILE) problems.push(`${MANIFEST_FILE} must be at the project root, not at ${p.slice(0, 60)}`);
@@ -53,7 +57,7 @@ export function vibeProblems(files, { enabled }) {
         }
     }
     const html = files['index.html'] || '';
-    if (uses && !/<script\b[^>]*\bsrc\s*=\s*["']\.?\/?vibe\.js["']/i.test(html)) problems.push('the app uses the vibe SDK (vibe.api, vibe.ai, vibe.auth, vibe.db or vibe.storage) but index.html does not load it: add <script src="vibe.js"></script> before the code that uses it');
+    if (uses && !/<script\b[^>]*\bsrc\s*=\s*["']\.?\/?vibe\.js["']/i.test(html)) problems.push('the app uses the vibe SDK (vibe.api, vibe.ai, vibe.auth, vibe.db, vibe.storage, vibe.pay or vibe.notify) but index.html does not load it: add <script src="vibe.js"></script> before the code that uses it');
     const known = [...KNOWN_CONNECTORS, ...declared];
     const unknown = new Set();
     const called = new Set();
@@ -67,10 +71,14 @@ export function vibeProblems(files, { enabled }) {
             else { called.add(lit[2]); if (!known.includes(lit[2])) unknown.add(lit[2]); }
         }
     }
+    for (const name of jobConnectorNames(files[JOBS_FILE])) called.add(name); // a connector only a scheduled job uses is still used
     for (const name of unknown) problems.push(`vibe.api connector "${name}" does not exist; the available connectors are: ${known.join(', ')} (a new third-party API must be declared in ${MANIFEST_FILE})`);
     if (nonLiteral) problems.push('the first argument of vibe.api must be a string literal connector name, for example vibe.api("nws", "/points/39.7,-97.1")');
     else for (const name of declared) if (!called.has(name)) problems.push(`${MANIFEST_FILE} declares connector "${name}" but the app never calls it with vibe.api: call it, or remove it from the manifest (declare only what the app uses)`);
     problems.push(...schemaProblems(files));
+    problems.push(...payProblems(files, declaredCatalog(files)));
+    problems.push(...notifyProblems(files));
+    problems.push(...jobsProblems(files, declared));
     return problems;
 }
 
@@ -86,6 +94,11 @@ export function injectSdk(files, { sdk, enabled }) {
             if (p !== MANIFEST_FILE || !enabled) continue;
             const r = parseManifestFile(c);
             if (r.ok && r.manifest) out[p] = `${JSON.stringify(r.manifest, null, 2)}\n`;
+            continue;
+        }
+        if (path.basename(p) === JOBS_FILE) {
+            const norm = p === JOBS_FILE && enabled ? normalisedJobs(files) : null;
+            if (norm) out[p] = norm;
             continue;
         }
         if (path.basename(p) === SCHEMA_FILE) {
@@ -141,6 +154,41 @@ WHEN TO USE THEM: only when the app's value depends on data that must follow a p
 - ERRORS: every call can fail. Catch every rejection and show a friendly message, and keep the rest of the app usable. err.status 401 means the session ended or the person is signed out: show the sign-in screen again instead of an error. 429 means slow down (err.retryAfter seconds), 413 or 415 means the file is too big or not allowed, 0 means offline.
 - An app that uses vibe.db or vibe.storage MUST also use vibe.auth, because those only work for a signed-in person: load or save only after vibe.auth.user() returned a user. Provide an empty state ("Nothing here yet") and a loading state.
 - A schema file without any vibe.db call, a vibe.db call to a table or column that is not in the schema, and a vibe.db or vibe.storage call in an app without vibe.auth are errors that will be sent back to you.
+
+## Payments (vibe.pay)
+Same script tag (<script src="vibe.js"></script>) and the same rules: no keys in the code, no other network calls. WHEN TO USE: only when the creator asks to sell something (a product, a ticket, a paid plan, a tip jar). Payments go through Stripe Checkout on the creator's OWN Stripe account; the platform and the page never see card data. Otherwise do not use vibe.pay and do not write a pay section.
+- Declare what is for sale in vibe.manifest.json, the same file as connectors (it may hold connectors, pay, or both). Format:
+{"pay":{"catalog":[{"id":"tee","name":"T-shirt","amountCents":2500,"currency":"usd","mode":"payment","maxQuantity":5},{"id":"pro","name":"Pro plan","amountCents":900,"currency":"usd","mode":"subscription","interval":"month"}]}}
+  - id: lowercase letters, digits, - and _, starting with a letter, at most 32. name: 1 to 100 printable characters. amountCents: a whole number from 50 to 99999999 (2500 means 25.00). currency: usd, eur, gbp, cad, aud or inr. mode: "payment" (one-off) or "subscription"; a subscription needs interval (day, week, month or year) and a payment must not have one. maxQuantity (optional, 1 to 100, default 1): the most a buyer can take in one checkout. At most 20 items, no other fields. Use the prices the creator asked for; if none were given, pick plausible ones.
+- vibe.pay.checkout({ item: "tee", quantity: 1 }) returns a Promise and sends the browser to the Stripe checkout page (it resolves { url, mode } just before). Pass ONLY item (the id of a catalog entry, exactly as written in vibe.manifest.json) and optionally quantity (a whole number up to the item's maxQuantity). NEVER send a price, amount, currency or product name from the browser, never compute a total for Stripe: the platform reads all of that from the catalog on the server. You may show prices in the page, taken from the same numbers as the catalog. Optional: successPath and cancelPath (paths on the app such as "/thanks"), redirect: false.
+- After paying, the buyer returns to the app with ?vibe_pay=success&session_id=... (or ?vibe_pay=cancel) in the address bar: read it with URLSearchParams and show a thank-you or a "payment cancelled" message. Checkout works without signing in: do not force a sign-in to buy.
+- vibe.pay.orders() resolves to the signed-in user's own paid orders [{ sessionId, itemId, quantity, amountCents, currency, status, createdAt }]. It needs vibe.auth (a signed-in person); use it only for a "my purchases" list. An order appears a moment after Stripe confirms the payment, so a new purchase may not be listed yet.
+- The owner must add Stripe keys: the creator pastes their own Stripe secret key into the platform's key screen after the build (and a webhook signing secret to record orders); never write a key in any file and never ask a visitor for one. Until then checkout fails with err.code "stripe_key_missing" (err.status 424): show a clear message such as "The app owner still needs to add Stripe keys" and keep the rest of the app working. Also put a short visible note near the buy button, for example "Payments run in Stripe test mode until the owner adds live Stripe keys; the checkout opens on Stripe's own page."
+- Other errors, all catchable: err.status 429 (err.code pay_rate_limited_ip, pay_rate_limited_hour or pay_daily_cap) means too many checkouts, try later (err.retryAfter seconds); 400 bad_quantity means the quantity is above maxQuantity; 404 payments_not_configured or unknown_item means the catalog and the code disagree (a bug: show a generic "this item is not available"); 502, 503 or 504 with a stripe_ code means Stripe is having trouble, try again; 0 means offline.
+- NEVER ask for a card number, expiry date, security code or bank details in the page, and never add inputs for them: only the Stripe checkout page collects payment details. Say so ("You pay on Stripe's secure page").
+- Not allowed with real money: gambling and betting, lotteries, adult content, weapons, binary options, trading signals, investment advice, and anything illegal. If the creator asks to sell or run any of these, do NOT write a pay section and do NOT use vibe.pay: build a free simulator or demo instead (play money, paper trading, sample data), clearly labelled "demo only, no real money, not financial advice", and say in the page that it is a demo. Ordinary goods, tickets, services, subscriptions and donations are fine.
+- A pay catalog without any vibe.pay.checkout call, a checkout item that is not in the catalog, a price or amount sent to vibe.pay.checkout, a quantity above maxQuantity, vibe.pay.orders without vibe.auth, vibe.pay without a pay catalog and a card-number input are errors that will be sent back to you.
+
+## Email to the signed-in user (vibe.notify)
+Same script tag and rules. WHEN TO USE: only when the person wants a message sent to THEMSELF: a reminder, a receipt, a summary of what they just did, an exported list. Never add it "just in case".
+- vibe.notify.me({ subject, text }) returns a Promise of { ok: true }. It only ever emails the signed-in user themself, at their own address: there is no way to name a recipient, so never pass to, email, recipient, cc or bcc (they are errors). subject is at most 120 characters and text at most 2000 characters, both plain text (no HTML) and not empty.
+- It requires vibe.auth: build the sign-in UI described above and call vibe.notify.me only after vibe.auth.user() returned a user.
+- It sends right now, when the person does something (a button); there is no "send later" and no scheduled email (notify jobs are not supported yet). For a reminder app, keep the reminders in the page and offer an "Email me this now" button; never promise an email at a set time.
+- Never promise or imply delivery to anyone else (a friend, a customer, a team, the owner): no invite, share-by-email or "notify the buyer" flows. If the creator asks for that, build the in-app version without email and say plainly that the app cannot email other people. Delivery is best effort: write "We sent an email to your address", not "delivered".
+- Errors: err.status 401 means the session ended: show the sign-in screen; 429 means slow down (err.retryAfter seconds); err.code "opted_out" (409) means the person turned off emails from this app: say so; 502 or 503 means try later. Catch every rejection.
+- vibe.notify without vibe.auth, extra keys besides subject and text, and a literal subject over 120 or text over 2000 characters are errors that will be sent back to you.
+
+## Scheduled jobs (vibe.jobs.json)
+WHEN TO USE: only when the app needs data to keep being collected or tidied while nobody has it open: a periodic refresh of live data saved into a table (a weather logger, a rate history) or pruning old rows. Otherwise do not write the file. Jobs run on the platform, not in the page, so the page only reads what they saved.
+- Write vibe.jobs.json at the project root (an ordinary <file> block). Format:
+{"version":1,"jobs":[{"id":"hourly","schedule":{"every":"1h"},"action":{"type":"connector","connector":"nws","method":"GET","path":"/gridpoints/TOP/31,80/forecast","save":{"table":"readings","map":{"temp":"/properties/periods/0/temperature"}}}},{"id":"tidy","schedule":{"dailyAt":"03:30"},"action":{"type":"prune","table":"readings","olderThanDays":30}}]}
+  - At most 5 jobs. id: lowercase letters, digits, - and _, starting with a letter, unique. schedule: {"every":"15m"}, "1h", "6h" or "1d", or {"dailyAt":"HH:MM"} in UTC. Choose the slowest schedule that serves the app (hourly is plenty for weather).
+  - "type":"connector": connector is "nws" or one declared in vibe.manifest.json (and that is a real use of it); method "GET"; path is fixed text starting with / without ? or # (put parameters in "query": an object of strings, numbers or booleans). A job cannot look anything up: write the fixed coordinates or ids into the file (for nws, grid ids such as TOP/31,80, which you must be sure of). save.table must be declared in vibe.schema.json; save.map maps a column name to a JSON pointer into the response (such as "/properties/periods/0/temperature"), 1 to 30 columns, every required column without a default must be mapped and every column you map must be declared in the schema; never map id, user_id or created_at. Each run adds one row.
+  - "type":"prune": deletes the rows of a table older than olderThanDays (1 to 365). Use it with a refresh job so the table does not grow forever.
+  - notify jobs are not supported yet (error not_yet): never write a job of type "notify", and never use jobs to send email.
+- The app reads the saved rows like any table: declare the table in vibe.schema.json and use vibe.db.from("readings").select({ order: [{ col: "created_at", dir: "desc" }], limit: 24 }) (with vibe.auth as above, since vibe.db needs a signed-in person). Rows written by a job have no user_id, so that table must have access "public_read" or "authenticated", never "owner" (nobody could read rows that have no owner).
+- The data is not real time: show "Last updated" from created_at, and an empty state ("No readings yet, the first one arrives within the hour") instead of an error.
+- A jobs file that does not validate, a job saving into a table or column missing from vibe.schema.json, a job using a connector that does not exist, and a job table with access "owner" are errors that will be sent back to you.
 `;
 
 export const withVibeRules = (rules, enabled) => (enabled ? `${rules}\n${VIBE_RULES}` : rules);
