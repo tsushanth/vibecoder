@@ -420,6 +420,7 @@ test('update set validation', () => {
 
 // ---------- value coercion ----------
 
+const BAD = { ok: false, status: 400, code: 'bad_value' };
 const cell = (type, v) => {
   const spec = { version: 1, tables: { t: { access: 'owner', columns: { c: { type } } } } };
   return run({ op: 'insert', table: 't', rows: [{ c: v }] }, U1, spec);
@@ -435,19 +436,19 @@ test('text values', () => {
 
 test('integer values', () => {
   for (const v of [0, -0, 1, -1, Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER]) assert.equal(cell('integer', v).ok, true, String(v));
-  for (const v of [1.5, NaN, Infinity, -Infinity, 2 ** 53, -(2 ** 53), '1', true, {}, [], 1e300]) assert.equal(cell('integer', v).ok, false, String(v));
+  for (const v of [1.5, NaN, Infinity, -Infinity, 2 ** 53, -(2 ** 53), '1', true, {}, [], 1e300]) assert.deepEqual(cell('integer', v), BAD, String(v));
   assert.deepEqual(cell('integer', '1'), { ok: false, status: 400, code: 'bad_value' });
 });
 
 test('number values', () => {
   for (const v of [0, 1.5, -1e300, 1e-300, Number.MAX_VALUE]) assert.equal(cell('number', v).ok, true, String(v));
-  for (const v of [NaN, Infinity, -Infinity, '1.5', true, {}, []]) assert.equal(cell('number', v).ok, false, String(v));
+  for (const v of [NaN, Infinity, -Infinity, '1.5', true, {}, []]) assert.deepEqual(cell('number', v), BAD, String(v));
 });
 
 test('boolean values are strict', () => {
   assert.deepEqual(cell('boolean', true).values, [true, U1]);
   assert.deepEqual(cell('boolean', false).values, [false, U1]);
-  for (const v of [0, 1, 'true', 'false', 'yes', {}, []]) assert.equal(cell('boolean', v).ok, false, String(v));
+  for (const v of [0, 1, 'true', 'false', 'yes', {}, []]) assert.deepEqual(cell('boolean', v), BAD, String(v));
 });
 
 test('timestamp values are ISO-8601, normalised to UTC', () => {
@@ -473,8 +474,8 @@ test('timestamp values are ISO-8601, normalised to UTC', () => {
     '2024-04-31', '2024-01-32', '2024-01-00', '2024-05-01T24:00:00Z', '2024-05-01T10:60:00Z', '2024-05-01T10:20:60Z', '2024-05-01T10:20:30+24:00',
     '2024-05-01T10:20:30+05:60', '2024-05-01T10:20:30+0530', '2024-05-01T10:20:30z', '0000-01-01T00:00:00Z', '10000-01-01', '+002024-05-01',
     '2024-05-01T10:20:30Z; DROP TABLE x', '2024-05-01\0', 1714558830000, true, {}, [], '2024-05-01T10:20:30.Z', '9999-12-31T23:59:59-23:59',
-  ]) assert.equal(t(v).ok, false, JSON.stringify(v));
-  assert.equal(t('2024-05-01T' + '0'.repeat(50)).ok, false);
+  ]) assert.deepEqual(t(v), BAD, JSON.stringify(v));
+  assert.deepEqual(t('2024-05-01T' + '0'.repeat(50)), BAD);
 });
 
 test('json values: any JSON, size capped, depth capped, no exotic types', () => {
@@ -486,24 +487,25 @@ test('json values: any JSON, size capped, depth capped, no exotic types', () => 
   assert.equal(j(true).values[0], 'true');
   assert.equal(j({ k: null }).values[0], '{"k":null}');
   assert.equal(j('a'.repeat(19998)).ok, true);
-  assert.equal(j('a'.repeat(19999)).ok, false);
-  assert.equal(j('a'.repeat(20000)).ok, false);
+  assert.deepEqual(j('a'.repeat(19999)), BAD);
+  assert.deepEqual(j('a'.repeat(20000)), BAD);
   assert.equal(j({ a: 'a'.repeat(19990) }).ok, true);
   assert.equal(j({ a: 'a'.repeat(19995) }).ok, false);
   const nest = (n) => { let v = 1; for (let i = 0; i < n; i++) v = [v]; return v; };
   assert.equal(j(nest(20)).ok, true);
-  assert.equal(j(nest(21)).ok, false);
+  assert.deepEqual(j(nest(21)), BAD);
   const nestO = (n) => { let v = 1; for (let i = 0; i < n; i++) v = { a: v }; return v; };
   assert.equal(j(nestO(20)).ok, true);
-  assert.equal(j(nestO(21)).ok, false);
-  assert.equal(j(nest(100000)).ok, false);
+  assert.deepEqual(j(nestO(21)), BAD);
+  assert.deepEqual(j(nest(100000)), { ok: false, status: 413, code: 'request_too_large' });
+  assert.equal(j(nest(40000)).ok, false);
   for (const v of [NaN, Infinity, { a: NaN }, [Infinity], { a: 'x\0' }, { 'k\0': 1 }, ['\ud800'], new Date(0), new Map(), () => 1, 10n, Symbol('s'), Object.create({ x: 1 })]) {
     let r;
     try { r = j(v); } catch (e) { r = { ok: false, threw: true }; }
-    assert.equal(r.ok, false, String(typeof v));
+    assert.deepEqual(r, typeof v === 'bigint' ? { ok: false, status: 400, code: 'invalid_request' } : BAD, String(typeof v));
     assert.equal(r.threw, undefined, 'must refuse, not throw: ' + String(typeof v));
   }
-  assert.equal(j({ k: undefined }).ok, false);
+  assert.deepEqual(j({ k: undefined }), BAD);
   assert.equal(j(Object.create(null)).ok, true);
   // proto-named keys inside json data are plain data
   assert.equal(j(JSON.parse('{"__proto__": {"x": 1}}')).values[0], '{"__proto__":{"x":1}}');
@@ -523,7 +525,7 @@ test('like and ilike values are capped at 200 chars', () => {
 test('uuid values (id filter) are validated and normalised', () => {
   const w = (val) => ({ op: 'select', table: 'posts', where: [{ col: 'id', op: 'eq', val }] });
   assert.equal(run(w(U2.toUpperCase())).values[0], U2);
-  for (const v of ['', 'abc', U2 + 'x', "x' OR 1=1", U2.replace(/-/g, ''), 1, null, '{' + U2 + '}', U2.slice(0, 35) + 'g']) assert.equal(run(w(v)).ok, false, String(v));
+  for (const v of ['', 'abc', U2 + 'x', "x' OR 1=1", U2.replace(/-/g, ''), 1, null, '{' + U2 + '}', U2.slice(0, 35) + 'g']) assert.deepEqual(run(w(v)), BAD, String(v));
 });
 
 // ---------- injection and identifiers ----------

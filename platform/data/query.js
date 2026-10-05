@@ -100,17 +100,16 @@ function checkJson(v, depth) {
 }
 
 function coerceTimestamp(v) {
-  if (typeof v !== 'string' || v.length > 40) refuse(400, 'bad_value');
+  if (typeof v !== 'string') refuse(400, 'bad_value');
   const m = ISO_RE.exec(v);
   if (!m) refuse(400, 'bad_value');
-  const [y, mo, d, h, mi, s] = [m[1], m[2], m[3], m[4], m[5], m[6]].map((x) => (x === undefined ? 0 : Number(x)));
-  if (y < 1 || mo < 1 || mo > 12 || d < 1 || h > 23 || mi > 59 || s > 59) refuse(400, 'bad_value');
+  const [y, mo, d] = [m[1], m[2], m[3]].map(Number);
+  // Date.parse rejects bad months, day 00, minutes, seconds and zone offsets, but accepts 24:00 and Feb 30.
+  if (m[4] !== undefined && Number(m[4]) > 23) refuse(400, 'bad_value');
   // Day 0 of the following month is the last day of this one; the year only matters for leap years.
   if (d > new Date(Date.UTC(2000 + (y % 400), mo, 0)).getUTCDate()) refuse(400, 'bad_value');
-  const zone = m[7];
-  if (zone && zone !== 'Z' && (Number(zone.slice(1, 3)) > 23 || Number(zone.slice(4, 6)) > 59)) refuse(400, 'bad_value');
   // Date-only and zone-less values are taken as UTC.
-  const iso = m[4] === undefined ? v + 'T00:00:00Z' : zone ? v : v + 'Z';
+  const iso = m[4] === undefined ? v + 'T00:00:00Z' : m[7] ? v : v + 'Z';
   const t = Date.parse(iso);
   if (Number.isNaN(t)) refuse(400, 'bad_value');
   const out = new Date(t);
@@ -141,11 +140,9 @@ function coerce(type, v) {
       if (text.length > MAX_JSON) refuse(400, 'bad_value');
       return text;
     }
-    case 'uuid':
+    default: // uuid: the only other type, used by id and user_id
       if (typeof v !== 'string' || !UUID_RE.test(v)) refuse(400, 'bad_value');
       return v.toLowerCase();
-    default:
-      return refuse(400, 'bad_spec');
   }
 }
 
@@ -227,7 +224,7 @@ const KEYS = {
 
 function intInRange(v, def, min, max, code) {
   if (v === undefined) return def;
-  if (typeof v !== 'number' || !Number.isSafeInteger(v) || v < min || v > max) refuse(400, code);
+  if (typeof v !== 'number' || !Number.isInteger(v) || v < min || v > max) refuse(400, code);
   return v;
 }
 
