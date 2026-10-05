@@ -1,5 +1,5 @@
 # vibe-proxy. NOT DEPLOYED. The app name must be created and confirmed before the first deploy.
-# Secrets (set with `fly secrets set`, never in this file): DATABASE_URL, VIBE_MASTER_KEY, OPENROUTER_API_KEY.
+# Secrets (set with `fly secrets set`, never in this file): DATABASE_URL, VIBE_MASTER_KEY, OPENROUTER_API_KEY, PROXY_ADMIN_TOKEN (32+ characters, shared only with the VibeBuild backend).
 # Plain settings: BASE_DOMAIN below; optional PER_IP_PER_MIN, PER_APP_PER_MIN, DAILY_CALLS, APP_AI_DAILY_MICROS, PLATFORM_AI_DAILY_MICROS.
 # The database schema is migrated explicitly with `node store/migrate.js` (not at release time).
 app = "vibe-proxy"

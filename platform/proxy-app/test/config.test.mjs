@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { loadConfig } from '../config.js';
 
 const HEX = 'a'.repeat(64);
-const base = () => ({ DATABASE_URL: 'postgres://u:p@h:5432/db', VIBE_MASTER_KEY: HEX, OPENROUTER_API_KEY: 'sk-or-v1-x', BASE_DOMAIN: 'vibebuild.cc' });
+const ADMIN = 'admin-' + 'k'.repeat(40);
+const base = () => ({ DATABASE_URL: 'postgres://u:p@h:5432/db', VIBE_MASTER_KEY: HEX, OPENROUTER_API_KEY: 'sk-or-v1-x', BASE_DOMAIN: 'vibebuild.cc', PROXY_ADMIN_TOKEN: ADMIN });
 
 test('loads required settings and applies defaults', () => {
     const c = loadConfig(base());
@@ -21,7 +22,7 @@ test('overrides are read from the environment as numbers', () => {
     assert.equal(c.port, 3000); assert.equal(c.limits.dailySpendMicros, 100000); assert.equal(c.platformAiDailyMicros, 500000); assert.equal(c.limits.perIpPerMin, 10);
 });
 
-for (const missing of ['DATABASE_URL', 'VIBE_MASTER_KEY', 'OPENROUTER_API_KEY', 'BASE_DOMAIN']) {
+for (const missing of ['DATABASE_URL', 'VIBE_MASTER_KEY', 'OPENROUTER_API_KEY', 'BASE_DOMAIN', 'PROXY_ADMIN_TOKEN']) {
     test(`refuses to start without ${missing} and names it`, () => {
         const e = base(); delete e[missing];
         assert.throws(() => loadConfig(e), (err) => err.message.includes(missing));
@@ -51,4 +52,13 @@ test('the config object does not leak secrets through JSON.stringify', () => {
 test('config values are available to the server through accessors', () => {
     const c = loadConfig(base());
     assert.equal(c.secrets.masterKey, HEX); assert.equal(c.secrets.openRouterKey, 'sk-or-v1-x'); assert.equal(c.secrets.databaseUrl, 'postgres://u:p@h:5432/db');
+});
+
+test('the admin token must be at least 32 characters, and a short one is rejected without echoing it', () => {
+    const short = 'shortsecrettoken';
+    assert.throws(() => loadConfig({ ...base(), PROXY_ADMIN_TOKEN: short }), (e) => /PROXY_ADMIN_TOKEN/.test(e.message) && !e.message.includes(short));
+});
+test('the admin token is available through secrets and absent from JSON', () => {
+    const c = loadConfig(base());
+    assert.equal(c.secrets.adminToken, ADMIN); assert.equal(JSON.stringify(c).includes(ADMIN), false);
 });
