@@ -142,9 +142,11 @@ router.post('/:projectId/deploy', async (req, res) => {
         }
 
         // Make the app known to the platform proxy (vibe.api / vibe.ai). Best effort: never fails the deploy.
-        await registerDeployedApp(req.app.locals.proxyAdmin, subdomain, undefined, { projectId, bundle });
+        // A vibe.schema.json in the bundle is applied to the app's database; destructive changes only when the creator confirmed.
+        const result = {};
+        await registerDeployedApp(req.app.locals.proxyAdmin, subdomain, undefined, { projectId, bundle, allowDestructive: req.body.allowDestructiveSchema === true, result });
 
-        res.json({ success: true, url });
+        res.json({ success: true, url, ...(result.schemaStatus ? { schemaStatus: result.schemaStatus } : {}) });
     } catch (error) {
         console.error('Deploy error:', error);
         res.status(500).json({ error: 'Deployment failed' });
