@@ -11,6 +11,15 @@ import { createAuthService } from '../auth/service.js';
 import { createResendMailer } from '../auth/mailer.js';
 import { createStorageStore } from '../storage/pgStore.js';
 import { createStorageService } from '../storage/service.js';
+import { createDataExecutor } from '../data/executor.js';
+import { createJobsStore } from '../jobs/store.js';
+import { createJobsAdmin } from '../jobs/admin.js';
+import { createActionRunner } from '../jobs/actions.js';
+import { runDueJobs, createGate } from '../jobs/runner.js';
+import { startScheduler } from '../jobs/scheduler.js';
+import { createPayService } from '../pay/service.js';
+import { createPayHttp } from '../pay/http.js';
+import { createOrderStore } from '../pay/orderStore.js';
 
 async function dnsResolve(host) {
     const [a, b] = await Promise.allSettled([dns.resolve4(host), dns.resolve6(host)]);
@@ -22,7 +31,7 @@ export function makePool(config) {
     return new pg.Pool({ connectionString: config.secrets.databaseUrl, max: config.dbPoolMax, connectionTimeoutMillis: 5000, idleTimeoutMillis: 30_000 });
 }
 
-export async function startServer(config, { pool: injected, listenPort, resolve = dnsResolve, fetchImpl = globalThis.fetch, log = (l) => console.log(l) } = {}) {
+export async function startServer(config, { pool: injected, listenPort, jobsTickMs = config.jobsTickMs, resolve = dnsResolve, fetchImpl = globalThis.fetch, log = (l) => console.log(l) } = {}) {
     const pool = injected || makePool(config);
     const ownsPool = !injected;
     const fail = async (msg) => { if (ownsPool) await pool.end().catch(() => {}); throw new Error(msg); };
@@ -45,17 +54,32 @@ export async function startServer(config, { pool: injected, listenPort, resolve 
         store: createStorageStore({ pool }), fetchImpl,
         r2: { host: `${r2.accountId}.r2.cloudflarestorage.com`, bucket: r2.bucket, accessKeyId: r2.accessKeyId, secretAccessKey: r2.secretAccessKey },
     }) : undefined;
+    const meter = createMeter({ sink: stores.usageSink });
+    const jobsStore = createJobsStore({ pool });
+    let scheduler = null;
+    if (config.jobsEnabled) {
+        // Jobs reuse the proxy's limiter, meter, secrets and SSRF-guarded fetch, and write rows through the data executor (app role).
+        const executor = createDataExecutor({ pool });
+        const runAction = createActionRunner({ appStore: stores.appStore, secretStore: stores.secretStore, limiter, meter, fetchImpl, resolve, runQuery: (appId, q) => executor.run(appId, q), getSpec: (appId) => jobsStore.getSpec(appId) });
+        const gate = createGate(3);
+        scheduler = startScheduler({
+            tickMs: jobsTickMs, tick: () => runDueJobs({ pool, runAction, gate }),
+            onError: (e) => log(JSON.stringify({ ts: new Date().toISOString(), event: 'jobs_tick_error', code: String(e?.code || e?.name || 'error').slice(0, 40) })),
+        });
+    }
+    const payService = createPayService({ secretStore: stores.secretStore, limiter, limiterStore: stores.limiterStore, orderStore: createOrderStore({ pool }), auth: authService, fetchImpl, baseDomain: config.baseDomain });
     const handler = createHandler({
-        storageService, authService,
+        jobsAdmin: createJobsAdmin({ store: jobsStore, appStore: stores.appStore }),
+        dataExecutor: authService ? createDataExecutor({ pool }) : undefined, storageService, authService, payHttp: createPayHttp({ service: payService, appStore: stores.appStore, baseDomain: config.baseDomain }),
         appStore: stores.appStore, secretStore: stores.secretStore, limiter, globalAiLimiter,
-        meter: createMeter({ sink: stores.usageSink }), fetchImpl, resolve,
+        meter, fetchImpl, resolve,
         openRouterKey: config.secrets.openRouterKey, log, baseDomain: config.baseDomain,
         adminToken: config.secrets.adminToken, upsertApp: stores.upsertApp, ensureApp: stores.ensureApp, setEnabled: stores.setEnabled, setDomains: stores.setDomains, setManifest: stores.setManifest, copySecrets: stores.copySecrets, limiterStore: stores.limiterStore,
     });
     const server = http.createServer(handler);
-    await new Promise((ok, bad) => { server.once('error', bad); server.listen(listenPort ?? config.port, '0.0.0.0', ok); });
+    try { await new Promise((ok, bad) => { server.once('error', bad); server.listen(listenPort ?? config.port, '0.0.0.0', ok); }); } catch (e) { await scheduler?.stop(); throw e; }
     return {
-        server, port: server.address().port, stores, pool,
-        async close() { await new Promise((r) => server.close(r)); server.closeAllConnections?.(); if (ownsPool) await pool.end().catch(() => {}); },
+        server, port: server.address().port, stores, pool, scheduler,
+        async close() { await scheduler?.stop(); await new Promise((r) => server.close(r)); server.closeAllConnections?.(); if (ownsPool) await pool.end().catch(() => {}); },
     };
 }
