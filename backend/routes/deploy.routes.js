@@ -142,7 +142,7 @@ router.post('/:projectId/deploy', async (req, res) => {
         }
 
         // Make the app known to the platform proxy (vibe.api / vibe.ai). Best effort: never fails the deploy.
-        await registerDeployedApp(req.app.locals.proxyAdmin, subdomain);
+        await registerDeployedApp(req.app.locals.proxyAdmin, subdomain, undefined, { projectId, bundle });
 
         res.json({ success: true, url });
     } catch (error) {

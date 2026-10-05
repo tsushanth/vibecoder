@@ -773,7 +773,7 @@ router.post('/generate', async (req, res) => {
                                     const previewUrl = `https://${previewSubdomain}.${process.env.BASE_DOMAIN || 'vibebuild.cc'}`;
                                     await supabase.from('projects').update({ preview_url: previewUrl }).eq('id', finalProjectId);
                                     console.log(`[generate] Preview deployed: ${previewUrl}`);
-                                    await registerDeployedApp(req.app.locals.proxyAdmin, previewSubdomain); // lets the preview use vibe.api / vibe.ai
+                                    await registerDeployedApp(req.app.locals.proxyAdmin, previewSubdomain, undefined, { projectId: finalProjectId, bundle: parsed.bundle }); // lets the preview use vibe.api / vibe.ai
 
                                     // Thumbnail capture in background
                                     const screenshotServiceUrl = process.env.SCREENSHOT_SERVICE_URL || 'http://178.156.231.255:3465';
@@ -1137,7 +1137,7 @@ router.post('/:id/build-complete', async (req, res) => {
                     const previewUrl = `https://${previewSubdomain}.${process.env.BASE_DOMAIN || 'vibebuild.cc'}`;
                     await supabase.from('projects').update({ preview_url: previewUrl }).eq('id', id);
                     console.log(`[build-complete] Preview deployed for ${id}: ${previewUrl}`);
-                    await registerDeployedApp(req.app.locals.proxyAdmin, previewSubdomain); // lets the preview use vibe.api / vibe.ai
+                    await registerDeployedApp(req.app.locals.proxyAdmin, previewSubdomain, undefined, { projectId: id, bundle }); // lets the preview use vibe.api / vibe.ai
                     // Capture thumbnail in background
                     const screenshotServiceUrl = process.env.SCREENSHOT_SERVICE_URL || 'http://178.156.231.255:3465';
                     fetch(`${screenshotServiceUrl}/screenshot?url=${encodeURIComponent(previewUrl)}&width=390&height=844`)
@@ -2040,6 +2040,7 @@ router.post('/:id/tweak', async (req, res) => {
                             });
                             if (dr.ok) {
                                 console.log(`[tweak] Redeployed bundle to ${sub}`);
+                                await registerDeployedApp(req.app.locals.proxyAdmin, sub, undefined, { projectId: id, bundle: parsed.bundle }); // keep the connector manifest in step
                             } else {
                                 console.error(`[tweak] Redeploy ${sub} returned ${dr.status}`);
                             }
@@ -2236,6 +2237,7 @@ router.post('/:id/revert/:sha', async (req, res) => {
                     });
                     if (dr.ok) {
                         console.log(`[revert] Redeployed bundle to ${sub}`);
+                        await registerDeployedApp(req.app.locals.proxyAdmin, sub, undefined, { projectId: id, bundle: revertData.bundle }); // keep the connector manifest in step
                     } else {
                         console.error(`[revert] Redeploy ${sub} returned ${dr.status}`);
                     }

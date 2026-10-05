@@ -11,7 +11,15 @@ const { createSecretsRouter } = await import('../../routes/secrets.routes.js');
 const PID = '11111111-2222-3333-4444-555555555555';
 const SECRET = 'RouteSecretValue1234567890';
 const ERR_PID = 'eeeeeeee-2222-3333-4444-555555555555';
-const projects = { [PID]: { id: PID, creator_id: 'owner-1' }, [ERR_PID]: { id: ERR_PID, creator_id: 'owner-1' } };
+const SAME_PID = 'bbbbbbbb-2222-3333-4444-555555555555';
+const NOURL_PID ='dddddddd-2222-3333-4444-555555555555';
+const EVIL_PID = 'cccccccc-2222-3333-4444-555555555555';
+const projects = {
+    [PID]: { id: PID, creator_id: 'owner-1', preview_url: 'https://prev-11111111.vibebuild.cc', published_url: 'https://my-app.vibebuild.cc' },
+    [ERR_PID]: { id: ERR_PID, creator_id: 'owner-1' },
+    [NOURL_PID]: { id: NOURL_PID, creator_id: 'owner-1', preview_url: null, published_url: null },
+    [EVIL_PID]: { id: EVIL_PID, creator_id: 'owner-1', preview_url: 'https://evil.example.com', published_url: 'https://a.b.vibebuild.cc' },
+};
 let lookups = 0;
 stubSupabase(supabase, (q) => {
     if (q.table !== 'projects') return { data: null, error: null };
@@ -30,6 +38,7 @@ const proxyAdmin = {
     async listSecrets(app) { calls.push(['list', app]); if (proxyBehavior.list) return proxyBehavior.list(); return [{ name: 'API_KEY', updatedAt: 't1' }]; },
     async deleteSecret(app, name) { calls.push(['delete', app, name]); if (proxyBehavior.del) return proxyBehavior.del(); return null; },
     async registerApp(app, o) { calls.push(['register', app, o]); return null; },
+    async getApp(app) { calls.push(['getApp', app]); if (proxyBehavior.getApp) return proxyBehavior.getApp(); return { enabled: false, connectors: [] }; },
 };
 const logs = [];
 let srv;
@@ -71,7 +80,7 @@ test('the owner can PUT a secret: 204, no body, and the proxy gets the project i
     reset();
     const r = await call('PUT', `${PID}/secrets/API_KEY`, { body: { value: SECRET } });
     assert.equal(r.status, 204); assert.equal(await r.text(), '');
-    assert.deepEqual(calls, [['set', PID, 'API_KEY', SECRET]]);
+    assert.deepEqual(calls[0], ['set', PID, 'API_KEY', SECRET]);
     assert.equal(r.headers.get('cache-control'), 'no-store');
 });
 
@@ -96,8 +105,8 @@ test('if the proxy does not know the app yet it is registered once with an empty
     proxyBehavior.set = (n) => { if (n === 1) throw new ProxyAdminError(404, 'unknown_app'); return null; };
     const r = await call('PUT', `${PID}/secrets/API_KEY`, { body: { value: SECRET } });
     assert.equal(r.status, 204);
-    assert.deepEqual(calls.map((c) => c[0]), ['set', 'register', 'set']);
-    assert.deepEqual(calls[1], ['register', PID, { manifest: null, domains: [], enabled: true }]);
+    assert.deepEqual(calls.map((c) => c[0]).filter((n) => n !== 'getApp'), ['set', 'register', 'set', 'set', 'set']);
+    assert.deepEqual(calls[1], ['register', PID, { manifest: null, domains: [], enabled: false }]);
 });
 
 test('if it is still unknown after registering, or the proxy is down, the answer is a generic 502 that never contains the value', async () => {
@@ -117,14 +126,14 @@ test('if it is still unknown after registering, or the proxy is down, the answer
 test('GET lists names only and an app the proxy has never seen is an empty list', async () => {
     reset();
     const r = await call('GET', `${PID}/secrets`);
-    assert.equal(r.status, 200); assert.deepEqual(await r.json(), { secrets: [{ name: 'API_KEY', updatedAt: 't1' }] });
+    assert.equal(r.status, 200); assert.deepEqual(await r.json(), { secrets: [{ name: 'API_KEY', updatedAt: 't1' }], required: [] });
     reset(); proxyBehavior.list = () => { throw new ProxyAdminError(404, 'unknown_app'); };
-    assert.deepEqual(await (await call('GET', `${PID}/secrets`)).json(), { secrets: [] });
+    assert.deepEqual(await (await call('GET', `${PID}/secrets`)).json(), { secrets: [], required: [] });
 });
 
 test('DELETE removes a secret, is idempotent for an unknown app, and validates the name', async () => {
     reset();
-    assert.equal((await call('DELETE', `${PID}/secrets/API_KEY`)).status, 204); assert.deepEqual(calls, [['delete', PID, 'API_KEY']]);
+    assert.equal((await call('DELETE', `${PID}/secrets/API_KEY`)).status, 204); assert.deepEqual(calls[0], ['delete', PID, 'API_KEY']);
     reset(); proxyBehavior.del = () => { throw new ProxyAdminError(404, 'unknown_app'); };
     assert.equal((await call('DELETE', `${PID}/secrets/API_KEY`)).status, 204);
     assert.equal((await call('DELETE', `${PID}/secrets/bad%20name`)).status, 400);
@@ -172,4 +181,77 @@ test('repeated requests from one address are rate limited', async () => {
         for (let i = 0; i < 7; i++) codes.push((await fetch(`${s.base}/api/projects/${PID}/secrets`, { headers: { authorization: 'Bearer tok-owner', 'x-forwarded-for': '8.8.4.4' } })).status);
         assert.deepEqual(codes.slice(0, 5), [200, 200, 200, 200, 200]); assert.equal(codes[6], 429);
     } finally { await s.close(); }
+});
+
+// ---- required secrets, from the manifest registered under the project id
+const WEATHER = { enabled: false, connectors: [{ name: 'weather', host: 'api.example.com', secret: { name: 'WEATHER_KEY', in: 'query' } }, { name: 'forecast', host: 'api.example.com', secret: { name: 'WEATHER_KEY', in: 'header' } }, { name: 'facts', host: 'facts.example.org', secret: null }, { name: 'news', host: 'news.example.net', secret: { name: 'NEWS_KEY', in: 'header' } }] };
+
+test('GET also lists the secrets the app needs: one entry per secret name, with the connectors that use it, keyless connectors left out', async () => {
+    reset(); proxyBehavior.getApp = () => WEATHER;
+    const j = await (await call('GET', `${PID}/secrets`)).json();
+    assert.deepEqual(j.required, [{ name: 'WEATHER_KEY', connectors: ['weather', 'forecast'] }, { name: 'NEWS_KEY', connectors: ['news'] }]);
+    assert.deepEqual(j.secrets, [{ name: 'API_KEY', updatedAt: 't1' }]);
+    assert.ok(calls.some((c) => c[0] === 'getApp' && c[1] === PID), 'the manifest is read from the project-id app');
+});
+
+test('GET: an unknown app means nothing is required; any other failure of the manifest lookup is a generic 502', async () => {
+    reset(); proxyBehavior.getApp = () => { throw new ProxyAdminError(404, 'unknown_app'); };
+    assert.deepEqual((await (await call('GET', `${PID}/secrets`)).json()).required, []);
+    reset(); proxyBehavior.getApp = () => { throw new ProxyAdminError(500, 'internal'); };
+    const r = await call('GET', `${PID}/secrets`);
+    assert.equal(r.status, 502); assert.deepEqual(await r.json(), { error: 'secret_store_unavailable' });
+});
+
+test('GET never lets a malformed proxy answer produce required entries with odd names', async () => {
+    reset(); proxyBehavior.getApp = () => ({ connectors: [{ name: 'x', secret: { name: 'lower' } }, { name: 'y', secret: { name: 'GOOD_KEY' } }, null, { secret: { name: 'NO_CONNECTOR_NAME' } }] });
+    assert.deepEqual((await (await call('GET', `${PID}/secrets`)).json()).required, [{ name: 'GOOD_KEY', connectors: ['y'] }]);
+});
+
+// ---- the key must reach the apps that actually run (preview and published subdomains), not just the project id
+test('PUT also stores the key under the project preview and published subdomain apps', async () => {
+    reset();
+    assert.equal((await call('PUT', `${PID}/secrets/API_KEY`, { body: { value: SECRET } })).status, 204);
+    const sets = calls.filter((c) => c[0] === 'set');
+    assert.deepEqual(sets.map((c) => c[1]).sort(), [PID, 'my-app', 'prev-11111111'].sort());
+    for (const c of sets) { assert.equal(c[2], 'API_KEY'); assert.equal(c[3], SECRET); }
+});
+
+test('PUT without deployed or preview URLs writes only the project id; foreign hosts and nested hosts are never written to', async () => {
+    reset();
+    assert.equal((await call('PUT', `${NOURL_PID}/secrets/API_KEY`, { body: { value: SECRET } })).status, 204);
+    assert.deepEqual(calls.filter((c) => c[0] === 'set').map((c) => c[1]), [NOURL_PID]);
+    reset();
+    assert.equal((await call('PUT', `${EVIL_PID}/secrets/API_KEY`, { body: { value: SECRET } })).status, 204);
+    assert.deepEqual(calls.filter((c) => c[0] === 'set').map((c) => c[1]), [EVIL_PID]);
+});
+
+test('PUT skips a subdomain app the proxy does not know yet (registration copies the keys later) without failing', async () => {
+    reset();
+    proxyBehavior.set = (n) => { if (n >= 2) throw new ProxyAdminError(404, 'unknown_app'); return null; };
+    assert.equal((await call('PUT', `${PID}/secrets/API_KEY`, { body: { value: SECRET } })).status, 204);
+});
+
+test('PUT: a failure writing a subdomain app is a 502 (the key is not live yet) that never contains the value', async () => {
+    reset();
+    proxyBehavior.set = (n) => { if (n >= 2) throw new ProxyAdminError(500, 'internal'); return null; };
+    const r = await call('PUT', `${PID}/secrets/API_KEY`, { body: { value: SECRET } }); const t = await r.text();
+    assert.equal(r.status, 502); assert.equal(t.includes(SECRET), false); assert.equal(logs.join('\n').includes(SECRET), false);
+});
+
+test('DELETE removes the key from the subdomain apps too, ignoring apps the proxy does not know', async () => {
+    reset();
+    proxyBehavior.del = () => null;
+    assert.equal((await call('DELETE', `${PID}/secrets/API_KEY`)).status, 204);
+    assert.deepEqual(calls.filter((c) => c[0] === 'delete').map((c) => c[1]).sort(), [PID, 'my-app', 'prev-11111111'].sort());
+    reset(); let n = 0; proxyBehavior.del = () => { n += 1; if (n >= 2) throw new ProxyAdminError(404, 'unknown_app'); return null; };
+    assert.equal((await call('DELETE', `${PID}/secrets/API_KEY`)).status, 204);
+    reset(); n = 0; proxyBehavior.del = () => { n += 1; if (n >= 2) throw new ProxyAdminError(500, 'internal'); return null; };
+    assert.equal((await call('DELETE', `${PID}/secrets/API_KEY`)).status, 502);
+});
+
+test('a project whose preview and published URLs share one subdomain writes that app once', async () => {
+    reset();
+    projects[SAME_PID] = { id: SAME_PID, creator_id: 'owner-1', preview_url: 'https://same-app.vibebuild.cc', published_url: 'https://SAME-app.vibebuild.cc/' };
+    assert.equal((await call('PUT', `${SAME_PID}/secrets/API_KEY`, { body: { value: SECRET } })).status, 204);
+    assert.deepEqual(calls.filter((c) => c[0] === 'set').map((c) => c[1]), [SAME_PID, 'same-app']);
 });

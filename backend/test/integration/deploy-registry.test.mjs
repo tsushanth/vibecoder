@@ -5,20 +5,24 @@ import express from 'express';
 import { listen } from '../helpers/http.mjs';
 import { stubSupabase, eqOf } from '../helpers/supabaseStub.mjs';
 import { ProxyAdminError } from '../../services/proxyAdmin.js';
+import { zip, file } from '../helpers/zip.mjs';
+
+const MANIFEST = { connectors: { stocks: { host: 'api.example.com', paths: ['/v1/*'], methods: ['GET'], secret: { name: 'STOCKS_API_KEY', in: 'query', field: 'apikey' } } } };
+const MANIFEST_BUNDLE = zip([file('index.html', '<html></html>'), file('vibe.manifest.json', MANIFEST)]);
 const { supabase } = await import('../../config/database.js');
 
 let undeployRows = [{ subdomain: 'my-app', user_id: 'owner-1' }];
 stubSupabase(supabase, (q) => {
     if (q.table === 'deployments' && q.op === 'select' && q.single) return { data: null, error: { code: 'PGRST116' } };
     if (q.table === 'deployments' && q.op === 'select') return { data: undeployRows.filter((r) => eqOf(q, 'project_id') === 'proj-1' && eqOf(q, 'user_id') === r.user_id), error: null };
-    if (q.table === 'projects' && q.op === 'select' && q.single) return eqOf(q, 'id') === 'proj-1' ? { data: { bundle: 'QUJD', creator_id: 'owner-1', github_repo: null, preview_url: null }, error: null } : { data: null, error: { code: 'PGRST116' } };
+    if (q.table === 'projects' && q.op === 'select' && q.single) return ['proj-1', 'proj-manifest'].includes(eqOf(q, 'id')) ? { data: { bundle: eqOf(q, 'id') === 'proj-manifest' ? MANIFEST_BUNDLE : 'QUJD', creator_id: 'owner-1', github_repo: null, preview_url: null }, error: null } : { data: null, error: { code: 'PGRST116' } };
     return { data: null, error: null };
 });
 const { default: router } = await import('../../routes/deploy.routes.js');
 
 const realFetch = globalThis.fetch; let deployStatus = 200;
 const calls = []; let behavior = {};
-const fakeProxy = (configured = true) => ({ configured, ensureApp: async (a) => { calls.push(['ensure', a]); if (behavior.ensure) throw behavior.ensure; }, setEnabled: async (a, e) => { calls.push(['enabled', a, e]); if (behavior.enabled) throw behavior.enabled; } });
+const fakeProxy = (configured = true) => ({ configured, ensureApp: async (a) => { calls.push(['ensure', a]); if (behavior.ensure) throw behavior.ensure; }, setEnabled: async (a, e) => { calls.push(['enabled', a, e]); if (behavior.enabled) throw behavior.enabled; }, setManifest: async (a, m) => { calls.push(['manifest', a, m]); }, copySecrets: async (to, from, o) => { calls.push(['copy', to, from, o]); return { copied: 0 }; } });
 let srv, srvNoProxy;
 before(async () => {
     globalThis.fetch = (url, opts = {}) => { const u = new URL(String(url)); if (u.hostname === '127.0.0.1') return realFetch(url, opts); return Promise.resolve(new Response(deployStatus === 200 ? '{}' : '{"error":"boom"}', { status: deployStatus, headers: { 'content-type': 'application/json' } })); };
@@ -86,4 +90,17 @@ test('a reserved name is refused with 400 before anything is deployed or registe
         assert.equal(r.status, 400, name); assert.match((await r.json()).error, /reserved/);
     }
     assert.deepEqual(calls, []);
+});
+
+test('deploying a project whose bundle carries a manifest registers the manifest and copies the project keys before enabling', async () => {
+    reset();
+    const r = await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app' }, 'proj-manifest'));
+    assert.equal(r.status, 200);
+    assert.deepEqual(calls, [['ensure', 'my-app'], ['ensure', 'proj-manifest'], ['enabled', 'proj-manifest', false], ['manifest', 'proj-manifest', MANIFEST], ['manifest', 'my-app', MANIFEST], ['copy', 'my-app', 'proj-manifest', { replace: true }], ['enabled', 'my-app', true]]);
+});
+
+test('a project id is not accepted as a subdomain', async () => {
+    reset();
+    const r = await quiet(() => post(srv, { userId: 'owner-1', subdomain: '11111111-2222-3333-4444-555555555555' }));
+    assert.equal(r.status, 400); assert.deepEqual(calls, []);
 });
