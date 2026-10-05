@@ -17,7 +17,7 @@ const noBody = (status) => ({ status });
 
 export const ADMIN_BODY_LIMIT = 8192;
 
-export function createAdmin({ token, appStore, upsertApp, secretStore, limiterStore, baseDomain, now = () => Date.now() }) {
+export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled, secretStore, limiterStore, baseDomain, now = () => Date.now() }) {
     const expected = digest(token);
     const minute = () => Math.floor(now() / 60_000);
 
@@ -34,7 +34,7 @@ export function createAdmin({ token, appStore, upsertApp, secretStore, limiterSt
     return async function handle(req) {
         const denied = await authorize(req.headers, req.ip);
         if (denied) return denied;
-        const m = /^\/admin\/apps\/([^/]+)(?:\/(secrets)(?:\/([^/]+))?)?$/.exec(req.pathname);
+        const m = /^\/admin\/apps\/([^/]+)(?:\/(secrets|ensure|enabled)(?:\/([^/]+))?)?$/.exec(req.pathname);
         if (!m) return json(404, { error: 'not_found' });
         const [, appId, sub, name] = m;
         if (!APP_ID.test(appId)) return json(404, { error: 'not_found' });
@@ -53,6 +53,17 @@ export function createAdmin({ token, appStore, upsertApp, secretStore, limiterSt
                 try { resolveManifest(manifest); } catch (e) { return json(400, { error: 'invalid_manifest', problems: [e.message] }); }
             }
             await upsertApp({ appId, manifest, domains, enabled });
+            return noBody(204);
+        }
+
+        if (sub === 'ensure' || sub === 'enabled') {
+            if (name !== undefined) return json(404, { error: 'not_found' });
+            if (req.method !== 'POST') return json(405, { error: 'method_not_allowed' });
+            if (sub === 'ensure') { await ensureApp({ appId }); return noBody(204); }   // creates if missing; never changes an existing app
+            const body = await req.readBody(ADMIN_BODY_LIMIT);
+            if (body.error) return json(body.error, { error: body.error === 413 ? 'request_too_large' : 'bad_json' });
+            if (typeof body.value.enabled !== 'boolean') return json(400, { error: 'invalid_enabled' });
+            if (!(await setEnabled(appId, body.value.enabled))) return json(404, { error: 'unknown_app' });
             return noBody(204);
         }
 
