@@ -37,14 +37,14 @@ after(() => provider?.close());
 function startWorker(env) {
     return new Promise((resolve, reject) => {
         const port = 36000 + Math.floor(Math.random() * 2000);
-        const child = spawn(process.execPath, ['server.js'], { cwd: WORKER_DIR, env: { PATH: path.dirname(process.execPath), HOME, WORKER_PORT: String(port), WORKER_SECRET: 'testsecret', OUTCOME_LOG: path.join(HOME, 'outcomes.jsonl'), OPENROUTER_API_KEY: 'fake', OPENROUTER_BASE_URL: `http://127.0.0.1:${PPORT}`, DIRECT_PERCENT: '100', DIRECT_MODELS: 'm1', ...env }, stdio: ['ignore', 'pipe', 'pipe'] });
+        const child = spawn(process.execPath, ['server.js'], { cwd: WORKER_DIR, env: { PATH: path.dirname(process.execPath), HOME, WORKER_PORT: String(port), WORKER_SECRET: 'test-worker-secret-0123456789', OUTCOME_LOG: path.join(HOME, 'outcomes.jsonl'), OPENROUTER_API_KEY: 'fake', OPENROUTER_BASE_URL: `http://127.0.0.1:${PPORT}`, DIRECT_PERCENT: '100', DIRECT_MODELS: 'm1', ...env }, stdio: ['ignore', 'pipe', 'pipe'] });
         let out = ''; child.stdout.on('data', (d) => { out += d; }); child.stderr.on('data', (d) => { out += d; });
         const t = setTimeout(() => { child.kill(); reject(new Error('worker did not start: ' + out.slice(-300))); }, 15000);
         const iv = setInterval(async () => { try { const r = await fetch(`http://127.0.0.1:${port}/health`); if (r.ok) { clearInterval(iv); clearTimeout(t); resolve({ child, base: `http://127.0.0.1:${port}` }); } } catch { /* not up yet */ } }, 150);
     });
 }
 async function generate(base, prompt) {
-    const r = await fetch(base + '/generate', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-worker-secret': 'testsecret' }, body: JSON.stringify({ prompt, userId: 't', stream: true }) });
+    const r = await fetch(base + '/generate', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-worker-secret': 'test-worker-secret-0123456789' }, body: JSON.stringify({ prompt, userId: 't', stream: true }) });
     const text = await r.text(); let ev = null;
     for (const chunk of text.split('\n\n')) { const l = chunk.split('\n').find((x) => x.startsWith('data: ')); if (!l) continue; try { const j = JSON.parse(l.slice(6)); if (j.type === 'result' || j.type === 'error') ev = j; } catch { /* partial */ } }
     return ev;
