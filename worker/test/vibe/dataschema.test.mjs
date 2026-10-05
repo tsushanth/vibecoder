@@ -229,6 +229,7 @@ test('the rules teach the SDK surface, the schema format and the key constraints
     }
     assert.match(VIBE_RULES, /NEVER declare them/); assert.match(VIBE_RULES, /NEVER put user_id/);
     assert.match(VIBE_RULES, /await vibe\.auth\.ready/); assert.match(VIBE_RULES, /401/);
+    assert.match(VIBE_RULES, /"owner" \(the DEFAULT:/); assert.match(VIBE_RULES, /table name must be a string literal that exists in vibe\.schema\.json/);
     assert.match(VIBE_RULES, /WHEN NOT TO/); assert.match(VIBE_RULES, /purely local app/);
 });
 test('the example schema in the rules is itself valid and uses the documented defaults', () => {
