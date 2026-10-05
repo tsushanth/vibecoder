@@ -28,6 +28,7 @@ app.use('/api/appdata', appdataRoutes);
 const WEB_ORIGINS = ['https://vibebuild.cc', 'https://www.vibebuild.cc', 'https://vibebuild-web.fly.dev', 'http://localhost:3000'];
 const proxyAdmin = createProxyAdmin({ baseUrl: process.env.PROXY_ADMIN_URL, token: process.env.PROXY_ADMIN_TOKEN });
 app.use('/api/projects/:id/secrets', cors({ origin: WEB_ORIGINS }), createSecretsRouter({ proxyAdmin }));
+app.locals.proxyAdmin = proxyAdmin; // used by the deploy routes to register deployed apps with the proxy
 app.use(cors({
     origin: [
         'https://vibebuild.cc',
