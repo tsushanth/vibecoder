@@ -43,6 +43,16 @@ export function createPgStores({ pool, masterKey, now = () => Date.now() }) {
         return rowCount > 0;
     }
 
+    /** Replaces only the manifest of an existing app (null clears it). Never touches enabled, domains or secrets. */
+    async function setManifest(appId, manifest) {
+        if (manifest !== null) {
+            const v = validateManifest(manifest);
+            if (!v.ok) throw new Error(`invalid manifest: ${v.problems.slice(0, 3).join('; ')}`);
+        }
+        const { rowCount } = await pool.query('update platform.apps set manifest = $2, updated_at = now() where app_id = $1', [appId, manifest ? JSON.stringify(manifest) : null]);
+        return rowCount > 0;
+    }
+
     async function setEnabled(appId, enabled) {
         const { rowCount } = await pool.query('update platform.apps set enabled = $2, updated_at = now() where app_id = $1', [appId, !!enabled]);
         return rowCount > 0;
@@ -84,6 +94,19 @@ export function createPgStores({ pool, masterKey, now = () => Date.now() }) {
         async delete(appId, name) { await pool.query('delete from platform.app_secrets where app_id = $1 and name = $2', [appId, name]); },
     };
 
+    /** Copies every secret of one app to another (decrypted and re-encrypted, since the app id is bound into the ciphertext). Returns the count. */
+    async function copySecrets(fromAppId, toAppId) {
+        const rows = await secretStore.list(fromAppId);
+        let copied = 0;
+        for (const { name } of rows) {
+            const value = await secretStore.get(fromAppId, name);
+            if (value === undefined) continue;
+            await secretStore.set(toAppId, name, value);
+            copied += 1;
+        }
+        return copied;
+    }
+
     const bump = (amount) => `
         insert into platform.limiter_counters (key, n, expires_at) values ($1, ${amount}, $2::timestamptz + make_interval(secs => $3))
         on conflict (key) do update set
@@ -120,5 +143,5 @@ export function createPgStores({ pool, masterKey, now = () => Date.now() }) {
         return Object.fromEntries(rows.map((r) => [r.connector, { calls: r.calls, errors: r.errors, responseBytes: r.bytes }]));
     }
 
-    return { appStore, upsertApp, ensureApp, setEnabled, setDomains, secretStore, limiterStore, usageSink, usageSummary };
+    return { appStore, upsertApp, ensureApp, setManifest, copySecrets, setEnabled, setDomains, secretStore, limiterStore, usageSink, usageSummary };
 }
