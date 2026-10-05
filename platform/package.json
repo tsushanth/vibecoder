@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test --test-concurrency=1 --test-force-exit data/test/ vibe-proxy/test/ sdk/test/ proxy-app/test/ auth/test/ storage/test/ store/test/migrate.test.mjs store/test/store.test.mjs store/test/integration.test.mjs"
+    "test": "node --test --test-concurrency=1 --test-force-exit data/test/ vibe-proxy/test/ sdk/test/ proxy-app/test/ auth/test/ storage/test/ notify/test/ store/test/migrate.test.mjs store/test/store.test.mjs store/test/integration.test.mjs"
   },
   "dependencies": {
     "pg": "^8.23.1"

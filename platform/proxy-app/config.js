@@ -1,4 +1,5 @@
 // Reads and validates the proxy's environment. Fails fast with the NAME of the bad setting, never its value.
+import { loadNotifyConfig } from '../notify/config.js';
 const need = (env, name) => {
     const v = env[name];
     if (typeof v !== 'string' || !v.trim()) throw new Error(`missing required setting ${name}`);
@@ -39,6 +40,7 @@ export function loadConfig(env = process.env) {
             dailySpendMicros: int(env, 'APP_AI_DAILY_MICROS', 50_000, { min: 0, max: 1_000_000_000 }),
         },
         authMailFrom,
+        notify: loadNotifyConfig(env, baseDomain),
         platformAiDailyMicros: int(env, 'PLATFORM_AI_DAILY_MICROS', 2_000_000, { min: 0, max: 1_000_000_000 }),
     };
     // non-enumerable so JSON.stringify and console.log of the config never print secrets

@@ -11,6 +11,9 @@ import { createAuthService } from '../auth/service.js';
 import { createResendMailer } from '../auth/mailer.js';
 import { createStorageStore } from '../storage/pgStore.js';
 import { createStorageService } from '../storage/service.js';
+import { createNotifyStore } from '../notify/pgStore.js';
+import { createNotifyService } from '../notify/service.js';
+import { createNotifyHttp } from '../notify/http.js';
 
 async function dnsResolve(host) {
     const [a, b] = await Promise.allSettled([dns.resolve4(host), dns.resolve6(host)]);
@@ -35,18 +38,21 @@ export async function startServer(config, { pool: injected, listenPort, resolve 
     const limiter = createLimiter({ store: stores.limiterStore, perIpPerMin: l.perIpPerMin, perAppPerMin: l.perAppPerMin, dailyCalls: l.dailyCalls, dailySpendMicros: l.dailySpendMicros });
     const globalAiLimiter = createLimiter({ store: stores.limiterStore, perIpPerMin: 1e9, perAppPerMin: 1e9, dailyCalls: 1e9, dailySpendMicros: config.platformAiDailyMicros });
     // Sign-in is only offered when a mail sender is configured; without one the auth routes answer 503.
-    const authService = config.secrets.resendKey ? createAuthService({
+    const mailer = config.secrets.resendKey ? createResendMailer({ apiKey: config.secrets.resendKey, from: config.authMailFrom, fetchImpl }) : undefined;
+    const authService = mailer ? createAuthService({
         store: createAuthStore({ pool }), limiterStore: stores.limiterStore, masterKey: config.secrets.masterKey,
-        mailer: createResendMailer({ apiKey: config.secrets.resendKey, from: config.authMailFrom, fetchImpl }),
+        mailer,
         linkFor: async (appId, token) => { const app = await stores.appStore.get(appId); return `https://${app?.domains?.[0] || `${appId}.${config.baseDomain}`}/?vibe_login=${token}`; },
     }) : undefined;
+    // End-user notifications share the sender and are on only when it is configured. sendToUser is the in-process entry for scheduled jobs.
+    const notifyService = mailer ? createNotifyService({ store: createNotifyStore({ pool }), limiterStore: stores.limiterStore, mailer, appStore: stores.appStore, masterKey: config.secrets.masterKey, baseUrl: config.notify.baseUrl, limits: config.notify.limits }) : undefined;
     const r2 = config.secrets.r2;
     const storageService = r2 ? createStorageService({
         store: createStorageStore({ pool }), fetchImpl,
         r2: { host: `${r2.accountId}.r2.cloudflarestorage.com`, bucket: r2.bucket, accessKeyId: r2.accessKeyId, secretAccessKey: r2.secretAccessKey },
     }) : undefined;
     const handler = createHandler({
-        storageService, authService,
+        storageService, authService, notifyHttp: createNotifyHttp({ svc: notifyService, auth: authService, appStore: stores.appStore, limiter, baseDomain: config.baseDomain }),
         appStore: stores.appStore, secretStore: stores.secretStore, limiter, globalAiLimiter,
         meter: createMeter({ sink: stores.usageSink }), fetchImpl, resolve,
         openRouterKey: config.secrets.openRouterKey, log, baseDomain: config.baseDomain,
@@ -55,7 +61,7 @@ export async function startServer(config, { pool: injected, listenPort, resolve 
     const server = http.createServer(handler);
     await new Promise((ok, bad) => { server.once('error', bad); server.listen(listenPort ?? config.port, '0.0.0.0', ok); });
     return {
-        server, port: server.address().port, stores, pool,
+        server, port: server.address().port, stores, pool, notify: notifyService,
         async close() { await new Promise((r) => server.close(r)); server.closeAllConnections?.(); if (ownsPool) await pool.end().catch(() => {}); },
     };
 }

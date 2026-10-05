@@ -39,7 +39,7 @@ export async function readRaw(req, max) {
     return size > max ? { error: 413 } : { value: Buffer.concat(chunks) };
 }
 
-export function createHandler({ storageService, authService, appStore, secretStore, limiter, globalAiLimiter, meter, fetchImpl, resolve, openRouterKey, log = () => {}, baseDomain, adminToken, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, limiterStore }) {
+export function createHandler({ storageService, authService, appStore, secretStore, limiter, globalAiLimiter, meter, fetchImpl, resolve, openRouterKey, log = () => {}, baseDomain, adminToken, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, limiterStore, notifyHttp }) {
     const admin = adminToken ? createAdmin({ token: adminToken, appStore, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, secretStore, limiterStore, baseDomain }) : null;
     const aiLimiter = {
         async check(a) {
@@ -70,6 +70,10 @@ export function createHandler({ storageService, authService, appStore, secretSto
                 const ip = req.headers['fly-client-ip'] || req.socket.remoteAddress || '';
                 const out = await admin({ method: req.method, pathname: url.pathname, headers: req.headers, ip, readBody: (limit) => readJson(req, limit) });
                 return out.body === undefined ? send(out.status, '') : sendJson(out.status, out.body);
+            }
+            if (notifyHttp) { // end-user notifications (platform/notify): answers null for any other path
+                const nout = await notifyHttp.handle(req, url, req.headers['fly-client-ip'] || req.socket.remoteAddress || '');
+                if (nout) { appId = nout.appId; route = 'notify'; headers = { ...headers, ...nout.headers }; return send(nout.status, nout.body); }
             }
             const m = ROUTE.exec(url.pathname);
             if (!m) return sendJson(404, { error: 'not_found' });
