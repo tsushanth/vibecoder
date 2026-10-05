@@ -34,3 +34,11 @@ test('every platform directory the running proxy imports from is copied into the
     for (const d of needed) { if (d.endsWith('.js')) continue; assert.ok(copied.has(d), `Dockerfile does not COPY ${d}`); }
     assert.ok(needed.has('auth') && needed.has('store') && needed.has('vibe-proxy'), [...needed].join(','));
 });
+
+test('test directories of every copied directory are removed from the image', () => {
+    const rm = /^RUN rm -rf (.+)$/m.exec(dockerfile)?.[1].split(/\s+/) || [];
+    for (const d of copied) {
+        if (!fs.existsSync(path.join(ROOT, d, 'test'))) continue;
+        assert.ok(rm.includes(`${d}/test`), `${d}/test is not removed in the image`);
+    }
+});
