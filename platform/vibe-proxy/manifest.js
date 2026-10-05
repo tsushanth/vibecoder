@@ -1,4 +1,5 @@
 // Validates the connector manifest a generated app declares. The manifest is untrusted input.
+import { validatePay } from '../pay/catalog.js';
 const METHODS = new Set(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);
 const NAME = /^[a-z][a-z0-9_-]{0,31}$/;
 const HOST = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
@@ -18,11 +19,14 @@ function pathProblem(p) {
 
 export function validateManifest(m, { allowHeaders = false } = {}) {
     const problems = [];
-    if (!m || typeof m !== 'object' || !m.connectors || typeof m.connectors !== 'object' || Array.isArray(m.connectors)) {
+    const hasPay = !!m && typeof m === 'object' && m.pay !== undefined;
+    if (hasPay) problems.push(...validatePay(m.pay).problems.map((p) => `pay: ${p}`));
+    if (!m || typeof m !== 'object' || (!hasPay && (!m.connectors || typeof m.connectors !== 'object' || Array.isArray(m.connectors)))
+        || (hasPay && m.connectors !== undefined && (!m.connectors || typeof m.connectors !== 'object' || Array.isArray(m.connectors)))) {
         return { ok: false, problems: ['manifest must be an object with a connectors object'] };
     }
-    const entries = Object.entries(m.connectors);
-    if (!entries.length) problems.push('manifest declares no connectors');
+    const entries = Object.entries(m.connectors || {});
+    if (!entries.length && !hasPay) problems.push('manifest declares no connectors');
     if (entries.length > MAX_CONNECTORS) problems.push(`too many connectors (max ${MAX_CONNECTORS})`);
     for (const [name, c] of entries) {
         const at = `connector "${String(name).slice(0, 40)}"`;
