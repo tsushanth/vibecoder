@@ -136,3 +136,11 @@ t('the started server wires ensure and enabled: an app can be created and switch
     assert.equal((await stores.appStore.get('wired-ensure')).enabled, false);
     await s.close();
 });
+
+t('the started server wires setDomains', async () => {
+    const stores = createPgStores({ pool: db.pool, masterKey: MK }); await stores.upsertApp({ appId: 'wired-dom', enabled: true });
+    const s = await boot();
+    const r = await fetch(url(s, '/admin/apps/wired-dom/domains'), { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${ADMIN_T}`, 'fly-client-ip': '2.2.2.2' }, body: JSON.stringify({ domains: ['wired.example.com'] }) });
+    assert.equal(r.status, 204); assert.deepEqual((await stores.appStore.get('wired-dom')).domains, ['wired.example.com']);
+    await s.close();
+});
