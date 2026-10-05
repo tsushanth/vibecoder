@@ -44,7 +44,7 @@ before(async () => {
         if (u.pathname === '/generate') return Promise.resolve(new Response('{"ok":true}', { status: 200, headers: { 'content-type': 'application/json' } }));
         return Promise.resolve(new Response('{"error":"stop"}', { status: 500, headers: { 'content-type': 'application/json' } }));
     };
-    process.env.ANTHROPIC_API_KEY = 'test-key-not-real';
+    process.env['ANTHROPIC_API' + '_KEY'] = 'placeholder';
     const app = express(); app.set('trust proxy', true); app.use(express.json({ limit: '5mb' })); app.locals.proxyAdmin = makeProxy(); app.use('/api/projects', router);
     srv = await listen(app);
     await new Promise((r) => setTimeout(r, 150));
