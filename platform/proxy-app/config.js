@@ -21,6 +21,9 @@ export function loadConfig(env = process.env) {
     const adminToken = need(env, 'PROXY_ADMIN_TOKEN');
     if (adminToken.length < 32) throw new Error('invalid setting PROXY_ADMIN_TOKEN: expected at least 32 characters');
     if (!/^[0-9a-f]{64}$/i.test(masterKey)) throw new Error('invalid setting VIBE_MASTER_KEY: expected 64 hex characters (32 bytes)');
+    const resendKey = env.RESEND_API_KEY?.trim() || null;
+    const authMailFrom = env.AUTH_MAIL_FROM?.trim() || null;
+    if (resendKey && !authMailFrom) throw new Error('missing required setting AUTH_MAIL_FROM (needed when RESEND_API_KEY is set)');
     const config = {
         port: int(env, 'PORT', 8080, { min: 1, max: 65535 }),
         dbPoolMax: int(env, 'DB_POOL_MAX', 5, { min: 1, max: 20 }),
@@ -31,9 +34,10 @@ export function loadConfig(env = process.env) {
             dailyCalls: int(env, 'DAILY_CALLS', 5000, { min: 1, max: 100000000 }),
             dailySpendMicros: int(env, 'APP_AI_DAILY_MICROS', 50_000, { min: 0, max: 1_000_000_000 }),
         },
+        authMailFrom,
         platformAiDailyMicros: int(env, 'PLATFORM_AI_DAILY_MICROS', 2_000_000, { min: 0, max: 1_000_000_000 }),
     };
     // non-enumerable so JSON.stringify and console.log of the config never print secrets
-    Object.defineProperty(config, 'secrets', { value: { databaseUrl, masterKey, openRouterKey, adminToken }, enumerable: false });
+    Object.defineProperty(config, 'secrets', { value: { databaseUrl, masterKey, openRouterKey, adminToken, resendKey }, enumerable: false });
     return config;
 }
