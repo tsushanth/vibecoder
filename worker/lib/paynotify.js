@@ -59,6 +59,7 @@ export function payProblems(files, { state, catalog }) {
     if (uses(files, /\bvibe\.pay\s*\.\s*orders\b/) && !uses(files, /\bvibe\.auth\b/)) once('the app uses vibe.pay.orders, which only works for a signed-in user, but never uses vibe.auth: add a sign-in form or remove the orders list');
     if (codeFiles(files).some(([, c]) => CARD_INPUT.test(c))) once('never ask for a card number, expiry or security code in the page: Stripe\'s own checkout page collects card details, so remove those inputs and call vibe.pay.checkout instead');
     if (state !== 'ok') return problems;
+    if (checkouts.length && !uses(files, /\b424\b|stripe_key_missing/)) once('the app calls vibe.pay.checkout but never handles the error when the owner has not added Stripe keys: in the catch, check err.status === 424 (err.code "stripe_key_missing") and show "The app owner still needs to add Stripe keys"');
 
     const ids = catalog.map((i) => i.id);
     let dynamic = false;

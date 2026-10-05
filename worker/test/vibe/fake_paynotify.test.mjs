@@ -65,7 +65,7 @@ const CHROME = process.env.CHROME_PATH || ['/Applications/Google Chrome.app/Cont
 const real = (n, f) => test(n, { skip: CHROME && hasPuppeteer ? false : 'needs Chrome and puppeteer-core installed (otherwise the check fails open and proves nothing)' }, f);
 const page = (js) => `<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width"><script src="vibe.js"></script></head><body><!--${'x'.repeat(250)}--><button id="go" onclick="go()">Go</button><div id="out"></div><script>${js}</script></body></html>`;
 const CATALOG = JSON.stringify({ pay: { catalog: [{ id: 'tee', name: 'Tee', amountCents: 2500, currency: 'usd', mode: 'payment' }] } });
-const guard = 'function show(t){ document.getElementById("out").textContent = t; }';
+const guard = 'function show(t){ document.getElementById("out").textContent = t; } function owner(e){ if (e && e.status === 424) show("The app owner still needs to add Stripe keys"); }';
 const run = (js) => fullChecks({ 'index.html': page(guard + js), [MANIFEST_FILE]: CATALOG }, { vibe: true, chrome: CHROME });
 
 real('a store whose buy button calls vibe.pay.checkout passes, and the page stays on the app (no redirect to Stripe)', async () => {
