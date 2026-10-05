@@ -1,4 +1,5 @@
 import { injectAppId } from "./appId.js";
+import { stripPrivateFiles } from "./publishFilter.js";
 import express from "express";
 import { Buffer } from "buffer";
 import zlib from "zlib";
@@ -519,7 +520,7 @@ app.post("/deploy", async (req, res) => {
 
     let files;
     try {
-      files = await unzipBundle(zipBuffer);
+      files = stripPrivateFiles(await unzipBundle(zipBuffer));
     } catch (err) {
       return res.status(400).json({ error: "Failed to extract ZIP bundle", details: err.message });
     }
