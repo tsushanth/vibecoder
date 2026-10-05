@@ -20,6 +20,7 @@ import { fullChecks } from './lib/browsercheck.js';
 import { readProject, writeFiles } from './lib/files.js';
 import { makeOutcomeLogger } from './lib/outcome.js';
 import { scrubSecrets } from './lib/scrub.js';
+import { loadVibeSdk, injectSdk, withVibeRules } from './lib/vibe.js';
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -44,6 +45,10 @@ const directLlm = process.env.OPENROUTER_API_KEY
     : null;
 const logOutcome = makeOutcomeLogger({ file: process.env.OUTCOME_LOG || path.join(path.dirname(new URL(import.meta.url).pathname), 'outcomes.jsonl') });
 
+// The vibe.js SDK (vibe.api / vibe.ai through the platform proxy). Off unless VIBE_PROXY_ENABLED is exactly "true": apps must not be told to call a proxy that is not live.
+const VIBE_SDK = loadVibeSdk();
+const VIBE_ON = process.env.VIBE_PROXY_ENABLED === 'true' && !!VIBE_SDK;
+
 function useDirect() {
     return !!directLlm && DIRECT_PERCENT > 0 && Math.random() * 100 < DIRECT_PERCENT;
 }
@@ -57,9 +62,9 @@ async function runDirect({ kind, prompt, projectDir }) {
     }
     // credentials pasted into a prompt must never reach a model provider or be copied into the app
     const { text: safePrompt, count: scrubbed } = scrubSecrets(prompt);
-    const r = await generateApp({ prompt: safePrompt, kind, existing, llm: directLlm, models: DIRECT_MODELS, rules: CLAUDE_MD, check: fullChecks, deadlineMs: parseInt(process.env.DIRECT_DEADLINE_MS || '480000', 10) });
+    const r = await generateApp({ prompt: safePrompt, kind, existing, llm: directLlm, models: DIRECT_MODELS, rules: withVibeRules(CLAUDE_MD, VIBE_ON), check: (files) => fullChecks(files, { vibe: VIBE_ON }), deadlineMs: parseInt(process.env.DIRECT_DEADLINE_MS || '480000', 10) });
     if (!r.ok) return { success: false, cause: r.cause, attempts: r.attempts, costUsd: r.costUsd, scrubbed };
-    writeFiles(projectDir, r.files);
+    writeFiles(projectDir, injectSdk(r.files, { sdk: VIBE_SDK, enabled: VIBE_ON }));
     return { success: true, model: r.model, attempts: r.attempts, costUsd: r.costUsd, fixes: r.fixes, scrubbed };
 }
 
@@ -445,7 +450,7 @@ app.get('/ready', authMiddleware, async (req, res) => {
 app.get('/health', (req, res) => {
     let cliAvailable = false, cliPath = '';
     try { cliPath = findClaudeCLI(); cliAvailable = true; } catch {}
-    res.json({ healthy: true, cliAvailable, cliPath, activeGenerations, maxConcurrent: MAX_CONCURRENT, quotaExhausted, quotaResetTime, uptime: process.uptime(), direct: { enabled: !!directLlm, percent: DIRECT_PERCENT, models: DIRECT_MODELS, breakersOpen: DIRECT_MODELS.filter((m) => directLlm?.isOpen(m)) } });
+    res.json({ healthy: true, cliAvailable, cliPath, activeGenerations, maxConcurrent: MAX_CONCURRENT, quotaExhausted, quotaResetTime, uptime: process.uptime(), direct: { enabled: !!directLlm, percent: DIRECT_PERCENT, models: DIRECT_MODELS, breakersOpen: DIRECT_MODELS.filter((m) => directLlm?.isOpen(m)) }, vibe: { enabled: VIBE_ON } });
 });
 
 // ============================================

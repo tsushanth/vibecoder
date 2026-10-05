@@ -9,7 +9,7 @@ You cannot run tools. Reply with ONLY the project files, each COMPLETE, in this 
 <file path="index.html">
 ...full contents...
 </file>
-Emit every file in full (no ellipsis, no placeholders). index.html is required for a new app. For an edit, return only the files you changed or added, each complete. No text outside the <file> blocks. Do not recreate vibedata.js.`;
+Emit every file in full (no ellipsis, no placeholders). index.html is required for a new app. For an edit, return only the files you changed or added, each complete. No text outside the <file> blocks. Do not write vibedata.js or vibe.js (the platform provides them).`;
 
 export const BUILD_RULES = `IMPORTANT RULES:
 - index.html is the entry point; every function fully implemented, no stubs or TODOs
