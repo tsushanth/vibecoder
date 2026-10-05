@@ -66,7 +66,7 @@ test('redirects are not followed and the base URL must be https', async () => {
 test('the client never exposes the token or a way to read a secret value', () => {
     const { admin } = rig(res(204));
     assert.equal(JSON.stringify(admin).includes(TOKEN), false);
-    assert.deepEqual(Object.keys(admin).sort(), ['configured', 'deleteSecret', 'ensureApp', 'listSecrets', 'registerApp', 'setEnabled', 'setSecret']);
+    assert.deepEqual(Object.keys(admin).sort(), ['configured', 'deleteSecret', 'ensureApp', 'listSecrets', 'registerApp', 'setDomains', 'setEnabled', 'setSecret']);
 });
 
 test('ensureApp posts to the ensure endpoint with no body, and setEnabled posts the flag', async () => {
@@ -84,4 +84,12 @@ test('ensureApp and setEnabled encode the app id and report errors like the othe
     const c = createProxyAdmin({ baseUrl: '', token: '' });
     await assert.rejects(() => c.ensureApp('x'), (e) => e.code === 'not_configured');
     await assert.rejects(() => c.setEnabled('x', true), (e) => e.code === 'not_configured');
+});
+
+test('setDomains posts the domain list to the domains endpoint', async () => {
+    const a = rig(res(204)); await a.admin.setDomains('my-app', ['shop.example.com']);
+    assert.equal(a.calls[0].url, 'https://proxy.test/admin/apps/my-app/domains'); assert.equal(a.calls[0].init.method, 'POST'); assert.deepEqual(a.calls[0].body, { domains: ['shop.example.com'] });
+    const b = rig(res(404, { error: 'unknown_app' }));
+    await assert.rejects(() => b.admin.setDomains('x', []), (e) => e.status === 404 && e.code === 'unknown_app');
+    await assert.rejects(() => createProxyAdmin({ baseUrl: '', token: '' }).setDomains('x', []), (e) => e.code === 'not_configured');
 });
