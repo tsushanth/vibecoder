@@ -95,8 +95,12 @@ export function createPgStores({ pool, masterKey, now = () => Date.now() }) {
     };
 
     /** Copies every secret of one app to another (decrypted and re-encrypted, since the app id is bound into the ciphertext). Returns the count. */
-    async function copySecrets(fromAppId, toAppId) {
+    async function copySecrets(fromAppId, toAppId, { replace = false } = {}) {
         const rows = await secretStore.list(fromAppId);
+        if (replace) {
+            const keep = new Set(rows.map((r) => r.name));
+            for (const { name } of await secretStore.list(toAppId)) if (!keep.has(name)) await secretStore.delete(toAppId, name);
+        }
         let copied = 0;
         for (const { name } of rows) {
             const value = await secretStore.get(fromAppId, name);

@@ -106,6 +106,24 @@ t('copy-secrets validates ids, requires both apps and refuses copying onto itsel
     assert.equal((await call('POST', '/admin/apps/dst1/copy-secrets', { from: 'src1' }, 'wrong')).status, 401);
 });
 
+t('copy-secrets with replace removes secrets the source does not have (a reused subdomain must not keep a previous owner\'s keys)', async () => {
+    await stores.upsertApp({ appId: 'src2' }); await stores.upsertApp({ appId: 'dst2' });
+    await stores.secretStore.set('src2', 'A_KEY', VALUE + 'A');
+    await stores.secretStore.set('dst2', 'OLD_OWNER_KEY', VALUE + 'old'); await stores.secretStore.set('dst2', 'A_KEY', VALUE + 'stale');
+    const r = await call('POST', '/admin/apps/dst2/copy-secrets', { from: 'src2', replace: true });
+    assert.deepEqual(await r.json(), { copied: 1 });
+    assert.equal(await stores.secretStore.has('dst2', 'OLD_OWNER_KEY'), false);
+    assert.equal(await stores.secretStore.get('dst2', 'A_KEY'), VALUE + 'A');
+});
+
+t('copy-secrets with replace and an empty source clears the destination; a non-boolean replace is 400', async () => {
+    await stores.secretStore.set('dst2', 'LEFTOVER_KEY', VALUE + 'x');
+    await stores.upsertApp({ appId: 'empty2' });
+    assert.deepEqual(await (await call('POST', '/admin/apps/dst2/copy-secrets', { from: 'empty2', replace: true })).json(), { copied: 0 });
+    assert.deepEqual(await stores.secretStore.list('dst2'), []);
+    assert.equal((await call('POST', '/admin/apps/dst2/copy-secrets', { from: 'src2', replace: 'yes' })).status, 400);
+});
+
 t('copy-secrets with nothing to copy is a harmless zero', async () => {
     await stores.upsertApp({ appId: 'empty1' });
     const r = await call('POST', '/admin/apps/dst1/copy-secrets', { from: 'empty1' });
