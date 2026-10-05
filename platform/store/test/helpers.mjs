@@ -7,14 +7,14 @@ const conn = (db) => ({ host: process.env.PGHOST || 'localhost', user: process.e
 export const MIGRATION = fileURLToPath(new URL('../migrations/001_platform.sql', import.meta.url));
 
 /** Creates a throwaway database owned by this test run, applies the migration, returns pools and a cleanup. */
-export async function scratchDb() {
+export async function scratchDb({ migrate = true } = {}) {
     const name = `vibe_platform_test_${randomBytes(4).toString('hex')}`;
     const admin = new pg.Pool({ ...conn('postgres'), max: 1 });
     try { await admin.query(`create database ${name}`); } catch (e) { await admin.end().catch(() => {}); return { unavailable: String(e.message) }; }
     const pool = new pg.Pool({ ...conn(name), max: 10 });
-    await pool.query(fs.readFileSync(MIGRATION, 'utf8'));
+    if (migrate) await pool.query(fs.readFileSync(MIGRATION, 'utf8'));
     return {
-        name, pool, admin, connFor: (extra) => new pg.Pool({ ...conn(name), ...extra, max: 2 }),
+        name, pool, admin, connFor: (extra) => new pg.Pool({ ...conn(name), max: 2, ...extra }),
         async cleanup() { await pool.end().catch(() => {}); await admin.query(`drop database if exists ${name} with (force)`).catch(() => {}); for (const r of ['anon_sim', 'vibe_proxy']) await admin.query(`drop role if exists ${r}`).catch(() => {}); await admin.end().catch(() => {}); },
     };
 }
