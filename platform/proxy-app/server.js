@@ -6,9 +6,10 @@ import { resolveManifest } from '../vibe-proxy/builtins.js';
 import { validateManifest } from '../vibe-proxy/manifest.js';
 import { createAdmin } from './admin.js';
 import { handleAuth, AUTH_OPS } from '../auth/routes.js';
+import { handleStorage, STORAGE_OPS, MAX_UPLOAD_BYTES } from '../storage/routes.js';
 
 const MAX_BODY = 200_000;
-const ROUTE = new RegExp(`^/([a-z0-9][a-z0-9-]{0,62})/(api|ai|auth/(?:${AUTH_OPS.join('|')}))$`);
+const ROUTE = new RegExp(`^/([a-z0-9][a-z0-9-]{0,62})/(api|ai|auth/(?:${AUTH_OPS.join('|')})|storage/(?:${STORAGE_OPS.join('|')}))$`);
 const BASE_HEADERS = { 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' };
 
 function originAllowed(origin, appId, app, baseDomain) {
@@ -27,7 +28,18 @@ async function readJson(req, max = MAX_BODY) {
     try { const v = JSON.parse(Buffer.concat(chunks).toString('utf8') || 'null'); return v && typeof v === 'object' && !Array.isArray(v) ? { value: v } : { error: 400 }; } catch { return { error: 400 }; }
 }
 
-export function createHandler({ authService, appStore, secretStore, limiter, globalAiLimiter, meter, fetchImpl, resolve, openRouterKey, log = () => {}, baseDomain, adminToken, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, limiterStore }) {
+export async function readRaw(req, max) {
+    if (Number(req.headers['content-length']) > max) return { error: 413 };
+    let size = 0; const chunks = [];
+    for await (const c of req) {
+        size += c.length;
+        if (size > 4 * max) { req.destroy(); return { error: 413 }; } // a client that lies about its length gets cut off
+        if (size <= max) chunks.push(c);
+    }
+    return size > max ? { error: 413 } : { value: Buffer.concat(chunks) };
+}
+
+export function createHandler({ storageService, authService, appStore, secretStore, limiter, globalAiLimiter, meter, fetchImpl, resolve, openRouterKey, log = () => {}, baseDomain, adminToken, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, limiterStore }) {
     const admin = adminToken ? createAdmin({ token: adminToken, appStore, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, secretStore, limiterStore, baseDomain }) : null;
     const aiLimiter = {
         async check(a) {
@@ -74,10 +86,18 @@ export function createHandler({ authService, appStore, secretStore, limiter, glo
             if (req.method !== 'POST') return sendJson(405, { error: 'method_not_allowed' });
             if (!okOrigin) return sendJson(403, { error: 'origin_not_allowed' });
             if (!app.enabled) return sendJson(403, { error: 'app_disabled' });
-            const body = await readJson(req);
+            const isUpload = route === 'storage/upload';
+            const body = isUpload ? await readRaw(req, MAX_UPLOAD_BYTES) : await readJson(req);
             if (body.error) return sendJson(body.error, { error: body.error === 413 ? 'request_too_large' : 'bad_json' });
             const ip = req.headers['fly-client-ip'] || req.socket.remoteAddress || '';
             let result;
+            if (route.startsWith('storage/')) {
+                const gate = await limiter.check({ appId, ip });
+                if (!gate.ok) return sendJson(gate.reason === 'app_disabled' ? 403 : 429, { error: gate.reason });
+                const bearer = /^Bearer (\S+)$/.exec(String(req.headers.authorization || ''))?.[1];
+                const out = await handleStorage({ op: route.slice(8), bearer, query: url.searchParams, contentType: req.headers['content-type'], body: isUpload ? body.value : undefined, json: isUpload ? undefined : body.value, appId, auth: authService, storage: storageService });
+                return sendJson(out.status, out.body);
+            }
             if (route.startsWith('auth/')) {
                 const gate = await limiter.check({ appId, ip });
                 if (!gate.ok) return sendJson(gate.reason === 'app_disabled' ? 403 : 429, { error: gate.reason });
