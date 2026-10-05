@@ -29,17 +29,36 @@ function appSubdomains(project, baseDomain) {
     return out;
 }
 
-// The secrets an app's manifest asks for, one entry per secret name with the connectors that use it. Names only.
+// An app that sells things (its manifest has a pay catalog) runs on the creator's own Stripe account: the proxy needs their secret
+// key and the signing secret of the webhook they register in Stripe (platform/pay/service.js reads these two vault names).
+const PAY_SECRETS = [
+    { name: 'STRIPE_SECRET_KEY', purpose: 'Your Stripe secret key: starts with sk_ or rk_ (test keys start with sk_test_)' },
+    { name: 'STRIPE_WEBHOOK_SECRET', purpose: 'The signing secret of your Stripe webhook endpoint: starts with whsec_' },
+];
+const hasPay = (app) => Number.isInteger(app?.pay?.items) && app.pay.items > 0;
+
+// The secrets an app's manifest asks for, one entry per secret name with the connectors that use it, then the Stripe keys when
+// the app sells things (connector 'pay', with a short `purpose` hint). Names and hints only.
 function requiredFrom(app) {
     const byName = new Map();
     for (const c of Array.isArray(app?.connectors) ? app.connectors : []) {
         if (!c || typeof c.name !== 'string' || !c.secret || !SECRET_NAME.test(String(c.secret.name || ''))) continue;
         byName.set(c.secret.name, [...(byName.get(c.secret.name) || []), c.name]);
     }
-    return [...byName].map(([name, connectors]) => ({ name, connectors }));
+    const purposes = new Map();
+    if (hasPay(app)) for (const { name, purpose } of PAY_SECRETS) { byName.set(name, [...(byName.get(name) || []), 'pay']); purposes.set(name, purpose); }
+    return [...byName].map(([name, connectors]) => ({ name, connectors, ...(purposes.has(name) ? { purpose: purposes.get(name) } : {}) }));
 }
 
-export function createSecretsRouter({ supabase = defaultSupabase, verifyUser = verifiedUserId, proxyAdmin, log = console.error, maxPerMinute = 60, baseDomain = process.env.BASE_DOMAIN || 'vibebuild.cc' }) {
+// Where the creator registers the Stripe webhook: the proxy serves /<app>/pay/webhook for the app the browser calls, which is the
+// published subdomain, or the preview one until the app is published (appSubdomains lists the preview first, the published last).
+// Null when the project has no app of its own yet.
+function payWebhookUrl(subdomains, proxyPublicUrl) {
+    const sub = subdomains.at(-1);
+    return sub ? `${String(proxyPublicUrl).replace(/\/+$/, '')}/${sub}/pay/webhook` : null;
+}
+
+export function createSecretsRouter({ supabase = defaultSupabase, verifyUser = verifiedUserId, proxyAdmin, log = console.error, maxPerMinute = 60, baseDomain = process.env.BASE_DOMAIN || 'vibebuild.cc', proxyPublicUrl = process.env.PROXY_PUBLIC_URL || 'https://vibe-proxy.vibebuild.cc' }) {
     const router = express.Router({ mergeParams: true });
     const fail = (res, op, id, e) => {
         log(`[secrets] ${op} failed project=${id} code=${e?.code || 'error'}`);
@@ -71,7 +90,7 @@ export function createSecretsRouter({ supabase = defaultSupabase, verifyUser = v
                 proxyAdmin.listSecrets(req.projectId).catch((e) => { if (e?.code === 'unknown_app') return []; throw e; }),
                 proxyAdmin.getApp(req.projectId).catch((e) => { if (e?.code === 'unknown_app') return null; throw e; }),
             ]);
-            res.json({ secrets, required: requiredFrom(app) });
+            res.json({ secrets, required: requiredFrom(app), ...(hasPay(app) ? { pay: { webhookUrl: payWebhookUrl(req.appSubdomains, proxyPublicUrl) } } : {}) });
         } catch (e) {
             fail(res, 'list', req.projectId, e);
         }
