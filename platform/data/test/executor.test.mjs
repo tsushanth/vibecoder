@@ -29,6 +29,16 @@ t('provisioning creates a role and schema once, registers them, and is repeatabl
     const fresh = createDataExecutor({ pool: proxyPool }); assert.equal(await fresh.ensure('app-a'), s1);
 });
 
+t('peekSpec reads the stored spec without provisioning anything', async () => {
+    assert.deepEqual(await ex.peekSpec('app-never-provisioned'), { spec: null, version: 0 });
+    assert.equal((await db.pool.query("select count(*)::int n from platform.app_dbs where app_id='app-never-provisioned'")).rows[0].n, 0);
+    await stores.upsertApp({ appId: 'app-peek', enabled: true, manifest: null });
+    assert.deepEqual(await ex.peekSpec('app-peek'), { spec: null, version: 0 }, 'a registered app with no database yet');
+    assert.equal((await db.pool.query("select count(*)::int n from platform.app_dbs where app_id='app-peek'")).rows[0].n, 0);
+    await ex.applySchema({ appId: 'app-peek', spec: spec(TODO) });
+    const p = await ex.peekSpec('app-peek'); assert.equal(p.version, 1); assert.deepEqual(p.spec, spec(TODO));
+});
+
 t('provision_app_db refuses bad and unknown app ids', async () => {
     for (const bad of ['', 'A', "x'; drop schema platform;--", '../x', null]) await assert.rejects(() => proxyPool.query('select * from platform.provision_app_db($1)', [bad]), /invalid app id/, String(bad));
     await assert.rejects(() => proxyPool.query("select * from platform.provision_app_db('ghost-app')"), /unknown app/);
