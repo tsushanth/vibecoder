@@ -45,7 +45,7 @@ test('the snippet is ES5: no arrow functions, let/const, template strings or asy
 test('vibe.pay exposes exactly checkout and orders, and the other APIs are untouched', () => {
     const { vibe } = load();
     assert.deepEqual(Object.keys(vibe.pay).sort(), ['checkout', 'orders']);
-    assert.deepEqual(Object.keys(vibe).sort(), ['ai', 'api', 'auth', 'pay', 'version']);
+    assert.deepEqual(Object.keys(vibe).sort(), ['ai', 'api', 'auth', 'db', 'pay', 'version']);
 });
 
 test('checkout posts only the item id and quantity to /<app>/pay/checkout and redirects', async () => {
