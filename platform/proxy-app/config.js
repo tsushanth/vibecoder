@@ -41,6 +41,8 @@ export function loadConfig(env = process.env) {
         },
         authMailFrom,
         notify: loadNotifyConfig(env, baseDomain),
+        jobsEnabled: env.JOBS_ENABLED === 'true',   // scheduled jobs run only when this is exactly "true"; default off
+        jobsTickMs: int(env, 'JOBS_TICK_MS', 30_000, { min: 1000, max: 600_000 }),
         platformAiDailyMicros: int(env, 'PLATFORM_AI_DAILY_MICROS', 2_000_000, { min: 0, max: 1_000_000_000 }),
     };
     // non-enumerable so JSON.stringify and console.log of the config never print secrets

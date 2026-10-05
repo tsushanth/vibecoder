@@ -8,13 +8,9 @@ const read = (rel) => fs.readFileSync(fileURLToPath(new URL(rel, import.meta.url
 const SNIPPET = /\/\* BEGIN vibe\.pay \*\/([\s\S]*?)\/\* END vibe\.pay \*\//.exec(read('../sdk-snippet.js'))[1];
 const VIBE = read('../../sdk/vibe.js');
 
-// Splice exactly as documented in sdk-snippet.js: block before `window.vibe = {`, and `pay: pay` in the exported object.
-function spliced() {
-    const marker = /^(\s*)window\.vibe = \{/m;
-    assert.ok(marker.test(VIBE), 'vibe.js must still export through `window.vibe = {`');
-    return VIBE.replace(marker, (m) => `${SNIPPET}\n${m} pay: pay,`);
-}
-const SRC = spliced();
+// The block is spliced into sdk/vibe.js itself; the SDK under test is the real file.
+assert.ok(VIBE.includes(SNIPPET.trim()), 'sdk/vibe.js must contain the vibe.pay block from pay/sdk-snippet.js');
+const SRC = VIBE;
 
 function load({ host = 'myapp.vibebuild.cc', win = {}, reply } = {}) {
     const calls = []; const assigned = [];
@@ -45,7 +41,7 @@ test('the snippet is ES5: no arrow functions, let/const, template strings or asy
 test('vibe.pay exposes exactly checkout and orders, and the other APIs are untouched', () => {
     const { vibe } = load();
     assert.deepEqual(Object.keys(vibe.pay).sort(), ['checkout', 'orders']);
-    assert.deepEqual(Object.keys(vibe).sort(), ['ai', 'api', 'auth', 'db', 'pay', 'version']);
+    assert.deepEqual(Object.keys(vibe).sort(), ['ai', 'api', 'auth', 'db', 'notify', 'pay', 'storage', 'version']);
 });
 
 test('checkout posts only the item id and quantity to /<app>/pay/checkout and redirects', async () => {

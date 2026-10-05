@@ -16,6 +16,9 @@
  *   vibe.db.from('todos').delete([{col:'id', op:'eq', val:id}])                -> where is required
  *   Tables and columns come from the app's vibe.schema.json; id, user_id and created_at are added to every row by the platform
  *   and cannot be written. Who may read or write a table follows its access rule; signed-in calls send the session automatically.
+ *   vibe.storage.upload(file, {public}) / list() / url(id) / remove(id)   -> files for signed-in users (5 MB; images, pdf, mp3, text)
+ *   vibe.pay.checkout({item:'pro', quantity:1}) -> redirects to Stripe Checkout; vibe.pay.orders() -> the signed-in user's orders
+ *   vibe.notify.me({subject, text}) -> emails the signed-in user themself (never anyone else), rate-limited
  * All calls return Promises. Errors reject with Error: err.status (0 = network/timeout), err.code, err.retryAfter (seconds).
  * Keys never live in the app: the platform adds them server-side. Only connectors declared in the app manifest or built in work.
  * Config for custom domains: window.VIBE_APP_ID, window.VIBE_BASE, window.VIBE_TIMEOUT_MS.
@@ -48,14 +51,16 @@
   }
   function notify(user) { listeners.slice().forEach(function (fn) { try { fn(user); } catch (e) { /* a listener must not break the others */ } }); }
 
-  function post(kind, payload, token) {
+  function post(kind, payload, token, raw) {
     if (!appId) return Promise.reject(fail('vibe: app id unknown (set window.VIBE_APP_ID for custom domains)', 0, 'no_app_id'));
     var ctrl = new AbortController();
     var timer = setTimeout(function () { ctrl.abort(); }, window.VIBE_TIMEOUT_MS || 40000);
-    return fetch(BASE + '/' + encodeURIComponent(appId) + '/' + kind, {
+    var headers = { 'Content-Type': raw ? raw.type : 'application/json' };
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    return fetch(BASE + '/' + encodeURIComponent(appId) + '/' + kind + (raw ? raw.query : ''), {
       method: 'POST',
-      headers: token ? { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token } : { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      headers: headers,
+      body: raw ? raw.body : JSON.stringify(payload),
       signal: ctrl.signal
     }).then(function (r) {
       var json = /json/i.test(r.headers.get('content-type') || '');
@@ -225,5 +230,80 @@
     };
   }
 
-  window.vibe = { version: '1', api: api, ai: { chat: chat, ask: ask }, auth: { signIn: signIn, user: user, signOut: signOut, onChange: onChange, ready: ready }, db: { from: from } };
+  var PAY_URL = /^https:\/\/checkout\.stripe\.com\//;
+  function payCheckout(o) {
+    o = o || {};
+    return Promise.resolve().then(function () {
+      if (typeof o.item !== 'string' || !o.item) throw fail('vibe.pay.checkout({item}): item must be a catalog item id', 0, 'bad_request');
+      var q = o.quantity === undefined ? 1 : o.quantity;
+      if (typeof q !== 'number' || q !== Math.floor(q) || q < 1) throw fail('vibe.pay.checkout: quantity must be a whole number of at least 1', 0, 'bad_request');
+      var p = { item: o.item, quantity: q };
+      if (o.successPath !== undefined) p.successPath = o.successPath;
+      if (o.cancelPath !== undefined) p.cancelPath = o.cancelPath;
+      return post('pay/checkout', p, getToken() || undefined);
+    }).then(function (r) {
+      if (!r || typeof r.url !== 'string' || !PAY_URL.test(r.url)) throw fail('vibe.pay.checkout: unexpected response', 0, 'bad_response');
+      if (o.redirect !== false && typeof location !== 'undefined' && typeof location.assign === 'function') location.assign(r.url);
+      return { url: r.url, mode: r.mode };
+    });
+  }
+  function payOrders() {
+    return Promise.resolve().then(function () {
+      var t = getToken();
+      if (!t) throw fail('vibe.pay.orders: sign in first', 401, 'unauthorized');
+      return post('pay/orders', {}, t);
+    }).then(function (r) { return r.orders; });
+  }
+  var pay = { checkout: payCheckout, orders: payOrders };
+
+  // ---- vibe.storage: files for signed-in users (png, jpeg, gif, webp, pdf, mp3, plain text; up to 5 MB) ----
+  function needToken(what) {
+    var t = getToken();
+    if (!t) throw fail('vibe.storage.' + what + ': sign in first', 401, 'unauthorized');
+    return t;
+  }
+  function stUpload(file, o) {
+    o = o || {};
+    return Promise.resolve().then(function () {
+      var t = needToken('upload');
+      if (!file || typeof file.size !== 'number' || typeof file.type !== 'string' || !file.type) throw fail('vibe.storage.upload(file): pass a File or Blob with a type', 0, 'bad_request');
+      if (file.size < 1 || file.size > 5 * 1024 * 1024) throw fail('vibe.storage.upload: files must be between 1 byte and 5 MB', 0, 'bad_request');
+      var q = '?name=' + encodeURIComponent(file.name || 'file') + (o.public ? '&public=1' : '');
+      return post('storage/upload', null, t, { body: file, type: file.type, query: q });
+    }).then(function (r) { return r.file; });
+  }
+  function stList() {
+    return Promise.resolve().then(function () { return post('storage/list', {}, needToken('list')); }).then(function (r) { return r.files; });
+  }
+  function stUrl(id) {
+    return Promise.resolve().then(function () {
+      var t = needToken('url');
+      if (typeof id !== 'string' || !id) throw fail('vibe.storage.url(id): id must be a file id', 0, 'bad_request');
+      return post('storage/url', { id: id }, t);
+    }).then(function (r) { return r.url; });
+  }
+  function stRemove(id) {
+    return Promise.resolve().then(function () {
+      var t = needToken('remove');
+      if (typeof id !== 'string' || !id) throw fail('vibe.storage.remove(id): id must be a file id', 0, 'bad_request');
+      return post('storage/delete', { id: id }, t);
+    }).then(function () { return { ok: true }; });
+  }
+  var storage = { upload: stUpload, list: stList, url: stUrl, remove: stRemove };
+
+  function notifyMe(o) {
+    return Promise.resolve().then(function () {
+      if (!o || typeof o !== 'object' || typeof o.subject !== 'string' || !o.subject.trim() || typeof o.text !== 'string' || !o.text.trim()) {
+        throw fail('vibe.notify.me({subject, text}): subject and text must be non-empty strings', 0, 'bad_request');
+      }
+      var t = getToken();
+      if (!t) throw fail('vibe.notify.me: the user must be signed in', 401, 'unauthorized');
+      return post('notify/me', { subject: o.subject, text: o.text }, t).then(function (r) { return { ok: true }; }, function (e) {
+        if (e && e.status === 401) setToken(null);
+        throw e;
+      });
+    });
+  }
+  var notifyApi = { me: notifyMe };
+  window.vibe = { version: '1', api: api, ai: { chat: chat, ask: ask }, auth: { signIn: signIn, user: user, signOut: signOut, onChange: onChange, ready: ready }, db: { from: from }, pay: pay, storage: storage, notify: notifyApi };
 })();

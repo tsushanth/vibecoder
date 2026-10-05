@@ -9,20 +9,22 @@ import { zip, file } from '../helpers/zip.mjs';
 
 const MANIFEST = { connectors: { stocks: { host: 'api.example.com', paths: ['/v1/*'], methods: ['GET'], secret: { name: 'STOCKS_API_KEY', in: 'query', field: 'apikey' } } } };
 const MANIFEST_BUNDLE = zip([file('index.html', '<html></html>'), file('vibe.manifest.json', MANIFEST)]);
+const SPEC = { version: 1, tables: { todos: { access: 'owner', columns: { title: { type: 'text', required: true } } } } };
+const SCHEMA_BUNDLE = zip([file('index.html', '<html></html>'), file('vibe.schema.json', SPEC)]);
 const { supabase } = await import('../../config/database.js');
 
 let undeployRows = [{ subdomain: 'my-app', user_id: 'owner-1' }];
 stubSupabase(supabase, (q) => {
     if (q.table === 'deployments' && q.op === 'select' && q.single) return { data: null, error: { code: 'PGRST116' } };
     if (q.table === 'deployments' && q.op === 'select') return { data: undeployRows.filter((r) => eqOf(q, 'project_id') === 'proj-1' && eqOf(q, 'user_id') === r.user_id), error: null };
-    if (q.table === 'projects' && q.op === 'select' && q.single) return ['proj-1', 'proj-manifest'].includes(eqOf(q, 'id')) ? { data: { bundle: eqOf(q, 'id') === 'proj-manifest' ? MANIFEST_BUNDLE : 'QUJD', creator_id: 'owner-1', github_repo: null, preview_url: null }, error: null } : { data: null, error: { code: 'PGRST116' } };
+    if (q.table === 'projects' && q.op === 'select' && q.single) return ['proj-1', 'proj-manifest', 'proj-schema'].includes(eqOf(q, 'id')) ? { data: { bundle: eqOf(q, 'id') === 'proj-manifest' ? MANIFEST_BUNDLE : eqOf(q, 'id') === 'proj-schema' ? SCHEMA_BUNDLE : 'QUJD', creator_id: 'owner-1', github_repo: null, preview_url: null }, error: null } : { data: null, error: { code: 'PGRST116' } };
     return { data: null, error: null };
 });
 const { default: router } = await import('../../routes/deploy.routes.js');
 
 const realFetch = globalThis.fetch; let deployStatus = 200;
 const calls = []; let behavior = {};
-const fakeProxy = (configured = true) => ({ configured, ensureApp: async (a) => { calls.push(['ensure', a]); if (behavior.ensure) throw behavior.ensure; }, setEnabled: async (a, e) => { calls.push(['enabled', a, e]); if (behavior.enabled) throw behavior.enabled; }, setManifest: async (a, m) => { calls.push(['manifest', a, m]); }, copySecrets: async (to, from, o) => { calls.push(['copy', to, from, o]); return { copied: 0 }; } });
+const fakeProxy = (configured = true) => ({ configured, ensureApp: async (a) => { calls.push(['ensure', a]); if (behavior.ensure) throw behavior.ensure; }, setEnabled: async (a, e) => { calls.push(['enabled', a, e]); if (behavior.enabled) throw behavior.enabled; }, setManifest: async (a, m) => { calls.push(['manifest', a, m]); }, copySecrets: async (to, from, o) => { calls.push(['copy', to, from, o]); return { copied: 0 }; }, setSchema: async (a, spec, o) => { calls.push(['schema', a, spec, o]); if (behavior.schema) throw behavior.schema; return behavior.schemaOut || { version: 1, applied: 2 }; } });
 let srv, srvNoProxy;
 before(async () => {
     globalThis.fetch = (url, opts = {}) => { const u = new URL(String(url)); if (u.hostname === '127.0.0.1') return realFetch(url, opts); return Promise.resolve(new Response(deployStatus === 200 ? '{}' : '{"error":"boom"}', { status: deployStatus, headers: { 'content-type': 'application/json' } })); };
@@ -103,4 +105,36 @@ test('a project id is not accepted as a subdomain', async () => {
     reset();
     const r = await quiet(() => post(srv, { userId: 'owner-1', subdomain: '11111111-2222-3333-4444-555555555555' }));
     assert.equal(r.status, 400); assert.deepEqual(calls, []);
+});
+
+test('deploying a bundle with a schema pushes it to the deployed app and reports schemaStatus', async () => {
+    reset();
+    const r = await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app' }, 'proj-schema'));
+    assert.equal(r.status, 200); assert.deepEqual(await r.json(), { success: true, url: 'https://my-app.vibebuild.cc', schemaStatus: 'applied' });
+    assert.deepEqual(calls.find((c) => c[0] === 'schema'), ['schema', 'my-app', SPEC, { allowDestructive: false }]);
+});
+
+test('a deploy only allows destructive schema changes when the request says allowDestructiveSchema: true', async () => {
+    reset();
+    await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app', allowDestructiveSchema: true }, 'proj-schema'));
+    assert.equal(calls.find((c) => c[0] === 'schema')[3].allowDestructive, true);
+    reset();
+    await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app', allowDestructiveSchema: 'true' }, 'proj-schema'));
+    assert.equal(calls.find((c) => c[0] === 'schema')[3].allowDestructive, false);
+});
+
+test('a schema that needs confirmation or fails does not fail the deploy but is surfaced', async () => {
+    reset(); behavior.schema = new ProxyAdminError(409, 'destructive_change_needs_confirmation');
+    let r = await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app' }, 'proj-schema'));
+    assert.equal(r.status, 200); let j = await r.json(); assert.equal(j.success, true); assert.equal(j.schemaStatus, 'needs_confirmation');
+    reset(); behavior.schema = new ProxyAdminError(422, 'migration_failed');
+    r = await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app' }, 'proj-schema'));
+    assert.equal(r.status, 200); assert.equal((await r.json()).schemaStatus, 'failed');
+    assert.deepEqual(calls.at(-1), ['enabled', 'my-app', true]);
+});
+
+test('a bundle without a schema answers exactly as before (no schemaStatus key)', async () => {
+    reset();
+    const r = await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app' }));
+    assert.deepEqual(await r.json(), { success: true, url: 'https://my-app.vibebuild.cc' });
 });
