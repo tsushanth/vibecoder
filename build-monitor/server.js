@@ -9,11 +9,12 @@
 import http from 'http';
 import http2 from 'http2';
 import crypto from 'crypto';
+import { requireSecret } from './requireSecret.js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://owvvrljdfnhntwedepkl.supabase.co';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 const WORKER_URL = process.env.WORKER_URL || 'http://vibebuild-nginx:3456';
-const WORKER_SECRET = process.env.WORKER_SECRET || 'vibecoder-worker-secret-2024';
+const WORKER_SECRET = requireSecret('WORKER_SECRET');
 const DEPLOY_URL = process.env.DEPLOY_SERVER_URL || 'https://vibecoder-deploy.fly.dev';
 const MAX_RETRIES = 3;
 const STALE_MINUTES = 15;
