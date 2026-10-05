@@ -60,6 +60,17 @@ t('the recipient cannot be chosen by the browser: to, cc, bcc, from and email fi
     assert.deepEqual(Object.keys(mails[0].headers).sort(), ['List-Unsubscribe', 'List-Unsubscribe-Post']);
 });
 
+t('the unsubscribe link uses NOTIFY_PUBLIC_URL when set', async () => {
+    const custom = await startServer(cfg({ NOTIFY_PUBLIC_URL: 'https://notify.example.org/' }), { pool: db.pool, listenPort: 0, fetchImpl });
+    try { const u = await signIn('app-a'); assert.equal((await me('app-a', u.token, undefined, { s: custom })).status, 200); assert.equal(unsubPath(mails[0]).origin, 'https://notify.example.org'); } finally { await custom.close(); }
+});
+
+t('an http origin is refused even on the app host', async () => {
+    const u = await signIn('app-a');
+    assert.equal((await me('app-a', u.token, undefined, { headers: { origin: 'http://app-a.vibebuild.cc' } })).status, 403);
+    assert.equal(mails.length, 0);
+});
+
 t('a CR/LF in the subject cannot add headers', async () => {
     const u = await signIn('app-a');
     assert.equal((await me('app-a', u.token, { subject: 'Hi\r\nBcc: evil@example.com', text: 't' })).status, 200);

@@ -194,6 +194,13 @@ test('default limits are 3 per user per hour, 10 per user per day, 200 per app p
     assert.deepEqual(DEFAULT_LIMITS, { perUserPerHour: 3, perUserPerDay: 10, perAppPerDay: 200, globalPerDay: 2000 });
 });
 
+test('retry hints round up to whole seconds when the clock is mid-second', async () => {
+    const r = rig({ limits: { perUserPerHour: 100, perUserPerDay: 1 } });
+    r.advance(500); // 12:00:00.500, so 43199.5 s to midnight
+    await send(r);
+    assert.equal((await send(r)).retryAfterSec, 43200);
+});
+
 test('construction validates its inputs', () => {
     const base = { store: {}, limiterStore: {}, mailer: {}, appStore: {}, masterKey: MK, baseUrl: 'https://p.test' };
     assert.doesNotThrow(() => createNotifyService(base));

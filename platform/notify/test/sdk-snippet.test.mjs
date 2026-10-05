@@ -35,8 +35,10 @@ test('the snippet is plain ES5: no arrow functions, const/let, template strings,
 test('after splicing, vibe.notify exposes only me, and the existing surface is unchanged', () => {
     const { vibe } = spliced();
     assert.deepEqual(Object.keys(vibe.notify), ['me']);
-    assert.deepEqual(Object.keys(vibe).sort(), ['ai', 'api', 'auth', 'notify', 'version']);
-    assert.deepEqual(Object.keys(vibe.auth).sort(), ['onChange', 'ready', 'signIn', 'signOut', 'user']);
+    const plain = {}; plain.window = plain; Object.assign(plain, { location: { hostname: 'myapp.vibebuild.cc', search: '' }, fetch: async () => {}, AbortController, setTimeout, clearTimeout, JSON, Promise, Error, encodeURIComponent, Object, Array, Number, String, URLSearchParams, VIBE_BASE: 'https://proxy.test' });
+    vm.createContext(plain); vm.runInContext(VIBE, plain);
+    assert.deepEqual(Object.keys(vibe).sort(), [...Object.keys(plain.vibe), 'notify'].sort()); // adds notify, removes nothing
+    assert.deepEqual(Object.keys(vibe.auth).sort(), Object.keys(plain.vibe.auth).sort());
 });
 
 test('me posts only subject and text to notify/me with the session bearer token and resolves {ok:true}', async () => {
