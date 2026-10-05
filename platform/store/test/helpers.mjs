@@ -16,7 +16,15 @@ export async function scratchDb({ migrate = true } = {}) {
     if (migrate) await applyMigrations(pool);
     return {
         name, pool, admin, connFor: (extra) => new pg.Pool({ ...conn(name), max: 2, ...extra }),
-        async cleanup() { await pool.end().catch(() => {}); await admin.query(`drop database if exists ${name} with (force)`).catch(() => {}); const app = (await admin.query("select rolname from pg_roles where rolname like 'appr\\_%' or rolname = 'proxy_sim'").catch(() => ({ rows: [] }))).rows.map((r) => r.rolname); for (const r of [...app, 'anon_sim', 'vibe_proxy']) await admin.query(`drop role if exists "${r}"`).catch(() => {}); await admin.end().catch(() => {}); },
+        async cleanup() {
+            // roles are cluster-wide: drop only the ones this database created, and leave the shared ones (vibe_proxy, proxy_sim, anon_sim)
+            // alone so that other test runs using the same server are not disturbed
+            const mine = (await pool.query('select role_name from platform.app_dbs').catch(() => ({ rows: [] }))).rows.map((r) => r.role_name);
+            await pool.end().catch(() => {});
+            await admin.query(`drop database if exists ${name} with (force)`).catch(() => {});
+            for (const r of mine) await admin.query(`drop role if exists "${r}"`).catch(() => {});
+            await admin.end().catch(() => {});
+        },
     };
 }
 export const masterKey = () => randomBytes(32).toString('hex');
