@@ -17,6 +17,7 @@ export const BUILD_RULES = `IMPORTANT RULES:
 - Wire up EVERY button, link and interactive element with working handlers
 - Complete game loops, full form validation and result display where relevant
 - Use localStorage to persist user data where it makes sense
+- A [SECRET:NAME] placeholder in the request stands for a credential the creator stored in the platform vault: never write the placeholder or any key value into the app's code
 - Make sensible assumptions and never ask the user questions; if the request is unsafe or impossible as stated (for example real-money trading or live third-party data), build the closest safe, useful, self-contained version such as a simulator and say so inside the app`;
 
 export function buildMessages({ rules, kind = 'generate', prompt, existing = null }) {
@@ -36,21 +37,25 @@ export function buildMessages({ rules, kind = 'generate', prompt, existing = nul
 
 const fixPrompt = (problems) => `Automated checks found these problems:\n- ${problems.join('\n- ')}\n\nReturn the COMPLETE corrected project in the same <file> block format. Emit all files in full.`;
 
-async function evaluate({ text, kind, existing, check }) {
+async function evaluate({ text, kind, existing, check, scan }) {
     const { files } = parseFiles(text);
     if (!Object.keys(files).length) {
         return { ok: false, cause: /<file\b/i.test(text || '') ? 'no_files' : 'declined_text', problems: ['no usable file blocks in the reply'], files };
     }
     const merged = kind === 'generate' ? files : { ...(existing || {}), ...files };
     const c = await check(merged);
-    return c.ok ? { ok: true, files, merged } : { ok: false, cause: 'check_failed', problems: c.problems, files, merged };
+    if (!c.ok) return { ok: false, cause: 'check_failed', problems: c.problems, files, merged };
+    // Safety scan (hardcoded secrets, outside requests) runs only on a draft that already passed the normal checks, and its
+    // findings (kind, file, line; never values) go through the same fix pass.
+    const s = scan ? await scan(merged) : { ok: true };
+    return s.ok ? { ok: true, files, merged } : { ok: false, cause: 'scan_failed', problems: s.problems, files, merged };
 }
 
 /**
  * Returns { ok:true, files, model, attempts, costUsd, fixes } or { ok:false, cause, attempts, costUsd }.
  * `files` is the full project (existing files merged with the model's changes for edits).
  */
-export async function generateApp({ prompt, kind = 'generate', existing = null, llm, models, rules, check = staticChecks, maxFixPasses = 1, deadlineMs = 480000, maxCalls = 4, now = () => Date.now() }) {
+export async function generateApp({ prompt, kind = 'generate', existing = null, llm, models, rules, check = staticChecks, scan = null, maxFixPasses = 1, deadlineMs = 480000, maxCalls = 4, now = () => Date.now() }) {
     const attempts = [];
     let costUsd = 0;
     let calls = 0;
@@ -71,7 +76,7 @@ export async function generateApp({ prompt, kind = 'generate', existing = null, 
             continue;
         }
         costUsd += res.costUsd || 0;
-        let outcome = await evaluate({ text: res.text, kind, existing, check });
+        let outcome = await evaluate({ text: res.text, kind, existing, check, scan });
         let fixes = 0;
         while (!outcome.ok && outcome.cause !== 'declined_text' && fixes < maxFixPasses && calls < maxCalls) {
             fixes += 1;
@@ -84,13 +89,13 @@ export async function generateApp({ prompt, kind = 'generate', existing = null, 
                 break;
             }
             costUsd += res.costUsd || 0;
-            outcome = await evaluate({ text: res.text, kind, existing, check });
+            outcome = await evaluate({ text: res.text, kind, existing, check, scan });
         }
         attempts.push({ model, ok: outcome.ok, cause: outcome.ok ? 'ok' : outcome.cause, problems: (outcome.problems || []).slice(0, 3), fixes });
         if (outcome.ok) return { ok: true, files: outcome.merged || outcome.files, model, attempts, costUsd, fixes };
     }
     const causes = attempts.map((a) => a.cause);
-    const cause = causes.includes('check_failed') ? 'check_failed' : causes.includes('declined_text') ? 'declined_text'
+    const cause = causes.includes('scan_failed') ? 'scan_failed' : causes.includes('check_failed') ? 'check_failed' : causes.includes('declined_text') ? 'declined_text'
         : causes.includes('no_files') ? 'no_files' : causes.includes('timeout') ? 'timeout' : causes.includes('budget') ? 'budget' : 'provider_error';
     return { ok: false, cause, attempts, costUsd };
 }

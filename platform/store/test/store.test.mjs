@@ -176,8 +176,13 @@ t('row level security: a role with SELECT but no policy sees nothing, the proxy 
     await db.pool.query("do $$ begin if not exists (select 1 from pg_roles where rolname='anon_sim') then create role anon_sim login; end if; end $$");
     await db.pool.query('grant usage on schema platform to anon_sim; grant select on all tables in schema platform to anon_sim');
     const anon = db.connFor({ user: 'anon_sim' });
-    for (const tbl of ['apps', 'app_secrets', 'limiter_counters', 'usage_events']) assert.equal((await anon.query(`select count(*)::int as n from platform.${tbl}`)).rows[0].n, 0, tbl);
+    await db.pool.query("insert into platform.apps (app_id) values ('rls-app') on conflict do nothing");
+    await db.pool.query("insert into platform.end_users (app_id, email) values ('rls-app', 'rls@example.com') on conflict do nothing");
+    await db.pool.query("insert into platform.login_links (token_hash, app_id, email, expires_at) values ('\\x01', 'rls-app', 'rls@example.com', now() + interval '1 hour') on conflict do nothing");
+    await db.pool.query("insert into platform.sessions (jti, app_id, user_id, expires_at) select 'rls-jti', app_id, id, now() + interval '1 day' from platform.end_users where app_id = 'rls-app' on conflict do nothing");
+    for (const tbl of ['end_users', 'login_links', 'sessions']) assert.equal((await db.pool.query(`select count(*)::int as n from platform.${tbl}`)).rows[0].n, 1, `owner sees ${tbl}`);
+    for (const tbl of ['apps', 'app_secrets', 'limiter_counters', 'usage_events', 'end_users', 'login_links', 'sessions']) assert.equal((await anon.query(`select count(*)::int as n from platform.${tbl}`)).rows[0].n, 0, tbl);
     await anon.end();
     const { rows } = await db.pool.query("select relname, relrowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='platform' and relkind='r'");
-    assert.ok(rows.length >= 4 && rows.every((r) => r.relrowsecurity), JSON.stringify(rows));
+    assert.ok(rows.length >= 7 && rows.every((r) => r.relrowsecurity), JSON.stringify(rows));
 });
