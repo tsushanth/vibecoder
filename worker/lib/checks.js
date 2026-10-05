@@ -1,6 +1,7 @@
 // Static checks for a generated project. The browser check (load, console errors, click every button) lives in the screenshot service.
 import vm from 'node:vm';
 import { checkExternalDeps } from '../validators.js';
+import { vibeProblems } from './vibe.js';
 
 const SKIP_SCRIPT_TYPES = /type\s*=\s*["']?(module|importmap|application\/json|application\/ld\+json|text\/template|text\/x-template)/i;
 
@@ -14,7 +15,7 @@ function syntaxProblem(name, code) {
 }
 
 /** files: { 'index.html': '...', 'js/app.js': '...' }. Returns { ok, hasApp, problems }. */
-export function staticChecks(files) {
+export function staticChecks(files, { vibe = false } = {}) {
     const idx = files['index.html'];
     if (!idx || idx.trim().length <= 200) return { ok: false, hasApp: false, problems: ['no usable index.html'] };
     const problems = [];
@@ -34,5 +35,6 @@ export function staticChecks(files) {
         const e = syntaxProblem(`index.html inline script ${n}`, m[2]);
         if (e) problems.push(e);
     }
+    problems.push(...vibeProblems(files, { enabled: vibe }));
     return { ok: problems.length === 0, hasApp: true, problems };
 }

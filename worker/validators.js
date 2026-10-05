@@ -14,6 +14,12 @@ export function readVibedataSdk() {
     try { return fs.readFileSync(ASSET_PATH, 'utf-8'); } catch { return null; }
 }
 
+// assets/vibe.js is the platform proxy SDK (vibe.api / vibe.ai). It is exempt only when byte-identical.
+const VIBE_ASSET_PATH = path.join(path.dirname(fileURLToPath(import.meta.url)), 'assets', 'vibe.js');
+export function readVibeSdk() {
+    try { return fs.readFileSync(VIBE_ASSET_PATH, 'utf-8'); } catch { return null; }
+}
+
 /** True only for https://vibecoder-api.fly.dev/api/appdata/... (exact host, no userinfo/port tricks). */
 export function isAllowedApiUrl(raw) {
     let u;
@@ -26,13 +32,14 @@ export function isAllowedApiUrl(raw) {
 /**
  * Check for external dependencies (CDN links, external URLs).
  * Exemptions (nothing else is relaxed):
- *  - vibedata.js when byte-identical to the bundled SDK
+ *  - vibedata.js and vibe.js when byte-identical to the bundled SDKs
  *  - src/href/fetch URLs that are exactly the VibeBuild appdata API
  */
-export function checkExternalDeps(sources, sdkSource = readVibedataSdk()) {
+export function checkExternalDeps(sources, sdkSource = readVibedataSdk(), vibeSdk = readVibeSdk()) {
     const issues = [];
     for (const [filePath, content] of Object.entries(sources)) {
         if (sdkSource && path.basename(filePath) === 'vibedata.js' && content === sdkSource) continue;
+        if (vibeSdk && path.basename(filePath) === 'vibe.js' && content === vibeSdk) continue;
         const externalMatches = content.match(/(?:src|href)\s*=\s*["'](https?:\/\/[^"']+)["']/gi);
         if (externalMatches) {
             for (const match of externalMatches) {
