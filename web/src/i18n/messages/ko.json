@@ -213,5 +213,41 @@
     "empty": "아직 버전이 없습니다",
     "count": "{count}개 버전",
     "emptyHint": "채팅에서 변경을 시작하여 버전을 추적하세요."
+  },
+  "secrets": {
+    "title": "API keys",
+    "summary": "{missing} of {total} API keys still needed",
+    "summaryAllSet": "All {total} API keys are set",
+    "manage": "Manage keys",
+    "hide": "Hide",
+    "set": "Set",
+    "notSet": "Not set",
+    "save": "Save key",
+    "saving": "Saving...",
+    "replace": "Replace",
+    "remove": "Remove",
+    "removing": "Removing...",
+    "cancel": "Cancel",
+    "inputLabel": "Paste {name}",
+    "inputHint": "Keys are write-only: once saved, a key is never shown again. Pasting a new one replaces it.",
+    "usedBy": "Used by: {connectors}",
+    "saved": "Key saved.",
+    "removed": "Key removed.",
+    "retry": "Try again",
+    "loading": "Checking keys...",
+    "extraTitle": "Other stored keys",
+    "error": {
+      "signIn": "Your session expired. Sign in again to manage keys.",
+      "forbidden": "Only the creator of this app can manage its keys.",
+      "notFound": "This project could not be found.",
+      "unavailable": "The key service had a problem, so the change may not have taken effect. Try again in a moment.",
+      "notSetUp": "Key storage is not available yet.",
+      "rateLimited": "Too many attempts. Wait a minute and try again.",
+      "invalid": "That key contains characters that are not allowed. Paste it again without line breaks.",
+      "tooLong": "That key is too long.",
+      "empty": "Paste a key first.",
+      "network": "Could not reach the server. Check your connection and paste the key again.",
+      "unknown": "Something went wrong. Paste the key again to retry."
+    }
   }
 }
