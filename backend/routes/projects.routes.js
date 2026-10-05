@@ -19,6 +19,7 @@ import { checkUsageLimit, recordUsage, ACTION_TYPES } from '../services/subscrip
 import { sendPushToUser, sendAPNsPush } from '../services/pushService.js';
 import { filterBrowseProjects } from '../services/browseFilter.js';
 import { reportFailure } from '../lib/failureReporter.js';
+import { registerDeployedApp } from '../services/appRegistry.js';
 
 const router = express.Router();
 
@@ -717,11 +718,12 @@ router.post('/generate', async (req, res) => {
 
                 // All backend work runs in background after client gets bundle
                 (async () => {
+                    let finalProjectId = savedProjectId; // declared outside the try so the push notification below can use it
                     try {
                         // Record usage for subscription tracking
                         if (userId) await recordUsage(userId, ACTION_TYPES.generation);
 
-                        let finalProjectId = savedProjectId;
+                        finalProjectId = savedProjectId;
                         if (finalProjectId) {
                             await supabase.from('projects').update({ bundle: parsed.bundle, status: 'ready' }).eq('id', finalProjectId);
                             console.log(`[generate] Updated project ${finalProjectId} with bundle`);
@@ -758,6 +760,7 @@ router.post('/generate', async (req, res) => {
                                     const previewUrl = `https://${previewSubdomain}.${process.env.BASE_DOMAIN || 'vibebuild.cc'}`;
                                     await supabase.from('projects').update({ preview_url: previewUrl }).eq('id', finalProjectId);
                                     console.log(`[generate] Preview deployed: ${previewUrl}`);
+                                    await registerDeployedApp(req.app.locals.proxyAdmin, previewSubdomain); // lets the preview use vibe.api / vibe.ai
 
                                     // Thumbnail capture in background
                                     const screenshotServiceUrl = process.env.SCREENSHOT_SERVICE_URL || 'http://178.156.231.255:3465';
@@ -806,8 +809,8 @@ router.post('/generate', async (req, res) => {
 
                     // Push notification
                     const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
-                    if (userId) sendPushToUser(userId, 'Project Ready!', `"${shortPrompt}" has been built. Tap to view!`, { projectId: projectId }).catch(() => {});
-                    else if (deviceToken) sendAPNsPush(deviceToken, 'Project Ready!', `"${shortPrompt}" has been built. Tap to view!`, { projectId: projectId }).catch(() => {});
+                    if (userId) sendPushToUser(userId, 'Project Ready!', `"${shortPrompt}" has been built. Tap to view!`, { projectId: finalProjectId }).catch(() => {});
+                    else if (deviceToken) sendAPNsPush(deviceToken, 'Project Ready!', `"${shortPrompt}" has been built. Tap to view!`, { projectId: finalProjectId }).catch(() => {});
                 })();
             }
         });
@@ -1111,6 +1114,7 @@ router.post('/:id/build-complete', async (req, res) => {
                     const previewUrl = `https://${previewSubdomain}.${process.env.BASE_DOMAIN || 'vibebuild.cc'}`;
                     await supabase.from('projects').update({ preview_url: previewUrl }).eq('id', id);
                     console.log(`[build-complete] Preview deployed for ${id}: ${previewUrl}`);
+                    await registerDeployedApp(req.app.locals.proxyAdmin, previewSubdomain); // lets the preview use vibe.api / vibe.ai
                     // Capture thumbnail in background
                     const screenshotServiceUrl = process.env.SCREENSHOT_SERVICE_URL || 'http://178.156.231.255:3465';
                     fetch(`${screenshotServiceUrl}/screenshot?url=${encodeURIComponent(previewUrl)}&width=390&height=844`)
