@@ -5,7 +5,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { writeFiles } from './files.js';
 import { staticChecks } from './checks.js';
-import { injectSdk, loadVibeSdk } from './vibe.js';
+import { injectSdk, loadVibeSdk, usesBackendSdk } from './vibe.js';
+import { FAKE_SCRIPT } from './vibeFake.js';
 
 const CONTROLS = 'button,[role=button],input[type=submit],a[href^="#"],[onclick]';
 
@@ -44,7 +45,7 @@ export async function runtimeProblems(files, { chrome = process.env.CHROME_PATH,
                 await new Promise((r) => setTimeout(r, 900)); // let in-flight SDK calls settle
                 for (const m of await page.evaluate(() => window.__vbRej || [])) {
                     if (!/^vibe/i.test(m)) continue;
-                    const hinted = `unhandled promise rejection from the vibe SDK: ${m}. Catch errors from vibe.api and vibe.ai and show a friendly message`;
+                    const hinted = `unhandled promise rejection from the vibe SDK: ${m}. Catch errors from vibe.api and vibe.ai (and from vibe.auth, vibe.db and vibe.storage calls) and show a friendly message`;
                     const dup = errs.findIndex((e) => e.includes(m)); // Chrome may already have reported it as a page error
                     if (dup >= 0) errs[dup] = hinted; else errs.push(hinted);
                 }
@@ -60,13 +61,21 @@ export async function runtimeProblems(files, { chrome = process.env.CHROME_PATH,
     return [...new Set(errs)].slice(0, 3).map((m) => `runtime error when the page loads or a control is clicked: ${m}`);
 }
 
+/** The files the browser check loads: the app as it will ship, plus the real SDK. Accounts, tables and uploads run against an
+ *  in-memory fake in the check, so no network call is made and none can fail the app. vibe.api and vibe.ai stay real. */
+export function filesForRun(files, { vibe = false, sdk = loadVibeSdk() } = {}) {
+    const out = injectSdk(files, { sdk, enabled: vibe });
+    if (out['vibe.js'] && usesBackendSdk(files)) out['vibe.js'] += FAKE_SCRIPT;
+    return out;
+}
+
 /** Static checks first (cheap), then the browser check. Async; usable as generateApp's `check`.
  *  opts.vibe: the vibe proxy SDK is enabled. The browser check then runs the app with the real vibe.js injected. */
 export async function fullChecks(files, opts = {}) {
     const { vibe = false, ...runtimeOpts } = opts;
     const s = staticChecks(files, { vibe });
     if (!s.ok) return s;
-    const runFiles = injectSdk(files, { sdk: loadVibeSdk(), enabled: vibe });
+    const runFiles = filesForRun(files, { vibe });
     const problems = await runtimeProblems(runFiles, runtimeOpts);
     return problems.length ? { ok: false, hasApp: true, problems } : s;
 }
