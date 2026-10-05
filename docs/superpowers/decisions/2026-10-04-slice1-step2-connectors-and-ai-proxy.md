@@ -99,3 +99,15 @@ Known limits:
 - The admin API shares a public hostname with the app routes. It is rate limited and token protected, but it would be safer reachable only over Fly's private network or from an allowlisted address; that is not configured.
 - No audit log of admin actions, no secret versioning or rotation tooling (`key_version` is always 1), no deletion of an app's secrets when an app is deleted, no rotation procedure for `PROXY_ADMIN_TOKEN`.
 - A secret is only as safe as the master key and the database: anyone with both can read all secrets.
+
+## Owner decisions, 2026-10-05
+
+1. **AI caps CONFIRMED:** $0.05 per app per day (`APP_AI_DAILY_MICROS=50000`) and $2 per day across all apps (`PLATFORM_AI_DAILY_MICROS=2000000`). These were previously unconfirmed defaults.
+2. **Postgres host: reuse the existing Supabase project** (the VibeBuild production project, `Replitor`), not a new project and not Fly Postgres. This reverses the earlier recommendation to avoid Replitor; the owner chose reuse. Consequences to handle before applying anything:
+   - Create the proxy's database login as its own role with access to the `platform` schema only. Never give the proxy the service-role key or the project's database owner credentials; its `DATABASE_URL` must use that restricted role. This is what keeps the other 38 VibeBuild tables out of reach of a proxy bug.
+   - `store/migrations/001_platform.sql` creates a NOLOGIN role `vibe_proxy` and enables row level security on every platform table with a policy only for that role. A LOGIN role that is a member of `vibe_proxy` (with a password stored only in the Fly secret) must be created separately; that step is not scripted.
+   - The `platform` schema must not be added to the project's API exposed schemas, and Supabase's anon and authenticated roles get no grants. After applying, run the Supabase security advisor and re-test that the anon key sees nothing in `platform`.
+   - Row level security behavior with Supabase's own roles has only been tested on plain local Postgres, not on Supabase.
+   - Connection limits and shared compute with the live app apply; the proxy uses a pool of up to 10 connections, which should be checked against the project's pooler settings.
+   - The earlier 'shared project first, per-app projects later' plan is unchanged and now concretely points at this project.
+3. **Push the platform branch and open a PR:** approved. Nothing is applied to Supabase and nothing is deployed by that.
