@@ -13,6 +13,7 @@ COPY storage ./storage
 COPY data ./data
 COPY jobs ./jobs
 COPY pay ./pay
+COPY data ./data
 # tests and fixtures are not needed at run time
 RUN rm -rf vibe-proxy/test proxy-app/test store/test auth/test storage/test data/test jobs/test pay/test
 USER node
