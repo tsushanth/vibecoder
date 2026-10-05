@@ -37,3 +37,12 @@ Only one candidate is verified for commercial use: US National Weather Service. 
 `platform/vibe-proxy/builtins.js` (NWS only, with terms metadata), `ai.js` (allowlisted model, 8,000 input characters, 800 output tokens, 20 messages, 30 s timeout, provider-reported cost recorded in micro-dollars, 200 micro-dollars charged when no cost is reported), 128 tests passing, every rule mutation-checked. Not built: crypto and holiday connectors (no approved source), per-app AI allowance configuration (the $0.05/day default is applied through the limiter's `dailySpendMicros = 50000`; the wiring that sets it per app is part of the edge wrapper), real token pricing display.
 
 Known behavior: the spend cap is checked before a call, so one call can overshoot it by that call's cost (bounded by 800 output tokens on the default model).
+
+## Step 3 built: browser SDK (2026-10-04)
+
+`platform/sdk/vibe.js` exposes `vibe.api(connector, path, opts)`, `vibe.ai.chat(messages)` and `vibe.ai.ask(prompt)`. It follows `worker/assets/vibedata.js` conventions (ES5 IIFE, Promises, `err.status`, app id from `<id>.vibebuild.cc` or `window.VIBE_APP_ID`). It sends no caller headers or keys, never lets an app choose a model, and rejects with `status`, `code` and `retryAfter`. 143 tests across the proxy and SDK pass, all rules mutation-checked.
+
+Open items:
+- The default endpoint `https://vibe-proxy.vibebuild.cc` is a PLACEHOLDER. Nothing is provisioned there. The real host (Supabase function URL behind a custom domain, or the existing `vibecoder-api` Fly app) is an owner decision at the edge-wrapper step.
+- The worker's external-dependency validator (`worker/validators.js`) must be taught to accept `vibe.js` the way it accepts a byte-identical `vibedata.js`, and `vibe.js` must be copied to `worker/assets/` and kept in sync. This is step 5 (generation changes).
+- The SDK has been tested in a Node VM with a fake `window` and `fetch`, not in a real browser against a real server.
