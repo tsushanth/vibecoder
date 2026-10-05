@@ -21,12 +21,13 @@ import { readProject, writeFiles } from './lib/files.js';
 import { makeOutcomeLogger } from './lib/outcome.js';
 import { scrubSecrets } from './lib/scrub.js';
 import { loadVibeSdk, injectSdk, withVibeRules } from './lib/vibe.js';
+import { requireSecret } from './lib/requireSecret.js';
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
 
 const PORT = process.env.WORKER_PORT || 3456;
-const WORKER_SECRET = process.env.WORKER_SECRET || 'vibecoder-worker-secret-2024';
+const WORKER_SECRET = requireSecret('WORKER_SECRET');
 const PROJECTS_DIR = path.join(os.homedir(), '.vibecoder-worker', 'projects');
 const GITHUB_PAT = process.env.GITHUB_PAT || '';
 const GITHUB_ORG = process.env.GITHUB_ORG || 'Kreative-Koala-LLC';
