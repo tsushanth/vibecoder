@@ -12,6 +12,7 @@ import {
   type SecretErrorKey,
   type SecretsData,
 } from '@/lib/secrets';
+import { payHelpKey, paySection } from '@/lib/payKeys';
 
 interface Props {
   projectId: string;
@@ -39,6 +40,7 @@ export function SecretsPanel({ projectId, reloadKey }: Props) {
   const [confirming, setConfirming] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<Note | null>(null);
+  const [urlCopied, setUrlCopied] = useState(false);
 
   const refresh = useCallback(async () => {
     const r = await client.list(projectId);
@@ -76,6 +78,7 @@ export function SecretsPanel({ projectId, reloadKey }: Props) {
   const rows = buildSecretRows(load.data.required, load.data.secrets);
   const { show, missing, total } = panelVisibility(rows);
   if (!show) return null;
+  const pay = paySection(load.data);
   const required = rows.filter((r) => r.required);
   const extras = rows.filter((r) => !r.required);
 
@@ -108,7 +111,12 @@ export function SecretsPanel({ projectId, reloadKey }: Props) {
     setBusy(null);
   }
 
+  async function copyWebhookUrl(url: string) {
+    try { await navigator.clipboard.writeText(url); setUrlCopied(true); setTimeout(() => setUrlCopied(false), 2000); } catch { /* the URL is selectable text, so copying by hand still works */ }
+  }
+
   const renderRow = (row: (typeof rows)[number]) => {
+    const helpKey = payHelpKey(row.name);
     const editing = !row.isSet || replacing === row.name;
     const isBusy = busy === row.name;
     const inputId = `secret-input-${row.name}`;
@@ -120,6 +128,7 @@ export function SecretsPanel({ projectId, reloadKey }: Props) {
             {row.connectors.length > 0 && (
               <p className="text-[10px] text-subtle truncate">{t('secrets.usedBy', { connectors: row.connectors.join(', ') })}</p>
             )}
+            {(helpKey || row.purpose) && <p className="text-[10px] text-subtle whitespace-normal">{helpKey ? t(helpKey) : row.purpose}</p>}
           </div>
           <span className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-medium ${row.isSet ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
             {row.isSet ? t('secrets.set') : t('secrets.notSet')}
@@ -233,6 +242,32 @@ export function SecretsPanel({ projectId, reloadKey }: Props) {
       {open && (
         <div className="px-3 pb-3 space-y-2 max-h-[50vh] overflow-y-auto">
           <p className="text-[10px] text-subtle">{t('secrets.inputHint')}</p>
+          {pay && (
+            <div className="rounded-lg border border-border bg-card p-2.5 space-y-2">
+              <p className="text-[11px] text-foreground">{t('secrets.pay.testFirst')}</p>
+              <p className="text-[10px] text-subtle">{t('secrets.pay.webhookUrlLabel')}</p>
+              {pay.webhookUrl ? (
+                <div className="flex items-stretch gap-1.5">
+                  <input
+                    readOnly
+                    value={pay.webhookUrl}
+                    aria-label={t('secrets.pay.webhookUrlLabel')}
+                    onFocus={(e) => e.currentTarget.select()}
+                    className="flex-1 min-w-0 px-2.5 py-1.5 bg-surface border border-border rounded-lg text-[11px] font-mono text-foreground"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void copyWebhookUrl(pay.webhookUrl as string)}
+                    className="px-3 py-1.5 text-xs font-medium bg-surface hover:bg-surface-hover border border-border rounded-lg transition"
+                  >
+                    {urlCopied ? t('common.copied') : t('secrets.pay.copyUrl')}
+                  </button>
+                </div>
+              ) : (
+                <p className="text-[10px] text-warning">{t('secrets.pay.webhookUrlPending')}</p>
+              )}
+            </div>
+          )}
           <ul className="space-y-2">{required.map(renderRow)}</ul>
           {extras.length > 0 && (
             <>
