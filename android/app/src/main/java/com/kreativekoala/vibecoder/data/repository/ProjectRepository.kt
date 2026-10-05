@@ -145,7 +145,8 @@ class ProjectRepository @Inject constructor(
         val jsonBody = gson.toJson(request)
         return sseStreamReader.stream(
             url = "${Constants.BASE_URL}api/projects/generate",
-            jsonBody = jsonBody
+            jsonBody = jsonBody,
+            authToken = getAccessToken()
         )
     }
 
@@ -161,7 +162,8 @@ class ProjectRepository @Inject constructor(
         val jsonBody = gson.toJson(request)
         return sseStreamReader.stream(
             url = "${Constants.BASE_URL}api/projects/$projectId/tweak",
-            jsonBody = jsonBody
+            jsonBody = jsonBody,
+            authToken = getAccessToken()
         )
     }
 
