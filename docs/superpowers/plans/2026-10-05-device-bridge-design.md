@@ -181,3 +181,21 @@ Spend (all small, none committed):
 - A physical Android test device or emulator time for Phase 3 (the owner may already have one).
 - Push only: Firebase project(s) (free tier, but possibly several projects and a service account) and the engineering above. Not needed unless push is approved.
 - No Play Store fees, no new LLM spend.
+
+## Decisions (owner delegated, 2026-10-05) and Phase 0 findings
+
+Phase 0 findings from the template recovered from box 231 (backup in the owner's private folder, now committed as `worker/apk-template/`):
+- Every exported APK is signed with the public Android **debug keystore** (`app/debug.keystore`, password `android`). It is the same key for every app and is not secret. Existing installs therefore depend on that key; changing it would stop updates for them.
+- minSdk 24, targetSdk 34, Gradle 8.5, JDK 17, Kotlin; `isMinifyEnabled = false` (matches the standing rule). Permissions: INTERNET only.
+- The WebView loads `file:///android_asset/index.html` with universal file access and remote debugging on. Pages there send `Origin: null`, which the platform proxy rejects, so **exported APKs of apps that use vibe.auth, vibe.db, vibe.storage, vibe.pay or vibe.notify cannot work today**. Serving the APK at `https://<app>.vibebuild.cc` (decision 7) fixes this.
+
+Decisions taken (owner: "your call"):
+1. **Build host:** stay on box 231 (it already has the JDK and Android SDK). Template is now in git so the box is reproducible; the Dockerfile/box provisioning for JDK and SDK is the next step before any host move.
+2. **Signing key:** keep the debug key for existing installs and for now for new ones (changing it breaks updates). Follow-up, needs a decision before Play distribution: per-app release keys. Note the risk: anyone can sign an APK with the public key and the same package name, so these sideloaded exports must never be presented as tamper-proof.
+3. **Capacitor default:** yes, after verification, with the old template kept as the fallback behind a flag.
+4. **Push:** deferred.
+5. **API:** five calls (isNative, camera.capture, geolocation.get, share, haptics.tap).
+6. **Capacitor version:** pin the 7.x line, which builds with JDK 17 (the box's current JDK), instead of 8.x which needs JDK 21 and SDK 36. Revisit when the box gets JDK 21.
+7. **Origin:** the APK serves itself at `https://<app>.vibebuild.cc` (Capacitor `server.hostname`), which the proxy already accepts.
+
+Next steps (not started): fix the file:// origin problem with a minimal change to the existing shell (load the bundled files via a WebViewAssetLoader at https://<app>.vibebuild.cc so the proxy accepts the origin), turn off universal file access and remote debugging in release builds, then the vibe.device SDK, then Capacitor.
