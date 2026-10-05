@@ -62,3 +62,9 @@ test('the admin token is available through secrets and absent from JSON', () => 
     const c = loadConfig(base());
     assert.equal(c.secrets.adminToken, ADMIN); assert.equal(JSON.stringify(c).includes(ADMIN), false);
 });
+
+test('the database pool size defaults to 5 and is configurable within 1 to 20', () => {
+    assert.equal(loadConfig(base()).dbPoolMax, 5);
+    assert.equal(loadConfig({ ...base(), DB_POOL_MAX: '8' }).dbPoolMax, 8);
+    for (const bad of ['0', '21', 'many', '-1', '2.5']) assert.throws(() => loadConfig({ ...base(), DB_POOL_MAX: bad }), (e) => /DB_POOL_MAX/.test(e.message), bad);
+});

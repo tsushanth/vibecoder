@@ -12,8 +12,13 @@ async function dnsResolve(host) {
     return [...(a.status === 'fulfilled' ? a.value : []), ...(b.status === 'fulfilled' ? b.value : [])];
 }
 
+/** The pool is deliberately small: the shared database allows few connections. Connections open lazily. */
+export function makePool(config) {
+    return new pg.Pool({ connectionString: config.secrets.databaseUrl, max: config.dbPoolMax, connectionTimeoutMillis: 5000, idleTimeoutMillis: 30_000 });
+}
+
 export async function startServer(config, { pool: injected, listenPort, resolve = dnsResolve, fetchImpl = globalThis.fetch, log = (l) => console.log(l) } = {}) {
-    const pool = injected || new pg.Pool({ connectionString: config.secrets.databaseUrl, max: 10, connectionTimeoutMillis: 5000 });
+    const pool = injected || makePool(config);
     const ownsPool = !injected;
     const fail = async (msg) => { if (ownsPool) await pool.end().catch(() => {}); throw new Error(msg); };
     let present;
@@ -33,7 +38,7 @@ export async function startServer(config, { pool: injected, listenPort, resolve 
     const server = http.createServer(handler);
     await new Promise((ok, bad) => { server.once('error', bad); server.listen(listenPort ?? config.port, '0.0.0.0', ok); });
     return {
-        server, port: server.address().port, stores,
+        server, port: server.address().port, stores, pool,
         async close() { await new Promise((r) => server.close(r)); server.closeAllConnections?.(); if (ownsPool) await pool.end().catch(() => {}); },
     };
 }
