@@ -247,7 +247,18 @@
       "tooLong": "That key is too long.",
       "empty": "Paste a key first.",
       "network": "Could not reach the server. Check your connection and paste the key again.",
-      "unknown": "Something went wrong. Paste the key again to retry."
+      "unknown": "Something went wrong. Paste the key again to retry.",
+      "stripePublishable": "게시 가능 키(pk_)입니다. 대신 시크릿 키(sk_ 또는 rk_)를 붙여넣으세요.",
+      "stripeWebhookFormat": "웹훅 서명 시크릿이 아닌 것 같습니다. whsec_로 시작해야 합니다.",
+      "stripeKeyFormat": "Stripe 시크릿 키가 아닌 것 같습니다. sk_ 또는 rk_로 시작해야 합니다(예: sk_test_...)."
+    },
+    "pay": {
+      "secretKeyHelp": "Stripe 시크릿 키입니다. sk_ 또는 rk_로 시작합니다(테스트 키는 sk_test_로 시작). 게시 가능 키(pk_)는 절대 사용하지 마세요.",
+      "webhookSecretHelp": "Stripe에서 만든 웹훅 엔드포인트의 서명 시크릿입니다. whsec_로 시작합니다.",
+      "testFirst": "먼저 Stripe 테스트 키(sk_test_로 시작)를 사용하세요. 실제 결제를 받을 준비가 되었을 때만 라이브 키로 바꾸세요. 저장된 키는 쓰기 전용이라 이 패널에서는 저장된 키가 어느 모드인지 알 수 없습니다.",
+      "webhookUrlLabel": "Stripe(개발자 > 웹훅)에서 이 URL로 엔드포인트를 추가한 다음, 그 서명 시크릿을 아래에 붙여넣으세요:",
+      "webhookUrlPending": "웹훅 URL을 받으려면 앱을 미리 보거나 게시하세요.",
+      "copyUrl": "URL 복사"
     }
   }
 }

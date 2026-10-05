@@ -4,6 +4,40 @@
 
 export const MAX_SECRET_LENGTH = 4096;
 const SECRET_NAME = /^[A-Z][A-Z0-9_]{1,63}$/;
+
+// ---- Stripe keys (apps that sell things; see payKeys.ts for the panel helpers)
+export const STRIPE_SECRET_KEY = 'STRIPE_SECRET_KEY';
+export const STRIPE_WEBHOOK_SECRET = 'STRIPE_WEBHOOK_SECRET';
+
+export type StripeKeyErrorKey = 'secrets.error.stripePublishable' | 'secrets.error.stripeKeyFormat' | 'secrets.error.stripeWebhookFormat';
+
+// Test keys cannot be told from live ones once stored (values are write-only), so the panel always tells the creator to start with test keys.
+const SECRET_KEY = /^(sk|rk)_(test|live)_\S{8,}$/;
+const PUBLISHABLE_KEY = /^pk_(test|live)_/;
+const WEBHOOK_SECRET = /^whsec_\S{8,}$/;
+
+/** Catches the common wrong pastes (publishable key, webhook secret in the key field and the reverse) before anything is sent. */
+export function stripeKeyProblem(name: string, value: string): StripeKeyErrorKey | null {
+  if (name === STRIPE_SECRET_KEY) {
+    if (PUBLISHABLE_KEY.test(value)) return 'secrets.error.stripePublishable';
+    return SECRET_KEY.test(value) ? null : 'secrets.error.stripeKeyFormat';
+  }
+  if (name === STRIPE_WEBHOOK_SECRET) return WEBHOOK_SECRET.test(value) ? null : 'secrets.error.stripeWebhookFormat';
+  return null;
+}
+
+const WEBHOOK_PATH = /^\/[a-z0-9][a-z0-9-]{1,60}[a-z0-9]\/pay\/webhook$/;
+
+/** The webhook URL is shown as text for the creator to paste into Stripe, so it must look exactly like what the proxy serves. */
+export function safeWebhookUrl(raw: unknown): string | null {
+  if (typeof raw !== 'string' || raw.length > 300) return null;
+  let u: URL;
+  try { u = new URL(raw); } catch { return null; }
+  if (u.protocol !== 'https:' || u.username || u.password || u.search || u.hash || !WEBHOOK_PATH.test(u.pathname)) return null;
+  return u.href === raw ? raw : null;
+}
+
+const MAX_PURPOSE = 200;
 const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
 
 export const SECRET_ERROR_KEYS = [
@@ -18,6 +52,9 @@ export const SECRET_ERROR_KEYS = [
   'secrets.error.empty',
   'secrets.error.network',
   'secrets.error.unknown',
+  'secrets.error.stripePublishable',
+  'secrets.error.stripeKeyFormat',
+  'secrets.error.stripeWebhookFormat',
 ] as const;
 export type SecretErrorKey = (typeof SECRET_ERROR_KEYS)[number];
 
@@ -37,9 +74,10 @@ export function errorKeyForStatus(status: number): SecretErrorKey {
 }
 
 export type SecretStatus = { name: string; updatedAt: string | null };
-export type RequiredSecret = { name: string; connectors: string[] };
-export type SecretsData = { secrets: SecretStatus[]; required: RequiredSecret[] };
-export type SecretRow = { name: string; connectors: string[]; isSet: boolean; updatedAt: string | null; required: boolean };
+export type RequiredSecret = { name: string; connectors: string[]; purpose?: string };
+/** `pay` is present only for an app that sells things: where the creator registers the Stripe webhook (null until the app has a URL). */
+export type SecretsData = { secrets: SecretStatus[]; required: RequiredSecret[]; pay?: { webhookUrl: string | null } };
+export type SecretRow = { name: string; connectors: string[]; isSet: boolean; updatedAt: string | null; required: boolean; purpose?: string };
 
 export function validateSecretInput(raw: string): { ok: true; value: string } | { ok: false; errorKey: SecretErrorKey } {
   if (typeof raw !== 'string') return { ok: false, errorKey: 'secrets.error.empty' };
@@ -61,18 +99,22 @@ export function parseSecretsResponse(body: unknown): SecretsData | null {
     secrets.push({ name: s.name, updatedAt: typeof s.updatedAt === 'string' ? s.updatedAt : null });
   }
   const byName = new Map<string, string[]>();
+  const purposes = new Map<string, string>();
   for (const r of Array.isArray(body.required) ? body.required : []) {
     if (!isObj(r) || typeof r.name !== 'string' || !SECRET_NAME.test(r.name)) continue;
     const connectors = Array.isArray(r.connectors) ? r.connectors.filter((c): c is string => typeof c === 'string') : [];
     byName.set(r.name, [...new Set([...(byName.get(r.name) ?? []), ...connectors])]);
+    if (typeof r.purpose === 'string' && r.purpose.trim() && r.purpose.length <= MAX_PURPOSE && !CONTROL_CHARS.test(r.purpose) && !purposes.has(r.name)) purposes.set(r.name, r.purpose.trim());
   }
-  return { secrets, required: [...byName].map(([name, connectors]) => ({ name, connectors })) };
+  const out: SecretsData = { secrets, required: [...byName].map(([name, connectors]) => ({ name, connectors, ...(purposes.has(name) ? { purpose: purposes.get(name) } : {}) })) };
+  if (isObj(body.pay)) out.pay = { webhookUrl: safeWebhookUrl(body.pay.webhookUrl) };
+  return out;
 }
 
 /** Required secrets first, in the order the app declares them, then any other stored secret (so it can still be removed). */
 export function buildSecretRows(required: RequiredSecret[], secrets: SecretStatus[]): SecretRow[] {
   const stored = new Map(secrets.map((s) => [s.name, s]));
-  const rows: SecretRow[] = required.map((r) => ({ name: r.name, connectors: r.connectors, isSet: stored.has(r.name), updatedAt: stored.get(r.name)?.updatedAt ?? null, required: true }));
+  const rows: SecretRow[] = required.map((r) => ({ name: r.name, connectors: r.connectors, isSet: stored.has(r.name), updatedAt: stored.get(r.name)?.updatedAt ?? null, required: true, ...(r.purpose ? { purpose: r.purpose } : {}) }));
   const needed = new Set(required.map((r) => r.name));
   const extras = secrets.filter((s) => !needed.has(s.name)).sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
   for (const s of extras) rows.push({ name: s.name, connectors: [], isSet: true, updatedAt: s.updatedAt, required: false });
@@ -139,6 +181,8 @@ export function createSecretsClient({ baseUrl, fetchImpl = fetch, withAuth }: {
 export async function submitSecret(client: SecretsClient, projectId: string, name: string, raw: string): Promise<{ ok: true; sent: true } | { ok: false; sent: boolean; errorKey: SecretErrorKey }> {
   const v = validateSecretInput(raw);
   if (!v.ok) return { ok: false, sent: false, errorKey: v.errorKey };
+  const wrong = stripeKeyProblem(name, v.value); // a wrong paste is refused here, so it is kept in the field to correct
+  if (wrong) return { ok: false, sent: false, errorKey: wrong };
   const r = await client.set(projectId, name, v.value);
   return r.ok ? { ok: true, sent: true } : { ok: false, sent: true, errorKey: r.errorKey };
 }

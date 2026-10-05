@@ -40,6 +40,26 @@ export async function pushAppSchema(proxyAdmin, subdomain, bundle, { allowDestru
     }
 }
 
+// Scheduled jobs (vibe.jobs.json) follow the same rules as schemas: pushed to each subdomain app being deployed, never failing the
+// deploy, logged by code only, and an absent or unreadable file leaves the app's existing jobs alone. They are validated by the
+// proxy against the app's tables and connectors, so this runs after the schema and the manifest. Outcome is written to
+// `source.result.jobsStatus` ('applied' | 'invalid' | 'failed'); omitted when the bundle has no jobs file.
+import { jobsFromBundle } from '../lib/bundleJobs.js';
+
+export async function pushAppJobs(proxyAdmin, subdomain, bundle, { log = console.warn } = {}) {
+    const found = jobsFromBundle(bundle);
+    if (found.status === 'invalid') return 'invalid';
+    if (found.status !== 'found') return null;
+    try {
+        await proxyAdmin.setJobs(subdomain, found.spec);
+        return 'applied';
+    } catch (e) {
+        const code = e?.code || 'error';
+        log(`[proxy] jobs failed app=${subdomain} code=${code}`);
+        return code === 'invalid_jobs' || code === 'request_too_large' || code === 'bad_json' ? 'invalid' : 'failed';
+    }
+}
+
 export async function registerDeployedApp(proxyAdmin, subdomain, log = console.warn, source = {}) {
     if (!proxyAdmin?.configured || typeof subdomain !== 'string' || !SUBDOMAIN.test(subdomain)) return false;
     if (UUID_LIKE.test(subdomain)) return false; // project ids are the platform's own app ids
@@ -61,6 +81,8 @@ export async function registerDeployedApp(proxyAdmin, subdomain, log = console.w
         if (source?.bundle) {
             const status = await pushAppSchema(proxyAdmin, subdomain, source.bundle, { allowDestructive: source.allowDestructive === true, log });
             if (status && source.result && typeof source.result === 'object') source.result.schemaStatus = status;
+            const jobs = await pushAppJobs(proxyAdmin, subdomain, source.bundle, { log });
+            if (jobs && source.result && typeof source.result === 'object') source.result.jobsStatus = jobs;
         }
         await proxyAdmin.setEnabled(subdomain, true);
         return true;

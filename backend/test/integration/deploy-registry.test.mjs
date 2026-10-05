@@ -11,20 +11,22 @@ const MANIFEST = { connectors: { stocks: { host: 'api.example.com', paths: ['/v1
 const MANIFEST_BUNDLE = zip([file('index.html', '<html></html>'), file('vibe.manifest.json', MANIFEST)]);
 const SPEC = { version: 1, tables: { todos: { access: 'owner', columns: { title: { type: 'text', required: true } } } } };
 const SCHEMA_BUNDLE = zip([file('index.html', '<html></html>'), file('vibe.schema.json', SPEC)]);
+const JOBS = { version: 1, jobs: [{ id: 'cleanup', schedule: { dailyAt: '03:00', tz: 'UTC' }, action: { type: 'prune', table: 'todos', olderThanDays: 30 } }] };
+const JOBS_BUNDLE = zip([file('index.html', '<html></html>'), file('vibe.schema.json', SPEC), file('vibe.jobs.json', JOBS)]);
 const { supabase } = await import('../../config/database.js');
 
 let undeployRows = [{ subdomain: 'my-app', user_id: 'owner-1' }];
 stubSupabase(supabase, (q) => {
     if (q.table === 'deployments' && q.op === 'select' && q.single) return { data: null, error: { code: 'PGRST116' } };
     if (q.table === 'deployments' && q.op === 'select') return { data: undeployRows.filter((r) => eqOf(q, 'project_id') === 'proj-1' && eqOf(q, 'user_id') === r.user_id), error: null };
-    if (q.table === 'projects' && q.op === 'select' && q.single) return ['proj-1', 'proj-manifest', 'proj-schema'].includes(eqOf(q, 'id')) ? { data: { bundle: eqOf(q, 'id') === 'proj-manifest' ? MANIFEST_BUNDLE : eqOf(q, 'id') === 'proj-schema' ? SCHEMA_BUNDLE : 'QUJD', creator_id: 'owner-1', github_repo: null, preview_url: null }, error: null } : { data: null, error: { code: 'PGRST116' } };
+    if (q.table === 'projects' && q.op === 'select' && q.single) return ['proj-1', 'proj-manifest', 'proj-schema', 'proj-jobs'].includes(eqOf(q, 'id')) ? { data: { bundle: eqOf(q, 'id') === 'proj-manifest' ? MANIFEST_BUNDLE : eqOf(q, 'id') === 'proj-schema' ? SCHEMA_BUNDLE : eqOf(q, 'id') === 'proj-jobs' ? JOBS_BUNDLE : 'QUJD', creator_id: 'owner-1', github_repo: null, preview_url: null }, error: null } : { data: null, error: { code: 'PGRST116' } };
     return { data: null, error: null };
 });
 const { default: router } = await import('../../routes/deploy.routes.js');
 
 const realFetch = globalThis.fetch; let deployStatus = 200;
 const calls = []; let behavior = {};
-const fakeProxy = (configured = true) => ({ configured, ensureApp: async (a) => { calls.push(['ensure', a]); if (behavior.ensure) throw behavior.ensure; }, setEnabled: async (a, e) => { calls.push(['enabled', a, e]); if (behavior.enabled) throw behavior.enabled; }, setManifest: async (a, m) => { calls.push(['manifest', a, m]); }, copySecrets: async (to, from, o) => { calls.push(['copy', to, from, o]); return { copied: 0 }; }, setSchema: async (a, spec, o) => { calls.push(['schema', a, spec, o]); if (behavior.schema) throw behavior.schema; return behavior.schemaOut || { version: 1, applied: 2 }; } });
+const fakeProxy = (configured = true) => ({ configured, ensureApp: async (a) => { calls.push(['ensure', a]); if (behavior.ensure) throw behavior.ensure; }, setEnabled: async (a, e) => { calls.push(['enabled', a, e]); if (behavior.enabled) throw behavior.enabled; }, setManifest: async (a, m) => { calls.push(['manifest', a, m]); }, copySecrets: async (to, from, o) => { calls.push(['copy', to, from, o]); return { copied: 0 }; }, setSchema: async (a, spec, o) => { calls.push(['schema', a, spec, o]); if (behavior.schema) throw behavior.schema; return behavior.schemaOut || { version: 1, applied: 2 }; }, setJobs: async (a, spec) => { calls.push(['jobs', a, spec]); if (behavior.jobs) throw behavior.jobs; return { jobs: 1, warnings: [] }; } });
 let srv, srvNoProxy;
 before(async () => {
     globalThis.fetch = (url, opts = {}) => { const u = new URL(String(url)); if (u.hostname === '127.0.0.1') return realFetch(url, opts); return Promise.resolve(new Response(deployStatus === 200 ? '{}' : '{"error":"boom"}', { status: deployStatus, headers: { 'content-type': 'application/json' } })); };
@@ -137,4 +139,25 @@ test('a bundle without a schema answers exactly as before (no schemaStatus key)'
     reset();
     const r = await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app' }));
     assert.deepEqual(await r.json(), { success: true, url: 'https://my-app.vibebuild.cc' });
+});
+
+test('a bundle with vibe.jobs.json pushes the jobs after the schema and reports jobsStatus', async () => {
+    reset();
+    const r = await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app' }, 'proj-jobs'));
+    assert.equal(r.status, 200); assert.deepEqual(await r.json(), { success: true, url: 'https://my-app.vibebuild.cc', schemaStatus: 'applied', jobsStatus: 'applied' });
+    assert.deepEqual(calls.filter((c) => ['schema', 'jobs', 'enabled'].includes(c[0])).map((c) => c[0]), ['schema', 'jobs', 'enabled']);
+    assert.deepEqual(calls.find((c) => c[0] === 'jobs'), ['jobs', 'my-app', JOBS]);
+});
+
+test('rejected or failed jobs do not fail the deploy but are surfaced; a bundle without jobs has no jobsStatus key', async () => {
+    reset(); behavior.jobs = new ProxyAdminError(400, 'invalid_jobs');
+    let r = await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app' }, 'proj-jobs'));
+    assert.equal(r.status, 200); let j = await r.json(); assert.equal(j.success, true); assert.equal(j.jobsStatus, 'invalid');
+    reset(); behavior.jobs = new ProxyAdminError(0, 'unreachable');
+    r = await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app' }, 'proj-jobs'));
+    assert.equal((await r.json()).jobsStatus, 'failed');
+    assert.deepEqual(calls.at(-1), ['enabled', 'my-app', true]);
+    reset();
+    r = await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app' }, 'proj-schema'));
+    assert.equal('jobsStatus' in (await r.json()), false);
 });
