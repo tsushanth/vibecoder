@@ -77,3 +77,25 @@ Still not built: the entry point that reads configuration and starts the server,
 `platform/proxy-app/config.js` (fail-fast env validation; errors name the setting, never its value; secrets are non-enumerable so logging the config cannot print them), `start.js` (wires config, Postgres stores, per-app and platform-wide AI caps, HTTP handler; refuses to start if the database is unreachable or the schema is not migrated), `index.js` (process entry, SIGTERM-graceful), `store/migrate.js` (ordered, checksummed, one transaction per file, advisory lock; refuses a migration whose contents changed after it was applied), `Dockerfile` (node:22-slim, non-root, no tests in the image) and `fly.toml` (validated with `flyctl config validate`; scale-to-zero, shared-cpu-1x 256 MB, /health check). 214 tests pass on local Postgres, mutation-checked. The built image was run against a throwaway Postgres container: migrate (twice), start, health, 404, 403, clean shutdown.
 
 Still true, nothing deployed: no Fly app named `vibe-proxy` exists (the name is unchecked and unclaimed), no secrets set, no production database chosen. The $0.05 per app and $2 platform daily AI caps remain defaults the owner has not confirmed. The migration creates a cluster-level Postgres role `vibe_proxy` (NOLOGIN); the production `DATABASE_URL` user must be granted membership in it, and RLS behavior with a hosted provider's own roles is untested. `fly.toml` has no `release_command`: migrations are an explicit step. Scale-to-zero adds a cold start (about 1 to 3 seconds is an estimate, not measured).
+
+## Step 6 built: secure key entry (2026-10-05)
+
+Design: the proxy has no user logins, so keys are entered through a service-to-service admin API. The VibeBuild backend authenticates the creator and checks they own the app, then calls the proxy with a long shared token (`PROXY_ADMIN_TOKEN`, 32+ characters, required at startup). The proxy trusts that token and does no ownership check of its own.
+
+Built and tested locally (263 tests on local Postgres, security rules mutation-checked):
+- `proxy-app/admin.js`: `PUT /admin/apps/:app` (register with a validated manifest and custom domains), `PUT|DELETE /admin/apps/:app/secrets/:name`, `GET /admin/apps/:app/secrets` (names and update times only). Write-only: there is no route that returns a value. Constant-time token comparison; failures all return the same 401; 10 failed attempts per address per minute lock that address out (including with the right token); 8 KB body cap; no CORS headers ever; `no-store`; request logs record route, app id and status only. With no token configured every `/admin` path is a plain 404.
+- `store/pg.js`: `secretStore.list` (names only).
+- `vibe-proxy/capture.js`: finds pasted credentials (OpenAI, OpenRouter, Anthropic, Google, Gemini, GitHub, Stripe, AWS, Slack, Supabase, JWT, and "api key / secret / token / password" followed by a long value) and replaces each with `[SECRET:NAME]`; same value gives one entry, collisions get `_2`, `_3`; running it again finds nothing.
+- `vibe-proxy/vault-capture.js`: `moveSecretsToVault` stores each found key through caller-supplied `listNames` and `setSecret` functions. Fail-safe: the returned text is always redacted, a failure to store reports the name as failed and never carries the value, and a failure to list existing names stores nothing under a guessed name.
+- One end-to-end test: key pasted in chat, stored encrypted through the real admin HTTP API, used by a connector call, and absent from the vault ciphertext, list output, logs and usage rows.
+
+Not built, and needed before this is useful to a creator:
+- The backend side: calling `moveSecretsToVault` on chat messages and prompts, and the backend routes that call the admin API after an ownership check. This is a change to `vibecoder-api`, a production service.
+- The mobile creator-app screen and chat UI for entering a key.
+- Generation changes so the model knows `[SECRET:NAME]` placeholders and writes a manifest connector that uses the name; the worker's prompt currently teaches only the built-in `nws` connector and `vibe.ai`.
+
+Known limits:
+- Detection is a heuristic. Generic detection needs a digit in the value, so a long digit-free passphrase is NOT caught; a key that is split, spelled out or obfuscated is not caught; any provider format not in the list is caught only through the generic rule.
+- The admin API shares a public hostname with the app routes. It is rate limited and token protected, but it would be safer reachable only over Fly's private network or from an allowlisted address; that is not configured.
+- No audit log of admin actions, no secret versioning or rotation tooling (`key_version` is always 1), no deletion of an app's secrets when an app is deleted, no rotation procedure for `PROXY_ADMIN_TOKEN`.
+- A secret is only as safe as the master key and the database: anyone with both can read all secrets.
