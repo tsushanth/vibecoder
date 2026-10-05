@@ -255,3 +255,44 @@ test('a project whose preview and published URLs share one subdomain writes that
     assert.equal((await call('PUT', `${SAME_PID}/secrets/API_KEY`, { body: { value: SECRET } })).status, 204);
     assert.deepEqual(calls.filter((c) => c[0] === 'set').map((c) => c[1]), [SAME_PID, 'same-app']);
 });
+
+// ---- Stripe keys for apps that sell things (manifest has a pay catalog)
+const PAYAPP = (items, connectors = []) => () => ({ enabled: false, connectors, pay: { items } });
+const PAY_NAMES = ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'];
+
+test('GET: a manifest with a pay catalog also requires the Stripe secret key and webhook secret, each with a purpose, plus the webhook URL of the published app', async () => {
+    reset(); proxyBehavior.getApp = PAYAPP(2);
+    const j = await (await call('GET', `${PID}/secrets`)).json();
+    assert.deepEqual(j.required.map((r) => r.name), PAY_NAMES);
+    for (const r of j.required) { assert.deepEqual(r.connectors, ['pay']); assert.equal(typeof r.purpose, 'string'); assert.ok(r.purpose.length > 10 && r.purpose.length < 200); }
+    assert.match(j.required[0].purpose, /sk_|rk_/); assert.match(j.required[1].purpose, /whsec_/);
+    assert.deepEqual(j.pay, { webhookUrl: 'https://vibe-proxy.vibebuild.cc/my-app/pay/webhook' });
+});
+
+test('GET: the webhook URL falls back to the preview app when unpublished, and is null when the project has no app yet', async () => {
+    reset(); proxyBehavior.getApp = PAYAPP(1);
+    projects['fafafafa-2222-3333-4444-555555555555'] = { id: 'fafafafa-2222-3333-4444-555555555555', creator_id: 'owner-1', preview_url: 'https://prev-fafafafa.vibebuild.cc', published_url: null };
+    assert.deepEqual((await (await call('GET', 'fafafafa-2222-3333-4444-555555555555/secrets')).json()).pay, { webhookUrl: 'https://vibe-proxy.vibebuild.cc/prev-fafafafa/pay/webhook' });
+    assert.deepEqual((await (await call('GET', `${NOURL_PID}/secrets`)).json()).pay, { webhookUrl: null });
+    assert.deepEqual((await (await call('GET', `${EVIL_PID}/secrets`)).json()).pay, { webhookUrl: null }, 'foreign hosts never produce a URL');
+});
+
+test('GET: Stripe entries come after connector keys, merge with a connector that already names the same secret, and no pay items or a malformed count adds nothing', async () => {
+    reset(); proxyBehavior.getApp = PAYAPP(1, [{ name: 'stripe', host: 'api.stripe.com', secret: { name: 'STRIPE_SECRET_KEY', in: 'header' } }, { name: 'wx', host: 'a.example.com', secret: { name: 'WX_KEY', in: 'query' } }]);
+    const j = await (await call('GET', `${PID}/secrets`)).json();
+    assert.deepEqual(j.required.map((r) => [r.name, r.connectors]), [['STRIPE_SECRET_KEY', ['stripe', 'pay']], ['WX_KEY', ['wx']], ['STRIPE_WEBHOOK_SECRET', ['pay']]]);
+    for (const items of [0, -1, 1.5, '2', null, undefined, {}, NaN]) {
+        reset(); proxyBehavior.getApp = () => ({ enabled: true, connectors: [], pay: { items } });
+        const b = await (await call('GET', `${PID}/secrets`)).json();
+        assert.deepEqual(b, { secrets: [{ name: 'API_KEY', updatedAt: 't1' }], required: [] }, String(items));
+    }
+    reset(); proxyBehavior.getApp = () => ({ enabled: true, connectors: [] });
+    assert.deepEqual(await (await call('GET', `${PID}/secrets`)).json(), { secrets: [{ name: 'API_KEY', updatedAt: 't1' }], required: [] });
+});
+
+test('PUT and DELETE work for the Stripe key names on the project app and every subdomain app, like any other secret', async () => {
+    reset();
+    assert.equal((await call('PUT', `${PID}/secrets/STRIPE_SECRET_KEY`, { body: { value: 'sk_test_' + 'a'.repeat(24) } })).status, 204);
+    assert.deepEqual(calls.filter((c) => c[0] === 'set').map((c) => c[1]).sort(), [PID, 'my-app', 'prev-11111111'].sort());
+    reset(); assert.equal((await call('DELETE', `${PID}/secrets/STRIPE_WEBHOOK_SECRET`)).status, 204);
+});
