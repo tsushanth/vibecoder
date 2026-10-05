@@ -2,5 +2,10 @@
   "name": "vibebuild-platform",
   "private": true,
   "type": "module",
-  "scripts": { "test": "node --test --test-force-exit vibe-proxy/test/ sdk/test/ proxy-app/test/" }
+  "scripts": {
+    "test": "node --test --test-force-exit vibe-proxy/test/ sdk/test/ proxy-app/test/ store/test/store.test.mjs"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
+  }
 }
