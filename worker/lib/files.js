@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const SKIP_NAMES = new Set(['CLAUDE.md', 'vibedata.js', 'screenshot.png', '.git', '.claude', 'node_modules']);
+const SKIP_NAMES = new Set(['CLAUDE.md', 'vibedata.js', 'vibe.js', 'screenshot.png', '.git', '.claude', 'node_modules']);
 const TEXT_EXT = /\.(html|css|js|mjs|json|svg|txt|md|webmanifest)$/i;
 
 /** Parse `<file path="...">...</file>` blocks. Tolerates markdown fences and prose around the blocks. */
