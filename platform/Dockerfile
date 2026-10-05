@@ -8,11 +8,14 @@ COPY vibe-proxy ./vibe-proxy
 COPY proxy-app ./proxy-app
 COPY store ./store
 COPY auth ./auth
+COPY data ./data
 COPY storage ./storage
+COPY data ./data
+COPY jobs ./jobs
 COPY pay ./pay
 COPY data ./data
 # tests and fixtures are not needed at run time
-RUN rm -rf vibe-proxy/test proxy-app/test store/test auth/test storage/test pay/test data/test
+RUN rm -rf vibe-proxy/test proxy-app/test store/test auth/test storage/test data/test jobs/test pay/test
 USER node
 EXPOSE 8080
 CMD ["node", "proxy-app/index.js"]
