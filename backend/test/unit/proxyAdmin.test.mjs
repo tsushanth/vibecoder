@@ -66,7 +66,7 @@ test('redirects are not followed and the base URL must be https', async () => {
 test('the client never exposes the token or a way to read a secret value', () => {
     const { admin } = rig(res(204));
     assert.equal(JSON.stringify(admin).includes(TOKEN), false);
-    assert.deepEqual(Object.keys(admin).sort(), ['configured', 'copySecrets', 'deleteSecret', 'ensureApp', 'getApp', 'getSchema', 'listSecrets', 'registerApp', 'setDomains', 'setEnabled', 'setManifest', 'setSchema', 'setSecret']);
+    assert.deepEqual(Object.keys(admin).sort(), ['configured', 'copySecrets', 'deleteSecret', 'ensureApp', 'getApp', 'getJobs', 'getSchema', 'listSecrets', 'registerApp', 'setDomains', 'setEnabled', 'setJobs', 'setManifest', 'setSchema', 'setSecret']);
 });
 
 test('ensureApp posts to the ensure endpoint with no body, and setEnabled posts the flag', async () => {

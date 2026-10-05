@@ -51,7 +51,7 @@ test('only the two Stripe names have row help', () => {
 test('the webhook URL is shown only when it is an https /<app>/pay/webhook URL without credentials, query or fragment', () => {
   assert.equal(safeWebhookUrl(URL_OK), URL_OK);
   for (const bad of [null, undefined, 5, '', 'http://vibe-proxy.vibebuild.cc/a-app/pay/webhook', 'javascript:alert(1)', 'https://u:p@vibe-proxy.vibebuild.cc/a-app/pay/webhook',
-    URL_OK + '?x=1', URL_OK + '#f', 'https://vibe-proxy.vibebuild.cc/a-app/pay/checkout', 'https://vibe-proxy.vibebuild.cc/pay/webhook', 'https://vibe-proxy.vibebuild.cc/A_app/pay/webhook', 'https://vibe-proxy.vibebuild.cc/a/b/pay/webhook']) {
+    URL_OK + '?x=1', URL_OK + '#f', 'https://vibe-proxy.vibebuild.cc:443/a-app/pay/webhook', 'HTTPS://Vibe-Proxy.vibebuild.cc/a-app/pay/webhook', ' '+URL_OK, 'https://vibe-proxy.vibebuild.cc/a-app/pay/checkout', 'https://vibe-proxy.vibebuild.cc/pay/webhook', 'https://vibe-proxy.vibebuild.cc/A_app/pay/webhook', 'https://vibe-proxy.vibebuild.cc/a/b/pay/webhook']) {
     assert.equal(safeWebhookUrl(bad), null, String(bad));
   }
 });
