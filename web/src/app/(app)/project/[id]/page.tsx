@@ -21,6 +21,7 @@ import {
 import { PreviewPane } from '@/components/builder/PreviewPane';
 import { ChatPanel } from '@/components/builder/ChatPanel';
 import { PublishDialog } from '@/components/builder/PublishDialog';
+import { SecretsPanel } from '@/components/project/SecretsPanel';
 import { VersionsPopover } from '@/components/builder/VersionsPopover';
 import type {
   ProjectDetailResponse,
@@ -419,6 +420,11 @@ export default function ProjectBuilderPage() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* API keys the app's connector manifest asks for (owner only; renders nothing when the app needs none) */}
+      {isOwner && user && (
+        <SecretsPanel projectId={id} reloadKey={`${genStore.isGenerating ? 'generating' : 'idle'}:${store.project.publishedUrl ?? ''}`} />
       )}
 
       {/* Main builder area — desktop: preview top, chat bottom.

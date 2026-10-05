@@ -17,7 +17,7 @@ const noBody = (status) => ({ status });
 
 export const ADMIN_BODY_LIMIT = 8192;
 
-export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled, setDomains, secretStore, limiterStore, baseDomain, now = () => Date.now() }) {
+export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, secretStore, limiterStore, baseDomain, now = () => Date.now() }) {
     const expected = digest(token);
     const minute = () => Math.floor(now() / 60_000);
     const validDomains = (domains) => Array.isArray(domains) && domains.length <= MAX_DOMAINS && domains.every((d) => typeof d === 'string' && HOSTNAME.test(d) && !d.endsWith(`.${baseDomain}`) && d !== baseDomain);
@@ -35,10 +35,18 @@ export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled,
     return async function handle(req) {
         const denied = await authorize(req.headers, req.ip);
         if (denied) return denied;
-        const m = /^\/admin\/apps\/([^/]+)(?:\/(secrets|ensure|enabled|domains)(?:\/([^/]+))?)?$/.exec(req.pathname);
+        const m = /^\/admin\/apps\/([^/]+)(?:\/(secrets|ensure|enabled|domains|manifest|copy-secrets)(?:\/([^/]+))?)?$/.exec(req.pathname);
         if (!m) return json(404, { error: 'not_found' });
         const [, appId, sub, name] = m;
         if (!APP_ID.test(appId)) return json(404, { error: 'not_found' });
+
+        if (!sub && req.method === 'GET') {
+            // what the app declares, for the key-entry screen: connector names, hosts and which secret each needs. Never a value.
+            const app = await appStore.get(appId);
+            if (!app) return json(404, { error: 'unknown_app' });
+            const connectors = Object.entries(app.manifest?.connectors || {}).map(([name, c]) => ({ name, host: c.host, secret: c.secret ? { name: c.secret.name, in: c.secret.in } : null }));
+            return json(200, { enabled: app.enabled, connectors });
+        }
 
         if (!sub) {
             if (req.method !== 'PUT') return json(405, { error: 'method_not_allowed' });
@@ -55,6 +63,34 @@ export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled,
             }
             await upsertApp({ appId, manifest, domains, enabled });
             return noBody(204);
+        }
+
+        if (sub === 'manifest') {
+            if (name !== undefined) return json(404, { error: 'not_found' });
+            if (req.method !== 'POST') return json(405, { error: 'method_not_allowed' });
+            const body = await req.readBody(ADMIN_BODY_LIMIT);
+            if (body.error) return json(body.error, { error: body.error === 413 ? 'request_too_large' : 'bad_json' });
+            const manifest = body.value.manifest;
+            if (manifest === undefined || (manifest !== null && (typeof manifest !== 'object' || Array.isArray(manifest)))) return json(400, { error: 'invalid_manifest', problems: ['manifest must be an object or null'] });
+            if (manifest !== null) {
+                const v = validateManifest(manifest);
+                if (!v.ok) return json(400, { error: 'invalid_manifest', problems: v.problems.slice(0, 10) });
+                try { resolveManifest(manifest); } catch (e) { return json(400, { error: 'invalid_manifest', problems: [e.message] }); }
+            }
+            if (!(await setManifest(appId, manifest))) return json(404, { error: 'unknown_app' });
+            return noBody(204);
+        }
+
+        if (sub === 'copy-secrets') {
+            if (name !== undefined) return json(404, { error: 'not_found' });
+            if (req.method !== 'POST') return json(405, { error: 'method_not_allowed' });
+            const body = await req.readBody(ADMIN_BODY_LIMIT);
+            if (body.error) return json(body.error, { error: body.error === 413 ? 'request_too_large' : 'bad_json' });
+            const from = body.value.from;
+            const replace = body.value.replace ?? false;
+            if (typeof from !== 'string' || !APP_ID.test(from) || from === appId || typeof replace !== 'boolean') return json(400, { error: 'invalid_source' });
+            if (!(await appStore.get(appId)) || !(await appStore.get(from))) return json(404, { error: 'unknown_app' });
+            return json(200, { copied: await copySecrets(from, appId, { replace }) });
         }
 
         if (sub === 'ensure' || sub === 'enabled' || sub === 'domains') {

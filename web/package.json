@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test src/lib/withAuth.test.mts"
+    "test": "node --test src/lib/*.test.mts"
   },
   "dependencies": {
     "@codemirror/lang-css": "^6.3.1",

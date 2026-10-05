@@ -66,7 +66,7 @@ test('redirects are not followed and the base URL must be https', async () => {
 test('the client never exposes the token or a way to read a secret value', () => {
     const { admin } = rig(res(204));
     assert.equal(JSON.stringify(admin).includes(TOKEN), false);
-    assert.deepEqual(Object.keys(admin).sort(), ['configured', 'deleteSecret', 'ensureApp', 'listSecrets', 'registerApp', 'setDomains', 'setEnabled', 'setSecret']);
+    assert.deepEqual(Object.keys(admin).sort(), ['configured', 'copySecrets', 'deleteSecret', 'ensureApp', 'getApp', 'listSecrets', 'registerApp', 'setDomains', 'setEnabled', 'setManifest', 'setSecret']);
 });
 
 test('ensureApp posts to the ensure endpoint with no body, and setEnabled posts the flag', async () => {
@@ -92,4 +92,28 @@ test('setDomains posts the domain list to the domains endpoint', async () => {
     const b = rig(res(404, { error: 'unknown_app' }));
     await assert.rejects(() => b.admin.setDomains('x', []), (e) => e.status === 404 && e.code === 'unknown_app');
     await assert.rejects(() => createProxyAdmin({ baseUrl: '', token: '' }).setDomains('x', []), (e) => e.code === 'not_configured');
+});
+
+test('getApp reads the declared connectors with GET and no body', async () => {
+    const body = { enabled: false, connectors: [{ name: 'w', host: 'api.example.com', secret: { name: 'W_KEY', in: 'query' } }] };
+    const a = rig(res(200, body));
+    assert.deepEqual(await a.admin.getApp('proj-1'), body);
+    assert.equal(a.calls[0].url, 'https://proxy.test/admin/apps/proj-1'); assert.equal(a.calls[0].init.method, 'GET'); assert.equal(a.calls[0].init.body, undefined);
+    await assert.rejects(() => rig(res(404, { error: 'unknown_app' })).admin.getApp('x'), (e) => e.status === 404 && e.code === 'unknown_app');
+});
+
+test('setManifest posts only the manifest (or null) to the manifest endpoint', async () => {
+    const m = { connectors: { w: { host: 'api.example.com', paths: ['/'], methods: ['GET'] } } };
+    const a = rig(res(204)); await a.admin.setManifest('my-app', m);
+    assert.equal(a.calls[0].url, 'https://proxy.test/admin/apps/my-app/manifest'); assert.equal(a.calls[0].init.method, 'POST'); assert.deepEqual(a.calls[0].body, { manifest: m });
+    const b = rig(res(204)); await b.admin.setManifest('my-app', null); assert.deepEqual(b.calls[0].body, { manifest: null });
+    await assert.rejects(() => rig(res(400, { error: 'invalid_manifest' })).admin.setManifest('x', m), (e) => e.status === 400 && e.code === 'invalid_manifest');
+});
+
+test('copySecrets posts the source app and the replace flag to the destination app', async () => {
+    const a = rig(res(200, { copied: 2 }));
+    assert.deepEqual(await a.admin.copySecrets('dest-app', 'proj-1', { replace: true }), { copied: 2 });
+    assert.equal(a.calls[0].url, 'https://proxy.test/admin/apps/dest-app/copy-secrets'); assert.deepEqual(a.calls[0].body, { from: 'proj-1', replace: true });
+    const b = rig(res(200, { copied: 0 })); await b.admin.copySecrets('dest-app', 'proj-1'); assert.deepEqual(b.calls[0].body, { from: 'proj-1', replace: false });
+    await assert.rejects(() => createProxyAdmin({ baseUrl: '', token: '' }).copySecrets('a', 'b'), (e) => e.code === 'not_configured');
 });
