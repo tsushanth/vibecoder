@@ -207,3 +207,14 @@ t('domains: validation, unknown app, auth and path rules', async () => {
     assert.equal((await call('POST', '/admin/apps/dom-app2/domains/extra', { body: { domains: [] } })).status, 404);
     assert.deepEqual((await stores.appStore.get('dom-app2')).domains, []);
 });
+
+t('GET an app reports how many catalog items its pay section sells (a count only, never names or prices), and omits pay when there is none', async () => {
+    const pay = { catalog: [{ id: 'pro', name: 'Secret Plan Name', amountCents: 123456, currency: 'usd', mode: 'payment' }, { id: 'ebook', name: 'Another', amountCents: 999, currency: 'usd', mode: 'payment' }] };
+    assert.equal((await call('PUT', '/admin/apps/pay-app', { body: { manifest: { pay }, enabled: true } })).status, 204);
+    const r = await call('GET', '/admin/apps/pay-app'); const text = await r.text();
+    assert.equal(r.status, 200);
+    assert.deepEqual(JSON.parse(text), { enabled: true, connectors: [], pay: { items: 2 } });
+    assert.equal(/Secret Plan Name|123456|amountCents/.test(text), false);
+    assert.equal((await call('PUT', '/admin/apps/nopay-app', { body: { manifest: null, enabled: true } })).status, 204);
+    assert.deepEqual(await (await call('GET', '/admin/apps/nopay-app')).json(), { enabled: true, connectors: [] });
+});

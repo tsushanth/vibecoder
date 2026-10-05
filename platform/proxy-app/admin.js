@@ -49,7 +49,9 @@ export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled,
             const app = await appStore.get(appId);
             if (!app) return json(404, { error: 'unknown_app' });
             const connectors = Object.entries(app.manifest?.connectors || {}).map(([name, c]) => ({ name, host: c.host, secret: c.secret ? { name: c.secret.name, in: c.secret.in } : null }));
-            return json(200, { enabled: app.enabled, connectors });
+            // and, when it sells things, how many catalog items: a count only (the key-entry screen asks for the Stripe keys on that basis)
+            const catalog = app.manifest?.pay?.catalog;
+            return json(200, { enabled: app.enabled, connectors, ...(Array.isArray(catalog) ? { pay: { items: catalog.length } } : {}) });
         }
 
         if (!sub) {
