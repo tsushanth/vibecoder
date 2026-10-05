@@ -8,6 +8,14 @@
  *   vibe.auth.signOut()                            -> clears the session
  *   vibe.auth.onChange(function (user) {})         -> called after sign-in or sign-out
  *   vibe.auth.ready                                -> Promise that settles once a sign-in link in the URL has been handled
+ *   vibe.db.from('todos').select()                 -> the server's JSON (50 rows by default; no arguments = all columns, no filter)
+ *   vibe.db.from('todos').select({where:[{col:'done', op:'eq', val:false}], order:[{col:'created_at', dir:'desc'}], limit:20, offset:0, columns:['id','title']})
+ *       where ops: eq neq lt lte gt gte like ilike in is_null (conditions are ANDed, max 10). limit max 100.
+ *   vibe.db.from('todos').insert({title:'x'})      -> one row, or an array of up to 50 rows
+ *   vibe.db.from('todos').update({done:true}, [{col:'id', op:'eq', val:id}])   -> where is required
+ *   vibe.db.from('todos').delete([{col:'id', op:'eq', val:id}])                -> where is required
+ *   Tables and columns come from the app's vibe.schema.json; id, user_id and created_at are added to every row by the platform
+ *   and cannot be written. Who may read or write a table follows its access rule; signed-in calls send the session automatically.
  * All calls return Promises. Errors reject with Error: err.status (0 = network/timeout), err.code, err.retryAfter (seconds).
  * Keys never live in the app: the platform adds them server-side. Only connectors declared in the app manifest or built in work.
  * Config for custom domains: window.VIBE_APP_ID, window.VIBE_BASE, window.VIBE_TIMEOUT_MS.
@@ -148,5 +156,74 @@
     });
   }
 
-  window.vibe = { version: '1', api: api, ai: { chat: chat, ask: ask }, auth: { signIn: signIn, user: user, signOut: signOut, onChange: onChange, ready: ready } };
+  // ---- vibe.db: typed table access. The server checks everything again; these checks only fail fast without a request. ----
+  var NAME_RE = /^[a-z][a-z0-9_]{0,40}$/;
+  var SELECT_KEYS = ['columns', 'where', 'order', 'limit', 'offset'];
+  function isObj(v) { return Object.prototype.toString.call(v) === '[object Object]'; }
+  function badArg(msg) { return fail(msg, 0, 'bad_request'); }
+  function dbPost(body) {
+    // The session token is optional: anonymous reads of public tables work without one.
+    return post('db', body, getToken());
+  }
+  function checkTable(table) {
+    if (typeof table !== 'string' || !NAME_RE.test(table)) throw badArg('vibe.db.from(table): table must be a lowercase name such as "todos"');
+  }
+  function checkWhere(where, what, required) {
+    if (where === undefined && !required) return;
+    if (!Array.isArray(where) || (required && !where.length)) throw badArg(what + ': where must be ' + (required ? 'a non-empty ' : 'an ') + 'array of {col, op, val}');
+    for (var i = 0; i < where.length; i++) if (!isObj(where[i])) throw badArg(what + ': each where entry must be an object {col, op, val}');
+  }
+  function dbSelect(table, o) {
+    return Promise.resolve().then(function () {
+      checkTable(table);
+      if (o !== undefined && !isObj(o)) throw badArg('select(options): options must be an object');
+      o = o || {};
+      Object.keys(o).forEach(function (k) { if (SELECT_KEYS.indexOf(k) < 0) throw badArg('select: unknown option "' + k + '" (allowed: ' + SELECT_KEYS.join(', ') + ')'); });
+      if (o.columns !== undefined && (!Array.isArray(o.columns) || !o.columns.length)) throw badArg('select: columns must be a non-empty array of names');
+      checkWhere(o.where, 'select', false);
+      if (o.order !== undefined) {
+        if (!Array.isArray(o.order)) throw badArg('select: order must be an array of {col, dir}');
+        for (var i = 0; i < o.order.length; i++) if (!isObj(o.order[i])) throw badArg('select: each order entry must be an object {col, dir}');
+      }
+      if (o.limit !== undefined && typeof o.limit !== 'number') throw badArg('select: limit must be a number');
+      if (o.offset !== undefined && typeof o.offset !== 'number') throw badArg('select: offset must be a number');
+      var p = { op: 'select', table: table };
+      SELECT_KEYS.forEach(function (k) { if (o[k] !== undefined) p[k] = o[k]; });
+      return dbPost(p);
+    });
+  }
+  function dbInsert(table, rowOrRows) {
+    return Promise.resolve().then(function () {
+      checkTable(table);
+      var rows = Array.isArray(rowOrRows) ? rowOrRows : [rowOrRows];
+      if (!rows.length || rows.length > 50) throw badArg('insert: pass one row object or an array of 1 to 50 rows');
+      for (var i = 0; i < rows.length; i++) if (!isObj(rows[i])) throw badArg('insert: each row must be an object of column values');
+      return dbPost({ op: 'insert', table: table, rows: rows });
+    });
+  }
+  function dbUpdate(table, set, where) {
+    return Promise.resolve().then(function () {
+      checkTable(table);
+      if (!isObj(set) || !Object.keys(set).length) throw badArg('update(set, where): set must be a non-empty object of column values');
+      checkWhere(where, 'update(set, where)', true);
+      return dbPost({ op: 'update', table: table, set: set, where: where });
+    });
+  }
+  function dbDelete(table, where) {
+    return Promise.resolve().then(function () {
+      checkTable(table);
+      checkWhere(where, 'delete(where)', true);
+      return dbPost({ op: 'delete', table: table, where: where });
+    });
+  }
+  function from(table) {
+    return {
+      select: function (o) { return dbSelect(table, o); },
+      insert: function (rowOrRows) { return dbInsert(table, rowOrRows); },
+      update: function (set, where) { return dbUpdate(table, set, where); },
+      delete: function (where) { return dbDelete(table, where); }
+    };
+  }
+
+  window.vibe = { version: '1', api: api, ai: { chat: chat, ask: ask }, auth: { signIn: signIn, user: user, signOut: signOut, onChange: onChange, ready: ready }, db: { from: from } };
 })();

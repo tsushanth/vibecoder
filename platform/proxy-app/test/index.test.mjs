@@ -17,7 +17,7 @@ function run(env) {
     const exited = new Promise((r) => child.on('exit', (code, signal) => r({ code, signal })));
     return { child, exited, out: () => out, err: () => err };
 }
-const goodEnv = (port) => ({ DATABASE_URL: `postgres://${process.env.USER}@localhost/${db.name}`, VIBE_MASTER_KEY: masterKey(), OPENROUTER_API_KEY: 'sk-or-v1-FAKEINDEX', BASE_DOMAIN: 'vibebuild.cc', PROXY_ADMIN_TOKEN: 'admin-' + 'i'.repeat(40), PORT: String(port) });
+const goodEnv = (port) => ({ DATABASE_URL: `postgres://${process.env.USER}@localhost:${process.env.PGPORT || 5432}/${db.name}`, VIBE_MASTER_KEY: masterKey(), OPENROUTER_API_KEY: 'sk-or-v1-FAKEINDEX', BASE_DOMAIN: 'vibebuild.cc', PROXY_ADMIN_TOKEN: 'admin-' + 'i'.repeat(40), PORT: String(port) });
 const until = async (fn, ms = 8000) => { const end = Date.now() + ms; for (;;) { try { const v = await fn(); if (v) return v; } catch { /* retry */ } if (Date.now() > end) throw new Error('timed out'); await new Promise((r) => setTimeout(r, 100)); } };
 
 t('exits 1 naming the missing setting and never printing secrets', async () => {
@@ -45,7 +45,7 @@ t('starts, serves /health on PORT, logs a start line without secrets, and exits 
 t('exits 1 with a clear message when the schema is not migrated', async () => {
     const bare = await scratchDb({ migrate: false });
     try {
-        const p = run({ ...goodEnv(44123), DATABASE_URL: `postgres://${process.env.USER}@localhost/${bare.name}` });
+        const p = run({ ...goodEnv(44123), DATABASE_URL: `postgres://${process.env.USER}@localhost:${process.env.PGPORT || 5432}/${bare.name}` });
         const { code } = await p.exited;
         assert.equal(code, 1); assert.match(p.err(), /migrat/i);
     } finally { await bare.cleanup(); }
