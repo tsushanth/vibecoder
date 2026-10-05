@@ -3,6 +3,7 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { validateManifest } from '../vibe-proxy/manifest.js';
 import { resolveManifest } from '../vibe-proxy/builtins.js';
+import { validateSpec } from '../data/schema.js';
 
 const APP_ID = /^[a-z0-9][a-z0-9-]{0,62}$/;
 const SECRET_NAME = /^[A-Z][A-Z0-9_]{1,63}$/;
@@ -16,8 +17,11 @@ const json = (status, body) => ({ status, body });
 const noBody = (status) => ({ status });
 
 export const ADMIN_BODY_LIMIT = 8192;
+// a full schema (20 tables x 30 columns) is bigger than the other admin payloads; the backend caps the schema file it reads at 64 KB, so this leaves room for the wrapper and for a direct caller
+export const SCHEMA_BODY_LIMIT = 131072;
+const MAX_SCHEMA_ERRORS = 20;
 
-export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, secretStore, limiterStore, baseDomain, now = () => Date.now() }) {
+export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, secretStore, limiterStore, baseDomain, dataExecutor, jobsAdmin, now = () => Date.now() }) {
     const expected = digest(token);
     const minute = () => Math.floor(now() / 60_000);
     const validDomains = (domains) => Array.isArray(domains) && domains.length <= MAX_DOMAINS && domains.every((d) => typeof d === 'string' && HOSTNAME.test(d) && !d.endsWith(`.${baseDomain}`) && d !== baseDomain);
@@ -35,7 +39,7 @@ export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled,
     return async function handle(req) {
         const denied = await authorize(req.headers, req.ip);
         if (denied) return denied;
-        const m = /^\/admin\/apps\/([^/]+)(?:\/(secrets|ensure|enabled|domains|manifest|copy-secrets)(?:\/([^/]+))?)?$/.exec(req.pathname);
+        const m = /^\/admin\/apps\/([^/]+)(?:\/(secrets|ensure|enabled|domains|manifest|copy-secrets|schema|jobs)(?:\/([^/]+))?)?$/.exec(req.pathname);
         if (!m) return json(404, { error: 'not_found' });
         const [, appId, sub, name] = m;
         if (!APP_ID.test(appId)) return json(404, { error: 'not_found' });
@@ -79,6 +83,34 @@ export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled,
             }
             if (!(await setManifest(appId, manifest))) return json(404, { error: 'unknown_app' });
             return noBody(204);
+        }
+
+        if (sub === 'schema') {
+            if (name !== undefined) return json(404, { error: 'not_found' });
+            if (req.method !== 'GET' && req.method !== 'POST') return json(405, { error: 'method_not_allowed' });
+            if (!dataExecutor) return json(503, { error: 'schema_unavailable' });
+            // checked first so an unknown app id never makes the executor provision a database for it
+            if (!(await appStore.get(appId))) return json(404, { error: 'unknown_app' });
+            if (req.method === 'GET') {
+                const cur = await dataExecutor.peekSpec(appId);
+                return json(200, { version: cur.version, spec: cur.spec });
+            }
+            const body = await req.readBody(SCHEMA_BODY_LIMIT);
+            if (body.error) return json(body.error, { error: body.error === 413 ? 'request_too_large' : 'bad_json' });
+            const allow = body.value.allowDestructive === undefined ? false : body.value.allowDestructive;
+            if (typeof allow !== 'boolean') return json(400, { error: 'invalid_allow_destructive' });
+            const v = validateSpec(body.value.spec);
+            if (!v.ok) return json(400, { error: 'invalid_schema', errors: v.errors.slice(0, MAX_SCHEMA_ERRORS) });
+            const out = await dataExecutor.applySchema({ appId, spec: v.spec, allowDestructive: allow });
+            if (out.ok) return json(200, { version: out.version, applied: out.applied });
+            const errors = out.errors || [];
+            if (errors.some((e) => e.code === 'destructive_change_needs_confirmation')) return json(409, { error: 'destructive_change_needs_confirmation', destructive: out.destructive || [] });
+            if (errors.some((e) => e.code === 'migration_failed')) return json(422, { error: 'migration_failed' });
+            return json(400, { error: 'invalid_schema', errors: errors.slice(0, MAX_SCHEMA_ERRORS) });
+        }
+        if (sub === 'jobs') {
+            if (name !== undefined || !jobsAdmin) return json(404, { error: 'not_found' });
+            return jobsAdmin({ appId, method: req.method, readBody: req.readBody });   // validation and storage live in ../jobs/admin.js
         }
 
         if (sub === 'copy-secrets') {

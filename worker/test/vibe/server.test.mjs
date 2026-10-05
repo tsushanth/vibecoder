@@ -19,13 +19,24 @@ const keyedJs = 'function ask(){ vibe.api("stocks","/v1/quote").then(function(t)
 const KEYED_MANIFEST = JSON.stringify({ connectors: { stocks: { host: 'API.Example.com', paths: ['/v1/quote*'], methods: ['GET'], note: 'dropped', secret: { name: 'STOCKS_API_KEY', in: 'query', field: 'apikey' } } } });
 const KEYED_NORMALISED = `${JSON.stringify({ connectors: { stocks: { host: 'api.example.com', paths: ['/v1/quote*'], methods: ['GET'], secret: { name: 'STOCKS_API_KEY', in: 'query', field: 'apikey' } } } }, null, 2)}\n`;
 
+const dataJs = (table) => `vibe.auth.ready.then(function(){ return vibe.auth.user(); }).then(function(u){ if (!u) return; vibe.db.from("${table}").select().then(function(r){ out.textContent = r.length; }).catch(function(e){ out.textContent = e.code; }); });`;
+const DATA_SCHEMA = JSON.stringify({ version: 1, tables: { todos: { columns: { title: { type: 'text', required: true } } } } });
+const DATA_NORMALISED = `${JSON.stringify({ version: 1, tables: { todos: { access: 'owner', columns: { title: { type: 'text', required: true } }, indexes: [] } } }, null, 2)}\n`;
+
 let provider, PPORT; const calls = [];
 before(async () => {
     provider = http.createServer((req, res) => {
         let body = ''; req.on('data', (d) => { body += d; });
         req.on('end', () => {
             const j = JSON.parse(body);
-            calls.push({ system: j.messages.find((m) => m.role === 'system')?.content || '', n: j.messages.length });
+            calls.push({ system: j.messages.find((m) => m.role === 'system')?.content || '', n: j.messages.length, last: j.messages[j.messages.length - 1].content });
+            if (/DATAAPP/.test(JSON.stringify(j.messages))) {
+                // first reply reads a table the schema does not declare (the table name is the only thing the fix text may echo); the fix pass corrects it
+                const fixed = j.messages.length > 2;
+                const reply = `<file path="index.html">\n${app(dataJs(fixed ? 'todos' : 'tasks'))}\n</file>\n<file path="vibe.schema.json">\n${DATA_SCHEMA}\n</file>`;
+                res.setHeader('Content-Type', 'application/json');
+                return res.end(JSON.stringify({ choices: [{ message: { content: reply }, finish_reason: 'stop' }], usage: { cost: 0.001 } }));
+            }
             const keyed = /KEYEDAPP/.test(JSON.stringify(j.messages));
             const mode = keyed || /VIBEAPP/.test(JSON.stringify(j.messages)) ? 'vibe' : 'plain';
             const html = keyed ? app(keyedJs) : mode === 'vibe' ? app(guarded) : app('function ask(){}', '');
@@ -92,6 +103,30 @@ test('proxy enabled: a keyed connector app ships the normalised vibe.manifest.js
         assert.equal(ev.files.find((f) => f.path === 'vibe.manifest.json').size, Buffer.byteLength(KEYED_NORMALISED), 'the delivered manifest must be the normalised one');
         assert.ok(calls[0].system.includes('vibe.manifest.json'), 'the prompt teaches the manifest');
         assert.equal(calls.length, 1, 'a valid manifest needs no fix pass');
+    } finally { w.child.kill(); }
+});
+
+test('proxy enabled: a table the schema does not declare goes through the fix pass, then the app ships with the normalised schema', async () => {
+    const w = await startWorker({ VIBE_PROXY_ENABLED: 'true' });
+    try {
+        calls.length = 0;
+        const ev = await generate(w.base, 'DATAAPP a todo list with accounts');
+        assert.equal(ev.type, 'result', JSON.stringify(ev).slice(0, 300));
+        assert.equal(calls.length, 2, 'one fix pass');
+        assert.ok(calls[0].system.includes('vibe.schema.json') && calls[0].system.includes('vibe.db.from('), 'the prompt teaches tables');
+        assert.match(calls[1].last, /"tasks"/); assert.match(calls[1].last, /not declared in vibe\.schema\.json/);
+        assert.ok(names(ev).includes('vibe.schema.json') && names(ev).includes('vibe.js'), names(ev).join(','));
+        assert.equal(ev.files.find((f) => f.path === 'vibe.schema.json').size, Buffer.byteLength(DATA_NORMALISED), 'the delivered schema must be the normalised one');
+    } finally { w.child.kill(); }
+});
+
+test('proxy not enabled: an app with accounts and tables is never delivered', async () => {
+    const w = await startWorker({});
+    try {
+        calls.length = 0;
+        const ev = await generate(w.base, 'DATAAPP a todo list with accounts');
+        assert.equal(ev.type, 'error');
+        assert.equal(calls.some((c) => c.system.includes('vibe.schema.json')), false, 'the prompt must not teach tables while the proxy is off');
     } finally { w.child.kill(); }
 });
 

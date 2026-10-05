@@ -13,9 +13,8 @@ const jsonRes = (status, obj, headers = {}) => new Response(JSON.stringify(obj),
 
 // Splices the snippet into the real vibe.js exactly as its header says, then loads that in a vm context.
 function spliced({ token = 'sess.token.value', reply } = {}) {
-    const marker = '  window.vibe = {';
-    assert.equal(VIBE.split(marker).length, 2, 'vibe.js must have exactly one `window.vibe = {` assignment to splice before');
-    const src = VIBE.replace(marker, `${SNIPPET}\n${marker}`).replace(/(window\.vibe = \{[^\n]*?)(auth: \{)/, '$1notify: notifyApi, $2');
+    assert.ok(VIBE.includes(SNIPPET.trim()), 'sdk/vibe.js must contain the vibe.notify block from notify/sdk-snippet.js');
+    const src = VIBE;
     const calls = []; const store = new Map(token ? [['vibe:session:myapp', token]] : []);
     const ctx = {
         location: { hostname: 'myapp.vibebuild.cc', search: '' },
@@ -37,7 +36,7 @@ test('after splicing, vibe.notify exposes only me, and the existing surface is u
     assert.deepEqual(Object.keys(vibe.notify), ['me']);
     const plain = {}; plain.window = plain; Object.assign(plain, { location: { hostname: 'myapp.vibebuild.cc', search: '' }, fetch: async () => {}, AbortController, setTimeout, clearTimeout, JSON, Promise, Error, encodeURIComponent, Object, Array, Number, String, URLSearchParams, VIBE_BASE: 'https://proxy.test' });
     vm.createContext(plain); vm.runInContext(VIBE, plain);
-    assert.deepEqual(Object.keys(vibe).sort(), [...Object.keys(plain.vibe), 'notify'].sort()); // adds notify, removes nothing
+    assert.deepEqual(Object.keys(vibe).sort(), ['ai', 'api', 'auth', 'db', 'notify', 'pay', 'storage', 'version']); // the real SDK now carries notify itself
     assert.deepEqual(Object.keys(vibe.auth).sort(), Object.keys(plain.vibe.auth).sort());
 });
 

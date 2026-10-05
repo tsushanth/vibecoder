@@ -15,6 +15,31 @@ const SUBDOMAIN = /^[a-z0-9][a-z0-9-]{1,60}[a-z0-9]$/;
 const PROJECT_ID = /^[A-Za-z0-9-]{8,64}$/;
 const UUID_LIKE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
+//
+// Schemas (vibe.schema.json) work differently from keys: the data lives in a per-app database keyed by the app id the browser calls,
+// i.e. the subdomain app, so there is nothing to hold under the project-id app and nothing to copy. The schema is pushed to each
+// subdomain app being deployed (so a preview and the published app have separate databases and a preview can never touch live data).
+// It is never destructive unless `source.allowDestructive === true` (the creator confirmed). A bundle without a schema, or one that
+// cannot be read, leaves the existing database alone. A failed push never fails the deploy and is logged by code only; its outcome
+// is written to `source.result.schemaStatus` ('applied' | 'unchanged' | 'invalid' | 'needs_confirmation' | 'failed') when a result
+// object is given. Absent when the bundle has no readable schema.
+import { schemaFromBundle } from '../lib/bundleSchema.js';
+
+export async function pushAppSchema(proxyAdmin, subdomain, bundle, { allowDestructive = false, log = console.warn } = {}) {
+    const found = schemaFromBundle(bundle);
+    if (found.status !== 'found') return null;
+    try {
+        const out = await proxyAdmin.setSchema(subdomain, found.spec, { allowDestructive: allowDestructive === true });
+        return out?.applied > 0 ? 'applied' : 'unchanged';
+    } catch (e) {
+        const code = e?.code || 'error';
+        log(`[proxy] schema failed app=${subdomain} code=${code}`);
+        if (code === 'invalid_schema' || code === 'invalid_allow_destructive') return 'invalid';
+        if (code === 'destructive_change_needs_confirmation') return 'needs_confirmation';
+        return 'failed';
+    }
+}
+
 export async function registerDeployedApp(proxyAdmin, subdomain, log = console.warn, source = {}) {
     if (!proxyAdmin?.configured || typeof subdomain !== 'string' || !SUBDOMAIN.test(subdomain)) return false;
     if (UUID_LIKE.test(subdomain)) return false; // project ids are the platform's own app ids
@@ -32,6 +57,10 @@ export async function registerDeployedApp(proxyAdmin, subdomain, log = console.w
         } else if (found.status === 'none') {
             await step('clear', async () => { await proxyAdmin.setManifest(subdomain, null); });
             await step('clear', async () => { await proxyAdmin.setManifest(projectId, null); });
+        }
+        if (source?.bundle) {
+            const status = await pushAppSchema(proxyAdmin, subdomain, source.bundle, { allowDestructive: source.allowDestructive === true, log });
+            if (status && source.result && typeof source.result === 'object') source.result.schemaStatus = status;
         }
         await proxyAdmin.setEnabled(subdomain, true);
         return true;
