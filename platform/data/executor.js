@@ -16,7 +16,7 @@ const mapError = (e) => {
     const c = e?.code;
     if (c === '23502') return { status: 400, code: 'missing_required' };
     if (c === '23505') return { status: 409, code: 'conflict' };
-    if (c === '22P02' || c === '22003' || c === '22007' || c === '22001' || c === '23514') return { status: 400, code: 'invalid_value' };
+    if (c === '22P02' || c === '22003' || c === '22007' || c === '22001' || c === '22025' || c === '23514') return { status: 400, code: 'invalid_value' };
     if (c === '57014') return { status: 504, code: 'query_timeout' };
     if (c === '55P03') return { status: 503, code: 'busy' };
     return { status: 500, code: 'db_error' };

@@ -12,6 +12,9 @@ import { createResendMailer } from '../auth/mailer.js';
 import { createStorageStore } from '../storage/pgStore.js';
 import { createStorageService } from '../storage/service.js';
 import { createDataExecutor } from '../data/executor.js';
+import { createPayService } from '../pay/service.js';
+import { createPayHttp } from '../pay/http.js';
+import { createOrderStore } from '../pay/orderStore.js';
 
 async function dnsResolve(host) {
     const [a, b] = await Promise.allSettled([dns.resolve4(host), dns.resolve6(host)]);
@@ -46,8 +49,9 @@ export async function startServer(config, { pool: injected, listenPort, resolve 
         store: createStorageStore({ pool }), fetchImpl,
         r2: { host: `${r2.accountId}.r2.cloudflarestorage.com`, bucket: r2.bucket, accessKeyId: r2.accessKeyId, secretAccessKey: r2.secretAccessKey },
     }) : undefined;
+    const payService = createPayService({ secretStore: stores.secretStore, limiter, limiterStore: stores.limiterStore, orderStore: createOrderStore({ pool }), auth: authService, fetchImpl, baseDomain: config.baseDomain });
     const handler = createHandler({
-        storageService, authService,
+        storageService, authService, payHttp: createPayHttp({ service: payService, appStore: stores.appStore, baseDomain: config.baseDomain }),
         dataExecutor: createDataExecutor({ pool }), // same pool: each statement runs inside a transaction that switches into the app's own role
         appStore: stores.appStore, secretStore: stores.secretStore, limiter, globalAiLimiter,
         meter: createMeter({ sink: stores.usageSink }), fetchImpl, resolve,
