@@ -85,3 +85,11 @@ test('timestamp rejects non-strings that stringify to a date', () => {
     assert.deepEqual(run({ op: 'insert', table: 't', rows: [{ c: v }] }, U1, spec), { ok: false, status: 400, code: 'bad_value' });
   }
 });
+
+test('an inherited default does not make a required column optional', () => {
+  const spec = { version: 1, tables: { t: { access: 'owner', columns: { a: { type: 'text', required: true } } } } };
+  Object.prototype.default = 'x';
+  try {
+    assert.deepEqual(run({ op: 'insert', table: 't', rows: [{}] }, U1, spec), { ok: false, status: 400, code: 'missing_required' });
+  } finally { delete Object.prototype.default; }
+});
