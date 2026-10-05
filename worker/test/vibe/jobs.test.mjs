@@ -104,6 +104,30 @@ test('problems name the job and are capped', () => {
     const many = JSON.parse(jobs()); many.jobs = Array.from({ length: 5 }, (_, i) => ({ id: `j${i}`, schedule: { every: 'x' }, action: { type: 'sql' } }));
     assert.ok(parseJobsFile(JSON.stringify(many), { spec: JSON.parse(schema()) }).problems.length <= 10);
 });
+test('messages carry the context the model needs: the declared tables, the table columns, the offending key', () => {
+    const spec = JSON.parse(schema());
+    const t = JSON.parse(jobs()); t.jobs[0].action.save.table = 'nope';
+    assert.match(parseJobsFile(JSON.stringify(t), { spec }).problems[0], /\(declared: "readings"\)/);
+    const c = JSON.parse(jobs()); c.jobs[0].action.save.map.nope = '/x';
+    assert.match(parseJobsFile(JSON.stringify(c), { spec }).problems.join(' '), /\(columns: "temp", "label"\)/);
+    const k = JSON.parse(jobs()); k.extra = 1;
+    assert.match(parseJobsFile(JSON.stringify(k), { spec }).problems[0], /\("extra"\)/);
+    const col = JSON.parse(jobs()); col.jobs[0].action.save.map.temp = 'bad';
+    assert.match(parseJobsFile(JSON.stringify(col), { spec }).problems[0], /\(column "temp"\)/);
+});
+test('an unknown connector is named even when another job comes first', () => {
+    const r = parseJobsFile(jobs({ ...nwsJob(), id: 'first' }, { ...nwsJob({ connector: 'weather' }), id: 'second' }), { spec: JSON.parse(schema()) });
+    assert.equal(r.problems.length, 1); assert.match(r.problems[0], /job "second": connector "weather"/);
+});
+test('problems are capped at 10 even when the file has many', () => {
+    const j = { version: 1, jobs: Array.from({ length: 6 }, (_, i) => ({ id: `j${i}`, schedule: { every: 'x' }, action: { type: 'sql' } })), extra: 1 };
+    const r = parseJobsFile(JSON.stringify(j), { spec: JSON.parse(schema()) });
+    assert.equal(r.problems.length, 10);
+});
+test('every owner-table job is reported, not just the first', () => {
+    const r = parseJobsFile(jobs({ ...nwsJob(), id: 'a' }, { ...nwsJob(), id: 'b' }), { spec: JSON.parse(schema('owner')) });
+    assert.equal(r.problems.length, 2); assert.match(r.problems[0], /job "a"/); assert.match(r.problems[1], /job "b"/);
+});
 test('model-written text never leaks into problem messages beyond names that look like names', () => {
     const j = JSON.parse(jobs()); j.jobs[0].action.save.table = 'x'.repeat(80) + '<script>';
     const r = parseJobsFile(JSON.stringify(j), { spec: JSON.parse(schema()) });
@@ -121,7 +145,8 @@ test('prune on an owner table is fine (it deletes, it does not need to be read)'
 });
 test('jobConnectorNames lists connectors of connector jobs only, tolerating junk', () => {
     assert.deepEqual(jobConnectorNames(JSON.stringify({ jobs: [nwsJob(), { action: { type: 'prune', table: 't', olderThanDays: 1 } }, nwsJob({ connector: 'stocks' }), null, 5, { action: null }] })).sort(), ['nws', 'stocks']);
-    for (const t of [undefined, '', '{nope', '[]', '{"jobs":5}']) assert.deepEqual(jobConnectorNames(t), []);
+    for (const t of [undefined, '', '{nope', '[]', '{"jobs":5}', '{"jobs":"abc"}', '{"jobs":{}}']) assert.deepEqual(jobConnectorNames(t), []);
+    assert.deepEqual(jobConnectorNames(JSON.stringify({ jobs: [{ action: { type: 'prune', connector: 'x' } }, { action: { type: 'connector' } }, { action: { type: 'connector', connector: 5 } }, nwsJob()] })), ['nws']);
 });
 
 // ---- vibeProblems integration
@@ -166,11 +191,13 @@ test('with an invalid schema, the schema problem is reported and the jobs file a
     const p = problems(project({ [SCHEMA_FILE]: '{nope' }));
     assert.ok(p.some((x) => /vibe\.schema\.json is not valid JSON/.test(x)), p.join(' | '));
     assert.ok(!p.some((x) => /not declared/.test(x)), p.join(' | '));
+    assert.ok(!p.some((x) => /vibe\.jobs\.json/.test(x)), p.join(' | '));
 });
 test('a jobs file that is not at the project root is a problem', () => {
     const f = project(); f['app/vibe.jobs.json'] = f[JOBS_FILE]; delete f[JOBS_FILE];
     const p = problems(f);
     assert.ok(p.some((x) => /vibe\.jobs\.json must be at the project root, not at app\/vibe\.jobs\.json/.test(x)), p.join(' | '));
+    assert.ok(!p.some((x) => /is empty|needs vibe\.schema/.test(x)), p.join(' | '));
 });
 test('when the proxy is off a jobs file is a problem and nothing else about jobs is said', () => {
     const p = vibeProblems({ 'index.html': page('var x=1;'), [JOBS_FILE]: jobs() }, { enabled: false });
@@ -203,6 +230,16 @@ test('injectSdk keeps a valid jobs file, normalised, only at the root with a val
     assert.equal('app/vibe.jobs.json' in injectSdk(h, { sdk: 'SDK', enabled: true }), false);
     assert.equal(JOBS_FILE in injectSdk({ ...f, [SCHEMA_FILE]: schema('owner') }, { sdk: 'SDK', enabled: true }), false);
 });
+test('injectSdk never copies the root jobs file to a nested path, and uses declared connectors', () => {
+    const f = project({ 'app/vibe.jobs.json': jobs() });
+    const out = injectSdk(f, { sdk: 'SDK', enabled: true });
+    assert.ok(JOBS_FILE in out); assert.equal('app/vibe.jobs.json' in out, false);
+    const withDeclared = project({ [MANIFEST_FILE]: manifest, [JOBS_FILE]: jobs(nwsJob({ connector: 'stocks', path: '/v1/q' })) });
+    assert.ok(JOBS_FILE in injectSdk(withDeclared, { sdk: 'SDK', enabled: true }));
+    const undeclared = project({ [JOBS_FILE]: jobs(nwsJob({ connector: 'stocks', path: '/v1/q' })) });
+    assert.equal(JOBS_FILE in injectSdk(undeclared, { sdk: 'SDK', enabled: true }), false);
+    assert.equal(JOBS_FILE in injectSdk({ ...withDeclared, [MANIFEST_FILE]: '{nope' }, { sdk: 'SDK', enabled: true }), false);
+});
 test('normalisedJobs returns null for anything not valid', () => {
     assert.equal(normalisedJobs({ [JOBS_FILE]: jobs() }), null);
     assert.ok(normalisedJobs({ [JOBS_FILE]: jobs(), [SCHEMA_FILE]: schema() }));
@@ -230,5 +267,10 @@ test('the rules teach scheduled jobs: when, format, notify not supported, readin
         /vibe\.db\.from/,
         /near real time|not real time|minutes late|delayed/i,
         /(?:other|every) (?:column|field)/i,
+        /notify jobs are not supported yet \(error not_yet\): never write a job of type "notify"/,
+        /"type":"prune": deletes/,
+        /a periodic refresh of live data saved into a table/, /pruning old rows/,
+        /every column you map must be declared in the schema/,
+        /vibe\.db\.from\("readings"\)\.select/,
     ]) assert.match(VIBE_RULES, re);
 });

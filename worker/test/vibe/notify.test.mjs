@@ -58,6 +58,8 @@ test('the rules teach notifications: self only, auth, limits, 429/401, no promis
         /subject.{0,30}120/i, /text.{0,30}2000/i,
         /429/, /401/, /opted_out/,
         /never (?:promise|say|claim).{0,80}(?:other people|anyone else|someone else)/i,
-        /plain text/i,
+        /plain text \(no HTML\)/,
+        /It requires vibe\.auth/,
+        /subject is at most 120 characters and text at most 2000 characters/,
     ]) assert.match(VIBE_RULES, re);
 });
