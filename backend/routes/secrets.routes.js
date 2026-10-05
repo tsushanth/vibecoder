@@ -12,8 +12,34 @@ import { verifiedUserId } from '../lib/verifiedUser.js';
 const PROJECT_ID = /^[A-Za-z0-9-]{8,64}$/;
 const SECRET_NAME = /^[A-Z][A-Z0-9_]{1,63}$/;
 const MAX_VALUE = 4096;
+const SUBDOMAIN = /^[a-z0-9][a-z0-9-]{1,60}[a-z0-9]$/;
 
-export function createSecretsRouter({ supabase = defaultSupabase, verifyUser = verifiedUserId, proxyAdmin, log = console.error, maxPerMinute = 60 }) {
+// The apps that actually run a project are its preview and published subdomains; the SDK identifies an app by subdomain.
+// A key set here is therefore stored under the project id (the canonical copy that new deployments are seeded from) and under
+// each of those subdomains. Only single-label names under our own base domain count; anything else in those columns is ignored.
+function appSubdomains(project, baseDomain) {
+    const out = [];
+    for (const u of [project.preview_url, project.published_url]) {
+        let host;
+        try { host = new URL(u).hostname.toLowerCase(); } catch { continue; }
+        if (!host.endsWith(`.${baseDomain}`)) continue;
+        const label = host.slice(0, -(baseDomain.length + 1));
+        if (SUBDOMAIN.test(label) && !out.includes(label)) out.push(label);
+    }
+    return out;
+}
+
+// The secrets an app's manifest asks for, one entry per secret name with the connectors that use it. Names only.
+function requiredFrom(app) {
+    const byName = new Map();
+    for (const c of Array.isArray(app?.connectors) ? app.connectors : []) {
+        if (!c || typeof c.name !== 'string' || !c.secret || !SECRET_NAME.test(String(c.secret.name || ''))) continue;
+        byName.set(c.secret.name, [...(byName.get(c.secret.name) || []), c.name]);
+    }
+    return [...byName].map(([name, connectors]) => ({ name, connectors }));
+}
+
+export function createSecretsRouter({ supabase = defaultSupabase, verifyUser = verifiedUserId, proxyAdmin, log = console.error, maxPerMinute = 60, baseDomain = process.env.BASE_DOMAIN || 'vibebuild.cc' }) {
     const router = express.Router({ mergeParams: true });
     const fail = (res, op, id, e) => {
         log(`[secrets] ${op} failed project=${id} code=${e?.code || 'error'}`);
@@ -29,10 +55,11 @@ export function createSecretsRouter({ supabase = defaultSupabase, verifyUser = v
         if (!proxyAdmin?.configured) return res.status(503).json({ error: 'secrets_unavailable' });
         const id = req.params.id;
         if (!PROJECT_ID.test(id)) return res.status(404).json({ error: 'not_found' });
-        const { data: project, error } = await supabase.from('projects').select('id, creator_id').eq('id', id).single();
+        const { data: project, error } = await supabase.from('projects').select('id, creator_id, preview_url, published_url').eq('id', id).single();
         if (error || !project) return res.status(404).json({ error: 'not_found' });
         if (project.creator_id !== uid) return res.status(403).json({ error: 'forbidden' });
         req.projectId = id;
+        req.appSubdomains = appSubdomains(project, baseDomain);
         next();
     });
 
@@ -40,9 +67,12 @@ export function createSecretsRouter({ supabase = defaultSupabase, verifyUser = v
 
     router.get('/', async (req, res) => {
         try {
-            res.json({ secrets: await proxyAdmin.listSecrets(req.projectId) });
+            const [secrets, app] = await Promise.all([
+                proxyAdmin.listSecrets(req.projectId).catch((e) => { if (e?.code === 'unknown_app') return []; throw e; }),
+                proxyAdmin.getApp(req.projectId).catch((e) => { if (e?.code === 'unknown_app') return null; throw e; }),
+            ]);
+            res.json({ secrets, required: requiredFrom(app) });
         } catch (e) {
-            if (e?.code === 'unknown_app') return res.json({ secrets: [] });
             fail(res, 'list', req.projectId, e);
         }
     });
@@ -57,8 +87,12 @@ export function createSecretsRouter({ supabase = defaultSupabase, verifyUser = v
                 await proxyAdmin.setSecret(req.projectId, name, value);
             } catch (e) {
                 if (e?.code !== 'unknown_app') throw e;
-                await proxyAdmin.registerApp(req.projectId, { manifest: null, domains: [], enabled: true });
+                // the project-id app only holds the manifest and the canonical keys; it is never enabled for calls
+                await proxyAdmin.registerApp(req.projectId, { manifest: null, domains: [], enabled: false });
                 await proxyAdmin.setSecret(req.projectId, name, value);
+            }
+            for (const sub of req.appSubdomains) {
+                try { await proxyAdmin.setSecret(sub, name, value); } catch (e) { if (e?.code !== 'unknown_app') throw e; }
             }
             log(`[secrets] set project=${req.projectId} name=${name}`);
             res.status(204).end();
@@ -71,9 +105,11 @@ export function createSecretsRouter({ supabase = defaultSupabase, verifyUser = v
         const { name } = req.params;
         if (!SECRET_NAME.test(name)) return res.status(400).json({ error: 'invalid_secret_name' });
         try {
-            await proxyAdmin.deleteSecret(req.projectId, name);
+            for (const appId of [req.projectId, ...req.appSubdomains]) {
+                try { await proxyAdmin.deleteSecret(appId, name); } catch (e) { if (e?.code !== 'unknown_app') throw e; }
+            }
         } catch (e) {
-            if (e?.code !== 'unknown_app') return fail(res, 'delete', req.projectId, e);
+            return fail(res, 'delete', req.projectId, e);
         }
         log(`[secrets] delete project=${req.projectId} name=${name}`);
         res.status(204).end();
