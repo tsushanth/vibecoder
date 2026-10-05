@@ -22,7 +22,7 @@ export function createPgStores({ pool, masterKey, now = () => Date.now() }) {
 
     async function upsertApp({ appId, manifest = null, domains = [], enabled = true }) {
         if (!APP_ID.test(String(appId))) throw new Error('invalid app id');
-        if (manifest && Object.keys(manifest.connectors || {}).length) {
+        if (manifest && (Object.keys(manifest.connectors || {}).length || manifest.pay !== undefined)) {
             const v = validateManifest(manifest);
             if (!v.ok) throw new Error(`invalid manifest: ${v.problems.slice(0, 3).join('; ')}`);
         }
