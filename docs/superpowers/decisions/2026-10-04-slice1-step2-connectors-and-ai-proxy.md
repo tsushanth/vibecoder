@@ -59,3 +59,15 @@ Open items:
 Routes `GET /health`, `POST /:app/api`, `POST /:app/ai`. Per-app CORS (the app's own `<id>.vibebuild.cc` origin or a registered custom domain, https only), 200 KB body cap, client IP from `fly-client-ip` only (spoofed `x-forwarded-for` ignored), non-cacheable responses, request logs with no secrets, queries or prompts, platform AI cap, and the vault read limited to the one secret the connector declares. Storage is injected. 155 tests pass, rules mutation-checked.
 
 Not built: the Postgres-backed app store, secret store (encrypted at rest) and limiter store; the entry point that wires them; Dockerfile and fly.toml. These need a database role and tables on a real Postgres, which is where production access starts and needs approval.
+
+## Step 4b built: Postgres stores (local Postgres 17, 2026-10-04)
+
+`platform/store/migrations/001_platform.sql` (schema `platform`: apps, app_secrets, limiter_counters, usage_events; row level security on every table, one policy granting only the `vibe_proxy` role) and `platform/store/pg.js`. Secrets use AES-256-GCM with the app id and secret name bound in as authenticated data, so a ciphertext copied to another app or name fails to decrypt; a wrong master key also fails. Limiter counters use one atomic upsert (40 concurrent increments produce exactly 1..40). 176 tests pass against a throwaway local database, including HTTP-to-Postgres end-to-end tests; the encryption, atomicity, expiry, validation and RLS rules were mutation-checked, which exposed three weak tests that were then tightened.
+
+Caveats found while building:
+- The migration creates a cluster-wide Postgres role `vibe_proxy`. On a managed Postgres this is an owner-level action and must be reviewed before applying anywhere real.
+- Database tests share cluster-wide roles, so `npm test` runs them serially (`--test-concurrency=1`). A parallel run raced and left two scratch databases, which were verified empty and dropped.
+- Nothing here has run against Supabase, Neon or any hosted Postgres, only a local Postgres 17.8. Row level security behavior on Supabase's own roles (anon, authenticated, service_role) is untested.
+- There is no secret-rotation procedure yet (`key_version` is stored, always 1) and no write-only key-entry endpoint yet.
+
+Still not built: the entry point that reads configuration and starts the server, the Dockerfile and `fly.toml`, a key-entry endpoint, and a Postgres host decision.
