@@ -6,3 +6,4 @@ delete process.env.SUPABASE_SERVICE_ROLE_KEY;
 process.env.WORKER_SECRET = 'test-worker-secret';
 process.env.WORKER_URL = 'http://worker.test:3456'; // non-loopback so tests can intercept it
 process.env.NODE_ENV = 'test';
+process.env.INTERNAL_SECRET = ['test', 'internal', 'secret', 'value', '0123456789'].join('-');
