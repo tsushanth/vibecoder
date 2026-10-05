@@ -79,7 +79,7 @@ export function payProblems(files, { state, catalog }) {
     }
     if (dynamic) {
         for (const id of ids) {
-            const re = new RegExp(`["'\`]${id.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&')}["'\`]`);
+            const re = new RegExp(`["'\`]${id}["'\`]`); // catalog ids are [a-z0-9_-] only (validated), nothing to escape
             if (!uses(files, re)) once(`catalog item "${id}" is never referenced in the app's code: show it to the buyer and pass its id as a string to vibe.pay.checkout({ item }), or remove it from the catalog`);
         }
     }

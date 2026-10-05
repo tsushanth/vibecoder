@@ -64,6 +64,10 @@ test('pay that is not an object, or has unknown fields, is rejected', () => {
 });
 test('a manifest with neither connectors nor pay is still rejected', () => {
     for (const t of ['{}', '{"x":1}', '{"connectors":5}', '{"connectors":[]}']) assert.equal(parseManifestFile(t).ok, false, t);
+    for (const c of [5, [], null, 'x']) {
+        const r = parseManifestFile(JSON.stringify({ connectors: c, pay: { catalog: [tee] } }));
+        assert.equal(r.ok, false, JSON.stringify(c)); assert.match(r.problems.join(' '), /connectors/);
+    }
 });
 test('declaredConnectors is empty for a pay-only manifest', () => {
     assert.deepEqual(declaredConnectors({ [MANIFEST_FILE]: man([tee]) }), []);
@@ -143,11 +147,29 @@ test('an item-less checkout call is a problem; a spread might supply it', () => 
     one(store('vibe.pay.checkout({ quantity: 1 })'), /needs an item/);
     assert.deepEqual(vibeProblems(store('var o = { item: "tee" }; vibe.pay.checkout({ ...o }); var l = ["pro","mug"];'), { enabled: true }), []);
 });
-test('catalog ids with regex characters are matched literally', () => {
+test('catalog ids with - and _ are matched as written', () => {
     const cat = [{ ...tee, id: 'a-b_c' }, { ...mug, id: 'x1' }];
     const js = 'var l = ["a-b_c","x1"]; function buy(i){ vibe.pay.checkout({ item: i }); }';
     assert.deepEqual(vibeProblems(store(js, cat), { enabled: true }), []);
     assert.equal(vibeProblems(store('var l = ["a_b_c","x1"]; function buy(i){ vibe.pay.checkout({ item: i }); }', cat), { enabled: true }).length, 1);
+});
+test('a checkout call whose argument is a variable is dynamic: every catalog id must still be mentioned', () => {
+    const p = vibeProblems(store('function buy(o){ return vibe.pay.checkout(o); }'), { enabled: true });
+    assert.equal(p.length, 3, p.join(' | '));
+});
+test('a template literal with an interpolation is a dynamic item, not an unknown literal', () => {
+    const js = 'var l = ["tee","pro","mug"]; function buy(n){ return vibe.pay.checkout({ item: `${l[n]}` }); }';
+    assert.deepEqual(vibeProblems(store(js), { enabled: true }), []);
+    assert.deepEqual(vibeProblems(store('var l = ["tee","pro","mug"]; function buy(n){ return vibe.pay.checkout({ item: `t${n}` }); }'), { enabled: true }), []);
+});
+test('a quantity that is an expression is not read as its leading digits', () => {
+    assert.deepEqual(vibeProblems(store('function buy(n){ return vibe.pay.checkout({ item: "tee", quantity: 2 * n }); }'), { enabled: true }), []);
+});
+test('card detail inputs matched anywhere in the name, id or placeholder, including expiry and security code', () => {
+    for (const input of ['<input name="billing_card_number_field">', '<input placeholder="Expiry date">', '<input id="expiration">', '<input placeholder="Security code">', '<input name="security-code">', '<input aria-label="Card No">', '<input placeholder="CVV / CVC">']) {
+        const f = store(CHECK); f['index.html'] = page(CHECK, '<script src="vibe.js"></script>', input);
+        one(f, /never ask for (?:a )?card/i);
+    }
 });
 test('card number inputs are a problem: the page never asks for card details', () => {
     for (const input of ['<input autocomplete="cc-number">', '<input name="cardNumber">', '<input id="card-number">', '<input placeholder="Card number">', '<input name="cvv">', '<input name="cvc" type="text">', '<input autocomplete="cc-exp">']) {
@@ -212,5 +234,8 @@ test('the rules teach payments: catalog, item only, owner keys, test mode, no ca
         /vibe\.pay\.orders/,
         /payments_not_configured|unknown_item/,
         /Stripe checkout page/i,
+        /maxQuantity \(optional, 1 to 100, default 1\)/,
+        /vibe\.pay\.orders\(\) resolves to/,
+        /opens on Stripe's own page/,
     ]) assert.match(VIBE_RULES, re);
 });

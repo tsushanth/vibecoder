@@ -77,7 +77,6 @@ export function parseJobsFile(text, { spec, declared = [] } = {}) {
 export function jobConnectorNames(text) {
     try {
         const jobs = JSON.parse(text)?.jobs;
-        if (!Array.isArray(jobs)) return [];
         return [...new Set(jobs.map((j) => j?.action).filter((a) => a && a.type === 'connector' && typeof a.connector === 'string').map((a) => a.connector))];
     } catch { return []; }
 }
@@ -99,10 +98,7 @@ export function jobsProblems(files, declared = []) {
 
 /** The validated, normalised jobs file text for a project, or null when there is nothing valid at the root (a valid schema is required). */
 export function normalisedJobs(files) {
-    const text = files?.[JOBS_FILE];
-    if (typeof text !== 'string') return null;
-    const s = parseSchemaFile(files?.[SCHEMA_FILE]);
-    if (!s.ok) return null;
-    const r = parseJobsFile(text, { spec: s.spec, declared: declaredConnectors(files) });
+    // a missing or invalid file, schema (spec null) or manifest each make parseJobsFile fail, so there is nothing to guard here
+    const r = parseJobsFile(files?.[JOBS_FILE], { spec: parseSchemaFile(files?.[SCHEMA_FILE]).spec, declared: declaredConnectors(files) });
     return r.ok ? `${JSON.stringify(r.manifest, null, 2)}\n` : null;
 }
