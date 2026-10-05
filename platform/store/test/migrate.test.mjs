@@ -15,13 +15,13 @@ const tables = async () => (await db.pool.query("select table_name from informat
 t('applies the real migrations to an empty database', async () => {
     assert.deepEqual(await tables(), []);
     const r = await applyMigrations(db.pool);
-    assert.deepEqual(r.applied, ['001_platform.sql', '002_end_user_auth.sql']);
-    assert.deepEqual(await tables(), ['app_secrets', 'apps', 'end_users', 'limiter_counters', 'login_links', 'schema_migrations', 'sessions', 'usage_events']);
+    assert.deepEqual(r.applied, ['001_platform.sql', '002_end_user_auth.sql', '003_app_databases.sql', '004_storage.sql']);
+    assert.deepEqual(await tables(), ['app_dbs', 'app_secrets', 'apps', 'end_users', 'files', 'limiter_counters', 'login_links', 'schema_migrations', 'sessions', 'usage_events']);
 });
 
 t('running it again applies nothing and changes nothing', async () => {
     const r = await applyMigrations(db.pool);
-    assert.deepEqual(r.applied, []); assert.deepEqual(r.skipped, ['001_platform.sql', '002_end_user_auth.sql']);
+    assert.deepEqual(r.applied, []); assert.deepEqual(r.skipped, ['001_platform.sql', '002_end_user_auth.sql', '003_app_databases.sql', '004_storage.sql']);
 });
 
 t('migrations run in filename order, each in a transaction, and a failure stops the run and records nothing for it', async () => {
