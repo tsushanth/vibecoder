@@ -98,6 +98,26 @@ t('secretStore.list returns names and update times only, sorted, scoped to the a
     assert.deepEqual(await stores.secretStore.list('nobody'), []);
 });
 
+t('ensureApp creates a missing app with defaults and never changes an existing one', async () => {
+    await stores.ensureApp({ appId: 'ensured1' });
+    assert.deepEqual(await stores.appStore.get('ensured1'), { enabled: true, domains: [], manifest: null });
+    await stores.upsertApp({ appId: 'ensured2', manifest, domains: ['keep.example.com'], enabled: false });
+    await stores.ensureApp({ appId: 'ensured2' });
+    assert.deepEqual(await stores.appStore.get('ensured2'), { enabled: false, domains: ['keep.example.com'], manifest });
+    await stores.ensureApp({ appId: 'ensured1' });   // idempotent
+    await assert.rejects(() => stores.ensureApp({ appId: 'Bad App!' }), /app id/i);
+    assert.equal(await stores.appStore.get('Bad App!'), null);
+});
+
+t('setEnabled flips only the enabled flag, and reports whether the app existed', async () => {
+    await stores.upsertApp({ appId: 'toggle1', manifest, domains: ['t.example.com'], enabled: true });
+    assert.equal(await stores.setEnabled('toggle1', false), true);
+    assert.deepEqual(await stores.appStore.get('toggle1'), { enabled: false, domains: ['t.example.com'], manifest });
+    assert.equal(await stores.setEnabled('toggle1', true), true);
+    assert.equal((await stores.appStore.get('toggle1')).enabled, true);
+    assert.equal(await stores.setEnabled('no-such-app', false), false);
+});
+
 t('secret names must be UPPER_SNAKE and values non-empty and bounded', async () => {
     await assert.rejects(() => stores.secretStore.set('app1', 'bad name', 'v'), /^Error: invalid secret name$/);
     await assert.rejects(() => stores.secretStore.set('app1', 'GOOD_NAME', ''), /value/i);
