@@ -11,7 +11,7 @@ const CONTROLS = 'button,[role=button],input[type=submit],a[href^="#"],[onclick]
 export async function runtimeProblems(files, { chrome = process.env.CHROME_PATH, timeoutMs = 25000, maxClicks = 40 } = {}) {
     if (!chrome) return [];
     let puppeteer;
-    try { puppeteer = (await import('puppeteer-core')).default; } catch { return []; }
+    try { puppeteer = (await import('puppeteer-core')).default; } catch { console.warn('[browsercheck] puppeteer-core missing, build not checked'); return []; }
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vb-rt-'));
     let browser;
     const errs = [];
@@ -40,7 +40,7 @@ export async function runtimeProblems(files, { chrome = process.env.CHROME_PATH,
         })();
         await Promise.race([work, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), timeoutMs))]);
     } catch (e) {
-        if (!errs.length) return []; // harness trouble, not an app bug
+        if (!errs.length) { console.warn(`[browsercheck] unavailable, build not checked: ${String(e.message).slice(0, 120)}`); return []; } // harness trouble, not an app bug
     } finally {
         try { await browser?.close(); } catch { /* ignore */ }
         fs.rmSync(dir, { recursive: true, force: true });
