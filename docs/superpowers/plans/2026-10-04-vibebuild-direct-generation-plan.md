@@ -53,7 +53,15 @@ Reported by the session auditing Hetzner 192 and partly verified by me (read-onl
 - Consequence: when 192 and the Claude broker retire, RiddleVerse game creation (create, harder, next level) breaks unless `GAME_WORKER_URL` moves to a worker that has those endpoints and no Claude CLI dependency. Reported usage is low and none since 2026-08-19.
 - These are different products: RiddleVerse game generation has its own prompts and a three-stage flow, so adding two endpoints to the 231 worker is a design task, not a copy. It is not planned or built.
 
-Options for the owner (none chosen):
+Owner decision (RELAYED by the 192-audit session on 2026-10-05; not yet confirmed to this session by the owner): option 2, port `/generate-harder` and `/generate-next-level` to the direct-generation worker (Luna > Kimi > DeepSeek, no Claude CLI), then repoint `GAME_WORKER_URL`. The broker and the 192 worker stay until the port is live and the repoint is done.
+
+Work still unknown before the port can be designed (from the same session, none verified by me):
+- 192's RiddleVerse worker has its own prompts and a three-stage flow (generate, fix, polish, each through the Claude CLI with turn limits 15, 10 and 8). The 231 and 192 worker copies diverged, so it is unknown whether 231's `/generate` and `/customize` behave the same for RiddleVerse.
+- What `GAME_WORKER_URL` points at (Fly secret on `quiz-web-frontend`, unread; its machines are stopped, so waking one only to read it has a small side effect).
+- Whether game quality holds on the cheaper models. RiddleVerse games are HTML in a mobile WebView, so a bake-off on real RiddleVerse prompts, like the VibeBuild one, would settle it. Not run.
+- Who builds it is not decided.
+
+Options considered (the owner chose 2):
 1. Drop RiddleVerse game creation and retire the 192 worker with the broker.
 2. Port the missing endpoints to a direct-generation worker, using the same chain and checks as VibeBuild, then repoint `GAME_WORKER_URL`.
 3. Keep the 192 worker and the broker for RiddleVerse only. This keeps the box and the Claude dependency alive.
