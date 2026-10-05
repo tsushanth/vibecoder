@@ -184,5 +184,5 @@ t('row level security: a role with SELECT but no policy sees nothing, the proxy 
     for (const tbl of ['apps', 'app_secrets', 'limiter_counters', 'usage_events', 'end_users', 'login_links', 'sessions']) assert.equal((await anon.query(`select count(*)::int as n from platform.${tbl}`)).rows[0].n, 0, tbl);
     await anon.end();
     const { rows } = await db.pool.query("select relname, relrowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='platform' and relkind='r'");
-    assert.ok(rows.length >= 8 && rows.every((r) => r.relrowsecurity), JSON.stringify(rows));
+    assert.ok(rows.length >= 9 && rows.every((r) => r.relrowsecurity), JSON.stringify(rows));
 });
