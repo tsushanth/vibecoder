@@ -6,6 +6,7 @@ import { resolveManifest } from '../vibe-proxy/builtins.js';
 import { validateManifest } from '../vibe-proxy/manifest.js';
 import { createAdmin } from './admin.js';
 import { handleAuth, AUTH_OPS } from '../auth/routes.js';
+import { PAY_ROUTE } from '../pay/http.js';
 import { handleStorage, STORAGE_OPS, MAX_UPLOAD_BYTES } from '../storage/routes.js';
 
 const MAX_BODY = 200_000;
@@ -39,7 +40,7 @@ export async function readRaw(req, max) {
     return size > max ? { error: 413 } : { value: Buffer.concat(chunks) };
 }
 
-export function createHandler({ storageService, authService, appStore, secretStore, limiter, globalAiLimiter, meter, fetchImpl, resolve, openRouterKey, log = () => {}, baseDomain, adminToken, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, limiterStore, jobsAdmin }) {
+export function createHandler({ storageService, authService, appStore, secretStore, limiter, globalAiLimiter, meter, fetchImpl, resolve, openRouterKey, log = () => {}, baseDomain, adminToken, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, limiterStore, payHttp, jobsAdmin }) {
     const admin = adminToken ? createAdmin({ token: adminToken, jobsAdmin, appStore, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, secretStore, limiterStore, baseDomain }) : null;
     const aiLimiter = {
         async check(a) {
@@ -69,6 +70,13 @@ export function createHandler({ storageService, authService, appStore, secretSto
                 if (!admin) return sendJson(404, { error: 'not_found' });
                 const ip = req.headers['fly-client-ip'] || req.socket.remoteAddress || '';
                 const out = await admin({ method: req.method, pathname: url.pathname, headers: req.headers, ip, readBody: (limit) => readJson(req, limit) });
+                return out.body === undefined ? send(out.status, '') : sendJson(out.status, out.body);
+            }
+            const pm = payHttp ? PAY_ROUTE.exec(url.pathname) : null; // creator-keyed Stripe checkout: /<app>/pay/{checkout,orders,webhook}
+            if (pm) {
+                [, appId] = pm; route = `pay/${pm[2]}`;
+                const out = await payHttp.handle({ op: pm[2], appId, req, ip: req.headers['fly-client-ip'] || req.socket.remoteAddress || '' });
+                headers = { ...headers, ...out.headers };
                 return out.body === undefined ? send(out.status, '') : sendJson(out.status, out.body);
             }
             const m = ROUTE.exec(url.pathname);
