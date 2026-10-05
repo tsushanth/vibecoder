@@ -71,3 +71,9 @@ Caveats found while building:
 - There is no secret-rotation procedure yet (`key_version` is stored, always 1) and no write-only key-entry endpoint yet.
 
 Still not built: the entry point that reads configuration and starts the server, the Dockerfile and `fly.toml`, a key-entry endpoint, and a Postgres host decision.
+
+## Step 4c built: entry point, migration runner, container (2026-10-05)
+
+`platform/proxy-app/config.js` (fail-fast env validation; errors name the setting, never its value; secrets are non-enumerable so logging the config cannot print them), `start.js` (wires config, Postgres stores, per-app and platform-wide AI caps, HTTP handler; refuses to start if the database is unreachable or the schema is not migrated), `index.js` (process entry, SIGTERM-graceful), `store/migrate.js` (ordered, checksummed, one transaction per file, advisory lock; refuses a migration whose contents changed after it was applied), `Dockerfile` (node:22-slim, non-root, no tests in the image) and `fly.toml` (validated with `flyctl config validate`; scale-to-zero, shared-cpu-1x 256 MB, /health check). 214 tests pass on local Postgres, mutation-checked. The built image was run against a throwaway Postgres container: migrate (twice), start, health, 404, 403, clean shutdown.
+
+Still true, nothing deployed: no Fly app named `vibe-proxy` exists (the name is unchecked and unclaimed), no secrets set, no production database chosen. The $0.05 per app and $2 platform daily AI caps remain defaults the owner has not confirmed. The migration creates a cluster-level Postgres role `vibe_proxy` (NOLOGIN); the production `DATABASE_URL` user must be granted membership in it, and RLS behavior with a hosted provider's own roles is untested. `fly.toml` has no `release_command`: migrations are an explicit step. Scale-to-zero adds a cold start (about 1 to 3 seconds is an estimate, not measured).
