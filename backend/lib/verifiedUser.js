@@ -1,5 +1,5 @@
-// The ONLY trustworthy identity in this backend: the user id Supabase Auth vouches for in the caller's access token.
-// Most older routes trust a userId sent by the client; routes that guard secrets must use this instead.
+// The user id Supabase Auth vouches for in the caller's access token. Routes that guard secrets must use this and nothing
+// from the request body or query.
 import { supabase as defaultClient } from '../config/database.js';
 
 const BEARER = /^Bearer ([A-Za-z0-9._~+/=-]{1,4096})$/;
