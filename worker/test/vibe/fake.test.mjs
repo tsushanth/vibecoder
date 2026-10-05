@@ -63,6 +63,7 @@ test('db: where, order and limit behave', async () => {
     assert.deepEqual(await sel({ order: [{ col: 'n', dir: 'asc' }] }), [1, 2, 3]);
     assert.deepEqual(await sel({ order: [{ col: 'n', dir: 'desc' }] }), [3, 2, 1]);
     assert.deepEqual(await sel({ order: [{ col: 'k', dir: 'asc' }, { col: 'n', dir: 'desc' }] }), [3, 2, 1]);
+    assert.deepEqual(await sel({ order: [{ col: 'k', dir: 'asc' }, { col: 'n', dir: 'asc' }] }), [2, 3, 1]);
     assert.deepEqual(await sel({ order: [{ col: 'n', dir: 'asc' }], limit: 2 }), [1, 2]);
     assert.deepEqual(await sel({ limit: 0 }), []);
 });
@@ -71,7 +72,7 @@ test('db: select and insert return copies, so changing a result does not change 
     await db.from('t').insert({ a: 1 });
     (await db.from('t').select())[0].a = 99;
     assert.equal((await db.from('t').select())[0].a, 1);
-    const ins = await db.from('t').insert({ a: 2 }); ins.a = 7;
+    const input = { a: 2 }; const ins = await db.from('t').insert(input); ins.a = 7; input.a = 8;
     assert.equal((await db.from('t').select({ where: [{ col: 'a', op: '=', val: 2 }] })).length, 1);
 });
 test('db: update and delete change only matching rows and report the count', async () => {
