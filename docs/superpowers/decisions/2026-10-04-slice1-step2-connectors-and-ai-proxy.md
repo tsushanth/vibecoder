@@ -46,3 +46,16 @@ Open items:
 - The default endpoint `https://vibe-proxy.vibebuild.cc` is a PLACEHOLDER. Nothing is provisioned there. The real host (Supabase function URL behind a custom domain, or the existing `vibecoder-api` Fly app) is an owner decision at the edge-wrapper step.
 - The worker's external-dependency validator (`worker/validators.js`) must be taught to accept `vibe.js` the way it accepts a byte-identical `vibedata.js`, and `vibe.js` must be copied to `worker/assets/` and kept in sync. This is step 5 (generation changes).
 - The SDK has been tested in a Node VM with a fake `window` and `fetch`, not in a real browser against a real server.
+
+## Step 4 decisions (owner, 2026-10-04)
+
+1. Hosting: a NEW small Fly app (`vibe-proxy`), not a Supabase Edge Function. Reasons weighed: a Supabase function's runtime environment includes the service-role key, which reaches all 38 tables of the live VibeBuild database (Replitor); a Fly app can use a Postgres role limited to the platform tables. The proxy code is web-standard and runs unchanged on either host. Costs and cold-start figures in the comparison were estimates, not measurements.
+2. OpenRouter key for `vibe.ai`: the owner answered "same one", read as the $100 dedicated generation key. Risk accepted knowingly: one key means app AI usage and app generation share the $100 hard limit, which has no reset. OpenRouter cannot split a key's limit.
+3. Mitigation built: a platform-wide daily cap on `vibe.ai` spend, applied on top of the per-app $0.05/day cap. Default 2,000,000 micro-dollars ($2/day). THE $2 FIGURE WAS MY PROPOSAL AND THE OWNER HAS NOT CONFIRMED IT. It is a configuration value, not a decision.
+4. Nothing is deployed: no Fly app created, no Dockerfile or fly.toml yet, no secrets set, no database changes.
+
+## Step 4a built: HTTP layer (`platform/proxy-app/server.js`)
+
+Routes `GET /health`, `POST /:app/api`, `POST /:app/ai`. Per-app CORS (the app's own `<id>.vibebuild.cc` origin or a registered custom domain, https only), 200 KB body cap, client IP from `fly-client-ip` only (spoofed `x-forwarded-for` ignored), non-cacheable responses, request logs with no secrets, queries or prompts, platform AI cap, and the vault read limited to the one secret the connector declares. Storage is injected. 155 tests pass, rules mutation-checked.
+
+Not built: the Postgres-backed app store, secret store (encrypted at rest) and limiter store; the entry point that wires them; Dockerfile and fly.toml. These need a database role and tables on a real Postgres, which is where production access starts and needs approval.
