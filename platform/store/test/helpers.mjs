@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import { randomBytes } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
+import { applyMigrations } from '../migrate.js';
 
 const conn = (db) => ({ host: process.env.PGHOST || 'localhost', user: process.env.PGUSER || process.env.USER, database: db });
 export const MIGRATION = fileURLToPath(new URL('../migrations/001_platform.sql', import.meta.url));
@@ -12,7 +13,7 @@ export async function scratchDb({ migrate = true } = {}) {
     const admin = new pg.Pool({ ...conn('postgres'), max: 1 });
     try { await admin.query(`create database ${name}`); } catch (e) { await admin.end().catch(() => {}); return { unavailable: String(e.message) }; }
     const pool = new pg.Pool({ ...conn(name), max: 10 });
-    if (migrate) await pool.query(fs.readFileSync(MIGRATION, 'utf8'));
+    if (migrate) await applyMigrations(pool);
     return {
         name, pool, admin, connFor: (extra) => new pg.Pool({ ...conn(name), max: 2, ...extra }),
         async cleanup() { await pool.end().catch(() => {}); await admin.query(`drop database if exists ${name} with (force)`).catch(() => {}); for (const r of ['anon_sim', 'vibe_proxy']) await admin.query(`drop role if exists ${r}`).catch(() => {}); await admin.end().catch(() => {}); },
