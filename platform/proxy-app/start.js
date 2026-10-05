@@ -17,6 +17,9 @@ import { createJobsAdmin } from '../jobs/admin.js';
 import { createActionRunner } from '../jobs/actions.js';
 import { runDueJobs, createGate } from '../jobs/runner.js';
 import { startScheduler } from '../jobs/scheduler.js';
+import { createPayService } from '../pay/service.js';
+import { createPayHttp } from '../pay/http.js';
+import { createOrderStore } from '../pay/orderStore.js';
 
 async function dnsResolve(host) {
     const [a, b] = await Promise.allSettled([dns.resolve4(host), dns.resolve6(host)]);
@@ -64,9 +67,10 @@ export async function startServer(config, { pool: injected, listenPort, jobsTick
             onError: (e) => log(JSON.stringify({ ts: new Date().toISOString(), event: 'jobs_tick_error', code: String(e?.code || e?.name || 'error').slice(0, 40) })),
         });
     }
+    const payService = createPayService({ secretStore: stores.secretStore, limiter, limiterStore: stores.limiterStore, orderStore: createOrderStore({ pool }), auth: authService, fetchImpl, baseDomain: config.baseDomain });
     const handler = createHandler({
         jobsAdmin: createJobsAdmin({ store: jobsStore, appStore: stores.appStore }),
-        storageService, authService,
+        storageService, authService, payHttp: createPayHttp({ service: payService, appStore: stores.appStore, baseDomain: config.baseDomain }),
         appStore: stores.appStore, secretStore: stores.secretStore, limiter, globalAiLimiter,
         meter, fetchImpl, resolve,
         openRouterKey: config.secrets.openRouterKey, log, baseDomain: config.baseDomain,
