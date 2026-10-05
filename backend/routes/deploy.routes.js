@@ -3,9 +3,10 @@ import crypto from 'crypto';
 import { supabase } from '../config/database.js';
 import { getActiveDomainMap } from '../services/domainService.js';
 import { WORKER_URL, WORKER_SECRET } from '../config/constants.js';
+import { requireSecret } from '../lib/requireSecret.js';
 
 const DEPLOY_SERVER_URL = process.env.DEPLOY_SERVER_URL || 'http://localhost:4000';
-const INTERNAL_SECRET = process.env.INTERNAL_SECRET || 'vibecoder-internal-secret';
+const INTERNAL_SECRET = requireSecret('INTERNAL_SECRET');
 
 const router = express.Router();
 

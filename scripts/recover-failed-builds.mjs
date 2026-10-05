@@ -13,12 +13,13 @@
  */
 
 import { createClient } from '../backend/node_modules/@supabase/supabase-js/dist/index.mjs';
+import { requireSecret } from '../backend/lib/requireSecret.js';
 
 // ── Config ────────────────────────────────────────────────────────────────────
 const SUPABASE_URL    = process.env.SUPABASE_URL    || 'https://owvvrljdfnhntwedepkl.supabase.co';
 const SUPABASE_KEY    = process.env.SUPABASE_SERVICE_KEY; // must be service role
 const WORKER_URL      = process.env.WORKER_URL      || 'http://178.156.231.255:3456';
-const WORKER_SECRET   = process.env.WORKER_SECRET   || 'vibecoder-worker-secret-2024';
+const WORKER_SECRET   = requireSecret('WORKER_SECRET');
 
 // Local machine workers (connected via reverse SSH tunnel from VM)
 // Add Mac Mini here once tunnel is set up: 'http://localhost:3472'
