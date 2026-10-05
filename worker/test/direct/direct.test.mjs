@@ -217,3 +217,17 @@ test('generate: a per-build call limit stops a fallthrough storm', async () => {
     assert.equal(llm.calls.length, 3); // a (draft + fix), then b (draft) and no more
     assert.equal(r.attempts.at(-1).cause === 'budget' || r.attempts.at(-1).cause === 'check_failed', true);
 });
+
+test('generate: an async check that fails once feeds its problem back and the fix pass succeeds', async () => {
+    const { generateApp } = await import('../../lib/generate.js');
+    const good = '<file path="index.html">' + '<html><meta name="viewport" content="x"><body>'.padEnd(300, 'a') + '</body></html></file>';
+    const replies = [good, good];
+    const seen = [];
+    const llm = { isOpen: () => false, chat: async ({ messages }) => { seen.push(messages.length); return { text: replies.shift(), costUsd: 0 }; } };
+    let calls = 0;
+    const check = async () => (++calls === 1 ? { ok: false, problems: ['runtime error: boom'] } : { ok: true });
+    const r = await generateApp({ prompt: 'x', llm, models: ['m'], rules: 'r', check });
+    assert.equal(r.ok, true);
+    assert.equal(r.fixes, 1);
+    assert.deepEqual(seen, [2, 4]);
+});

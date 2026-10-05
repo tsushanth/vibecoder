@@ -16,6 +16,7 @@ import zlib from 'zlib';
 import { checkBrokerReady } from './brokerReady.js';
 import { OpenRouterClient } from './lib/llm.js';
 import { generateApp } from './lib/generate.js';
+import { fullChecks } from './lib/browsercheck.js';
 import { readProject, writeFiles } from './lib/files.js';
 import { makeOutcomeLogger } from './lib/outcome.js';
 import { scrubSecrets } from './lib/scrub.js';
@@ -56,7 +57,7 @@ async function runDirect({ kind, prompt, projectDir }) {
     }
     // credentials pasted into a prompt must never reach a model provider or be copied into the app
     const { text: safePrompt, count: scrubbed } = scrubSecrets(prompt);
-    const r = await generateApp({ prompt: safePrompt, kind, existing, llm: directLlm, models: DIRECT_MODELS, rules: CLAUDE_MD, deadlineMs: parseInt(process.env.DIRECT_DEADLINE_MS || '480000', 10) });
+    const r = await generateApp({ prompt: safePrompt, kind, existing, llm: directLlm, models: DIRECT_MODELS, rules: CLAUDE_MD, check: fullChecks, deadlineMs: parseInt(process.env.DIRECT_DEADLINE_MS || '480000', 10) });
     if (!r.ok) return { success: false, cause: r.cause, attempts: r.attempts, costUsd: r.costUsd, scrubbed };
     writeFiles(projectDir, r.files);
     return { success: true, model: r.model, attempts: r.attempts, costUsd: r.costUsd, fixes: r.fixes, scrubbed };

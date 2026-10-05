@@ -11,9 +11,9 @@ import { generateApp } from '../lib/generate.js';
 import { scrubSecrets } from '../lib/scrub.js';
 import { writeFiles } from '../lib/files.js';
 
-const { SUPABASE_URL, SUPABASE_SERVICE_KEY, OPENROUTER_API_KEY } = process.env;
-if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !OPENROUTER_API_KEY) {
-    console.error('need SUPABASE_URL, SUPABASE_SERVICE_KEY, OPENROUTER_API_KEY');
+const { SUPABASE_URL, SUPABASE_SERVICE_KEY, OPENROUTER_API_KEY, REPLAY_FILE } = process.env;
+if (!OPENROUTER_API_KEY || (!REPLAY_FILE && (!SUPABASE_URL || !SUPABASE_SERVICE_KEY))) {
+    console.error('need OPENROUTER_API_KEY and either REPLAY_FILE or SUPABASE_URL + SUPABASE_SERVICE_KEY');
     process.exit(2);
 }
 const THRESHOLD = parseFloat(process.env.THRESHOLD || '0.8');
@@ -22,11 +22,17 @@ const BUDGET = parseFloat(process.env.BUDGET_USD || '2');
 const models = (process.env.DIRECT_MODELS || 'openai/gpt-5.6-luna,moonshotai/kimi-k2.7-code,deepseek/deepseek-v4-pro').split(',');
 const rules = 'You are building a self-contained web app. Single index.html; no external resources.';
 
-const res = await fetch(`${SUPABASE_URL}/rest/v1/replay_prompts?select=id,prompt,prod_outcome&order=id`, {
-    headers: { apikey: SUPABASE_SERVICE_KEY, Authorization: `Bearer ${SUPABASE_SERVICE_KEY}` },
-});
-if (!res.ok) { console.error('fetch replay_prompts failed:', res.status); process.exit(2); }
-const rows = await res.json();
+let rows;
+if (REPLAY_FILE) {
+    // local JSON export of the table: [{id, text|prompt, prod_outcome?}]
+    rows = JSON.parse(fs.readFileSync(REPLAY_FILE, 'utf8')).map((x) => ({ id: x.id, prompt: x.prompt ?? x.text, prod_outcome: x.prod_outcome }));
+} else {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/replay_prompts?select=id,prompt,prod_outcome&order=id`, {
+        headers: { apikey: SUPABASE_SERVICE_KEY, Authorization: `Bearer ${SUPABASE_SERVICE_KEY}` },
+    });
+    if (!res.ok) { console.error('fetch replay_prompts failed:', res.status); process.exit(2); }
+    rows = await res.json();
+}
 console.log(`replaying ${rows.length} prompts, models ${models.map((m) => m.split('/')[1]).join(' > ')}, budget $${BUDGET}`);
 
 const llm = new OpenRouterClient({ apiKey: OPENROUTER_API_KEY, dailyBudgetUsd: BUDGET });
