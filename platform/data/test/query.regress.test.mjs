@@ -78,3 +78,10 @@ test('inherited properties on Object.prototype are never trusted for request fie
     for (const k of ['limit', 'offset', 'columns', 'order', 'rows', 'set']) delete Object.prototype[k];
   }
 });
+
+test('timestamp rejects non-strings that stringify to a date', () => {
+  const spec = { version: 1, tables: { t: { access: 'owner', columns: { c: { type: 'timestamp' } } } } };
+  for (const v of [['2024-05-01'], { toString: () => '2024-05-01' }, new Date(0)]) {
+    assert.deepEqual(run({ op: 'insert', table: 't', rows: [{ c: v }] }, U1, spec), { ok: false, status: 400, code: 'bad_value' });
+  }
+});
