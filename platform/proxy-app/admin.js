@@ -21,7 +21,7 @@ export const ADMIN_BODY_LIMIT = 8192;
 export const SCHEMA_BODY_LIMIT = 131072;
 const MAX_SCHEMA_ERRORS = 20;
 
-export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, secretStore, limiterStore, baseDomain, dataExecutor, now = () => Date.now() }) {
+export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, secretStore, limiterStore, baseDomain, dataExecutor, jobsAdmin, now = () => Date.now() }) {
     const expected = digest(token);
     const minute = () => Math.floor(now() / 60_000);
     const validDomains = (domains) => Array.isArray(domains) && domains.length <= MAX_DOMAINS && domains.every((d) => typeof d === 'string' && HOSTNAME.test(d) && !d.endsWith(`.${baseDomain}`) && d !== baseDomain);
@@ -39,7 +39,7 @@ export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled,
     return async function handle(req) {
         const denied = await authorize(req.headers, req.ip);
         if (denied) return denied;
-        const m = /^\/admin\/apps\/([^/]+)(?:\/(secrets|ensure|enabled|domains|manifest|copy-secrets|schema)(?:\/([^/]+))?)?$/.exec(req.pathname);
+        const m = /^\/admin\/apps\/([^/]+)(?:\/(secrets|ensure|enabled|domains|manifest|copy-secrets|schema|jobs)(?:\/([^/]+))?)?$/.exec(req.pathname);
         if (!m) return json(404, { error: 'not_found' });
         const [, appId, sub, name] = m;
         if (!APP_ID.test(appId)) return json(404, { error: 'not_found' });
@@ -107,6 +107,10 @@ export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled,
             if (errors.some((e) => e.code === 'destructive_change_needs_confirmation')) return json(409, { error: 'destructive_change_needs_confirmation', destructive: out.destructive || [] });
             if (errors.some((e) => e.code === 'migration_failed')) return json(422, { error: 'migration_failed' });
             return json(400, { error: 'invalid_schema', errors: errors.slice(0, MAX_SCHEMA_ERRORS) });
+        }
+        if (sub === 'jobs') {
+            if (name !== undefined || !jobsAdmin) return json(404, { error: 'not_found' });
+            return jobsAdmin({ appId, method: req.method, readBody: req.readBody });   // validation and storage live in ../jobs/admin.js
         }
 
         if (sub === 'copy-secrets') {

@@ -7,10 +7,11 @@ import { validateManifest } from '../vibe-proxy/manifest.js';
 import { createAdmin } from './admin.js';
 import { handleAuth, AUTH_OPS } from '../auth/routes.js';
 import { PAY_ROUTE } from '../pay/http.js';
+import { handleDb } from '../data/routes.js';
 import { handleStorage, STORAGE_OPS, MAX_UPLOAD_BYTES } from '../storage/routes.js';
 
 const MAX_BODY = 200_000;
-const ROUTE = new RegExp(`^/([a-z0-9][a-z0-9-]{0,62})/(api|ai|auth/(?:${AUTH_OPS.join('|')})|storage/(?:${STORAGE_OPS.join('|')}))$`);
+const ROUTE = new RegExp(`^/([a-z0-9][a-z0-9-]{0,62})/(api|ai|auth/(?:${AUTH_OPS.join('|')})|db|storage/(?:${STORAGE_OPS.join('|')}))$`);
 const BASE_HEADERS = { 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' };
 
 function originAllowed(origin, appId, app, baseDomain) {
@@ -40,8 +41,8 @@ export async function readRaw(req, max) {
     return size > max ? { error: 413 } : { value: Buffer.concat(chunks) };
 }
 
-export function createHandler({ storageService, authService, appStore, secretStore, limiter, globalAiLimiter, meter, fetchImpl, resolve, openRouterKey, log = () => {}, baseDomain, adminToken, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, limiterStore, payHttp, dataExecutor }) {
-    const admin = adminToken ? createAdmin({ token: adminToken, appStore, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, secretStore, limiterStore, baseDomain, dataExecutor }) : null;
+export function createHandler({ dataExecutor, storageService, authService, appStore, secretStore, limiter, globalAiLimiter, meter, fetchImpl, resolve, openRouterKey, log = () => {}, baseDomain, adminToken, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, limiterStore, payHttp, jobsAdmin }) {
+    const admin = adminToken ? createAdmin({ token: adminToken, jobsAdmin, appStore, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, secretStore, limiterStore, baseDomain, dataExecutor }) : null;
     const aiLimiter = {
         async check(a) {
             const r = await limiter.check(a);
@@ -99,6 +100,13 @@ export function createHandler({ storageService, authService, appStore, secretSto
             if (body.error) return sendJson(body.error, { error: body.error === 413 ? 'request_too_large' : 'bad_json' });
             const ip = req.headers['fly-client-ip'] || req.socket.remoteAddress || '';
             let result;
+            if (route === 'db') {
+                const gate = await limiter.check({ appId, ip });
+                if (!gate.ok) return sendJson(gate.reason === 'app_disabled' ? 403 : 429, { error: gate.reason });
+                const bearer = /^Bearer (\S+)$/.exec(String(req.headers.authorization || ''))?.[1];
+                const out = await handleDb({ body: body.value, bearer, appId, auth: authService, executor: dataExecutor });
+                return sendJson(out.status, out.body);
+            }
             if (route.startsWith('storage/')) {
                 const gate = await limiter.check({ appId, ip });
                 if (!gate.ok) return sendJson(gate.reason === 'app_disabled' ? 403 : 429, { error: gate.reason });
