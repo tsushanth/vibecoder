@@ -38,6 +38,11 @@ export function createPgStores({ pool, masterKey, now = () => Date.now() }) {
         await pool.query('insert into platform.apps (app_id) values ($1) on conflict (app_id) do nothing', [appId]);
     }
 
+    async function setDomains(appId, domains) {
+        const { rowCount } = await pool.query('update platform.apps set domains = $2, updated_at = now() where app_id = $1', [appId, domains]);
+        return rowCount > 0;
+    }
+
     async function setEnabled(appId, enabled) {
         const { rowCount } = await pool.query('update platform.apps set enabled = $2, updated_at = now() where app_id = $1', [appId, !!enabled]);
         return rowCount > 0;
@@ -115,5 +120,5 @@ export function createPgStores({ pool, masterKey, now = () => Date.now() }) {
         return Object.fromEntries(rows.map((r) => [r.connector, { calls: r.calls, errors: r.errors, responseBytes: r.bytes }]));
     }
 
-    return { appStore, upsertApp, ensureApp, setEnabled, secretStore, limiterStore, usageSink, usageSummary };
+    return { appStore, upsertApp, ensureApp, setEnabled, setDomains, secretStore, limiterStore, usageSink, usageSummary };
 }

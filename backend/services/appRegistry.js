@@ -26,3 +26,17 @@ export async function disableDeployedApp(proxyAdmin, subdomain, log = console.wa
         return false;
     }
 }
+
+// Tells the proxy an app's custom domain (or none), so the SDK works when the app is served from it. Best effort.
+export async function syncCustomDomain(proxyAdmin, { subdomain, domain } = {}, log = console.warn) {
+    if (!proxyAdmin?.configured || typeof subdomain !== 'string' || !SUBDOMAIN.test(subdomain)) return false;
+    if (domain !== null && typeof domain !== 'string') return false;
+    try {
+        await proxyAdmin.ensureApp(subdomain);
+        await proxyAdmin.setDomains(subdomain, domain ? [domain] : []);
+        return true;
+    } catch (e) {
+        log(`[proxy] custom domain sync failed app=${subdomain} code=${e?.code || 'error'}`);
+        return false;
+    }
+}

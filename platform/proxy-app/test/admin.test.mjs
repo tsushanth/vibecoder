@@ -19,7 +19,7 @@ before(async () => {
     const handler = createHandler({
         appStore: stores.appStore, secretStore: stores.secretStore, limiter, globalAiLimiter, meter: createMeter({ sink: stores.usageSink }),
         fetchImpl: async () => new Response('{}'), resolve: async () => ['93.184.216.34'], openRouterKey: 'sk-or-v1-FAKE', baseDomain: 'vibebuild.cc',
-        log: (l) => logs.push(l), adminToken: TOKEN, upsertApp: stores.upsertApp, ensureApp: stores.ensureApp, setEnabled: stores.setEnabled, limiterStore: stores.limiterStore,
+        log: (l) => logs.push(l), adminToken: TOKEN, upsertApp: stores.upsertApp, ensureApp: stores.ensureApp, setEnabled: stores.setEnabled, setDomains: stores.setDomains, limiterStore: stores.limiterStore,
     });
     server = http.createServer(handler);
     await new Promise((r) => server.listen(0, '127.0.0.1', r)); port = server.address().port;
@@ -184,4 +184,26 @@ t('ensure and enabled reject extra path segments', async () => {
     assert.equal((await call('POST', '/admin/apps/ensure-z/ensure/extra')).status, 404);
     assert.equal((await call('POST', '/admin/apps/toggle-app/enabled/extra', { body: { enabled: false } })).status, 404);
     assert.equal(await stores.appStore.get('ensure-z'), null);
+});
+
+t('POST /admin/apps/:app/domains replaces the domains and keeps the manifest and the flag', async () => {
+    const m = { connectors: { keyed: { host: 'api.example.com', paths: ['/v1/x'], methods: ['GET'] } } };
+    await stores.upsertApp({ appId: 'dom-app', manifest: m, domains: ['old.example.com'], enabled: false });
+    assert.equal((await call('POST', '/admin/apps/dom-app/domains', { body: { domains: ['shop.example.com'] } })).status, 204);
+    assert.deepEqual(await stores.appStore.get('dom-app'), { enabled: false, domains: ['shop.example.com'], manifest: m });
+    assert.equal((await call('POST', '/admin/apps/dom-app/domains', { body: { domains: [] } })).status, 204);
+    assert.deepEqual((await stores.appStore.get('dom-app')).domains, []);
+});
+
+t('domains: validation, unknown app, auth and path rules', async () => {
+    await stores.upsertApp({ appId: 'dom-app2', enabled: true });
+    for (const domains of [['https://not-a-host/'], ['a.vibebuild.cc'], ['vibebuild.cc'], 'shop.example.com', [123], ['a.example.com', 'b.example.com', 'c.example.com', 'd.example.com', 'e.example.com', 'f.example.com']]) {
+        assert.equal((await call('POST', '/admin/apps/dom-app2/domains', { body: { domains } })).status, 400, JSON.stringify(domains));
+    }
+    assert.equal((await call('POST', '/admin/apps/dom-app2/domains', { body: {} })).status, 400);
+    assert.equal((await call('POST', '/admin/apps/no-such-app/domains', { body: { domains: ['x.example.com'] } })).status, 404);
+    assert.equal((await call('POST', '/admin/apps/dom-app2/domains', { token: null, body: { domains: ['x.example.com'] } })).status, 401);
+    assert.equal((await call('GET', '/admin/apps/dom-app2/domains')).status, 405);
+    assert.equal((await call('POST', '/admin/apps/dom-app2/domains/extra', { body: { domains: [] } })).status, 404);
+    assert.deepEqual((await stores.appStore.get('dom-app2')).domains, []);
 });

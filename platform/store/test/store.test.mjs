@@ -109,6 +109,15 @@ t('ensureApp creates a missing app with defaults and never changes an existing o
     assert.equal(await stores.appStore.get('Bad App!'), null);
 });
 
+t('setDomains replaces only the domains list and reports whether the app existed', async () => {
+    await stores.upsertApp({ appId: 'doms1', manifest, domains: ['old.example.com'], enabled: false });
+    assert.equal(await stores.setDomains('doms1', ['a.example.com', 'b.example.com']), true);
+    assert.deepEqual(await stores.appStore.get('doms1'), { enabled: false, domains: ['a.example.com', 'b.example.com'], manifest });
+    assert.equal(await stores.setDomains('doms1', []), true);
+    assert.deepEqual((await stores.appStore.get('doms1')).domains, []);
+    assert.equal(await stores.setDomains('no-such-app', ['x.example.com']), false);
+});
+
 t('setEnabled flips only the enabled flag, and reports whether the app existed', async () => {
     await stores.upsertApp({ appId: 'toggle1', manifest, domains: ['t.example.com'], enabled: true });
     assert.equal(await stores.setEnabled('toggle1', false), true);

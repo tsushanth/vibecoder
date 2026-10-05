@@ -2,6 +2,8 @@ import dnsPromises from 'dns/promises';
 import crypto from 'crypto';
 import net from 'net';
 import { supabase as defaultSupabase } from '../config/database.js';
+import { createProxyAdmin } from './proxyAdmin.js';
+import { syncCustomDomain } from './appRegistry.js';
 
 const FLY_API_BASE = 'https://api.machines.dev/v1';
 const STALE_CLAIM_MS = 60 * 60 * 1000; // an unverified claim older than this can be taken over
@@ -73,6 +75,7 @@ export function createDomainService({
     fetchFn = (...args) => fetch(...args),
     env = process.env,
     now = () => Date.now(),
+    onDomainChange = null, // async ({ subdomain, domain|null }): tells the platform proxy which custom domain an app has
 } = {}) {
     const BASE_DOMAIN = env.BASE_DOMAIN || 'vibebuild.cc';
     const FLY_APP_NAME = env.FLY_DEPLOY_APP_NAME || 'vibecoder-deploy';
@@ -223,6 +226,12 @@ export function createDomainService({
         return { ...data, ...instructionsFor(cleanDomain, deployment.subdomain, token) };
     }
 
+    // Best effort: a proxy problem must never break verifying or removing a domain.
+    async function announce(event) {
+        if (typeof onDomainChange !== 'function') return;
+        try { await onDomainChange(event); } catch { /* the next verify repairs it */ }
+    }
+
     async function verifyDomain(deploymentId, userId) {
         const { data: record, error } = await supabase
             .from('custom_domains')
@@ -238,6 +247,7 @@ export function createDomainService({
             .eq('id', record.id);
 
         if (record.verification_status === 'active') {
+            await announce({ subdomain: record.deployments?.subdomain, domain: record.domain });
             return { status: 'active', domain: record.domain, message: 'Domain is live' };
         }
 
@@ -269,6 +279,7 @@ export function createDomainService({
 
         if (isCertReady(cert, now())) {
             await touch({ verification_status: 'active', ssl_certificate_id: record.domain, updated_at: new Date(now()).toISOString() });
+            await announce({ subdomain: record.deployments?.subdomain, domain: record.domain });
             return { status: 'active', domain: record.domain, message: 'Domain verified and certificate issued' };
         }
 
@@ -305,7 +316,7 @@ export function createDomainService({
     async function removeDomain(deploymentId, userId) {
         const { data: record, error } = await supabase
             .from('custom_domains')
-            .select('domain, ssl_certificate_id')
+            .select('domain, ssl_certificate_id, deployments!inner(subdomain)')
             .eq('deployment_id', deploymentId)
             .eq('user_id', userId)
             .maybeSingle();
@@ -319,6 +330,7 @@ export function createDomainService({
             }
         }
         await supabase.from('custom_domains').delete().eq('deployment_id', deploymentId).eq('user_id', userId);
+        await announce({ subdomain: record.deployments?.subdomain, domain: null });
         return { removed: true, domain: record.domain };
     }
 
@@ -340,7 +352,8 @@ export function createDomainService({
 
 // ─── Default instance used by the routes ──────────────────────────────
 
-const service = createDomainService();
+const proxyAdmin = createProxyAdmin({ baseUrl: process.env.PROXY_ADMIN_URL, token: process.env.PROXY_ADMIN_TOKEN });
+const service = createDomainService({ onDomainChange: (event) => syncCustomDomain(proxyAdmin, event) });
 export const {
     verifyCNAME, verifyAddressRecords, verifyTXTToken,
     provisionSSLCert, getSSLCertStatus, checkSSLCert, deleteSSLCert,

@@ -326,3 +326,52 @@ test('resolveDeploymentId accepts a deployment id or a project id, only for the 
     const r = await s.addDomain(await s.resolveDeploymentId('proj-1', 'u1'), 'u1', 'example.com');
     assert.equal(r.deployment_id, 'dep-1');
 });
+
+// ---- proxy registration callback ---------------------------------------------
+const withCallback = async (opts = {}) => {
+    const events = []; const onDomainChange = opts.onDomainChange || (async (e) => { events.push(e); });
+    const db = makeDb({ deployments: [{ ...DEP }] });
+    const fly = opts.fly || makeFly(ISSUED);
+    const s = createDomainService({ supabase: db, dns: opts.dns || makeDns({ cname: ['my-app.vibebuild.cc.'] }), fetchFn: fly.fetchFn, now: opts.now, onDomainChange, env: { FLY_API_TOKEN: 'FlyV1 fm2_test' } });
+    await s.addDomain('dep-1', 'u1', 'www.example.com');
+    return { s, events, db };
+};
+
+test('onDomainChange: an active domain is announced once with its deployment subdomain', async () => {
+    const { s, events } = await withCallback();
+    assert.equal((await s.verifyDomain('dep-1', 'u1')).status, 'active');
+    assert.deepEqual(events, [{ subdomain: 'my-app', domain: 'www.example.com' }]);
+});
+
+test('onDomainChange: re-verifying an already active domain announces it again, so a missed registration repairs itself', async () => {
+    const { s, events } = await withCallback();
+    await s.verifyDomain('dep-1', 'u1'); await s.verifyDomain('dep-1', 'u1');
+    assert.equal(events.length, 2);
+});
+
+test('onDomainChange: nothing is announced while the domain is pending or still issuing its certificate', async () => {
+    const a = await withCallback({ dns: makeDns() }); await a.s.verifyDomain('dep-1', 'u1');
+    const b = await withCallback({ fly: makeFly(PENDING) }); await b.s.verifyDomain('dep-1', 'u1');
+    assert.deepEqual([...a.events, ...b.events], []);
+});
+
+test('onDomainChange: removing the domain announces it as cleared, with the subdomain it belonged to', async () => {
+    const { s, events } = await withCallback();
+    await s.verifyDomain('dep-1', 'u1'); events.length = 0;
+    const r = await s.removeDomain('dep-1', 'u1');
+    assert.equal(r.removed, true);
+    assert.deepEqual(events, [{ subdomain: 'my-app', domain: null }]);
+});
+
+test('onDomainChange: a failing callback never breaks verify or remove', async () => {
+    const { s } = await withCallback({ onDomainChange: async () => { throw new Error('proxy down'); } });
+    assert.equal((await s.verifyDomain('dep-1', 'u1')).status, 'active');
+    assert.equal((await s.removeDomain('dep-1', 'u1')).removed, true);
+});
+
+test('onDomainChange is optional', async () => {
+    const db = makeDb({ deployments: [{ ...DEP }] }); const fly = makeFly(ISSUED);
+    const s = createDomainService({ supabase: db, dns: makeDns({ cname: ['my-app.vibebuild.cc.'] }), fetchFn: fly.fetchFn, env: { FLY_API_TOKEN: 'FlyV1 fm2_test' } });
+    await s.addDomain('dep-1', 'u1', 'www.example.com');
+    assert.equal((await s.verifyDomain('dep-1', 'u1')).status, 'active');
+});

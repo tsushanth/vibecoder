@@ -1,3 +1,4 @@
+import { isReservedSubdomain } from '../services/reservedSubdomains.js';
 import express from 'express';
 import crypto from 'crypto';
 import { supabase } from '../config/database.js';
@@ -52,6 +53,8 @@ router.post('/:projectId/deploy', async (req, res) => {
         if (!/^[a-z0-9][a-z0-9-]{1,60}[a-z0-9]$/.test(subdomain)) {
             return res.status(400).json({ error: 'Invalid subdomain. Use lowercase letters, numbers, and hyphens.' });
         }
+
+        if (isReservedSubdomain(subdomain)) return res.status(400).json({ error: 'That name is reserved. Please choose another subdomain.' });
 
         // Check subdomain availability
         const { data: existing } = await supabase

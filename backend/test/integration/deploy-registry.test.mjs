@@ -78,3 +78,12 @@ test('undeploying as a different user disables nothing', async () => {
     assert.equal((await quiet(() => del(srv, { userId: 'someone-else' }))).status, 200);
     assert.deepEqual(calls, []);
 });
+
+test('a reserved name is refused with 400 before anything is deployed or registered', async () => {
+    reset();
+    for (const name of ['vibe-proxy', 'www', 'preview-abc123']) {
+        const r = await quiet(() => post(srv, { userId: 'owner-1', subdomain: name }));
+        assert.equal(r.status, 400, name); assert.match((await r.json()).error, /reserved/);
+    }
+    assert.deepEqual(calls, []);
+});
