@@ -31,3 +31,9 @@ Only one candidate is verified for commercial use: US National Weather Service. 
 - Built-in connectors are platform-defined only. App-declared manifests may not set fixed headers (the proxy would otherwise let an untrusted app set arbitrary request headers); built-ins set a unique User-Agent as the NWS requires.
 - App-declared connectors may not reuse a built-in name.
 - AI proxy: platform picks the model allowlist (default `openai/gpt-5.6-luna`, the model used for direct generation); apps cannot choose arbitrary models; output and input sizes are capped; cost is read from the provider's reported usage, not guessed.
+
+## Built (2026-10-04, branch tier1-slice1)
+
+`platform/vibe-proxy/builtins.js` (NWS only, with terms metadata), `ai.js` (allowlisted model, 8,000 input characters, 800 output tokens, 20 messages, 30 s timeout, provider-reported cost recorded in micro-dollars, 200 micro-dollars charged when no cost is reported), 128 tests passing, every rule mutation-checked. Not built: crypto and holiday connectors (no approved source), per-app AI allowance configuration (the $0.05/day default is applied through the limiter's `dailySpendMicros = 50000`; the wiring that sets it per app is part of the edge wrapper), real token pricing display.
+
+Known behavior: the spend cap is checked before a call, so one call can overshoot it by that call's cost (bounded by 800 output tokens on the default model).
