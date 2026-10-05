@@ -68,3 +68,10 @@ test('the database pool size defaults to 5 and is configurable within 1 to 20', 
     assert.equal(loadConfig({ ...base(), DB_POOL_MAX: '8' }).dbPoolMax, 8);
     for (const bad of ['0', '21', 'many', '-1', '2.5']) assert.throws(() => loadConfig({ ...base(), DB_POOL_MAX: bad }), (e) => /DB_POOL_MAX/.test(e.message), bad);
 });
+
+test('mail sending is optional; a key without a from address is refused; the key stays out of JSON', () => {
+    const c = loadConfig(base()); assert.equal(c.secrets.resendKey, null); assert.equal(c.authMailFrom, null);
+    assert.throws(() => loadConfig({ ...base(), RESEND_API_KEY: 're_testkey12345' }), /AUTH_MAIL_FROM/);
+    const d = loadConfig({ ...base(), RESEND_API_KEY: 're_testkey12345', AUTH_MAIL_FROM: 'Vibe <login@mail.vibebuild.cc>' });
+    assert.equal(d.secrets.resendKey, 're_testkey12345'); assert.equal(d.authMailFrom, 'Vibe <login@mail.vibebuild.cc>'); assert.equal(JSON.stringify(d).includes('re_testkey'), false);
+});

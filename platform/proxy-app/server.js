@@ -5,9 +5,10 @@ import { aiChat } from '../vibe-proxy/ai.js';
 import { resolveManifest } from '../vibe-proxy/builtins.js';
 import { validateManifest } from '../vibe-proxy/manifest.js';
 import { createAdmin } from './admin.js';
+import { handleAuth, AUTH_OPS } from '../auth/routes.js';
 
 const MAX_BODY = 200_000;
-const ROUTE = /^\/([a-z0-9][a-z0-9-]{0,62})\/(api|ai)$/;
+const ROUTE = new RegExp(`^/([a-z0-9][a-z0-9-]{0,62})/(api|ai|auth/(?:${AUTH_OPS.join('|')}))$`);
 const BASE_HEADERS = { 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' };
 
 function originAllowed(origin, appId, app, baseDomain) {
@@ -26,7 +27,7 @@ async function readJson(req, max = MAX_BODY) {
     try { const v = JSON.parse(Buffer.concat(chunks).toString('utf8') || 'null'); return v && typeof v === 'object' && !Array.isArray(v) ? { value: v } : { error: 400 }; } catch { return { error: 400 }; }
 }
 
-export function createHandler({ appStore, secretStore, limiter, globalAiLimiter, meter, fetchImpl, resolve, openRouterKey, log = () => {}, baseDomain, adminToken, upsertApp, ensureApp, setEnabled, setDomains, limiterStore }) {
+export function createHandler({ authService, appStore, secretStore, limiter, globalAiLimiter, meter, fetchImpl, resolve, openRouterKey, log = () => {}, baseDomain, adminToken, upsertApp, ensureApp, setEnabled, setDomains, limiterStore }) {
     const admin = adminToken ? createAdmin({ token: adminToken, appStore, upsertApp, ensureApp, setEnabled, setDomains, secretStore, limiterStore, baseDomain }) : null;
     const aiLimiter = {
         async check(a) {
@@ -68,7 +69,7 @@ export function createHandler({ appStore, secretStore, limiter, globalAiLimiter,
             if (origin && okOrigin) headers = { ...headers, 'access-control-allow-origin': origin, vary: 'Origin' };
             if (req.method === 'OPTIONS') {
                 if (!origin || !okOrigin) return sendJson(403, { error: 'origin_not_allowed' });
-                return send(204, '', { 'access-control-allow-methods': 'POST', 'access-control-allow-headers': 'content-type', 'access-control-max-age': '600' });
+                return send(204, '', { 'access-control-allow-methods': 'POST', 'access-control-allow-headers': 'content-type, authorization', 'access-control-max-age': '600' });
             }
             if (req.method !== 'POST') return sendJson(405, { error: 'method_not_allowed' });
             if (!okOrigin) return sendJson(403, { error: 'origin_not_allowed' });
@@ -77,6 +78,13 @@ export function createHandler({ appStore, secretStore, limiter, globalAiLimiter,
             if (body.error) return sendJson(body.error, { error: body.error === 413 ? 'request_too_large' : 'bad_json' });
             const ip = req.headers['fly-client-ip'] || req.socket.remoteAddress || '';
             let result;
+            if (route.startsWith('auth/')) {
+                const gate = await limiter.check({ appId, ip });
+                if (!gate.ok) return sendJson(gate.reason === 'app_disabled' ? 403 : 429, { error: gate.reason });
+                const bearer = /^Bearer (\S+)$/.exec(String(req.headers.authorization || ''))?.[1];
+                const out = await handleAuth({ op: route.slice(5), body: body.value, bearer, ip, appId, svc: authService });
+                return sendJson(out.status, out.body);
+            }
             if (route === 'ai') {
                 result = await aiChat({ req: body.value, appId, ip, apiKey: openRouterKey, fetchImpl, limiter: aiLimiter, meter });
             } else {
