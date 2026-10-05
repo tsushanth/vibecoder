@@ -3,6 +3,7 @@ import { Buffer } from "buffer";
 import zlib from "zlib";
 import path from "path";
 import { createClient } from "@supabase/supabase-js";
+import { requireSecret } from "./requireSecret.js";
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -19,7 +20,7 @@ const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8080";
 // The custom-domain map must come from the live API. BACKEND_URL still points at an older
 // Cloud Run copy that has no such route, so it has its own setting.
 const DOMAIN_MAP_URL = process.env.DOMAIN_MAP_URL || "https://vibecoder-api.fly.dev";
-const INTERNAL_SECRET = process.env.INTERNAL_SECRET || "vibecoder-internal-secret";
+const INTERNAL_SECRET = requireSecret("INTERNAL_SECRET");
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
