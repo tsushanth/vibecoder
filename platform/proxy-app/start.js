@@ -9,6 +9,7 @@ import { createMeter } from '../vibe-proxy/meter.js';
 import { createAuthStore } from '../auth/pgStore.js';
 import { createAuthService } from '../auth/service.js';
 import { createResendMailer } from '../auth/mailer.js';
+import { createDataExecutor } from '../data/executor.js';
 import { createStorageStore } from '../storage/pgStore.js';
 import { createStorageService } from '../storage/service.js';
 import { createPayService } from '../pay/service.js';
@@ -50,7 +51,7 @@ export async function startServer(config, { pool: injected, listenPort, resolve 
     }) : undefined;
     const payService = createPayService({ secretStore: stores.secretStore, limiter, limiterStore: stores.limiterStore, orderStore: createOrderStore({ pool }), auth: authService, fetchImpl, baseDomain: config.baseDomain });
     const handler = createHandler({
-        storageService, authService, payHttp: createPayHttp({ service: payService, appStore: stores.appStore, baseDomain: config.baseDomain }),
+        dataExecutor: authService ? createDataExecutor({ pool }) : undefined, storageService, authService, payHttp: createPayHttp({ service: payService, appStore: stores.appStore, baseDomain: config.baseDomain }),
         appStore: stores.appStore, secretStore: stores.secretStore, limiter, globalAiLimiter,
         meter: createMeter({ sink: stores.usageSink }), fetchImpl, resolve,
         openRouterKey: config.secrets.openRouterKey, log, baseDomain: config.baseDomain,
