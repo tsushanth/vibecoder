@@ -6,11 +6,12 @@ import { startServer } from '../start.js';
 import { createPgStores } from '../../store/pg.js';
 import { loadConfig } from '../config.js';
 
+const ADMIN_T = 'admin-' + 'z'.repeat(40);
 let db, skip, MK;
 before(async () => { db = await scratchDb(); if (db.unavailable) skip = db.unavailable; MK = masterKey(); });
 after(async () => { if (db && !db.unavailable) await db.cleanup(); });
 const t = (n, f) => test(n, async (c) => { if (skip) return c.skip(skip); await f(c); });
-const cfg = (extra = {}) => loadConfig({ DATABASE_URL: 'postgres://unused/x', VIBE_MASTER_KEY: MK, OPENROUTER_API_KEY: 'sk-or-v1-FAKE', BASE_DOMAIN: 'vibebuild.cc', PORT: '8080', ...extra });
+const cfg = (extra = {}) => loadConfig({ DATABASE_URL: 'postgres://unused/x', VIBE_MASTER_KEY: MK, OPENROUTER_API_KEY: 'sk-or-v1-FAKE', BASE_DOMAIN: 'vibebuild.cc', PORT: '8080', PROXY_ADMIN_TOKEN: ADMIN_T, ...extra });
 const fakeFetch = (log) => async (url, init) => { log.push(String(url)); return new Response(JSON.stringify({ choices: [{ message: { content: 'ok' } }], usage: { prompt_tokens: 1, completion_tokens: 1, cost: 0.002 } }), { status: 200, headers: { 'content-type': 'application/json' } }); };
 const boot = (extra, deps = {}) => startServer(cfg(extra), { pool: db.pool, listenPort: 0, resolve: async () => ['93.184.216.34'], ...deps });
 const url = (s, p) => `http://127.0.0.1:${s.port}${p}`;
@@ -95,4 +96,14 @@ t('without a listenPort override the server binds the configured PORT', async ()
 
 t('an explicit listenPort of 0 picks a free port, not the configured one', async () => {
     const s = await boot(); assert.notEqual(s.port, 8080); await s.close();
+});
+
+t('the admin API is wired from PROXY_ADMIN_TOKEN: a secret set over HTTP is stored encrypted and usable', async () => {
+    const stores = createPgStores({ pool: db.pool, masterKey: MK }); await stores.upsertApp({ appId: 'wiredapp', enabled: true });
+    const s = await boot();
+    const put = (tok) => fetch(url(s, '/admin/apps/wiredapp/secrets/WIRED_KEY'), { method: 'PUT', headers: { 'content-type': 'application/json', authorization: `Bearer ${tok}`, 'fly-client-ip': '3.3.3.3' }, body: JSON.stringify({ value: 'WiredSecretValue123456' }) });
+    assert.equal((await put('wrong-token')).status, 401);
+    assert.equal((await put(ADMIN_T)).status, 204);
+    assert.equal(await stores.secretStore.get('wiredapp', 'WIRED_KEY'), 'WiredSecretValue123456');
+    await s.close();
 });
