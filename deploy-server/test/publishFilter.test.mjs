@@ -20,3 +20,13 @@ test("does not mutate its input and tolerates odd entries", () => {
   assert.equal(input.length, 2);
   assert.deepEqual(stripPrivateFiles([null, undefined, {}, f("index.html")]).filter((x) => x?.name).map((x) => x.name), ["index.html"]);
 });
+
+test("the table schema is not published, at the root or in any folder, in any letter case", () => {
+  const out = stripPrivateFiles([f("index.html"), f("vibe.schema.json"), f("app/vibe.schema.json"), f("VIBE.Schema.JSON"), f("a\\vibe.schema.json")]);
+  assert.deepEqual(out.map((x) => x.name), ["index.html"]);
+});
+
+test("names that merely resemble the schema file are published", () => {
+  const names = ["schema.json", "my-vibe.schema.json", "vibe.schema.json.bak", "data/vibe.schema.jsonl", "vibe-schema.json", "vibe.schemas.json", "vibe.schema.js"];
+  assert.deepEqual(stripPrivateFiles(names.map(f)).map((x) => x.name), names);
+});
