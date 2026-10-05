@@ -2,5 +2,5 @@
   "name": "vibebuild-platform",
   "private": true,
   "type": "module",
-  "scripts": { "test": "node --test --test-force-exit vibe-proxy/test/ sdk/test/" }
+  "scripts": { "test": "node --test --test-force-exit vibe-proxy/test/ sdk/test/ proxy-app/test/" }
 }
