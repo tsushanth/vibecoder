@@ -23,6 +23,7 @@ export function loadConfig(env = process.env) {
     if (!/^[0-9a-f]{64}$/i.test(masterKey)) throw new Error('invalid setting VIBE_MASTER_KEY: expected 64 hex characters (32 bytes)');
     const config = {
         port: int(env, 'PORT', 8080, { min: 1, max: 65535 }),
+        dbPoolMax: int(env, 'DB_POOL_MAX', 5, { min: 1, max: 20 }),
         baseDomain,
         limits: {
             perIpPerMin: int(env, 'PER_IP_PER_MIN', 30, { min: 1, max: 100000 }),
