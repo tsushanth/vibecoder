@@ -32,6 +32,11 @@ test('the size cap holds for the declared size and the real inflated size, and o
     assert.deepEqual(schemaFromBundle(zip([file('vibe.schema.json', big)])), { status: 'unreadable' });
     assert.deepEqual(schemaFromBundle(zip([file('vibe.schema.json', big, { claimSize: 100 })])), { status: 'unreadable' }, 'lying size field');
     assert.deepEqual(schemaFromBundle(zip([file('vibe.schema.json', big, { deflate: false, claimSize: 100 })])), { status: 'unreadable' });
+    assert.deepEqual(schemaFromBundle(zip([file('vibe.schema.json', JSON.stringify({ pad: 'x'.repeat(200000) }), { deflate: false })])), { status: 'unreadable' }, 'honest 200 KB file');
+    assert.equal(MAX_SCHEMA_BYTES, 65536);
+    const many = Array.from({ length: 5001 }, (_, i) => file(`f${i}.txt`, 'a'));
+    assert.deepEqual(schemaFromBundle(zip([...many, file('vibe.schema.json', SPEC)])), { status: 'unreadable' }, 'too many entries');
+    assert.equal(schemaFromBundle(zip([...many.slice(0, 100), file('vibe.schema.json', SPEC)])).status, 'found');
     const ok = JSON.stringify({ version: 1, pad: 'x'.repeat(30000) });
     assert.equal(schemaFromBundle(zip([file('vibe.schema.json', ok)])).status, 'found', 'a schema bigger than a manifest is allowed');
     assert.equal(schemaFromBundle(zip([file('big.bin', 'a'.repeat(5 * 1024 * 1024)), file('vibe.schema.json', SPEC)])).status, 'found');
