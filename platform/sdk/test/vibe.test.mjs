@@ -26,8 +26,8 @@ function load({ host = 'myapp.vibebuild.cc', win = {}, reply } = {}) {
 }
 const jsonRes = (status, obj, headers = {}) => new Response(JSON.stringify(obj), { status, headers: { 'content-type': 'application/json', ...headers } });
 
-test('exposes only api, ai and version', () => {
-    assert.deepEqual(Object.keys(load().vibe).sort(), ['ai', 'api', 'auth', 'version']);
+test('exposes only api, ai, auth, db and version', () => {
+    assert.deepEqual(Object.keys(load().vibe).sort(), ['ai', 'api', 'auth', 'db', 'version']);
     assert.deepEqual(Object.keys(load().vibe.ai).sort(), ['ask', 'chat']);
 });
 
@@ -222,4 +222,219 @@ test('an onChange listener can be removed and a throwing listener does not stop 
 test('without an app id (custom domain not configured) auth rejects with no_app_id and never fetches', async () => {
     const { vibe, calls } = load({ host: 'shop.example.com' });
     await assert.rejects(() => vibe.auth.signIn('a@b.com'), (e) => e.code === 'no_app_id'); assert.equal(calls.length, 0);
+});
+
+// ---- vibe.db ------------------------------------------------------------------
+const loadDb = ({ token, reply } = {}) => {
+    const ls = store();
+    if (token) ls.setItem('vibe:session:myapp', token);
+    const l = load({ win: { localStorage: ls }, reply: reply || (async () => jsonRes(200, { rows: [{ id: 'r1' }] })) });
+    return { ...l, ls };
+};
+const W = [{ col: 'id', op: 'eq', val: 'abc' }];
+
+test('db.from(t).select() with no arguments posts a bare select to the db endpoint', async () => {
+    const { vibe, calls } = loadDb();
+    assert.deepEqual(await vibe.db.from('todos').select(), { rows: [{ id: 'r1' }] });
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].url, 'https://proxy.test/myapp/db');
+    assert.equal(calls[0].init.method, 'POST');
+    assert.deepEqual(calls[0].body, { op: 'select', table: 'todos' });
+});
+
+test('db select forwards where, order, limit, offset and columns and nothing else', async () => {
+    const { vibe, calls } = loadDb();
+    const opts = { where: [{ col: 'done', op: 'eq', val: false }], order: [{ col: 'created_at', dir: 'desc' }], limit: 20, offset: 40, columns: ['id', 'title'] };
+    await vibe.db.from('todos').select(opts);
+    assert.deepEqual(calls[0].body, { op: 'select', table: 'todos', ...opts });
+    await vibe.db.from('todos').select({ limit: 0, offset: 0 });
+    assert.deepEqual(calls[1].body, { op: 'select', table: 'todos', limit: 0, offset: 0 });
+    await vibe.db.from('todos').select({});
+    assert.deepEqual(calls[2].body, { op: 'select', table: 'todos' });
+    await vibe.db.from('todos').select({ where: [] });
+    assert.deepEqual(calls[3].body, { op: 'select', table: 'todos', where: [] });
+    await vibe.db.from('todos').select({ order: [] });
+    assert.deepEqual(calls[4].body, { op: 'select', table: 'todos', order: [] });
+});
+
+test('db insert wraps one row in an array and passes arrays through', async () => {
+    const { vibe, calls } = loadDb();
+    await vibe.db.from('todos').insert({ title: 'a' });
+    assert.deepEqual(calls[0].body, { op: 'insert', table: 'todos', rows: [{ title: 'a' }] });
+    await vibe.db.from('todos').insert([{ title: 'a' }, { title: 'b' }]);
+    assert.deepEqual(calls[1].body, { op: 'insert', table: 'todos', rows: [{ title: 'a' }, { title: 'b' }] });
+    await vibe.db.from('todos').insert(Array.from({ length: 50 }, () => ({ title: 'x' })));
+    assert.equal(calls[2].body.rows.length, 50);
+});
+
+test('db update sends set and the required where; delete sends where', async () => {
+    const { vibe, calls } = loadDb();
+    await vibe.db.from('todos').update({ done: true }, W);
+    assert.deepEqual(calls[0].body, { op: 'update', table: 'todos', set: { done: true }, where: W });
+    await vibe.db.from('todos').delete(W);
+    assert.deepEqual(calls[1].body, { op: 'delete', table: 'todos', where: W });
+});
+
+test('db calls use the table they were created with and each builder is independent', async () => {
+    const { vibe, calls } = loadDb();
+    const a = vibe.db.from('todos');
+    const b = vibe.db.from('notes');
+    await a.select(); await b.select(); await a.delete(W);
+    assert.deepEqual(calls.map((c) => c.body.table), ['todos', 'notes', 'todos']);
+});
+
+test('db calls send the stored session token as a bearer, and none when signed out', async () => {
+    const out = loadDb();
+    await out.vibe.db.from('todos').select();
+    assert.deepEqual(Object.keys(out.calls[0].init.headers), ['Content-Type']);
+    const inn = loadDb({ token: 'tok-7' });
+    await inn.vibe.db.from('todos').select();
+    await inn.vibe.db.from('todos').insert({ a: 1 });
+    await inn.vibe.db.from('todos').update({ a: 1 }, W);
+    await inn.vibe.db.from('todos').delete(W);
+    assert.equal(inn.calls.length, 4);
+    for (const c of inn.calls) assert.equal(c.init.headers.Authorization, 'Bearer tok-7');
+});
+
+test('db picks up a token stored after load and stops sending it after sign-out', async () => {
+    const { vibe, calls, ls } = loadDb();
+    await vibe.db.from('todos').select();
+    ls.setItem('vibe:session:myapp', 'late');
+    await vibe.db.from('todos').select();
+    await vibe.auth.signOut();
+    await vibe.db.from('todos').select();
+    const dbCalls = calls.filter((c) => c.url.endsWith('/db'));
+    assert.equal(dbCalls[0].init.headers.Authorization, undefined);
+    assert.equal(dbCalls[1].init.headers.Authorization, 'Bearer late');
+    assert.equal(dbCalls[2].init.headers.Authorization, undefined);
+});
+
+test('db never lets the caller send a user id, headers or keys', async () => {
+    const { vibe, calls } = loadDb({ token: 't' });
+    await assert.rejects(() => vibe.db.from('todos').select({ user_id: 'u', headers: { a: 1 } }), (e) => e.code === 'bad_request');
+    await vibe.db.from('todos').insert({ title: 'x' });
+    assert.deepEqual(Object.keys(calls[0].body).sort(), ['op', 'rows', 'table']);
+    assert.deepEqual(Object.keys(calls[0].init.headers).sort(), ['Authorization', 'Content-Type']);
+});
+
+test('db errors from the server reject with status, code and retryAfter', async () => {
+    const { vibe } = loadDb({ reply: async () => jsonRes(403, { error: 'forbidden' }) });
+    await assert.rejects(() => vibe.db.from('todos').select(), (e) => e instanceof Error && e.status === 403 && e.code === 'forbidden');
+    await assert.rejects(() => vibe.db.from('todos').insert({ a: 1 }), (e) => e.status === 403);
+    await assert.rejects(() => vibe.db.from('todos').update({ a: 1 }, W), (e) => e.status === 403);
+    await assert.rejects(() => vibe.db.from('todos').delete(W), (e) => e.status === 403);
+    const rl = loadDb({ reply: async () => jsonRes(429, { error: 'rate_limited_ip' }, { 'retry-after': '9' }) });
+    await assert.rejects(() => rl.vibe.db.from('t').select(), (e) => e.status === 429 && e.code === 'rate_limited_ip' && e.retryAfter === 9);
+    const net = loadDb({ reply: 'network' });
+    await assert.rejects(() => net.vibe.db.from('t').select(), (e) => e.status === 0 && e.code === 'network');
+});
+
+test('db does not clear the session on 401 (only auth.user does)', async () => {
+    const { vibe, ls } = loadDb({ token: 'keep', reply: async () => jsonRes(401, { error: 'unauthenticated' }) });
+    await assert.rejects(() => vibe.db.from('todos').select(), (e) => e.status === 401 && e.code === 'unauthenticated');
+    assert.equal(ls.getItem('vibe:session:myapp'), 'keep');
+});
+
+test('db with no app id rejects with no_app_id and never fetches', async () => {
+    const { vibe, calls } = load({ host: 'shop.example.com' });
+    await assert.rejects(() => vibe.db.from('todos').select(), (e) => e.code === 'no_app_id');
+    assert.equal(calls.length, 0);
+});
+
+test('db rejects bad arguments locally with bad_request and makes no request', async () => {
+    const { vibe, calls } = loadDb({ token: 't' });
+    const t = vibe.db.from('todos');
+    const cases = [
+        () => vibe.db.from().select(),
+        () => vibe.db.from('').select(),
+        () => vibe.db.from(5).select(),
+        () => vibe.db.from('Todos').select(),
+        () => vibe.db.from('to-dos').select(),
+        () => vibe.db.from('todos; drop').select(),
+        () => vibe.db.from('1todos').select(),
+        () => vibe.db.from('a'.repeat(42)).select(),
+        () => vibe.db.from(null).insert({ a: 1 }),
+        () => vibe.db.from('x y').update({ a: 1 }, W),
+        () => vibe.db.from('x y').delete(W),
+        () => t.select('where'),
+        () => t.select(5),
+        () => t.select([]),
+        () => t.select({ filter: [] }),
+        () => t.select({ where: 'x' }),
+        () => t.select({ where: {} }),
+        () => t.select({ where: ['x'] }),
+        () => t.select({ where: [null] }),
+        () => t.select({ where: [[]] }),
+        () => t.select({ order: 'x' }),
+        () => t.select({ order: ['title'] }),
+        () => t.select({ order: [null] }),
+        () => t.select({ limit: '5' }),
+        () => t.select({ offset: '5' }),
+        () => t.select({ columns: 'id' }),
+        () => t.select({ columns: [] }),
+        () => t.insert(),
+        () => t.insert(null),
+        () => t.insert('x'),
+        () => t.insert(5),
+        () => t.insert([]),
+        () => t.insert(['x']),
+        () => t.insert([{ a: 1 }, null]),
+        () => t.insert([[]]),
+        () => t.insert(Array.from({ length: 51 }, () => ({ a: 1 }))),
+        () => t.update(),
+        () => t.update({ a: 1 }),
+        () => t.update({ a: 1 }, []),
+        () => t.update({ a: 1 }, {}),
+        () => t.update({ a: 1 }, 'x'),
+        () => t.update({ a: 1 }, ['x']),
+        () => t.update({}, W),
+        () => t.update(null, W),
+        () => t.update([], W),
+        () => t.update('x', W),
+        () => t.delete(),
+        () => t.delete([]),
+        () => t.delete({}),
+        () => t.delete('id'),
+        () => t.delete(['x']),
+    ];
+    for (let i = 0; i < cases.length; i++) {
+        const p = cases[i]();
+        assert.ok(p instanceof Promise, 'case ' + i + ' must return a Promise, not throw');
+        await assert.rejects(() => p, (e) => e instanceof Error && e.code === 'bad_request' && e.status === 0, 'case ' + i);
+    }
+    assert.equal(calls.length, 0);
+});
+
+test('db argument errors name the problem for the app author', async () => {
+    const { vibe } = loadDb();
+    await assert.rejects(() => vibe.db.from('Bad').select(), /table/i);
+    await assert.rejects(() => vibe.db.from('t').update({ a: 1 }, []), /where/i);
+    await assert.rejects(() => vibe.db.from('t').delete([]), /where/i);
+    await assert.rejects(() => vibe.db.from('t').update({}, W), /set/i);
+    await assert.rejects(() => vibe.db.from('t').insert([]), /row/i);
+    await assert.rejects(() => vibe.db.from('t').select({ nope: 1 }), /nope/);
+    await assert.rejects(() => vibe.db.from('t').select({ limit: 'x' }), /limit/i);
+    await assert.rejects(() => vibe.db.from('t').select({ offset: 'x' }), /offset/i);
+    await assert.rejects(() => vibe.db.from('t').select({ columns: [] }), /columns/i);
+    await assert.rejects(() => vibe.db.from('t').select({ order: 'x' }), /order/i);
+    await assert.rejects(() => vibe.db.from('t').select({ where: 'x' }), /where/i);
+    await assert.rejects(() => vibe.db.from('t').select('x'), /options/i);
+});
+
+test('db accepts a 41 char table name and rejects 42', async () => {
+    const { vibe, calls } = loadDb();
+    await vibe.db.from('a' + 'b'.repeat(40)).select();
+    assert.equal(calls.length, 1);
+    await assert.rejects(() => vibe.db.from('a' + 'b'.repeat(41)).select(), (e) => e.code === 'bad_request');
+});
+
+test('only db.from is exposed under vibe.db', () => {
+    assert.deepEqual(Object.keys(load().vibe.db), ['from']);
+    assert.deepEqual(Object.keys(load().vibe.db.from('t')).sort(), ['delete', 'insert', 'select', 'update']);
+});
+
+test('db insert of an empty row is allowed (all defaults) and is sent as one row', async () => {
+    const { vibe, calls } = loadDb();
+    await vibe.db.from('todos').insert({});
+    assert.deepEqual(calls[0].body, { op: 'insert', table: 'todos', rows: [{}] });
 });
