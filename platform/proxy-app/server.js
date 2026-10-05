@@ -41,7 +41,7 @@ export async function readRaw(req, max) {
     return size > max ? { error: 413 } : { value: Buffer.concat(chunks) };
 }
 
-export function createHandler({ dataExecutor, storageService, authService, appStore, secretStore, limiter, globalAiLimiter, meter, fetchImpl, resolve, openRouterKey, log = () => {}, baseDomain, adminToken, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, limiterStore, payHttp, jobsAdmin }) {
+export function createHandler({ dataExecutor, storageService, authService, appStore, secretStore, limiter, globalAiLimiter, meter, fetchImpl, resolve, openRouterKey, log = () => {}, baseDomain, adminToken, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, limiterStore, payHttp, notifyHttp, jobsAdmin }) {
     const admin = adminToken ? createAdmin({ token: adminToken, jobsAdmin, appStore, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, secretStore, limiterStore, baseDomain, dataExecutor }) : null;
     const aiLimiter = {
         async check(a) {
@@ -72,6 +72,10 @@ export function createHandler({ dataExecutor, storageService, authService, appSt
                 const ip = req.headers['fly-client-ip'] || req.socket.remoteAddress || '';
                 const out = await admin({ method: req.method, pathname: url.pathname, headers: req.headers, ip, readBody: (limit) => readJson(req, limit) });
                 return out.body === undefined ? send(out.status, '') : sendJson(out.status, out.body);
+            }
+            if (notifyHttp) { // end-user notifications (platform/notify): answers null for any other path
+                const nout = await notifyHttp.handle(req, url, req.headers['fly-client-ip'] || req.socket.remoteAddress || '');
+                if (nout) { appId = nout.appId; route = 'notify'; headers = { ...headers, ...nout.headers }; return send(nout.status, nout.body); }
             }
             const pm = payHttp ? PAY_ROUTE.exec(url.pathname) : null; // creator-keyed Stripe checkout: /<app>/pay/{checkout,orders,webhook}
             if (pm) {
