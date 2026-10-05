@@ -9,8 +9,9 @@ const tee = { id: 'tee', name: 'T-shirt', amountCents: 2500, currency: 'usd', mo
 const pro = { id: 'pro', name: 'Pro plan', amountCents: 900, currency: 'usd', mode: 'subscription', interval: 'month' };
 const mug = { id: 'mug', name: 'Mug', amountCents: 1200, currency: 'usd', mode: 'payment', maxQuantity: 5 };
 const man = (catalog, extra = {}) => JSON.stringify({ pay: { catalog }, ...extra });
-const CHECK = 'vibe.pay.checkout({ item: "tee" }).catch(function (e) { show(e.code); });';
-const store = (js = CHECK, catalog = [tee, pro, mug], more = {}) => ({ 'index.html': page(js), [MANIFEST_FILE]: man(catalog), ...more });
+const CHECK = 'vibe.pay.checkout({ item: "tee" }).catch(function (e) { show(e.status === 424 ? "The app owner still needs to add Stripe keys" : e.code); });';
+const ERR424 = ' function onErr(e) { if (e.status === 424) show("The app owner still needs to add Stripe keys"); }';
+const store = (js = CHECK, catalog = [tee, pro, mug], more = {}) => ({ 'index.html': page(js + ERR424), [MANIFEST_FILE]: man(catalog), ...more });
 const one = (files, re) => {
     const p = vibeProblems(files, { enabled: true });
     assert.equal(p.length, 1, p.join(' | '));
@@ -170,6 +171,14 @@ test('card detail inputs matched anywhere in the name, id or placeholder, includ
         const f = store(CHECK); f['index.html'] = page(CHECK, '<script src="vibe.js"></script>', input);
         one(f, /never ask for (?:a )?card/i);
     }
+});
+test('a checkout that never handles the missing-Stripe-keys error (424 / stripe_key_missing) is a problem', () => {
+    const bare = { 'index.html': page('vibe.pay.checkout({ item: "tee" }).catch(function (e) { show(e.code); });'), [MANIFEST_FILE]: man([tee]) };
+    one(bare, /never handles the error when the owner has not added Stripe keys.*424/s);
+    for (const handled of ['if (e.status === 424) show("x");', 'if (e.code === "stripe_key_missing") show("x");']) {
+        assert.deepEqual(vibeProblems({ 'index.html': page(`vibe.pay.checkout({ item: "tee" }).catch(function (e) { ${handled} });`), [MANIFEST_FILE]: man([tee]) }, { enabled: true }), []);
+    }
+    assert.equal(vibeProblems({ 'index.html': page('vibe.pay.checkout({ item: "tee" }).catch(function (e) { show(e.status === 4240 ? 1 : 2); });'), [MANIFEST_FILE]: man([tee]) }, { enabled: true }).length, 1, '4240 is not 424');
 });
 test('card number inputs are a problem: the page never asks for card details', () => {
     for (const input of ['<input autocomplete="cc-number">', '<input name="cardNumber">', '<input id="card-number">', '<input placeholder="Card number">', '<input name="cvv">', '<input name="cvc" type="text">', '<input autocomplete="cc-exp">']) {
