@@ -54,11 +54,11 @@ test('problems are capped at ten lines', () => {
 
 // ---- reading vibe.db calls
 test('scanDbUse finds literal tables, filter and order columns and written columns', () => {
-    const js = `vibe.db.from("todos").select({ where: [{ col: 'done', op: '=', val: false }], order: [{ col: "created_at", dir: 'desc' }], limit: 5 });
+    const js = `vibe.db.from("todos").select({ where: [{ col: 'done', op: 'eq', val: false }], order: [{ col: "created_at", dir: 'desc' }], limit: 5 });
       vibe.db.from('todos').insert({ title: t, "done": false });
       vibe.db.from('todos').insert([{ title: 'a' }, { title: 'b', due: 1 }]);
-      vibe.db.from('todos').update({ done: true }, [{ col: 'id', op: '=', val: id }]);
-      vibe.db.from('notes').delete([{ col: 'owner_name', op: '=', val: 1 }]);`;
+      vibe.db.from('todos').update({ done: true }, [{ col: 'id', op: 'eq', val: id }]);
+      vibe.db.from('notes').delete([{ col: 'owner_name', op: 'eq', val: 1 }]);`;
     const { calls, nonLiteral, used } = scanDbUse({ 'index.html': page(js) });
     assert.equal(used, true); assert.equal(nonLiteral, false);
     assert.deepEqual(calls.map((c) => c.table), ['todos', 'todos', 'todos', 'todos', 'notes']);
@@ -82,7 +82,7 @@ test('scanDbUse flags a table name that is not a string literal, and ignores vib
     assert.equal(r.used, false); assert.equal(r.nonLiteral, false); assert.deepEqual(r.calls, []);
 });
 test('scanDbUse reads calls in separate js files and follows a method chain', () => {
-    const { calls } = scanDbUse({ 'js/app.js': 'vibe.db\n  .from("todos")\n  .select({ where: [{ col: "done", op: "=", val: 1 }] })\n  .then(render);' });
+    const { calls } = scanDbUse({ 'js/app.js': 'vibe.db\n  .from("todos")\n  .select({ where: [{ col: "done", op: "eq", val: 1 }] })\n  .then(render);' });
     assert.equal(calls.length, 1); assert.deepEqual(calls[0].reads, ['done']); assert.deepEqual(calls[0].ops, ['select', 'then']);
 });
 
@@ -98,7 +98,7 @@ test('scanDbUse handles escaped quotes in strings, unbalanced code, .mjs files a
 
 // ---- problems for the fix pass
 test('a consistent app has no schema problems', () => {
-    const js = 'vibe.db.from("todos").select({ where: [{ col: "done", op: "=", val: false }], order: [{ col: "created_at", dir: "desc" }] }); vibe.db.from("todos").insert({ title: "x" }); vibe.db.from("todos").update({ done: true }, [{ col: "id", op: "=", val: 1 }]); vibe.db.from("todos").delete([{ col: "id", op: "=", val: 1 }]);';
+    const js = 'vibe.db.from("todos").select({ where: [{ col: "done", op: "eq", val: false }], order: [{ col: "created_at", dir: "desc" }] }); vibe.db.from("todos").insert({ title: "x" }); vibe.db.from("todos").update({ done: true }, [{ col: "id", op: "eq", val: 1 }]); vibe.db.from("todos").delete([{ col: "id", op: "eq", val: 1 }]);';
     assert.deepEqual(schemaProblems(app(js)), []);
 });
 test('an app with neither vibe.db nor a schema has no problems', () => {
@@ -127,19 +127,19 @@ test('an undeclared table is reported with the declared ones, once per table', (
     assert.equal(hits.length, 1); assert.match(hits[0], /declared: "todos"/);
 });
 test('an undeclared column in a filter, an order, an insert and an update is reported', () => {
-    const js = 'vibe.db.from("todos").select({ where: [{ col: "priority", op: "=", val: 1 }] }); vibe.db.from("todos").select({ order: [{ col: "rank", dir: "asc" }] }); vibe.db.from("todos").insert({ title: "x", colour: "red" }); vibe.db.from("todos").update({ owner: 1 }, [{ col: "id", op: "=", val: 1 }]);';
+    const js = 'vibe.db.from("todos").select({ where: [{ col: "priority", op: "eq", val: 1 }] }); vibe.db.from("todos").select({ order: [{ col: "rank", dir: "asc" }] }); vibe.db.from("todos").insert({ title: "x", colour: "red" }); vibe.db.from("todos").update({ owner: 1 }, [{ col: "id", op: "eq", val: 1 }]);';
     const p = names(schemaProblems(app(js)));
     for (const c of ['priority', 'rank', 'colour', 'owner']) assert.match(p, new RegExp(`"${c}"`));
 });
 test('filtering or ordering by the implicit columns is allowed', () => {
-    const js = 'vibe.db.from("todos").select({ where: [{ col: "id", op: "=", val: 1 }, { col: "created_at", op: ">", val: 0 }, { col: "user_id", op: "=", val: 1 }], order: [{ col: "created_at", dir: "desc" }] });';
+    const js = 'vibe.db.from("todos").select({ where: [{ col: "id", op: "eq", val: 1 }, { col: "created_at", op: "gt", val: 0 }, { col: "user_id", op: "eq", val: 1 }], order: [{ col: "created_at", dir: "desc" }] });';
     assert.deepEqual(schemaProblems(app(js)), []);
 });
 test('writing id, user_id or created_at in an insert or update is a problem', () => {
     for (const k of ['id', 'user_id', 'created_at']) {
         const ins = schemaProblems(app(`vibe.db.from("todos").insert({ title: "x", ${k}: 1 })`));
         assert.ok(ins.some((x) => new RegExp(`writes "${k}"`).test(x) && /set by the platform/.test(x)), names(ins));
-        const upd = schemaProblems(app(`vibe.db.from("todos").update({ ${k}: 1 }, [{ col: "id", op: "=", val: 1 }])`));
+        const upd = schemaProblems(app(`vibe.db.from("todos").update({ ${k}: 1 }, [{ col: "id", op: "eq", val: 1 }])`));
         assert.ok(upd.some((x) => new RegExp(`writes "${k}"`).test(x)), names(upd));
     }
 });
@@ -230,6 +230,7 @@ test('the rules teach the SDK surface, the schema format and the key constraints
     assert.match(VIBE_RULES, /NEVER declare them/); assert.match(VIBE_RULES, /NEVER put user_id/);
     assert.match(VIBE_RULES, /await vibe\.auth\.ready/); assert.match(VIBE_RULES, /401/);
     assert.match(VIBE_RULES, /"owner" \(the DEFAULT:/); assert.match(VIBE_RULES, /table name must be a string literal that exists in vibe\.schema\.json/);
+    assert.match(VIBE_RULES, /"eq", "neq", "lt", "lte", "gt", "gte", "like", "ilike", "in"/); assert.match(VIBE_RULES, /\{ rows, count \}/); assert.match(VIBE_RULES, /REQUIRED/);
     assert.match(VIBE_RULES, /WHEN NOT TO/); assert.match(VIBE_RULES, /purely local app/);
 });
 test('the example schema in the rules is itself valid and uses the documented defaults', () => {
