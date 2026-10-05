@@ -18,6 +18,7 @@
  *   and cannot be written. Who may read or write a table follows its access rule; signed-in calls send the session automatically.
  *   vibe.storage.upload(file, {public}) / list() / url(id) / remove(id)   -> files for signed-in users (5 MB; images, pdf, mp3, text)
  *   vibe.pay.checkout({item:'pro', quantity:1}) -> redirects to Stripe Checkout; vibe.pay.orders() -> the signed-in user's orders
+ *   vibe.notify.me({subject, text}) -> emails the signed-in user themself (never anyone else), rate-limited
  * All calls return Promises. Errors reject with Error: err.status (0 = network/timeout), err.code, err.retryAfter (seconds).
  * Keys never live in the app: the platform adds them server-side. Only connectors declared in the app manifest or built in work.
  * Config for custom domains: window.VIBE_APP_ID, window.VIBE_BASE, window.VIBE_TIMEOUT_MS.
@@ -290,5 +291,19 @@
   }
   var storage = { upload: stUpload, list: stList, url: stUrl, remove: stRemove };
 
-  window.vibe = { version: '1', api: api, ai: { chat: chat, ask: ask }, auth: { signIn: signIn, user: user, signOut: signOut, onChange: onChange, ready: ready }, db: { from: from }, pay: pay, storage: storage };
+  function notifyMe(o) {
+    return Promise.resolve().then(function () {
+      if (!o || typeof o !== 'object' || typeof o.subject !== 'string' || !o.subject.trim() || typeof o.text !== 'string' || !o.text.trim()) {
+        throw fail('vibe.notify.me({subject, text}): subject and text must be non-empty strings', 0, 'bad_request');
+      }
+      var t = getToken();
+      if (!t) throw fail('vibe.notify.me: the user must be signed in', 401, 'unauthorized');
+      return post('notify/me', { subject: o.subject, text: o.text }, t).then(function (r) { return { ok: true }; }, function (e) {
+        if (e && e.status === 401) setToken(null);
+        throw e;
+      });
+    });
+  }
+  var notifyApi = { me: notifyMe };
+  window.vibe = { version: '1', api: api, ai: { chat: chat, ask: ask }, auth: { signIn: signIn, user: user, signOut: signOut, onChange: onChange, ready: ready }, db: { from: from }, pay: pay, storage: storage, notify: notifyApi };
 })();
