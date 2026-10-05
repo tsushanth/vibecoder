@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.kreativekoala.vibecoder.data.remote.AccessTokenProvider
 import com.kreativekoala.vibecoder.data.remote.AuthInterceptor
 import com.kreativekoala.vibecoder.data.remote.VibeBuildApi
 import com.kreativekoala.vibecoder.util.Constants
@@ -51,9 +52,15 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideAccessTokenProvider(supabase: SupabaseClient): AccessTokenProvider =
+        com.kreativekoala.vibecoder.data.remote.SupabaseAccessTokenProvider(supabase)
+
+    @Provides
+    @Singleton
     fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.HEADERS
+            redactHeader("Authorization")
         }
 
         return OkHttpClient.Builder()

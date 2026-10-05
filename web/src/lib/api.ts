@@ -1,4 +1,5 @@
 import { API_URL } from './constants';
+import { withAuth } from './authHeader';
 
 class ApiClient {
   private baseUrl: string;
@@ -8,7 +9,7 @@ class ApiClient {
   }
 
   async get<T>(path: string): Promise<T> {
-    const res = await fetch(`${this.baseUrl}${path}`);
+    const res = await fetch(`${this.baseUrl}${path}`, { headers: await withAuth({}) });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
       throw new ApiError(err.error || `HTTP ${res.status}`, res.status, err);
@@ -19,7 +20,7 @@ class ApiClient {
   async post<T>(path: string, body?: Record<string, unknown>): Promise<T> {
     const res = await fetch(`${this.baseUrl}${path}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await withAuth({ 'Content-Type': 'application/json' }),
       body: body ? JSON.stringify(body) : undefined,
     });
     if (!res.ok) {
@@ -32,7 +33,7 @@ class ApiClient {
   async delete<T>(path: string, body?: Record<string, unknown>): Promise<T> {
     const res = await fetch(`${this.baseUrl}${path}`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await withAuth({ 'Content-Type': 'application/json' }),
       body: body ? JSON.stringify(body) : undefined,
     });
     if (!res.ok) {

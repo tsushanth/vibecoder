@@ -23,9 +23,10 @@ class VibeBuildApiIntegrationTest {
     private lateinit var server: MockWebServer
     private lateinit var api: VibeBuildApi
     private val gson = AppModule.provideGson()
+    private var testToken: String? = null
 
     private fun buildApi(readTimeoutMs: Long? = null): VibeBuildApi {
-        var client: OkHttpClient = AppModule.provideOkHttpClient(AuthInterceptor())
+        var client: OkHttpClient = AppModule.provideOkHttpClient(AuthInterceptor(object : AccessTokenProvider { override fun tokenFor(host: String): String? = testToken }))
         if (readTimeoutMs != null) client = client.newBuilder().readTimeout(readTimeoutMs, TimeUnit.MILLISECONDS)
             .retryOnConnectionFailure(false).build()
         return AppModule.provideRetrofit(client, gson).newBuilder().baseUrl(server.url("/")).build()
@@ -41,6 +42,23 @@ class VibeBuildApiIntegrationTest {
 
     private fun json(body: String, code: Int = 200) =
         MockResponse().setResponseCode(code).setHeader("Content-Type", "application/json").setBody(body)
+
+    @Test fun sends_bearer_token_when_signed_in_and_none_when_signed_out() = runBlocking {
+        val body = """{"success":true,"status":"building","phase":"Polish","percent":71.0,"events":[]}"""
+        testToken = "tok-123"
+        server.enqueue(json(body)); api.getProgress("abc")
+        assertEquals("Bearer tok-123", server.takeRequest().getHeader("Authorization"))
+        testToken = null
+        server.enqueue(json(body)); api.getProgress("abc")
+        assertEquals(null, server.takeRequest().getHeader("Authorization"))
+    }
+
+    @Test fun token_policy_only_matches_our_api_host() {
+        assertEquals(true, SupabaseAccessTokenProvider.isApiHost("vibecoder-api.fly.dev"))
+        assertEquals(true, SupabaseAccessTokenProvider.isApiHost("VIBECODER-API.FLY.DEV"))
+        assertEquals(false, SupabaseAccessTokenProvider.isApiHost("evil.example.com"))
+        assertEquals(false, SupabaseAccessTokenProvider.isApiHost("vibecoder-api.fly.dev.evil.com"))
+    }
 
     @Test fun progress_parses_and_sends_platform_header() = runBlocking {
         server.enqueue(json("""{"success":true,"status":"building","phase":"Polish","percent":71.0,"events":[{"message":"m"}]}"""))

@@ -1,4 +1,5 @@
 import { API_URL } from './constants';
+import { withAuth } from './authHeader';
 import type { SSEEvent } from '@/types/sse';
 
 export async function* streamSSE(
@@ -10,7 +11,7 @@ export async function* streamSSE(
 
   const response = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: await withAuth({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body),
     signal,
   });
