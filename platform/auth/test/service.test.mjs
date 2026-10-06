@@ -135,3 +135,11 @@ t('a correctly signed token that pairs one session with another user is refused'
     const forged = signToken({ key: deriveAppKey(MASTER, 'app-a'), appId: 'app-a', sub: b.user.id, jti: jtiA, now: clock });
     assert.deepEqual(await svc.verifySession({ appId: 'app-a', token: forged }), { ok: false, reason: 'revoked' });
 });
+
+t('limitsFor.emailsPerDay overrides the per-app daily email cap', async () => {
+    await stores.upsertApp({ appId: 'app-lim', enabled: true, manifest: null });
+    const s = createAuthService({ store: createAuthStore({ pool: db.pool }), limiterStore: stores.limiterStore, mailer, linkFor: (a, tk) => `https://${a}.vibebuild.cc/?vibe_login=${tk}`, masterKey: MASTER, now: () => clock, limits: { perEmailPerHour: 100, perIpPerHour: 100, perAppPerDay: 100 }, limitsFor: async () => ({ emailsPerDay: 2 }) });
+    for (const i of [1, 2]) assert.equal((await s.requestLink({ appId: 'app-lim', email: `cap${i}@example.com`, ip: '3.3.3.3' })).ok, true);
+    assert.deepEqual(await s.requestLink({ appId: 'app-lim', email: 'cap3@example.com', ip: '3.3.3.3' }), { ok: false, reason: 'rate_limited' });
+    assert.equal(sent.length, 2);
+});

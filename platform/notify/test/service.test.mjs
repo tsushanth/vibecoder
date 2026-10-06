@@ -220,3 +220,13 @@ test('construction validates its inputs', () => {
     assert.throws(() => createNotifyService({ ...base, baseUrl: undefined }));
     assert.throws(() => createNotifyService({ ...base, masterKey: 'short' }));
 });
+
+test('limitsFor.emailsPerDay overrides the per-app daily cap', async () => {
+    const r = rig({ limits: { perUserPerHour: 100, perUserPerDay: 100 }, });
+    const s2 = createNotifyService({ store: r.store, limiterStore: r.limiterStore, mailer: r.mailer, appStore: r.appStore, masterKey: MK, baseUrl: 'https://vibe-proxy.test', now: () => T0, limits: { perUserPerHour: 100, perUserPerDay: 100 }, limitsFor: async () => ({ emailsPerDay: 2 }) });
+    assert.equal((await s2.sendToUser({ appId: 'app-a', userId: r.u1, subject: 's', text: 'one' })).ok, true);
+    assert.equal((await s2.sendToUser({ appId: 'app-a', userId: r.u2, subject: 's', text: 'two' })).ok, true);
+    const third = await s2.sendToUser({ appId: 'app-a', userId: r.u3, subject: 's', text: 'three' });
+    assert.equal(third.ok, false); assert.equal(third.reason, 'rate_limited');
+    assert.equal(r.sent.length, 2);
+});

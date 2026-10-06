@@ -10,7 +10,7 @@ const APP_ID = /^[a-z0-9][a-z0-9-]{0,62}$/;
 const DAY_TTL = 26 * 3600;
 export const DEFAULT_LIMITS = { perUserPerHour: 3, perUserPerDay: 10, perAppPerDay: 200, globalPerDay: 2000 };
 
-export function createNotifyService({ store, limiterStore, mailer, appStore, masterKey, baseUrl, now = () => Date.now(), limits = {} }) {
+export function createNotifyService({ store, limiterStore, mailer, appStore, masterKey, baseUrl, now = () => Date.now(), limits = {}, limitsFor }) {
     if (typeof masterKey !== 'string' || !/^[0-9a-f]{64}$/i.test(masterKey)) throw new Error('notify needs a 64 hex character master key');
     if (typeof baseUrl !== 'string' || !/^https:\/\/[^\s/]+(\/[^\s]*)?$/.test(baseUrl)) throw new Error('notify needs an https base url');
     const base = baseUrl.replace(/\/+$/, '');
@@ -37,9 +37,11 @@ export function createNotifyService({ store, limiterStore, mailer, appStore, mas
             if (!rcpt) return { ok: false, reason: 'unknown_user' };
             if (rcpt.optedOut) return { ok: false, reason: 'opted_out' };
             try {
+                const o = limitsFor ? await limitsFor(appId) : null; // per-app override of the emails-per-day cap
+                const appCap = Number.isInteger(o?.emailsPerDay) ? o.emailsPerDay : L.perAppPerDay;
                 if ((await limiterStore.incr(`notify:uh:${appId}:${userId}:${hour()}`, 7200)) > L.perUserPerHour) return limited(untilNextHour());
                 if ((await limiterStore.incr(`notify:ud:${appId}:${userId}:${day()}`, DAY_TTL)) > L.perUserPerDay) return limited(untilNextDay());
-                if ((await limiterStore.incr(`notify:app:${appId}:${day()}`, DAY_TTL)) > L.perAppPerDay) return limited(untilNextDay());
+                if ((await limiterStore.incr(`notify:app:${appId}:${day()}`, DAY_TTL)) > appCap) return limited(untilNextDay());
                 if ((await limiterStore.incr(`notify:global:${day()}`, DAY_TTL)) > L.globalPerDay) return limited(untilNextDay());
             } catch { return { ok: false, reason: 'unavailable' }; }
             const token = signUnsubscribe({ masterKey, appId, userId });

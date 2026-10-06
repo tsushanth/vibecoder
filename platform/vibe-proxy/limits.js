@@ -15,7 +15,7 @@ export function memoryStore({ now = () => Date.now() } = {}) {
 
 const DAY_TTL = 26 * 3600;
 
-export function createLimiter({ store, now = () => Date.now(), perIpPerMin = 30, perAppPerMin = 120, dailyCalls = 5000, dailySpendMicros = 2_000_000 }) {
+export function createLimiter({ store, now = () => Date.now(), perIpPerMin = 30, perAppPerMin = 120, dailyCalls = 5000, dailySpendMicros = 2_000_000, limitsFor }) {
     const deny = (reason, retryAfterSec) => ({ ok: false, reason, retryAfterSec });
     const minute = () => Math.floor(now() / 60_000);
     const day = () => new Date(now()).toISOString().slice(0, 10);
@@ -26,11 +26,15 @@ export function createLimiter({ store, now = () => Date.now(), perIpPerMin = 30,
         async check({ appId, ip }) {
             if (!appId || !ip) return deny('bad_request', 0);
             try {
+                // optional per-app overrides (platform.app_limits); the resolver falls back to the defaults, so the caps stay on if it fails
+                const o = limitsFor ? await limitsFor(appId) : null;
+                const callCap = Number.isInteger(o?.dailyCalls) ? o.dailyCalls : dailyCalls;
+                const spendCap = Number.isInteger(o?.dailySpendMicros) ? o.dailySpendMicros : dailySpendMicros;
                 if (await store.get(`kill:${appId}`)) return deny('app_disabled', 0);
                 if ((await store.incr(`ip:${appId}:${ip}:${minute()}`, 120)) > perIpPerMin) return deny('rate_limited_ip', untilNextMinute());
                 if ((await store.incr(`app:${appId}:${minute()}`, 120)) > perAppPerMin) return deny('rate_limited_app', untilNextMinute());
-                if ((await store.incr(`calls:${appId}:${day()}`, DAY_TTL)) > dailyCalls) return deny('daily_call_cap', untilNextDay());
-                if ((await store.get(`spend:${appId}:${day()}`)) >= dailySpendMicros) return deny('spend_cap', untilNextDay());
+                if ((await store.incr(`calls:${appId}:${day()}`, DAY_TTL)) > callCap) return deny('daily_call_cap', untilNextDay());
+                if ((await store.get(`spend:${appId}:${day()}`)) >= spendCap) return deny('spend_cap', untilNextDay());
                 return { ok: true };
             } catch {
                 return deny('limiter_unavailable', 30);

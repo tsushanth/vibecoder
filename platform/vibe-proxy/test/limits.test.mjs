@@ -88,3 +88,34 @@ test('a missing app id or ip is refused rather than shared into one bucket', asy
     assert.equal((await limiter.check({ appId: '', ip: '1.1.1.1' })).ok, false);
     assert.equal((await limiter.check({ appId: 'a', ip: '' })).ok, false);
 });
+
+test('limitsFor overrides the daily call cap per app, and other apps keep the default', async () => {
+    const { limiter } = setup({ perIpPerMin: 100, perAppPerMin: 100, limitsFor: async (id) => (id === 'app1' ? { dailyCalls: 2 } : {}) });
+    assert.equal((await call(limiter)).ok, true); assert.equal((await call(limiter)).ok, true);
+    assert.equal((await call(limiter)).reason, 'daily_call_cap');
+    for (let i = 0; i < 8; i++) assert.equal((await call(limiter, { appId: 'app2' })).ok, true);
+    assert.equal((await call(limiter, { appId: 'app2' })).reason, 'daily_call_cap');
+});
+
+test('limitsFor overrides the daily AI spend cap, including 0 (no AI spend at all)', async () => {
+    const { limiter } = setup({ limitsFor: async () => ({ dailySpendMicros: 0 }) });
+    assert.equal((await call(limiter)).reason, 'spend_cap');
+    const b = setup({ limitsFor: async () => ({ dailySpendMicros: 500 }) });
+    assert.equal((await call(b.limiter)).ok, true);
+    await b.limiter.recordSpend({ appId: 'app1', micros: 500 });
+    assert.equal((await call(b.limiter)).reason, 'spend_cap');
+});
+
+test('a throwing limitsFor fails closed (limiter_unavailable), never open', async () => {
+    const { limiter } = setup({ limitsFor: async () => { throw new Error('x'); } });
+    assert.equal((await call(limiter)).reason, 'limiter_unavailable');
+});
+
+test('junk override values (strings, floats) are ignored in favour of the defaults', async () => {
+    const { limiter } = setup({ perIpPerMin: 100, perAppPerMin: 100, dailyCalls: 2, limitsFor: async () => ({ dailyCalls: '999', dailySpendMicros: 1.5 }) });
+    await call(limiter); await call(limiter);
+    assert.equal((await call(limiter)).reason, 'daily_call_cap');
+    const b = setup({ dailySpendMicros: 1000, limitsFor: async () => ({ dailySpendMicros: 1.5 }) });
+    await b.limiter.recordSpend({ appId: 'app1', micros: 2 });
+    assert.equal((await call(b.limiter)).ok, true);
+});
