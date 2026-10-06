@@ -147,5 +147,34 @@ export function createPgStores({ pool, masterKey, now = () => Date.now() }) {
         return Object.fromEntries(rows.map((r) => [r.connector, { calls: r.calls, errors: r.errors, responseBytes: r.bytes }]));
     }
 
-    return { appStore, upsertApp, ensureApp, setManifest, copySecrets, setEnabled, setDomains, secretStore, limiterStore, usageSink, usageSummary };
+    /** Adds one merged event (counts, bytes, ms, spend) to the (app, day, kind) rollup row. */
+    async function usageDailySink(e) {
+        await pool.query(
+            `insert into platform.usage_daily (app_id, day, kind, calls, errors, bytes, row_count, ms, spend_micros) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+             on conflict (app_id, day, kind) do update set calls = platform.usage_daily.calls + excluded.calls, errors = platform.usage_daily.errors + excluded.errors,
+                bytes = platform.usage_daily.bytes + excluded.bytes, row_count = platform.usage_daily.row_count + excluded.row_count,
+                ms = platform.usage_daily.ms + excluded.ms, spend_micros = platform.usage_daily.spend_micros + excluded.spend_micros`,
+            [e.appId, e.day, e.kind, e.calls, e.errors, e.bytes, e.rows, e.ms, e.spendMicros]);
+    }
+    /** Rollup rows for the last `days` days up to and including `today` (YYYY-MM-DD). Numbers only. */
+    async function usageDaily(appId, { days, today }) {
+        const { rows } = await pool.query(
+            `select to_char(day, 'YYYY-MM-DD') as day, kind, calls::float8 as calls, errors::float8 as errors, bytes::float8 as bytes, row_count::float8 as rows, ms::float8 as ms, spend_micros::float8 as "spendMicros"
+             from platform.usage_daily where app_id = $1 and day > $2::date - $3::int and day <= $2::date order by day, kind`, [appId, today, days]);
+        return rows;
+    }
+    async function purgeUsageDaily(beforeDay) { return (await pool.query('delete from platform.usage_daily where day < $1::date', [beforeDay])).rowCount; }
+
+    const limitsStore = {
+        async get(appId) { return (await pool.query('select overrides from platform.app_limits where app_id = $1', [appId])).rows[0]?.overrides ?? {}; },
+        /** Replaces the whole override set; {} removes the row. Returns false for an unknown app. */
+        async set(appId, overrides) {
+            if (!(await pool.query('select 1 from platform.apps where app_id = $1', [appId])).rowCount) return false;
+            if (!Object.keys(overrides).length) { await pool.query('delete from platform.app_limits where app_id = $1', [appId]); return true; }
+            await pool.query('insert into platform.app_limits (app_id, overrides) values ($1, $2) on conflict (app_id) do update set overrides = $2, updated_at = now()', [appId, JSON.stringify(overrides)]);
+            return true;
+        },
+    };
+
+    return { usageDailySink, usageDaily, purgeUsageDaily, limitsStore, appStore, upsertApp, ensureApp, setManifest, copySecrets, setEnabled, setDomains, secretStore, limiterStore, usageSink, usageSummary };
 }
