@@ -35,3 +35,10 @@ test('worker/lib/data/schema.js re-exports exactly the vendored schema module', 
     assert.equal(shim.NAME, real.NAME);
     assert.ok(Object.keys(shim).length >= 5);
 });
+
+// worker/assets/vibe.js is what the generator ships into apps; platform/sdk/vibe.js is the source the SDK tests run against.
+test('worker/assets/vibe.js is byte-identical to platform/sdk/vibe.js', () => {
+    const a = fs.readFileSync(path.join(ROOT, 'worker', 'assets', 'vibe.js'));
+    const b = fs.readFileSync(path.join(ROOT, 'platform', 'sdk', 'vibe.js'));
+    assert.ok(a.equals(b), 'worker/assets/vibe.js drifted from platform/sdk/vibe.js; re-copy it:  cp platform/sdk/vibe.js worker/assets/vibe.js');
+});
