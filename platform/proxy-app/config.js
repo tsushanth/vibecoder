@@ -29,9 +29,12 @@ export function loadConfig(env = process.env) {
     if (r2.some(Boolean) && !r2.every(Boolean)) throw new Error('invalid storage settings: set all of R2_ACCOUNT_ID, R2_BUCKET, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY or none');
     if (r2[0] && !/^[0-9a-f]{32}$/i.test(r2[0])) throw new Error('invalid setting R2_ACCOUNT_ID: expected 32 hex characters');
     if (r2[1] && !/^[a-z0-9][a-z0-9-]{2,62}$/.test(r2[1])) throw new Error('invalid setting R2_BUCKET');
+    const dbPoolMax = int(env, 'DB_POOL_MAX', 5, { min: 1, max: 20 });
     const config = {
         port: int(env, 'PORT', 8080, { min: 1, max: 65535 }),
-        dbPoolMax: int(env, 'DB_POOL_MAX', 5, { min: 1, max: 20 }),
+        dbPoolMax,
+        // requests served at once before new ones get 503 + Retry-After (admission control); default scales with the pool
+        maxInflight: int(env, 'MAX_INFLIGHT', dbPoolMax * 10, { min: 1, max: 100000 }),
         baseDomain,
         limits: {
             perIpPerMin: int(env, 'PER_IP_PER_MIN', 30, { min: 1, max: 100000 }),

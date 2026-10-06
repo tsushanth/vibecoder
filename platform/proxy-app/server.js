@@ -42,7 +42,7 @@ export async function readRaw(req, max) {
     return size > max ? { error: 413 } : { value: Buffer.concat(chunks) };
 }
 
-export function createHandler({ dataExecutor, storageService, authService, appStore, secretStore, limiter, globalAiLimiter, meter, fetchImpl, resolve, openRouterKey, log = () => {}, baseDomain, adminToken, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, limiterStore, payHttp, notifyHttp, jobsAdmin, usage, usageAdmin, limitsFor }) {
+export function createHandler({ dataExecutor, storageService, authService, appStore, secretStore, limiter, globalAiLimiter, meter, fetchImpl, resolve, openRouterKey, log = () => {}, baseDomain, adminToken, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, limiterStore, payHttp, notifyHttp, jobsAdmin, usage, usageAdmin, limitsFor, maxInflight = Infinity }) {
     const admin = adminToken ? createAdmin({ token: adminToken, jobsAdmin, usageAdmin, appStore, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, secretStore, limiterStore, baseDomain, dataExecutor }) : null;
     const aiLimiter = {
         async check(a) {
@@ -54,9 +54,13 @@ export function createHandler({ dataExecutor, storageService, authService, appSt
         async recordSpend(a) { await limiter.recordSpend(a); await usage?.record({ appId: a.appId, kind: 'ai', calls: 0, spendMicros: a.micros }); await globalAiLimiter.recordSpend({ appId: '__platform_ai__', micros: a.micros }); },
     };
 
+    // Admission control: past this many requests being served at once, new ones are refused straight away with 503 + Retry-After
+    // instead of queueing for a database connection (the pool queue is otherwise unbounded, so overload turned into minutes of
+    // hung requests that kept using connections after their callers gave up). /health and /admin are never refused.
+    let inflight = 0;
     return async function handler(req, res) {
         const t0 = Date.now();
-        let appId = '-', route = '-', headers = { ...BASE_HEADERS };
+        let appId = '-', route = '-', headers = { ...BASE_HEADERS }, counted = false;
         let ukind = null, urows = 0, ubytes = 0; // what to meter for this request; set once the route and app are known
         const send = (status, body, extra = {}) => {
             res.writeHead(status, { ...headers, ...extra });
@@ -77,6 +81,8 @@ export function createHandler({ dataExecutor, storageService, authService, appSt
                 const out = await admin({ method: req.method, pathname: url.pathname, query: url.searchParams, headers: req.headers, ip, readBody: (limit) => readJson(req, limit) });
                 return out.body === undefined ? send(out.status, '') : sendJson(out.status, out.body);
             }
+            if (inflight >= maxInflight) { route = 'shed'; return send(503, JSON.stringify({ error: 'overloaded' }), { 'content-type': 'application/json', 'retry-after': '1' }); }
+            inflight++; counted = true;
             if (notifyHttp) { // end-user notifications (platform/notify): answers null for any other path
                 const nout = await notifyHttp.handle(req, url, req.headers['fly-client-ip'] || req.socket.remoteAddress || '');
                 if (nout) { appId = nout.appId; route = 'notify'; if (url.pathname.endsWith('/notify/me') && req.method === 'POST') ukind = kindForRoute('notify/me'); headers = { ...headers, ...nout.headers }; return send(nout.status, nout.body); }
@@ -147,6 +153,8 @@ export function createHandler({ dataExecutor, storageService, authService, appSt
             // Name and database/system code only: an error message can carry request values, so it is never logged.
             log(JSON.stringify({ ts: new Date().toISOString(), event: 'error', appId, route, name: typeof e?.name === 'string' ? e.name.slice(0, 40) : 'Error', code: typeof e?.code === 'string' && /^[A-Za-z0-9_]{1,20}$/.test(e.code) ? e.code : undefined }));
             return sendJson(500, { error: 'internal' });
+        } finally {
+            if (counted) inflight--;
         }
     };
 }
