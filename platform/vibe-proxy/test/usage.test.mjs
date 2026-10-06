@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createUsage, kindForRoute, validateOverrides, resolveLimits, buildUsageReport, createLimitsResolver, LIMIT_DEFS, KINDS, emailsFrom } from '../usage.js';
+import { createUsage, kindForRoute, validateOverrides, resolveLimits, buildUsageReport, createLimitsResolver, LIMIT_DEFS, KINDS, emailsFrom, billableUnits } from '../usage.js';
 
 const T = Date.UTC(2026, 9, 6, 12, 0, 0);
 
@@ -169,4 +169,15 @@ test('the in-memory buffer is bounded: new keys are dropped past the cap, existi
     assert.equal(seen.length, 5000);
     assert.equal(seen.find((e) => e.appId === 'app-0').calls, 2);
     await u.close();
+});
+
+test('billableUnits turns totals into units only (no prices), counting successes for downloads, emails and checkouts', () => {
+    const c = (calls, o = {}) => ({ calls, errors: 0, bytes: 0, rows: 0, ms: 0, spendMicros: 0, ...o });
+    const u = billableUnits({
+        db: c(10, { rows: 300 }), api: c(4), ai: c(3, { spendMicros: 7000 }), auth_email: c(5, { errors: 2 }), notify: c(2), storage_upload: c(2, { bytes: 4096 }),
+        storage_download: c(6, { errors: 1 }), job: c(8), pay_checkout: c(3, { errors: 1 }), pay_webhook: c(9),
+    });
+    assert.deepEqual(u, { requests: 10 + 4 + 3 + 5 + 2 + 2 + 6 + 3, aiSpendMicros: 7000, dbRowsReturned: 300, uploadBytes: 4096, downloads: 5, emailsSent: 5, jobRuns: 8, payCheckouts: 2 });
+    assert.deepEqual(billableUnits({}), { requests: 0, aiSpendMicros: 0, dbRowsReturned: 0, uploadBytes: 0, downloads: 0, emailsSent: 0, jobRuns: 0, payCheckouts: 0 });
+    assert.deepEqual(billableUnits(undefined), billableUnits({}));
 });
