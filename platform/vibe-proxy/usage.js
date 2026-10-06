@@ -118,3 +118,24 @@ export function buildUsageReport({ days, today, rows, limits, usage }) {
     }
     return { days: list.map((day) => ({ day, byKind: byDay.get(day) })), totals, limits, usage };
 }
+
+/**
+ * The billing hook: turns a usage report's per-kind totals into billable UNITS, and nothing more. There is no price here and nothing
+ * calls this to charge anyone: the owner has not decided prices (see docs/superpowers/plans/2026-10-06-usage-and-billing.md).
+ * Flow units are per period; stored rows, stored bytes and stored files are gauges, read from the report's `usage`, not summed.
+ */
+export function billableUnits(totals) {
+    const t = (k) => totals?.[k] || {};
+    const ok = (k) => Math.max(0, (t(k).calls || 0) - (t(k).errors || 0));
+    const requests = KINDS.filter((k) => k !== 'job' && k !== 'pay_webhook').reduce((n, k) => n + (t(k).calls || 0), 0);
+    return {
+        requests,
+        aiSpendMicros: t('ai').spendMicros || 0,
+        dbRowsReturned: t('db').rows || 0,
+        uploadBytes: t('storage_upload').bytes || 0,
+        downloads: ok('storage_download'),
+        emailsSent: emailsFrom(totals || {}),
+        jobRuns: t('job').calls || 0,
+        payCheckouts: ok('pay_checkout'),
+    };
+}
