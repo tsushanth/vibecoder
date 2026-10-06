@@ -33,6 +33,12 @@ real('the runtime check runs the app with the real SDK injected, so a guarded vi
     assert.equal(r.ok, true, JSON.stringify(r.problems));
 });
 
+real('an app using vibe.device runs against the harmless fake, so it passes without a camera or a position', async () => {
+    const js = 'function go(){ vibe.device.camera.capture().then(function(r){ document.getElementById("out").textContent = r.name; }).catch(function(){}); vibe.device.geolocation.get().catch(function(){}); vibe.device.share({text:"hi"}).catch(function(){}); vibe.device.haptics.tap("light"); } go();';
+    const r = await fullChecks({ 'index.html': page(js) }, { vibe: true, chrome: CHROME });
+    assert.equal(r.ok, true, JSON.stringify(r.problems));
+});
+
 real('an unguarded vibe call that fails at run time is reported to the fix pass', async () => {
     const r = await fullChecks({ 'index.html': page(unguarded) }, { vibe: true, chrome: CHROME });
     assert.equal(r.ok, false); assert.equal(r.problems.length, 1, JSON.stringify(r.problems));

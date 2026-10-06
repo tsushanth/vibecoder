@@ -36,7 +36,7 @@ test('after splicing, vibe.notify exposes only me, and the existing surface is u
     assert.deepEqual(Object.keys(vibe.notify), ['me']);
     const plain = {}; plain.window = plain; Object.assign(plain, { location: { hostname: 'myapp.vibebuild.cc', search: '' }, fetch: async () => {}, AbortController, setTimeout, clearTimeout, JSON, Promise, Error, encodeURIComponent, Object, Array, Number, String, URLSearchParams, VIBE_BASE: 'https://proxy.test' });
     vm.createContext(plain); vm.runInContext(VIBE, plain);
-    assert.deepEqual(Object.keys(vibe).sort(), ['ai', 'api', 'auth', 'db', 'notify', 'pay', 'storage', 'version']); // the real SDK now carries notify itself
+    assert.deepEqual(Object.keys(vibe).sort(), ['ai', 'api', 'auth', 'db', 'device', 'notify', 'pay', 'storage', 'version']); // the real SDK now carries notify itself
     assert.deepEqual(Object.keys(vibe.auth).sort(), Object.keys(plain.vibe.auth).sort());
 });
 
