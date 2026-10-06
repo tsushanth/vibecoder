@@ -19,3 +19,19 @@ for (const [dir, file] of [['vibe-proxy', 'scanner.js'], ['vibe-proxy', 'ssrf.js
         assert.ok(vendored.equals(source), `vendored ${file} drifted from platform/${dir}/${file}; re-copy it`);
     });
 }
+
+// jobs/validate.js imports ../data/schema.js (a re-export shim of vendor/schema.js, not a copy) and ./schedule.js
+for (const file of ['validate.js', 'schedule.js']) {
+    test(`worker/lib/jobs/${file} is byte-identical to platform/jobs/${file}`, () => {
+        const vendored = fs.readFileSync(path.join(ROOT, 'worker', 'lib', 'jobs', file));
+        const source = fs.readFileSync(path.join(ROOT, 'platform', 'jobs', file));
+        assert.ok(vendored.equals(source), `vendored jobs/${file} drifted from platform/jobs/${file}; re-copy it`);
+    });
+}
+test('worker/lib/data/schema.js re-exports exactly the vendored schema module', async () => {
+    const shim = await import('../lib/data/schema.js');
+    const real = await import('../lib/vendor/schema.js');
+    assert.deepEqual(Object.keys(shim).sort(), Object.keys(real).sort());
+    assert.equal(shim.NAME, real.NAME);
+    assert.ok(Object.keys(shim).length >= 5);
+});
