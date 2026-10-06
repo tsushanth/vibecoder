@@ -136,7 +136,9 @@ export function createHandler({ dataExecutor, storageService, authService, appSt
                 result = await guardedProxy({ limiter, meter, appId, ip, req: body.value, manifest, secrets, fetchImpl, resolve });
             }
             return send(result.status, result.body, result.headers);
-        } catch {
+        } catch (e) {
+            // Name and database/system code only: an error message can carry request values, so it is never logged.
+            log(JSON.stringify({ ts: new Date().toISOString(), event: 'error', appId, route, name: typeof e?.name === 'string' ? e.name.slice(0, 40) : 'Error', code: typeof e?.code === 'string' && /^[A-Za-z0-9_]{1,20}$/.test(e.code) ? e.code : undefined }));
             return sendJson(500, { error: 'internal' });
         }
     };
