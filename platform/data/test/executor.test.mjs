@@ -166,3 +166,22 @@ t('statements that could change role or reach system functions are refused, whil
         assert.equal(isSafeStatement(text), true, text);
     assert.deepEqual(await ex.run('app-c', { text: "select set_config('role', 'x', true)", values: [] }), { ok: false, status: 500, code: 'bad_query' });
 });
+
+t('planSchema reports statements and destructive changes read-only: nothing is applied, provisioned or versioned', async () => {
+    await stores.upsertApp({ appId: 'app-plan', enabled: true, manifest: null });
+    const none = await ex.planSchema({ appId: 'app-plan', spec: spec(TODO) });
+    assert.equal(none.ok, true); assert.ok(none.statements > 0); assert.deepEqual(none.destructive, []);
+    assert.equal((await db.pool.query("select count(*)::int n from platform.app_dbs where app_id='app-plan'")).rows[0].n, 0, 'planning provisions no database');
+    await ex.applySchema({ appId: 'app-plan', spec: spec(TODO) });
+    const before = await ex.peekSpec('app-plan');
+    const same = await ex.planSchema({ appId: 'app-plan', spec: spec(TODO) });
+    assert.deepEqual(same, { ok: true, statements: 0, destructive: [] });
+    const smaller = spec({ version: 1, tables: { todos: { access: 'owner', columns: { title: { type: 'text', required: true } } } } });
+    const drop = await ex.planSchema({ appId: 'app-plan', spec: smaller });
+    assert.deepEqual(drop.destructive, [{ kind: 'drop_column', table: 'todos', column: 'n' }]); assert.equal(drop.statements, 1);
+    const gone = await ex.planSchema({ appId: 'app-plan', spec: spec({ version: 1, tables: { other: { access: 'owner', columns: { a: { type: 'text' } } } } }) });
+    assert.ok(gone.destructive.some((d) => d.kind === 'drop_table' && d.table === 'todos'));
+    assert.deepEqual(await ex.peekSpec('app-plan'), before, 'stored spec and version untouched');
+    const cols = (await db.pool.query("select count(*)::int n from information_schema.columns where column_name='n' and table_name='todos'")).rows[0].n;
+    assert.ok(cols >= 1, 'column n still exists');
+});

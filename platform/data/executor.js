@@ -68,6 +68,17 @@ export function createDataExecutor({ pool, timeoutMs = 5000, ddlTimeoutMs = 3000
             return (await pool.query('select spec, version from platform.app_dbs where app_id = $1', [appId])).rows[0] || { spec: null, version: 0 };
         },
 
+        /**
+         * Read-only dry run of applySchema: what applying `spec` would do right now, with destructive changes planned as if confirmed.
+         * Uses peekSpec, so it never provisions a database, writes nothing and runs no DDL.
+         * Returns { ok: true, statements: <count>, destructive: [{ kind, table, column? }] } or { ok: false, errors }.
+         */
+        async planSchema({ appId, spec }) {
+            const cur = await this.peekSpec(appId);
+            const plan = planMigration(cur.spec, spec, { allowDestructive: true });
+            return plan.ok ? { ok: true, statements: plan.statements.length, destructive: plan.destructive } : { ok: false, errors: plan.errors };
+        },
+
         /** Plans and applies a validated spec. Returns { ok: true, applied, version } or { ok: false, errors, destructive? }. */
         async applySchema({ appId, spec, allowDestructive = false }) {
             const cur = await this.currentSpec(appId);
