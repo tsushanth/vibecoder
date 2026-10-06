@@ -20,7 +20,9 @@ stubSupabase(supabase, (q) => {
     return { data: null, error: null };
 });
 const { default: projects } = await import('../../routes/projects.routes.js');
-const { default: auth } = await import('../../routes/auth.routes.js');
+const { createAuthRouter } = await import('../../routes/auth.routes.js');
+let verified = 'u1'; // what the access token proves; null = no or bad token
+const auth = createAuthRouter({ verifyUser: async () => verified });
 
 const realFetch = globalThis.fetch; let workerCalls = 0, srv;
 before(async () => {
@@ -31,7 +33,7 @@ before(async () => {
 after(async () => { globalThis.fetch = realFetch; await srv.close(); });
 const quiet = async (fn) => { const e = console.error, l = console.log, w = console.warn; console.error = console.log = console.warn = () => {}; try { return await fn(); } finally { console.error = e; console.log = l; console.warn = w; } };
 const call = (m, p, body) => quiet(() => realFetch(`${srv.base}${p}`, { method: m, headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }));
-const reset = () => { ops.length = 0; deploymentsError = null; failTables = new Set(); placeholderFails = false; projectOwner = 'owner'; workerCalls = 0; };
+const reset = () => { ops.length = 0; deploymentsError = null; failTables = new Set(); placeholderFails = false; projectOwner = 'owner'; workerCalls = 0; verified = 'u1'; };
 
 test('deleting a published project removes its deployments first, then the project', async () => {
     reset(); const r = await call('DELETE', '/api/projects/p1', { userId: 'owner' });
@@ -76,4 +78,18 @@ test('generate: an old streaming client still proceeds without a project row, an
     assert.notEqual(s.status, 500); assert.ok(workerCalls >= 1);
     reset(); const ok = await call('POST', '/api/projects/generate', { prompt: 'A simple pomodoro timer for studying', userId: 'u-gen-3' });
     assert.equal(ok.status, 200); assert.match(await ok.text(), /"type":"queued"/);
+});
+
+test('account deletion needs the caller\'s own sign-in: no token is 401, someone else\'s id is 403, and nothing is deleted either way', async () => {
+    reset(); verified = null; let r = await call('DELETE', '/api/auth/account', { userId: 'u1' });
+    assert.equal(r.status, 401); assert.equal(ops.some((o) => o.op === 'delete'), false);
+    reset(); verified = 'attacker'; r = await call('DELETE', '/api/auth/account', { userId: 'u1' });
+    assert.equal(r.status, 403); assert.equal(ops.some((o) => o.op === 'delete'), false);
+});
+
+test('account deletion uses the verified id even when the body omits it, and never the body id when they agree only by luck', async () => {
+    reset(); verified = 'u1'; let r = await call('DELETE', '/api/auth/account', {});
+    assert.equal(r.status, 200);
+    const sel = ops.find((o) => o.table === 'projects' && o.op === 'select'); assert.deepEqual(sel.filters.find((f) => f[0] === 'eq').slice(1), ['creator_id', 'u1']);
+    assert.equal(ops.filter((o) => o.op === 'delete' && o.filters.some((f) => f[2] === 'u1' || (Array.isArray(f[2]) && f[2].length))).length >= 5, true);
 });
