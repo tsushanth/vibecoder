@@ -184,9 +184,44 @@ t('row level security: a role with SELECT but no policy sees nothing, the proxy 
     await db.pool.query("insert into platform.orders (app_id, session_id, item_id, quantity, amount_cents, currency, status) values ('rls-app', 'cs_rls', 'pro', 1, 999, 'usd', 'paid') on conflict do nothing");
     await db.pool.query("insert into platform.jobs (app_id, job_id, spec, next_run_at) values ('rls-app', 'rls-job', '{}', now()) on conflict do nothing");
     await db.pool.query("insert into platform.job_runs (app_id, job_id, started_at, status) select 'rls-app', 'rls-job', now(), 'ok' where not exists (select 1 from platform.job_runs where app_id = 'rls-app')");
-    for (const tbl of ['end_users', 'login_links', 'sessions', 'orders', 'notify_optouts', 'jobs', 'job_runs']) assert.equal((await db.pool.query(`select count(*)::int as n from platform.${tbl}`)).rows[0].n, 1, `owner sees ${tbl}`);
-    for (const tbl of ['apps', 'app_secrets', 'limiter_counters', 'usage_events', 'end_users', 'login_links', 'sessions', 'orders', 'notify_optouts', 'jobs', 'job_runs']) assert.equal((await anon.query(`select count(*)::int as n from platform.${tbl}`)).rows[0].n, 0, tbl);
+    await db.pool.query("insert into platform.usage_daily (app_id, day, kind, calls) values ('rls-app', '2026-10-06', 'db', 1) on conflict do nothing");
+    await db.pool.query("insert into platform.app_limits (app_id, overrides) values ('rls-app', '{}') on conflict do nothing");
+    for (const tbl of ['end_users', 'login_links', 'sessions', 'orders', 'notify_optouts', 'jobs', 'job_runs', 'usage_daily', 'app_limits']) assert.equal((await db.pool.query(`select count(*)::int as n from platform.${tbl}`)).rows[0].n, 1, `owner sees ${tbl}`);
+    for (const tbl of ['apps', 'app_secrets', 'limiter_counters', 'usage_events', 'usage_daily', 'app_limits', 'end_users', 'login_links', 'sessions', 'orders', 'notify_optouts', 'jobs', 'job_runs']) assert.equal((await anon.query(`select count(*)::int as n from platform.${tbl}`)).rows[0].n, 0, tbl);
     await anon.end();
     const { rows } = await db.pool.query("select relname, relrowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='platform' and relkind='r'");
     assert.ok(rows.length >= 11 && rows.every((r) => r.relrowsecurity), JSON.stringify(rows));
+});
+
+t('usage_daily upserts add up per (app, day, kind) and usageDaily returns only the window, as numbers', async () => {
+    await stores.upsertApp({ appId: 'usage-app', enabled: true });
+    const ev = (day, kind, o = {}) => ({ appId: 'usage-app', day, kind, calls: 1, errors: 0, bytes: 0, rows: 0, ms: 0, spendMicros: 0, ...o });
+    await stores.usageDailySink(ev('2026-10-06', 'db', { rows: 3, ms: 10 }));
+    await stores.usageDailySink(ev('2026-10-06', 'db', { calls: 4, errors: 1, rows: 7, ms: 5 }));
+    await stores.usageDailySink(ev('2026-10-06', 'ai', { spendMicros: 1500 }));
+    await stores.usageDailySink(ev('2026-10-04', 'db'));
+    await stores.usageDailySink(ev('2026-09-01', 'db'));
+    await stores.usageDailySink(ev('2026-10-03', 'db')); // just outside a 3-day window
+    await stores.usageDailySink(ev('2026-10-07', 'db')); // the future
+    await stores.usageDailySink(ev('2026-10-06', 'ai', { spendMicros: 500 }));
+    const rows = await stores.usageDaily('usage-app', { days: 3, today: '2026-10-06' });
+    assert.deepEqual(rows.map((r) => `${r.day}/${r.kind}`), ['2026-10-04/db', '2026-10-06/ai', '2026-10-06/db']);
+    const db6 = rows.find((r) => r.day === '2026-10-06' && r.kind === 'db');
+    assert.deepEqual([db6.calls, db6.errors, db6.rows, db6.ms], [5, 1, 10, 15]);
+    assert.equal(typeof db6.calls, 'number');
+    assert.equal(rows.find((r) => r.kind === 'ai').spendMicros, 2000);
+    assert.deepEqual(await stores.usageDaily('other-app', { days: 3, today: '2026-10-06' }), []);
+    assert.equal(await stores.purgeUsageDaily('2026-10-03'), 1); // strictly before: 2026-09-01 only
+});
+
+t('limitsStore sets, replaces and clears per-app overrides, and refuses an unknown app', async () => {
+    await stores.upsertApp({ appId: 'lim-app', enabled: true });
+    assert.deepEqual(await stores.limitsStore.get('lim-app'), {});
+    assert.equal(await stores.limitsStore.set('lim-app', { rowCap: 5000 }), true);
+    assert.equal(await stores.limitsStore.set('lim-app', { dailyCalls: 10 }), true);
+    assert.deepEqual(await stores.limitsStore.get('lim-app'), { dailyCalls: 10 });
+    assert.equal(await stores.limitsStore.set('lim-app', {}), true);
+    assert.equal((await db.pool.query("select count(*)::int n from platform.app_limits where app_id = 'lim-app'")).rows[0].n, 0);
+    assert.deepEqual(await stores.limitsStore.get('lim-app'), {});
+    assert.equal(await stores.limitsStore.set('nope-app', { rowCap: 5000 }), false);
 });

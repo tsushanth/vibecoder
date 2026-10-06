@@ -287,5 +287,70 @@
       "webhookUrlPending": "预览或发布你的应用即可获得它的 Webhook URL。",
       "copyUrl": "复制 URL"
     }
+  },
+  "usage": {
+    "summary": "{calls} requests in the last {days} days",
+    "summaryNone": "No activity yet in the last {days} days",
+    "summaryWarn": "{name} is at {percent}% of its limit",
+    "summaryFull": "Limit reached: {name}",
+    "manage": "Show usage",
+    "hide": "Hide",
+    "retry": "Try again",
+    "activityTitle": "Last {days} days",
+    "capsTitle": "Current use and limits",
+    "resetsDaily": "Daily limits reset at midnight UTC.",
+    "requests": "{count} requests",
+    "errors": "{count} failed",
+    "dayBar": "{day}: {count}",
+    "meterOf": "{used} of {cap}",
+    "meterUnknown": "Not available right now",
+    "stateWarn": "Close to the limit",
+    "contact": "Ask the VibeBuild team to raise the limit if your app needs more.",
+    "feature": {
+      "data": "Data",
+      "files": "Files",
+      "accounts": "Sign-ins and emails",
+      "jobs": "Scheduled jobs",
+      "payments": "Payments",
+      "connectors": "Connectors and AI"
+    },
+    "meter": {
+      "rows": {
+        "name": "Saved rows",
+        "full": "Your app has reached its row limit. New data cannot be saved until rows are deleted or the limit is raised."
+      },
+      "storage": {
+        "name": "Stored files size",
+        "full": "Your app has used all of its file storage. New uploads are refused until files are deleted or the limit is raised."
+      },
+      "files": {
+        "name": "Stored files",
+        "full": "Your app has reached its file count limit. New uploads are refused until files are deleted or the limit is raised."
+      },
+      "calls": {
+        "name": "Requests today",
+        "full": "Your app has used today's request allowance. Requests are refused until the counter resets at midnight UTC."
+      },
+      "ai": {
+        "name": "AI spend today",
+        "full": "Your app has used today's AI allowance. AI features pause until the counter resets at midnight UTC."
+      },
+      "emails": {
+        "name": "Emails today",
+        "full": "Your app has used today's email allowance. Sign-in links and notifications pause until midnight UTC."
+      },
+      "jobs": {
+        "name": "Job runs today",
+        "full": "Your app has used today's scheduled job runs. Jobs resume after midnight UTC."
+      }
+    },
+    "error": {
+      "signIn": "Sign in again to see usage.",
+      "forbidden": "Only the owner of this project can see its usage.",
+      "unavailable": "Usage is temporarily unavailable.",
+      "rateLimited": "Too many requests. Try again in a minute.",
+      "network": "Could not reach the server.",
+      "unknown": "Something went wrong loading usage."
+    }
   }
 }

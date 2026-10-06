@@ -289,3 +289,28 @@ t('a job whose row is locked by someone else is skipped, not waited for (SKIP LO
         assert.deepEqual(seen, ['l2']);
     } finally { await holder.query('rollback'); holder.release(); }
 });
+
+t('limitsFor.jobRunsPerDay overrides the daily run cap for that app only; onRun reports each finished run without any payload', async () => {
+    const a = await app(); const b = await app();
+    await store.setJobs(a, [job('j1', { every: '1h' }), job('j2', { every: '1h' })]); await store.setJobs(b, [job('j1')]);
+    const seen = []; let n = 0;
+    const act = async () => (++n === 1 ? { ok: false, code: 'upstream_500' } : { ok: true });
+    const s = await tick(T0 + HOUR, act, { limitsFor: async (id) => (id === a ? { jobRunsPerDay: 1 } : {}), onRun: async (e) => { seen.push(e); } });
+    assert.equal(s.capped, 1);
+    assert.equal(s.claimed, 2); // a.j1 and b.j1 ran; a.j2 was over a's cap of 1
+    assert.equal(seen.length, 2);
+    for (const e of seen) assert.deepEqual(Object.keys(e).sort(), ['appId', 'ms', 'ok', 'skipped']);
+    assert.equal(seen.filter((e) => !e.ok).length, 1);
+    assert.equal((await runs(a)).filter((r) => r.status === 'skipped').length, 1);
+    assert.ok(seen.every((e) => e.ms >= 0));
+    const c = await app(); await store.setJobs(c, [job('j1')]);
+    const slow = async () => { await sleep(30); return { ok: true }; };
+    const sc = await tick(T0 + HOUR, slow, { onRun: async (e) => { if (e.appId === c) seen.push(e); } });
+    assert.ok(seen.at(-1).ms >= 25, `ms is the run's wall time, got ${seen.at(-1).ms}`);
+    assert.equal(sc.ok, 1);
+    // a failing meter or limits lookup never breaks the tick: the run is still recorded
+    const d = await app(); await store.setJobs(d, [job('j1')]);
+    const sd = await tick(T0 + 2 * HOUR, okAction, { onRun: async () => { throw new Error('metering down'); }, limitsFor: async () => { throw new Error('limits down'); } });
+    assert.equal(sd.ok >= 1, true);
+    assert.equal((await runs(d, 'j1')).at(-1).status, 'ok');
+});

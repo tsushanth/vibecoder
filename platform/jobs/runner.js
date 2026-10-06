@@ -20,7 +20,7 @@ export function createGate(max) {
     };
 }
 
-export async function runDueJobs({ now = Date.now, pool, limit = DEFAULTS.limit, runAction, gate, concurrency = DEFAULTS.concurrency, timeoutMs = DEFAULTS.timeoutMs, maxRunsPerAppPerDay = DEFAULTS.maxRunsPerAppPerDay, maxFailures = DEFAULTS.maxFailures }) {
+export async function runDueJobs({ now = Date.now, pool, limit = DEFAULTS.limit, runAction, gate, concurrency = DEFAULTS.concurrency, timeoutMs = DEFAULTS.timeoutMs, maxRunsPerAppPerDay = DEFAULTS.maxRunsPerAppPerDay, maxFailures = DEFAULTS.maxFailures, limitsFor, onRun }) {
     const clock = typeof now === 'function' ? () => Number(now()) : () => Number(now instanceof Date ? now.getTime() : now);
     const theGate = gate || createGate(concurrency);
     const lease = timeoutMs * 2 + 60_000;
@@ -44,7 +44,9 @@ export async function runDueJobs({ now = Date.now, pool, limit = DEFAULTS.limit,
             for (const j of rows) {
                 await client.query('select pg_advisory_xact_lock(hashtext($1))', [`jobs:${j.app_id}`]);
                 const used = (await client.query("select count(*)::int n from platform.job_runs where app_id = $1 and started_at >= $2 and status <> 'skipped'", [j.app_id, at(dayStartMs(t0))])).rows[0].n;
-                if (used >= maxRunsPerAppPerDay) {
+                let cap = maxRunsPerAppPerDay;
+                if (limitsFor) { const o = await limitsFor(j.app_id).catch(() => null); if (Number.isInteger(o?.jobRunsPerDay)) cap = o.jobRunsPerDay; }
+                if (used >= cap) {
                     await client.query("insert into platform.job_runs (app_id, job_id, started_at, finished_at, status, error_code) values ($1, $2, $3, $3, 'skipped', 'daily_cap')", [j.app_id, j.job_id, at(t0)]);
                     await client.query("update platform.jobs set next_run_at = $3, last_status = 'daily_cap' where app_id = $1 and job_id = $2", [j.app_id, j.job_id, at(dayStartMs(t0) + DAY)]);
                     summary.capped += 1;
@@ -63,6 +65,7 @@ export async function runDueJobs({ now = Date.now, pool, limit = DEFAULTS.limit,
     }
 
     async function execute(c) {
+        const wallStart = Date.now(); // real elapsed time for metering; `clock` may be a test clock
         const ctrl = new AbortController();
         let timer;
         let res;
@@ -84,6 +87,7 @@ export async function runDueJobs({ now = Date.now, pool, limit = DEFAULTS.limit,
             if (failures >= maxFailures) { enabled = false; lastStatus = 'auto_disabled'; summary.disabled += 1; }
             else next = Math.min(natural, end + backoffMs(failures));
         }
+        if (onRun) { try { await onRun({ appId: c.appId, ok: !!res.ok, skipped: !!res.skipped, ms: Date.now() - wallStart }); } catch { /* metering must never break a run */ } }
         const client = await pool.connect();
         try {
             await client.query('begin');

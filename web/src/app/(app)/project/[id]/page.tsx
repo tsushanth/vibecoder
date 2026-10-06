@@ -22,6 +22,7 @@ import { PreviewPane } from '@/components/builder/PreviewPane';
 import { ChatPanel } from '@/components/builder/ChatPanel';
 import { PublishDialog } from '@/components/builder/PublishDialog';
 import { SecretsPanel } from '@/components/project/SecretsPanel';
+import { UsagePanel } from '@/components/project/UsagePanel';
 import { VersionsPopover } from '@/components/builder/VersionsPopover';
 import type {
   ProjectDetailResponse,
@@ -425,6 +426,11 @@ export default function ProjectBuilderPage() {
       {/* API keys the app's connector manifest asks for (owner only; renders nothing when the app needs none) */}
       {isOwner && user && (
         <SecretsPanel projectId={id} reloadKey={`${genStore.isGenerating ? 'generating' : 'idle'}:${store.project.publishedUrl ?? ''}`} />
+      )}
+
+      {/* What the app uses (last 7 days) against its limits (owner only; renders nothing until the app is running) */}
+      {isOwner && user && (
+        <UsagePanel projectId={id} reloadKey={`${genStore.isGenerating ? 'generating' : 'idle'}:${store.project.publishedUrl ?? ''}`} />
       )}
 
       {/* Main builder area — desktop: preview top, chat bottom.
