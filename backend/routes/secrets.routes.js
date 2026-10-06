@@ -2,6 +2,7 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 import { supabase as defaultSupabase } from '../config/database.js';
 import { verifiedUserId } from '../lib/verifiedUser.js';
+import { appSubdomains } from '../lib/appSubdomains.js';
 
 // Key entry for generated apps: a creator stores API keys that the platform proxy injects server-side.
 //   GET    /api/projects/:id/secrets          names and update times only
@@ -12,22 +13,6 @@ import { verifiedUserId } from '../lib/verifiedUser.js';
 const PROJECT_ID = /^[A-Za-z0-9-]{8,64}$/;
 const SECRET_NAME = /^[A-Z][A-Z0-9_]{1,63}$/;
 const MAX_VALUE = 4096;
-const SUBDOMAIN = /^[a-z0-9][a-z0-9-]{1,60}[a-z0-9]$/;
-
-// The apps that actually run a project are its preview and published subdomains; the SDK identifies an app by subdomain.
-// A key set here is therefore stored under the project id (the canonical copy that new deployments are seeded from) and under
-// each of those subdomains. Only single-label names under our own base domain count; anything else in those columns is ignored.
-function appSubdomains(project, baseDomain) {
-    const out = [];
-    for (const u of [project.preview_url, project.published_url]) {
-        let host;
-        try { host = new URL(u).hostname.toLowerCase(); } catch { continue; }
-        if (!host.endsWith(`.${baseDomain}`)) continue;
-        const label = host.slice(0, -(baseDomain.length + 1));
-        if (SUBDOMAIN.test(label) && !out.includes(label)) out.push(label);
-    }
-    return out;
-}
 
 // An app that sells things (its manifest has a pay catalog) runs on the creator's own Stripe account: the proxy needs their secret
 // key and the signing secret of the webhook they register in Stripe (platform/pay/service.js reads these two vault names).
