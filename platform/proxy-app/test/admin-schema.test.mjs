@@ -6,11 +6,12 @@ const TOKEN = 'admin-token-' + 'x'.repeat(40);
 const GOOD = { version: 1, tables: { todos: { access: 'owner', columns: { title: { type: 'text', required: true } } } } };
 const memLimiter = () => { const m = new Map(); return { get: async (k) => m.get(k) || 0, incr: async (k) => m.set(k, (m.get(k) || 0) + 1) }; };
 
-function rig({ apps = ['app1'], apply, current, executor = 'default' } = {}) {
+function rig({ apps = ['app1'], apply, current, plan, executor = 'default' } = {}) {
     const calls = [];
     const dataExecutor = executor === 'none' ? undefined : {
         applySchema: async (a) => { calls.push(['apply', a]); return apply ? apply(a) : { ok: true, applied: 2, version: 1 }; },
         peekSpec: async (id) => { calls.push(['peek', id]); return current ? current(id) : { spec: GOOD, version: 3 }; },
+        planSchema: async (a) => { calls.push(['plan', a]); return plan ? plan(a) : { ok: true, statements: 3, destructive: [{ kind: 'drop_table', table: 'todos' }] }; },
     };
     const appStore = { get: async (id) => (apps.includes(id) ? { enabled: true, domains: [], manifest: null } : null) };
     const handle = createAdmin({ token: TOKEN, appStore, secretStore: {}, limiterStore: memLimiter(), baseDomain: 'vibebuild.cc', dataExecutor });
@@ -138,4 +139,36 @@ test('without a data executor both methods answer 503 schema_unavailable', async
     const r = rig({ executor: 'none' });
     assert.deepEqual(await r.req('POST', '/admin/apps/app1/schema', { spec: GOOD }), { status: 503, body: { error: 'schema_unavailable' } });
     assert.deepEqual(await r.req('GET', '/admin/apps/app1/schema'), { status: 503, body: { error: 'schema_unavailable' } });
+});
+
+test('POST /schema/plan answers the statement count and the destructive list without applying anything', async () => {
+    const r = rig(); const out = await r.req('POST', '/admin/apps/app1/schema/plan', { spec: GOOD });
+    assert.deepEqual(out, { status: 200, body: { ok: true, statements: 3, destructive: [{ kind: 'drop_table', table: 'todos' }] } });
+    assert.deepEqual(r.calls.map((c) => c[0]), ['plan'], 'never applySchema');
+    assert.equal(r.calls[0][1].appId, 'app1'); assert.equal(r.calls[0][1].spec.tables.todos.columns.title.type, 'text');
+    assert.equal(r.bodies[0], SCHEMA_BODY_LIMIT);
+});
+
+test('POST /schema/plan exposes only ok, statements and destructive names', async () => {
+    const r = rig({ plan: () => ({ ok: true, statements: 1, destructive: [{ kind: 'drop_column', table: 't', column: 'c', secret: 'x' }], statementsSql: ['drop table t'] }) });
+    const out = await r.req('POST', '/admin/apps/app1/schema/plan', { spec: GOOD });
+    assert.deepEqual(Object.keys(out.body).sort(), ['destructive', 'ok', 'statements']);
+    assert.deepEqual(out.body.destructive, [{ kind: 'drop_column', table: 't', column: 'c' }]);
+});
+
+test('POST /schema/plan rejects an invalid spec, an unknown app, wrong methods and a bad token', async () => {
+    const r = rig();
+    const bad = await r.req('POST', '/admin/apps/app1/schema/plan', { spec: { version: 1, tables: { 'Bad Name': { columns: {} } } } });
+    assert.equal(bad.status, 400); assert.equal(bad.body.error, 'invalid_schema');
+    assert.deepEqual(await r.req('POST', '/admin/apps/ghost/schema/plan', { spec: GOOD }), { status: 404, body: { error: 'unknown_app' } });
+    assert.equal((await r.req('GET', '/admin/apps/app1/schema/plan')).status, 405);
+    assert.equal((await r.req('POST', '/admin/apps/app1/schema/plan', { spec: GOOD }, { token: 'wrong' })).status, 401);
+    assert.equal((await r.req('POST', '/admin/apps/app1/schema/other', { spec: GOOD })).status, 404);
+    assert.equal(r.calls.length, 0);
+});
+
+test('POST /schema/plan maps planner errors to 400 invalid_schema and a missing executor to 503', async () => {
+    const errors = [{ code: 'required_needs_default', table: 't', column: 'c' }];
+    assert.deepEqual(await rig({ plan: () => ({ ok: false, errors }) }).req('POST', '/admin/apps/app1/schema/plan', { spec: GOOD }), { status: 400, body: { error: 'invalid_schema', errors } });
+    assert.equal((await rig({ executor: 'none' }).req('POST', '/admin/apps/app1/schema/plan', { spec: GOOD })).status, 503);
 });
