@@ -4,7 +4,8 @@
 //   GET|POST /<app>/notify/unsubscribe?t=<token>   GET shows a confirmation form (link prefetchers must not opt people
 //        out), POST records the opt-out (also the RFC 8058 one-click POST that mail clients send).
 // Errors are short codes only. No token, address or message text is ever echoed.
-const ROUTE = /^\/([a-z0-9][a-z0-9-]{0,62})\/notify\/(me|unsubscribe)$/;
+export const NOTIFY_OPS = ['me', 'unsubscribe'];
+export const NOTIFY_ROUTE = new RegExp(`^/([a-z0-9][a-z0-9-]{0,62})/notify/(${NOTIFY_OPS.join('|')})$`);
 const MAX_BODY = 8_000;
 const STATUS = {
     invalid_content: 400, unknown_user: 401, unknown_app: 404, app_disabled: 403, opted_out: 409,
@@ -42,7 +43,7 @@ const HTML = {
 export function createNotifyHttp({ svc, auth, appStore, limiter, baseDomain }) {
     return {
         async handle(req, url, ip) {
-            const m = ROUTE.exec(url.pathname);
+            const m = NOTIFY_ROUTE.exec(url.pathname);
             if (!m) return null;
             const [, appId, op] = m;
             const out = (status, body, headers = {}) => ({ appId, status, headers, body: typeof body === 'string' ? body : JSON.stringify(body) });
