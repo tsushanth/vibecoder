@@ -25,11 +25,22 @@ if (P.unavailable) { send({ type: 'unavailable', reason: P.unavailable }); proce
 const waits = []; let maxWaiting = 0, maxTotal = 0, maxChecked = 0;
 const pool = P.proxyPool;
 const origConnect = pool.connect.bind(pool);
+// optional simulated network round trip to the database, added to every statement while the connection is held (the real database is remote)
+const dbLatency = cfg.dbLatencyMs ?? 0;
+let queryCount = 0;
+const slow = (client) => {
+    if (!client || client.__slow) return client;
+    client.__slow = true; const q = client.query.bind(client);
+    client.query = dbLatency
+        ? (...a) => { queryCount++; return new Promise((ok, bad) => setTimeout(() => { try { Promise.resolve(q(...a)).then(ok, bad); } catch (e) { bad(e); } }, dbLatency)); }
+        : (...a) => { queryCount++; return q(...a); };
+    return client;
+};
 pool.connect = (cb) => {
     const t0 = performance.now();
     const rec = () => { const w = performance.now() - t0; if (w > 0.05 || waits.length < 1_000_000) waits.push(w); };
-    if (typeof cb === 'function') return origConnect((err, client, done) => { rec(); cb(err, client, done); });
-    return origConnect().then((c) => { rec(); return c; });
+    if (typeof cb === 'function') return origConnect((err, client, done) => { rec(); cb(err, slow(client), done); });
+    return origConnect().then((c) => { rec(); return slow(c); });
 };
 const loop = monitorEventLoopDelay({ resolution: 5 }); loop.enable();
 const sampler = setInterval(() => { maxWaiting = Math.max(maxWaiting, pool.waitingCount); maxTotal = Math.max(maxTotal, pool.totalCount); maxChecked = Math.max(maxChecked, pool.totalCount - pool.idleCount); }, 10);
@@ -58,14 +69,14 @@ for (let a = 0; a < cfg.apps; a++) {
     await P.call(`/${appId}/db`, { token: users[0].token, body: { op: 'insert', table: 'pub', rows: [{ v: 'hello' }] } });
     apps.push({ appId, users, links });
 }
-waits.length = 0; maxWaiting = 0; maxTotal = 0; maxChecked = 0; loop.reset();
+waits.length = 0; maxWaiting = 0; maxTotal = 0; maxChecked = 0; queryCount = 0; loop.reset();
 send({ type: 'ready', port: P.srv.port, loginName: P.loginName, dbName: P.db.name, apps, poolMax: cfg.poolMax ?? 5, connLimit: cfg.connLimit });
 
 process.on('message', async (m) => {
     if (m.type === 'stats') {
         const w = [...waits].sort((x, y) => x - y);
-        send({ type: 'stats', id: m.id, pool: { total: pool.totalCount, idle: pool.idleCount, waiting: pool.waitingCount, maxTotal, maxWaiting, maxChecked }, waits: { n: w.length, p50: pct(w, 50), p95: pct(w, 95), p99: pct(w, 99), max: w.at(-1) ?? 0 }, loop: { p99Ms: loop.percentile(99) / 1e6, maxMs: loop.max / 1e6 } });
-        if (m.reset) { waits.length = 0; maxWaiting = 0; maxTotal = pool.totalCount; maxChecked = pool.totalCount - pool.idleCount; loop.reset(); }
+        send({ type: 'stats', id: m.id, pool: { total: pool.totalCount, idle: pool.idleCount, waiting: pool.waitingCount, maxTotal, maxWaiting, maxChecked }, queries: queryCount, waits: { n: w.length, p50: pct(w, 50), p95: pct(w, 95), p99: pct(w, 99), max: w.at(-1) ?? 0 }, loop: { p99Ms: loop.percentile(99) / 1e6, maxMs: loop.max / 1e6 } });
+        if (m.reset) { queryCount = 0; waits.length = 0; maxWaiting = 0; maxTotal = pool.totalCount; maxChecked = pool.totalCount - pool.idleCount; loop.reset(); }
     } else if (m.type === 'stop') {
         clearInterval(sampler);
         await P.stop().catch(() => {});
