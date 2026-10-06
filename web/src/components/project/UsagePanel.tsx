@@ -86,7 +86,15 @@ export function UsagePanel({ projectId, reloadKey }: Props) {
   return (
     <div className={`border-b ${tone}`}>
       <div className="flex items-center justify-between gap-3 px-3 py-2 text-xs">
-        <span className="text-foreground min-w-0" role={status.state === 'full' ? 'alert' : undefined}>{headline}</span>
+        <span className="text-foreground min-w-0" role={status.state === 'full' ? 'alert' : undefined}>
+          {headline}
+          {status.state === 'full' && (
+            <>
+              {' '}
+              <a href="/settings" className="underline font-medium">{t('usage.upgrade')}</a>
+            </>
+          )}
+        </span>
         <button
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}

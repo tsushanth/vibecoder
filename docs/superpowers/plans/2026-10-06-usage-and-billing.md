@@ -79,3 +79,9 @@ Proposed wiring, when the decisions below are made (not built):
 4. **Who pays.** The creator (assumed here), or the end users of a published app; and whether the 55% creator share on generation spend still applies to usage charges (this plan says no).
 5. **Granularity and timing.** Daily settlement (proposed) or per period; whether the creator gets a warning before charging starts (the 80% warning state exists in the panel).
 6. **Mounting the coin system.** `coins.routes.js` is not mounted and `spend` is unauthenticated; decide whether coins are the unit at all or whether usage is simply folded into the subscription price.
+
+## Decision taken (owner, 2026-10-06): tiers only, no per-unit charging
+
+Answers to the six questions above: (1) no unit is charged; (2) the plan sets the size of the caps: Free keeps the platform defaults, Pro gets 5x and Team 20x of every cap (`backend/lib/tierLimits.js`, multipliers are the only numbers to tune); (3) at a cap the request fails with a clear message and the creator's Usage panel shows "Limit reached" with an upgrade link; (4) the creator pays (the plan is theirs); (5) nothing is settled or charged, so there is no timing; (6) coins are not used for usage, and the unmounted `coins.routes.js` must not be mounted until `spend` takes a verified user.
+
+How it works: when a creator publishes, `backend/services/tierSync.js` reads the app's defaults from the proxy and applies the override set for the creator's effective tier (`getSubscriptionStatus`, which already treats expired and non-active subscriptions as Free). The same function runs right after a receipt verification, after any Stripe subscription webhook (debounced), and in a 15 minute sweep of everyone with a Pro or Team subscription row, which also lowers the caps again after an expiry or downgrade. `TIER_SWEEP_MS=0` turns the sweep off. Everything is best effort and never fails a deploy.

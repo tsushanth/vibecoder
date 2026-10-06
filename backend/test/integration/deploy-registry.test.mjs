@@ -16,17 +16,19 @@ const JOBS_BUNDLE = zip([file('index.html', '<html></html>'), file('vibe.schema.
 const { supabase } = await import('../../config/database.js');
 
 let undeployRows = [{ subdomain: 'my-app', user_id: 'owner-1' }];
+let subscriptionRow = null; // what user_subscriptions returns for the deploying user (null = no row, which the service reads as an error)
 stubSupabase(supabase, (q) => {
     if (q.table === 'deployments' && q.op === 'select' && q.single) return { data: null, error: { code: 'PGRST116' } };
     if (q.table === 'deployments' && q.op === 'select') return { data: undeployRows.filter((r) => eqOf(q, 'project_id') === 'proj-1' && eqOf(q, 'user_id') === r.user_id), error: null };
     if (q.table === 'projects' && q.op === 'select' && q.single) return ['proj-1', 'proj-manifest', 'proj-schema', 'proj-jobs'].includes(eqOf(q, 'id')) ? { data: { bundle: eqOf(q, 'id') === 'proj-manifest' ? MANIFEST_BUNDLE : eqOf(q, 'id') === 'proj-schema' ? SCHEMA_BUNDLE : eqOf(q, 'id') === 'proj-jobs' ? JOBS_BUNDLE : 'QUJD', creator_id: 'owner-1', github_repo: null, preview_url: null }, error: null } : { data: null, error: { code: 'PGRST116' } };
+    if (q.table === 'user_subscriptions' && q.op === 'select') return subscriptionRow ? { data: subscriptionRow, error: null } : { data: null, error: { code: 'PGRST116' } };
     return { data: null, error: null };
 });
 const { default: router } = await import('../../routes/deploy.routes.js');
 
 const realFetch = globalThis.fetch; let deployStatus = 200;
-const calls = []; let behavior = {};
-const fakeProxy = (configured = true) => ({ configured, ensureApp: async (a) => { calls.push(['ensure', a]); if (behavior.ensure) throw behavior.ensure; }, setEnabled: async (a, e) => { calls.push(['enabled', a, e]); if (behavior.enabled) throw behavior.enabled; }, setManifest: async (a, m) => { calls.push(['manifest', a, m]); }, copySecrets: async (to, from, o) => { calls.push(['copy', to, from, o]); return { copied: 0 }; }, setSchema: async (a, spec, o) => { calls.push(['schema', a, spec, o]); if (behavior.schema) throw behavior.schema; return behavior.schemaOut || { version: 1, applied: 2 }; }, setJobs: async (a, spec) => { calls.push(['jobs', a, spec]); if (behavior.jobs) throw behavior.jobs; return { jobs: 1, warnings: [] }; } });
+const calls = []; const limitCalls = []; let behavior = {};
+const fakeProxy = (configured = true) => ({ configured, getLimits: async (a) => { limitCalls.push(['limits-get', a]); return { defaults: { rowCap: 20000, dailyCalls: 5000 }, overrides: behavior.overrides || {} }; }, setLimits: async (a, o) => { limitCalls.push(['limits-set', a, o]); if (behavior.limitsErr) throw behavior.limitsErr; }, ensureApp: async (a) => { calls.push(['ensure', a]); if (behavior.ensure) throw behavior.ensure; }, setEnabled: async (a, e) => { calls.push(['enabled', a, e]); if (behavior.enabled) throw behavior.enabled; }, setManifest: async (a, m) => { calls.push(['manifest', a, m]); }, copySecrets: async (to, from, o) => { calls.push(['copy', to, from, o]); return { copied: 0 }; }, setSchema: async (a, spec, o) => { calls.push(['schema', a, spec, o]); if (behavior.schema) throw behavior.schema; return behavior.schemaOut || { version: 1, applied: 2 }; }, setJobs: async (a, spec) => { calls.push(['jobs', a, spec]); if (behavior.jobs) throw behavior.jobs; return { jobs: 1, warnings: [] }; } });
 let srv, srvNoProxy;
 before(async () => {
     globalThis.fetch = (url, opts = {}) => { const u = new URL(String(url)); if (u.hostname === '127.0.0.1') return realFetch(url, opts); return Promise.resolve(new Response(deployStatus === 200 ? '{}' : '{"error":"boom"}', { status: deployStatus, headers: { 'content-type': 'application/json' } })); };
@@ -34,7 +36,7 @@ before(async () => {
     srv = await mk(fakeProxy()); srvNoProxy = await mk(null);
 });
 after(async () => { globalThis.fetch = realFetch; await srv.close(); await srvNoProxy.close(); });
-const reset = () => { calls.length = 0; behavior = {}; deployStatus = 200; undeployRows = [{ subdomain: 'my-app' }]; };
+const reset = () => { calls.length = 0; limitCalls.length = 0; behavior = {}; subscriptionRow = null; deployStatus = 200; undeployRows = [{ subdomain: 'my-app' }]; };
 const post = (s, body, pid = 'proj-1', token) => realFetch(`${s.base}/api/deploy/${pid}/deploy`, { method: 'POST', headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify(body) });
 const del = (s, body, pid = 'proj-1') => realFetch(`${s.base}/api/deploy/${pid}/deploy`, { method: 'DELETE', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
 const quiet = async (fn) => { const w = console.warn, l = console.log, e = console.error; console.warn = console.log = console.error = () => {}; try { return await fn(); } finally { console.warn = w; console.log = l; console.error = e; } };
@@ -182,4 +184,25 @@ test('rejected or failed jobs do not fail the deploy but are surfaced; a bundle 
     reset();
     r = await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app' }, 'proj-schema'));
     assert.equal('jobsStatus' in (await r.json()), false);
+});
+
+test('deploy: a Pro creator\'s app gets 5x caps, a Free creator\'s app stays on the defaults, and the proxy is not touched when nothing changes', async () => {
+    reset(); subscriptionRow = { tier: 'pro', status: 'active', expires_at: null };
+    assert.equal((await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app' }))).status, 200);
+    assert.deepEqual(limitCalls, [['limits-get', 'my-app'], ['limits-set', 'my-app', { rowCap: 100000, dailyCalls: 25000 }]]);
+    reset(); subscriptionRow = { tier: 'team', status: 'active', expires_at: null }; await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app' }));
+    assert.equal(limitCalls.find((c) => c[0] === 'limits-set')[2].rowCap, 400000);
+    reset(); subscriptionRow = null; await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app' }));
+    assert.deepEqual(limitCalls, [['limits-get', 'my-app']]); // free, nothing to change
+    reset(); subscriptionRow = { tier: 'pro', status: 'active', expires_at: null }; behavior.overrides = { rowCap: 100000, dailyCalls: 25000 };
+    await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app' })); assert.equal(limitCalls.some((c) => c[0] === 'limits-set'), false);
+});
+
+test('deploy: an expired or cancelled paid plan is treated as Free, and a failing limits call never fails the deploy', async () => {
+    reset(); subscriptionRow = { tier: 'pro', status: 'active', expires_at: '2020-01-01T00:00:00Z' }; behavior.overrides = { rowCap: 100000, dailyCalls: 25000 };
+    await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app' })); assert.deepEqual(limitCalls.find((c) => c[0] === 'limits-set'), ['limits-set', 'my-app', {}]);
+    reset(); subscriptionRow = { tier: 'pro', status: 'cancelled', expires_at: null }; behavior.overrides = { rowCap: 100000 };
+    await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app' })); assert.deepEqual(limitCalls.find((c) => c[0] === 'limits-set'), ['limits-set', 'my-app', {}]);
+    reset(); subscriptionRow = { tier: 'pro', status: 'active', expires_at: null }; behavior.limitsErr = new ProxyAdminError(0, 'unreachable');
+    const r = await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app' })); assert.equal(r.status, 200); assert.equal((await r.json()).success, true);
 });
