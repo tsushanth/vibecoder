@@ -9,7 +9,7 @@ const LINK_TTL_MS = 15 * 60_000;
 const SESSION_TTL_SEC = 30 * 24 * 3600;
 const sha = (t) => createHash('sha256').update(t).digest();
 
-export function createAuthService({ store, limiterStore, mailer, linkFor, masterKey, now = () => Date.now(), limits = {} }) {
+export function createAuthService({ store, limiterStore, mailer, linkFor, masterKey, now = () => Date.now(), limits = {}, limitsFor }) {
     const L = { perEmailPerHour: 5, perIpPerHour: 20, perAppPerDay: 200, ...limits };
     const key = (appId) => deriveAppKey(masterKey, appId);
     const hour = () => Math.floor(now() / 3_600_000);
@@ -21,9 +21,11 @@ export function createAuthService({ store, limiterStore, mailer, linkFor, master
             const e = typeof email === 'string' ? email.trim().toLowerCase() : '';
             if (e.length > 254 || !EMAIL.test(e)) return { ok: false, reason: 'invalid_email' };
             try {
+                const o = limitsFor ? await limitsFor(appId) : null; // per-app override of the emails-per-day cap
+                const appCap = Number.isInteger(o?.emailsPerDay) ? o.emailsPerDay : L.perAppPerDay;
                 if ((await limiterStore.incr(`authmail:${appId}:${e}:${hour()}`, 7200)) > L.perEmailPerHour) return { ok: false, reason: 'rate_limited' };
                 if ((await limiterStore.incr(`authip:${appId}:${ip}:${hour()}`, 7200)) > L.perIpPerHour) return { ok: false, reason: 'rate_limited' };
-                if ((await limiterStore.incr(`authapp:${appId}:${day()}`, 26 * 3600)) > L.perAppPerDay) return { ok: false, reason: 'rate_limited' };
+                if ((await limiterStore.incr(`authapp:${appId}:${day()}`, 26 * 3600)) > appCap) return { ok: false, reason: 'rate_limited' };
             } catch { return { ok: false, reason: 'unavailable' }; }
             const token = randomBytes(32).toString('base64url');
             try {
