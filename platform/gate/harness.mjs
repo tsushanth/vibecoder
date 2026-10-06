@@ -3,7 +3,7 @@
 // Everything is local: nothing here can reach the live proxy, production Supabase or a real third party.
 import { randomBytes } from 'node:crypto';
 import { scratchDb, masterKey } from '../store/test/helpers.mjs';
-import { startServer } from '../proxy-app/start.js';
+import { startServer, makePool } from '../proxy-app/start.js';
 import { createPgStores } from '../store/pg.js';
 import { loadConfig } from '../proxy-app/config.js';
 
@@ -24,7 +24,6 @@ export async function startPlatform({ connLimit = null, poolMax = 5, env = {}, l
     const MK = masterKey();
     const loginName = `gate_proxy_${randomBytes(4).toString('hex')}`;
     await db.admin.query(`create role ${loginName} login in role vibe_proxy${connLimit ? ` connection limit ${Number(connLimit)}` : ''}`);
-    const proxyPool = db.connFor({ user: loginName, max: poolMax });
     const mails = [], r2calls = [], stripeCalls = [], upstreamCalls = [];
     const fetchImpl = async (url, init = {}) => {
         const u = String(url);
@@ -38,9 +37,11 @@ export async function startPlatform({ connLimit = null, poolMax = 5, env = {}, l
     };
     const resolve = async () => ['93.184.216.34'];
     const cfg = loadConfig({
-        DATABASE_URL: 'postgres://unused/x', VIBE_MASTER_KEY: MK, OPENROUTER_API_KEY: 'sk-or-v1-FAKE', BASE_DOMAIN, PORT: '8080', PROXY_ADMIN_TOKEN: ADMIN_T,
+        DATABASE_URL: `postgres://${loginName}@${process.env.PGHOST || 'localhost'}:${process.env.PGPORT || 5432}/${db.name}`, DB_POOL_MAX: String(poolMax), VIBE_MASTER_KEY: MK, OPENROUTER_API_KEY: 'sk-or-v1-FAKE', BASE_DOMAIN, PORT: '8080', PROXY_ADMIN_TOKEN: ADMIN_T,
         RESEND_API_KEY: 're_testkey12345', AUTH_MAIL_FROM: 'login@mail.vibebuild.cc', PER_IP_PER_MIN: '100000', PER_APP_PER_MIN: '1000000', DAILY_CALLS: '100000000', ...R2ENV, ...env,
     });
+    // the pool is built exactly as in production (makePool: DB_POOL_MAX, 5 s connect/queue timeout, 30 s idle timeout)
+    const proxyPool = makePool(cfg); proxyPool.on('error', () => {});
     const srv = await startServer(cfg, { pool: proxyPool, listenPort: 0, fetchImpl, resolve, log });
     const stores = createPgStores({ pool: db.pool, masterKey: MK });
     let ipn = 0;
