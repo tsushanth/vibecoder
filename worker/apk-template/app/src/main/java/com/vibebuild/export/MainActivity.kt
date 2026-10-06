@@ -3,6 +3,9 @@ package com.vibebuild.export
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.widget.FrameLayout
+import android.content.res.Configuration
+import androidx.core.view.ViewCompat
 import android.view.WindowManager
 import android.webkit.WebChromeClient
 import android.webkit.WebView
@@ -29,7 +32,23 @@ class MainActivity : AppCompatActivity() {
         window.navigationBarColor = android.graphics.Color.TRANSPARENT
 
         webView = WebView(this)
-        setContentView(webView)
+        // The WebView sits in a container that takes the system bar and keyboard insets as padding, so page content is never
+        // drawn under the status bar, the navigation bar or the keyboard (edge-to-edge alone does not resize for the IME).
+        val root = FrameLayout(this)
+        root.addView(webView, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))
+        setContentView(root)
+        ViewCompat.setOnApplyWindowInsetsListener(root) { v, windowInsets ->
+            val bars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+            val ime = windowInsets.getInsets(WindowInsetsCompat.Type.ime())
+            v.setPadding(bars.left, bars.top, bars.right, maxOf(bars.bottom, ime.bottom))
+            WindowInsetsCompat.CONSUMED
+        }
+        // The bars sit over the window background (light or dark by system mode), so pick dark icons on light and light icons on dark.
+        val night = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        WindowInsetsControllerCompat(window, root).apply {
+            isAppearanceLightStatusBars = !night
+            isAppearanceLightNavigationBars = !night
+        }
 
         // Served from https://<app>.vibebuild.cc (bundled files answer locally), so the page has a real origin that the platform
         // proxy accepts. With no host configured the app falls back to the old file:// mode.
