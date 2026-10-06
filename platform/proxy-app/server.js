@@ -8,6 +8,7 @@ import { createAdmin } from './admin.js';
 import { handleAuth, AUTH_OPS } from '../auth/routes.js';
 import { PAY_ROUTE } from '../pay/http.js';
 import { handleDb } from '../data/routes.js';
+import { kindForRoute } from '../vibe-proxy/usage.js';
 import { handleStorage, STORAGE_OPS, MAX_UPLOAD_BYTES } from '../storage/routes.js';
 
 const MAX_BODY = 200_000;
@@ -41,8 +42,8 @@ export async function readRaw(req, max) {
     return size > max ? { error: 413 } : { value: Buffer.concat(chunks) };
 }
 
-export function createHandler({ dataExecutor, storageService, authService, appStore, secretStore, limiter, globalAiLimiter, meter, fetchImpl, resolve, openRouterKey, log = () => {}, baseDomain, adminToken, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, limiterStore, payHttp, notifyHttp, jobsAdmin }) {
-    const admin = adminToken ? createAdmin({ token: adminToken, jobsAdmin, appStore, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, secretStore, limiterStore, baseDomain, dataExecutor }) : null;
+export function createHandler({ dataExecutor, storageService, authService, appStore, secretStore, limiter, globalAiLimiter, meter, fetchImpl, resolve, openRouterKey, log = () => {}, baseDomain, adminToken, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, limiterStore, payHttp, notifyHttp, jobsAdmin, usage, usageAdmin, limitsFor }) {
+    const admin = adminToken ? createAdmin({ token: adminToken, jobsAdmin, usageAdmin, appStore, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, secretStore, limiterStore, baseDomain, dataExecutor }) : null;
     const aiLimiter = {
         async check(a) {
             const r = await limiter.check(a);
@@ -50,15 +51,18 @@ export function createHandler({ dataExecutor, storageService, authService, appSt
             const g = await globalAiLimiter.check({ appId: '__platform_ai__', ip: 'platform' });
             return g.ok ? g : { ok: false, reason: g.reason === 'spend_cap' ? 'platform_ai_cap' : g.reason, retryAfterSec: g.retryAfterSec };
         },
-        async recordSpend(a) { await limiter.recordSpend(a); await globalAiLimiter.recordSpend({ appId: '__platform_ai__', micros: a.micros }); },
+        async recordSpend(a) { await limiter.recordSpend(a); await usage?.record({ appId: a.appId, kind: 'ai', calls: 0, spendMicros: a.micros }); await globalAiLimiter.recordSpend({ appId: '__platform_ai__', micros: a.micros }); },
     };
 
     return async function handler(req, res) {
         const t0 = Date.now();
         let appId = '-', route = '-', headers = { ...BASE_HEADERS };
+        let ukind = null, urows = 0, ubytes = 0; // what to meter for this request; set once the route and app are known
         const send = (status, body, extra = {}) => {
             res.writeHead(status, { ...headers, ...extra });
             res.end(body ?? '');
+            // counts, bytes, ms and status only. A 404 (unknown app or route) is never metered, so garbage app ids cannot create rows.
+            if (ukind && usage && status !== 404) usage.record({ appId, kind: ukind, status, ms: Date.now() - t0, rows: urows, bytes: ubytes }).catch(() => {});
             log(JSON.stringify({ ts: new Date().toISOString(), event: 'request', appId, route, status, ms: Date.now() - t0 }));
         };
         const sendJson = (status, obj) => send(status, JSON.stringify(obj), { 'content-type': 'application/json' });
@@ -70,16 +74,16 @@ export function createHandler({ dataExecutor, storageService, authService, appSt
                 appId = /^\/admin\/apps\/([^/]+)/.exec(url.pathname)?.[1]?.slice(0, 63) || '-';
                 if (!admin) return sendJson(404, { error: 'not_found' });
                 const ip = req.headers['fly-client-ip'] || req.socket.remoteAddress || '';
-                const out = await admin({ method: req.method, pathname: url.pathname, headers: req.headers, ip, readBody: (limit) => readJson(req, limit) });
+                const out = await admin({ method: req.method, pathname: url.pathname, query: url.searchParams, headers: req.headers, ip, readBody: (limit) => readJson(req, limit) });
                 return out.body === undefined ? send(out.status, '') : sendJson(out.status, out.body);
             }
             if (notifyHttp) { // end-user notifications (platform/notify): answers null for any other path
                 const nout = await notifyHttp.handle(req, url, req.headers['fly-client-ip'] || req.socket.remoteAddress || '');
-                if (nout) { appId = nout.appId; route = 'notify'; headers = { ...headers, ...nout.headers }; return send(nout.status, nout.body); }
+                if (nout) { appId = nout.appId; route = 'notify'; if (url.pathname.endsWith('/notify/me') && req.method === 'POST') ukind = kindForRoute('notify/me'); headers = { ...headers, ...nout.headers }; return send(nout.status, nout.body); }
             }
             const pm = payHttp ? PAY_ROUTE.exec(url.pathname) : null; // creator-keyed Stripe checkout: /<app>/pay/{checkout,orders,webhook}
             if (pm) {
-                [, appId] = pm; route = `pay/${pm[2]}`;
+                [, appId] = pm; route = `pay/${pm[2]}`; if (req.method === 'POST') ukind = kindForRoute(route);
                 const out = await payHttp.handle({ op: pm[2], appId, req, ip: req.headers['fly-client-ip'] || req.socket.remoteAddress || '' });
                 headers = { ...headers, ...out.headers };
                 return out.body === undefined ? send(out.status, '') : sendJson(out.status, out.body);
@@ -99,6 +103,7 @@ export function createHandler({ dataExecutor, storageService, authService, appSt
             if (req.method !== 'POST') return sendJson(405, { error: 'method_not_allowed' });
             if (!okOrigin) return sendJson(403, { error: 'origin_not_allowed' });
             if (!app.enabled) return sendJson(403, { error: 'app_disabled' });
+            if (route !== 'api' && route !== 'ai') ukind = kindForRoute(route); // api and ai are metered by the meter, with their connector and spend
             const isUpload = route === 'storage/upload';
             const body = isUpload ? await readRaw(req, MAX_UPLOAD_BYTES) : await readJson(req);
             if (body.error) return sendJson(body.error, { error: body.error === 413 ? 'request_too_large' : 'bad_json' });
@@ -108,7 +113,8 @@ export function createHandler({ dataExecutor, storageService, authService, appSt
                 const gate = await limiter.check({ appId, ip });
                 if (!gate.ok) return sendJson(gate.reason === 'app_disabled' ? 403 : 429, { error: gate.reason });
                 const bearer = /^Bearer (\S+)$/.exec(String(req.headers.authorization || ''))?.[1];
-                const out = await handleDb({ body: body.value, bearer, appId, auth: authService, executor: dataExecutor });
+                const out = await handleDb({ body: body.value, bearer, appId, auth: authService, executor: dataExecutor, limitsFor });
+                urows = Array.isArray(out.body?.rows) ? out.body.rows.length : 0;
                 return sendJson(out.status, out.body);
             }
             if (route.startsWith('storage/')) {
@@ -116,6 +122,7 @@ export function createHandler({ dataExecutor, storageService, authService, appSt
                 if (!gate.ok) return sendJson(gate.reason === 'app_disabled' ? 403 : 429, { error: gate.reason });
                 const bearer = /^Bearer (\S+)$/.exec(String(req.headers.authorization || ''))?.[1];
                 const out = await handleStorage({ op: route.slice(8), bearer, query: url.searchParams, contentType: req.headers['content-type'], body: isUpload ? body.value : undefined, json: isUpload ? undefined : body.value, appId, auth: authService, storage: storageService });
+                if (isUpload && out.status === 200) ubytes = body.value.length;
                 return sendJson(out.status, out.body);
             }
             if (route.startsWith('auth/')) {

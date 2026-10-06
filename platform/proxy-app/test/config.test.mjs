@@ -81,3 +81,11 @@ test('notification settings are part of the config and a bad one refuses to star
     assert.equal(loadConfig({ ...base(), NOTIFY_GLOBAL_PER_DAY: '77' }).notify.limits.globalPerDay, 77);
     assert.throws(() => loadConfig({ ...base(), NOTIFY_USER_PER_HOUR: 'x' }), (err) => err.message.includes('NOTIFY_USER_PER_HOUR'));
 });
+
+test('USAGE_FLUSH_MS defaults to 5000, accepts 0..60000 and rejects the rest', () => {
+    const env = { DATABASE_URL: 'postgres://x/y', VIBE_MASTER_KEY: 'a'.repeat(64), OPENROUTER_API_KEY: 'k', BASE_DOMAIN: 'vibebuild.cc', PROXY_ADMIN_TOKEN: 'z'.repeat(40) };
+    assert.equal(loadConfig(env).usageFlushMs, 5000);
+    assert.equal(loadConfig({ ...env, USAGE_FLUSH_MS: '0' }).usageFlushMs, 0);
+    assert.equal(loadConfig({ ...env, USAGE_FLUSH_MS: '60000' }).usageFlushMs, 60000);
+    for (const v of ['-1', '60001', 'x', '1.5']) assert.throws(() => loadConfig({ ...env, USAGE_FLUSH_MS: v }), /USAGE_FLUSH_MS/, v);
+});
