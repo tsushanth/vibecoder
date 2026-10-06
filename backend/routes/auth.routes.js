@@ -1,13 +1,18 @@
 import express from 'express';
 import { supabase, supabaseAdmin } from '../config/database.js';
+import { verifiedUserId } from '../lib/verifiedUser.js';
 
+export function createAuthRouter({ verifyUser = verifiedUserId } = {}) {
 const router = express.Router();
 
 // DELETE /api/auth/account - Delete user account and all associated data
 router.delete('/account', async (req, res) => {
     try {
-        const { userId } = req.body;
-        if (!userId) return res.status(400).json({ error: 'userId is required' });
+        // Deleting an account is irreversible, and user ids are not secret (a creator id is part of every public project), so
+        // the caller must prove who they are with their own access token; a userId in the body is never trusted.
+        const userId = await verifyUser(req);
+        if (!userId) return res.status(401).json({ error: 'Sign in again to delete your account.' });
+        if (typeof req.body?.userId === 'string' && req.body.userId !== userId) return res.status(403).json({ error: 'You can only delete your own account.' });
 
         // Delete the user's data in dependency order. A project's deployments reference it, so they go first; the old
         // list filtered deployments by a column that does not exist, so the project, and then the user, could never be deleted
@@ -100,4 +105,7 @@ router.post('/push-token', async (req, res) => {
 });
 
 
-export default router;
+return router;
+}
+
+export default createAuthRouter();
