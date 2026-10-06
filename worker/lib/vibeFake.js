@@ -1,4 +1,4 @@
-// In-memory stand-in for vibe.auth, vibe.db and vibe.storage, used only by the headless browser check so that a generated app is
+// In-memory stand-in for vibe.auth, vibe.db, vibe.storage, vibe.pay and vibe.notify, used only by the headless browser check so that a generated app is
 // never failed for a network error and never talks to the real proxy. installFake runs INSIDE the page (it is serialised with
 // toString), so it must stay self-contained: no imports, no references to anything outside its own body.
 // It follows the behaviour contract the generator is taught (lib/vibe.js VIBE_RULES): signIn resolves, user() is a signed-in
@@ -117,6 +117,37 @@ export function installFake(w) {
                     });
                 }
             };
+        }
+    };
+
+    // vibe.pay: checkout resolves with a Stripe-looking url and NEVER navigates (the real SDK would), orders is empty. Same input rules as the SDK.
+    v.pay = {
+        checkout: function (o) {
+            return Promise.resolve().then(function () {
+                o = o || {};
+                if (typeof o.item !== 'string' || !o.item) throw fail('vibe.pay.checkout({item}): item must be a catalog item id', 0, 'bad_request');
+                var q = o.quantity === undefined ? 1 : o.quantity;
+                if (typeof q !== 'number' || q !== Math.floor(q) || q < 1) throw fail('vibe.pay.checkout: quantity must be a whole number of at least 1', 0, 'bad_request');
+                return { url: 'https://checkout.stripe.com/c/pay/cs_test_check', mode: 'test' };
+            });
+        },
+        orders: function () {
+            return Promise.resolve().then(function () {
+                if (!signedIn) throw fail('vibe.pay.orders: sign in first', 401, 'unauthorized');
+                return [];
+            });
+        }
+    };
+
+    // vibe.notify: only ever "emails" the signed-in user; the limits are the server's (subject 120, text 2000).
+    v.notify = {
+        me: function (o) {
+            return Promise.resolve().then(function () {
+                if (!o || typeof o !== 'object' || typeof o.subject !== 'string' || !o.subject.trim() || typeof o.text !== 'string' || !o.text.trim()) throw fail('vibe.notify.me({subject, text}): subject and text must be non-empty strings', 0, 'bad_request');
+                if (!signedIn) throw fail('vibe.notify.me: the user must be signed in', 401, 'unauthorized');
+                if (o.subject.length > 120 || o.text.length > 2000) throw fail('subject must be at most 120 and text at most 2000 characters', 400, 'invalid_content');
+                return { ok: true };
+            });
         }
     };
 

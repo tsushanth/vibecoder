@@ -63,7 +63,7 @@ function skipString(s, i) {
 }
 
 /** s[open] is an opening bracket; returns the index of its matching close, or -1. */
-function matching(s, open) {
+export function matching(s, open) {
     let depth = 0;
     for (let i = open; i < s.length; i++) {
         const c = s[i];
@@ -75,7 +75,7 @@ function matching(s, open) {
 }
 
 /** Splits the inside of a call on its top-level commas. */
-function splitArgs(inner) {
+export function splitArgs(inner) {
     const parts = [];
     let depth = 0;
     let start = 0;
