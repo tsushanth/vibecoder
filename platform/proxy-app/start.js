@@ -91,7 +91,7 @@ export async function startServer(config, { pool: injected, listenPort, jobsTick
         usageAdmin: createUsageAdmin({ appStore: stores.appStore, usageStore: stores, limitsStore: stores.limitsStore, limitsResolver, defaults: limitDefaults, executor: dataExecutor, storageStore: createStorageStore({ pool }), limiterStore: stores.limiterStore }),
         storageService, authService, notifyHttp: createNotifyHttp({ svc: notifyService, auth: authService, appStore: stores.appStore, limiter, baseDomain: config.baseDomain }), payHttp: createPayHttp({ service: payService, appStore: stores.appStore, baseDomain: config.baseDomain }),
         appStore: stores.appStore, secretStore: stores.secretStore, limiter, globalAiLimiter,
-        meter, fetchImpl, resolve,
+        meter, fetchImpl, resolve, maxInflight: config.maxInflight,
         openRouterKey: config.secrets.openRouterKey, log, baseDomain: config.baseDomain,
         adminToken: config.secrets.adminToken, upsertApp: stores.upsertApp, ensureApp: stores.ensureApp, setEnabled: stores.setEnabled, setDomains: stores.setDomains, setManifest: stores.setManifest, copySecrets: stores.copySecrets, limiterStore: stores.limiterStore,
     });
