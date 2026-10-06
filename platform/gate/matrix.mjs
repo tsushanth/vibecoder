@@ -111,6 +111,8 @@ function storageOps() {
             ops.push({ route: `storage/${op}`, id: `storage.${op}.victim_${n}_file`, build: (c) => ({ path: `/${c.id.app}/storage/${op}`, body: { id: pick(c.vic) } }), exp: { anon: U401, bad: U401, own: E(404, 'not_found', { r2: 0 }) } });
         }
     }
+    // intra-app: a user must not read or delete another user's private file in the same app
+    for (const op of ['url', 'delete']) ops.push({ route: `storage/${op}`, id: `storage.${op}.peer_private_file`, build: (c) => ({ path: `/${c.id.app}/storage/${op}`, body: { id: c.att.fileU2.id } }), exp: { anon: U401, bad: U401, own: E(404, 'not_found', { r2: 0 }) } });
     const ids = (c) => ['../..', "x' or 1=1--", '', null, 7, [c.vic.filePriv.id], { id: c.vic.filePriv.id }, c.vic.filePriv.id.toUpperCase() + ' ', `${c.vic.filePriv.id}/../x`];
     for (let i = 0; i < 9; i++) for (const op of ['url', 'delete']) ops.push({ route: `storage/${op}`, id: `storage.${op}.id_abuse_${i}`, build: (c) => ({ path: `/${c.id.app}/storage/${op}`, body: { id: ids(c)[i] } }), exp: { anon: U401, bad: U401, own: E(404, 'not_found', { r2: 0 }) } });
     return ops;
@@ -137,7 +139,7 @@ export function buildOps() {
     // ---- pay ----
     ops.push({ route: 'pay/checkout', id: 'pay.checkout.victim_item', build: (c) => ({ path: `/${c.id.app}/pay/checkout`, body: { item: c.vic.item, quantity: 1 } }),
         exp: { anon: E(200, undefined, { stripe: 1, check: payCheck }), bad: E(200, undefined, { stripe: 1, check: payCheck }), own: E(404, 'unknown_item', { stripe: 0 }) } });
-    ops.push({ route: 'pay/orders', id: 'pay.orders', build: (c) => ({ path: `/${c.id.app}/pay/orders`, body: {} }), exp: { anon: U401, bad: U401, own: E(200, undefined, { check: (r, c) => (r.json.orders || []).every((o) => o.sessionId === c.att.orderSession) }) } });
+    ops.push({ route: 'pay/orders', id: 'pay.orders', build: (c) => ({ path: `/${c.id.app}/pay/orders`, body: {} }), exp: { anon: U401, bad: U401, own: E(200, undefined, { check: (r, c) => (r.json.orders || []).length === 1 && r.json.orders[0].sessionId === c.att.orderSession }) } });
     ops.push({ route: 'pay/webhook', id: 'pay.webhook.signed_with_attacker_secret', build: (c) => { const raw = hookBody(c); return { path: `/${c.id.app}/pay/webhook`, raw: true, body: raw, headers: { 'stripe-signature': stripeSign(raw, c.att.whSecret) } }; }, exp: { anon: E(400, 'bad_signature'), bad: E(400, 'bad_signature'), own: E(200, undefined, { check: (r) => r.json?.ignored === true }) } });
     ops.push({ route: 'pay/webhook', id: 'pay.webhook.unsigned', build: (c) => ({ path: `/${c.id.app}/pay/webhook`, raw: true, body: hookBody(c) }), exp: { anon: E(400, 'bad_signature'), bad: E(400, 'bad_signature'), own: E(400, 'bad_signature') } });
     ops.push({ route: 'pay/webhook', id: 'pay.webhook.signed_with_other_secrets', build: (c) => { const raw = hookBody(c); return { path: `/${c.id.app}/pay/webhook`, raw: true, body: raw, headers: { 'stripe-signature': stripeSign(raw, c.p.MK) } }; }, exp: { anon: E(400, 'bad_signature'), bad: E(400, 'bad_signature'), own: E(400, 'bad_signature') } });

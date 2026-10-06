@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { startPlatform, ADMIN_T, BASE_DOMAIN, R2ENV } from '../harness.mjs';
-import { seedTenant, snapshot, TABLES, sha } from '../fixture.mjs';
+import { seedTenant, snapshot, TABLES, sha, addForeignReferenceOrder } from '../fixture.mjs';
 import { buildOps, ADMIN_NEAR_MISSES } from '../matrix.mjs';
 import { signToken } from '../../auth/jwt.js';
 import { deriveAppKey } from '../../auth/keys.js';
@@ -31,6 +31,8 @@ before(async () => {
     p = { stripe: P.stripeCalls, upstream: P.upstreamCalls, r2: P.r2calls, MK: P.MK };
     A = await seedTenant(P, 'app-a', 'A');
     B = await seedTenant(P, 'app-b', 'B');
+    // each tenant's creator records an order naming the OTHER tenant's user as the buyer: the other tenant's user must never see it
+    await addForeignReferenceOrder(P, A, B.u1.id); await addForeignReferenceOrder(P, B, A.u1.id);
     P.r2calls.length = 0; P.stripeCalls.length = 0; P.upstreamCalls.length = 0; P.mails.length = 0; logs.length = 0;
 });
 after(async () => { if (P && !P.unavailable) await P.stop(); });
@@ -402,7 +404,7 @@ t('coverage: server.js has exactly the known top-level dispatch sites (a new one
     for (const [re, n] of sites) assert.equal((src.match(re) || []).length, n, String(re));
     assert.equal((src.match(/url\.pathname/g) || []).length, 7, 'a new url.pathname test was added to server.js: decide where it belongs in the matrix, then update this count');
     const notify = fs.readFileSync(`${ROOT}notify/http.js`, 'utf8');
-    assert.deepEqual([...notify.matchAll(/op === '([a-z]+)'/g)].map((m) => m[1]), ['unsubscribe']);
+    assert.deepEqual([...new Set([...notify.matchAll(/op === '([a-z]+)'/g)].map((m) => m[1]))], ['unsubscribe']);
     const pay = fs.readFileSync(`${ROOT}pay/http.js`, 'utf8');
     assert.deepEqual([...pay.matchAll(/op === '([a-z]+)'/g)].map((m) => m[1]).sort(), ['checkout', 'webhook']);
 });

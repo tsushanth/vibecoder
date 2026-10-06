@@ -68,6 +68,8 @@ export async function seedTenant(P, app, tag) {
         return { id: r.json.file.id, name: r.json.file.name, key };
     };
     T.filePriv = await up(`${tag}-priv-canary.png`); T.filePub = await up(`${tag}-pub-canary.png`, '&public=1');
+    const u2up = await P.call(`/${app}/storage/upload?name=${encodeURIComponent(`${tag}-u2-canary.png`)}`, { token: T.u2.token, body: PNG, headers: { 'content-type': 'image/png' } });
+    T.fileU2 = { id: u2up.json.file.id, name: u2up.json.file.name, key: (await P.db.pool.query('select object_key from platform.files where id = $1', [u2up.json.file.id])).rows[0].object_key };
 
     // an order, created the legitimate way: Stripe's signed webhook for this app
     T.orderSession = `cs_${tag}CANARY001`;
@@ -86,9 +88,9 @@ export async function seedTenant(P, app, tag) {
     // Strings that must never reach a caller who is not this tenant's signed-in user.
     const c = T.canary;
     c.emails = [T.u1.email, T.u2.email, T.u3.email, T.u4.email];
-    c.ids = [T.u3.id, T.u4.id, T.rowIds['t_owner.u1'], T.rowIds['t_owner.u2'], T.rowIds['t_auth.u1'], T.rowIds['t_auth.u2'], T.rowIds['t_priv.u1'], T.filePriv.id, T.filePub.id, T.u1.jti, T.u2.jti];
+    c.ids = [T.u3.id, T.u4.id, T.rowIds['t_owner.u1'], T.rowIds['t_owner.u2'], T.rowIds['t_auth.u1'], T.rowIds['t_auth.u2'], T.rowIds['t_priv.u1'], T.filePriv.id, T.filePub.id, T.fileU2.id, T.u1.jti, T.u2.jti];
     c.values = [rows.t_owner.u1.v, rows.t_owner.u2.v, rows.t_auth.u1.v, rows.t_auth.u2.v, rows.t_priv.u1.v];
-    c.files = [T.filePriv.name, T.filePub.name, T.filePriv.key, T.filePub.key];
+    c.files = [T.filePriv.name, T.filePub.name, T.fileU2.name, T.filePriv.key, T.filePub.key, T.fileU2.key];
     c.misc = [T.orderSession, T.jobId, T.schema, T.role, T.u1.token, T.u2.token, T.u3.token, T.u4.token, T.stripeKey, T.whSecret, T.apiKey];
     // The authors' ids and the public_read rows are served to anyone on a public_read table by design: flagged `pub`, allowed only there.
     T.forbidden = () => [
@@ -111,4 +113,13 @@ export async function snapshot(P, T) {
     out.app = await q('select enabled, domains, manifest::text as manifest from platform.apps where app_id = $1', [T.app]);
     out.app_db = await q('select role_name, schema_name, spec::text as spec, version from platform.app_dbs where app_id = $1', [T.app]);
     return JSON.stringify(out);
+}
+
+/** A malicious or confused creator of `T` records an order (through T's own signed webhook) that names a user of ANOTHER app as the buyer. */
+export async function addForeignReferenceOrder(P, T, foreignUserId) {
+    const sessionId = `cs_${T.tag}FOREIGNREF002`;
+    const raw = JSON.stringify({ id: `evt_${sessionId}`, type: 'checkout.session.completed', data: { object: { id: sessionId, object: 'checkout.session', payment_status: 'paid', amount_total: 500, currency: 'usd', client_reference_id: foreignUserId, customer_email: T.u1.email, metadata: { vibe_app: T.app, vibe_item: T.item, vibe_qty: '1' } } } });
+    const r = await P.call(`/${T.app}/pay/webhook`, { body: raw, headers: { 'stripe-signature': stripeSign(raw, T.whSecret) } });
+    if (r.status !== 200 || r.json?.duplicate !== false) throw new Error('foreign-ref order failed');
+    T.foreignOrderSession = sessionId; T.canary.misc.push(sessionId);
 }
