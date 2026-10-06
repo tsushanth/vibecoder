@@ -185,3 +185,65 @@ export function installFake(w) {
 
 /** Script text to append to the real vibe.js in a check run: it replaces auth, db and storage with the in-memory fake. */
 export const FAKE_SCRIPT = `\n;(${installFake.toString()})(window);\n`;
+
+// In-memory stand-in for vibe.device, for the headless check: every call resolves a harmless value and nothing touches a camera, a
+// position or the network. Same argument rules as the SDK. Self-contained for the same reason as installFake.
+export function installDeviceFake(w) {
+    var v = w.vibe = w.vibe || {};
+    var fail = function (msg) { var e = new Error('vibe.device: ' + msg); e.status = 0; e.code = 'bad_request'; return e; };
+    var KINDS = ['light', 'medium', 'heavy', 'success', 'warning', 'error'];
+    var isInt = function (n, lo, hi) { return typeof n === 'number' && isFinite(n) && Math.floor(n) === n && n >= lo && n <= hi; };
+    var opts = function (o) { return o === undefined || (o !== null && typeof o === 'object' && !Array.isArray(o)); };
+    var q = function (fn) { return Promise.resolve().then(fn); };
+    var GIF = [71, 73, 70, 56, 57, 97, 1, 0, 1, 0, 0, 0, 0, 44, 0, 0, 0, 0, 1, 0, 1, 0, 0, 2, 0, 59];
+    v.device = {
+        isNative: function () { return false; },
+        camera: {
+            capture: function (o) {
+                return q(function () {
+                    if (!opts(o)) throw fail('camera.capture(options): options must be an object');
+                    o = o || {};
+                    if (o.facing !== undefined && o.facing !== 'environment' && o.facing !== 'user') throw fail('camera.capture: facing must be "environment" or "user"');
+                    if (o.maxBytes !== undefined && !isInt(o.maxBytes, 1, 10485760)) throw fail('camera.capture: maxBytes must be an integer 1..10485760');
+                    if (o.timeoutMs !== undefined && !isInt(o.timeoutMs, 1000, 900000)) throw fail('camera.capture: timeoutMs must be an integer 1000..900000');
+                    var bytes = new Uint8Array(GIF);
+                    return { blob: new Blob([bytes], { type: 'image/gif' }), type: 'image/gif', size: bytes.length, name: 'photo.gif' };
+                });
+            }
+        },
+        geolocation: {
+            get: function (o) {
+                return q(function () {
+                    if (!opts(o)) throw fail('geolocation.get(options): options must be an object');
+                    o = o || {};
+                    if (o.highAccuracy !== undefined && typeof o.highAccuracy !== 'boolean') throw fail('geolocation.get: highAccuracy must be a boolean');
+                    if (o.timeoutMs !== undefined && !isInt(o.timeoutMs, 1000, 60000)) throw fail('geolocation.get: timeoutMs must be an integer 1000..60000');
+                    if (o.maxAgeMs !== undefined && !isInt(o.maxAgeMs, 0, 600000)) throw fail('geolocation.get: maxAgeMs must be an integer 0..600000');
+                    return { lat: 37.7749, lng: -122.4194, accuracy: 25, timestamp: 1767225600000 };
+                });
+            }
+        },
+        share: function (o) {
+            return q(function () {
+                if (o === null || typeof o !== 'object' || Array.isArray(o)) throw fail('share({title, text, url}): options must be an object');
+                var keys = Object.keys(o);
+                for (var i = 0; i < keys.length; i++) if (keys[i] !== 'title' && keys[i] !== 'text' && keys[i] !== 'url') throw fail('share: unknown option');
+                if (o.title !== undefined && (typeof o.title !== 'string' || !o.title || o.title.length > 200)) throw fail('share: title must be a string of 1 to 200 characters');
+                if (o.text !== undefined && (typeof o.text !== 'string' || !o.text || o.text.length > 2000)) throw fail('share: text must be a string of 1 to 2000 characters');
+                if (o.url !== undefined && (typeof o.url !== 'string' || o.url.length > 2000 || !/^https?:\/\/[^\s]+$/i.test(o.url))) throw fail('share: url must be an http(s) URL');
+                if (o.title === undefined && o.text === undefined && o.url === undefined) throw fail('share: give at least one of title, text, url');
+                return { shared: true, copied: false };
+            });
+        },
+        haptics: {
+            tap: function (kind) {
+                return q(function () {
+                    if (typeof kind !== 'string' || KINDS.indexOf(kind) < 0) throw fail('haptics.tap(kind): kind must be one of ' + KINDS.join(', '));
+                    return { ok: true };
+                });
+            }
+        }
+    };
+}
+
+export const DEVICE_FAKE_SCRIPT = `\n;(${installDeviceFake.toString()})(window);\n`;
