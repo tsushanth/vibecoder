@@ -142,7 +142,11 @@ export async function runStep({ server, mode = 'closed', users = 10, rps = 50, d
 export async function statementsPerOp({ server }) {
     const ops = { ...makeOps(server) }; ops.ctx = () => ({ app: server.apps[0], user: server.apps[0].users[0] });
     const out = {};
-    for (const name of Object.keys(ops).filter((k) => k !== 'ctx')) { await server.stats(true); await doOp(ops, name); await sleep(30); out[name] = (await server.stats(false)).queries; }
+    for (const name of Object.keys(ops).filter((k) => k !== 'ctx')) {
+        const counts = [];
+        for (let i = 0; i < 7; i++) { await server.stats(true); await doOp(ops, name); await sleep(40); counts.push((await server.stats(false)).queries); }
+        counts.sort((a, b) => a - b); out[name] = counts[3]; // median of 7: caches and the usage buffer's periodic flush make single calls vary
+    }
     return out;
 }
 
