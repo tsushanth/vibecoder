@@ -179,6 +179,7 @@ t('injected links for the other app are still unused after the matrix', async ()
 
 t('logs captured during the whole matrix contain no tenant value, id, email, token or secret', () => {
     assert.ok(logs.length > 1500, `only ${logs.length} log lines`);
+    console.log(`# captured log lines: ${logs.length}`);
     const all = [...A.forbidden(), ...B.forbidden(), ['admin', ADMIN_T], ['master', P.MK], ['r2secret', R2ENV.R2_SECRET_ACCESS_KEY]].filter(([, s]) => s);
     const text = logs.join('\n');
     assert.deepEqual(scan(text, all), []);
@@ -249,7 +250,7 @@ for (const [att, vic] of [['A', 'B'], ['B', 'A']]) {
             if (!ok.includes(r.status)) fails.push(`${path}: ${r.status}`);
             if (scan(r.text, forbiddenFor(a, v, false)).length) fails.push(`LEAK ${path}`);
         }
-        stats.cells += cases.length;
+        stats.cells += cases.length; console.log(`# routing tricks ${att}->${vic}: ${cases.length} cells`);
         assert.deepEqual(fails, []);
     });
 }
@@ -348,6 +349,7 @@ t('executor: statements that could switch role, reach another tenant or run seve
         'select lo_import($1)', 'select nextval($1)', 'select dblink($1,$2)', 'prepare x as select 1', 'listen x', 'notify x', 'vacuum', 'analyze', 'select authorization',
         'select "role" from "t_owner" where role = 1', // bare identifier role is refused even though a quoted column named role is fine
     ];
+    console.log(`# executor refusals: ${attempts.length} statements`);
     for (const text of attempts) {
         const r = await ex.run(A.app, { text, values: text.includes('$') ? ['x', 'y'] : [] });
         assert.deepEqual(r, { ok: false, status: 500, code: 'bad_query' }, text);
