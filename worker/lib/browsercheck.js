@@ -5,8 +5,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { writeFiles } from './files.js';
 import { staticChecks } from './checks.js';
-import { injectSdk, loadVibeSdk, usesBackendSdk } from './vibe.js';
-import { FAKE_SCRIPT } from './vibeFake.js';
+import { injectSdk, loadVibeSdk, usesBackendSdk, usesDeviceSdk } from './vibe.js';
+import { DEVICE_FAKE_SCRIPT, FAKE_SCRIPT } from './vibeFake.js';
 
 const CONTROLS = 'button,[role=button],input[type=submit],a[href^="#"],[onclick]';
 
@@ -45,7 +45,7 @@ export async function runtimeProblems(files, { chrome = process.env.CHROME_PATH,
                 await new Promise((r) => setTimeout(r, 900)); // let in-flight SDK calls settle
                 for (const m of await page.evaluate(() => window.__vbRej || [])) {
                     if (!/^vibe/i.test(m)) continue;
-                    const hinted = `unhandled promise rejection from the vibe SDK: ${m}. Catch errors from vibe.api and vibe.ai (and from vibe.auth, vibe.db, vibe.storage, vibe.pay and vibe.notify calls) and show a friendly message`;
+                    const hinted = `unhandled promise rejection from the vibe SDK: ${m}. Catch errors from vibe.api and vibe.ai (and from vibe.auth, vibe.db, vibe.storage, vibe.pay, vibe.notify and vibe.device calls) and show a friendly message`;
                     const dup = errs.findIndex((e) => e.includes(m)); // Chrome may already have reported it as a page error
                     if (dup >= 0) errs[dup] = hinted; else errs.push(hinted);
                 }
@@ -66,6 +66,7 @@ export async function runtimeProblems(files, { chrome = process.env.CHROME_PATH,
 export function filesForRun(files, { vibe = false, sdk = loadVibeSdk() } = {}) {
     const out = injectSdk(files, { sdk, enabled: vibe });
     if (out['vibe.js'] && usesBackendSdk(files)) out['vibe.js'] += FAKE_SCRIPT;
+    if (out['vibe.js'] && usesDeviceSdk(files)) out['vibe.js'] += DEVICE_FAKE_SCRIPT;
     return out;
 }
 
