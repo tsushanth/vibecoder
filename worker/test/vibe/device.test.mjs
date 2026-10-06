@@ -34,7 +34,7 @@ test('with the platform SDK off, vibe.device use is reported as unavailable', ()
 });
 test('VIBE_RULES teaches when to use vibe.device, feature detection and denial handling', () => {
     assert.match(VIBE_RULES, /## .*vibe\.device/);
-    for (const re of [/vibe\.device\.camera\.capture/, /vibe\.device\.geolocation\.get/, /vibe\.device\.share/, /vibe\.device\.haptics\.tap/, /isNative\(\)/, /UI hint/i, /denied/, /cancelled/, /feature-detect|never assume/i, /plain web API|standard web/i]) assert.match(VIBE_RULES, re);
+    for (const re of [/vibe\.device\.camera\.capture/, /vibe\.device\.geolocation\.get/, /vibe\.device\.share/, /vibe\.device\.haptics\.tap/, /isNative\(\) is true only inside/, /UI hint/i, /denied/, /cancelled/, /feature-detect|never assume/i, /plain web API|standard web/i]) assert.match(VIBE_RULES, re);
     assert.doesNotMatch(VIBE_RULES, /vibe\.device\.push\./);
 });
 
