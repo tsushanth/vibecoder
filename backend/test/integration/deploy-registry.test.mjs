@@ -30,12 +30,12 @@ const fakeProxy = (configured = true) => ({ configured, ensureApp: async (a) => 
 let srv, srvNoProxy;
 before(async () => {
     globalThis.fetch = (url, opts = {}) => { const u = new URL(String(url)); if (u.hostname === '127.0.0.1') return realFetch(url, opts); return Promise.resolve(new Response(deployStatus === 200 ? '{}' : '{"error":"boom"}', { status: deployStatus, headers: { 'content-type': 'application/json' } })); };
-    const mk = (proxy) => { const app = express(); app.use(express.json()); if (proxy) app.locals.proxyAdmin = proxy; app.use('/api/deploy', router); return listen(app); };
+    const mk = (proxy) => { const app = express(); app.use(express.json()); if (proxy) app.locals.proxyAdmin = proxy; app.locals.verifyUser = async (req) => ({ 'Bearer tok-owner': 'owner-1', 'Bearer tok-other': 'other-2' })[req.headers.authorization] || null; app.use('/api/deploy', router); return listen(app); };
     srv = await mk(fakeProxy()); srvNoProxy = await mk(null);
 });
 after(async () => { globalThis.fetch = realFetch; await srv.close(); await srvNoProxy.close(); });
 const reset = () => { calls.length = 0; behavior = {}; deployStatus = 200; undeployRows = [{ subdomain: 'my-app' }]; };
-const post = (s, body, pid = 'proj-1') => realFetch(`${s.base}/api/deploy/${pid}/deploy`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+const post = (s, body, pid = 'proj-1', token) => realFetch(`${s.base}/api/deploy/${pid}/deploy`, { method: 'POST', headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify(body) });
 const del = (s, body, pid = 'proj-1') => realFetch(`${s.base}/api/deploy/${pid}/deploy`, { method: 'DELETE', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
 const quiet = async (fn) => { const w = console.warn, l = console.log, e = console.error; console.warn = console.log = console.error = () => {}; try { return await fn(); } finally { console.warn = w; console.log = l; console.error = e; } };
 
@@ -116,13 +116,35 @@ test('deploying a bundle with a schema pushes it to the deployed app and reports
     assert.deepEqual(calls.find((c) => c[0] === 'schema'), ['schema', 'my-app', SPEC, { allowDestructive: false }]);
 });
 
-test('a deploy only allows destructive schema changes when the request says allowDestructiveSchema: true', async () => {
+test('a deploy only allows destructive schema changes when the request says allowDestructiveSchema: true and the verified owner sent it', async () => {
     reset();
-    await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app', allowDestructiveSchema: true }, 'proj-schema'));
+    const ok = await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app', allowDestructiveSchema: true }, 'proj-schema', 'tok-owner'));
+    assert.equal(ok.status, 200);
     assert.equal(calls.find((c) => c[0] === 'schema')[3].allowDestructive, true);
     reset();
-    await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app', allowDestructiveSchema: 'true' }, 'proj-schema'));
+    await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app', allowDestructiveSchema: 'true' }, 'proj-schema', 'tok-owner'));
     assert.equal(calls.find((c) => c[0] === 'schema')[3].allowDestructive, false);
+});
+
+test('confirming a destructive change without a verified owner token is 403 and nothing is deployed or pushed', async () => {
+    for (const token of [undefined, 'tok-other', 'tok-bogus']) {
+        reset();
+        const r = await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app', allowDestructiveSchema: true }, 'proj-schema', token));
+        assert.equal(r.status, 403, String(token)); assert.equal((await r.json()).error, 'destructive_confirmation_requires_owner');
+        assert.deepEqual(calls, [], String(token));
+    }
+});
+
+test('a needs_confirmation answer carries the destructive list (names only) and a normal deploy needs no token', async () => {
+    reset();
+    const e = new ProxyAdminError(409, 'destructive_change_needs_confirmation'); e.destructive = [{ kind: 'drop_table', table: 'todos' }, { kind: 'drop_column', table: 'notes', column: 'body' }];
+    behavior.schema = e;
+    const r = await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app' }, 'proj-schema'));
+    assert.equal(r.status, 200); const j = await r.json();
+    assert.equal(j.schemaStatus, 'needs_confirmation'); assert.deepEqual(j.destructive, e.destructive);
+    reset(); behavior.schemaOut = { version: 1, applied: 1 };
+    const ok = await (await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app' }, 'proj-schema'))).json();
+    assert.equal('destructive' in ok, false);
 });
 
 test('a schema that needs confirmation or fails does not fail the deploy but is surfaced', async () => {

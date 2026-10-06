@@ -6,6 +6,7 @@ import { getActiveDomainMap } from '../services/domainService.js';
 import { WORKER_URL, WORKER_SECRET } from '../config/constants.js';
 import { requireSecret } from '../lib/requireSecret.js';
 import { registerDeployedApp, disableDeployedApp } from '../services/appRegistry.js';
+import { verifiedUserId } from '../lib/verifiedUser.js';
 
 const DEPLOY_SERVER_URL = process.env.DEPLOY_SERVER_URL || 'http://localhost:4000';
 const INTERNAL_SECRET = requireSecret('INTERNAL_SECRET');
@@ -76,6 +77,15 @@ router.post('/:projectId/deploy', async (req, res) => {
         if (projectError || !project) return res.status(404).json({ error: 'Project not found' });
         if (project.creator_id !== userId) return res.status(403).json({ error: 'Not authorized' });
 
+        // Confirming a destructive schema change (dropping tables or columns) needs more than the body's userId: the caller's verified
+        // Supabase token must belong to the project's owner. Refused before anything is deployed.
+        let allowDestructive = false;
+        if (req.body.allowDestructiveSchema === true) {
+            const verified = await (req.app.locals.verifyUser || verifiedUserId)(req);
+            if (!verified || verified !== project.creator_id) return res.status(403).json({ error: 'destructive_confirmation_requires_owner' });
+            allowDestructive = true;
+        }
+
         // Always fetch latest bundle from git if repo exists, fallback to DB bundle
         let bundle = project.bundle;
         if (project.github_repo) {
@@ -144,9 +154,9 @@ router.post('/:projectId/deploy', async (req, res) => {
         // Make the app known to the platform proxy (vibe.api / vibe.ai). Best effort: never fails the deploy.
         // A vibe.schema.json in the bundle is applied to the app's database; destructive changes only when the creator confirmed.
         const result = {};
-        await registerDeployedApp(req.app.locals.proxyAdmin, subdomain, undefined, { projectId, bundle, allowDestructive: req.body.allowDestructiveSchema === true, result });
+        await registerDeployedApp(req.app.locals.proxyAdmin, subdomain, undefined, { projectId, bundle, allowDestructive, result });
 
-        res.json({ success: true, url, ...(result.schemaStatus ? { schemaStatus: result.schemaStatus } : {}), ...(result.jobsStatus ? { jobsStatus: result.jobsStatus } : {}) });
+        res.json({ success: true, url, ...(result.schemaStatus ? { schemaStatus: result.schemaStatus } : {}), ...(result.jobsStatus ? { jobsStatus: result.jobsStatus } : {}), ...(result.schemaStatus === 'needs_confirmation' ? { destructive: result.destructive || [] } : {}) });
     } catch (error) {
         console.error('Deploy error:', error);
         res.status(500).json({ error: 'Deployment failed' });
