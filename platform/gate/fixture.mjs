@@ -111,6 +111,7 @@ export async function snapshot(P, T) {
     out.notify_optouts = await byApp('notify_optouts'); out.jobs = await byApp('jobs'); out.job_runs = await byApp('job_runs');
     out.secrets = await q('select name, md5(ciphertext) as h from platform.app_secrets where app_id = $1 order by name', [T.app]);
     out.app = await q('select enabled, domains, manifest::text as manifest from platform.apps where app_id = $1', [T.app]);
+    out.app_limits = await byApp('app_limits');
     out.app_db = await q('select role_name, schema_name, spec::text as spec, version from platform.app_dbs where app_id = $1', [T.app]);
     return JSON.stringify(out);
 }

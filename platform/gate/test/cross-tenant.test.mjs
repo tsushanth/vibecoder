@@ -404,7 +404,7 @@ t('coverage: server.js has exactly the known top-level dispatch sites (a new one
         [/route === 'db'/g, 1], [/route\.startsWith\('storage\/'\)/g, 1], [/route\.startsWith\('auth\/'\)/g, 1], [/route === 'ai'/g, 1],
     ];
     for (const [re, n] of sites) assert.equal((src.match(re) || []).length, n, String(re));
-    assert.equal((src.match(/url\.pathname/g) || []).length, 7, 'a new url.pathname test was added to server.js: decide where it belongs in the matrix, then update this count');
+    assert.equal((src.match(/url\.pathname/g) || []).length, 8, 'a new url.pathname test was added to server.js: decide where it belongs in the matrix, then update this count');
     const notify = fs.readFileSync(`${ROOT}notify/http.js`, 'utf8');
     assert.deepEqual([...new Set([...notify.matchAll(/op === '([a-z]+)'/g)].map((m) => m[1]))], ['unsubscribe']);
     const pay = fs.readFileSync(`${ROOT}pay/http.js`, 'utf8');
