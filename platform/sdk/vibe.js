@@ -19,6 +19,12 @@
  *   vibe.storage.upload(file, {public}) / list() / url(id) / remove(id)   -> files for signed-in users (5 MB; images, pdf, mp3, text)
  *   vibe.pay.checkout({item:'pro', quantity:1}) -> redirects to Stripe Checkout; vibe.pay.orders() -> the signed-in user's orders
  *   vibe.notify.me({subject, text}) -> emails the signed-in user themself (never anyone else), rate-limited
+ *   vibe.device.isNative()                          -> true only inside an exported Android app (use for UI hints only; every call below works on the web too)
+ *   vibe.device.camera.capture({facing, maxBytes, timeoutMs}) -> {blob, type, size, name}; blob is a File/Blob you can pass to vibe.storage.upload (max 5 MB by default)
+ *   vibe.device.geolocation.get({highAccuracy, timeoutMs, maxAgeMs}) -> {lat, lng, accuracy, timestamp} (timeoutMs default 15000)
+ *   vibe.device.share({title, text, url}) -> {shared, copied}; falls back to copying to the clipboard, rejects 'unsupported' if neither works
+ *   vibe.device.haptics.tap('light'|'medium'|'heavy'|'success'|'warning'|'error') -> {ok}; best effort, never rejects for missing hardware
+ *   Device errors reject with err.status 0 and err.code: bad_request | unsupported | denied | cancelled | timeout | unavailable. The user may always deny or cancel.
  * All calls return Promises. Errors reject with Error: err.status (0 = network/timeout), err.code, err.retryAfter (seconds).
  * Keys never live in the app: the platform adds them server-side. Only connectors declared in the app manifest or built in work.
  * Config for custom domains: window.VIBE_APP_ID, window.VIBE_BASE, window.VIBE_TIMEOUT_MS.
@@ -305,5 +311,187 @@
     });
   }
   var notifyApi = { me: notifyMe };
-  window.vibe = { version: '1', api: api, ai: { chat: chat, ask: ask }, auth: { signIn: signIn, user: user, signOut: signOut, onChange: onChange, ready: ready }, db: { from: from }, pay: pay, storage: storage, notify: notifyApi };
+  // vibe.device: camera, location, share and haptics. Web fallbacks use the standard browser APIs; inside an exported
+  // Capacitor APK the native plugins are used when present, and anything unimplemented falls back to the web path.
+  // Errors reject with Error: err.status 0 and err.code in bad_request | unsupported | denied | cancelled | timeout | unavailable.
+  var DEV_KINDS = ['light', 'medium', 'heavy', 'success', 'warning', 'error'];
+  var DEV_PATTERNS = { light: 10, medium: 20, heavy: 40, success: [10, 30, 10], warning: [20, 40, 20], error: [40, 30, 40, 30, 40] };
+  var DEV_MB = 1024 * 1024;
+
+  function devBad(msg) { return Promise.reject(fail('vibe.device.' + msg, 0, 'bad_request')); }
+  function devInt(n, lo, hi) { return typeof n === 'number' && isFinite(n) && Math.floor(n) === n && n >= lo && n <= hi; }
+  function devOpts(o) { return o === undefined || (o !== null && typeof o === 'object' && !Array.isArray(o)); }
+  function devStr(s, max) { return typeof s === 'string' && s.length > 0 && s.length <= max; }
+  function devUrl(u) { return typeof u === 'string' && u.length <= 2000 && /^https?:\/\/[^\s]+$/i.test(u); }
+  function devMsg(e) { return String((e && (e.message || e)) || ''); }
+  function devUnimplemented(e) { return /not implemented|not available|unimplemented/i.test(devMsg(e)); }
+  function devMap(e) {
+    var m = devMsg(e);
+    if (/cancel/i.test(m)) return fail('vibe.device: cancelled by the user', 0, 'cancelled');
+    if (/denied|permission/i.test(m)) return fail('vibe.device: permission denied', 0, 'denied');
+    if (/timeout|timed out/i.test(m)) return fail('vibe.device: timed out', 0, 'timeout');
+    return fail('vibe.device: the device could not do that', 0, 'unavailable');
+  }
+  function devNative() {
+    var c = window.Capacitor;
+    try { return !!(c && typeof c.isNativePlatform === 'function' && c.isNativePlatform() === true); } catch (e) { return false; }
+  }
+  function devPlugin(name) {
+    if (!devNative()) return null;
+    var c = window.Capacitor;
+    if (c.Plugins && c.Plugins[name]) return c.Plugins[name];
+    try { if (typeof c.registerPlugin === 'function') return c.registerPlugin(name) || null; } catch (e) { /* fall through to the web path */ }
+    return null;
+  }
+  // Run the native plugin when there is one; no plugin, or one the APK does not implement, runs the web path instead.
+  function devVia(name, call, onOk, web, onErr) {
+    var p = devPlugin(name);
+    if (!p) return web();
+    var r;
+    try { r = Promise.resolve(call(p)); } catch (e) { r = Promise.reject(e); }
+    return r.then(onOk, function (e) {
+      if (devUnimplemented(e)) return web();
+      if (onErr) return onErr(e);
+      throw devMap(e);
+    });
+  }
+  // A call that waits on the person or a browser prompt can stay pending forever; settle it with code "timeout" after ms.
+  function devGuard(promise, ms, what) {
+    return new Promise(function (resolve, reject) {
+      var timer = setTimeout(function () { reject(fail('vibe.device.' + what + ' timed out', 0, 'timeout')); }, ms);
+      promise.then(function (v) { clearTimeout(timer); resolve(v); }, function (e) { clearTimeout(timer); reject(e); });
+    });
+  }
+  function devBlobFromDataUrl(url, maxBytes) {
+    var comma = typeof url === 'string' ? url.indexOf(',') : -1;
+    var m = comma > 0 ? /^data:(image\/[A-Za-z0-9.+-]+);base64$/.exec(url.slice(0, comma)) : null;
+    if (!m) throw fail('vibe.device.camera.capture: the camera returned no usable image', 0, 'unavailable');
+    var b64 = url.slice(comma + 1);
+    var size = Math.floor(b64.length * 3 / 4) - (/==$/.test(b64) ? 2 : /=$/.test(b64) ? 1 : 0);
+    if (size > maxBytes) throw fail('vibe.device.camera.capture: the image is larger than maxBytes (' + maxBytes + ')', 0, 'bad_request');
+    try {
+      var bin = atob(b64), bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      var ext = m[1] === 'image/png' ? 'png' : m[1] === 'image/webp' ? 'webp' : 'jpg';
+      return { blob: new Blob([bytes], { type: m[1] }), type: m[1], size: bytes.length, name: 'photo.' + ext };
+    } catch (e) { throw fail('vibe.device.camera.capture: the camera returned no usable image', 0, 'unavailable'); }
+  }
+
+  function devCapture(o) {
+    if (!devOpts(o)) return devBad('camera.capture(options): options must be an object');
+    o = o || {};
+    var facing = o.facing === undefined ? 'environment' : o.facing;
+    var maxWidth = o.maxWidth === undefined ? 1280 : o.maxWidth;
+    var quality = o.quality === undefined ? 80 : o.quality;
+    var maxBytes = o.maxBytes === undefined ? 5 * DEV_MB : o.maxBytes;
+    var timeoutMs = o.timeoutMs === undefined ? 300000 : o.timeoutMs;
+    if (facing !== 'environment' && facing !== 'user') return devBad('camera.capture: facing must be "environment" or "user"');
+    if (!devInt(maxWidth, 64, 4096)) return devBad('camera.capture: maxWidth must be an integer 64..4096 (native camera only)');
+    if (!devInt(quality, 1, 100)) return devBad('camera.capture: quality must be an integer 1..100 (native camera only)');
+    if (!devInt(maxBytes, 1, 10 * DEV_MB)) return devBad('camera.capture: maxBytes must be an integer 1..10485760');
+    if (!devInt(timeoutMs, 1000, 900000)) return devBad('camera.capture: timeoutMs must be an integer 1000..900000');
+    function web() {
+      var doc = window.document;
+      if (!doc || typeof doc.createElement !== 'function') return Promise.reject(fail('vibe.device.camera.capture: not supported here', 0, 'unsupported'));
+      return new Promise(function (resolve, reject) {
+        var input = doc.createElement('input');
+        input.type = 'file'; input.accept = 'image/*'; input.setAttribute('capture', facing);
+        var done = false;
+        function once(fn, v) { if (!done) { done = true; fn(v); } }
+        input.addEventListener('cancel', function () { once(reject, fail('vibe.device.camera.capture: cancelled by the user', 0, 'cancelled')); });
+        input.addEventListener('change', function () {
+          var f = input.files && input.files[0];
+          if (!f) return once(reject, fail('vibe.device.camera.capture: cancelled by the user', 0, 'cancelled'));
+          if (!/^image\//.test(f.type || '')) return once(reject, fail('vibe.device.camera.capture: the chosen file is not an image', 0, 'bad_request'));
+          if (f.size > maxBytes) return once(reject, fail('vibe.device.camera.capture: the image is larger than maxBytes (' + maxBytes + ')', 0, 'bad_request'));
+          once(resolve, { blob: f, type: f.type, size: f.size, name: f.name || 'photo' });
+        });
+        try { input.click(); } catch (e) { once(reject, fail('vibe.device.camera.capture: not supported here', 0, 'unsupported')); }
+      });
+    }
+    return devGuard(devVia('Camera', function (p) {
+      return p.getPhoto({ quality: quality, width: maxWidth, resultType: 'dataUrl', source: 'CAMERA', direction: facing === 'user' ? 'FRONT' : 'REAR', correctOrientation: true, saveToGallery: false });
+    }, function (r) { return devBlobFromDataUrl(r && r.dataUrl, maxBytes); }, web), timeoutMs, 'camera.capture');
+  }
+
+  function devLocate(o) {
+    if (!devOpts(o)) return devBad('geolocation.get(options): options must be an object');
+    o = o || {};
+    var hi = o.highAccuracy === undefined ? false : o.highAccuracy;
+    var t = o.timeoutMs === undefined ? 15000 : o.timeoutMs;
+    var age = o.maxAgeMs === undefined ? 60000 : o.maxAgeMs;
+    if (typeof hi !== 'boolean') return devBad('geolocation.get: highAccuracy must be a boolean');
+    if (!devInt(t, 1000, 60000)) return devBad('geolocation.get: timeoutMs must be an integer 1000..60000');
+    if (!devInt(age, 0, 600000)) return devBad('geolocation.get: maxAgeMs must be an integer 0..600000');
+    var opts = { enableHighAccuracy: hi, timeout: t, maximumAge: age };
+    function shape(pos) {
+      var c = pos && pos.coords;
+      if (!c) throw fail('vibe.device.geolocation.get: no position', 0, 'unavailable');
+      return { lat: c.latitude, lng: c.longitude, accuracy: c.accuracy, timestamp: pos.timestamp };
+    }
+    function web() {
+      var nav = window.navigator;
+      if (!nav || !nav.geolocation) return Promise.reject(fail('vibe.device.geolocation.get: not supported here', 0, 'unsupported'));
+      return new Promise(function (resolve, reject) {
+        nav.geolocation.getCurrentPosition(function (pos) { try { resolve(shape(pos)); } catch (e) { reject(e); } }, function (err) {
+          var code = err && err.code;
+          reject(code === 1 ? fail('vibe.device.geolocation.get: permission denied', 0, 'denied') : code === 3 ? fail('vibe.device.geolocation.get: timed out', 0, 'timeout') : fail('vibe.device.geolocation.get: position unavailable', 0, 'unavailable'));
+        }, opts);
+      });
+    }
+    // The browser timeout does not cover a permission prompt left open, so a guard timer settles the call shortly after it.
+    return devGuard(devVia('Geolocation', function (p) { return p.getCurrentPosition(opts); }, shape, web), t + 2000, 'geolocation.get');
+  }
+
+  function devShare(o) {
+    if (o === null || typeof o !== 'object' || Array.isArray(o)) return devBad('share({title, text, url}): options must be an object');
+    var keys = Object.keys(o);
+    for (var i = 0; i < keys.length; i++) if (keys[i] !== 'title' && keys[i] !== 'text' && keys[i] !== 'url') return devBad('share: unknown option "' + String(keys[i]).slice(0, 20) + '"');
+    if (o.title !== undefined && !devStr(o.title, 200)) return devBad('share: title must be a string of 1 to 200 characters');
+    if (o.text !== undefined && !devStr(o.text, 2000)) return devBad('share: text must be a string of 1 to 2000 characters');
+    if (o.url !== undefined && !devUrl(o.url)) return devBad('share: url must be an http(s) URL of at most 2000 characters');
+    if (o.title === undefined && o.text === undefined && o.url === undefined) return devBad('share: give at least one of title, text, url');
+    var payload = {};
+    if (o.title !== undefined) payload.title = o.title;
+    if (o.text !== undefined) payload.text = o.text;
+    if (o.url !== undefined) payload.url = o.url;
+    function copyOr(err) {
+      var nav = window.navigator, clip = nav && nav.clipboard;
+      if (clip && typeof clip.writeText === 'function') {
+        var txt = [o.title, o.text, o.url].filter(function (x) { return x !== undefined; }).join('\n');
+        return clip.writeText(txt).then(function () { return { shared: false, copied: true }; }, function () { throw err; });
+      }
+      return Promise.reject(err);
+    }
+    function web() {
+      var nav = window.navigator;
+      if (nav && typeof nav.share === 'function') {
+        var r;
+        try { r = Promise.resolve(nav.share(payload)); } catch (e) { r = Promise.reject(e); }
+        return r.then(function () { return { shared: true, copied: false }; }, function (e) {
+          if (e && e.name === 'AbortError') return { shared: false, copied: false };
+          return copyOr(e && e.name === 'NotAllowedError' ? fail('vibe.device.share: sharing needs a tap or click', 0, 'denied') : fail('vibe.device.share: sharing failed', 0, 'unavailable'));
+        });
+      }
+      return copyOr(fail('vibe.device.share: not supported here', 0, 'unsupported'));
+    }
+    return devVia('Share', function (p) { return p.share(payload); }, function () { return { shared: true, copied: false }; }, web, function (e) {
+      if (/cancel/i.test(devMsg(e))) return { shared: false, copied: false };
+      throw devMap(e);
+    });
+  }
+
+  function devTap(kind) {
+    if (typeof kind !== 'string' || DEV_KINDS.indexOf(kind) < 0) return devBad('haptics.tap(kind): kind must be one of ' + DEV_KINDS.join(', '));
+    function web() {
+      var nav = window.navigator, ok = false;
+      try { ok = !!(nav && typeof nav.vibrate === 'function' && nav.vibrate(DEV_PATTERNS[kind])); } catch (e) { ok = false; }
+      return Promise.resolve({ ok: ok });
+    }
+    return devVia('Haptics', function (p) {
+      return /^(light|medium|heavy)$/.test(kind) ? p.impact({ style: kind.toUpperCase() }) : p.notification({ type: kind.toUpperCase() });
+    }, function () { return { ok: true }; }, web, function () { return { ok: false }; });
+  }
+  var device = { isNative: devNative, camera: { capture: devCapture }, geolocation: { get: devLocate }, share: devShare, haptics: { tap: devTap } };
+  window.vibe = { version: '1', api: api, ai: { chat: chat, ask: ask }, auth: { signIn: signIn, user: user, signOut: signOut, onChange: onChange, ready: ready }, db: { from: from }, pay: pay, storage: storage, notify: notifyApi, device: device };
 })();

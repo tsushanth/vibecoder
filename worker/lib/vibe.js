@@ -15,7 +15,7 @@ export { KNOWN_CONNECTORS };
 const isVibeSdkFile = (p) => path.basename(p) === 'vibe.js';
 const TEXT_FILE = /\.(html?|js|mjs)$/i;
 const BACKEND_USES = /\bvibe\.(?:auth|db|storage|pay|notify)\b/;
-const USES = /\bvibe\.(?:api|ai|auth|db|storage|pay|notify)\b/;
+const USES = /\bvibe\.(?:api|ai|auth|db|storage|pay|notify|device)\b/;
 
 export function loadVibeSdk() {
     try { return fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'assets', 'vibe.js'), 'utf8'); } catch { return null; }
@@ -25,9 +25,33 @@ export function usesVibe(files) {
     return Object.entries(files).some(([p, c]) => TEXT_FILE.test(p) && !isVibeSdkFile(p) && USES.test(c));
 }
 
+const DEVICE_USES = /\bvibe\.device\b/;
+export function usesDeviceSdk(files) {
+    return Object.entries(files).some(([p, c]) => TEXT_FILE.test(p) && !isVibeSdkFile(p) && DEVICE_USES.test(c));
+}
+
 /** True when the app uses the parts of the SDK that need a signed-in user or stored data (accounts, tables, uploads). */
 export function usesBackendSdk(files) {
     return Object.entries(files).some(([p, c]) => TEXT_FILE.test(p) && !isVibeSdkFile(p) && BACKEND_USES.test(c));
+}
+
+const DEVICE_MEMBERS = { camera: ['capture'], geolocation: ['get'], haptics: ['tap'] };
+const DEVICE_CALL = /\bvibe\.device\.([A-Za-z_$][\w$]*)(?:\.([A-Za-z_$][\w$]*))?(\s*\(|\b)/g;
+const safeName = (n) => (/^[A-Za-z_$][\w$]{0,40}$/.test(n) ? n : '(invalid name)');
+
+/** Calls into vibe.device other than the five the SDK has (isNative, camera.capture, geolocation.get, share, haptics.tap). */
+export function deviceProblems(files) {
+    const bad = new Set();
+    for (const [p, c] of Object.entries(files)) {
+        if (!TEXT_FILE.test(p) || isVibeSdkFile(p) || typeof c !== 'string') continue;
+        for (const m of c.matchAll(DEVICE_CALL)) {
+            const [, a, b, tail] = m;
+            const called = tail.includes('(');
+            const ok = a === 'isNative' || a === 'share' ? !b : DEVICE_MEMBERS[a] ? (b ? DEVICE_MEMBERS[a].includes(b) : !called) : false;
+            if (!ok) bad.add(`vibe.device.${safeName(a)}${b ? '.' + safeName(b) : ''}`);
+        }
+    }
+    return [...bad].map((n) => `${n} does not exist: vibe.device only has isNative(), camera.capture(), geolocation.get(), share() and haptics.tap(); use the standard web API for anything else (push notifications are not available)`);
 }
 
 /** Problems the fix pass can act on. Empty for apps that do not use vibe and carry no manifest. */
@@ -39,7 +63,7 @@ export function vibeProblems(files, { enabled }) {
     if (!uses && !manifestPaths.length && !schemaPaths.length && !jobsPaths.length) return [];
     const problems = [];
     if (!enabled) {
-        if (uses) problems.push('the vibe SDK (vibe.api, vibe.ai, vibe.auth, vibe.db, vibe.storage, vibe.pay, vibe.notify) is not available here: remove every vibe call and make the app work without it (keep data in localStorage)');
+        if (uses) problems.push('the vibe SDK (vibe.api, vibe.ai, vibe.auth, vibe.db, vibe.storage, vibe.pay, vibe.notify, vibe.device) is not available here: remove every vibe call and make the app work without it (keep data in localStorage)');
         if (schemaPaths.length) problems.push(`${SCHEMA_FILE} is not available here: do not write it, and keep the app's data in localStorage`);
         if (manifestPaths.length) problems.push(`${MANIFEST_FILE} is not available here: do not write it, and make the app work without any connector or payment`);
         if (jobsPaths.length) problems.push(`${JOBS_FILE} is not available here: do not write it, and make the app work without scheduled jobs`);
@@ -57,7 +81,7 @@ export function vibeProblems(files, { enabled }) {
         }
     }
     const html = files['index.html'] || '';
-    if (uses && !/<script\b[^>]*\bsrc\s*=\s*["']\.?\/?vibe\.js["']/i.test(html)) problems.push('the app uses the vibe SDK (vibe.api, vibe.ai, vibe.auth, vibe.db, vibe.storage, vibe.pay or vibe.notify) but index.html does not load it: add <script src="vibe.js"></script> before the code that uses it');
+    if (uses && !/<script\b[^>]*\bsrc\s*=\s*["']\.?\/?vibe\.js["']/i.test(html)) problems.push('the app uses the vibe SDK (vibe.api, vibe.ai, vibe.auth, vibe.db, vibe.storage, vibe.pay, vibe.notify or vibe.device) but index.html does not load it: add <script src="vibe.js"></script> before the code that uses it');
     const known = [...KNOWN_CONNECTORS, ...declared];
     const unknown = new Set();
     const called = new Set();
@@ -78,6 +102,7 @@ export function vibeProblems(files, { enabled }) {
     problems.push(...schemaProblems(files));
     problems.push(...payProblems(files, declaredCatalog(files)));
     problems.push(...notifyProblems(files));
+    problems.push(...deviceProblems(files));
     problems.push(...jobsProblems(files, declared));
     return problems;
 }
@@ -177,6 +202,13 @@ Same script tag and rules. WHEN TO USE: only when the person wants a message sen
 - Never promise or imply delivery to anyone else (a friend, a customer, a team, the owner): no invite, share-by-email or "notify the buyer" flows. If the creator asks for that, build the in-app version without email and say plainly that the app cannot email other people. Delivery is best effort: write "We sent an email to your address", not "delivered".
 - Errors: err.status 401 means the session ended: show the sign-in screen; 429 means slow down (err.retryAfter seconds); err.code "opted_out" (409) means the person turned off emails from this app: say so; 502 or 503 means try later. Catch every rejection.
 - vibe.notify without vibe.auth, extra keys besides subject and text, and a literal subject over 120 or text over 2000 characters are errors that will be sent back to you.
+
+## Device features (vibe.device)
+Same script tag (<script src="vibe.js"></script>). Five calls, all Promises, all working in a plain browser too: vibe.device.camera.capture({ facing: "environment" | "user", maxBytes }) resolves { blob, type, size, name } (a photo, 5 MB at most by default; pass blob to vibe.storage.upload or URL.createObjectURL(blob) for a preview), vibe.device.geolocation.get({ highAccuracy, timeoutMs }) resolves { lat, lng, accuracy, timestamp }, vibe.device.share({ title, text, url }) resolves { shared, copied } (url must be http or https; when the device cannot share it copies the text to the clipboard and says so with copied: true), vibe.device.haptics.tap("light" | "medium" | "heavy" | "success" | "warning" | "error") resolves { ok } and never fails for lack of hardware. There is nothing else: no push notifications, no contacts, no files, no vibe.device.* member not listed here (static check errors).
+WHEN TO USE: only when the app's value is the device feature itself: a photo the person takes, "near me" from their location, a share button, tactile feedback on a key action. Where a plain web API is enough, prefer the standard web API (navigator.geolocation, an <input type="file" accept="image/*" capture>, navigator.share) and skip vibe.device; never add it "just in case".
+- Never assume permission. Each call can reject with err.code: "denied" (the person refused the camera, location or sharing: say what is needed and keep the app usable, for example offer a manual address or a file picker), "cancelled" (the person closed the camera: do nothing, no error message), "unsupported" (no such feature here: hide or replace the button), "timeout" or "unavailable" (try again later), "bad_request" (a bug in the call). Catch every rejection; never retry in a loop and never ask for a permission on page load: call only from a tap or click.
+- vibe.device.isNative() is true only inside the exported Android app. Use it ONLY for UI hints (for example the wording of a button), never to decide whether a feature works: always call the feature, handle its rejection, and never skip a feature because isNative() is false.
+- Never put a photo or location into a URL, a log or an unrelated request. Say why the app wants the camera or location next to the button, and only keep a photo or position the person chose to save (vibe.storage or vibe.db).
 
 ## Scheduled jobs (vibe.jobs.json)
 WHEN TO USE: only when the app needs data to keep being collected or tidied while nobody has it open: a periodic refresh of live data saved into a table (a weather logger, a rate history) or pruning old rows. Otherwise do not write the file. Jobs run on the platform, not in the page, so the page only reads what they saved.
