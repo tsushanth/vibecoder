@@ -622,9 +622,17 @@ router.post('/generate', async (req, res) => {
                 placeholderProjectId = placeholder.id;
                 progressStart(placeholderProjectId);
                 console.log(`[generate] Placeholder project created: ${placeholderProjectId}`);
+            } else {
+                console.error(`[generate] Placeholder creation failed code=${phErr?.code || 'none'}`);
             }
         } catch (e) {
             console.error(`[generate] Placeholder creation failed: ${e.message}`);
+        }
+
+        // The async path (new apps) hands the result back through the project row, so without one the build would finish
+        // and be lost. Say so instead of silently building. Streaming clients (old apps) get the result on the stream.
+        if (!placeholderProjectId && req.body.stream !== true) {
+            return res.status(500).json({ error: 'Could not start your build. Please try again.' });
         }
 
         // Set up SSE
@@ -2429,11 +2437,13 @@ router.delete('/:id', async (req, res) => {
             return res.status(403).json({ error: 'Only the project creator can delete this project' });
         }
 
-        // Delete deployment if exists
-        await supabase
+        // Remove the project's deployments first: they reference the project, so leaving the row (even marked deleted) made
+        // deleting any published project fail with a foreign key error.
+        const { error: deployDeleteError } = await supabase
             .from('deployments')
-            .update({ status: 'deleted' })
+            .delete()
             .eq('project_id', id);
+        if (deployDeleteError) throw deployDeleteError;
 
         // Delete the project
         const { error: deleteError } = await supabase

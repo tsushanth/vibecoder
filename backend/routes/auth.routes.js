@@ -9,25 +9,24 @@ router.delete('/account', async (req, res) => {
         const { userId } = req.body;
         if (!userId) return res.status(400).json({ error: 'userId is required' });
 
-        // Delete user's data from all tables (cascade)
-        const tables = [
-            { table: 'project_chats', column: 'user_id' },
-            { table: 'deployments', column: 'creator_id' },
-            { table: 'projects', column: 'creator_id' },
-            { table: 'coin_transactions', column: 'user_id' },
-            { table: 'user_coins', column: 'user_id' },
-            { table: 'users', column: 'user_id' },
-        ];
-
-        for (const { table, column } of tables) {
-            const { error } = await supabase
-                .from(table)
-                .delete()
-                .eq(column, userId);
-            if (error) {
-                console.warn(`Warning: failed to delete from ${table}:`, error.message);
-            }
-        }
+        // Delete the user's data in dependency order. A project's deployments reference it, so they go first; the old
+        // list filtered deployments by a column that does not exist, so the project, and then the user, could never be deleted
+        // while the login was removed anyway, which left the account's data behind.
+        const failed = [];
+        const run = async (table, build) => {
+            const { error } = await build(supabase.from(table));
+            if (error) { failed.push(table); console.warn(`Warning: failed to delete from ${table}:`, error.message); }
+        };
+        const { data: mine } = await supabase.from('projects').select('id').eq('creator_id', userId);
+        const projectIds = (mine || []).map((p) => p.id);
+        await run('project_chats', (q) => q.delete().eq('user_id', userId));
+        if (projectIds.length) await run('deployments', (q) => q.delete().in('project_id', projectIds));
+        await run('projects', (q) => q.delete().eq('creator_id', userId));
+        await run('coin_transactions', (q) => q.delete().eq('user_id', userId));
+        await run('user_coins', (q) => q.delete().eq('user_id', userId));
+        await run('users', (q) => q.delete().eq('user_id', userId));
+        // Only remove the login once the data is gone, so a failed attempt can be retried.
+        if (failed.length) return res.status(500).json({ error: 'Could not delete all account data. Please try again.', failed });
 
         // Delete auth user via admin API if available
         if (supabaseAdmin) {
