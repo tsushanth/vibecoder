@@ -35,3 +35,11 @@ test('capacitor shell: status and navigation bar icons are set light or dark fro
     assert.match(CAP, /onCreate\([\s\S]*?super\.onCreate\(savedInstanceState\);\s*applySystemBarAppearance\(\);/);
     assert.match(CAP, /onConfigurationChanged\([\s\S]*?applySystemBarAppearance\(\);/);
 });
+
+test('capacitor shell: the content view is padded by system bars, cutout and keyboard, so the page starts below the status bar (targetSdk 35 is edge to edge)', () => {
+    assert.match(CAP, /ViewCompat\.setOnApplyWindowInsetsListener\(content,/);
+    assert.match(CAP, /WindowInsetsCompat\.Type\.systemBars\(\) \| WindowInsetsCompat\.Type\.displayCutout\(\) \| WindowInsetsCompat\.Type\.ime\(\)/);
+    assert.match(CAP, /v\.setPadding\(bars\.left, bars\.top, bars\.right, bars\.bottom\)/);
+    assert.match(CAP, /findViewById\(android\.R\.id\.content\)/);
+    assert.match(CAP, /onCreate\([\s\S]*?applySystemBarInsets\(\);/);
+});
