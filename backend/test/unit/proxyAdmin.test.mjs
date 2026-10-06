@@ -66,7 +66,7 @@ test('redirects are not followed and the base URL must be https', async () => {
 test('the client never exposes the token or a way to read a secret value', () => {
     const { admin } = rig(res(204));
     assert.equal(JSON.stringify(admin).includes(TOKEN), false);
-    assert.deepEqual(Object.keys(admin).sort(), ['configured', 'copySecrets', 'deleteSecret', 'ensureApp', 'getApp', 'getJobs', 'getSchema', 'listSecrets', 'registerApp', 'setDomains', 'setEnabled', 'setJobs', 'setManifest', 'setSchema', 'setSecret']);
+    assert.deepEqual(Object.keys(admin).sort(), ['configured', 'copySecrets', 'deleteSecret', 'ensureApp', 'getApp', 'getJobs', 'getSchema', 'listSecrets', 'planSchema', 'registerApp', 'setDomains', 'setEnabled', 'setJobs', 'setManifest', 'setSchema', 'setSecret']);
 });
 
 test('ensureApp posts to the ensure endpoint with no body, and setEnabled posts the flag', async () => {
@@ -116,4 +116,18 @@ test('copySecrets posts the source app and the replace flag to the destination a
     assert.equal(a.calls[0].url, 'https://proxy.test/admin/apps/dest-app/copy-secrets'); assert.deepEqual(a.calls[0].body, { from: 'proj-1', replace: true });
     const b = rig(res(200, { copied: 0 })); await b.admin.copySecrets('dest-app', 'proj-1'); assert.deepEqual(b.calls[0].body, { from: 'proj-1', replace: false });
     await assert.rejects(() => createProxyAdmin({ baseUrl: '', token: '' }).copySecrets('a', 'b'), (e) => e.code === 'not_configured');
+});
+
+test('planSchema POSTs the spec to /schema/plan and resolves the plan', async () => {
+    const { admin, calls } = rig(res(200, { ok: true, statements: 2, destructive: [] }));
+    assert.deepEqual(await admin.planSchema('my-app', { version: 1, tables: {} }), { ok: true, statements: 2, destructive: [] });
+    assert.equal(calls[0].url, 'https://proxy.test/admin/apps/my-app/schema/plan'); assert.equal(calls[0].init.method, 'POST');
+    assert.deepEqual(calls[0].body, { spec: { version: 1, tables: {} } });
+});
+
+test('a 409 destructive answer keeps only identifier names of the destructive list on the error', async () => {
+    const { admin } = rig(res(409, { error: 'destructive_change_needs_confirmation', destructive: [{ kind: 'drop_column', table: 'todos', column: 'n', row: 'SECRET' }, { kind: 'drop_table', table: 'a; drop' }, 'junk'] }));
+    await assert.rejects(() => admin.setSchema('my-app', {}), (e) => e.code === 'destructive_change_needs_confirmation' && JSON.stringify(e.destructive) === JSON.stringify([{ kind: 'drop_column', table: 'todos', column: 'n' }]));
+    const other = rig(res(422, { error: 'migration_failed', destructive: [{ kind: 'drop_table', table: 't' }] }));
+    await assert.rejects(() => other.admin.setSchema('my-app', {}), (e) => e.code === 'migration_failed' && e.destructive.length === 0);
 });
