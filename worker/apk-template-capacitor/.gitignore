@@ -1,0 +1,9 @@
+.gradle/
+build/
+local.properties
+# the signing key is NOT stored in git: it lives on the build host (APK_KEYSTORE_PATH / APK_KEYSTORE_PASSWORD / APK_KEY_ALIAS)
+*.keystore
+*.jks
+# the worker fills this per build; only the placeholder is tracked
+app/src/main/assets/public/*
+!app/src/main/assets/public/.gitkeep
