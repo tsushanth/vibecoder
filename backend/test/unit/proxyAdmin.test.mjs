@@ -66,7 +66,7 @@ test('redirects are not followed and the base URL must be https', async () => {
 test('the client never exposes the token or a way to read a secret value', () => {
     const { admin } = rig(res(204));
     assert.equal(JSON.stringify(admin).includes(TOKEN), false);
-    assert.deepEqual(Object.keys(admin).sort(), ['configured', 'copySecrets', 'deleteSecret', 'ensureApp', 'getApp', 'getJobs', 'getSchema', 'listSecrets', 'planSchema', 'registerApp', 'setDomains', 'setEnabled', 'setJobs', 'setManifest', 'setSchema', 'setSecret']);
+    assert.deepEqual(Object.keys(admin).sort(), ['configured', 'copySecrets', 'deleteSecret', 'ensureApp', 'getApp', 'getJobs', 'getSchema', 'getUsage', 'listSecrets', 'planSchema', 'registerApp', 'setDomains', 'setEnabled', 'setJobs', 'setManifest', 'setSchema', 'setSecret']);
 });
 
 test('ensureApp posts to the ensure endpoint with no body, and setEnabled posts the flag', async () => {
@@ -130,4 +130,18 @@ test('a 409 destructive answer keeps only identifier names of the destructive li
     await assert.rejects(() => admin.setSchema('my-app', {}), (e) => e.code === 'destructive_change_needs_confirmation' && JSON.stringify(e.destructive) === JSON.stringify([{ kind: 'drop_column', table: 'todos', column: 'n' }]));
     const other = rig(res(422, { error: 'migration_failed', destructive: [{ kind: 'drop_table', table: 't' }] }));
     await assert.rejects(() => other.admin.setSchema('my-app', {}), (e) => e.code === 'migration_failed' && e.destructive.length === 0);
+});
+
+test('getUsage sends GET /usage?days=N with the bearer token and resolves the report', async () => {
+    const report = { days: [], totals: {}, limits: {}, usage: {} };
+    const { admin, calls } = rig(res(200, report));
+    assert.deepEqual(await admin.getUsage('proj-1', 14), report);
+    assert.equal(calls[0].url, 'https://proxy.test/admin/apps/proj-1/usage?days=14'); assert.equal(calls[0].init.method, 'GET');
+    assert.equal(new Headers(calls[0].init.headers).get('authorization'), `Bearer ${TOKEN}`);
+    await admin.getUsage('proj-1'); assert.match(calls[1].url, /days=7$/);
+});
+
+test('getUsage rejects with the proxy\'s error code (unknown_app) and never leaks the token', async () => {
+    const { admin } = rig(res(404, { error: 'unknown_app' }));
+    await assert.rejects(() => admin.getUsage('nope'), (e) => e.code === 'unknown_app' && e.status === 404 && !e.message.includes(TOKEN));
 });

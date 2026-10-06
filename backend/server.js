@@ -14,6 +14,7 @@ import { reportCrash } from './lib/failureReporter.js';
 import githubRoutes from './routes/github.routes.js';
 import appdataRoutes from './routes/appdata.routes.js';
 import { createSecretsRouter } from './routes/secrets.routes.js';
+import { createUsageRouter } from './routes/usage.routes.js';
 import { createSchemaPlanRouter } from './routes/schemaPlan.routes.js';
 import { createProxyAdmin } from './services/proxyAdmin.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -29,6 +30,7 @@ app.use('/api/appdata', appdataRoutes);
 const WEB_ORIGINS = ['https://vibebuild.cc', 'https://www.vibebuild.cc', 'https://vibebuild-web.fly.dev', 'http://localhost:3000'];
 const proxyAdmin = createProxyAdmin({ baseUrl: process.env.PROXY_ADMIN_URL, token: process.env.PROXY_ADMIN_TOKEN });
 app.use('/api/projects/:id/secrets', cors({ origin: WEB_ORIGINS }), createSecretsRouter({ proxyAdmin }));
+app.use('/api/projects/:id/usage', cors({ origin: WEB_ORIGINS }), createUsageRouter({ proxyAdmin }));
 app.use('/api/projects/:id/schema', cors({ origin: WEB_ORIGINS }), createSchemaPlanRouter({ proxyAdmin }));
 app.locals.proxyAdmin = proxyAdmin; // used by the deploy routes to register deployed apps with the proxy
 app.use(cors({

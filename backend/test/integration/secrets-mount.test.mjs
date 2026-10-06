@@ -28,6 +28,11 @@ test('the secrets routes are mounted: unauthenticated requests are 401, not 404'
     }
 });
 
+test('the usage route is mounted: unauthenticated requests are 401, not 404', async () => {
+    assert.equal((await fetch(`${base}/api/projects/${PID}/usage`)).status, 401);
+    assert.equal((await fetch(`${base}/api/projects/${PID}/usage?days=7`, { headers: { authorization: 'Bearer not.a.real.token' } })).status, 401);
+});
+
 test('a token Supabase cannot verify is 401', async () => {
     const r = await fetch(`${base}/api/projects/${PID}/secrets`, { headers: { authorization: 'Bearer not.a.real.token' } });
     assert.equal(r.status, 401);
