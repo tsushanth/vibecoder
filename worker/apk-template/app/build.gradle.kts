@@ -17,10 +17,22 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("debug.keystore")
-            storePassword = "android"
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
+            // The release key is NOT in this repository. The build host provides it through APK_KEYSTORE_PATH,
+            // APK_KEYSTORE_PASSWORD and (optionally) APK_KEY_ALIAS. Without them the build falls back to the legacy
+            // key file that older hosts still carry next to this file, so builds keep working during the switch.
+            val ksPath = System.getenv("APK_KEYSTORE_PATH")
+            val ksPassword = System.getenv("APK_KEYSTORE_PASSWORD")
+            if (!ksPath.isNullOrBlank() && !ksPassword.isNullOrBlank()) {
+                storeFile = file(ksPath)
+                storePassword = ksPassword
+                keyAlias = System.getenv("APK_KEY_ALIAS") ?: "vibebuild-export"
+                keyPassword = ksPassword
+            } else {
+                storeFile = file("debug.keystore")
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
         }
     }
 
