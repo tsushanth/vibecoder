@@ -5,9 +5,9 @@ Both run only against a local scratch Postgres with fake mail, R2, Stripe, upstr
 the production Supabase project, box 231, or any migration.
 
 Bottom line:
-- **Gate 1 (cross-tenant): green. No leak found.** 7,758 matrix cells plus 496 CORS cells, 42 routing-trick cells and the database-level checks. 19 of 19 deliberate security mutations make it fail.
+- **Gate 1 (cross-tenant): green. No leak found.** 7,908 matrix cells plus 496 CORS cells, 42 routing-trick cells and the database-level checks. 19 of 19 deliberate security mutations make it fail.
 - **Gate 2 (load): found one real defect, fixed it.** Under overload the proxy queued requests without bound: hangs, then 500s, and it had not recovered minutes after the load stopped. It now refuses with a clean 503 and recovers immediately. The connection budget itself was never exceeded.
-- **Capacity is much lower than the headline local number once the database is remote.** About 2,800 requests/s with a database at 0 ms, about 150/s at 2 ms per statement, about 36/s at 10 ms per statement. Each request costs 7 to 20 database statements. Read the caveats before quoting any number.
+- **Capacity is much lower than the headline local number once the database is remote.** About 2,700 requests/s with a database at 0 ms, about 140/s at 2 ms per statement, about 32/s at 10 ms per statement. Each request costs 7 to 22 database statements. Read the caveats before quoting any number.
 
 ## How to run
 
@@ -42,23 +42,23 @@ prototype names, wrong types), 17 column-name abuses each in where/order/columns
 app; `/storage` upload (with path-traversal names), list, url, delete with the victim's file ids (private and public) and id abuse, and the peer's private file;
 `/notify/me` with spoofed recipient fields, `/notify/unsubscribe` GET and POST with the other app's token; `/pay` checkout, orders, webhook (signed with the
 attacker's secret, unsigned, signed with the master key); `/api` and `/ai` (public by design: asserts the victim's own key is used and never returned);
-19 admin operations including copy-secrets in both directions; CORS preflight and POST from the other app's subdomain and custom domain plus look-alike origins.
+22 admin operations including copy-secrets in both directions, usage and limits (added by #47 while this was in review: the coverage guard failed on the rebase until they were covered); CORS preflight and POST from the other app's subdomain and custom domain plus look-alike origins.
 
 Every cell states an exact expected status (and error code), and is checked for:
 no victim canary (email, user id, row value, file id or name, object key, order id, job id, schema or role name, token, secret) and no admin token, master key, R2 or
 mail key in the response body or headers; no mail to a victim address; the expected number of R2, Stripe and upstream calls; and operation-specific checks
 (for example the R2 object key must start with `<app>/<user>/`). After each direction a full snapshot of the victim (all four tables, end users, sessions,
-files, orders, opt-outs, jobs, secrets by hash, app row, schema spec) must be byte-identical. The captured proxy logs (7,772 lines) contain no canary.
+files, orders, opt-outs, jobs, secrets by hash, app row, schema spec) must be byte-identical. The captured proxy logs (about 7,900 lines) contain no canary.
 Positive controls prove the routes are live and the detector sees real data (legitimate users get their own data; the detector flags it).
 
 | | cells |
 |---|---|
-| matrix A->B | 3,879 |
-| matrix B->A | 3,879 |
+| matrix A->B | 3,954 |
+| matrix B->A | 3,954 |
 | CORS A->B / B->A | 248 / 248 |
 | routing tricks (path, query, header, encoding) A->B / B->A | 21 / 21 |
 | skipped, each with a stated reason (signout is idempotent for validly signed tokens) | 10 |
-| operations in the table | 208 |
+| operations in the table | 211 |
 
 **Database level.** As each app role, directly on the connection: select, insert, update, delete, truncate, drop and alter on every table of the other app; create table in
 the other schema, `platform`, `public`; drop the other schema; create schema and role; alter the other role; every `platform.*` table (select, delete, insert);
@@ -116,39 +116,41 @@ limits do not mask results; app limits are lifted except in the last scenario. M
 time to acquire a pooled connection (instrumented on `pool.connect`), peak pool queue, event-loop lag, database statements per request, recovery probe after the burst, and a leak check (`total - idle` clients after the burst).
 The database is local, so an optional `--db-latency` adds a fixed sleep to every statement while the connection is held, to stand in for a remote database.
 
-**Cost of a request (database statements, each takes a pooled connection).**
-me 7, db_public 14, db_read 15, db_write 15, storage_list 8, storage_url 8, upload 12, notify 14, sign-in 20 (request plus consume). The mix averages about 13.
+**Cost of a request (database statements, each takes a pooled connection; median of 7 calls).**
+me 7, db_public 14, db_read 15, db_write 22, storage_list 8, storage_url 8, upload 12, notify 14, sign-in 20 (request plus consume). The mix averages about 14.
+(db_write was 15 before the metering and row-cap change #47 landed mid-task; capacity fell about 12 percent with it. Re-measure after any change that adds per-request queries.)
 Where they go: app lookup 1, limiter 4 to 5 (kill switch, per-IP, per-app, daily), session check 1, and for data calls a 7-statement transaction (begin, four `set local`, the query, commit) plus a spec lookup.
 This is the main lever on capacity (see recommendations).
 
-**Saturation, closed loop, local database (about 0.1 ms per statement), 6 s per step.** Throughput peaks at about 2,800 req/s from 20 users and stays flat; more users only add queueing.
+**Saturation, closed loop, local database (about 0.1 ms per statement), 6 s per step, `MAX_INFLIGHT` raised to 5,000 so nothing is shed.** Throughput peaks at about 2,700 req/s from 20 users and stays flat; more users only add queueing.
+(With the shipped default cap of 50, users beyond 50 in a no-think-time loop get instant 503s and spin; that is the cap working, and why the capacity runs lift it.)
 
 | users | req/s | p50 ms | p95 ms | p99 ms | pg conns max | pool wait p99 ms | failures |
 |---|---|---|---|---|---|---|---|
-| 1 | 201 | 1.8 | 33 | 34 | 2 | 0 | 0 |
-| 5 | 1,152 | 1.2 | 31 | 32 | 5 | 0 | 0 |
-| 10 | 2,096 | 1.7 | 32 | 33 | 5 | 0.1 | 0 |
-| 20 | 2,819 | 4.2 | 35 | 37 | 5 | 0.6 | 0 |
-| 80 | 2,756 | 26 | 56 | 73 | 5 | 4.7 | 0 |
-| 320 | 2,706 | 115 | 181 | 217 | 5 | 19.8 | 0 |
-| 640 | 2,503 | 247 | 306 | 455 | 5 | 45.9 | 0 |
+| 1 | 199 | 1.9 | 33 | 34 | 2 | 0.01 | 0 |
+| 5 | 1,138 | 1.5 | 32 | 33 | 5 | 0 | 0 |
+| 10 | 2,112 | 1.9 | 32 | 33 | 5 | 0.2 | 0 |
+| 20 | 2,691 | 4.5 | 35 | 37 | 5 | 0.7 | 0 |
+| 80 | 2,660 | 27 | 63 | 72 | 5 | 4.4 | 0 |
+| 320 | 2,539 | 121 | 179 | 223 | 5 | 20.5 | 0 |
+| 640 | 2,544 | 246 | 330 | 421 | 5 | 37.9 | 0 |
 
-(The 33 ms p95 is the 30 ms fake mail latency on notify. The few 429s are the sign-in cap of 200 per app per day, by design.) At this speed the proxy is CPU-bound on one core and the pool is never the limit. The 5-connection pool was fully used from 5 users, and Postgres
+(The 32 ms p95 floor is the 30 ms fake mail latency on notify.) At this speed the proxy is CPU-bound on one core and the pool is never the limit. The 5-connection pool was fully used from 5 users, and Postgres
 never saw more than 5 connections from the proxy login in any run (role limit 8).
 
-**With a remote database.** Same mix, closed loop. Capacity is set by the pool: roughly `5 / (13 statements x round trip)`.
+**With a remote database.** Same mix, closed loop, cap lifted. Capacity is set by the pool: roughly `5 / (14 statements x round trip)`.
 
 | simulated round trip | max throughput | p50 at 10 users | p95 at 40 users | p95 at 160 users |
 |---|---|---|---|---|
-| 0 ms (local) | about 2,800 req/s | 1.7 ms | 41 ms | 83 ms |
-| 2 ms | about 150 req/s | 69 ms | 351 ms | 1,224 ms |
-| 10 ms | about 36 req/s | 292 ms | 1,278 ms | 5,157 ms |
+| 0 ms (local) | about 2,700 req/s | 1.9 ms | 44 ms | 101 ms |
+| 2 ms | about 141 req/s | 67 ms | 364 ms | 1,375 ms |
+| 10 ms | about 32 req/s | 303 ms | 1,560 ms | 6,116 ms |
 
 No errors in these closed-loop runs: users just wait their turn. A real browser will not wait 5 seconds, so the closed-loop latency at overload is a floor, not a promise.
 
-**Overload, open loop (arrivals keep coming whether or not the proxy keeps up), 10 ms round trip, 15 to 20 s per step.** Capacity is about 37 req/s.
+**Overload, open loop (arrivals keep coming whether or not the proxy keeps up), 10 ms round trip.** Capacity is about 32 to 37 req/s depending on the code version.
 
-Before the fix (20 s steps):
+Before the fix (measured on the code before #47, 20 s steps, capacity about 37 req/s):
 
 | offered req/s | 2xx % | timeouts at 15 s (client) | 500s | pool queue max | pool wait max |
 |---|---|---|---|---|---|
@@ -163,24 +165,25 @@ and each wait can be up to the 5 s pool timeout, so a request can live for a min
 requests kept running server-side: 3 seconds after a 20 s burst ended, recovery probes still failed (p95 6.8 s, a 500 and a timeout) and the pool had shrunk to 2 clients. In production that is a retry storm waiting to happen.
 
 The fix (separate commit, regression test `proxy-app/test/overload.test.mjs`, `MAX_INFLIGHT`, default 10 x `DB_POOL_MAX`): admission control in `server.js`. Past the cap, new requests get an immediate `503 {"error":"overloaded"}` with `Retry-After: 1`; `/health` and `/admin` are never refused.
+The regression test hangs on the unfixed code (refused requests wait for the database), and the load smoke test fails on it (500s and timeouts).
 
-After the fix (15 s steps, same setup):
+After the fix (rebased on #47, 15 s steps):
 
-| offered req/s | served ok/s | 503 (clean refusals) | 500 | client timeouts | p95 of admitted ms | pool queue max |
+| offered req/s | served ok/s | 503 (clean refusals) | 500 | client timeouts | p95 / p99 over all requests ms | pool queue max |
 |---|---|---|---|---|---|---|
-| 20 | 20 | 0 | 0 | 0 | 174 | 0 |
-| 30 | 30 | 0 | 0 | 0 | 181 | 1 |
-| 45 | 37.6 | 91 | 0 | 0 | 1,405 | 45 |
-| 70 | 37.3 | 472 | 0 | 0 | 1,449 | 45 |
-| 150 | 37.1 | 1,706 | 0 | 0 | 1,418 | 45 |
-| 400 | 38.1 | 5,517 | 0 | 0 | 1,315 | 45 |
-| 1,000 | 38.1 | 14,684 | 0 | 0 | 7 (refusals are instant) | 45 |
+| 20 | 20.1 | 0 | 0 | 0 | 244 / 248 | 1 |
+| 30 | 30.3 | 0 | 0 | 0 | 274 / 325 | 5 |
+| 45 | 31.4 | 177 | 0 | 0 | 1,866 / 2,371 | 46 |
+| 70 | 32.5 | 549 | 0 | 0 | 1,797 / 2,332 | 46 |
+| 150 | 31.6 | 1,780 | 0 | 0 | 1,728 / 1,955 | 47 |
+| 400 | 33.4 | 5,592 | 0 | 0 | 1,394 / 1,770 | 46 |
+| 1,000 | 32.7 | 14,791 | 0 | 0 | 2 / 1,619 (refusals are instant) | 46 |
 
-Served throughput stays flat at capacity instead of collapsing, nothing hangs, nothing 500s, the queue is bounded, and after the 15 s bursts plus 3 s settle the probes ran at baseline (p50 159 ms, p95 169 ms, zero failures, pool 5 total / 5 idle / 0 waiting, no leaked client).
-Admitted requests still see about 1.4 s at the cap of 50 with a 10 ms round trip (cap divided by capacity). Lower `MAX_INFLIGHT` trades more 503s for lower latency.
+Served throughput stays flat at capacity instead of collapsing, nothing hangs, nothing 500s, the queue is bounded, and after the 15 s bursts plus 3 s settle the probes ran at baseline (p50 167 ms, p95 249 ms against 164 / 244 at light load, zero failures, pool 5 total / 5 idle / 0 waiting, no leaked client).
+Admitted requests still see 1 to 2 s at the cap of 50 with a 10 ms round trip (cap divided by capacity). Lower `MAX_INFLIGHT` trades more 503s for lower latency.
 
 **Connection budget.** Peak Postgres connections for the proxy login were 5 in every run with `DB_POOL_MAX=5` (role limit 8); the pool never exceeded its max and `total == idle` after every burst (no leak). Misconfiguration test: `DB_POOL_MAX=12` against the role limit of 8 at 40 users:
-Postgres capped the role at 8 connections (budget held) but **2,444 of 10,000 requests were 500** (`too many connections for role`) and the rest queued. Nothing validates `DB_POOL_MAX` against the role limit.
+Postgres capped the role at 8 connections (budget held) but **2,444 of 12,679 requests (19 percent) were 500** (`too many connections for role`) and the rest queued. Nothing validates `DB_POOL_MAX` against the role limit.
 
 **Default limits.** With the shipped defaults (30 per IP per minute, 120 per app per minute) 4 apps and 20 users got 40,929 clean 429s and 477 successes in 6 s, and recovery probes within the same minute are 429 as well. Clean and cheap (about 6,900 req/s of refusals, p99 7 ms), but see the recommendations: these defaults were chosen for the connector and AI proxy and now also gate `/db`, `/auth` and `/storage`.
 
@@ -188,17 +191,17 @@ Postgres capped the role at 8 connections (budget held) but **2,444 of 10,000 re
 
 1. **Keep `DB_POOL_MAX` at 5 (at most 6 or 7) while the proxy's database role has `connection limit 8`**, and make the rule explicit: machines x `DB_POOL_MAX` must stay below the role limit, with one spare for migrations and `psql`. `fly.toml` has no machine cap and `auto_start_machines = true`; a second machine means 10 connections against a limit of 8 and the failure mode above. Pin a single machine or lower the pool per machine, and set `[http_service.concurrency]` explicitly. The shared project allows 60; the proxy at 5 is well inside.
 2. **Keep `MAX_INFLIGHT` at its default 50 for now**, and lower it (20 to 25) if the measured database round trip is 10 ms or more, so admitted requests do not wait over a second. Rule of thumb: cap = capacity (req/s) x acceptable latency (s). Slow connector calls (up to 15 s) hold a slot without using the database, which is why it is not set lower.
-3. **Plan capacity from round trips, not from the local number.** About `5 / (13 x RTT)` requests per second: roughly 150/s at 2 ms, 36/s at 10 ms. Measure the real proxy-to-database round trip before launch day; if it is above about 5 ms, the next win is fewer statements per request, not more connections. The obvious candidates: fold the limiter's four to five counters into one statement, and run the executor's transaction setup in one round trip (`set_config` calls in a single query) instead of seven. That should multiply capacity several times and needs no new connections.
-4. **Per-app and per-IP request limits.** The defaults (120 per app per minute, 30 per IP per minute) cap an entire app at 2 requests per second and one user behind one address at one request every 2 seconds, which a real data-backed page will exceed. They also bear no relation to capacity: at 10 ms the whole proxy serves about 2,200 requests per minute. Suggested starting points, decided by the owner: per IP 120 per minute for data routes, per app no more than about a quarter of measured capacity per minute (about 500 per minute at 10 ms, about 2,000 at 2 ms), and keep the daily call cap. Keep the stricter numbers on `/ai`.
+3. **Plan capacity from round trips, not from the local number.** About `5 / (14 x RTT)` requests per second: roughly 140/s at 2 ms, 32/s at 10 ms. Measure the real proxy-to-database round trip before launch day; if it is above about 5 ms, the next win is fewer statements per request, not more connections. The obvious candidates: fold the limiter's four to five counters into one statement, and run the executor's transaction setup in one round trip (`set_config` calls in a single query) instead of seven. That should multiply capacity several times and needs no new connections.
+4. **Per-app and per-IP request limits.** The defaults (120 per app per minute, 30 per IP per minute) cap an entire app at 2 requests per second and one user behind one address at one request every 2 seconds, which a real data-backed page will exceed. They also bear no relation to capacity: at 10 ms the whole proxy serves about 1,900 requests per minute. Suggested starting points, decided by the owner: per IP 120 per minute for data routes, per app no more than about a quarter of measured capacity per minute (about 450 per minute at 10 ms, about 2,000 at 2 ms), and keep the daily call cap. Keep the stricter numbers on `/ai`.
 5. **Sign-in cap.** 200 magic-link requests per app per day is hard-coded in the auth service (not configurable); the load test hits it within seconds. Decide whether that is the intended launch number, and make it configurable if it is not.
 6. **Alert on** `shed` events (log lines with `route: "shed"`, status 503), on pool wait, and on `53300` database errors, since those are the early signs of this saturation.
 
 ## Caveats (read before quoting numbers)
 
-- Laptop (Apple M2 Pro, 10 cores, Node 26) and Postgres 17.8 on loopback, generator and proxy as separate processes on the same machine. The 2,800 req/s figure is a one-core ceiling on a much faster CPU than the Fly `shared-cpu-1x` 256 MB machine in `fly.toml`; expect far less there, and memory was not measured.
+- Laptop (Apple M2 Pro, 10 cores, Node 26) and Postgres 17.8 on loopback, generator and proxy as separate processes on the same machine. The 2,700 req/s figure is a one-core ceiling on a much faster CPU than the Fly `shared-cpu-1x` 256 MB machine in `fly.toml`; expect far less there, and memory was not measured.
 - No network. The 2 ms and 10 ms rows are a fixed sleep per statement, with no jitter, TLS, pooler hop or packet loss. The real proxy-to-Supabase round trip has not been measured, and it decides the capacity.
 - Fake mail, R2, Stripe, upstream and AI with a constant 30 ms. Real providers have variance and failures; slow upstreams hold in-flight slots.
 - One proxy instance and a scratch database with no other tenants. A noisy neighbour on the shared project, replication, autovacuum and the 60-connection pool are not modelled. Scale-to-zero cold starts were not measured.
-- The mix is a guess. Capacity scales with the mix; heavy sign-in or upload traffic costs more statements per request (20 and 12).
+- The mix is a guess. Capacity scales with the mix; heavy sign-in or data-write traffic costs more statements per request (20 and 22).
 - Closed-loop numbers overstate how patient real users are. The open-loop runs are the honest overload picture. Open-loop steps were 15 to 20 s; a longer soak (minutes to hours) and pool behaviour across the 30 s idle timeout were not run.
 - Cross-tenant: see the caveat at the end of Gate 1.
