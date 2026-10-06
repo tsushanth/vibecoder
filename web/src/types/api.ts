@@ -143,11 +143,16 @@ export interface RevertResponse {
 export interface DeployRequest {
   userId: string;
   subdomain: string;
+  allowDestructiveSchema?: true;
 }
 
 export interface DeployResponse {
   success: boolean;
   url: string;
+  schemaStatus?: 'applied' | 'unchanged' | 'invalid' | 'needs_confirmation' | 'failed';
+  jobsStatus?: 'applied' | 'invalid' | 'failed';
+  /** Present when schemaStatus is 'needs_confirmation': what would be dropped or changed (names only). */
+  destructive?: { kind: string; table: string; column?: string }[];
 }
 
 export interface DeploymentInfoResponse {
