@@ -1,3 +1,4 @@
+import { validApkHost, applyApkHost } from './lib/apk.js';
 import 'dotenv/config';
 /**
  * VibeCoder Worker — Single-Pass Build
@@ -950,8 +951,9 @@ const APK_TEMPLATE_DIR = path.join(path.dirname(new URL(import.meta.url).pathnam
 let activeApkBuilds = 0;
 
 app.post('/build-apk', authMiddleware, async (req, res) => {
-    const { projectId, bundle, appName } = req.body;
+    const { projectId, bundle, appName, host } = req.body;
     if (!bundle) return res.status(400).json({ error: 'bundle is required' });
+    if (host !== undefined && !validApkHost(host)) return res.status(400).json({ error: 'host must be a vibebuild.cc subdomain' });
     if (!appName) return res.status(400).json({ error: 'appName is required' });
     if (activeApkBuilds >= 1) return res.status(429).json({ error: 'APK build queue full. Try again in a minute.' });
 
@@ -969,7 +971,9 @@ app.post('/build-apk', authMiddleware, async (req, res) => {
 
         const stringsPath = path.join(tmpDir, 'app', 'src', 'main', 'res', 'values', 'strings.xml');
         const cleanAppName = deriveAppName(appName);
-        fs.writeFileSync(stringsPath, fs.readFileSync(stringsPath, 'utf-8').replace('VibeBuild App', cleanAppName));
+        let stringsXml = fs.readFileSync(stringsPath, 'utf-8').replace('VibeBuild App', cleanAppName);
+        if (host !== undefined) stringsXml = applyApkHost(stringsXml, host);
+        fs.writeFileSync(stringsPath, stringsXml);
 
         const appGradle = path.join(tmpDir, 'app', 'build.gradle.kts');
         const appIdSuffix = 'a' + (projectId || 'app').replace(/[^a-zA-Z0-9]/g, '').substring(0, 20).toLowerCase();

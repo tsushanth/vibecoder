@@ -1,3 +1,4 @@
+import { apkHostFor } from '../lib/apkHost.js';
 import express from 'express';
 import { supabase } from '../config/database.js';
 import {
@@ -1670,7 +1671,7 @@ router.post('/:id/export-apk', async (req, res) => {
         // Get project
         const { data: project, error } = await supabase
             .from('projects')
-            .select('id, title, github_repo, creator_id')
+            .select('id, title, github_repo, creator_id, preview_url, published_url')
             .eq('id', id)
             .single();
 
@@ -1714,7 +1715,9 @@ router.post('/:id/export-apk', async (req, res) => {
             body: JSON.stringify({
                 projectId: id,
                 bundle,
-                appName: project.title || 'VibeBuild App'
+                appName: project.title || 'VibeBuild App',
+                // serve the app from its own https origin so the platform proxy accepts its requests (omitted = legacy file:// shell)
+                ...(apkHostFor(project) ? { host: apkHostFor(project) } : {})
             }),
             signal: AbortSignal.timeout(180000) // 3 min timeout
         });

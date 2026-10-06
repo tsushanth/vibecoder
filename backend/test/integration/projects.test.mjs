@@ -16,8 +16,13 @@ const rows = {
     'ok-2': P({ id: 'ok-2', title: 'Second', initial_prompt: 'A completely different long prompt' }),
 };
 let projectRow = null; // used by progress/export-apk lookups
+let strictSelect = false; // when true a single-row lookup returns only the columns the route asked for
 stubSupabase(supabase, (q) => {
     if (q.table !== 'projects') return { data: [], error: null };
+    if (q.single && eqOf(q, 'id') === projectRow?.id && strictSelect) {
+        const cols = String(q.filters.find((f) => f[0] === 'select')?.[1] || '*').split(',').map((c) => c.trim());
+        return { data: cols.includes('*') ? projectRow : Object.fromEntries(cols.filter((c) => c in projectRow).map((c) => [c, projectRow[c]])), error: null };
+    }
     if (q.single) return eqOf(q, 'id') === projectRow?.id ? { data: projectRow, error: null } : { data: null, error: { code: 'PGRST116' } };
     if (q.op === 'select') return { data: Object.values(rows), error: null };
     return { data: null, error: null };
@@ -179,6 +184,20 @@ test('export-apk: owner with client bundle is forwarded to worker with the secre
     external = () => new Response(JSON.stringify({ error: 'gradle blew up' }), { status: 500 });
     const f = await quiet(() => post('/pa/export-apk', { userId: 'owner', bundle: 'QUJD' }));
     assert.equal(f.status, 500);
+});
+
+test('export-apk: the worker is told which https origin to serve the app from (published wins, preview next, none for foreign urls)', async () => {
+    strictSelect = true;
+    const send = async (extra) => {
+        projectRow = { id: 'pa', creator_id: 'owner', title: 'My App', github_repo: null, ...extra };
+        let body; external = (u, o) => { body = JSON.parse(o.body); return new Response(JSON.stringify({ success: true, apkSize: 5 })); };
+        assert.equal((await quiet(() => post('/pa/export-apk', { userId: 'owner', bundle: 'QUJD' }))).status, 200); return body;
+    };
+    assert.equal((await send({ published_url: 'https://my-app.vibebuild.cc', preview_url: 'https://preview-abc123def456.vibebuild.cc' })).host, 'my-app.vibebuild.cc');
+    assert.equal((await send({ published_url: null, preview_url: 'https://preview-abc123def456.vibebuild.cc' })).host, 'preview-abc123def456.vibebuild.cc');
+    const none = await send({ published_url: 'https://evil.com', preview_url: null }); assert.equal('host' in none, false);
+    assert.deepEqual(none, { projectId: 'pa', bundle: 'QUJD', appName: 'My App' });
+    strictSelect = false;
 });
 
 test('export-apk: no bundle anywhere -> 400', async () => {
