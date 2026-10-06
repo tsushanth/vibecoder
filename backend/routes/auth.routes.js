@@ -48,23 +48,49 @@ router.delete('/account', async (req, res) => {
     }
 });
 
+// Real accounts (a row with an email, written only for a verified sign-in) are protected: changing one needs the owner's own
+// access token. Anonymous device ids (the iOS app has no login) have nothing to protect and keep working without a token.
+// 'ok' = the caller may act on this user id, 'forbidden' = a real account and the token does not prove ownership.
+async function mayActAs(req, userId, verifyUser) {
+    const verified = await verifyUser(req);
+    if (verified) return verified === userId ? 'ok' : 'forbidden';
+    const { data: row } = await supabase.from('users').select('email').eq('user_id', userId).maybeSingle();
+    return row?.email ? 'forbidden' : 'ok';
+}
+
 router.post('/register', async (req, res) => {
     try {
         const { userId, email, displayName, avatarUrl } = req.body;
-        if (!userId) return res.status(400).json({ error: 'userId is required' });
+        if (!userId || typeof userId !== 'string') return res.status(400).json({ error: 'userId is required' });
+        const verified = await verifyUser(req);
+        if (verified && verified !== userId) return res.status(403).json({ error: 'You can only register your own account.' });
 
+        if (verified) {
+            // A verified sign-in may create or update its own row, including the email.
+            const { data, error } = await supabase
+                .from('users')
+                .upsert({
+                    user_id: userId,
+                    email: email || null,
+                    display_name: displayName || 'Anonymous',
+                    avatar_url: avatarUrl || null,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'user_id' })
+                .select()
+                .single();
+            if (error) throw error;
+            return res.json({ success: true, user: data });
+        }
+
+        // No token: this can only create a missing anonymous row. It never touches an existing row (anyone can guess or read
+        // a user id) and an email claimed without proof is not stored, so it cannot mark a row as a real account.
+        const { data: existing } = await supabase.from('users').select('user_id, display_name').eq('user_id', userId).maybeSingle();
+        if (existing) return res.json({ success: true, user: existing });
         const { data, error } = await supabase
             .from('users')
-            .upsert({
-                user_id: userId,
-                email: email || null,
-                display_name: displayName || 'Anonymous',
-                avatar_url: avatarUrl || null,
-                updated_at: new Date().toISOString()
-            }, { onConflict: 'user_id' })
+            .insert({ user_id: userId, email: null, display_name: displayName || 'Anonymous', avatar_url: null, updated_at: new Date().toISOString() })
             .select()
             .single();
-
         if (error) throw error;
         res.json({ success: true, user: data });
     } catch (error) {
@@ -80,6 +106,8 @@ router.post('/push-token', async (req, res) => {
         if (!userId || !token) {
             return res.status(400).json({ error: 'userId and token are required' });
         }
+        // Otherwise anyone who knows a user id could send that user's notifications to their own device.
+        if (await mayActAs(req, userId, verifyUser) !== 'ok') return res.status(403).json({ error: 'Sign in as this user to register a device.' });
 
         if (platform === 'android') {
             // Store FCM token in users table fcm_token column (may not exist yet - soft fail)
