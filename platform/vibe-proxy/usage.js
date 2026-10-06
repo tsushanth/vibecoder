@@ -12,6 +12,7 @@ const KIND_BY_ROUTE = {
 export const kindForRoute = (route) => (Object.hasOwn(KIND_BY_ROUTE, route) ? KIND_BY_ROUTE[route] : null);
 
 const APP_ID = /^[a-z0-9][a-z0-9-]{0,62}$/;
+const MAX_BUFFERED = 5000; // distinct (app, day, kind) rows held in memory
 const num = (v) => (Number.isFinite(v) && v > 0 ? Math.round(v) : 0);
 
 /**
@@ -27,18 +28,22 @@ export function createUsage({ sink, now = () => Date.now(), flushMs = 0 }) {
         if (!buf.size) return;
         const batch = buf; buf = new Map();
         for (const e of batch.values()) {
-            try { await sink(e); } catch { const k = `${e.appId}|${e.day}|${e.kind}`; const cur = buf.get(k); buf.set(k, cur ? merge(cur, e) : e); } // keep it for the next flush
+            try { await sink(e); } catch (err) {
+                if (/^2[23]/.test(String(err?.code))) continue; // a constraint or data error (e.g. an app id that does not exist) can never succeed: drop it
+                const k = `${e.appId}|${e.day}|${e.kind}`; const cur = buf.get(k); // anything else (database briefly down): keep it for the next flush
+                if (cur) merge(cur, e); else if (buf.size < MAX_BUFFERED) buf.set(k, e);
+            }
         }
     }
 
     if (flushMs > 0) { timer = setInterval(() => { flush().catch(() => {}); }, flushMs); timer.unref?.(); }
 
     return {
-        async record({ appId, kind, status, ok, rows = 0, bytes = 0, ms = 0, spendMicros = 0 }) {
+        async record({ appId, kind, status, ok, calls = 1, rows = 0, bytes = 0, ms = 0, spendMicros = 0 }) {
             if (!KINDS.includes(kind) || !APP_ID.test(String(appId))) return;
-            const failed = ok === false || (Number.isFinite(status) && status >= 400);
-            const e = { appId, day: new Date(now()).toISOString().slice(0, 10), kind, calls: 1, errors: failed ? 1 : 0, bytes: num(bytes), rows: num(rows), ms: num(ms), spendMicros: num(spendMicros) };
-            if (flushMs > 0) { const k = `${appId}|${e.day}|${kind}`; const cur = buf.get(k); buf.set(k, cur ? merge(cur, e) : e); return; }
+            const failed = calls > 0 && (ok === false || (Number.isFinite(status) && status >= 400));
+            const e = { appId, day: new Date(now()).toISOString().slice(0, 10), kind, calls: calls === 0 ? 0 : 1, errors: failed ? 1 : 0, bytes: num(bytes), rows: num(rows), ms: num(ms), spendMicros: num(spendMicros) };
+            if (flushMs > 0) { const k = `${appId}|${e.day}|${kind}`; const cur = buf.get(k); if (cur) merge(cur, e); else if (buf.size < MAX_BUFFERED) buf.set(k, e); return; }
             try { await sink(e); } catch { /* metering must never break a request */ }
         },
         flush,

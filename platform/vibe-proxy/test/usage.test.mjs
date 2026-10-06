@@ -140,3 +140,33 @@ test('emailsFrom counts sent mail: auth_email and notify calls minus errors', ()
     assert.equal(emailsFrom({ auth_email: { calls: 10, errors: 3 }, notify: { calls: 4, errors: 1 }, db: { calls: 99, errors: 0 } }), 10);
     assert.equal(emailsFrom({}), 0);
 });
+
+test('calls: 0 records spend or bytes without counting another call (AI spend lands after the call is metered)', async () => {
+    const seen = [];
+    const u = createUsage({ sink: async (e) => { seen.push(e); }, now: () => T });
+    await u.record({ appId: 'a', kind: 'ai', calls: 0, spendMicros: 4200, status: 500 });
+    assert.deepEqual([seen[0].calls, seen[0].errors, seen[0].spendMicros], [0, 0, 4200]);
+});
+
+test('a flush drops events the database can never accept (constraint/data errors) instead of retrying forever, but keeps them on other errors', async () => {
+    let code = '23503'; let attempts = 0;
+    const u = createUsage({ sink: async () => { attempts++; const e = new Error('x'); e.code = code; throw e; }, now: () => T, flushMs: 60_000 });
+    await u.record({ appId: 'ghost', kind: 'db', status: 200 });
+    await u.flush(); await u.flush();
+    assert.equal(attempts, 1, 'dropped after the first failure');
+    code = '08006'; await u.record({ appId: 'a', kind: 'db', status: 200 });
+    await u.flush(); await u.flush();
+    assert.equal(attempts, 3, 'kept and retried');
+    await u.close();
+});
+
+test('the in-memory buffer is bounded: new keys are dropped past the cap, existing keys keep merging', async () => {
+    const seen = [];
+    const u = createUsage({ sink: async (e) => { seen.push(e); }, now: () => T, flushMs: 60_000 });
+    for (let i = 0; i < 5100; i++) await u.record({ appId: `app-${i}`, kind: 'db', status: 200 });
+    await u.record({ appId: 'app-0', kind: 'db', status: 200 });
+    await u.flush();
+    assert.equal(seen.length, 5000);
+    assert.equal(seen.find((e) => e.appId === 'app-0').calls, 2);
+    await u.close();
+});
