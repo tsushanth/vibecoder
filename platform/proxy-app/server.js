@@ -12,7 +12,7 @@ import { kindForRoute } from '../vibe-proxy/usage.js';
 import { handleStorage, STORAGE_OPS, MAX_UPLOAD_BYTES } from '../storage/routes.js';
 
 const MAX_BODY = 200_000;
-const ROUTE = new RegExp(`^/([a-z0-9][a-z0-9-]{0,62})/(api|ai|auth/(?:${AUTH_OPS.join('|')})|db|storage/(?:${STORAGE_OPS.join('|')}))$`);
+export const ROUTE = new RegExp(`^/([a-z0-9][a-z0-9-]{0,62})/(api|ai|auth/(?:${AUTH_OPS.join('|')})|db|storage/(?:${STORAGE_OPS.join('|')}))$`);
 const BASE_HEADERS = { 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' };
 
 function originAllowed(origin, appId, app, baseDomain) {

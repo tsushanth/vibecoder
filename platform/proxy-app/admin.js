@@ -16,6 +16,8 @@ const digest = (s) => createHash('sha256').update(String(s)).digest();
 const json = (status, body) => ({ status, body });
 const noBody = (status) => ({ status });
 
+export const ADMIN_SUBS = ['secrets', 'ensure', 'enabled', 'domains', 'manifest', 'copy-secrets', 'schema', 'jobs', 'usage', 'limits'];
+export const ADMIN_PATH = new RegExp(`^/admin/apps/([^/]+)(?:/(${ADMIN_SUBS.join('|')})(?:/([^/]+))?)?$`);
 export const ADMIN_BODY_LIMIT = 8192;
 // a full schema (20 tables x 30 columns) is bigger than the other admin payloads; the backend caps the schema file it reads at 64 KB, so this leaves room for the wrapper and for a direct caller
 export const SCHEMA_BODY_LIMIT = 131072;
@@ -39,7 +41,7 @@ export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled,
     return async function handle(req) {
         const denied = await authorize(req.headers, req.ip);
         if (denied) return denied;
-        const m = /^\/admin\/apps\/([^/]+)(?:\/(secrets|ensure|enabled|domains|manifest|copy-secrets|schema|jobs|usage|limits)(?:\/([^/]+))?)?$/.exec(req.pathname);
+        const m = ADMIN_PATH.exec(req.pathname);
         if (!m) return json(404, { error: 'not_found' });
         const [, appId, sub, name] = m;
         if (!APP_ID.test(appId)) return json(404, { error: 'not_found' });
