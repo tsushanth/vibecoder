@@ -1,4 +1,5 @@
-import { validApkHost, applyApkHost } from './lib/apk.js';
+import { validApkHost, applyApkHost, applyCapacitorHost } from './lib/apk.js';
+import { checkApk } from './scripts/check-apk-permissions.mjs';
 import 'dotenv/config';
 /**
  * VibeCoder Worker — Single-Pass Build
@@ -947,13 +948,20 @@ function deriveAppName(rawName) {
     return name.replace(/[<>&"']/g, '');
 }
 
-const APK_TEMPLATE_DIR = path.join(path.dirname(new URL(import.meta.url).pathname), 'apk-template');
+const WORKER_DIR = path.dirname(new URL(import.meta.url).pathname);
+const APK_TEMPLATE_DIR = process.env.APK_TEMPLATE_DIR || path.join(WORKER_DIR, 'apk-template');
+const APK_TEMPLATE_DIR_CAPACITOR = process.env.APK_TEMPLATE_DIR_CAPACITOR || path.join(WORKER_DIR, 'apk-template-capacitor');
 let activeApkBuilds = 0;
+class BuildInputError extends Error {}
 
 app.post('/build-apk', authMiddleware, async (req, res) => {
-    const { projectId, bundle, appName, host } = req.body;
+    const { projectId, bundle, appName, host, shell } = req.body;
     if (!bundle) return res.status(400).json({ error: 'bundle is required' });
     if (host !== undefined && !validApkHost(host)) return res.status(400).json({ error: 'host must be a vibebuild.cc subdomain' });
+    // shell: 'legacy' (default, the WebView shell) or 'capacitor' (opt-in, serves the bundle at https://<host>/ and bridges vibe.device)
+    if (shell !== undefined && shell !== 'legacy' && shell !== 'capacitor') return res.status(400).json({ error: "shell must be 'legacy' or 'capacitor'" });
+    const capacitor = shell === 'capacitor';
+    if (capacitor && host === undefined) return res.status(400).json({ error: 'host is required for the capacitor shell' });
     if (!appName) return res.status(400).json({ error: 'appName is required' });
     if (activeApkBuilds >= 1) return res.status(429).json({ error: 'APK build queue full. Try again in a minute.' });
 
@@ -963,16 +971,23 @@ app.post('/build-apk', authMiddleware, async (req, res) => {
 
     try {
         fs.mkdirSync(tmpDir, { recursive: true });
-        execSync(`cp -r ${APK_TEMPLATE_DIR}/. ${tmpDir}/`, { stdio: 'pipe' });
+        execSync(`cp -r ${capacitor ? APK_TEMPLATE_DIR_CAPACITOR : APK_TEMPLATE_DIR}/. ${tmpDir}/`, { stdio: 'pipe' });
 
+        // Capacitor serves www from assets/public; its config (assets/capacitor.config.json) is never taken from the bundle.
         const assetsDir = path.join(tmpDir, 'app', 'src', 'main', 'assets');
-        fs.mkdirSync(assetsDir, { recursive: true });
-        unzipBundle(bundle, assetsDir);
+        const webDir = capacitor ? path.join(assetsDir, 'public') : assetsDir;
+        fs.mkdirSync(webDir, { recursive: true });
+        unzipBundle(bundle, webDir);
+        if (capacitor) {
+            if (!fs.existsSync(path.join(webDir, 'index.html'))) throw new BuildInputError('the bundle has no index.html at its root');
+            const cfgPath = path.join(assetsDir, 'capacitor.config.json');
+            fs.writeFileSync(cfgPath, applyCapacitorHost(fs.readFileSync(cfgPath, 'utf-8'), host));
+        }
 
         const stringsPath = path.join(tmpDir, 'app', 'src', 'main', 'res', 'values', 'strings.xml');
         const cleanAppName = deriveAppName(appName);
         let stringsXml = fs.readFileSync(stringsPath, 'utf-8').replace('VibeBuild App', cleanAppName);
-        if (host !== undefined) stringsXml = applyApkHost(stringsXml, host);
+        if (host !== undefined && !capacitor) stringsXml = applyApkHost(stringsXml, host);
         fs.writeFileSync(stringsPath, stringsXml);
 
         const appGradle = path.join(tmpDir, 'app', 'build.gradle.kts');
@@ -987,11 +1002,17 @@ app.post('/build-apk', authMiddleware, async (req, res) => {
 
         const apkPath = path.join(tmpDir, 'app', 'build', 'outputs', 'apk', 'release', 'app-release.apk');
         if (!fs.existsSync(apkPath)) throw new Error('APK not found after build');
+        if (capacitor) {
+            // Fails closed: an APK whose permissions cannot be read, or that has any beyond the allow-list, is not returned.
+            const perms = checkApk(apkPath);
+            if (!perms.ok) throw new Error(`permission check failed: ${perms.violations.join('; ')}`);
+        }
         const apkBuffer = fs.readFileSync(apkPath);
         console.log(`[${buildId}] APK ready: ${(apkBuffer.length / 1024 / 1024).toFixed(1)}MB`);
         res.json({ success: true, apk: apkBuffer.toString('base64'), apkSize: apkBuffer.length });
     } catch (error) {
         console.error(`[${buildId}] APK build failed:`, error.message);
+        if (error instanceof BuildInputError) return res.status(400).json({ error: error.message });
         res.status(500).json({ error: `APK build failed: ${error.message}` });
     } finally {
         activeApkBuilds--;

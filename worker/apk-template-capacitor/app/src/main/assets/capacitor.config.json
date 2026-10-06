@@ -1,0 +1,14 @@
+{
+  "appId": "com.vibebuild.export",
+  "appName": "VibeBuild App",
+  "webDir": "public",
+  "server": {
+    "androidScheme": "https",
+    "hostname": "__VIBE_HOST__"
+  },
+  "android": {
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false,
+    "loggingBehavior": "none"
+  }
+}
