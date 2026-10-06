@@ -184,14 +184,14 @@ Spend (all small, none committed):
 
 ## Decisions (owner delegated, 2026-10-05) and Phase 0 findings
 
-Phase 0 findings from the template recovered from box 231 (backup in the owner's private folder, now committed as `worker/apk-template/`):
-- Every exported APK is signed with the public Android **debug keystore** (`app/debug.keystore`, password `android`). It is the same key for every app and is not secret. Existing installs therefore depend on that key; changing it would stop updates for them.
+Phase 0 findings from the template recovered from box 231 (everything except the signing key is committed as `worker/apk-template/`):
+- Exported APKs are signed with a custom self-signed key (`CN=VibeBuild Export`, alias `androiddebugkey`, store/key password `android`, valid to 2126), the same key for every app. The password is the well-known default and is also written in `build.gradle.kts`, so the file's secrecy is the only protection it ever had. **The keystore was committed to this PUBLIC repository by mistake in PR #35 and removed from the current files afterwards; it remains in git history, so treat that key as compromised.** The only copy now lives on the build host and in the owner's private backup.
 - minSdk 24, targetSdk 34, Gradle 8.5, JDK 17, Kotlin; `isMinifyEnabled = false` (matches the standing rule). Permissions: INTERNET only.
-- The WebView loads `file:///android_asset/index.html` with universal file access and remote debugging on. Pages there send `Origin: null`, which the platform proxy rejects, so **exported APKs of apps that use vibe.auth, vibe.db, vibe.storage, vibe.pay or vibe.notify cannot work today**. Serving the APK at `https://<app>.vibebuild.cc` (decision 7) fixes this.
+- The WebView loaded `file:///android_asset/index.html` with universal file access and remote debugging on. Pages there send `Origin: null`, which the platform proxy rejects, so exported APKs of apps that use vibe.auth, vibe.db, vibe.storage, vibe.pay or vibe.notify could not work. Fixed in this change: with a host configured the shell serves the bundle from `https://<app>.vibebuild.cc` (WebViewAssetLoader), turns off file access, and enables remote debugging only for debuggable builds.
 
 Decisions taken (owner: "your call"):
 1. **Build host:** stay on box 231 (it already has the JDK and Android SDK). Template is now in git so the box is reproducible; the Dockerfile/box provisioning for JDK and SDK is the next step before any host move.
-2. **Signing key:** keep the debug key for existing installs and for now for new ones (changing it breaks updates). Follow-up, needs a decision before Play distribution: per-app release keys. Note the risk: anyone can sign an APK with the public key and the same package name, so these sideloaded exports must never be presented as tamper-proof.
+2. **Signing key:** the current key is compromised (see above). Needs an owner decision: rotate for new builds (existing installs then cannot be updated in place and must be reinstalled) or keep it knowingly. Either way these sideloaded exports must not be presented as tamper-proof.
 3. **Capacitor default:** yes, after verification, with the old template kept as the fallback behind a flag.
 4. **Push:** deferred.
 5. **API:** five calls (isNative, camera.capture, geolocation.get, share, haptics.tap).

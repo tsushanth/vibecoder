@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">VibeBuild App</string>
+    <!-- Set at build time to <app>.vibebuild.cc so the app is served from the origin the platform proxy accepts. Empty = legacy file:// mode. -->
+    <string name="vibe_host" translatable="false"></string>
 </resources>
