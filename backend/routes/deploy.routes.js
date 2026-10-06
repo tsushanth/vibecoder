@@ -6,6 +6,8 @@ import { getActiveDomainMap } from '../services/domainService.js';
 import { WORKER_URL, WORKER_SECRET } from '../config/constants.js';
 import { requireSecret } from '../lib/requireSecret.js';
 import { registerDeployedApp, disableDeployedApp } from '../services/appRegistry.js';
+import { applyTierLimits } from '../services/tierSync.js';
+import { getSubscriptionStatus } from '../services/subscriptionService.js';
 import { verifiedUserId } from '../lib/verifiedUser.js';
 
 const DEPLOY_SERVER_URL = process.env.DEPLOY_SERVER_URL || 'http://localhost:4000';
@@ -155,6 +157,8 @@ router.post('/:projectId/deploy', async (req, res) => {
         // A vibe.schema.json in the bundle is applied to the app's database; destructive changes only when the creator confirmed.
         const result = {};
         await registerDeployedApp(req.app.locals.proxyAdmin, subdomain, undefined, { projectId, bundle, allowDestructive, result });
+        // The plan sets the size of the app's usage caps (Free defaults, Pro and Team larger). Never fails the deploy.
+        try { await applyTierLimits(req.app.locals.proxyAdmin, subdomain, (await getSubscriptionStatus(userId)).tier); } catch { /* the periodic sweep corrects it */ }
 
         res.json({ success: true, url, ...(result.schemaStatus ? { schemaStatus: result.schemaStatus } : {}), ...(result.jobsStatus ? { jobsStatus: result.jobsStatus } : {}), ...(result.schemaStatus === 'needs_confirmation' ? { destructive: result.destructive || [] } : {}) });
     } catch (error) {

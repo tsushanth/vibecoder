@@ -1,6 +1,7 @@
 import express from 'express';
 import Stripe from 'stripe';
 import { supabase } from '../config/database.js';
+import { syncTierLimitsForUser } from '../services/tierSync.js';
 import {
     getSubscriptionStatus,
     verifyReceipt,
@@ -95,6 +96,9 @@ router.post('/verify', async (req, res) => {
                 duplicate: true
             });
         }
+
+        // A new or renewed plan changes the size of the user's apps' usage caps; do it now, not at the next sweep.
+        syncTierLimitsForUser({ supabase, proxyAdmin: req.app.locals.proxyAdmin, userId, getStatus: getSubscriptionStatus }).catch(() => {});
 
         res.json({
             success: true,
@@ -338,6 +342,8 @@ router.post('/stripe-webhook', express.raw({ type: 'application/json' }), async 
         console.error('[stripe-webhook] Processing error:', error);
     }
 
+    // Any subscription event can change a user's tier: re-apply tiers soon (debounced; the periodic sweep is the backstop).
+    req.app.locals.tierSweep?.trigger?.();
     res.json({ received: true });
 });
 

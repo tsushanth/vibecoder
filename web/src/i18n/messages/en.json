@@ -356,6 +356,7 @@
       "rateLimited": "Too many requests. Try again in a minute.",
       "network": "Could not reach the server.",
       "unknown": "Something went wrong loading usage."
-    }
+    },
+    "upgrade": "Upgrade your plan to raise this limit."
   }
 }

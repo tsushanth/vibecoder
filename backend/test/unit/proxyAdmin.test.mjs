@@ -66,7 +66,7 @@ test('redirects are not followed and the base URL must be https', async () => {
 test('the client never exposes the token or a way to read a secret value', () => {
     const { admin } = rig(res(204));
     assert.equal(JSON.stringify(admin).includes(TOKEN), false);
-    assert.deepEqual(Object.keys(admin).sort(), ['configured', 'copySecrets', 'deleteSecret', 'ensureApp', 'getApp', 'getJobs', 'getSchema', 'getUsage', 'listSecrets', 'planSchema', 'registerApp', 'setDomains', 'setEnabled', 'setJobs', 'setManifest', 'setSchema', 'setSecret']);
+    assert.deepEqual(Object.keys(admin).sort(), ['configured', 'copySecrets', 'deleteSecret', 'ensureApp', 'getApp', 'getJobs', 'getLimits', 'getSchema', 'getUsage', 'listSecrets', 'planSchema', 'registerApp', 'setDomains', 'setEnabled', 'setJobs', 'setLimits', 'setManifest', 'setSchema', 'setSecret']);
 });
 
 test('ensureApp posts to the ensure endpoint with no body, and setEnabled posts the flag', async () => {
@@ -144,4 +144,14 @@ test('getUsage sends GET /usage?days=N with the bearer token and resolves the re
 test('getUsage rejects with the proxy\'s error code (unknown_app) and never leaks the token', async () => {
     const { admin } = rig(res(404, { error: 'unknown_app' }));
     await assert.rejects(() => admin.getUsage('nope'), (e) => e.code === 'unknown_app' && e.status === 404 && !e.message.includes(TOKEN));
+});
+
+test('getLimits reads GET /limits and setLimits POSTs the whole override set, with errors mapped to codes', async () => {
+    const lim = { defaults: { rowCap: 20000 }, overrides: {}, limits: { rowCap: 20000 } };
+    const a = rig(res(200, lim)); assert.deepEqual(await a.admin.getLimits('my-app'), lim);
+    assert.equal(a.calls[0].url, 'https://proxy.test/admin/apps/my-app/limits'); assert.equal(a.calls[0].init.method, 'GET');
+    const b = rig(res(200, { overrides: { rowCap: 100000 } })); await b.admin.setLimits('my-app', { rowCap: 100000 });
+    assert.equal(b.calls[0].url, 'https://proxy.test/admin/apps/my-app/limits'); assert.equal(b.calls[0].init.method, 'POST'); assert.deepEqual(b.calls[0].body, { overrides: { rowCap: 100000 } });
+    await assert.rejects(() => rig(res(400, { error: 'invalid_limits' })).admin.setLimits('x', {}), (e) => e.status === 400 && e.code === 'invalid_limits');
+    await assert.rejects(() => rig(res(404, { error: 'unknown_app' })).admin.getLimits('x'), (e) => e.code === 'unknown_app');
 });

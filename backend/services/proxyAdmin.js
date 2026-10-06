@@ -69,6 +69,9 @@ export function createProxyAdmin({ baseUrl, token, fetchImpl = globalThis.fetch,
         getJobs: (appId) => call('GET', `/admin/apps/${enc(appId)}/jobs`),
         copySecrets: (toAppId, fromAppId, { replace = false } = {}) => call('POST', `/admin/apps/${enc(toAppId)}/copy-secrets`, { from: fromAppId, replace }),
         // Per-app usage for the last `days` (1..30): { days: [{ day, byKind }], totals, limits, usage }, numbers only. Rejects with unknown_app or invalid_days.
+        // Limits: { defaults, overrides, limits }. setLimits REPLACES the override set ({} clears it); rejects invalid_limits or unknown_app.
+        getLimits: (appId) => call('GET', `/admin/apps/${enc(appId)}/limits`),
+        setLimits: (appId, overrides) => call('POST', `/admin/apps/${enc(appId)}/limits`, { overrides }),
         getUsage: (appId, days = 7) => call('GET', `/admin/apps/${enc(appId)}/usage?days=${enc(String(days))}`),
         listSecrets: async (appId) => (await call('GET', `/admin/apps/${enc(appId)}/secrets`))?.secrets ?? [],
     };

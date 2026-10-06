@@ -17,6 +17,9 @@ import { createSecretsRouter } from './routes/secrets.routes.js';
 import { createUsageRouter } from './routes/usage.routes.js';
 import { createSchemaPlanRouter } from './routes/schemaPlan.routes.js';
 import { createProxyAdmin } from './services/proxyAdmin.js';
+import { supabase } from './config/database.js';
+import { startTierSweep } from './services/tierSync.js';
+import { getSubscriptionStatus } from './services/subscriptionService.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { WORKER_URL, WORKER_SECRET } from './config/constants.js';
 
@@ -32,7 +35,9 @@ const proxyAdmin = createProxyAdmin({ baseUrl: process.env.PROXY_ADMIN_URL, toke
 app.use('/api/projects/:id/secrets', cors({ origin: WEB_ORIGINS }), createSecretsRouter({ proxyAdmin }));
 app.use('/api/projects/:id/usage', cors({ origin: WEB_ORIGINS }), createUsageRouter({ proxyAdmin }));
 app.use('/api/projects/:id/schema', cors({ origin: WEB_ORIGINS }), createSchemaPlanRouter({ proxyAdmin }));
-app.locals.proxyAdmin = proxyAdmin; // used by the deploy routes to register deployed apps with the proxy
+app.locals.proxyAdmin = proxyAdmin;
+// Keep each published app's usage caps in step with its creator's plan (also handles expiries and downgrades). TIER_SWEEP_MS=0 turns it off.
+if (process.env.NODE_ENV !== 'test') app.locals.tierSweep = startTierSweep({ supabase, proxyAdmin, getStatus: getSubscriptionStatus, intervalMs: Number(process.env.TIER_SWEEP_MS ?? 15 * 60_000) }); // used by the deploy routes to register deployed apps with the proxy
 app.use(cors({
     origin: [
         'https://vibebuild.cc',
