@@ -107,6 +107,14 @@ export function createDataExecutor({ pool, timeoutMs = 5000, ddlTimeoutMs = 3000
             } catch (e) { return { ok: false, ...mapError(e) }; }
         },
 
+        /** Total rows across the named tables in one statement (one round trip). Table names are re-validated: they are interpolated. */
+        async totalRows(appId, tables) {
+            if (!tables.length) return 0;
+            if (!tables.every((t) => typeof t === 'string' && /^[a-z][a-z0-9_]{0,40}$/.test(t))) throw new Error('bad table');
+            const sql = `select (${tables.map((t) => `(select count(*) from "${t}")`).join(' + ')})::bigint as n`;
+            return inRole(appId, timeoutMs, async (client) => Number((await client.query(sql)).rows[0].n));
+        },
+
         /** Count of rows in one table, used for per-app quotas. */
         async count(appId, table) {
             if (!/^[a-z][a-z0-9_]{0,40}$/.test(table)) throw new Error('bad table');
