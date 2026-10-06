@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { api, ApiError } from '@/lib/api';
 import { isValidSubdomain } from '@/lib/utils';
+import { deployBody, deployOutcome, describeDestructive, isConfirmationTyped, confirmPhrases, planDestructive, type DeployOutcome, type DestructiveItem, type Tone } from '@/lib/schemaDeploy';
 import type { DeployResponse, DeploymentInfoResponse, DomainStatusResponse, AddDomainResponse, VerifyDomainResponse } from '@/types/api';
 
 interface Props {
@@ -25,6 +26,12 @@ export function PublishDialog({ projectId, userId, subscriptionTier, onClose, on
   const [isUndeploying, setIsUndeploying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // Schema / jobs results of the last deploy, and the destructive-change confirmation
+  const [outcome, setOutcome] = useState<DeployOutcome | null>(null);
+  const [isPlanning, setIsPlanning] = useState(false);
+  const [confirmItems, setConfirmItems] = useState<DestructiveItem[] | null>(null);
+  const [typed, setTyped] = useState('');
 
   // Custom domain state
   const [customDomain, setCustomDomain] = useState('');
@@ -126,8 +133,9 @@ export function PublishDialog({ projectId, userId, subscriptionTier, onClose, on
     }
   }
 
-  async function handleDeploy() {
+  async function handleDeploy(allowDestructive = false) {
     setError(null);
+    setOutcome(null);
     const trimmed = subdomain.trim().toLowerCase();
 
     if (!isValidSubdomain(trimmed)) {
@@ -135,18 +143,42 @@ export function PublishDialog({ projectId, userId, subscriptionTier, onClose, on
       return;
     }
 
+    // Updating an app that is already live: look first (read-only) at what the new schema would drop, and ask before deploying.
+    if (!allowDestructive && isDeployed) {
+      setIsPlanning(true);
+      try {
+        const plan = await api.get<unknown>(`/api/projects/${projectId}/schema/plan?subdomain=${encodeURIComponent(trimmed)}`);
+        const items = planDestructive(plan);
+        if (items.length) {
+          setTyped('');
+          setConfirmItems(items);
+          return;
+        }
+      } catch {
+        // The check is advisory: the server still refuses destructive changes that were not confirmed.
+      } finally {
+        setIsPlanning(false);
+      }
+    }
+
     setIsDeploying(true);
     try {
       const result = await api.post<DeployResponse>(
         `/api/deploy/${projectId}/deploy`,
-        { userId, subdomain: trimmed }
+        deployBody(userId, trimmed, allowDestructive)
       );
       setIsDeployed(true);
       setLiveUrl(result.url);
       setDeployedAt(new Date().toISOString());
+      const out = deployOutcome(result);
+      setOutcome(out);
+      if (out.needsConfirmation && out.destructive.length) {
+        setTyped('');
+        setConfirmItems(out.destructive);
+      }
       onPublished(result.url);
     } catch (err) {
-      if (err instanceof ApiError) {
+      if (err instanceof ApiError && err.data?.error !== 'destructive_confirmation_requires_owner') {
         setError(err.message);
       } else {
         setError(t('publish.deployFailed'));
@@ -154,6 +186,18 @@ export function PublishDialog({ projectId, userId, subscriptionTier, onClose, on
     } finally {
       setIsDeploying(false);
     }
+  }
+
+  function handleCancelConfirm() {
+    setConfirmItems(null);
+    setTyped('');
+  }
+
+  function handleConfirmDestructive() {
+    if (!confirmItems || !isConfirmationTyped(typed, confirmItems)) return;
+    setConfirmItems(null);
+    setTyped('');
+    void handleDeploy(true);
   }
 
   async function handleUndeploy() {
@@ -282,11 +326,11 @@ export function PublishDialog({ projectId, userId, subscriptionTier, onClose, on
               {/* Update / Unpublish */}
               <div className="flex gap-2">
                 <button
-                  onClick={handleDeploy}
-                  disabled={isDeploying}
+                  onClick={() => handleDeploy()}
+                  disabled={isDeploying || isPlanning}
                   className="flex-1 px-4 py-2 text-xs font-medium bg-accent hover:bg-accent-hover text-white rounded-lg transition disabled:opacity-50"
                 >
-                  {isDeploying ? t('publish.updating') : t('publish.updateDeployment')}
+                  {isPlanning ? t('publish.schema.checking') : isDeploying ? t('publish.updating') : t('publish.updateDeployment')}
                 </button>
                 <button
                   onClick={handleUndeploy}
@@ -417,7 +461,7 @@ export function PublishDialog({ projectId, userId, subscriptionTier, onClose, on
               </div>
 
               <button
-                onClick={handleDeploy}
+                onClick={() => handleDeploy()}
                 disabled={isDeploying || !subdomain.trim()}
                 className="w-full px-4 py-2.5 text-sm font-medium bg-accent hover:bg-accent-hover text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -433,11 +477,67 @@ export function PublishDialog({ projectId, userId, subscriptionTier, onClose, on
             </div>
           )}
 
+          {outcome && (outcome.schema || outcome.jobs) && (
+            <div className="mt-3 space-y-1.5">
+              {outcome.schema && <StatusLine heading={t('publish.schema.statusHeading')} text={t(outcome.schema.key)} tone={outcome.schema.tone} />}
+              {outcome.jobs && <StatusLine heading={t('publish.jobs.heading')} text={t(outcome.jobs.key)} tone={outcome.jobs.tone} />}
+            </div>
+          )}
+
           {error && (
             <p className="mt-3 text-xs text-danger">{error}</p>
           )}
         </div>
       </div>
+
+      {confirmItems && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center" role="alertdialog" aria-modal="true" aria-labelledby="schema-confirm-title">
+          <div className="absolute inset-0 bg-black/60" onClick={handleCancelConfirm} />
+          <div className="relative w-full max-w-md mx-4 bg-card border border-danger/40 rounded-xl shadow-2xl p-5 space-y-3 max-h-[90vh] overflow-y-auto">
+            <h3 id="schema-confirm-title" className="text-sm font-semibold text-danger">{t('publish.schema.confirmTitle')}</h3>
+            <p className="text-xs text-muted">{t('publish.schema.confirmIntro')}</p>
+            <ul className="list-disc pl-4 space-y-1 text-xs text-foreground">
+              {confirmItems.map((item, i) => {
+                const d = describeDestructive(item);
+                return <li key={`${item.kind}-${item.table}-${item.column ?? ''}-${i}`}>{t(d.key, d.values)}</li>;
+              })}
+            </ul>
+            <p className="text-[11px] text-subtle">{t('publish.schema.confirmTypeHint', { names: confirmPhrases(confirmItems).join(', ') })}</p>
+            <input
+              type="text"
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              placeholder={t('publish.schema.confirmPlaceholder')}
+              autoComplete="off"
+              autoFocus
+              className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm text-foreground placeholder:text-subtle focus:outline-none focus:border-danger transition"
+            />
+            <div className="flex gap-2 justify-end">
+              <button onClick={handleCancelConfirm} className="px-4 py-2 text-xs font-medium bg-surface hover:bg-surface-hover border border-border rounded-lg transition">
+                {t('publish.schema.cancel')}
+              </button>
+              <button
+                onClick={handleConfirmDestructive}
+                disabled={!isConfirmationTyped(typed, confirmItems)}
+                className="px-4 py-2 text-xs font-medium bg-danger text-white rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {t('publish.schema.confirmButton')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+const TONE_CLASS: Record<Tone, string> = { success: 'text-success', neutral: 'text-muted', warning: 'text-yellow-500', error: 'text-danger' };
+
+function StatusLine({ heading, text, tone }: { heading: string; text: string; tone: Tone }) {
+  return (
+    <p className={`text-xs ${TONE_CLASS[tone]}`}>
+      <span className="font-semibold">{heading}: </span>
+      {text}
+    </p>
   );
 }

@@ -22,10 +22,12 @@ const UUID_LIKE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}
 // It is never destructive unless `source.allowDestructive === true` (the creator confirmed). A bundle without a schema, or one that
 // cannot be read, leaves the existing database alone. A failed push never fails the deploy and is logged by code only; its outcome
 // is written to `source.result.schemaStatus` ('applied' | 'unchanged' | 'invalid' | 'needs_confirmation' | 'failed') when a result
-// object is given. Absent when the bundle has no readable schema.
+// object is given. Absent when the bundle has no readable schema. On 'needs_confirmation' the result also gets `destructive`
+// ([{ kind, table, column? }], names only) so the UI can list what would be lost.
 import { schemaFromBundle } from '../lib/bundleSchema.js';
+import { sanitizeDestructive } from '../lib/schemaDestructive.js';
 
-export async function pushAppSchema(proxyAdmin, subdomain, bundle, { allowDestructive = false, log = console.warn } = {}) {
+export async function pushAppSchema(proxyAdmin, subdomain, bundle, { allowDestructive = false, log = console.warn, result } = {}) {
     const found = schemaFromBundle(bundle);
     if (found.status !== 'found') return null;
     try {
@@ -35,7 +37,10 @@ export async function pushAppSchema(proxyAdmin, subdomain, bundle, { allowDestru
         const code = e?.code || 'error';
         log(`[proxy] schema failed app=${subdomain} code=${code}`);
         if (code === 'invalid_schema' || code === 'invalid_allow_destructive') return 'invalid';
-        if (code === 'destructive_change_needs_confirmation') return 'needs_confirmation';
+        if (code === 'destructive_change_needs_confirmation') {
+            if (result && typeof result === 'object') result.destructive = sanitizeDestructive(e?.destructive);   // names only
+            return 'needs_confirmation';
+        }
         return 'failed';
     }
 }
@@ -79,7 +84,7 @@ export async function registerDeployedApp(proxyAdmin, subdomain, log = console.w
             await step('clear', async () => { await proxyAdmin.setManifest(projectId, null); });
         }
         if (source?.bundle) {
-            const status = await pushAppSchema(proxyAdmin, subdomain, source.bundle, { allowDestructive: source.allowDestructive === true, log });
+            const status = await pushAppSchema(proxyAdmin, subdomain, source.bundle, { allowDestructive: source.allowDestructive === true, log, result: source.result });
             if (status && source.result && typeof source.result === 'object') source.result.schemaStatus = status;
             const jobs = await pushAppJobs(proxyAdmin, subdomain, source.bundle, { log });
             if (jobs && source.result && typeof source.result === 'object') source.result.jobsStatus = jobs;

@@ -87,6 +87,19 @@ export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled,
             return noBody(204);
         }
 
+        if (sub === 'schema' && name === 'plan') {
+            // dry run for the confirmation dialog: what a deploy would change right now. Read-only; never provisions or applies.
+            if (req.method !== 'POST') return json(405, { error: 'method_not_allowed' });
+            if (!dataExecutor) return json(503, { error: 'schema_unavailable' });
+            if (!(await appStore.get(appId))) return json(404, { error: 'unknown_app' });
+            const body = await req.readBody(SCHEMA_BODY_LIMIT);
+            if (body.error) return json(body.error, { error: body.error === 413 ? 'request_too_large' : 'bad_json' });
+            const v = validateSpec(body.value.spec);
+            if (!v.ok) return json(400, { error: 'invalid_schema', errors: v.errors.slice(0, MAX_SCHEMA_ERRORS) });
+            const out = await dataExecutor.planSchema({ appId, spec: v.spec });
+            if (!out.ok) return json(400, { error: 'invalid_schema', errors: (out.errors || []).slice(0, MAX_SCHEMA_ERRORS) });
+            return json(200, { ok: true, statements: out.statements, destructive: (out.destructive || []).slice(0, MAX_SCHEMA_ERRORS * 5).map(({ kind, table, column }) => ({ kind, table, ...(column ? { column } : {}) })) });
+        }
         if (sub === 'schema') {
             if (name !== undefined) return json(404, { error: 'not_found' });
             if (req.method !== 'GET' && req.method !== 'POST') return json(405, { error: 'method_not_allowed' });
