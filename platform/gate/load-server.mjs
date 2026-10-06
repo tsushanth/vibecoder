@@ -18,6 +18,7 @@ const send = (m) => process.send(m);
 
 const env = cfg.limits === 'default' ? { PER_IP_PER_MIN: '30', PER_APP_PER_MIN: '120', DAILY_CALLS: '5000' } : { NOTIFY_USER_PER_HOUR: '1000', NOTIFY_USER_PER_DAY: '10000', NOTIFY_APP_PER_DAY: '1000000', NOTIFY_GLOBAL_PER_DAY: '10000000' };
 if (cfg.poolMax) env.DB_POOL_MAX = String(cfg.poolMax);
+if (cfg.maxInflight) env.MAX_INFLIGHT = String(cfg.maxInflight);
 const P = await startPlatform({ connLimit: cfg.connLimit, poolMax: cfg.poolMax ?? 5, env, latencyMs: cfg.extLatencyMs ?? 0, log: () => {} });
 if (P.unavailable) { send({ type: 'unavailable', reason: P.unavailable }); process.exit(0); }
 

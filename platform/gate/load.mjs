@@ -5,7 +5,7 @@
 //
 //   cd platform && PGHOST=localhost PGPORT=5544 node gate/load.mjs --users 5,10,20,40,80,160,320 --apps 4 --duration 8
 //   options: --mode closed|open  --rps 50,100,200 (open mode)  --pool 5  --conn-limit 8  --limits lift|default  --ext-latency 30
-//            --db-latency 0 (simulated ms added to every DB statement)  --think 0 (ms between a user's requests)  --mix me=15,db_read=35,...  --json out.json
+//            --max-inflight 50 (default 10 x pool)  --db-latency 0 (simulated ms added to every DB statement)  --think 0 (ms between a user's requests)  --mix me=15,db_read=35,...  --json out.json
 import { fork } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
@@ -125,7 +125,7 @@ export async function runStep({ server, mode = 'closed', users = 10, rps = 50, d
     }
     for (const o of Object.values(byOp)) { o.ms.sort((a, b) => a - b); o.p50 = pct(o.ms, 50); o.p95 = pct(o.ms, 95); o.p99 = pct(o.ms, 99); delete o.ms; }
     const ok = results.filter((r) => r.status >= 200 && r.status < 300).length;
-    const fiveXX = results.filter((r) => typeof r.status === 'number' && r.status >= 500).length;
+    const fiveXX = results.filter((r) => typeof r.status === 'number' && r.status >= 500 && r.status !== 503).length; // server errors; 503 is the deliberate, clean refusal
     const clean = results.filter((r) => r.status === 429 || r.status === 503).length;
     const hung = results.filter((r) => r.status === 'timeout' || r.status === 'neterr').length;
     return {
@@ -157,11 +157,13 @@ export async function recovery({ server, settleMs = 3000, probes = 30 }) {
     return { probes: lat.length, failures: bad, p50: +pct(lat, 50).toFixed(1), p95: +pct(lat, 95).toFixed(1), pool: st.pool, leakedClients: st.pool.total - st.pool.idle, queued: st.pool.waiting };
 }
 
-export async function runLoad({ steps, apps = 4, usersPerApp = 25, poolMax = 5, connLimit = 8, limits = 'lift', extLatencyMs = 30, dbLatencyMs = 0, durationMs = 8000, mode = 'closed', thinkMs = 0, mix = DEFAULT_MIX, settleMs = 3000, onStep = () => {} }) {
-    const server = await startServerChild({ apps, usersPerApp, linksPerApp: 400, poolMax, connLimit, limits, extLatencyMs, dbLatencyMs });
+export async function runLoad({ steps, apps = 4, usersPerApp = 25, poolMax = 5, connLimit = 8, limits = 'lift', extLatencyMs = 30, dbLatencyMs = 0, maxInflight = null, durationMs = 8000, mode = 'closed', thinkMs = 0, mix = DEFAULT_MIX, settleMs = 3000, onStep = () => {} }) {
+    const server = await startServerChild({ apps, usersPerApp, linksPerApp: 400, poolMax, connLimit, limits, extLatencyMs, dbLatencyMs, maxInflight });
     if (server.unavailable) { server.child.kill(); return { unavailable: server.unavailable }; }
     try {
-        const out = { config: { apps, usersPerApp, poolMax, connLimit, limits, extLatencyMs, dbLatencyMs, durationMs, mode, thinkMs, mix }, steps: [] };
+        const adm = new pg.Client({ host: process.env.PGHOST || 'localhost', user: process.env.PGUSER || process.env.USER, database: 'postgres' });
+        await adm.connect(); const roleConnLimit = (await adm.query('select rolconnlimit from pg_roles where rolname = $1', [server.loginName])).rows[0]?.rolconnlimit; await adm.end();
+        const out = { roleConnLimit, config: { maxInflight, apps, usersPerApp, poolMax, connLimit, limits, extLatencyMs, dbLatencyMs, durationMs, mode, thinkMs, mix }, steps: [] };
         await runStep({ server, users: 2, durationMs: 1000, mix, label: 'warmup' });
         out.statementsPerOp = await statementsPerOp({ server });
         for (const s of steps) { const r = await runStep({ server, mode, durationMs, thinkMs, mix, ...(mode === 'closed' ? { users: s } : { rps: s }) }); out.steps.push(r); onStep(r); }
@@ -173,7 +175,7 @@ export async function runLoad({ steps, apps = 4, usersPerApp = 25, poolMax = 5, 
 export function formatReport(res) {
     const L = [];
     const c = res.config;
-    L.push(`pool max ${c.poolMax}, role connection limit ${c.connLimit ?? 'none'}, ${c.apps} apps x ${c.usersPerApp} users, ${c.mode} loop, ${c.durationMs / 1000}s per step, external call latency ${c.extLatencyMs} ms, simulated DB round trip ${c.dbLatencyMs} ms, limits: ${c.limits}`);
+    L.push(`pool max ${c.poolMax}, MAX_INFLIGHT ${c.maxInflight ?? 'default (10 x pool)'}, role connection limit ${c.connLimit ?? 'none'}, ${c.apps} apps x ${c.usersPerApp} users, ${c.mode} loop, ${c.durationMs / 1000}s per step, external call latency ${c.extLatencyMs} ms, simulated DB round trip ${c.dbLatencyMs} ms, limits: ${c.limits}`);
     L.push('step        | req/s | ok/s  | p50 ms | p95 ms | p99 ms | max ms | 2xx%  | 429/503 | 5xx | timeout | pg conns (max/active) | pool wait p50/p99/max ms | queue max | loop lag p99');
     for (const s of res.steps) {
         const okPct = ((s.ok / Math.max(1, s.requests)) * 100).toFixed(1);
@@ -194,7 +196,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const mode = a.mode || 'closed';
     const steps = (a[mode === 'open' ? 'rps' : 'users'] || (mode === 'open' ? '25,50,100,200' : '5,10,20,40,80,160')).split(',').map(Number);
     const mix = a.mix ? Object.fromEntries(a.mix.split(',').map((kv) => kv.split('=')).map(([k, v]) => [k, Number(v)])) : DEFAULT_MIX;
-    const res = await runLoad({ steps, mode, apps: Number(a.apps || 4), usersPerApp: Number(a['users-per-app'] || 25), poolMax: Number(a.pool || 5), connLimit: a['conn-limit'] === 'none' ? null : Number(a['conn-limit'] || 8), limits: a.limits || 'lift', extLatencyMs: Number(a['ext-latency'] ?? 30), dbLatencyMs: Number(a['db-latency'] ?? 0), durationMs: Number(a.duration || 8) * 1000, thinkMs: Number(a.think || 0), mix, onStep: (s) => console.log(`... ${s.label}: ${s.throughputRps} req/s, p95 ${s.latencyMs.p95} ms, 5xx ${s.fiveXX}, timeouts ${s.timeoutsOrNetErrors}, pg max ${s.pg.maxConnections}`) });
+    const res = await runLoad({ steps, mode, apps: Number(a.apps || 4), usersPerApp: Number(a['users-per-app'] || 25), poolMax: Number(a.pool || 5), connLimit: a['conn-limit'] === 'none' ? null : Number(a['conn-limit'] || 8), limits: a.limits || 'lift', extLatencyMs: Number(a['ext-latency'] ?? 30), dbLatencyMs: Number(a['db-latency'] ?? 0), maxInflight: a['max-inflight'] ? Number(a['max-inflight']) : null, durationMs: Number(a.duration || 8) * 1000, thinkMs: Number(a.think || 0), mix, onStep: (s) => console.log(`... ${s.label}: ${s.throughputRps} req/s, p95 ${s.latencyMs.p95} ms, 5xx ${s.fiveXX}, timeouts ${s.timeoutsOrNetErrors}, pg max ${s.pg.maxConnections}`) });
     if (res.unavailable) { console.error(`no local Postgres: ${res.unavailable}`); process.exit(2); }
     console.log('\n' + formatReport(res));
     if (a.json) fs.writeFileSync(a.json, JSON.stringify(res, null, 2));
