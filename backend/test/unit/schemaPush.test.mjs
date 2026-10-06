@@ -120,3 +120,19 @@ test('a schema is not pushed when the app could not even be registered', async (
     assert.equal(await reg(p, { bundle: withSchema }), false);
     assert.equal(p.calls.length, 0);
 });
+
+test('needs_confirmation copies the destructive list (names only) into the result; other statuses do not', async () => {
+    const e = new ProxyAdminError(409, 'destructive_change_needs_confirmation');
+    e.destructive = [{ kind: 'drop_column', table: 'todos', column: 'n', value: 'secret row data' }, { kind: 'evil', table: 'x' }, { kind: 'drop_table', table: 'Bad Name' }];
+    const result = {}; await reg(fake({ setSchema: e }), { bundle: withSchema, result });
+    assert.equal(result.schemaStatus, 'needs_confirmation'); assert.deepEqual(result.destructive, [{ kind: 'drop_column', table: 'todos', column: 'n' }]);
+    const r2 = {}; await reg(fake({ setSchema: new ProxyAdminError(422, 'migration_failed') }), { bundle: withSchema, result: r2 });
+    assert.equal('destructive' in r2, false);
+});
+
+test('the destructive list is capped so a hostile proxy answer cannot bloat the deploy response', async () => {
+    const e = new ProxyAdminError(409, 'destructive_change_needs_confirmation');
+    e.destructive = Array.from({ length: 500 }, (_, i) => ({ kind: 'drop_table', table: `t${i}` }));
+    const result = {}; await reg(fake({ setSchema: e }), { bundle: withSchema, result });
+    assert.equal(result.destructive.length, 100);
+});

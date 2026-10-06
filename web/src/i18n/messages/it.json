@@ -196,7 +196,34 @@
     "removeDomainFailed": "Rimozione dominio fallita.",
     "statusActive": "Attivo",
     "statusVerified": "Verificato (SSL in attesa)",
-    "statusPending": "Verifica DNS in attesa"
+    "statusPending": "Verifica DNS in attesa",
+    "schema": {
+      "statusHeading": "Database",
+      "applied": "Database changes applied.",
+      "unchanged": "Nothing to change in your database.",
+      "invalid": "Your database schema is not valid, so it was not applied. Fix vibe.schema.json and publish again.",
+      "needsConfirmation": "This update would delete data. Nothing was changed in your database until you confirm.",
+      "failed": "Could not update your database. Please try again.",
+      "checking": "Checking database changes...",
+      "confirmTitle": "Confirm data loss",
+      "confirmIntro": "Publishing this update will permanently change your live database. This cannot be undone:",
+      "confirmTypeHint": "To confirm, type DELETE or one of these table names: {names}",
+      "confirmPlaceholder": "Type to confirm",
+      "confirmButton": "Delete and publish",
+      "cancel": "Cancel",
+      "kind": {
+        "drop_table": "Table {table} will be deleted with all its rows",
+        "drop_column": "Column {column} of table {table} will be deleted with its data",
+        "change_type": "Column {column} of table {table} will change type; values that do not fit may be lost",
+        "make_required": "Column {column} of table {table} will become required; rows without a value will be affected"
+      }
+    },
+    "jobs": {
+      "heading": "Scheduled jobs",
+      "applied": "Scheduled jobs updated.",
+      "invalid": "Your scheduled jobs file is not valid, so it was not applied. Fix vibe.jobs.json and publish again.",
+      "failed": "Could not update your scheduled jobs. Please try again."
+    }
   },
   "project": {
     "generatedSuccess": "App generata con successo!",
