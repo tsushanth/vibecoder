@@ -34,7 +34,7 @@ real('the runtime check runs the app with the real SDK injected, so a guarded vi
 });
 
 real('an app using vibe.device runs against the harmless fake, so it passes without a camera or a position', async () => {
-    const js = 'function go(){ vibe.device.camera.capture().then(function(r){ document.getElementById("out").textContent = r.name; }).catch(function(){}); vibe.device.geolocation.get().catch(function(){}); vibe.device.share({text:"hi"}).catch(function(){}); vibe.device.haptics.tap("light"); } go();';
+    const js = 'function ask(){ vibe.device.camera.capture().then(function(r){ document.getElementById("out").textContent = r.name; }).catch(function(){}); vibe.device.geolocation.get().catch(function(){}); vibe.device.share({text:"hi"}).catch(function(){}); vibe.device.haptics.tap("light"); } ask();';
     const r = await fullChecks({ 'index.html': page(js) }, { vibe: true, chrome: CHROME });
     assert.equal(r.ok, true, JSON.stringify(r.problems));
 });
