@@ -185,3 +185,16 @@ t('planSchema reports statements and destructive changes read-only: nothing is a
     const cols = (await db.pool.query("select count(*)::int n from information_schema.columns where column_name='n' and table_name='todos'")).rows[0].n;
     assert.ok(cols >= 1, 'column n still exists');
 });
+
+t('totalRows sums the rows of the named tables in one call, is zero for none, and refuses a hostile table name', async () => {
+    const spec2 = spec({ version: 1, tables: { a: { access: 'owner', columns: { x: { type: 'integer' } } }, b: { access: 'owner', columns: { x: { type: 'integer' } } } } });
+    await stores.upsertApp({ appId: 'app-d', enabled: true });
+    assert.equal((await ex.applySchema({ appId: 'app-d', spec: spec2 })).ok, true);
+    await ex.run('app-d', q('insert into "a" ("x", "user_id") values ($1, $3), ($2, $3)', [1, 2, '11111111-1111-4111-8111-111111111111']));
+    await ex.run('app-d', q('insert into "b" ("x", "user_id") values ($1, $2)', [3, '11111111-1111-4111-8111-111111111111']));
+    assert.equal(await ex.totalRows('app-d', ['a', 'b']), 3);
+    assert.equal(await ex.totalRows('app-d', ['a']), 2);
+    assert.equal(await ex.totalRows('app-d', []), 0);
+    await assert.rejects(ex.totalRows('app-d', ['a"; drop table x; --']), /bad table/);
+    await assert.rejects(ex.totalRows('app-d', ['A']), /bad table/);
+});

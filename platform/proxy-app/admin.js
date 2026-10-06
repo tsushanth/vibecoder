@@ -21,7 +21,7 @@ export const ADMIN_BODY_LIMIT = 8192;
 export const SCHEMA_BODY_LIMIT = 131072;
 const MAX_SCHEMA_ERRORS = 20;
 
-export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, secretStore, limiterStore, baseDomain, dataExecutor, jobsAdmin, now = () => Date.now() }) {
+export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled, setDomains, setManifest, copySecrets, secretStore, limiterStore, baseDomain, dataExecutor, jobsAdmin, usageAdmin, now = () => Date.now() }) {
     const expected = digest(token);
     const minute = () => Math.floor(now() / 60_000);
     const validDomains = (domains) => Array.isArray(domains) && domains.length <= MAX_DOMAINS && domains.every((d) => typeof d === 'string' && HOSTNAME.test(d) && !d.endsWith(`.${baseDomain}`) && d !== baseDomain);
@@ -39,7 +39,7 @@ export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled,
     return async function handle(req) {
         const denied = await authorize(req.headers, req.ip);
         if (denied) return denied;
-        const m = /^\/admin\/apps\/([^/]+)(?:\/(secrets|ensure|enabled|domains|manifest|copy-secrets|schema|jobs)(?:\/([^/]+))?)?$/.exec(req.pathname);
+        const m = /^\/admin\/apps\/([^/]+)(?:\/(secrets|ensure|enabled|domains|manifest|copy-secrets|schema|jobs|usage|limits)(?:\/([^/]+))?)?$/.exec(req.pathname);
         if (!m) return json(404, { error: 'not_found' });
         const [, appId, sub, name] = m;
         if (!APP_ID.test(appId)) return json(404, { error: 'not_found' });
@@ -126,6 +126,11 @@ export function createAdmin({ token, appStore, upsertApp, ensureApp, setEnabled,
         if (sub === 'jobs') {
             if (name !== undefined || !jobsAdmin) return json(404, { error: 'not_found' });
             return jobsAdmin({ appId, method: req.method, readBody: req.readBody });   // validation and storage live in ../jobs/admin.js
+        }
+
+        if (sub === 'usage' || sub === 'limits') {
+            if (name !== undefined || !usageAdmin) return json(404, { error: 'not_found' });
+            return usageAdmin({ appId, sub, method: req.method, query: req.query, readBody: req.readBody });   // see ../vibe-proxy/usage-admin.js
         }
 
         if (sub === 'copy-secrets') {

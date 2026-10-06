@@ -122,3 +122,16 @@ t('a store failure while deleting does not fail the removal', async () => {
     const f = await svc.upload({ appId: 'app-a', userId: uA, name: 'g2.png', contentType: 'image/png', bytes: PNG });
     nextStatus = 'throw'; assert.equal((await svc.remove({ appId: 'app-a', userId: uA, id: f.file.id })).ok, true);
 });
+
+t('limitsFor overrides the per-app byte and file quotas', async () => {
+    await createPgStores({ pool: db.pool, masterKey: masterKey() }).upsertApp({ appId: 'app-q', enabled: true, manifest: null });
+    const qu = await createAuthStore({ pool: db.pool }).upsertUser({ appId: 'app-q', email: 'q@example.com' });
+    const lim = (o) => createStorageService({ store: createStorageStore({ pool: db.pool }), r2: R2, fetchImpl, now: () => clock, limitsFor: async () => o });
+    const up = (s, name) => s.upload({ appId: 'app-q', userId: qu, name, contentType: 'image/png', bytes: PNG });
+    assert.equal((await up(lim({ storageBytes: 10 }), 'big.png')).code, 'quota_bytes');
+    const files = lim({ storageFiles: 1 });
+    assert.equal((await up(files, 'one.png')).ok, true);
+    assert.equal((await up(files, 'two.png')).code, 'quota_files');
+    assert.equal((await up(lim({ storageFiles: 5, storageBytes: 1_000_000 }), 'three.png')).ok, true);
+    assert.equal((await up(lim({ storageBytes: '10' }), 'four.png')).ok, true); // junk (a numeric string) is ignored
+});

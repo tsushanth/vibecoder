@@ -6,7 +6,7 @@ import { checkFile, safeName, INLINE_TYPES } from './policy.js';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
-export function createStorageService({ store, r2, fetchImpl = globalThis.fetch, now = () => Date.now(), limits = {}, timeoutMs = 20000 }) {
+export function createStorageService({ store, r2, fetchImpl = globalThis.fetch, now = () => Date.now(), limits = {}, timeoutMs = 20000, limitsFor }) {
     const L = { maxFileBytes: 5 * 1024 * 1024, maxAppBytes: 200 * 1024 * 1024, maxAppFiles: 2000, downloadTtlSec: 300, ...limits };
     const objectUrl = (method, key, extra = {}) => presignUrl({ method, host: r2.host, path: `/${r2.bucket}/${key}`, accessKeyId: r2.accessKeyId, secretAccessKey: r2.secretAccessKey, now: now(), ...extra });
     const call = async (url, init) => {
@@ -18,10 +18,11 @@ export function createStorageService({ store, r2, fetchImpl = globalThis.fetch, 
         async upload({ appId, userId, name, contentType, bytes, isPublic = false }) {
             const check = checkFile({ contentType, bytes, maxBytes: L.maxFileBytes });
             if (!check.ok) return check;
+            const o = limitsFor ? await limitsFor(appId) : null; // per-app overrides of the byte and file quotas
             const id = randomUUID();
             const clean = safeName(name);
             const key = `${appId}/${userId}/${id}-${clean}`;
-            const res = await store.reserve({ id, appId, userId, objectKey: key, name: clean, contentType, bytes: bytes.length, isPublic, maxAppBytes: L.maxAppBytes, maxAppFiles: L.maxAppFiles });
+            const res = await store.reserve({ id, appId, userId, objectKey: key, name: clean, contentType, bytes: bytes.length, isPublic, maxAppBytes: Number.isInteger(o?.storageBytes) ? o.storageBytes : L.maxAppBytes, maxAppFiles: Number.isInteger(o?.storageFiles) ? o.storageFiles : L.maxAppFiles });
             if (res.error) return { ok: false, status: 413, code: res.error };
             try {
                 const put = await call(objectUrl('PUT', key, { expiresSec: 120, signedHeaders: { 'content-type': contentType } }), { method: 'PUT', headers: { 'content-type': contentType }, body: bytes });
