@@ -44,7 +44,7 @@ await Promise.all(Array.from({ length: CONC }, async () => {
         const row = rows[next++];
         const t0 = Date.now();
         let r;
-        try { r = await generateApp({ prompt: scrubSecrets(row.prompt), llm, models, rules }); }
+        try { r = await generateApp({ prompt: scrubSecrets(row.prompt).text, llm, models, rules }); }
         catch (e) { r = { ok: false, cause: 'exception', costUsd: 0 }; }
         const rec = { id: row.id, prod: row.prod_outcome, ok: r.ok, cause: r.cause || 'ok', model: r.model, costUsd: r.costUsd || 0, secs: Math.round((Date.now() - t0) / 1000) };
         if (r.ok) { const dir = path.join(out, row.id); fs.mkdirSync(dir, { recursive: true }); writeFiles(dir, r.files); }
