@@ -8,6 +8,10 @@ import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.webkit.WebSettings
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import androidx.webkit.WebViewAssetLoader
+import android.content.pm.ApplicationInfo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -27,15 +31,20 @@ class MainActivity : AppCompatActivity() {
         webView = WebView(this)
         setContentView(webView)
 
+        // Served from https://<app>.vibebuild.cc (bundled files answer locally), so the page has a real origin that the platform
+        // proxy accepts. With no host configured the app falls back to the old file:// mode.
+        val host = getString(R.string.vibe_host).trim()
+        val served = host.isNotEmpty()
+
         webView.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
-            allowFileAccess = true
+            allowFileAccess = !served
             @Suppress("DEPRECATION")
-            allowFileAccessFromFileURLs = true
+            allowFileAccessFromFileURLs = !served
             @Suppress("DEPRECATION")
-            allowUniversalAccessFromFileURLs = true
-            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            allowUniversalAccessFromFileURLs = !served
+            mixedContentMode = if (served) WebSettings.MIXED_CONTENT_NEVER_ALLOW else WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             loadWithOverviewMode = true
             useWideViewPort = true
             setSupportZoom(false)
@@ -47,15 +56,26 @@ class MainActivity : AppCompatActivity() {
             textZoom = 100
         }
 
-        webView.webViewClient = WebViewClient()
+        if (served) {
+            val loader = WebViewAssetLoader.Builder()
+                .setDomain(host)
+                .addPathHandler("/", WebViewAssetLoader.AssetsPathHandler(this))
+                .build()
+            webView.webViewClient = object : WebViewClient() {
+                override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? =
+                    loader.shouldInterceptRequest(request.url)
+            }
+        } else {
+            webView.webViewClient = WebViewClient()
+        }
         webView.webChromeClient = WebChromeClient()
         webView.setBackgroundColor(android.graphics.Color.TRANSPARENT)
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
 
-        // Enable remote debugging in debug builds
-        WebView.setWebContentsDebuggingEnabled(true)
+        // Remote debugging only for debuggable builds, never in a release APK
+        WebView.setWebContentsDebuggingEnabled((applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0)
 
-        webView.loadUrl("file:///android_asset/index.html")
+        webView.loadUrl(if (served) "https://$host/index.html" else "file:///android_asset/index.html")
     }
 
     @Suppress("DEPRECATION")
