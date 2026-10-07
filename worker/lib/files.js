@@ -22,6 +22,23 @@ export function parseFiles(text) {
         // the newline before </file> is part of the block delimiter, not of the file
         files[rel] = m[2].replace(/\r?\n$/, '').replace(/^```[a-z]*\r?\n/, '').replace(/\r?\n```\s*$/, '');
     }
+    // Models sometimes finish a complete page with a stray '>' or a markdown fence instead of </file>. A final, unclosed
+    // block is accepted only for an .html file that already ends in </html>, so a reply cut off mid-file is still rejected.
+    const text0 = text || '';
+    const open = text0.lastIndexOf('<file');
+    if (open !== -1 && text0.indexOf('</file>', open) === -1) {
+        const m2 = /^<file\s+path="([^"]+)"\s*>\r?\n?/.exec(text0.slice(open));
+        if (m2) {
+            const rel = m2[1].trim().replace(/^\.?\//, '');
+            const body = text0.slice(open + m2[0].length);
+            const end = body.toLowerCase().lastIndexOf('</html>');
+            const tail = end === -1 ? null : body.slice(end + 7);
+            if (rel && !rel.split('/').includes('..') && !path.isAbsolute(rel) && !rel.includes('\0') && /\.html?$/i.test(rel) && !SKIP_NAMES.has(path.basename(rel))
+                && tail !== null && /^[\s>`]*$/.test(tail) && !(rel in files)) {
+                files[rel] = body.slice(0, end + 7).replace(/^```[a-z]*\r?\n/, '');
+            }
+        }
+    }
     return { files, rejected };
 }
 

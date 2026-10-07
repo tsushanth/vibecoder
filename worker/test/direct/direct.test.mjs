@@ -21,6 +21,21 @@ test('parseFiles tolerates prose and fences, skips vibedata.js, rejects bad path
     assert.equal(files['index.html'], '<p>hi</p>');
     assert.deepEqual(rejected, ['../evil.js']);
 });
+test('parseFiles accepts a complete html page whose closing tag is missing or malformed, but not a cut-off one', () => {
+    const page = '<!doctype html><html><body><p>ok</p></body></html>';
+    for (const tail of ['\n>', '\n```', '\n', '']) {
+        const { files } = parseFiles(`<file path="index.html">\n${page}${tail}`);
+        assert.equal(files['index.html'], page, `tail ${JSON.stringify(tail)}`);
+    }
+    assert.deepEqual(parseFiles('<file path="index.html">\n<!doctype html><html><body><p>cut off').files, {});
+    assert.deepEqual(parseFiles('<file path="app.js">\nconsole.log(1)').files, {});
+    assert.deepEqual(parseFiles('<file path="app.js">\n// </html>').files, {}); // only a page counts, whatever its text ends with
+    assert.deepEqual(parseFiles(`<file path="index.html">\n${page}\nand then some prose`).files, {});
+    assert.deepEqual(parseFiles(`<file path="../x.html">\n${page}`).files, {});
+    const two = parseFiles(`<file path="a.js">\nvar a=1\n</file>\n<file path="index.html">\n${page}\n>`).files;
+    assert.deepEqual(Object.keys(two).sort(), ['a.js', 'index.html']);
+});
+
 test('parseFiles returns nothing for prose-only replies', () => {
     assert.deepEqual(parseFiles('I cannot build that, but how about a simulator?').files, {});
 });
