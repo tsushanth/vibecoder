@@ -29,7 +29,7 @@ test('parseFiles accepts a complete html page whose closing tag is missing or ma
     }
     assert.deepEqual(parseFiles('<file path="index.html">\n<!doctype html><html><body><p>cut off').files, {});
     assert.deepEqual(parseFiles('<file path="app.js">\nconsole.log(1)').files, {});
-    assert.deepEqual(parseFiles('<file path="app.js">\nvar s = "</html>"').files, {}); // only a page counts, whatever its text ends with
+    assert.deepEqual(parseFiles('<file path="app.js">\n// </html>').files, {}); // only a page counts, whatever its text ends with
     assert.deepEqual(parseFiles(`<file path="index.html">\n${page}\nand then some prose`).files, {});
     assert.deepEqual(parseFiles(`<file path="../x.html">\n${page}`).files, {});
     const two = parseFiles(`<file path="a.js">\nvar a=1\n</file>\n<file path="index.html">\n${page}\n>`).files;
