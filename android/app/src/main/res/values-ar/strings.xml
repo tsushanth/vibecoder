@@ -225,4 +225,38 @@
     <!-- Facebook SDK Configuration -->
     <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+
+    <!-- App keys (creator keys for generated apps) -->
+    <string name="app_keys_title">مفاتيح التطبيق</string>
+    <string name="app_keys_summary">تم تعيين %1$d من %2$d مفاتيح</string>
+    <string name="app_keys_summary_all_set">تم تعيين كل المفاتيح (%1$d)</string>
+    <string name="app_keys_manage">إدارة</string>
+    <string name="app_keys_hide">إخفاء</string>
+    <string name="app_keys_hint">يستخدم تطبيقك هذه المفاتيح للتواصل مع خدمات أخرى. يتم تخزينها بأمان ولا يمكن عرضها مرة أخرى، بل استبدالها أو إزالتها فقط.</string>
+    <string name="app_keys_used_by">يستخدمه: %1$s</string>
+    <string name="app_keys_set">تم التعيين</string>
+    <string name="app_keys_not_set">غير معيّن</string>
+    <string name="app_keys_input_label">الصق قيمة %1$s</string>
+    <string name="app_keys_save">حفظ</string>
+    <string name="app_keys_saving">جارٍ الحفظ…</string>
+    <string name="app_keys_replace">استبدال</string>
+    <string name="app_keys_remove">إزالة</string>
+    <string name="app_keys_removing">جارٍ الإزالة…</string>
+    <string name="app_keys_saved">تم الحفظ</string>
+    <string name="app_keys_removed">تمت الإزالة</string>
+    <string name="app_keys_remove_title">إزالة %1$s؟</string>
+    <string name="app_keys_remove_message">سيتوقف تطبيقك عن العمل مع هذه الخدمة حتى تضيف المفتاح مرة أخرى.</string>
+    <string name="app_keys_retry">حاول مرة أخرى</string>
+    <string name="app_keys_error_unauthorized">سجّل الدخول مرة أخرى لإدارة المفاتيح.</string>
+    <string name="app_keys_error_rate_limited">محاولات كثيرة جدًا. انتظر دقيقة ثم حاول مرة أخرى.</string>
+    <string name="app_keys_error_store_down">مخزن المفاتيح غير متاح الآن. حاول مرة أخرى قريبًا.</string>
+    <string name="app_keys_error_invalid_value">هذا المفتاح فارغ أو طويل جدًا.</string>
+    <string name="app_keys_error_network">لا يوجد اتصال. تحقق من الإنترنت وحاول مرة أخرى.</string>
+    <string name="app_keys_error_other">حدث خطأ ما. حاول مرة أخرى.</string>
+    <string name="app_keys_pay_test_first">استخدم مفاتيح الاختبار من Stripe أولًا (تبدأ بـ sk_test_).</string>
+    <string name="app_keys_pay_webhook_label">رابط Webhook لإضافته في Stripe</string>
+    <string name="app_keys_pay_webhook_pending">انشر تطبيقك للحصول على رابط Webhook الخاص به.</string>
+    <string name="app_keys_copy_url">نسخ الرابط</string>
+    <string name="app_keys_copied">تم النسخ</string>
+
 </resources>

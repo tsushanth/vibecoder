@@ -225,4 +225,38 @@
     <!-- Facebook SDK Configuration -->
     <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+
+    <!-- App keys (creator keys for generated apps) -->
+    <string name="app_keys_title">Mga key ng app</string>
+    <string name="app_keys_summary">%1$d sa %2$d key ang naitakda</string>
+    <string name="app_keys_summary_all_set">Naitakda na ang lahat ng %1$d key</string>
+    <string name="app_keys_manage">Pamahalaan</string>
+    <string name="app_keys_hide">Itago</string>
+    <string name="app_keys_hint">Ginagamit ng app mo ang mga key na ito para makipag-ugnayan sa ibang serbisyo. Ligtas itong naka-store at hindi na mababasa ulit, puwede lang palitan o alisin.</string>
+    <string name="app_keys_used_by">Ginagamit ng: %1$s</string>
+    <string name="app_keys_set">Naitakda</string>
+    <string name="app_keys_not_set">Hindi pa naitakda</string>
+    <string name="app_keys_input_label">I-paste ang value para sa %1$s</string>
+    <string name="app_keys_save">I-save</string>
+    <string name="app_keys_saving">Sine-save…</string>
+    <string name="app_keys_replace">Palitan</string>
+    <string name="app_keys_remove">Alisin</string>
+    <string name="app_keys_removing">Inaalis…</string>
+    <string name="app_keys_saved">Na-save</string>
+    <string name="app_keys_removed">Naalis</string>
+    <string name="app_keys_remove_title">Alisin ang %1$s?</string>
+    <string name="app_keys_remove_message">Titigil sa paggana ang app mo sa serbisyong ito hanggang idagdag mo ulit ang key.</string>
+    <string name="app_keys_retry">Subukan ulit</string>
+    <string name="app_keys_error_unauthorized">Mag-sign in ulit para pamahalaan ang mga key.</string>
+    <string name="app_keys_error_rate_limited">Masyadong maraming subok. Maghintay ng isang minuto at subukan ulit.</string>
+    <string name="app_keys_error_store_down">Hindi available ang key store ngayon. Subukan ulit mamaya.</string>
+    <string name="app_keys_error_invalid_value">Walang laman o masyadong mahaba ang key na iyon.</string>
+    <string name="app_keys_error_network">Walang koneksyon. Tingnan ang internet mo at subukan ulit.</string>
+    <string name="app_keys_error_other">May nangyaring mali. Subukan ulit.</string>
+    <string name="app_keys_pay_test_first">Gamitin muna ang mga Stripe test key mo (nagsisimula sa sk_test_).</string>
+    <string name="app_keys_pay_webhook_label">Webhook URL na idaragdag sa Stripe</string>
+    <string name="app_keys_pay_webhook_pending">I-publish ang app mo para makuha ang webhook URL nito.</string>
+    <string name="app_keys_copy_url">Kopyahin ang URL</string>
+    <string name="app_keys_copied">Nakopya</string>
+
 </resources>

@@ -225,4 +225,38 @@
     <!-- Facebook SDK Configuration -->
     <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+
+    <!-- App keys (creator keys for generated apps) -->
+    <string name="app_keys_title">应用密钥</string>
+    <string name="app_keys_summary">已设置 %1$d/%2$d 个密钥</string>
+    <string name="app_keys_summary_all_set">已设置全部 %1$d 个密钥</string>
+    <string name="app_keys_manage">管理</string>
+    <string name="app_keys_hide">隐藏</string>
+    <string name="app_keys_hint">你的应用使用这些密钥与其他服务连接。密钥会被安全存储,无法再次查看,只能替换或删除。</string>
+    <string name="app_keys_used_by">使用方: %1$s</string>
+    <string name="app_keys_set">已设置</string>
+    <string name="app_keys_not_set">未设置</string>
+    <string name="app_keys_input_label">粘贴 %1$s 的值</string>
+    <string name="app_keys_save">保存</string>
+    <string name="app_keys_saving">正在保存…</string>
+    <string name="app_keys_replace">替换</string>
+    <string name="app_keys_remove">删除</string>
+    <string name="app_keys_removing">正在删除…</string>
+    <string name="app_keys_saved">已保存</string>
+    <string name="app_keys_removed">已删除</string>
+    <string name="app_keys_remove_title">删除 %1$s?</string>
+    <string name="app_keys_remove_message">在你重新添加密钥之前,你的应用将无法使用此服务。</string>
+    <string name="app_keys_retry">重试</string>
+    <string name="app_keys_error_unauthorized">请重新登录以管理密钥。</string>
+    <string name="app_keys_error_rate_limited">尝试次数过多。请等待一分钟后重试。</string>
+    <string name="app_keys_error_store_down">密钥存储暂时不可用。请稍后重试。</string>
+    <string name="app_keys_error_invalid_value">该密钥为空或过长。</string>
+    <string name="app_keys_error_network">无网络连接。请检查网络后重试。</string>
+    <string name="app_keys_error_other">出了点问题。请重试。</string>
+    <string name="app_keys_pay_test_first">请先使用你的 Stripe 测试密钥(以 sk_test_ 开头)。</string>
+    <string name="app_keys_pay_webhook_label">要添加到 Stripe 的 Webhook URL</string>
+    <string name="app_keys_pay_webhook_pending">发布应用后即可获取其 Webhook URL。</string>
+    <string name="app_keys_copy_url">复制 URL</string>
+    <string name="app_keys_copied">已复制</string>
+
 </resources>

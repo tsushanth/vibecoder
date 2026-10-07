@@ -35,6 +35,7 @@ import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.preview.LivePreviewScreen
 import com.kreativekoala.vibecoder.ui.preview.VersionHistorySheet
 import com.kreativekoala.vibecoder.ui.apps.domain.CustomDomainSection
+import com.kreativekoala.vibecoder.ui.apps.keys.AppKeysSection
 import com.kreativekoala.vibecoder.ui.theme.*
 import com.kreativekoala.vibecoder.util.DateUtil
 
@@ -431,6 +432,10 @@ fun ProjectDetailScreen(
                             Text("Export Android App", fontWeight = FontWeight.SemiBold)
                         }
                     }
+
+                    // Keys the generated app needs (third-party APIs, Stripe); the card hides itself when the app needs none
+                    Spacer(modifier = Modifier.height(12.dp))
+                    AppKeysSection(projectId = project.id)
 
                     // Preview on iPhone (via Expo Go) — only for deployed apps
                     if (liveUrl != null) {

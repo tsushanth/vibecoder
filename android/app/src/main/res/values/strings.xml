@@ -231,6 +231,39 @@
     <string name="language_italian">Italiano</string>
     <string name="language_hindi">हिन्दी</string>
 
+    <!-- App keys (creator keys for generated apps) -->
+    <string name="app_keys_title">App keys</string>
+    <string name="app_keys_summary">%1$d of %2$d keys set</string>
+    <string name="app_keys_summary_all_set">All %1$d keys set</string>
+    <string name="app_keys_manage">Manage</string>
+    <string name="app_keys_hide">Hide</string>
+    <string name="app_keys_hint">Your app uses these keys to talk to other services. They are stored securely and cannot be read back, only replaced or removed.</string>
+    <string name="app_keys_used_by">Used by: %1$s</string>
+    <string name="app_keys_set">Set</string>
+    <string name="app_keys_not_set">Not set</string>
+    <string name="app_keys_input_label">Paste the value for %1$s</string>
+    <string name="app_keys_save">Save</string>
+    <string name="app_keys_saving">Saving…</string>
+    <string name="app_keys_replace">Replace</string>
+    <string name="app_keys_remove">Remove</string>
+    <string name="app_keys_removing">Removing…</string>
+    <string name="app_keys_saved">Saved</string>
+    <string name="app_keys_removed">Removed</string>
+    <string name="app_keys_remove_title">Remove %1$s?</string>
+    <string name="app_keys_remove_message">Your app will stop working with this service until you add the key again.</string>
+    <string name="app_keys_retry">Try again</string>
+    <string name="app_keys_error_unauthorized">Sign in again to manage keys.</string>
+    <string name="app_keys_error_rate_limited">Too many tries. Wait a minute and try again.</string>
+    <string name="app_keys_error_store_down">The key store is unavailable right now. Try again soon.</string>
+    <string name="app_keys_error_invalid_value">That key is empty or too long.</string>
+    <string name="app_keys_error_network">No connection. Check your internet and try again.</string>
+    <string name="app_keys_error_other">Something went wrong. Try again.</string>
+    <string name="app_keys_pay_test_first">Use your Stripe test keys first (they start with sk_test_).</string>
+    <string name="app_keys_pay_webhook_label">Webhook URL to add in Stripe</string>
+    <string name="app_keys_pay_webhook_pending">Publish your app to get its webhook URL.</string>
+    <string name="app_keys_copy_url">Copy URL</string>
+    <string name="app_keys_copied">Copied</string>
+
     <!-- Facebook SDK Configuration -->
     <string name="facebook_app_id">2361731814322648</string>
     <string name="facebook_client_token">32ed2eb93cd2e41e4a113956d7f53d03</string>

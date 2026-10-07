@@ -225,4 +225,38 @@
     <!-- Facebook SDK Configuration -->
     <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+
+    <!-- App keys (creator keys for generated apps) -->
+    <string name="app_keys_title">App-sleutels</string>
+    <string name="app_keys_summary">%1$d van %2$d sleutels ingesteld</string>
+    <string name="app_keys_summary_all_set">Alle %1$d sleutels ingesteld</string>
+    <string name="app_keys_manage">Beheren</string>
+    <string name="app_keys_hide">Verbergen</string>
+    <string name="app_keys_hint">Je app gebruikt deze sleutels om met andere diensten te praten. Ze worden veilig opgeslagen en kunnen niet opnieuw worden bekeken, alleen vervangen of verwijderd.</string>
+    <string name="app_keys_used_by">Gebruikt door: %1$s</string>
+    <string name="app_keys_set">Ingesteld</string>
+    <string name="app_keys_not_set">Niet ingesteld</string>
+    <string name="app_keys_input_label">Plak de waarde voor %1$s</string>
+    <string name="app_keys_save">Opslaan</string>
+    <string name="app_keys_saving">Opslaan…</string>
+    <string name="app_keys_replace">Vervangen</string>
+    <string name="app_keys_remove">Verwijderen</string>
+    <string name="app_keys_removing">Verwijderen…</string>
+    <string name="app_keys_saved">Opgeslagen</string>
+    <string name="app_keys_removed">Verwijderd</string>
+    <string name="app_keys_remove_title">%1$s verwijderen?</string>
+    <string name="app_keys_remove_message">Je app werkt niet meer met deze dienst totdat je de sleutel opnieuw toevoegt.</string>
+    <string name="app_keys_retry">Opnieuw proberen</string>
+    <string name="app_keys_error_unauthorized">Log opnieuw in om sleutels te beheren.</string>
+    <string name="app_keys_error_rate_limited">Te veel pogingen. Wacht een minuut en probeer het opnieuw.</string>
+    <string name="app_keys_error_store_down">De sleutelopslag is nu niet beschikbaar. Probeer het straks opnieuw.</string>
+    <string name="app_keys_error_invalid_value">Die sleutel is leeg of te lang.</string>
+    <string name="app_keys_error_network">Geen verbinding. Controleer je internet en probeer het opnieuw.</string>
+    <string name="app_keys_error_other">Er ging iets mis. Probeer het opnieuw.</string>
+    <string name="app_keys_pay_test_first">Gebruik eerst je Stripe-testsleutels (ze beginnen met sk_test_).</string>
+    <string name="app_keys_pay_webhook_label">Webhook-URL om toe te voegen in Stripe</string>
+    <string name="app_keys_pay_webhook_pending">Publiceer je app om de webhook-URL te krijgen.</string>
+    <string name="app_keys_copy_url">URL kopiëren</string>
+    <string name="app_keys_copied">Gekopieerd</string>
+
 </resources>
