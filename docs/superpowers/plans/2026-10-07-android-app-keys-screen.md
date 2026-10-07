@@ -14,8 +14,8 @@ Verified by reading the code on 2026-10-07; no on-device test was possible becau
 
 Goal: an Android creator can see which keys their app needs, which are set, and set, replace or remove each one.
 
-Not in this plan: reading a key back (the platform is write-only by design), schema-change confirmation, billing screens, the iOS app
-(it has the same gap and should get the same screen after Android proves the shape).
+Not in this plan: reading a key back (the platform is write-only by design), schema-change confirmation, billing screens. The iOS app
+has the same gap; the owner decided on 2026-10-07 not to do iOS, so this plan is Android only.
 
 ## Backend: nothing to build
 
@@ -86,4 +86,3 @@ model. Optional; keys are the part that blocks creators.
 
 1. Is the completion nudge wanted, or only the entry on the project screen?
 2. Phase 2 (usage) now or later?
-3. Should iOS follow immediately after Android ships?
