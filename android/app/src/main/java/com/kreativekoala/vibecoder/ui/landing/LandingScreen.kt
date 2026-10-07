@@ -60,32 +60,45 @@ fun LandingScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(scrollState)
                 .statusBarsPadding()
                 .navigationBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(48.dp))
+            // The page scrolls; the call to action below it stays on screen so nobody has to scroll to find "Get started".
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .verticalScroll(scrollState),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(32.dp))
 
-            // Hero Section
-            HeroSection()
+                // Hero Section
+                HeroSection()
 
-            Spacer(modifier = Modifier.height(48.dp))
+                Spacer(modifier = Modifier.height(40.dp))
 
-            // How it works
-            HowItWorksSection()
+                // How it works
+                HowItWorksSection()
 
-            Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(40.dp))
 
-            // Example apps showcase
-            ExampleAppsSection()
+                // Example apps showcase
+                ExampleAppsSection()
 
-            Spacer(modifier = Modifier.height(48.dp))
+                Spacer(modifier = Modifier.height(24.dp))
+            }
 
-            // CTA Section
-            CTASection(onGetStarted = onGetStarted, onSignIn = onSignIn)
-
-            Spacer(modifier = Modifier.height(40.dp))
+            HorizontalDivider(color = DarkBorder)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(DarkBackground)
+                    .padding(top = 16.dp, bottom = 12.dp)
+            ) {
+                CTASection(onGetStarted = onGetStarted, onSignIn = onSignIn)
+            }
         }
     }
 }
