@@ -225,4 +225,38 @@
     <!-- Facebook SDK Configuration -->
     <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+
+    <!-- App keys (creator keys for generated apps) -->
+    <string name="app_keys_title">Ключи приложения</string>
+    <string name="app_keys_summary">Задано ключей: %1$d из %2$d</string>
+    <string name="app_keys_summary_all_set">Все ключи заданы (%1$d)</string>
+    <string name="app_keys_manage">Управлять</string>
+    <string name="app_keys_hide">Скрыть</string>
+    <string name="app_keys_hint">Ваше приложение использует эти ключи для связи с другими сервисами. Они хранятся надежно и не могут быть показаны снова, их можно только заменить или удалить.</string>
+    <string name="app_keys_used_by">Используется в: %1$s</string>
+    <string name="app_keys_set">Задан</string>
+    <string name="app_keys_not_set">Не задан</string>
+    <string name="app_keys_input_label">Вставьте значение для %1$s</string>
+    <string name="app_keys_save">Сохранить</string>
+    <string name="app_keys_saving">Сохранение…</string>
+    <string name="app_keys_replace">Заменить</string>
+    <string name="app_keys_remove">Удалить</string>
+    <string name="app_keys_removing">Удаление…</string>
+    <string name="app_keys_saved">Сохранено</string>
+    <string name="app_keys_removed">Удалено</string>
+    <string name="app_keys_remove_title">Удалить %1$s?</string>
+    <string name="app_keys_remove_message">Ваше приложение перестанет работать с этим сервисом, пока вы снова не добавите ключ.</string>
+    <string name="app_keys_retry">Повторить</string>
+    <string name="app_keys_error_unauthorized">Войдите снова, чтобы управлять ключами.</string>
+    <string name="app_keys_error_rate_limited">Слишком много попыток. Подождите минуту и повторите.</string>
+    <string name="app_keys_error_store_down">Хранилище ключей сейчас недоступно. Повторите чуть позже.</string>
+    <string name="app_keys_error_invalid_value">Этот ключ пустой или слишком длинный.</string>
+    <string name="app_keys_error_network">Нет подключения. Проверьте интернет и повторите.</string>
+    <string name="app_keys_error_other">Что-то пошло не так. Повторите попытку.</string>
+    <string name="app_keys_pay_test_first">Сначала используйте тестовые ключи Stripe (они начинаются с sk_test_).</string>
+    <string name="app_keys_pay_webhook_label">URL вебхука для добавления в Stripe</string>
+    <string name="app_keys_pay_webhook_pending">Опубликуйте приложение, чтобы получить URL его вебхука.</string>
+    <string name="app_keys_copy_url">Копировать URL</string>
+    <string name="app_keys_copied">Скопировано</string>
+
 </resources>

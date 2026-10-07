@@ -225,4 +225,38 @@
     <!-- Facebook SDK Configuration -->
     <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+
+    <!-- App keys (creator keys for generated apps) -->
+    <string name="app_keys_title">Kunci apl</string>
+    <string name="app_keys_summary">%1$d daripada %2$d kunci telah ditetapkan</string>
+    <string name="app_keys_summary_all_set">Semua %1$d kunci telah ditetapkan</string>
+    <string name="app_keys_manage">Urus</string>
+    <string name="app_keys_hide">Sembunyi</string>
+    <string name="app_keys_hint">Apl anda menggunakan kunci ini untuk berhubung dengan perkhidmatan lain. Kunci disimpan dengan selamat dan tidak boleh dibaca semula, hanya boleh diganti atau dibuang.</string>
+    <string name="app_keys_used_by">Digunakan oleh: %1$s</string>
+    <string name="app_keys_set">Ditetapkan</string>
+    <string name="app_keys_not_set">Belum ditetapkan</string>
+    <string name="app_keys_input_label">Tampal nilai untuk %1$s</string>
+    <string name="app_keys_save">Simpan</string>
+    <string name="app_keys_saving">Menyimpan…</string>
+    <string name="app_keys_replace">Ganti</string>
+    <string name="app_keys_remove">Buang</string>
+    <string name="app_keys_removing">Membuang…</string>
+    <string name="app_keys_saved">Disimpan</string>
+    <string name="app_keys_removed">Dibuang</string>
+    <string name="app_keys_remove_title">Buang %1$s?</string>
+    <string name="app_keys_remove_message">Apl anda akan berhenti berfungsi dengan perkhidmatan ini sehingga anda menambah kunci itu semula.</string>
+    <string name="app_keys_retry">Cuba lagi</string>
+    <string name="app_keys_error_unauthorized">Log masuk semula untuk mengurus kunci.</string>
+    <string name="app_keys_error_rate_limited">Terlalu banyak percubaan. Tunggu seminit dan cuba lagi.</string>
+    <string name="app_keys_error_store_down">Stor kunci tidak tersedia buat masa ini. Cuba lagi sebentar nanti.</string>
+    <string name="app_keys_error_invalid_value">Kunci itu kosong atau terlalu panjang.</string>
+    <string name="app_keys_error_network">Tiada sambungan. Semak internet anda dan cuba lagi.</string>
+    <string name="app_keys_error_other">Sesuatu telah berlaku. Cuba lagi.</string>
+    <string name="app_keys_pay_test_first">Gunakan kunci ujian Stripe anda dahulu (bermula dengan sk_test_).</string>
+    <string name="app_keys_pay_webhook_label">URL webhook untuk ditambah dalam Stripe</string>
+    <string name="app_keys_pay_webhook_pending">Terbitkan apl anda untuk mendapatkan URL webhooknya.</string>
+    <string name="app_keys_copy_url">Salin URL</string>
+    <string name="app_keys_copied">Disalin</string>
+
 </resources>

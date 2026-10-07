@@ -225,4 +225,38 @@
     <!-- Facebook SDK Configuration -->
     <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+
+    <!-- App keys (creator keys for generated apps) -->
+    <string name="app_keys_title">Klucze aplikacji</string>
+    <string name="app_keys_summary">Ustawiono kluczy: %1$d z %2$d</string>
+    <string name="app_keys_summary_all_set">Ustawiono wszystkie klucze (%1$d)</string>
+    <string name="app_keys_manage">Zarządzaj</string>
+    <string name="app_keys_hide">Ukryj</string>
+    <string name="app_keys_hint">Twoja aplikacja używa tych kluczy do łączenia się z innymi usługami. Są przechowywane bezpiecznie i nie można ich ponownie odczytać, tylko zastąpić lub usunąć.</string>
+    <string name="app_keys_used_by">Używane przez: %1$s</string>
+    <string name="app_keys_set">Ustawiony</string>
+    <string name="app_keys_not_set">Nie ustawiono</string>
+    <string name="app_keys_input_label">Wklej wartość dla: %1$s</string>
+    <string name="app_keys_save">Zapisz</string>
+    <string name="app_keys_saving">Zapisywanie…</string>
+    <string name="app_keys_replace">Zastąp</string>
+    <string name="app_keys_remove">Usuń</string>
+    <string name="app_keys_removing">Usuwanie…</string>
+    <string name="app_keys_saved">Zapisano</string>
+    <string name="app_keys_removed">Usunięto</string>
+    <string name="app_keys_remove_title">Usunąć: %1$s?</string>
+    <string name="app_keys_remove_message">Twoja aplikacja przestanie działać z tą usługą, dopóki nie dodasz klucza ponownie.</string>
+    <string name="app_keys_retry">Spróbuj ponownie</string>
+    <string name="app_keys_error_unauthorized">Zaloguj się ponownie, aby zarządzać kluczami.</string>
+    <string name="app_keys_error_rate_limited">Zbyt wiele prób. Odczekaj minutę i spróbuj ponownie.</string>
+    <string name="app_keys_error_store_down">Magazyn kluczy jest teraz niedostępny. Spróbuj ponownie wkrótce.</string>
+    <string name="app_keys_error_invalid_value">Ten klucz jest pusty lub za długi.</string>
+    <string name="app_keys_error_network">Brak połączenia. Sprawdź internet i spróbuj ponownie.</string>
+    <string name="app_keys_error_other">Coś poszło nie tak. Spróbuj ponownie.</string>
+    <string name="app_keys_pay_test_first">Najpierw użyj kluczy testowych Stripe (zaczynają się od sk_test_).</string>
+    <string name="app_keys_pay_webhook_label">Adres URL webhooka do dodania w Stripe</string>
+    <string name="app_keys_pay_webhook_pending">Opublikuj aplikację, aby uzyskać adres URL jej webhooka.</string>
+    <string name="app_keys_copy_url">Kopiuj URL</string>
+    <string name="app_keys_copied">Skopiowano</string>
+
 </resources>

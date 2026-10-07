@@ -225,4 +225,38 @@
     <!-- Facebook SDK Configuration -->
     <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+
+    <!-- App keys (creator keys for generated apps) -->
+    <string name="app_keys_title">Uygulama anahtarları</string>
+    <string name="app_keys_summary">%1$d / %2$d anahtar ayarlandı</string>
+    <string name="app_keys_summary_all_set">Tüm %1$d anahtar ayarlandı</string>
+    <string name="app_keys_manage">Yönet</string>
+    <string name="app_keys_hide">Gizle</string>
+    <string name="app_keys_hint">Uygulamanız bu anahtarları diğer hizmetlerle iletişim kurmak için kullanır. Güvenle saklanır ve tekrar okunamaz, yalnızca değiştirilebilir veya kaldırılabilir.</string>
+    <string name="app_keys_used_by">Kullanan: %1$s</string>
+    <string name="app_keys_set">Ayarlandı</string>
+    <string name="app_keys_not_set">Ayarlanmadı</string>
+    <string name="app_keys_input_label">%1$s için değeri yapıştırın</string>
+    <string name="app_keys_save">Kaydet</string>
+    <string name="app_keys_saving">Kaydediliyor…</string>
+    <string name="app_keys_replace">Değiştir</string>
+    <string name="app_keys_remove">Kaldır</string>
+    <string name="app_keys_removing">Kaldırılıyor…</string>
+    <string name="app_keys_saved">Kaydedildi</string>
+    <string name="app_keys_removed">Kaldırıldı</string>
+    <string name="app_keys_remove_title">%1$s kaldırılsın mı?</string>
+    <string name="app_keys_remove_message">Anahtarı tekrar ekleyene kadar uygulamanız bu hizmetle çalışmayı bırakır.</string>
+    <string name="app_keys_retry">Tekrar dene</string>
+    <string name="app_keys_error_unauthorized">Anahtarları yönetmek için tekrar giriş yapın.</string>
+    <string name="app_keys_error_rate_limited">Çok fazla deneme. Bir dakika bekleyip tekrar deneyin.</string>
+    <string name="app_keys_error_store_down">Anahtar deposu şu anda kullanılamıyor. Birazdan tekrar deneyin.</string>
+    <string name="app_keys_error_invalid_value">Bu anahtar boş veya çok uzun.</string>
+    <string name="app_keys_error_network">Bağlantı yok. İnternetinizi kontrol edip tekrar deneyin.</string>
+    <string name="app_keys_error_other">Bir şeyler ters gitti. Tekrar deneyin.</string>
+    <string name="app_keys_pay_test_first">Önce Stripe test anahtarlarınızı kullanın (sk_test_ ile başlarlar).</string>
+    <string name="app_keys_pay_webhook_label">Stripe\'a eklenecek webhook URL\'si</string>
+    <string name="app_keys_pay_webhook_pending">Webhook URL\'sini almak için uygulamanızı yayınlayın.</string>
+    <string name="app_keys_copy_url">URL\'yi kopyala</string>
+    <string name="app_keys_copied">Kopyalandı</string>
+
 </resources>
