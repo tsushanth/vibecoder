@@ -231,6 +231,37 @@
     <string name="language_italian">Italiano</string>
     <string name="language_hindi">हिन्दी</string>
 
+    <!-- Paywall -->
+    <string name="paywall_title">Build without limits</string>
+    <string name="paywall_subtitle">Unlock everything in VibeBuild</string>
+    <string name="paywall_feature_projects">Unlimited projects</string>
+    <string name="paywall_feature_ai">AI assistant</string>
+    <string name="paywall_feature_deploy">One-click cloud deploy</string>
+    <string name="paywall_feature_templates">All templates</string>
+    <string name="paywall_feature_storage">Cloud storage</string>
+    <string name="paywall_plan_yearly">Yearly</string>
+    <string name="paywall_plan_monthly">Monthly</string>
+    <string name="paywall_plan_weekly">Weekly</string>
+    <string name="paywall_plan_lifetime">Lifetime</string>
+    <string name="paywall_price_per_year">%1$s / year</string>
+    <string name="paywall_price_per_month">%1$s / month</string>
+    <string name="paywall_price_per_week">%1$s / week</string>
+    <string name="paywall_price_once">%1$s one time</string>
+    <string name="paywall_badge_best_value">Best value</string>
+    <string name="paywall_trial_days">%1$d-day free trial</string>
+    <string name="paywall_cta_continue">Continue</string>
+    <string name="paywall_cta_trial">Start free trial</string>
+    <string name="paywall_renewal">Subscriptions renew automatically until cancelled. Cancel anytime in Google Play.</string>
+    <string name="paywall_restore">Restore purchases</string>
+    <string name="paywall_redeem">Have a code?</string>
+    <string name="paywall_terms">Terms</string>
+    <string name="paywall_privacy">Privacy</string>
+    <string name="paywall_close">Close</string>
+    <string name="paywall_unavailable">Plans could not be loaded. Check your connection and try again.</string>
+    <string name="paywall_retry">Try again</string>
+    <string name="paywall_error_purchase">The purchase could not be completed. Please try again.</string>
+    <string name="paywall_restore_none">No active subscription was found for this Google account.</string>
+
     <!-- Facebook SDK Configuration -->
     <string name="facebook_app_id">2361731814322648</string>
     <string name="facebook_client_token">32ed2eb93cd2e41e4a113956d7f53d03</string>

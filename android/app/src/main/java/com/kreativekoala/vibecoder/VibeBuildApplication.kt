@@ -6,8 +6,6 @@ import com.kreativekoala.vibecoder.service.FacebookSDKHelper
 import com.kreativekoala.vibecoder.service.FirebaseAnalyticsHelper
 import com.kreativekoala.vibecoder.service.TikTokHelper
 import com.kreativekoala.vibecoder.util.NotificationHelper
-import com.kreativekoala.paywallkit.manager.ExperimentManager
-import com.kreativekoala.paywallkit.manager.PromoCodeManager
 import com.kreativekoala.ratingkit.RatingKit
 import com.revenuecat.purchases.LogLevel
 import com.revenuecat.purchases.Purchases
@@ -30,10 +28,6 @@ class VibeBuildApplication : Application() {
 
         // Initialize TikTok Events SDK for install attribution
         TikTokHelper.initialize(this)
-
-        // Initialize PaywallKit experiment manager
-        ExperimentManager.init(this)
-        PromoCodeManager.init(this)
 
         // Initialize RatingKit
         RatingKit.init(this, appId = "vibebuild")

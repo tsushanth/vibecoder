@@ -225,4 +225,35 @@
     <!-- Facebook SDK Configuration -->
     <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+
+    <!-- Paywall -->
+    <string name="paywall_title">Créez sans limites</string>
+    <string name="paywall_subtitle">Débloquez tout dans VibeBuild</string>
+    <string name="paywall_feature_projects">Projets illimités</string>
+    <string name="paywall_feature_ai">Assistant IA</string>
+    <string name="paywall_feature_deploy">Déploiement cloud en un clic</string>
+    <string name="paywall_feature_templates">Tous les modèles</string>
+    <string name="paywall_feature_storage">Stockage cloud</string>
+    <string name="paywall_plan_yearly">Annuel</string>
+    <string name="paywall_plan_monthly">Mensuel</string>
+    <string name="paywall_plan_weekly">Hebdomadaire</string>
+    <string name="paywall_plan_lifetime">À vie</string>
+    <string name="paywall_price_per_year">%1$s / an</string>
+    <string name="paywall_price_per_month">%1$s / mois</string>
+    <string name="paywall_price_per_week">%1$s / semaine</string>
+    <string name="paywall_price_once">%1$s paiement unique</string>
+    <string name="paywall_badge_best_value">Meilleure offre</string>
+    <string name="paywall_trial_days">Essai gratuit de %1$d jours</string>
+    <string name="paywall_cta_continue">Continuer</string>
+    <string name="paywall_cta_trial">Démarrer l\'essai gratuit</string>
+    <string name="paywall_renewal">Les abonnements se renouvellent automatiquement jusqu\'à leur résiliation. Résiliez à tout moment dans Google Play.</string>
+    <string name="paywall_restore">Restaurer les achats</string>
+    <string name="paywall_redeem">Un code ?</string>
+    <string name="paywall_terms">Conditions</string>
+    <string name="paywall_privacy">Confidentialité</string>
+    <string name="paywall_close">Fermer</string>
+    <string name="paywall_unavailable">Impossible de charger les offres. Vérifiez votre connexion et réessayez.</string>
+    <string name="paywall_retry">Réessayer</string>
+    <string name="paywall_error_purchase">L\'achat n\'a pas pu être finalisé. Veuillez réessayer.</string>
+    <string name="paywall_restore_none">Aucun abonnement actif trouvé pour ce compte Google.</string>
 </resources>
