@@ -10,7 +10,9 @@ import { OpenRouterClient } from '../lib/llm.js';
 import { generateApp } from '../lib/generate.js';
 import { scrubSecrets } from '../lib/scrub.js';
 import { writeFiles } from '../lib/files.js';
+import { fullChecks } from '../lib/browsercheck.js';
 
+if (process.env.REPLAY_CHROME) process.env.CHROME_PATH = process.env.REPLAY_CHROME; // same runtime check production runs (loads the app and clicks every control)
 const { SUPABASE_URL, SUPABASE_SERVICE_KEY, OPENROUTER_API_KEY, REPLAY_FILE } = process.env;
 if (!OPENROUTER_API_KEY || (!REPLAY_FILE && (!SUPABASE_URL || !SUPABASE_SERVICE_KEY))) {
     console.error('need OPENROUTER_API_KEY and either REPLAY_FILE or SUPABASE_URL + SUPABASE_SERVICE_KEY');
@@ -44,7 +46,7 @@ await Promise.all(Array.from({ length: CONC }, async () => {
         const row = rows[next++];
         const t0 = Date.now();
         let r;
-        try { r = await generateApp({ prompt: scrubSecrets(row.prompt).text, llm, models, rules }); }
+        try { r = await generateApp({ prompt: scrubSecrets(row.prompt).text, llm, models, rules, ...(process.env.REPLAY_CHROME ? { check: (files) => fullChecks(files, { vibe: false }) } : {}) }); }
         catch (e) { r = { ok: false, cause: 'exception', costUsd: 0 }; }
         const rec = { id: row.id, prod: row.prod_outcome, ok: r.ok, cause: r.cause || 'ok', model: r.model, costUsd: r.costUsd || 0, secs: Math.round((Date.now() - t0) / 1000) };
         if (r.ok) { const dir = path.join(out, row.id); fs.mkdirSync(dir, { recursive: true }); writeFiles(dir, r.files); }
