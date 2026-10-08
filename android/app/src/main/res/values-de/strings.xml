@@ -226,6 +226,39 @@
     <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
 
+    <!-- App keys (creator keys for generated apps) -->
+    <string name="app_keys_title">App-Schlüssel</string>
+    <string name="app_keys_summary">%1$d von %2$d Schlüsseln festgelegt</string>
+    <string name="app_keys_summary_all_set">Alle %1$d Schlüssel festgelegt</string>
+    <string name="app_keys_manage">Verwalten</string>
+    <string name="app_keys_hide">Ausblenden</string>
+    <string name="app_keys_hint">Deine App nutzt diese Schlüssel, um mit anderen Diensten zu kommunizieren. Sie werden sicher gespeichert und können nicht wieder angezeigt, sondern nur ersetzt oder entfernt werden.</string>
+    <string name="app_keys_used_by">Verwendet von: %1$s</string>
+    <string name="app_keys_set">Festgelegt</string>
+    <string name="app_keys_not_set">Nicht festgelegt</string>
+    <string name="app_keys_input_label">Wert für %1$s einfügen</string>
+    <string name="app_keys_save">Speichern</string>
+    <string name="app_keys_saving">Wird gespeichert…</string>
+    <string name="app_keys_replace">Ersetzen</string>
+    <string name="app_keys_remove">Entfernen</string>
+    <string name="app_keys_removing">Wird entfernt…</string>
+    <string name="app_keys_saved">Gespeichert</string>
+    <string name="app_keys_removed">Entfernt</string>
+    <string name="app_keys_remove_title">%1$s entfernen?</string>
+    <string name="app_keys_remove_message">Deine App funktioniert mit diesem Dienst nicht mehr, bis du den Schlüssel wieder hinzufügst.</string>
+    <string name="app_keys_retry">Erneut versuchen</string>
+    <string name="app_keys_error_unauthorized">Melde dich erneut an, um Schlüssel zu verwalten.</string>
+    <string name="app_keys_error_rate_limited">Zu viele Versuche. Warte eine Minute und versuche es erneut.</string>
+    <string name="app_keys_error_store_down">Der Schlüsselspeicher ist gerade nicht verfügbar. Versuche es bald erneut.</string>
+    <string name="app_keys_error_invalid_value">Dieser Schlüssel ist leer oder zu lang.</string>
+    <string name="app_keys_error_network">Keine Verbindung. Prüfe dein Internet und versuche es erneut.</string>
+    <string name="app_keys_error_other">Etwas ist schiefgelaufen. Versuche es erneut.</string>
+    <string name="app_keys_pay_test_first">Verwende zuerst deine Stripe-Testschlüssel (sie beginnen mit sk_test_).</string>
+    <string name="app_keys_pay_webhook_label">Webhook-URL zum Hinzufügen in Stripe</string>
+    <string name="app_keys_pay_webhook_pending">Veröffentliche deine App, um ihre Webhook-URL zu erhalten.</string>
+    <string name="app_keys_copy_url">URL kopieren</string>
+    <string name="app_keys_copied">Kopiert</string>
+
     <!-- Paywall -->
     <string name="paywall_title">Bauen ohne Grenzen</string>
     <string name="paywall_subtitle">Alles in VibeBuild freischalten</string>

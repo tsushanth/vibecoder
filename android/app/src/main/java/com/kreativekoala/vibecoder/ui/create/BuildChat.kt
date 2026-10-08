@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kreativekoala.vibecoder.ui.theme.*
+import com.kreativekoala.vibecoder.ui.apps.keys.AppKeysSection
 import kotlinx.coroutines.delay
 
 private val Green = Color(0xFF34D399)
@@ -150,6 +151,10 @@ fun BuildChatThread(
                     Spacer(Modifier.height(6.dp))
                     TextButton(onClick = onNewApp) { Text("Start a new app", color = TextSecondary) }
                 }
+
+                // If the app needs keys (third-party APIs, Stripe) this card shows what is missing, open, right where the build ends;
+                // it shows nothing for an app that needs none.
+                (state.buildProjectId ?: state.savedProjectId)?.let { AppKeysSection(projectId = it) }
 
                 state.tweakTurns.forEachIndexed { i, turn ->
                     UserBubble(turn.text)

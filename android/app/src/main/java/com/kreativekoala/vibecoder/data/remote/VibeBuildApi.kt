@@ -100,6 +100,20 @@ interface VibeBuildApi {
     @GET("api/subscriptions/plans")
     suspend fun getPlans(): PlansResponse
 
+    // Creator keys for a generated app (owner only, identity from the access token; values are write-only)
+    @GET("api/projects/{id}/secrets")
+    suspend fun getSecrets(@Path("id") id: String): SecretsResponse
+
+    @PUT("api/projects/{id}/secrets/{name}")
+    suspend fun setSecret(
+        @Path("id") id: String,
+        @Path("name") name: String,
+        @Body body: SecretValueRequest
+    )
+
+    @DELETE("api/projects/{id}/secrets/{name}")
+    suspend fun deleteSecret(@Path("id") id: String, @Path("name") name: String)
+
     // Export APK
     @POST("api/projects/{id}/export-apk")
     suspend fun exportApk(

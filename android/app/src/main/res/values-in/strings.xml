@@ -226,6 +226,39 @@
     <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
 
+    <!-- App keys (creator keys for generated apps) -->
+    <string name="app_keys_title">Kunci aplikasi</string>
+    <string name="app_keys_summary">%1$d dari %2$d kunci sudah diatur</string>
+    <string name="app_keys_summary_all_set">Semua %1$d kunci sudah diatur</string>
+    <string name="app_keys_manage">Kelola</string>
+    <string name="app_keys_hide">Sembunyikan</string>
+    <string name="app_keys_hint">Aplikasimu memakai kunci ini untuk terhubung ke layanan lain. Kunci disimpan dengan aman dan tidak bisa dibaca kembali, hanya bisa diganti atau dihapus.</string>
+    <string name="app_keys_used_by">Dipakai oleh: %1$s</string>
+    <string name="app_keys_set">Diatur</string>
+    <string name="app_keys_not_set">Belum diatur</string>
+    <string name="app_keys_input_label">Tempel nilai untuk %1$s</string>
+    <string name="app_keys_save">Simpan</string>
+    <string name="app_keys_saving">Menyimpan…</string>
+    <string name="app_keys_replace">Ganti</string>
+    <string name="app_keys_remove">Hapus</string>
+    <string name="app_keys_removing">Menghapus…</string>
+    <string name="app_keys_saved">Tersimpan</string>
+    <string name="app_keys_removed">Dihapus</string>
+    <string name="app_keys_remove_title">Hapus %1$s?</string>
+    <string name="app_keys_remove_message">Aplikasimu akan berhenti berfungsi dengan layanan ini sampai kamu menambahkan kuncinya lagi.</string>
+    <string name="app_keys_retry">Coba lagi</string>
+    <string name="app_keys_error_unauthorized">Masuk lagi untuk mengelola kunci.</string>
+    <string name="app_keys_error_rate_limited">Terlalu banyak percobaan. Tunggu semenit lalu coba lagi.</string>
+    <string name="app_keys_error_store_down">Penyimpanan kunci sedang tidak tersedia. Coba lagi nanti.</string>
+    <string name="app_keys_error_invalid_value">Kunci itu kosong atau terlalu panjang.</string>
+    <string name="app_keys_error_network">Tidak ada koneksi. Periksa internetmu dan coba lagi.</string>
+    <string name="app_keys_error_other">Terjadi kesalahan. Coba lagi.</string>
+    <string name="app_keys_pay_test_first">Gunakan kunci uji Stripe dulu (diawali dengan sk_test_).</string>
+    <string name="app_keys_pay_webhook_label">URL webhook untuk ditambahkan di Stripe</string>
+    <string name="app_keys_pay_webhook_pending">Publikasikan aplikasimu untuk mendapatkan URL webhook-nya.</string>
+    <string name="app_keys_copy_url">Salin URL</string>
+    <string name="app_keys_copied">Tersalin</string>
+
     <!-- Paywall -->
     <string name="paywall_title">Bangun tanpa batas</string>
     <string name="paywall_subtitle">Buka semua fitur di VibeBuild</string>
