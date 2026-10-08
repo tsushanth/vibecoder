@@ -225,4 +225,35 @@
     <!-- Facebook SDK Configuration -->
     <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+
+    <!-- Paywall -->
+    <string name="paywall_title">Создавайте без ограничений</string>
+    <string name="paywall_subtitle">Откройте все возможности VibeBuild</string>
+    <string name="paywall_feature_projects">Неограниченное число проектов</string>
+    <string name="paywall_feature_ai">ИИ-ассистент</string>
+    <string name="paywall_feature_deploy">Деплой в облако в один клик</string>
+    <string name="paywall_feature_templates">Все шаблоны</string>
+    <string name="paywall_feature_storage">Облачное хранилище</string>
+    <string name="paywall_plan_yearly">Год</string>
+    <string name="paywall_plan_monthly">Месяц</string>
+    <string name="paywall_plan_weekly">Неделя</string>
+    <string name="paywall_plan_lifetime">Навсегда</string>
+    <string name="paywall_price_per_year">%1$s / год</string>
+    <string name="paywall_price_per_month">%1$s / мес.</string>
+    <string name="paywall_price_per_week">%1$s / нед.</string>
+    <string name="paywall_price_once">%1$s разово</string>
+    <string name="paywall_badge_best_value">Самая выгодная</string>
+    <string name="paywall_trial_days">Бесплатный пробный период: %1$d дн.</string>
+    <string name="paywall_cta_continue">Продолжить</string>
+    <string name="paywall_cta_trial">Начать бесплатный период</string>
+    <string name="paywall_renewal">Подписки продлеваются автоматически, пока вы их не отмените. Отменить можно в любой момент в Google Play.</string>
+    <string name="paywall_restore">Восстановить покупки</string>
+    <string name="paywall_redeem">Есть код?</string>
+    <string name="paywall_terms">Условия</string>
+    <string name="paywall_privacy">Конфиденциальность</string>
+    <string name="paywall_close">Закрыть</string>
+    <string name="paywall_unavailable">Не удалось загрузить тарифы. Проверьте подключение и повторите попытку.</string>
+    <string name="paywall_retry">Повторить</string>
+    <string name="paywall_error_purchase">Не удалось завершить покупку. Попробуйте ещё раз.</string>
+    <string name="paywall_restore_none">Для этого аккаунта Google активных подписок не найдено.</string>
 </resources>

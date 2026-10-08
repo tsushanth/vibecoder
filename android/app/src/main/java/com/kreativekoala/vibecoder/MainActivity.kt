@@ -15,17 +15,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.kreativekoala.paywallkit.manager.PaywallManager
-import com.kreativekoala.paywallkit.models.PaywallFeature
-import com.kreativekoala.paywallkit.models.PaywallProduct
-import com.kreativekoala.paywallkit.view.PaywallView
 import com.kreativekoala.ratingkit.RatingKit
 import com.kreativekoala.vibecoder.service.FacebookSDKHelper
 import com.kreativekoala.vibecoder.service.TikTokHelper
 import com.kreativekoala.vibecoder.navigation.VibeBuildNavGraph
+import com.kreativekoala.vibecoder.ui.paywall.GenerationLimit
+import com.kreativekoala.vibecoder.ui.paywall.PaywallHost
+import com.kreativekoala.vibecoder.data.repository.AuthRepository
+import com.kreativekoala.vibecoder.data.repository.ProjectRepository
+import javax.inject.Inject
+import com.kreativekoala.vibecoder.ui.theme.VibePurple
 import com.kreativekoala.vibecoder.ui.theme.VibeBuildTheme
 import com.revenuecat.purchases.CustomerInfo
 import com.revenuecat.purchases.Package
@@ -40,11 +45,17 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
+    @Inject lateinit var projectRepository: ProjectRepository
+    @Inject lateinit var authRepository: AuthRepository
+
     companion object {
         private const val TAG = "MainActivity"
         private const val PREFS_NAME = "vibebuild_paywall_prefs"
         private const val KEY_GENERATION_COUNT = "generation_count"
-        const val FREE_GENERATION_LIMIT = 30
+        const val FREE_GENERATION_LIMIT = GenerationLimit.FREE_LIMIT
+        private const val STATUS_TIMEOUT_MS = 5_000L
+        private const val SYNC_ATTEMPTS = 60
+        private const val SYNC_RETRY_MS = 2_000L
 
         fun incrementGenerationCount(context: Context) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -56,6 +67,14 @@ class MainActivity : AppCompatActivity() {
         fun getGenerationCount(context: Context): Int {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             return prefs.getInt(KEY_GENERATION_COUNT, 0)
+        }
+
+        /** Raises the local counter to the server's project count if that is higher (never lowers it). */
+        fun syncGenerationCount(context: Context, serverCount: Int) {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val current = prefs.getInt(KEY_GENERATION_COUNT, 0)
+            val merged = GenerationLimit.merge(current, serverCount)
+            if (merged != current) prefs.edit().putInt(KEY_GENERATION_COUNT, merged).apply()
         }
 
         fun isPremiumUser(context: Context): Boolean {
@@ -85,9 +104,7 @@ class MainActivity : AppCompatActivity() {
     @Composable
     private fun AppContentWithPaywallGate() {
         var isPremium by remember { mutableStateOf<Boolean?>(null) }
-        val generationCount = remember { getGenerationCount(this@MainActivity) }
-        var packages by remember { mutableStateOf<List<Package>>(emptyList()) }
-        var productsLoaded by remember { mutableStateOf(false) }
+        var generationCount by remember { mutableIntStateOf(getGenerationCount(this@MainActivity)) }
 
         // Check subscription status via RevenueCat. Uses restorePurchasesWith
         // rather than a plain getCustomerInfo() — RevenueCat's local
@@ -119,148 +136,47 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        // Load RevenueCat offerings for paywall products
+        // The local build counter is reset by clearing the app's data, so once the user is signed in take the server's project count
+        // as a floor. Waits for the session (a fresh install signs in after this screen starts) and gives up quietly offline.
         LaunchedEffect(Unit) {
-            Purchases.sharedInstance.getOfferingsWith(
-                onError = { error ->
-                    Log.e(TAG, "Error fetching offerings: ${error.message}")
-                    productsLoaded = true // mark loaded even on error so UI proceeds
-                },
-                onSuccess = { offerings ->
-                    packages = offerings.current?.availablePackages ?: emptyList()
-                    productsLoaded = true
+            repeat(SYNC_ATTEMPTS) {
+                val uid = authRepository.currentUser?.uid
+                if (uid != null) {
+                    val count = runCatching { projectRepository.countMyProjects(uid) }.getOrNull()
+                    if (count != null) {
+                        syncGenerationCount(this@MainActivity, count)
+                        generationCount = getGenerationCount(this@MainActivity)
+                        return@LaunchedEffect
+                    }
                 }
-            )
+                kotlinx.coroutines.delay(SYNC_RETRY_MS)
+            }
         }
 
-        // Wait for subscription check to complete
-        val premium = isPremium ?: return
+        // The launch gate must never leave a blank screen: if the store does not answer (no Play Billing, slow network), use the last
+        // known subscription status after a few seconds and carry on.
+        LaunchedEffect(Unit) {
+            kotlinx.coroutines.delay(STATUS_TIMEOUT_MS)
+            if (isPremium == null) isPremium = isPremiumUser(this@MainActivity)
+        }
 
-        // Wait for products to load before showing paywall
-        if (!productsLoaded) return
+        val premium = isPremium
+        if (premium == null) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = VibePurple) }
+            return
+        }
 
-        val shouldShowPaywall = !premium && generationCount >= FREE_GENERATION_LIMIT
+        val shouldShowPaywall = GenerationLimit.isOverLimit(premium, generationCount)
 
         if (shouldShowPaywall) {
-            val paywallProducts = packages.mapNotNull { pkg ->
-                mapPackageToPaywallProduct(pkg)
-            }
-
-            // Block back button so the paywall cannot be dismissed
-            BackHandler(enabled = true) {
-                // Do nothing — hard paywall cannot be dismissed
-            }
-
-            Box(modifier = Modifier.fillMaxSize()) {
-                PaywallView(
-                    appId = "vibebuild",
-                    appName = "VibeBuild",
-                    features = listOf(
-                        PaywallFeature("\uD83C\uDFA8", "Unlimited Projects", "Build without limits"),
-                        PaywallFeature("\uD83E\uDD16", "AI Assistant", "AI-powered development"),
-                        PaywallFeature("\uD83D\uDE80", "Cloud Deploy", "One-click deployment"),
-                        PaywallFeature("\uD83D\uDCF1", "All Templates", "Access every template"),
-                        PaywallFeature("\uD83D\uDCBE", "Cloud Storage", "Unlimited cloud storage")
-                    ),
-                    products = paywallProducts,
-                    isDismissible = false,
-                    showWinback = true,
-                    onPurchase = { productId ->
-                        val pkg = packages.firstOrNull { it.product.id == productId }
-                        if (pkg != null) {
-                            Purchases.sharedInstance.purchaseWith(
-                                PurchaseParams.Builder(this@MainActivity, pkg).build(),
-                                onError = { error, _ ->
-                                    Log.e(TAG, "Purchase error: ${error.message}")
-                                },
-                                onSuccess = { _, customerInfo ->
-                                    val hasPro = customerInfo.entitlements["pro"]?.isActive == true
-                                    val hasTeam = customerInfo.entitlements["team"]?.isActive == true
-                                    val hasAny = customerInfo.entitlements.active.isNotEmpty()
-                                    if (hasPro || hasTeam || hasAny) {
-                                        isPremium = true
-                                        setPremiumUser(this@MainActivity, true)
-                                    }
-                                    val price = pkg.product.price.amountMicros / 1_000_000.0
-                                    val currency = pkg.product.price.currencyCode
-                                    TikTokHelper.trackPurchase(productId, price)
-                                    RatingKit.trackPurchase(this@MainActivity)
-                                    // Meta attribution — without this, the Meta ad campaign can't
-                                    // close the CAC loop (was missing on hard paywall, only soft
-                                    // paywall in SubscriptionViewModel had it).
-                                    FacebookSDKHelper.logPurchase(price, currency, productId)
-                                    if (pkg.product.subscriptionOptions?.freeTrial != null) {
-                                        FacebookSDKHelper.logTrialStarted(productId)
-                                    }
-                                    PaywallManager.trackEvent(
-                                        appId = "vibebuild",
-                                        placement = "paywall",
-                                        templateId = "default",
-                                        event = "purchased",
-                                        productId = productId
-                                    )
-                                }
-                            )
-                        }
-                    },
-                    onRestore = {
-                        Purchases.sharedInstance.restorePurchasesWith(
-                            onError = { error ->
-                                Log.e(TAG, "Restore error: ${error.message}")
-                            },
-                            onSuccess = { customerInfo ->
-                                val hasPro = customerInfo.entitlements["pro"]?.isActive == true
-                                val hasTeam = customerInfo.entitlements["team"]?.isActive == true
-                                val hasAny = customerInfo.entitlements.active.isNotEmpty()
-                                if (hasPro || hasTeam || hasAny) {
-                                    isPremium = true
-                                    setPremiumUser(this@MainActivity, true)
-                                }
-                            }
-                        )
-                    },
-                    onRedeemCode = {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/redeem?code=promo-1month-free"))
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        try { startActivity(intent) } catch (_: Exception) {}
-                    },
-                    onDismiss = {
-                        // Non-dismissible paywall — no action needed
-                    }
-                )
-            }
+            PaywallHost(
+                placement = "hard_paywall",
+                hardGate = true,
+                onUnlocked = { isPremium = true },
+                onDismiss = {}
+            )
         } else {
             VibeBuildNavGraph()
         }
-    }
-
-    /**
-     * Maps a RevenueCat Package to a PaywallKit PaywallProduct.
-     */
-    private fun mapPackageToPaywallProduct(pkg: Package): PaywallProduct? {
-        val product = pkg.product
-        val period = when {
-            product.period?.unit?.name == "YEAR" -> PaywallProduct.Period.YEARLY
-            product.period?.unit?.name == "MONTH" -> PaywallProduct.Period.MONTHLY
-            product.period?.unit?.name == "WEEK" -> PaywallProduct.Period.WEEKLY
-            product.period == null -> PaywallProduct.Period.LIFETIME
-            else -> return null
-        }
-        val trialDays = product.subscriptionOptions?.freeTrial?.freePhase?.billingPeriod?.let { bp ->
-            when (bp.unit?.name) {
-                "DAY" -> bp.value
-                "WEEK" -> bp.value * 7
-                "MONTH" -> bp.value * 30
-                else -> null
-            }
-        }
-        return PaywallProduct(
-            id = product.id,
-            localizedPrice = product.price.formatted,
-            price = product.price.amountMicros / 1_000_000.0,
-            currencyCode = product.price.currencyCode,
-            trialDays = trialDays,
-            period = period
-        )
     }
 }

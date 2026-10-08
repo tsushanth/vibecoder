@@ -163,8 +163,6 @@ dependencies {
     implementation("com.google.android.play:review:2.0.1")
     implementation("com.google.android.play:review-ktx:2.0.1")
 
-    // PaywallKit
-    implementation(project(":paywallkit"))
     implementation(project(":crosspromokit"))
 
     // RatingKit
@@ -174,8 +172,8 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.mockk:mockk:1.13.13")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
-    // Must match the OkHttp that actually resolves at runtime: :paywallkit pulls 5.0.0-alpha.14,
-    // which wins conflict resolution over the 4.12.0 declared above (mockwebserver 4.x -> NoClassDefFoundError).
+    // Must match the OkHttp that actually resolves at runtime (a 5.0.0-alpha.14 pulled in by a kit module wins conflict resolution
+    // over the 4.12.0 declared above; mockwebserver 4.x then fails with NoClassDefFoundError).
     testImplementation("com.squareup.okhttp3:mockwebserver:5.0.0-alpha.14")
 
     androidTestImplementation(composeBom)

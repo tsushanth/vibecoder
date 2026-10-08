@@ -225,4 +225,35 @@
     <!-- Facebook SDK Configuration -->
     <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+
+    <!-- Paywall -->
+    <string name="paywall_title">ابنِ بلا حدود</string>
+    <string name="paywall_subtitle">افتح كل ميزات VibeBuild</string>
+    <string name="paywall_feature_projects">مشاريع غير محدودة</string>
+    <string name="paywall_feature_ai">مساعد الذكاء الاصطناعي</string>
+    <string name="paywall_feature_deploy">نشر سحابي بنقرة واحدة</string>
+    <string name="paywall_feature_templates">جميع القوالب</string>
+    <string name="paywall_feature_storage">تخزين سحابي</string>
+    <string name="paywall_plan_yearly">سنوي</string>
+    <string name="paywall_plan_monthly">شهري</string>
+    <string name="paywall_plan_weekly">أسبوعي</string>
+    <string name="paywall_plan_lifetime">مدى الحياة</string>
+    <string name="paywall_price_per_year">%1$s / سنة</string>
+    <string name="paywall_price_per_month">%1$s / شهر</string>
+    <string name="paywall_price_per_week">%1$s / أسبوع</string>
+    <string name="paywall_price_once">%1$s مرة واحدة</string>
+    <string name="paywall_badge_best_value">أفضل قيمة</string>
+    <string name="paywall_trial_days">تجربة مجانية لمدة %1$d يومًا</string>
+    <string name="paywall_cta_continue">متابعة</string>
+    <string name="paywall_cta_trial">ابدأ التجربة المجانية</string>
+    <string name="paywall_renewal">تتجدد الاشتراكات تلقائيًا حتى يتم إلغاؤها. يمكنك الإلغاء في أي وقت من Google Play.</string>
+    <string name="paywall_restore">استعادة المشتريات</string>
+    <string name="paywall_redeem">لديك رمز؟</string>
+    <string name="paywall_terms">الشروط</string>
+    <string name="paywall_privacy">الخصوصية</string>
+    <string name="paywall_close">إغلاق</string>
+    <string name="paywall_unavailable">تعذر تحميل الخطط. تحقق من اتصالك وحاول مرة أخرى.</string>
+    <string name="paywall_retry">حاول مرة أخرى</string>
+    <string name="paywall_error_purchase">تعذر إتمام الشراء. يرجى المحاولة مرة أخرى.</string>
+    <string name="paywall_restore_none">لم يتم العثور على اشتراك نشط لحساب Google هذا.</string>
 </resources>

@@ -225,4 +225,35 @@
     <!-- Facebook SDK Configuration -->
     <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+
+    <!-- Paywall -->
+    <string name="paywall_title">Bina tanpa had</string>
+    <string name="paywall_subtitle">Buka semua dalam VibeBuild</string>
+    <string name="paywall_feature_projects">Projek tanpa had</string>
+    <string name="paywall_feature_ai">Pembantu AI</string>
+    <string name="paywall_feature_deploy">Penempatan awan satu klik</string>
+    <string name="paywall_feature_templates">Semua templat</string>
+    <string name="paywall_feature_storage">Storan awan</string>
+    <string name="paywall_plan_yearly">Tahunan</string>
+    <string name="paywall_plan_monthly">Bulanan</string>
+    <string name="paywall_plan_weekly">Mingguan</string>
+    <string name="paywall_plan_lifetime">Seumur hidup</string>
+    <string name="paywall_price_per_year">%1$s / tahun</string>
+    <string name="paywall_price_per_month">%1$s / bulan</string>
+    <string name="paywall_price_per_week">%1$s / minggu</string>
+    <string name="paywall_price_once">%1$s sekali bayar</string>
+    <string name="paywall_badge_best_value">Nilai terbaik</string>
+    <string name="paywall_trial_days">Percubaan percuma %1$d hari</string>
+    <string name="paywall_cta_continue">Teruskan</string>
+    <string name="paywall_cta_trial">Mulakan percubaan percuma</string>
+    <string name="paywall_renewal">Langganan diperbaharui secara automatik sehingga dibatalkan. Batalkan pada bila-bila masa di Google Play.</string>
+    <string name="paywall_restore">Pulihkan pembelian</string>
+    <string name="paywall_redeem">Ada kod?</string>
+    <string name="paywall_terms">Terma</string>
+    <string name="paywall_privacy">Privasi</string>
+    <string name="paywall_close">Tutup</string>
+    <string name="paywall_unavailable">Pelan tidak dapat dimuatkan. Semak sambungan anda dan cuba lagi.</string>
+    <string name="paywall_retry">Cuba lagi</string>
+    <string name="paywall_error_purchase">Pembelian tidak dapat diselesaikan. Sila cuba lagi.</string>
+    <string name="paywall_restore_none">Tiada langganan aktif ditemui untuk akaun Google ini.</string>
 </resources>

@@ -298,7 +298,8 @@ fun SignInScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Google Sign-In button
-            OutlinedButton(
+            // Light button with dark text, as Google's own sign-in guidelines show it: on the dark page it is clearly a button
+            Button(
                 onClick = {
                     viewModel.clearError()
                     viewModel.signInWithGoogle(context)
@@ -308,11 +309,11 @@ fun SignInScreen(
                     .height(52.dp),
                 enabled = !isLoading,
                 shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = TextPrimary
-                ),
-                border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
-                    brush = Brush.linearGradient(listOf(DarkBorder, DarkBorder))
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = Color(0xFF1F1F1F),
+                    disabledContainerColor = Color.White.copy(alpha = 0.4f),
+                    disabledContentColor = Color(0xFF1F1F1F).copy(alpha = 0.6f)
                 )
             ) {
                 Text(
