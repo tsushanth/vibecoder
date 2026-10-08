@@ -225,4 +225,35 @@
     <!-- Facebook SDK Configuration -->
     <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+
+    <!-- Paywall -->
+    <string name="paywall_title">Crea senza limiti</string>
+    <string name="paywall_subtitle">Sblocca tutto in VibeBuild</string>
+    <string name="paywall_feature_projects">Progetti illimitati</string>
+    <string name="paywall_feature_ai">Assistente IA</string>
+    <string name="paywall_feature_deploy">Deploy nel cloud con un tocco</string>
+    <string name="paywall_feature_templates">Tutti i modelli</string>
+    <string name="paywall_feature_storage">Archiviazione cloud</string>
+    <string name="paywall_plan_yearly">Annuale</string>
+    <string name="paywall_plan_monthly">Mensile</string>
+    <string name="paywall_plan_weekly">Settimanale</string>
+    <string name="paywall_plan_lifetime">A vita</string>
+    <string name="paywall_price_per_year">%1$s / anno</string>
+    <string name="paywall_price_per_month">%1$s / mese</string>
+    <string name="paywall_price_per_week">%1$s / settimana</string>
+    <string name="paywall_price_once">%1$s una tantum</string>
+    <string name="paywall_badge_best_value">Miglior valore</string>
+    <string name="paywall_trial_days">Prova gratuita di %1$d giorni</string>
+    <string name="paywall_cta_continue">Continua</string>
+    <string name="paywall_cta_trial">Inizia la prova gratuita</string>
+    <string name="paywall_renewal">Gli abbonamenti si rinnovano automaticamente finché non vengono annullati. Annulla in qualsiasi momento su Google Play.</string>
+    <string name="paywall_restore">Ripristina acquisti</string>
+    <string name="paywall_redeem">Hai un codice?</string>
+    <string name="paywall_terms">Termini</string>
+    <string name="paywall_privacy">Privacy</string>
+    <string name="paywall_close">Chiudi</string>
+    <string name="paywall_unavailable">Impossibile caricare i piani. Controlla la connessione e riprova.</string>
+    <string name="paywall_retry">Riprova</string>
+    <string name="paywall_error_purchase">Non è stato possibile completare l\'acquisto. Riprova.</string>
+    <string name="paywall_restore_none">Nessun abbonamento attivo trovato per questo account Google.</string>
 </resources>

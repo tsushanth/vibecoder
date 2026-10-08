@@ -225,4 +225,35 @@
     <!-- Facebook SDK Configuration -->
     <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+
+    <!-- Paywall -->
+    <string name="paywall_title">Bouw zonder grenzen</string>
+    <string name="paywall_subtitle">Ontgrendel alles in VibeBuild</string>
+    <string name="paywall_feature_projects">Onbeperkt projecten</string>
+    <string name="paywall_feature_ai">AI-assistent</string>
+    <string name="paywall_feature_deploy">Cloud-deploy met één klik</string>
+    <string name="paywall_feature_templates">Alle sjablonen</string>
+    <string name="paywall_feature_storage">Cloudopslag</string>
+    <string name="paywall_plan_yearly">Jaarlijks</string>
+    <string name="paywall_plan_monthly">Maandelijks</string>
+    <string name="paywall_plan_weekly">Wekelijks</string>
+    <string name="paywall_plan_lifetime">Voor altijd</string>
+    <string name="paywall_price_per_year">%1$s / jaar</string>
+    <string name="paywall_price_per_month">%1$s / maand</string>
+    <string name="paywall_price_per_week">%1$s / week</string>
+    <string name="paywall_price_once">%1$s eenmalig</string>
+    <string name="paywall_badge_best_value">Beste deal</string>
+    <string name="paywall_trial_days">%1$d dagen gratis proberen</string>
+    <string name="paywall_cta_continue">Doorgaan</string>
+    <string name="paywall_cta_trial">Start gratis proefperiode</string>
+    <string name="paywall_renewal">Abonnementen worden automatisch verlengd tot je opzegt. Zeg op elk moment op in Google Play.</string>
+    <string name="paywall_restore">Aankopen herstellen</string>
+    <string name="paywall_redeem">Heb je een code?</string>
+    <string name="paywall_terms">Voorwaarden</string>
+    <string name="paywall_privacy">Privacy</string>
+    <string name="paywall_close">Sluiten</string>
+    <string name="paywall_unavailable">De abonnementen konden niet worden geladen. Controleer je verbinding en probeer het opnieuw.</string>
+    <string name="paywall_retry">Opnieuw proberen</string>
+    <string name="paywall_error_purchase">De aankoop kon niet worden voltooid. Probeer het opnieuw.</string>
+    <string name="paywall_restore_none">Er is geen actief abonnement gevonden voor dit Google-account.</string>
 </resources>

@@ -225,4 +225,35 @@
     <!-- Facebook SDK Configuration -->
     <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+
+    <!-- Paywall -->
+    <string name="paywall_title">Crie sem limites</string>
+    <string name="paywall_subtitle">Desbloqueie tudo no VibeBuild</string>
+    <string name="paywall_feature_projects">Projetos ilimitados</string>
+    <string name="paywall_feature_ai">Assistente de IA</string>
+    <string name="paywall_feature_deploy">Deploy na nuvem com um clique</string>
+    <string name="paywall_feature_templates">Todos os modelos</string>
+    <string name="paywall_feature_storage">Armazenamento na nuvem</string>
+    <string name="paywall_plan_yearly">Anual</string>
+    <string name="paywall_plan_monthly">Mensal</string>
+    <string name="paywall_plan_weekly">Semanal</string>
+    <string name="paywall_plan_lifetime">Vitalício</string>
+    <string name="paywall_price_per_year">%1$s / ano</string>
+    <string name="paywall_price_per_month">%1$s / mês</string>
+    <string name="paywall_price_per_week">%1$s / semana</string>
+    <string name="paywall_price_once">%1$s pagamento único</string>
+    <string name="paywall_badge_best_value">Melhor custo-benefício</string>
+    <string name="paywall_trial_days">Teste grátis de %1$d dias</string>
+    <string name="paywall_cta_continue">Continuar</string>
+    <string name="paywall_cta_trial">Começar teste grátis</string>
+    <string name="paywall_renewal">As assinaturas são renovadas automaticamente até serem canceladas. Cancele quando quiser no Google Play.</string>
+    <string name="paywall_restore">Restaurar compras</string>
+    <string name="paywall_redeem">Tem um código?</string>
+    <string name="paywall_terms">Termos</string>
+    <string name="paywall_privacy">Privacidade</string>
+    <string name="paywall_close">Fechar</string>
+    <string name="paywall_unavailable">Não foi possível carregar os planos. Verifique sua conexão e tente novamente.</string>
+    <string name="paywall_retry">Tentar novamente</string>
+    <string name="paywall_error_purchase">Não foi possível concluir a compra. Tente novamente.</string>
+    <string name="paywall_restore_none">Nenhuma assinatura ativa foi encontrada para esta conta Google.</string>
 </resources>

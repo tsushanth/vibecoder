@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.play.core.review.ReviewManagerFactory
 import com.kreativekoala.vibecoder.MainActivity
+import com.kreativekoala.vibecoder.ui.paywall.GenerationLimit
 import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.preview.LivePreviewScreen
 import com.kreativekoala.vibecoder.ui.theme.*
@@ -280,8 +281,7 @@ fun CreateScreen(
     Box(modifier = modifier.fillMaxSize()) {
         if (uiState.chatStage != ChatStage.Idle) {
             val showUpsell = remember(uiState.chatStage) {
-                !MainActivity.isPremiumUser(context) &&
-                    MainActivity.getGenerationCount(context) >= MainActivity.FREE_GENERATION_LIMIT - 1
+                GenerationLimit.showsUpsell(MainActivity.isPremiumUser(context), MainActivity.getGenerationCount(context))
             }
             BuildChatThread(
                 state = uiState,

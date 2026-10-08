@@ -225,4 +225,35 @@
     <!-- Facebook SDK Configuration -->
     <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+
+    <!-- Paywall -->
+    <string name="paywall_title">制限なしで作ろう</string>
+    <string name="paywall_subtitle">VibeBuildのすべてを解放</string>
+    <string name="paywall_feature_projects">無制限のプロジェクト</string>
+    <string name="paywall_feature_ai">AIアシスタント</string>
+    <string name="paywall_feature_deploy">ワンクリックでクラウド公開</string>
+    <string name="paywall_feature_templates">すべてのテンプレート</string>
+    <string name="paywall_feature_storage">クラウドストレージ</string>
+    <string name="paywall_plan_yearly">年額</string>
+    <string name="paywall_plan_monthly">月額</string>
+    <string name="paywall_plan_weekly">週額</string>
+    <string name="paywall_plan_lifetime">買い切り</string>
+    <string name="paywall_price_per_year">%1$s / 年</string>
+    <string name="paywall_price_per_month">%1$s / 月</string>
+    <string name="paywall_price_per_week">%1$s / 週</string>
+    <string name="paywall_price_once">%1$s(1回払い)</string>
+    <string name="paywall_badge_best_value">最もお得</string>
+    <string name="paywall_trial_days">%1$d日間無料トライアル</string>
+    <string name="paywall_cta_continue">続ける</string>
+    <string name="paywall_cta_trial">無料トライアルを開始</string>
+    <string name="paywall_renewal">サブスクリプションは解約するまで自動的に更新されます。Google Playでいつでも解約できます。</string>
+    <string name="paywall_restore">購入を復元</string>
+    <string name="paywall_redeem">コードをお持ちですか?</string>
+    <string name="paywall_terms">利用規約</string>
+    <string name="paywall_privacy">プライバシー</string>
+    <string name="paywall_close">閉じる</string>
+    <string name="paywall_unavailable">プランを読み込めませんでした。接続を確認してもう一度お試しください。</string>
+    <string name="paywall_retry">再試行</string>
+    <string name="paywall_error_purchase">購入を完了できませんでした。もう一度お試しください。</string>
+    <string name="paywall_restore_none">このGoogleアカウントに有効なサブスクリプションは見つかりませんでした。</string>
 </resources>

@@ -3,7 +3,6 @@ package com.kreativekoala.vibecoder.ui.account
 import android.app.Activity
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.kreativekoala.paywallkit.manager.PaywallManager
 import com.kreativekoala.ratingkit.RatingKit
 import com.kreativekoala.vibecoder.service.FacebookSDKHelper
 import com.kreativekoala.vibecoder.service.FirebaseAnalyticsHelper
@@ -156,13 +155,6 @@ class SubscriptionViewModel @Inject constructor(
                 if (pkg.product.subscriptionOptions?.freeTrial != null) {
                     FacebookSDKHelper.logTrialStarted(productId)
                 }
-                PaywallManager.trackEvent(
-                    appId = "vibebuild",
-                    placement = "subscription_screen",
-                    templateId = "default",
-                    event = "purchased",
-                    productId = productId
-                )
 
                 // Sync the new status to the backend
                 syncSubscriptionToBackend()
