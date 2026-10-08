@@ -1,101 +1,141 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useGenerationStore } from '@/stores/generationStore';
-import { api } from '@/lib/api';
-import { useState } from 'react';
 
-const PHASE_ORDER = ['generating', 'validating', 'fixing', 'polishing', 'verifying'];
+// The build pipeline's phases, in order, as the generation SSE `status` events name them.
+const PHASES = ['generating', 'validating', 'fixing', 'polishing', 'verifying'] as const;
+const PHASE_KEYS: Record<(typeof PHASES)[number], string> = {
+  generating: 'create.build.phase.generate',
+  validating: 'create.build.phase.validate',
+  fixing: 'create.build.phase.fix',
+  polishing: 'create.build.phase.polish',
+  verifying: 'create.build.phase.verify',
+};
 
-export function GenerationProgress() {
+/** Same rule as Android: match the phase name, else estimate from the overall percentage. */
+function phaseIndex(phase: string, percent: number): number {
+  const p = (phase || '').toLowerCase();
+  const idx = PHASES.findIndex((name) => p.includes(name.slice(0, 5)));
+  if (idx >= 0) return idx;
+  return Math.min(PHASES.length - 1, Math.max(0, Math.floor((percent / 100) * PHASES.length)));
+}
+
+function formatElapsed(seconds: number): string {
+  const s = Math.max(0, Math.floor(seconds));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+interface GenerationProgressProps {
+  /** Where the build is: running, finished, or stopped with an error. */
+  stage?: 'building' | 'ready' | 'failed';
+  startedAt?: number | null;
+  finishedAt?: number | null;
+  /** Recent distinct status messages from the build stream, oldest first. */
+  log?: string[];
+}
+
+/** The build's real steps, driven by the generation stream's status events (phase, message, detail, percent). */
+export function GenerationProgress({ stage = 'building', startedAt = null, finishedAt = null, log = [] }: GenerationProgressProps) {
   const t = useTranslations();
-  const { phase, message, detail, estimatedSecondsRemaining, systemBusy, error } =
-    useGenerationStore();
-  const [upgrading, setUpgrading] = useState(false);
+  const { phase, detail, message, progressPercent } = useGenerationStore();
+  const building = stage === 'building';
+  const [now, setNow] = useState(() => Date.now());
 
-  const handleUpgrade = async () => {
-    setUpgrading(true);
-    try {
-      const data = await api.post<{ url: string }>('/api/subscriptions/create-checkout', {});
-      if (data.url) window.location.href = data.url;
-    } catch {
-      setUpgrading(false);
-    }
-  };
+  useEffect(() => {
+    if (!building) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [building]);
 
-  if (systemBusy && error) {
+  const current = phaseIndex(phase, progressPercent);
+  const elapsed = startedAt ? ((finishedAt ?? now) - startedAt) / 1000 : 0;
+  const title =
+    stage === 'ready' ? t('create.build.complete') : stage === 'failed' ? t('create.build.failed') : t('create.build.building');
+  const recent = log.slice(-4);
+  const pct = Math.min(100, Math.max(0, Math.round(progressPercent || 0)));
+
+  // Once the app is built the steps are noise: keep one line with the time it took.
+  if (stage === 'ready') {
     return (
-      <div className="animate-fade-in rounded-2xl border border-border bg-card px-6 py-10 text-center">
-        <div className="mb-4 text-4xl">🔥</div>
-        <h2 className="mb-2 text-lg font-semibold">High demand right now</h2>
-        <p className="mx-auto mb-6 max-w-sm text-sm text-muted">
-          Our builders are at full capacity. Pro users get priority access and skip the queue.
+      <div className="flex items-center justify-between gap-3">
+        <p className="flex items-center gap-2 font-medium text-foreground">
+          <span className="flex h-[19px] w-[19px] shrink-0 items-center justify-center rounded-full bg-success/15 text-success" aria-hidden>
+            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </span>
+          {title}
         </p>
-        <button
-          onClick={handleUpgrade}
-          disabled={upgrading}
-          className="mb-3 rounded-full bg-accent px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-60"
-        >
-          {upgrading ? 'Redirecting...' : '⚡ Upgrade to Pro — Build Instantly'}
-        </button>
-        <button
-          onClick={() => window.location.reload()}
-          className="block w-full text-xs text-muted transition-colors hover:text-foreground"
-        >
-          Try again
-        </button>
+        {startedAt && <span className="text-sm tabular-nums text-muted">{formatElapsed(elapsed)}</span>}
       </div>
     );
   }
 
-  const PHASE_LABELS: Record<string, string> = {
-    generating: t('generation.phases.generating'),
-    validating: t('generation.phases.validating'),
-    fixing: t('generation.phases.fixing'),
-    polishing: t('generation.phases.polishing'),
-    verifying: t('generation.phases.verifying'),
-  };
-
-  const currentIndex = PHASE_ORDER.indexOf(phase);
-
   return (
-    <div className="animate-fade-in rounded-2xl border border-border bg-card p-5">
-      <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm font-semibold">{t('generation.buildingYourApp')}</p>
-        {estimatedSecondsRemaining != null && estimatedSecondsRemaining > 0 && (
-          <span className="font-mono text-xs text-subtle">
-            {t('generation.secondsRemaining', { seconds: Math.ceil(estimatedSecondsRemaining) })}
-          </span>
-        )}
+    <div aria-live="polite">
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="font-medium text-foreground">{title}</p>
+        {startedAt && <span className="text-sm tabular-nums text-muted">{formatElapsed(elapsed)}</span>}
       </div>
 
-      <ul className="space-y-2.5">
-        {PHASE_ORDER.map((p, i) => {
-          const done = currentIndex >= 0 && i < currentIndex;
-          const active = i === currentIndex || (currentIndex === -1 && i === 0);
+      <ol className="mt-3 space-y-0">
+        {PHASES.map((p, i) => {
+          const done = i < current;
+          const active = building && i === current;
+          const stopped = stage === 'failed' && i === current;
           return (
-            <li key={p} className="flex items-center gap-2.5 text-sm">
-              {done ? (
-                <svg className="h-4 w-4 shrink-0 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              ) : active ? (
-                <div className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-accent border-t-transparent" />
-              ) : (
-                <div className="h-4 w-4 shrink-0 rounded-full border-2 border-border" />
+            <li key={p} className="relative flex items-center gap-3 py-1.5">
+              {i < PHASES.length - 1 && (
+                <span
+                  className={`absolute left-[9px] top-[26px] h-[calc(100%-16px)] w-px ${done ? 'bg-success/50' : 'bg-border'}`}
+                  aria-hidden
+                />
               )}
-              <span className={done ? 'text-foreground' : active ? 'font-medium text-foreground' : 'text-subtle'}>
-                {PHASE_LABELS[p]}
+              {done ? (
+                <span className="flex h-[19px] w-[19px] shrink-0 items-center justify-center rounded-full bg-success/15 text-success">
+                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </span>
+              ) : active ? (
+                <span className="h-[19px] w-[19px] shrink-0 animate-spin rounded-full border-2 border-accent border-t-transparent" aria-hidden />
+              ) : stopped ? (
+                <span className="flex h-[19px] w-[19px] shrink-0 items-center justify-center rounded-full bg-danger/15 text-danger" aria-hidden>
+                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </span>
+              ) : (
+                <span className="h-[19px] w-[19px] shrink-0 rounded-full border-2 border-border" aria-hidden />
+              )}
+              <span className={done || active ? (active ? 'font-medium text-foreground' : 'text-foreground') : 'text-muted'}>
+                {t(PHASE_KEYS[p])}
               </span>
             </li>
           );
         })}
-      </ul>
+      </ol>
 
-      <div className="mt-4 border-t border-border pt-3">
-        <p className="text-sm text-foreground">{message || t('generation.connectingServer')}</p>
-        {detail && <p className="mt-0.5 text-xs text-muted">{detail}</p>}
-      </div>
+      {building && (
+        <div className="mt-4">
+          <p className="text-sm text-foreground">{detail || message || t('create.build.working')}</p>
+          <div className="mt-2 h-1 overflow-hidden rounded-full bg-surface" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+            <div className="h-full rounded-full bg-accent transition-[width] duration-500 ease-out" style={{ width: `${Math.max(pct, 3)}%` }} />
+          </div>
+        </div>
+      )}
+
+      {recent.length > 0 && (
+        <ul className="mt-3 space-y-0.5 border-l border-border pl-3">
+          {recent.map((line, i) => (
+            <li key={`${i}-${line}`} className="line-clamp-2 text-sm text-muted">
+              {line}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
