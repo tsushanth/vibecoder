@@ -1,0 +1,1 @@
+New: manage the API keys your apps need right from your phone, a simpler upgrade screen, and a clearer start screen. Plus fixes.
