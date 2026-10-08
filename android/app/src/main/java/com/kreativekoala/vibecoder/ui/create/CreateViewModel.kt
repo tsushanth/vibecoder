@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.kreativekoala.vibecoder.MainActivity
+import com.kreativekoala.vibecoder.ui.paywall.GenerationLimit
 import androidx.lifecycle.viewModelScope
 import com.kreativekoala.vibecoder.data.model.BuildPlan
 import com.kreativekoala.vibecoder.data.model.ProgressEvent
@@ -396,8 +397,7 @@ class CreateViewModel @Inject constructor(
         // Hard paywall gate — check at the *action*, not just app launch. Previously
         // the limit was only checked when AppContentWithPaywallGate first mounted,
         // so a user could keep building indefinitely once their session started.
-        if (!MainActivity.isPremiumUser(appContext) &&
-            MainActivity.getGenerationCount(appContext) >= MainActivity.FREE_GENERATION_LIMIT) {
+        if (GenerationLimit.isOverLimit(MainActivity.isPremiumUser(appContext), MainActivity.getGenerationCount(appContext))) {
             _uiState.update { it.copy(showHardPaywall = true) }
             return
         }
