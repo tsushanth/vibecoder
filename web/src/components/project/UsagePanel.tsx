@@ -36,9 +36,10 @@ const FILL: Record<Meter['state'], string> = { ok: 'bg-accent', warn: 'bg-warnin
 // from the server; nothing here shows an end user's data.
 export function UsagePanel({ projectId, reloadKey }: Props) {
   const t = useTranslations();
+  const ta = useTranslations('apps');
   const client = useMemo(() => createUsageClient({ baseUrl: API_URL, withAuth }), []);
   const [load, setLoad] = useState<Load>({ state: 'loading' });
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<boolean | null>(null); // null: open by itself when a limit is reached
 
   const refresh = useCallback(async () => {
     const r = await client.get(projectId, USAGE_DAYS);
@@ -54,14 +55,17 @@ export function UsagePanel({ projectId, reloadKey }: Props) {
 
   if (load.state === 'error') {
     return (
-      <div role="alert" className="flex items-center justify-between gap-3 px-3 py-2 bg-warning/10 border-b border-warning/20 text-xs">
-        <span className="text-foreground">{t(load.errorKey)}</span>
-        {load.errorKey !== 'usage.error.signIn' && load.errorKey !== 'usage.error.forbidden' && (
-          <button onClick={() => { setLoad({ state: 'loading' }); void refresh(); }} className="shrink-0 px-3 py-1.5 font-medium bg-surface hover:bg-surface-hover border border-border rounded-lg transition">
-            {t('usage.retry')}
-          </button>
-        )}
-      </div>
+      <section className="border-t border-border py-6">
+        <h2 className="font-display text-lg font-semibold">{ta('usageTitle')}</h2>
+        <div role="alert" className="mt-1 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-warning">{t(load.errorKey)}</p>
+          {load.errorKey !== 'usage.error.signIn' && load.errorKey !== 'usage.error.forbidden' && (
+            <button onClick={() => { setLoad({ state: 'loading' }); void refresh(); }} className="h-10 shrink-0 rounded-lg border border-border px-4 text-sm font-medium transition hover:bg-surface">
+              {t('usage.retry')}
+            </button>
+          )}
+        </div>
+      </section>
     );
   }
 
@@ -81,43 +85,47 @@ export function UsagePanel({ projectId, reloadKey }: Props) {
       : totalCalls > 0
         ? t('usage.summary', { calls: formatCount(totalCalls), days: data.days.length || USAGE_DAYS })
         : t('usage.summaryNone', { days: data.days.length || USAGE_DAYS });
-  const tone = status.state === 'full' ? 'bg-danger/10 border-danger/20' : status.state === 'warn' ? 'bg-warning/10 border-warning/20' : 'bg-card border-border';
+  const tone = status.state === 'full' ? 'text-danger' : status.state === 'warn' ? 'text-warning' : 'text-muted';
+  const isOpen = open ?? status.state === 'full';
 
   return (
-    <div className={`border-b ${tone}`}>
-      <div className="flex items-center justify-between gap-3 px-3 py-2 text-xs">
-        <span className="text-foreground min-w-0" role={status.state === 'full' ? 'alert' : undefined}>
-          {headline}
-          {status.state === 'full' && (
-            <>
-              {' '}
-              <a href="/settings" className="underline font-medium">{t('usage.upgrade')}</a>
-            </>
-          )}
-        </span>
+    <section className="border-t border-border py-6" aria-labelledby="usage-title">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h2 id="usage-title" className="font-display text-lg font-semibold">{ta('usageTitle')}</h2>
+          <p className={`mt-0.5 ${tone}`} role={status.state === 'full' ? 'alert' : undefined}>
+            {headline}
+            {status.state === 'full' && (
+              <>
+                {' '}
+                <a href="/settings" className="font-medium text-accent-hover underline">{t('usage.upgrade')}</a>
+              </>
+            )}
+          </p>
+        </div>
         <button
-          onClick={() => setOpen((o) => !o)}
-          aria-expanded={open}
-          className="shrink-0 px-3 py-1.5 font-medium bg-surface hover:bg-surface-hover border border-border rounded-lg transition"
+          onClick={() => setOpen(!isOpen)}
+          aria-expanded={isOpen}
+          className="-mr-3 h-10 shrink-0 rounded-lg px-3 text-sm font-medium text-accent-hover transition hover:bg-surface"
         >
-          {open ? t('usage.hide') : t('usage.manage')}
+          {isOpen ? t('usage.hide') : t('usage.manage')}
         </button>
       </div>
 
-      {open && (
-        <div className="px-3 pb-3 space-y-3 max-h-[50vh] overflow-y-auto">
+      {isOpen && (
+        <div className="mt-4 space-y-6">
           {series.length > 0 && (
-            <section aria-label={t('usage.activityTitle', { days: data.days.length })} className="space-y-2">
-              <h3 className="text-[10px] font-semibold text-subtle">{t('usage.activityTitle', { days: data.days.length })}</h3>
-              <ul className="space-y-2">
+            <section aria-label={t('usage.activityTitle', { days: data.days.length })}>
+              <h3 className="text-sm font-medium text-muted">{t('usage.activityTitle', { days: data.days.length })}</h3>
+              <ul className="mt-1 divide-y divide-border">
                 {series.map((s) => (
-                  <li key={s.key} className="bg-surface rounded-lg p-3 flex items-end justify-between gap-3">
+                  <li key={s.key} className="flex items-end justify-between gap-4 py-3">
                     <div className="min-w-0">
-                      <p className="text-xs font-medium truncate">{t(`usage.feature.${s.key}`)}</p>
-                      <p className="text-[10px] text-subtle">{t('usage.requests', { count: formatCount(s.total) })}</p>
-                      {s.errors > 0 && <p className="text-[10px] text-warning">{t('usage.errors', { count: formatCount(s.errors) })}</p>}
+                      <p className="truncate font-medium">{t(`usage.feature.${s.key}`)}</p>
+                      <p className="text-sm text-muted">{t('usage.requests', { count: formatCount(s.total) })}</p>
+                      {s.errors > 0 && <p className="text-sm text-warning">{t('usage.errors', { count: formatCount(s.errors) })}</p>}
                     </div>
-                    <div className="flex items-end gap-1 h-8 shrink-0" role="img" aria-label={s.days.map((d, i) => t('usage.dayBar', { day: d, count: s.perDay[i] })).join(', ')}>
+                    <div className="flex h-9 shrink-0 items-end gap-1" role="img" aria-label={s.days.map((d, i) => t('usage.dayBar', { day: d, count: s.perDay[i] })).join(', ')}>
                       {s.perDay.map((v, i) => (
                         <span key={s.days[i]} className="w-2 rounded-sm bg-accent/70" style={{ height: `${barPercent(v, s.max)}%`, minHeight: v > 0 ? 2 : 0 }} title={t('usage.dayBar', { day: s.days[i], count: v })} />
                       ))}
@@ -129,16 +137,16 @@ export function UsagePanel({ projectId, reloadKey }: Props) {
           )}
 
           {meters.length > 0 && (
-            <section aria-label={t('usage.capsTitle')} className="space-y-2">
-              <h3 className="text-[10px] font-semibold text-subtle">{t('usage.capsTitle')}</h3>
-              <ul className="space-y-2">
+            <section aria-label={t('usage.capsTitle')}>
+              <h3 className="text-sm font-medium text-muted">{t('usage.capsTitle')}</h3>
+              <ul className="mt-1 divide-y divide-border">
                 {meters.map((m) => {
                   const name = t(`usage.meter.${m.key}.name`);
                   return (
-                    <li key={m.key} className="bg-surface rounded-lg p-3 space-y-1.5">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-xs font-medium truncate">{name}</p>
-                        <p className="text-[10px] text-subtle shrink-0">
+                    <li key={m.key} className="space-y-2 py-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="truncate font-medium">{name}</p>
+                        <p className="shrink-0 text-sm text-muted tabular-nums">
                           {m.used === null ? t('usage.meterUnknown') : t('usage.meterOf', { used: formatMeterValue(m.unit, m.used), cap: formatMeterValue(m.unit, m.cap) })}
                         </p>
                       </div>
@@ -148,13 +156,13 @@ export function UsagePanel({ projectId, reloadKey }: Props) {
                         aria-valuemin={0}
                         aria-valuemax={100}
                         aria-valuenow={m.percent}
-                        className="h-1.5 rounded-full bg-card overflow-hidden"
+                        className="h-1.5 overflow-hidden rounded-full bg-surface"
                       >
                         <div className={`h-full rounded-full ${FILL[m.state]}`} style={{ width: `${m.percent}%` }} />
                       </div>
-                      {m.state === 'warn' && <p className="text-[10px] text-warning">{t('usage.stateWarn')}</p>}
+                      {m.state === 'warn' && <p className="text-sm text-warning">{t('usage.stateWarn')}</p>}
                       {m.state === 'full' && (
-                        <p role="alert" className="text-[10px] text-danger">
+                        <p role="alert" className="text-sm text-danger">
                           {t(`usage.meter.${m.key}.full`)} {t('usage.contact')}
                         </p>
                       )}
@@ -162,11 +170,11 @@ export function UsagePanel({ projectId, reloadKey }: Props) {
                   );
                 })}
               </ul>
-              <p className="text-[10px] text-subtle">{t('usage.resetsDaily')}</p>
+              <p className="mt-1 text-sm text-muted">{t('usage.resetsDaily')}</p>
             </section>
           )}
         </div>
       )}
-    </div>
+    </section>
   );
 }

@@ -1,0 +1,102 @@
+{
+  "create": {
+    "hero": {
+      "title": "Que voulez-vous créer ?",
+      "help": "Décrivez ce que votre app doit faire. Vous pourrez l'essayer, la modifier et la publier."
+    },
+    "composer": {
+      "placeholder": "Crée une app météo qui affiche les prévisions de ma ville",
+      "build": "Créer",
+      "attach": "Joindre une image de référence",
+      "removeImage": "Retirer l'image",
+      "imageAttached": "Image de référence jointe",
+      "imageHint": "Sert de guide visuel pour le design",
+      "voice": "Saisie vocale",
+      "stopVoice": "Arrêter la saisie vocale",
+      "count": "{count} sur {max} caractères",
+      "offTopic": "Cela ressemble à une question ou à un sujet. Décrivez ce que l'app doit faire, par exemple un suivi de trades qui affiche votre taux de réussite."
+    },
+    "ideas": {
+      "title": "Essayez une idée",
+      "more": "Proposer d'autres idées",
+      "loading": "Recherche d'idées"
+    },
+    "thread": {
+      "label": "Conversation de création"
+    },
+    "plan": {
+      "thinking": "Je réfléchis à votre idée",
+      "title": "Voici mon plan",
+      "style": "Style : {style}",
+      "build": "Créer ceci",
+      "edit": "Modifier la description"
+    },
+    "build": {
+      "building": "Création de votre app",
+      "complete": "Création terminée",
+      "failed": "Création arrêtée",
+      "working": "Travail en cours",
+      "phase": {
+        "generate": "Générer",
+        "validate": "Valider",
+        "fix": "Corriger",
+        "polish": "Peaufiner",
+        "verify": "Vérifier"
+      },
+      "cancel": "Annuler la création",
+      "endedEarly": "La création s'est arrêtée avant la fin. Modifiez la description et réessayez.",
+      "failedGeneric": "La création n'a pas abouti. Modifiez la description et réessayez.",
+      "editRetry": "Modifier et réessayer",
+      "newApp": "Nouvelle app",
+      "busyTitle": "Nos serveurs sont saturés",
+      "busyBody": "Réessayez dans quelques minutes. Les créations Pro passent en priorité.",
+      "tryAgain": "Réessayer",
+      "seePro": "Voir Pro"
+    },
+    "ready": {
+      "title": "Votre app est prête",
+      "saving": "Enregistrement dans vos apps",
+      "saved": "Enregistrée dans vos apps. Ouvrez l'aperçu en direct pour l'essayer.",
+      "savedNoPreview": "Enregistrée dans vos apps.",
+      "saveFailed": "Non enregistrée : {error}. Publier et ajuster demandent une app enregistrée, commencez une nouvelle app pour réessayer.",
+      "saveFailedGeneric": "Échec de l'enregistrement",
+      "published": "Publiée sur",
+      "openPreview": "Ouvrir l'aperçu en direct",
+      "publish": "Publier",
+      "managePublish": "Gérer la publication",
+      "tweak": "Ajuster",
+      "openApp": "Ouvrir la page de l'app",
+      "newApp": "Commencer une nouvelle app"
+    },
+    "feedback": {
+      "question": "Qu'en pensez-vous ?",
+      "good": "Bon résultat",
+      "bad": "À améliorer",
+      "thanks": "Merci pour votre avis"
+    },
+    "tweak": {
+      "placeholder": "Décrivez une modification",
+      "waitForSave": "Les ajustements s'ouvrent une fois l'app enregistrée",
+      "send": "Envoyer la modification",
+      "working": "Application des modifications",
+      "done": "C'est fait. L'aperçu est à jour.",
+      "doneVersion": "C'est fait. Enregistrée comme version {version}.",
+      "failed": "Cette modification n'a pas abouti : {error}",
+      "failedGeneric": "Cette modification n'a pas abouti. Essayez de la décrire autrement.",
+      "openPreview": "Ouvrir l'aperçu"
+    },
+    "preview": {
+      "title": "Aperçu en direct",
+      "close": "Fermer l'aperçu",
+      "reload": "Recharger l'aperçu",
+      "device": "Taille de l'aperçu",
+      "desktop": "Ordinateur",
+      "tablet": "Tablette",
+      "phone": "Téléphone",
+      "empty": "Votre app s'affichera ici une fois créée"
+    },
+    "versions": {
+      "untitled": "Version"
+    }
+  }
+}

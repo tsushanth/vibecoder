@@ -1,0 +1,102 @@
+{
+  "create": {
+    "hero": {
+      "title": "你想做什么？",
+      "help": "描述你的应用要做什么。你可以试用、修改并发布它。"
+    },
+    "composer": {
+      "placeholder": "做一个显示我所在城市天气预报的天气应用",
+      "build": "开始构建",
+      "attach": "附加参考图片",
+      "removeImage": "移除图片",
+      "imageAttached": "已附加参考图片",
+      "imageHint": "用作设计的视觉参考",
+      "voice": "语音输入",
+      "stopVoice": "停止语音输入",
+      "count": "{count} / {max} 个字符",
+      "offTopic": "这看起来像一个问题或话题。请描述应用要做什么，例如记录交易并显示胜率的追踪器。"
+    },
+    "ideas": {
+      "title": "试试这些想法",
+      "more": "换一批想法",
+      "loading": "正在寻找想法"
+    },
+    "thread": {
+      "label": "构建对话"
+    },
+    "plan": {
+      "thinking": "正在思考你的想法",
+      "title": "这是我的计划",
+      "style": "风格：{style}",
+      "build": "按此构建",
+      "edit": "编辑描述"
+    },
+    "build": {
+      "building": "正在构建你的应用",
+      "complete": "构建完成",
+      "failed": "构建已停止",
+      "working": "处理中",
+      "phase": {
+        "generate": "生成",
+        "validate": "校验",
+        "fix": "修复",
+        "polish": "润色",
+        "verify": "验证"
+      },
+      "cancel": "取消构建",
+      "endedEarly": "构建在完成前停止了。请编辑描述后重试。",
+      "failedGeneric": "构建未完成。请编辑描述后重试。",
+      "editRetry": "编辑并重试",
+      "newApp": "新应用",
+      "busyTitle": "构建服务器已满负荷",
+      "busyBody": "请几分钟后再试。Pro 构建优先排队。",
+      "tryAgain": "重试",
+      "seePro": "了解 Pro"
+    },
+    "ready": {
+      "title": "你的应用已就绪",
+      "saving": "正在保存到你的应用",
+      "saved": "已保存到你的应用。打开实时预览试用。",
+      "savedNoPreview": "已保存到你的应用。",
+      "saveFailed": "未保存：{error}。发布和调整需要已保存的应用，请新建一个应用重试。",
+      "saveFailedGeneric": "保存失败",
+      "published": "已发布到",
+      "openPreview": "打开实时预览",
+      "publish": "发布",
+      "managePublish": "管理发布",
+      "tweak": "调整",
+      "openApp": "打开应用页面",
+      "newApp": "新建一个应用"
+    },
+    "feedback": {
+      "question": "效果如何？",
+      "good": "效果不错",
+      "bad": "需要改进",
+      "thanks": "感谢你的反馈"
+    },
+    "tweak": {
+      "placeholder": "描述一个修改",
+      "waitForSave": "应用保存后即可调整",
+      "send": "发送修改",
+      "working": "正在应用修改",
+      "done": "完成。预览已更新。",
+      "doneVersion": "完成。已保存为版本 {version}。",
+      "failed": "修改未成功：{error}",
+      "failedGeneric": "修改未成功。请换一种说法试试。",
+      "openPreview": "打开预览"
+    },
+    "preview": {
+      "title": "实时预览",
+      "close": "关闭预览",
+      "reload": "重新加载预览",
+      "device": "预览尺寸",
+      "desktop": "桌面",
+      "tablet": "平板",
+      "phone": "手机",
+      "empty": "构建完成后应用会显示在这里"
+    },
+    "versions": {
+      "untitled": "版本"
+    }
+  }
+}

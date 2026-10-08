@@ -353,5 +353,12 @@
       "unknown": "Something went wrong loading usage."
     },
     "upgrade": "Upgrade your plan to raise this limit."
+  },
+  "nav": {
+    "label": "メイン",
+    "apps": "アプリ",
+    "create": "作成",
+    "explore": "探索",
+    "account": "アカウント"
   }
 }
