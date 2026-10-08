@@ -259,4 +259,34 @@
     <string name="app_keys_copy_url">URL kopieren</string>
     <string name="app_keys_copied">Kopiert</string>
 
+    <!-- Paywall -->
+    <string name="paywall_title">Bauen ohne Grenzen</string>
+    <string name="paywall_subtitle">Alles in VibeBuild freischalten</string>
+    <string name="paywall_feature_projects">Unbegrenzte Projekte</string>
+    <string name="paywall_feature_ai">KI-Assistent</string>
+    <string name="paywall_feature_deploy">Cloud-Deployment mit einem Klick</string>
+    <string name="paywall_feature_templates">Alle Vorlagen</string>
+    <string name="paywall_feature_storage">Cloud-Speicher</string>
+    <string name="paywall_plan_yearly">Jährlich</string>
+    <string name="paywall_plan_monthly">Monatlich</string>
+    <string name="paywall_plan_weekly">Wöchentlich</string>
+    <string name="paywall_plan_lifetime">Lebenslang</string>
+    <string name="paywall_price_per_year">%1$s / Jahr</string>
+    <string name="paywall_price_per_month">%1$s / Monat</string>
+    <string name="paywall_price_per_week">%1$s / Woche</string>
+    <string name="paywall_price_once">%1$s einmalig</string>
+    <string name="paywall_badge_best_value">Bestes Angebot</string>
+    <string name="paywall_trial_days">%1$d Tage kostenlos testen</string>
+    <string name="paywall_cta_continue">Weiter</string>
+    <string name="paywall_cta_trial">Gratis testen</string>
+    <string name="paywall_renewal">Abos verlängern sich automatisch, bis sie gekündigt werden. Jederzeit in Google Play kündbar.</string>
+    <string name="paywall_restore">Käufe wiederherstellen</string>
+    <string name="paywall_redeem">Code vorhanden?</string>
+    <string name="paywall_terms">Bedingungen</string>
+    <string name="paywall_privacy">Datenschutz</string>
+    <string name="paywall_close">Schließen</string>
+    <string name="paywall_unavailable">Die Tarife konnten nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.</string>
+    <string name="paywall_retry">Erneut versuchen</string>
+    <string name="paywall_error_purchase">Der Kauf konnte nicht abgeschlossen werden. Bitte versuche es erneut.</string>
+    <string name="paywall_restore_none">Für dieses Google-Konto wurde kein aktives Abo gefunden.</string>
 </resources>

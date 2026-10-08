@@ -259,4 +259,34 @@
     <string name="app_keys_copy_url">Kopiuj URL</string>
     <string name="app_keys_copied">Skopiowano</string>
 
+    <!-- Paywall -->
+    <string name="paywall_title">Twórz bez ograniczeń</string>
+    <string name="paywall_subtitle">Odblokuj wszystko w VibeBuild</string>
+    <string name="paywall_feature_projects">Nieograniczona liczba projektów</string>
+    <string name="paywall_feature_ai">Asystent AI</string>
+    <string name="paywall_feature_deploy">Wdrażanie w chmurze jednym kliknięciem</string>
+    <string name="paywall_feature_templates">Wszystkie szablony</string>
+    <string name="paywall_feature_storage">Pamięć w chmurze</string>
+    <string name="paywall_plan_yearly">Rocznie</string>
+    <string name="paywall_plan_monthly">Miesięcznie</string>
+    <string name="paywall_plan_weekly">Tygodniowo</string>
+    <string name="paywall_plan_lifetime">Na zawsze</string>
+    <string name="paywall_price_per_year">%1$s / rok</string>
+    <string name="paywall_price_per_month">%1$s / mies.</string>
+    <string name="paywall_price_per_week">%1$s / tydz.</string>
+    <string name="paywall_price_once">%1$s jednorazowo</string>
+    <string name="paywall_badge_best_value">Najlepsza oferta</string>
+    <string name="paywall_trial_days">%1$d dni bezpłatnego okresu próbnego</string>
+    <string name="paywall_cta_continue">Dalej</string>
+    <string name="paywall_cta_trial">Rozpocznij okres próbny</string>
+    <string name="paywall_renewal">Subskrypcje odnawiają się automatycznie do momentu anulowania. Anuluj w dowolnej chwili w Google Play.</string>
+    <string name="paywall_restore">Przywróć zakupy</string>
+    <string name="paywall_redeem">Masz kod?</string>
+    <string name="paywall_terms">Regulamin</string>
+    <string name="paywall_privacy">Prywatność</string>
+    <string name="paywall_close">Zamknij</string>
+    <string name="paywall_unavailable">Nie udało się wczytać planów. Sprawdź połączenie i spróbuj ponownie.</string>
+    <string name="paywall_retry">Spróbuj ponownie</string>
+    <string name="paywall_error_purchase">Nie udało się dokończyć zakupu. Spróbuj ponownie.</string>
+    <string name="paywall_restore_none">Nie znaleziono aktywnej subskrypcji dla tego konta Google.</string>
 </resources>

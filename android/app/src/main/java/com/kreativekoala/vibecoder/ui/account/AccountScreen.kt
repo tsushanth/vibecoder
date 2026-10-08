@@ -32,9 +32,6 @@ import com.kreativekoala.vibecoder.ui.components.SettingsRow
 import com.kreativekoala.vibecoder.ui.theme.*
 import com.kreativekoala.crosspromokit.models.AppId
 import com.kreativekoala.crosspromokit.view.CrossPromoSection
-import com.kreativekoala.paywallkit.models.PaywallFeature
-import com.kreativekoala.paywallkit.models.PaywallTheme
-import com.kreativekoala.paywallkit.view.PaywallPreview
 
 @Composable
 fun AccountScreen(
@@ -46,8 +43,6 @@ fun AccountScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showSignOutDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
-    var tapCount by remember { mutableIntStateOf(0) }
-    var showPaywallPreview by remember { mutableStateOf(false) }
 
     val supportedLanguages = listOf(
         "en" to R.string.language_english,
@@ -64,22 +59,6 @@ fun AccountScreen(
 
     val currentLocale = AppCompatDelegate.getApplicationLocales().toLanguageTags().ifEmpty { "en" }
 
-    if (showPaywallPreview) {
-        PaywallPreview(
-            appId = "vibebuild",
-            appName = "VibeBuild",
-            features = listOf(
-                PaywallFeature("\uD83C\uDFA8", "Unlimited Projects"),
-                PaywallFeature("\uD83E\uDD16", "AI Assistant"),
-                PaywallFeature("\uD83D\uDE80", "Cloud Deploy"),
-                PaywallFeature("\uD83D\uDCF1", "All Templates"),
-                PaywallFeature("\uD83D\uDCBE", "Cloud Storage")
-            ),
-            theme = PaywallTheme(accent = VibePurple, accent2 = Color(0xFF9C27B0)),
-            onDone = { showPaywallPreview = false }
-        )
-        return
-    }
 
     if (showLanguageDialog) {
         AlertDialog(
@@ -333,19 +312,8 @@ fun AccountScreen(
                     icon = Icons.Default.Info,
                     title = stringResource(R.string.account_settings_about),
                     subtitle = stringResource(R.string.account_settings_version),
-                    onClick = { tapCount++ }
+                    onClick = {}
                 )
-                if (tapCount >= 5) {
-                    Button(
-                        onClick = { showPaywallPreview = true },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = VibePurple)
-                    ) {
-                        Text("Preview Paywalls")
-                    }
-                }
             }
         }
 

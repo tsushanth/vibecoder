@@ -259,4 +259,34 @@
     <string name="app_keys_copy_url">Kopyahin ang URL</string>
     <string name="app_keys_copied">Nakopya</string>
 
+    <!-- Paywall -->
+    <string name="paywall_title">Bumuo nang walang limitasyon</string>
+    <string name="paywall_subtitle">I-unlock ang lahat sa VibeBuild</string>
+    <string name="paywall_feature_projects">Walang limitasyong proyekto</string>
+    <string name="paywall_feature_ai">AI assistant</string>
+    <string name="paywall_feature_deploy">Cloud deploy sa isang tap</string>
+    <string name="paywall_feature_templates">Lahat ng template</string>
+    <string name="paywall_feature_storage">Cloud storage</string>
+    <string name="paywall_plan_yearly">Taunan</string>
+    <string name="paywall_plan_monthly">Buwanan</string>
+    <string name="paywall_plan_weekly">Lingguhan</string>
+    <string name="paywall_plan_lifetime">Panghabambuhay</string>
+    <string name="paywall_price_per_year">%1$s / taon</string>
+    <string name="paywall_price_per_month">%1$s / buwan</string>
+    <string name="paywall_price_per_week">%1$s / linggo</string>
+    <string name="paywall_price_once">%1$s isang beses</string>
+    <string name="paywall_badge_best_value">Pinakamura</string>
+    <string name="paywall_trial_days">%1$d-araw na libreng trial</string>
+    <string name="paywall_cta_continue">Magpatuloy</string>
+    <string name="paywall_cta_trial">Simulan ang libreng trial</string>
+    <string name="paywall_renewal">Awtomatikong nagre-renew ang mga subscription hanggang makansela. Magkansela anumang oras sa Google Play.</string>
+    <string name="paywall_restore">Ibalik ang mga binili</string>
+    <string name="paywall_redeem">May code ka ba?</string>
+    <string name="paywall_terms">Mga Tuntunin</string>
+    <string name="paywall_privacy">Privacy</string>
+    <string name="paywall_close">Isara</string>
+    <string name="paywall_unavailable">Hindi ma-load ang mga plano. Suriin ang koneksyon mo at subukan ulit.</string>
+    <string name="paywall_retry">Subukan ulit</string>
+    <string name="paywall_error_purchase">Hindi makumpleto ang pagbili. Pakisubukan ulit.</string>
+    <string name="paywall_restore_none">Walang aktibong subscription na nahanap para sa Google account na ito.</string>
 </resources>

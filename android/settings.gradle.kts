@@ -17,8 +17,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "VibeBuild"
 include(":app")
-include(":paywallkit")
-project(":paywallkit").projectDir = file("/Users/sushanthtiruvaipati/Documents/GitHub/PaywallKit-Android/paywallkit")
 include(":ratingkit")
 project(":ratingkit").projectDir = file("/Users/sushanthtiruvaipati/Documents/GitHub/RatingKit-Android/ratingkit")
 
