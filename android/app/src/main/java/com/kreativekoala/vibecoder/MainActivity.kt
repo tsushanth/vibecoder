@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.material3.CircularProgressIndicator
@@ -24,7 +25,11 @@ import com.kreativekoala.ratingkit.RatingKit
 import com.kreativekoala.vibecoder.service.FacebookSDKHelper
 import com.kreativekoala.vibecoder.service.TikTokHelper
 import com.kreativekoala.vibecoder.navigation.VibeBuildNavGraph
+import com.kreativekoala.vibecoder.ui.paywall.GenerationLimit
 import com.kreativekoala.vibecoder.ui.paywall.PaywallHost
+import com.kreativekoala.vibecoder.data.repository.AuthRepository
+import com.kreativekoala.vibecoder.data.repository.ProjectRepository
+import javax.inject.Inject
 import com.kreativekoala.vibecoder.ui.theme.VibePurple
 import com.kreativekoala.vibecoder.ui.theme.VibeBuildTheme
 import com.revenuecat.purchases.CustomerInfo
@@ -40,12 +45,17 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
+    @Inject lateinit var projectRepository: ProjectRepository
+    @Inject lateinit var authRepository: AuthRepository
+
     companion object {
         private const val TAG = "MainActivity"
         private const val PREFS_NAME = "vibebuild_paywall_prefs"
         private const val KEY_GENERATION_COUNT = "generation_count"
-        const val FREE_GENERATION_LIMIT = 30
+        const val FREE_GENERATION_LIMIT = GenerationLimit.FREE_LIMIT
         private const val STATUS_TIMEOUT_MS = 5_000L
+        private const val SYNC_ATTEMPTS = 60
+        private const val SYNC_RETRY_MS = 2_000L
 
         fun incrementGenerationCount(context: Context) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -57,6 +67,14 @@ class MainActivity : AppCompatActivity() {
         fun getGenerationCount(context: Context): Int {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             return prefs.getInt(KEY_GENERATION_COUNT, 0)
+        }
+
+        /** Raises the local counter to the server's project count if that is higher (never lowers it). */
+        fun syncGenerationCount(context: Context, serverCount: Int) {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val current = prefs.getInt(KEY_GENERATION_COUNT, 0)
+            val merged = GenerationLimit.merge(current, serverCount)
+            if (merged != current) prefs.edit().putInt(KEY_GENERATION_COUNT, merged).apply()
         }
 
         fun isPremiumUser(context: Context): Boolean {
@@ -86,7 +104,7 @@ class MainActivity : AppCompatActivity() {
     @Composable
     private fun AppContentWithPaywallGate() {
         var isPremium by remember { mutableStateOf<Boolean?>(null) }
-        val generationCount = remember { getGenerationCount(this@MainActivity) }
+        var generationCount by remember { mutableIntStateOf(getGenerationCount(this@MainActivity)) }
 
         // Check subscription status via RevenueCat. Uses restorePurchasesWith
         // rather than a plain getCustomerInfo() — RevenueCat's local
@@ -118,6 +136,23 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
+        // The local build counter is reset by clearing the app's data, so once the user is signed in take the server's project count
+        // as a floor. Waits for the session (a fresh install signs in after this screen starts) and gives up quietly offline.
+        LaunchedEffect(Unit) {
+            repeat(SYNC_ATTEMPTS) {
+                val uid = authRepository.currentUser?.uid
+                if (uid != null) {
+                    val count = runCatching { projectRepository.countMyProjects(uid) }.getOrNull()
+                    if (count != null) {
+                        syncGenerationCount(this@MainActivity, count)
+                        generationCount = getGenerationCount(this@MainActivity)
+                        return@LaunchedEffect
+                    }
+                }
+                kotlinx.coroutines.delay(SYNC_RETRY_MS)
+            }
+        }
+
         // The launch gate must never leave a blank screen: if the store does not answer (no Play Billing, slow network), use the last
         // known subscription status after a few seconds and carry on.
         LaunchedEffect(Unit) {
@@ -131,7 +166,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        val shouldShowPaywall = !premium && generationCount >= FREE_GENERATION_LIMIT
+        val shouldShowPaywall = GenerationLimit.isOverLimit(premium, generationCount)
 
         if (shouldShowPaywall) {
             PaywallHost(
