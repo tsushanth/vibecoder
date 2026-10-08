@@ -226,6 +226,39 @@
     <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
 
+    <!-- App keys (creator keys for generated apps) -->
+    <string name="app_keys_title">アプリのキー</string>
+    <string name="app_keys_summary">%2$d個中%1$d個のキーを設定済み</string>
+    <string name="app_keys_summary_all_set">%1$d個のキーをすべて設定済み</string>
+    <string name="app_keys_manage">管理</string>
+    <string name="app_keys_hide">非表示</string>
+    <string name="app_keys_hint">アプリはこれらのキーを使って他のサービスと連携します。キーは安全に保存され、再表示はできません。置き換えまたは削除のみ可能です。</string>
+    <string name="app_keys_used_by">使用先: %1$s</string>
+    <string name="app_keys_set">設定済み</string>
+    <string name="app_keys_not_set">未設定</string>
+    <string name="app_keys_input_label">%1$sの値を貼り付け</string>
+    <string name="app_keys_save">保存</string>
+    <string name="app_keys_saving">保存中…</string>
+    <string name="app_keys_replace">置き換え</string>
+    <string name="app_keys_remove">削除</string>
+    <string name="app_keys_removing">削除中…</string>
+    <string name="app_keys_saved">保存しました</string>
+    <string name="app_keys_removed">削除しました</string>
+    <string name="app_keys_remove_title">%1$sを削除しますか?</string>
+    <string name="app_keys_remove_message">キーをもう一度追加するまで、アプリはこのサービスと連携できなくなります。</string>
+    <string name="app_keys_retry">再試行</string>
+    <string name="app_keys_error_unauthorized">キーを管理するには、もう一度サインインしてください。</string>
+    <string name="app_keys_error_rate_limited">試行回数が多すぎます。1分ほど待ってからもう一度お試しください。</string>
+    <string name="app_keys_error_store_down">キーの保管先が現在利用できません。しばらくしてからもう一度お試しください。</string>
+    <string name="app_keys_error_invalid_value">このキーは空か、長すぎます。</string>
+    <string name="app_keys_error_network">接続がありません。インターネットを確認してもう一度お試しください。</string>
+    <string name="app_keys_error_other">問題が発生しました。もう一度お試しください。</string>
+    <string name="app_keys_pay_test_first">まずStripeのテスト用キーを使ってください(sk_test_で始まります)。</string>
+    <string name="app_keys_pay_webhook_label">Stripeに追加するWebhook URL</string>
+    <string name="app_keys_pay_webhook_pending">アプリを公開すると、Webhook URLが取得できます。</string>
+    <string name="app_keys_copy_url">URLをコピー</string>
+    <string name="app_keys_copied">コピーしました</string>
+
     <!-- Paywall -->
     <string name="paywall_title">制限なしで作ろう</string>
     <string name="paywall_subtitle">VibeBuildのすべてを解放</string>

@@ -226,6 +226,39 @@
     <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
 
+    <!-- App keys (creator keys for generated apps) -->
+    <string name="app_keys_title">Clés de l\'app</string>
+    <string name="app_keys_summary">%1$d clé(s) sur %2$d définie(s)</string>
+    <string name="app_keys_summary_all_set">Les %1$d clés sont définies</string>
+    <string name="app_keys_manage">Gérer</string>
+    <string name="app_keys_hide">Masquer</string>
+    <string name="app_keys_hint">Votre app utilise ces clés pour communiquer avec d\'autres services. Elles sont stockées en toute sécurité et ne peuvent pas être relues, seulement remplacées ou supprimées.</string>
+    <string name="app_keys_used_by">Utilisée par : %1$s</string>
+    <string name="app_keys_set">Définie</string>
+    <string name="app_keys_not_set">Non définie</string>
+    <string name="app_keys_input_label">Collez la valeur pour %1$s</string>
+    <string name="app_keys_save">Enregistrer</string>
+    <string name="app_keys_saving">Enregistrement…</string>
+    <string name="app_keys_replace">Remplacer</string>
+    <string name="app_keys_remove">Supprimer</string>
+    <string name="app_keys_removing">Suppression…</string>
+    <string name="app_keys_saved">Enregistrée</string>
+    <string name="app_keys_removed">Supprimée</string>
+    <string name="app_keys_remove_title">Supprimer %1$s ?</string>
+    <string name="app_keys_remove_message">Votre app ne fonctionnera plus avec ce service tant que vous n\'aurez pas rajouté la clé.</string>
+    <string name="app_keys_retry">Réessayer</string>
+    <string name="app_keys_error_unauthorized">Reconnectez-vous pour gérer les clés.</string>
+    <string name="app_keys_error_rate_limited">Trop de tentatives. Patientez une minute et réessayez.</string>
+    <string name="app_keys_error_store_down">Le coffre de clés est indisponible pour le moment. Réessayez bientôt.</string>
+    <string name="app_keys_error_invalid_value">Cette clé est vide ou trop longue.</string>
+    <string name="app_keys_error_network">Pas de connexion. Vérifiez votre internet et réessayez.</string>
+    <string name="app_keys_error_other">Une erreur s\'est produite. Réessayez.</string>
+    <string name="app_keys_pay_test_first">Utilisez d\'abord vos clés de test Stripe (elles commencent par sk_test_).</string>
+    <string name="app_keys_pay_webhook_label">URL du webhook à ajouter dans Stripe</string>
+    <string name="app_keys_pay_webhook_pending">Publiez votre app pour obtenir l\'URL de son webhook.</string>
+    <string name="app_keys_copy_url">Copier l\'URL</string>
+    <string name="app_keys_copied">Copiée</string>
+
     <!-- Paywall -->
     <string name="paywall_title">Créez sans limites</string>
     <string name="paywall_subtitle">Débloquez tout dans VibeBuild</string>

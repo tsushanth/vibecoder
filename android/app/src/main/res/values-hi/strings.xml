@@ -226,6 +226,39 @@
     <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
 
+    <!-- App keys (creator keys for generated apps) -->
+    <string name="app_keys_title">ऐप कीज़</string>
+    <string name="app_keys_summary">%2$d में से %1$d कीज़ सेट हैं</string>
+    <string name="app_keys_summary_all_set">सभी %1$d कीज़ सेट हैं</string>
+    <string name="app_keys_manage">प्रबंधित करें</string>
+    <string name="app_keys_hide">छिपाएं</string>
+    <string name="app_keys_hint">आपका ऐप इन कीज़ का उपयोग दूसरी सेवाओं से जुड़ने के लिए करता है। ये सुरक्षित रूप से सहेजी जाती हैं और दोबारा देखी नहीं जा सकतीं, केवल बदली या हटाई जा सकती हैं।</string>
+    <string name="app_keys_used_by">इसके द्वारा उपयोग: %1$s</string>
+    <string name="app_keys_set">सेट है</string>
+    <string name="app_keys_not_set">सेट नहीं है</string>
+    <string name="app_keys_input_label">%1$s की वैल्यू पेस्ट करें</string>
+    <string name="app_keys_save">सहेजें</string>
+    <string name="app_keys_saving">सहेजा जा रहा है…</string>
+    <string name="app_keys_replace">बदलें</string>
+    <string name="app_keys_remove">हटाएं</string>
+    <string name="app_keys_removing">हटाया जा रहा है…</string>
+    <string name="app_keys_saved">सहेज लिया गया</string>
+    <string name="app_keys_removed">हटा दिया गया</string>
+    <string name="app_keys_remove_title">%1$s हटाएं?</string>
+    <string name="app_keys_remove_message">जब तक आप की दोबारा नहीं जोड़ते, आपका ऐप इस सेवा के साथ काम करना बंद कर देगा।</string>
+    <string name="app_keys_retry">फिर से कोशिश करें</string>
+    <string name="app_keys_error_unauthorized">कीज़ प्रबंधित करने के लिए दोबारा साइन इन करें।</string>
+    <string name="app_keys_error_rate_limited">बहुत ज़्यादा कोशिशें हो गईं। एक मिनट रुकें और फिर कोशिश करें।</string>
+    <string name="app_keys_error_store_down">की स्टोर अभी उपलब्ध नहीं है। थोड़ी देर बाद फिर कोशिश करें।</string>
+    <string name="app_keys_error_invalid_value">यह की खाली है या बहुत लंबी है।</string>
+    <string name="app_keys_error_network">कनेक्शन नहीं है। अपना इंटरनेट जांचें और फिर कोशिश करें।</string>
+    <string name="app_keys_error_other">कुछ गड़बड़ हो गई। फिर से कोशिश करें।</string>
+    <string name="app_keys_pay_test_first">पहले अपनी Stripe टेस्ट कीज़ इस्तेमाल करें (वे sk_test_ से शुरू होती हैं)।</string>
+    <string name="app_keys_pay_webhook_label">Stripe में जोड़ने के लिए Webhook URL</string>
+    <string name="app_keys_pay_webhook_pending">अपने ऐप का Webhook URL पाने के लिए उसे पब्लिश करें।</string>
+    <string name="app_keys_copy_url">URL कॉपी करें</string>
+    <string name="app_keys_copied">कॉपी किया गया</string>
+
     <!-- Paywall -->
     <string name="paywall_title">बिना सीमा के बनाएं</string>
     <string name="paywall_subtitle">VibeBuild में सब कुछ अनलॉक करें</string>

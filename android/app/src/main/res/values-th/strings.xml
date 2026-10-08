@@ -226,6 +226,39 @@
     <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
     <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
 
+    <!-- App keys (creator keys for generated apps) -->
+    <string name="app_keys_title">คีย์ของแอป</string>
+    <string name="app_keys_summary">ตั้งค่าคีย์แล้ว %1$d จาก %2$d</string>
+    <string name="app_keys_summary_all_set">ตั้งค่าคีย์ครบทั้ง %1$d แล้ว</string>
+    <string name="app_keys_manage">จัดการ</string>
+    <string name="app_keys_hide">ซ่อน</string>
+    <string name="app_keys_hint">แอปของคุณใช้คีย์เหล่านี้เพื่อเชื่อมต่อกับบริการอื่น คีย์จะถูกเก็บอย่างปลอดภัยและไม่สามารถดูย้อนหลังได้ ทำได้เพียงเปลี่ยนหรือลบเท่านั้น</string>
+    <string name="app_keys_used_by">ใช้โดย: %1$s</string>
+    <string name="app_keys_set">ตั้งค่าแล้ว</string>
+    <string name="app_keys_not_set">ยังไม่ได้ตั้งค่า</string>
+    <string name="app_keys_input_label">วางค่าสำหรับ %1$s</string>
+    <string name="app_keys_save">บันทึก</string>
+    <string name="app_keys_saving">กำลังบันทึก…</string>
+    <string name="app_keys_replace">เปลี่ยน</string>
+    <string name="app_keys_remove">ลบ</string>
+    <string name="app_keys_removing">กำลังลบ…</string>
+    <string name="app_keys_saved">บันทึกแล้ว</string>
+    <string name="app_keys_removed">ลบแล้ว</string>
+    <string name="app_keys_remove_title">ลบ %1$s ไหม</string>
+    <string name="app_keys_remove_message">แอปของคุณจะใช้งานกับบริการนี้ไม่ได้จนกว่าคุณจะเพิ่มคีย์อีกครั้ง</string>
+    <string name="app_keys_retry">ลองอีกครั้ง</string>
+    <string name="app_keys_error_unauthorized">ลงชื่อเข้าใช้อีกครั้งเพื่อจัดการคีย์</string>
+    <string name="app_keys_error_rate_limited">ลองหลายครั้งเกินไป รอสักครู่แล้วลองอีกครั้ง</string>
+    <string name="app_keys_error_store_down">ที่เก็บคีย์ไม่พร้อมใช้งานในขณะนี้ โปรดลองอีกครั้งในอีกสักครู่</string>
+    <string name="app_keys_error_invalid_value">คีย์นี้ว่างเปล่าหรือยาวเกินไป</string>
+    <string name="app_keys_error_network">ไม่มีการเชื่อมต่อ ตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง</string>
+    <string name="app_keys_error_other">เกิดข้อผิดพลาดบางอย่าง ลองอีกครั้ง</string>
+    <string name="app_keys_pay_test_first">ใช้คีย์ทดสอบของ Stripe ก่อน (ขึ้นต้นด้วย sk_test_)</string>
+    <string name="app_keys_pay_webhook_label">URL เว็บฮุคที่ต้องเพิ่มใน Stripe</string>
+    <string name="app_keys_pay_webhook_pending">เผยแพร่แอปของคุณเพื่อรับ URL เว็บฮุค</string>
+    <string name="app_keys_copy_url">คัดลอก URL</string>
+    <string name="app_keys_copied">คัดลอกแล้ว</string>
+
     <!-- Paywall -->
     <string name="paywall_title">สร้างได้ไม่จำกัด</string>
     <string name="paywall_subtitle">ปลดล็อกทุกอย่างใน VibeBuild</string>
