@@ -26,7 +26,7 @@ export default function CallbackPage() {
         } catch {
           // User may already exist
         }
-        router.push('/dashboard');
+        router.push('/welcome');
       } else {
         router.push('/login');
       }
@@ -34,10 +34,10 @@ export default function CallbackPage() {
   }, [router]);
 
   return (
-    <div className="theme-paper flex min-h-screen items-center justify-center bg-[#FAF6F1] text-[#17140F]">
+    <div className="flex min-h-dvh items-center justify-center bg-background text-foreground">
       <div className="text-center">
-        <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#5B4CFF] border-t-transparent" />
-        <p className="text-[#17140F]/62">Signing you in...</p>
+        <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+        <p className="text-muted">Signing you in…</p>
       </div>
     </div>
   );

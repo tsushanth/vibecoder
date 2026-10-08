@@ -8,16 +8,16 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="theme-paper min-h-screen bg-[#FAF6F1] text-[#17140F]">
+    <div className="min-h-screen bg-background text-foreground">
       <MarketingHeader />
 
       <div className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-4xl font-bold mb-2">Privacy Policy</h1>
-        <p className="text-sm text-[#17140F]/40 mb-10">Last updated: March 1, 2026</p>
+        <h1 className="font-display text-4xl font-bold mb-2">Privacy Policy</h1>
+        <p className="text-sm text-subtle mb-10">Last updated: March 1, 2026</p>
 
-        <div className="space-y-8 text-[#17140F]/62 leading-relaxed text-sm">
+        <div className="space-y-8 text-muted leading-relaxed text-sm">
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">1. Introduction</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">1. Introduction</h2>
             <p>
               KreativeKoalaSolutions LLC ("we", "us", "our") operates VibeBuild. This Privacy Policy explains
               how we collect, use, and protect your personal information when you use our platform at vibebuild.cc
@@ -26,22 +26,22 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">2. Information We Collect</h2>
-            <h3 className="text-base font-semibold text-[#17140F] mt-4 mb-2">Account Information</h3>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">2. Information We Collect</h2>
+            <h3 className="text-base font-semibold text-foreground mt-4 mb-2">Account Information</h3>
             <p>When you create an account, we collect your name, email address, and authentication credentials (or OAuth tokens if you sign in with Google).</p>
 
-            <h3 className="text-base font-semibold text-[#17140F] mt-4 mb-2">Usage Data</h3>
+            <h3 className="text-base font-semibold text-foreground mt-4 mb-2">Usage Data</h3>
             <p>We collect information about how you use the Service, including app generation prompts, project metadata, and feature usage patterns. This helps us improve the AI pipeline and user experience.</p>
 
-            <h3 className="text-base font-semibold text-[#17140F] mt-4 mb-2">Device Information</h3>
+            <h3 className="text-base font-semibold text-foreground mt-4 mb-2">Device Information</h3>
             <p>We collect standard technical information such as browser type, operating system, device type, and IP address for analytics and security purposes.</p>
 
-            <h3 className="text-base font-semibold text-[#17140F] mt-4 mb-2">Payment Information</h3>
+            <h3 className="text-base font-semibold text-foreground mt-4 mb-2">Payment Information</h3>
             <p>Payment processing is handled by third-party providers (Apple App Store, Google Play Store, or Stripe). We do not store your credit card information directly.</p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">3. How We Use Your Information</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">3. How We Use Your Information</h2>
             <ul className="list-disc pl-6 space-y-1">
               <li>To provide and operate the Service</li>
               <li>To process your app generation requests</li>
@@ -54,17 +54,17 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">4. Data Sharing</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">4. Data Sharing</h2>
             <p>We do not sell your personal information. We may share data with:</p>
             <ul className="list-disc pl-6 mt-2 space-y-1">
-              <li><strong className="text-[#17140F]">Service providers</strong> — hosting (Google Cloud), database (Supabase), analytics, and payment processing partners who help us operate the Service</li>
-              <li><strong className="text-[#17140F]">AI providers</strong> — your app prompts are sent to AI model providers for processing. These providers are contractually required to protect your data</li>
-              <li><strong className="text-[#17140F]">Legal requirements</strong> — when required by law, court order, or governmental authority</li>
+              <li><strong className="text-foreground">Service providers</strong> — hosting (Google Cloud), database (Supabase), analytics, and payment processing partners who help us operate the Service</li>
+              <li><strong className="text-foreground">AI providers</strong> — your app prompts are sent to AI model providers for processing. These providers are contractually required to protect your data</li>
+              <li><strong className="text-foreground">Legal requirements</strong> — when required by law, court order, or governmental authority</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">5. Public Projects</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">5. Public Projects</h2>
             <p>
               When you make a project public, its title, description, creator name, and generated app content
               are visible to all users in the community gallery. You can make projects private (Pro plan) or
@@ -73,7 +73,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">6. Data Retention</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">6. Data Retention</h2>
             <p>
               We retain your account data and projects as long as your account is active. If you delete your
               account, we will remove your personal data within 30 days, except where retention is required
@@ -82,7 +82,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">7. Data Security</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">7. Data Security</h2>
             <p>
               We implement industry-standard security measures to protect your data, including encryption in
               transit (TLS) and at rest, secure authentication, and regular security audits. However, no method
@@ -91,7 +91,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">8. Your Rights</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">8. Your Rights</h2>
             <p>Depending on your jurisdiction, you may have the right to:</p>
             <ul className="list-disc pl-6 mt-2 space-y-1">
               <li>Access your personal data</li>
@@ -105,19 +105,19 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">9. SMS / Text Messaging</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">9. SMS / Text Messaging</h2>
             <p>
               If you text VibeBuild to generate an app or link your account, we collect your phone number and
               message content to operate that feature. No mobile information will be shared with third parties
               or affiliates for marketing or promotional purposes. Message and data rates may apply, and message
               frequency varies. Reply STOP to opt out at any time, or HELP for help. See{' '}
-              <a href="/sms" className="text-[#5B4CFF] hover:underline">vibebuild.cc/sms</a> for details on how
+              <a href="/sms" className="text-accent-hover hover:underline">vibebuild.cc/sms</a> for details on how
               to opt in and out.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">10. Cookies</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">10. Cookies</h2>
             <p>
               We use essential cookies for authentication and session management. We may use analytics cookies
               to understand how users interact with the Service. You can control cookie preferences through
@@ -126,7 +126,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">11. Children's Privacy</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">11. Children's Privacy</h2>
             <p>
               VibeBuild is not intended for children under 13. We do not knowingly collect personal information
               from children under 13. If you believe a child has provided us with personal information, please
@@ -135,7 +135,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">12. Changes to This Policy</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">12. Changes to This Policy</h2>
             <p>
               We may update this Privacy Policy from time to time. We will notify you of material changes via
               email or in-app notification. Your continued use of the Service constitutes acceptance of the
@@ -144,10 +144,10 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">13. Contact Us</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">13. Contact Us</h2>
             <p>
               For privacy-related questions or concerns, contact us at{' '}
-              <a href="mailto:support@vibebuild.cc" className="text-[#5B4CFF] hover:underline">support@vibebuild.cc</a>.
+              <a href="mailto:support@vibebuild.cc" className="text-accent-hover hover:underline">support@vibebuild.cc</a>.
             </p>
           </section>
         </div>
