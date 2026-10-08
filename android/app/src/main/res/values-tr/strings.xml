@@ -259,4 +259,34 @@
     <string name="app_keys_copy_url">URL\'yi kopyala</string>
     <string name="app_keys_copied">Kopyalandı</string>
 
+    <!-- Paywall -->
+    <string name="paywall_title">Sınırsız geliştir</string>
+    <string name="paywall_subtitle">VibeBuild\'deki her şeyin kilidini aç</string>
+    <string name="paywall_feature_projects">Sınırsız proje</string>
+    <string name="paywall_feature_ai">Yapay zeka asistanı</string>
+    <string name="paywall_feature_deploy">Tek tıkla bulut dağıtımı</string>
+    <string name="paywall_feature_templates">Tüm şablonlar</string>
+    <string name="paywall_feature_storage">Bulut depolama</string>
+    <string name="paywall_plan_yearly">Yıllık</string>
+    <string name="paywall_plan_monthly">Aylık</string>
+    <string name="paywall_plan_weekly">Haftalık</string>
+    <string name="paywall_plan_lifetime">Ömür boyu</string>
+    <string name="paywall_price_per_year">%1$s / yıl</string>
+    <string name="paywall_price_per_month">%1$s / ay</string>
+    <string name="paywall_price_per_week">%1$s / hafta</string>
+    <string name="paywall_price_once">%1$s tek seferlik</string>
+    <string name="paywall_badge_best_value">En iyi değer</string>
+    <string name="paywall_trial_days">%1$d gün ücretsiz deneme</string>
+    <string name="paywall_cta_continue">Devam et</string>
+    <string name="paywall_cta_trial">Ücretsiz denemeyi başlat</string>
+    <string name="paywall_renewal">Abonelikler iptal edilene kadar otomatik yenilenir. İstediğin zaman Google Play\'den iptal edebilirsin.</string>
+    <string name="paywall_restore">Satın alımları geri yükle</string>
+    <string name="paywall_redeem">Kodun var mı?</string>
+    <string name="paywall_terms">Koşullar</string>
+    <string name="paywall_privacy">Gizlilik</string>
+    <string name="paywall_close">Kapat</string>
+    <string name="paywall_unavailable">Planlar yüklenemedi. Bağlantını kontrol edip tekrar dene.</string>
+    <string name="paywall_retry">Tekrar dene</string>
+    <string name="paywall_error_purchase">Satın alma tamamlanamadı. Lütfen tekrar dene.</string>
+    <string name="paywall_restore_none">Bu Google hesabı için etkin abonelik bulunamadı.</string>
 </resources>

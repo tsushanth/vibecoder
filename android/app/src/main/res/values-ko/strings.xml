@@ -259,4 +259,34 @@
     <string name="app_keys_copy_url">URL 복사</string>
     <string name="app_keys_copied">복사됨</string>
 
+    <!-- Paywall -->
+    <string name="paywall_title">한계 없이 만들어 보세요</string>
+    <string name="paywall_subtitle">VibeBuild의 모든 기능을 잠금 해제하세요</string>
+    <string name="paywall_feature_projects">무제한 프로젝트</string>
+    <string name="paywall_feature_ai">AI 어시스턴트</string>
+    <string name="paywall_feature_deploy">원클릭 클라우드 배포</string>
+    <string name="paywall_feature_templates">모든 템플릿</string>
+    <string name="paywall_feature_storage">클라우드 저장소</string>
+    <string name="paywall_plan_yearly">연간</string>
+    <string name="paywall_plan_monthly">월간</string>
+    <string name="paywall_plan_weekly">주간</string>
+    <string name="paywall_plan_lifetime">평생</string>
+    <string name="paywall_price_per_year">%1$s / 년</string>
+    <string name="paywall_price_per_month">%1$s / 월</string>
+    <string name="paywall_price_per_week">%1$s / 주</string>
+    <string name="paywall_price_once">%1$s 1회 결제</string>
+    <string name="paywall_badge_best_value">최고 가치</string>
+    <string name="paywall_trial_days">%1$d일 무료 체험</string>
+    <string name="paywall_cta_continue">계속</string>
+    <string name="paywall_cta_trial">무료 체험 시작</string>
+    <string name="paywall_renewal">구독은 취소할 때까지 자동으로 갱신됩니다. Google Play에서 언제든지 취소할 수 있습니다.</string>
+    <string name="paywall_restore">구매 복원</string>
+    <string name="paywall_redeem">코드가 있나요?</string>
+    <string name="paywall_terms">이용약관</string>
+    <string name="paywall_privacy">개인정보</string>
+    <string name="paywall_close">닫기</string>
+    <string name="paywall_unavailable">요금제를 불러오지 못했습니다. 연결을 확인하고 다시 시도하세요.</string>
+    <string name="paywall_retry">다시 시도</string>
+    <string name="paywall_error_purchase">결제를 완료하지 못했습니다. 다시 시도해 주세요.</string>
+    <string name="paywall_restore_none">이 Google 계정에서 활성 구독을 찾을 수 없습니다.</string>
 </resources>

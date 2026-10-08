@@ -259,4 +259,34 @@
     <string name="app_keys_copy_url">คัดลอก URL</string>
     <string name="app_keys_copied">คัดลอกแล้ว</string>
 
+    <!-- Paywall -->
+    <string name="paywall_title">สร้างได้ไม่จำกัด</string>
+    <string name="paywall_subtitle">ปลดล็อกทุกอย่างใน VibeBuild</string>
+    <string name="paywall_feature_projects">โปรเจกต์ไม่จำกัด</string>
+    <string name="paywall_feature_ai">ผู้ช่วย AI</string>
+    <string name="paywall_feature_deploy">ดีพลอยขึ้นคลาวด์ในคลิกเดียว</string>
+    <string name="paywall_feature_templates">เทมเพลตทั้งหมด</string>
+    <string name="paywall_feature_storage">พื้นที่เก็บข้อมูลบนคลาวด์</string>
+    <string name="paywall_plan_yearly">รายปี</string>
+    <string name="paywall_plan_monthly">รายเดือน</string>
+    <string name="paywall_plan_weekly">รายสัปดาห์</string>
+    <string name="paywall_plan_lifetime">ตลอดชีพ</string>
+    <string name="paywall_price_per_year">%1$s / ปี</string>
+    <string name="paywall_price_per_month">%1$s / เดือน</string>
+    <string name="paywall_price_per_week">%1$s / สัปดาห์</string>
+    <string name="paywall_price_once">%1$s จ่ายครั้งเดียว</string>
+    <string name="paywall_badge_best_value">คุ้มที่สุด</string>
+    <string name="paywall_trial_days">ทดลองใช้ฟรี %1$d วัน</string>
+    <string name="paywall_cta_continue">ดำเนินการต่อ</string>
+    <string name="paywall_cta_trial">เริ่มทดลองใช้ฟรี</string>
+    <string name="paywall_renewal">การสมัครสมาชิกจะต่ออายุอัตโนมัติจนกว่าจะยกเลิก ยกเลิกได้ทุกเมื่อใน Google Play</string>
+    <string name="paywall_restore">กู้คืนการซื้อ</string>
+    <string name="paywall_redeem">มีรหัสไหม</string>
+    <string name="paywall_terms">ข้อกำหนด</string>
+    <string name="paywall_privacy">ความเป็นส่วนตัว</string>
+    <string name="paywall_close">ปิด</string>
+    <string name="paywall_unavailable">โหลดแพ็กเกจไม่สำเร็จ ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง</string>
+    <string name="paywall_retry">ลองอีกครั้ง</string>
+    <string name="paywall_error_purchase">ทำรายการซื้อไม่สำเร็จ โปรดลองอีกครั้ง</string>
+    <string name="paywall_restore_none">ไม่พบการสมัครสมาชิกที่ใช้งานอยู่สำหรับบัญชี Google นี้</string>
 </resources>

@@ -16,6 +16,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.kreativekoala.vibecoder.MainActivity
+import com.kreativekoala.vibecoder.ui.paywall.GenerationLimit
 import com.kreativekoala.vibecoder.ui.account.SubscriptionPlansScreen
 import com.kreativekoala.vibecoder.ui.apps.ProjectDetailScreen
 import com.kreativekoala.vibecoder.ui.auth.AuthViewModel
@@ -95,7 +97,9 @@ fun VibeBuildNavGraph() {
                 onComplete = {
                     val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                     prefs.edit().putBoolean(KEY_ONBOARDING_COMPLETED, true).apply()
-                    navController.navigate(Screen.Paywall.route) {
+                    // people who already subscribe (for example after a reinstall) go straight in
+                    val next = if (GenerationLimit.showsPostOnboardingPaywall(MainActivity.isPremiumUser(context))) Screen.Paywall.route else Screen.Main.route
+                    navController.navigate(next) {
                         popUpTo(Screen.Onboarding.route) { inclusive = true }
                     }
                 }

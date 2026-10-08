@@ -259,4 +259,34 @@
     <string name="app_keys_copy_url">Salin URL</string>
     <string name="app_keys_copied">Tersalin</string>
 
+    <!-- Paywall -->
+    <string name="paywall_title">Bangun tanpa batas</string>
+    <string name="paywall_subtitle">Buka semua fitur di VibeBuild</string>
+    <string name="paywall_feature_projects">Proyek tanpa batas</string>
+    <string name="paywall_feature_ai">Asisten AI</string>
+    <string name="paywall_feature_deploy">Deploy cloud sekali klik</string>
+    <string name="paywall_feature_templates">Semua template</string>
+    <string name="paywall_feature_storage">Penyimpanan cloud</string>
+    <string name="paywall_plan_yearly">Tahunan</string>
+    <string name="paywall_plan_monthly">Bulanan</string>
+    <string name="paywall_plan_weekly">Mingguan</string>
+    <string name="paywall_plan_lifetime">Seumur hidup</string>
+    <string name="paywall_price_per_year">%1$s / tahun</string>
+    <string name="paywall_price_per_month">%1$s / bulan</string>
+    <string name="paywall_price_per_week">%1$s / minggu</string>
+    <string name="paywall_price_once">%1$s sekali bayar</string>
+    <string name="paywall_badge_best_value">Paling hemat</string>
+    <string name="paywall_trial_days">Uji coba gratis %1$d hari</string>
+    <string name="paywall_cta_continue">Lanjutkan</string>
+    <string name="paywall_cta_trial">Mulai uji coba gratis</string>
+    <string name="paywall_renewal">Langganan diperpanjang otomatis hingga dibatalkan. Batalkan kapan saja di Google Play.</string>
+    <string name="paywall_restore">Pulihkan pembelian</string>
+    <string name="paywall_redeem">Punya kode?</string>
+    <string name="paywall_terms">Ketentuan</string>
+    <string name="paywall_privacy">Privasi</string>
+    <string name="paywall_close">Tutup</string>
+    <string name="paywall_unavailable">Paket tidak dapat dimuat. Periksa koneksi Anda lalu coba lagi.</string>
+    <string name="paywall_retry">Coba lagi</string>
+    <string name="paywall_error_purchase">Pembelian tidak dapat diselesaikan. Silakan coba lagi.</string>
+    <string name="paywall_restore_none">Tidak ada langganan aktif untuk akun Google ini.</string>
 </resources>

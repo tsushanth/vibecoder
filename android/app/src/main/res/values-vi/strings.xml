@@ -259,4 +259,34 @@
     <string name="app_keys_copy_url">Sao chép URL</string>
     <string name="app_keys_copied">Đã sao chép</string>
 
+    <!-- Paywall -->
+    <string name="paywall_title">Xây dựng không giới hạn</string>
+    <string name="paywall_subtitle">Mở khóa mọi thứ trong VibeBuild</string>
+    <string name="paywall_feature_projects">Dự án không giới hạn</string>
+    <string name="paywall_feature_ai">Trợ lý AI</string>
+    <string name="paywall_feature_deploy">Triển khai lên đám mây chỉ một chạm</string>
+    <string name="paywall_feature_templates">Tất cả mẫu</string>
+    <string name="paywall_feature_storage">Lưu trữ đám mây</string>
+    <string name="paywall_plan_yearly">Hằng năm</string>
+    <string name="paywall_plan_monthly">Hằng tháng</string>
+    <string name="paywall_plan_weekly">Hằng tuần</string>
+    <string name="paywall_plan_lifetime">Trọn đời</string>
+    <string name="paywall_price_per_year">%1$s / năm</string>
+    <string name="paywall_price_per_month">%1$s / tháng</string>
+    <string name="paywall_price_per_week">%1$s / tuần</string>
+    <string name="paywall_price_once">%1$s một lần</string>
+    <string name="paywall_badge_best_value">Giá trị nhất</string>
+    <string name="paywall_trial_days">Dùng thử miễn phí %1$d ngày</string>
+    <string name="paywall_cta_continue">Tiếp tục</string>
+    <string name="paywall_cta_trial">Bắt đầu dùng thử miễn phí</string>
+    <string name="paywall_renewal">Gói đăng ký tự động gia hạn cho đến khi bạn hủy. Hủy bất cứ lúc nào trong Google Play.</string>
+    <string name="paywall_restore">Khôi phục giao dịch mua</string>
+    <string name="paywall_redeem">Có mã?</string>
+    <string name="paywall_terms">Điều khoản</string>
+    <string name="paywall_privacy">Quyền riêng tư</string>
+    <string name="paywall_close">Đóng</string>
+    <string name="paywall_unavailable">Không thể tải các gói. Hãy kiểm tra kết nối và thử lại.</string>
+    <string name="paywall_retry">Thử lại</string>
+    <string name="paywall_error_purchase">Không thể hoàn tất giao dịch mua. Vui lòng thử lại.</string>
+    <string name="paywall_restore_none">Không tìm thấy gói đăng ký đang hoạt động cho tài khoản Google này.</string>
 </resources>
