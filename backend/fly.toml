@@ -4,6 +4,10 @@ primary_region = "iad"
 [build]
   dockerfile = "Dockerfile"
 
+[env]
+  # the dedicated Stripe customer-portal configuration for VibeBuild Pro (not a secret)
+  STRIPE_PORTAL_CONFIGURATION_ID = "bpc_1UOBBOKFBTQTkmztwLXvhEnp"
+
 [http_service]
   internal_port = 8080
   force_https = true

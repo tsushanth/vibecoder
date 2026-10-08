@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { SUBSCRIPTION_TIERS } from '@/lib/constants';
 import { PlanCompare } from '@/components/upgrade/PlanCompare';
 import { Spinner } from '@/components/upgrade/Spinner';
+import { ManageBillingButton } from '@/components/upgrade/ManageBillingButton';
 import { useCheckout } from '@/components/upgrade/useCheckout';
 
 /**
@@ -51,12 +52,7 @@ export default function UpgradePage() {
           </main>
           <footer className="shrink-0 border-t border-border" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
             <div className="mx-auto flex w-full max-w-[640px] gap-3 px-4 py-4">
-              <Link
-                href="/settings"
-                className="flex h-12 flex-1 items-center justify-center rounded-lg border border-border text-[15px] font-medium transition-colors hover:bg-surface"
-              >
-                {t('manage')}
-              </Link>
+              <ManageBillingButton wrapperClassName="min-w-0 flex-1 items-stretch" className="flex h-12 w-full items-center justify-center rounded-lg border border-border text-[15px] font-medium transition-colors hover:bg-surface" label={t('manage')} />
               <Link
                 href="/project/new"
                 className="flex h-12 flex-1 items-center justify-center rounded-lg bg-accent text-[15px] font-semibold text-white transition-colors hover:bg-accent-deep"

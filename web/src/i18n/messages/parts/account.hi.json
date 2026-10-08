@@ -44,7 +44,10 @@
       "subscribedTitle": "आप {plan} पर हैं",
       "subscribedBody": "असीमित बदलाव, निजी ऐप्स और कस्टम डोमेन सब चालू हैं।",
       "manage": "प्रबंधित करें",
-      "startBuilding": "ऐप बनाएं"
+      "startBuilding": "ऐप बनाएं",
+      "manageOpening": "खोल रहे हैं…",
+      "manageNone": "आपका प्लान Android या iOS ऐप में खरीदा गया था। इसे Google Play या App Store में मैनेज करें।",
+      "manageFailed": "बिलिंग अभी उपलब्ध नहीं है। कुछ मिनट बाद फिर कोशिश करें।"
     },
     "page": {
       "title": "खाता",
@@ -74,7 +77,8 @@
       "deleting": "हटाया जा रहा है...",
       "deleteError": "आपका खाता नहीं हटा। फिर से कोशिश करें।",
       "deleteSignInAgain": "फिर से साइन इन करें, फिर अपना खाता हटाएं।",
-      "cancel": "रद्द करें"
+      "cancel": "रद्द करें",
+      "manage": "सदस्यता मैनेज करें"
     }
   }
 }
