@@ -44,7 +44,10 @@
       "subscribedTitle": "Du hast {plan}",
       "subscribedBody": "Unbegrenzte Anpassungen, private Apps und eigene Domains sind aktiv.",
       "manage": "Verwalten",
-      "startBuilding": "App erstellen"
+      "startBuilding": "App erstellen",
+      "manageOpening": "Wird geöffnet…",
+      "manageNone": "Dein Tarif wurde in der Android- oder iOS-App gekauft. Verwalte ihn in Google Play oder im App Store.",
+      "manageFailed": "Die Abrechnung ist gerade nicht verfügbar. Versuche es in ein paar Minuten erneut."
     },
     "page": {
       "title": "Konto",
@@ -74,7 +77,8 @@
       "deleting": "Wird gelöscht...",
       "deleteError": "Dein Konto wurde nicht gelöscht. Versuch es noch einmal.",
       "deleteSignInAgain": "Melde dich erneut an und lösche dann dein Konto.",
-      "cancel": "Abbrechen"
+      "cancel": "Abbrechen",
+      "manage": "Abo verwalten"
     }
   }
 }

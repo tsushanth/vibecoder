@@ -44,7 +44,10 @@
       "subscribedTitle": "You're on {plan}",
       "subscribedBody": "Unlimited tweaks, private apps and custom domains are all on.",
       "manage": "Manage",
-      "startBuilding": "Create an app"
+      "startBuilding": "Create an app",
+      "manageOpening": "Opening…",
+      "manageNone": "Your plan was bought in the Android or iOS app. Manage it in Google Play or the App Store.",
+      "manageFailed": "Billing is not available right now. Try again in a few minutes."
     },
     "page": {
       "title": "Account",
@@ -74,7 +77,8 @@
       "deleting": "Deleting...",
       "deleteError": "Your account wasn't deleted. Try again.",
       "deleteSignInAgain": "Sign in again, then delete your account.",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "manage": "Manage subscription"
     }
   }
 }
