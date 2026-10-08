@@ -11,6 +11,7 @@ import { api, ApiError } from '@/lib/api';
 import { SUPPORTED_LOCALES } from '@/i18n/locales';
 import { cn } from '@/lib/utils';
 import { Spinner } from '@/components/upgrade/Spinner';
+import { ManageBillingButton } from '@/components/upgrade/ManageBillingButton';
 
 const LANGUAGE_NAMES: Record<string, string> = {
   en: 'English',
@@ -243,6 +244,12 @@ function AccountScreen() {
             >
               {t('upgrade')}
             </Link>
+          )}
+          {paid && (
+            <ManageBillingButton
+              className="flex h-10 items-center rounded-lg border border-border px-4 text-[15px] font-medium transition-colors hover:bg-surface"
+              label={t('manage')}
+            />
           )}
         </div>
         <dl className="grid border-t border-border" style={{ gridTemplateColumns: `repeat(${stats.length}, minmax(0, 1fr))` }}>

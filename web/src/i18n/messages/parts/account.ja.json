@@ -44,7 +44,10 @@
       "subscribedTitle": "{plan}をご利用中です",
       "subscribedBody": "調整の無制限、非公開アプリ、独自ドメインがすべて有効です。",
       "manage": "管理",
-      "startBuilding": "アプリを作成"
+      "startBuilding": "アプリを作成",
+      "manageOpening": "開いています…",
+      "manageNone": "このプランはAndroidまたはiOSアプリで購入されました。Google PlayまたはApp Storeで管理してください。",
+      "manageFailed": "現在、請求の管理を利用できません。数分後にもう一度お試しください。"
     },
     "page": {
       "title": "アカウント",
@@ -74,7 +77,8 @@
       "deleting": "削除中...",
       "deleteError": "アカウントは削除されませんでした。もう一度お試しください。",
       "deleteSignInAgain": "もう一度サインインしてから、アカウントを削除してください。",
-      "cancel": "キャンセル"
+      "cancel": "キャンセル",
+      "manage": "サブスクリプションを管理"
     }
   }
 }

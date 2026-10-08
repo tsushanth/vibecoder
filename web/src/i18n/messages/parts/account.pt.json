@@ -44,7 +44,10 @@
       "subscribedTitle": "Você está no {plan}",
       "subscribedBody": "Ajustes ilimitados, apps privados e domínios próprios estão ativos.",
       "manage": "Gerenciar",
-      "startBuilding": "Criar um app"
+      "startBuilding": "Criar um app",
+      "manageOpening": "Abrindo…",
+      "manageNone": "Seu plano foi comprado no app Android ou iOS. Gerencie-o no Google Play ou na App Store.",
+      "manageFailed": "A cobrança não está disponível agora. Tente novamente em alguns minutos."
     },
     "page": {
       "title": "Conta",
@@ -74,7 +77,8 @@
       "deleting": "Excluindo...",
       "deleteError": "Sua conta não foi excluída. Tente de novo.",
       "deleteSignInAgain": "Entre de novo e depois exclua sua conta.",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "manage": "Gerenciar assinatura"
     }
   }
 }

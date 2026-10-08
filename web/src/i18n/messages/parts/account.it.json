@@ -44,7 +44,10 @@
       "subscribedTitle": "Hai il piano {plan}",
       "subscribedBody": "Modifiche illimitate, app private e domini personalizzati sono attivi.",
       "manage": "Gestisci",
-      "startBuilding": "Crea un'app"
+      "startBuilding": "Crea un'app",
+      "manageOpening": "Apertura…",
+      "manageNone": "Il tuo piano è stato acquistato nell'app Android o iOS. Gestiscilo su Google Play o sull'App Store.",
+      "manageFailed": "La fatturazione non è disponibile al momento. Riprova tra qualche minuto."
     },
     "page": {
       "title": "Account",
@@ -74,7 +77,8 @@
       "deleting": "Eliminazione...",
       "deleteError": "Il tuo account non è stato eliminato. Riprova.",
       "deleteSignInAgain": "Accedi di nuovo, poi elimina il tuo account.",
-      "cancel": "Annulla"
+      "cancel": "Annulla",
+      "manage": "Gestisci abbonamento"
     }
   }
 }

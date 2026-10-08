@@ -44,7 +44,10 @@
       "subscribedTitle": "{plan} 이용 중",
       "subscribedBody": "무제한 수정, 비공개 앱, 사용자 지정 도메인이 모두 켜져 있습니다.",
       "manage": "관리",
-      "startBuilding": "앱 만들기"
+      "startBuilding": "앱 만들기",
+      "manageOpening": "여는 중…",
+      "manageNone": "이 요금제는 Android 또는 iOS 앱에서 구매했습니다. Google Play 또는 App Store에서 관리하세요.",
+      "manageFailed": "지금은 결제 관리를 사용할 수 없습니다. 몇 분 후에 다시 시도하세요."
     },
     "page": {
       "title": "계정",
@@ -74,7 +77,8 @@
       "deleting": "삭제 중...",
       "deleteError": "계정이 삭제되지 않았습니다. 다시 시도하세요.",
       "deleteSignInAgain": "다시 로그인한 후 계정을 삭제하세요.",
-      "cancel": "취소"
+      "cancel": "취소",
+      "manage": "구독 관리"
     }
   }
 }

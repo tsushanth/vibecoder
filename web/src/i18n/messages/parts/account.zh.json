@@ -44,7 +44,10 @@
       "subscribedTitle": "你正在使用 {plan}",
       "subscribedBody": "无限次调整、私有应用和自定义域名均已开启。",
       "manage": "管理",
-      "startBuilding": "创建应用"
+      "startBuilding": "创建应用",
+      "manageOpening": "正在打开…",
+      "manageNone": "此套餐是在 Android 或 iOS 应用中购买的。请在 Google Play 或 App Store 中管理。",
+      "manageFailed": "账单功能暂时无法使用。请几分钟后重试。"
     },
     "page": {
       "title": "账户",
@@ -74,7 +77,8 @@
       "deleting": "正在删除...",
       "deleteError": "账户未被删除，请重试。",
       "deleteSignInAgain": "请重新登录，然后再删除账户。",
-      "cancel": "取消"
+      "cancel": "取消",
+      "manage": "管理订阅"
     }
   }
 }
