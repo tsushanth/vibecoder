@@ -353,5 +353,12 @@
       "unknown": "Something went wrong loading usage."
     },
     "upgrade": "Upgrade your plan to raise this limit."
+  },
+  "nav": {
+    "label": "Principale",
+    "apps": "Apps",
+    "create": "Créer",
+    "explore": "Explorer",
+    "account": "Compte"
   }
 }

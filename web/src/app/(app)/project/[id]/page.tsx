@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useCallback, useState } from 'react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import {
@@ -11,8 +12,9 @@ import {
 import { useAuthStore } from '@/stores/authStore';
 import { useProjectStore } from '@/stores/projectStore';
 import { useGenerationStore } from '@/stores/generationStore';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 import { streamSSE } from '@/lib/sse';
+import { cn } from '@/lib/utils';
 import {
   extractBundle,
   buildFileTree,
@@ -24,7 +26,10 @@ import { PublishDialog } from '@/components/builder/PublishDialog';
 import { SecretsPanel } from '@/components/project/SecretsPanel';
 import { UsagePanel } from '@/components/project/UsagePanel';
 import { VersionsPopover } from '@/components/builder/VersionsPopover';
+import { shortAddress, useRelativeTime } from '@/components/project/ProjectCard';
 import type {
+  DomainStatusResponse,
+  ForkResponse,
   ProjectDetailResponse,
   ProjectVersion,
   VersionsResponse,
@@ -97,8 +102,30 @@ function buildChatFromVersions(
   };
 }
 
+type ExportApkResponse = { success: boolean; apk?: string; apkSize?: number; error?: string };
+
+function downloadBase64(base64: string, fileName: string, type: string) {
+  const bin = atob(base64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  const url = URL.createObjectURL(new Blob([bytes], { type }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}
+
+function suggestSubdomain(title: string) {
+  return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30);
+}
+
 export default function ProjectBuilderPage() {
   const t = useTranslations();
+  const ta = useTranslations('apps');
+  const ago = useRelativeTime();
   const { id } = useParams<{ id: string }>();
   const { user, subscription } = useAuthStore();
   const router = useRouter();
@@ -304,9 +331,16 @@ export default function ProjectBuilderPage() {
     [user, id, store]
   );
 
+  const [mode, setMode] = useState<'overview' | 'build'>('overview');
   const [showPublish, setShowPublish] = useState(false);
+  const [publishOpenCount, setPublishOpenCount] = useState(0); // re-reads the domain status after the dialog closes
   const [usageLimitError, setUsageLimitError] = useState<string | null>(null);
   const [showPublishNudge, setShowPublishNudge] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportNote, setExportNote] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
+  const [shareNote, setShareNote] = useState<string | null>(null);
+  const [isRemixing, setIsRemixing] = useState(false);
+  const [remixError, setRemixError] = useState<string | null>(null);
 
   const isOwner = store.project?.creatorId === user?.id;
 
@@ -328,6 +362,58 @@ export default function ProjectBuilderPage() {
     wasGenerating.current = genStore.isGenerating;
   }, [genStore.isGenerating, genStore.error, isOwner, store.project?.publishedUrl]);
 
+  async function handleExportApk() {
+    if (!user || !store.project || isExporting) return;
+    setIsExporting(true);
+    setExportNote(null);
+    try {
+      const r = await api.post<ExportApkResponse>(`/api/projects/${id}/export-apk`, {
+        userId: user.id,
+        ...(store.bundle ? { bundle: store.bundle } : {}),
+      });
+      if (!r.success || !r.apk) throw new Error(r.error || '');
+      const name = store.project.title.replace(/[^a-zA-Z0-9 ]/g, '').trim().replace(/\s+/g, '_') || 'app';
+      downloadBase64(r.apk, `${name}.apk`, 'application/vnd.android.package-archive');
+      setExportNote({ kind: 'ok', text: ta('exportDone') });
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : '';
+      setExportNote({ kind: 'error', text: detail ? ta('exportFailedWith', { error: detail }) : ta('exportFailed') });
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
+  async function handleShare(url: string) {
+    const text = ta('shareText', { url });
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: store.project?.title, text, url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setShareNote(ta('addressCopied'));
+      setTimeout(() => setShareNote(null), 2500);
+    } catch {
+      // the share sheet was dismissed
+    }
+  }
+
+  async function handleRemix() {
+    if (!user || isRemixing) return;
+    setIsRemixing(true);
+    setRemixError(null);
+    try {
+      const data = await api.post<ForkResponse>(`/api/projects/${id}/fork`, {
+        userId: user.id,
+        userName: user.user_metadata?.full_name || user.email?.split('@')[0],
+      });
+      router.push(`/project/${data.projectId}`);
+    } catch (err) {
+      setRemixError(err instanceof ApiError ? err.message : ta('remixFailed'));
+      setIsRemixing(false);
+    }
+  }
+
   if (store.isLoadingProject) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -338,155 +424,63 @@ export default function ProjectBuilderPage() {
 
   if (!store.project) {
     return (
-      <div className="h-full flex items-center justify-center text-muted">
-        {t('project.notFound')}
+      <div className="flex h-full flex-col items-center justify-center gap-4 px-4 text-center">
+        <p className="text-muted">{ta('notFound')}</p>
+        <Link href="/dashboard" className="flex h-10 items-center rounded-lg border border-border px-4 text-sm font-medium transition hover:bg-surface">
+          {ta('backToApps')}
+        </Link>
       </div>
     );
   }
 
-  return (
-    <div className="h-full flex flex-col">
-      {/* Top toolbar */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-card">
-        <div className="flex items-center gap-2 min-w-0">
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="text-subtle hover:text-foreground transition shrink-0"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <h1 className="text-sm font-semibold truncate max-w-[140px] md:max-w-[200px]">
-            {store.project.title}
-          </h1>
-          {!isOwner && (
-            <span className="px-2 py-0.5 bg-surface text-subtle text-[10px] rounded-full shrink-0 hidden sm:inline">
-              {t('common.readOnly')}
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <VersionsPopover
-            versions={store.versions}
-            activeVersionSha={store.activeVersionSha}
-            isReverting={store.isReverting}
-            disabled={!isOwner}
-            onLoad={handleLoadVersion}
-          />
-          {store.project.publishedUrl && (
-            <a
-              href={store.project.publishedUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-2 py-1.5 text-xs text-accent hover:bg-accent/10 rounded-lg transition"
-            >
-              {t('common.viewLive')}
-            </a>
-          )}
-          {isOwner && (
-            <button
-              onClick={() => setShowPublish(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-accent hover:bg-accent-hover text-white rounded-full transition"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-              </svg>
-              <span className="hidden sm:inline">{store.project.publishedUrl ? t('common.manage') : t('common.publish')}</span>
-            </button>
-          )}
-        </div>
+  const project = store.project;
+  const liveUrl = project.publishedUrl;
+  const panelsReloadKey = `${genStore.isGenerating ? 'generating' : 'idle'}:${project.publishedUrl ?? ''}`;
+
+  const publishNudge = showPublishNudge && isOwner && !liveUrl && (
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-accent/30 bg-accent/10 px-4 py-3 text-sm">
+      <span className="text-foreground">{ta('publishNudge')}</span>
+      <div className="flex shrink-0 items-center gap-1">
+        <button
+          onClick={() => { setShowPublishNudge(false); setShowPublish(true); }}
+          className="h-9 rounded-lg bg-accent px-3 font-semibold text-white transition hover:bg-accent-hover"
+        >
+          {ta('publishShort')}
+        </button>
+        <button
+          onClick={() => setShowPublishNudge(false)}
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-subtle transition hover:bg-surface hover:text-foreground"
+          aria-label={t('common.dismiss')}
+        >
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
+    </div>
+  );
 
-      {showPublishNudge && isOwner && !store.project.publishedUrl && (
-        <div className="flex items-center justify-between gap-3 px-3 py-2 bg-accent/10 border-b border-accent/20 text-xs">
-          <span className="text-foreground">
-            {t('publish.nudgeText')}
-          </span>
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={() => { setShowPublishNudge(false); setShowPublish(true); }}
-              className="px-3 py-1.5 font-medium bg-accent hover:bg-accent-hover text-white rounded-lg transition"
-            >
-              {t('common.publish')}
-            </button>
-            <button
-              onClick={() => setShowPublishNudge(false)}
-              className="text-subtle hover:text-foreground transition p-1"
-              aria-label={t('common.dismiss')}
-            >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* API keys the app's connector manifest asks for (owner only; renders nothing when the app needs none) */}
-      {isOwner && user && (
-        <SecretsPanel projectId={id} reloadKey={`${genStore.isGenerating ? 'generating' : 'idle'}:${store.project.publishedUrl ?? ''}`} />
-      )}
-
-      {/* What the app uses (last 7 days) against its limits (owner only; renders nothing until the app is running) */}
-      {isOwner && user && (
-        <UsagePanel projectId={id} reloadKey={`${genStore.isGenerating ? 'generating' : 'idle'}:${store.project.publishedUrl ?? ''}`} />
-      )}
-
-      {/* Main builder area — desktop: preview top, chat bottom.
-          Chat input lives at the top of the chat panel, so a larger default
-          chat size keeps the prompt within easy reach without dominating
-          the screen. */}
-      <div className="hidden md:flex flex-1 min-h-0">
-        <Group orientation="vertical" className="w-full">
-          <Panel defaultSize={55} minSize={25}>
-            <PreviewPane />
-          </Panel>
-
-          <Separator className="h-1 bg-border hover:bg-accent transition" />
-
-          <Panel defaultSize={45} minSize={25} maxSize={75}>
-            <ChatPanel
-              onTweak={handleTweak}
-              onLoadVersion={handleLoadVersion}
-              disabled={!isOwner}
-            />
-          </Panel>
-        </Group>
-      </div>
-
-      {/* Main builder area — mobile: preview on top, chat fixed below */}
-      <div className="flex md:hidden flex-1 min-h-0 flex-col">
-        <div className="flex-1 min-h-0">
-          <PreviewPane />
-        </div>
-        <div className="shrink-0 h-[45vh] border-t border-border flex flex-col">
-          <ChatPanel
-            onTweak={handleTweak}
-            onLoadVersion={handleLoadVersion}
-            disabled={!isOwner}
-          />
-        </div>
-      </div>
-
+  const dialogs = (
+    <>
       {/* Tweak usage limit modal */}
       {usageLimitError && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => setUsageLimitError(null)}>
-          <div className="bg-card border border-border rounded-2xl p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-bold mb-2">{t('project.tweakLimitReached')}</h3>
-            <p className="text-sm text-muted mb-6">{usageLimitError}</p>
-            <div className="flex gap-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background/80" onClick={() => setUsageLimitError(null)} />
+          <div role="alertdialog" aria-modal="true" aria-labelledby="limit-title" className="relative w-full max-w-sm rounded-xl border border-border bg-card p-5">
+            <h3 id="limit-title" className="font-display text-lg font-semibold">{ta('limitTitle')}</h3>
+            <p className="mt-2 text-muted">{usageLimitError}</p>
+            <div className="mt-5 flex justify-end gap-2">
               <button
                 onClick={() => setUsageLimitError(null)}
-                className="flex-1 px-4 py-2 border border-border hover:bg-surface rounded-xl text-sm font-medium transition"
+                className="h-10 rounded-lg border border-border px-4 text-sm font-medium transition hover:bg-surface"
               >
-                {t('common.ok')}
+                {ta('notNow')}
               </button>
               <button
                 onClick={() => { setUsageLimitError(null); router.push('/settings'); }}
-                className="flex-1 px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-semibold transition"
+                className="h-10 rounded-lg bg-accent px-4 text-sm font-semibold text-white transition hover:bg-accent-hover"
               >
-                {t('common.upgrade')}
+                {ta('upgrade')}
               </button>
             </div>
           </div>
@@ -498,7 +492,8 @@ export default function ProjectBuilderPage() {
           projectId={id}
           userId={user.id}
           subscriptionTier={subscription?.tier || 'free'}
-          onClose={() => setShowPublish(false)}
+          suggestedSubdomain={suggestSubdomain(project.title)}
+          onClose={() => { setShowPublish(false); setPublishOpenCount((n) => n + 1); }}
           onPublished={(url) => {
             if (store.project) {
               store.setProject({ ...store.project, publishedUrl: url || null });
@@ -506,6 +501,349 @@ export default function ProjectBuilderPage() {
           }}
         />
       )}
+    </>
+  );
+
+  // ---- Build mode: the full preview with the change box, as Android's "Preview and change" screen
+  if (mode === 'build') {
+    return (
+      <div className="h-full flex flex-col">
+        <div className="flex items-center justify-between gap-2 border-b border-border bg-card px-3 py-2">
+          <div className="flex min-w-0 items-center gap-1">
+            <button
+              onClick={() => setMode('overview')}
+              className="flex h-10 shrink-0 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-foreground transition hover:bg-surface"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              {ta('done')}
+            </button>
+            <h1 className="truncate font-display text-[15px] font-semibold">{project.title}</h1>
+            {!isOwner && (
+              <span className="hidden shrink-0 rounded-lg bg-surface px-2 py-0.5 text-xs text-muted sm:inline">{ta('readOnly')}</span>
+            )}
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <VersionsPopover
+              versions={store.versions}
+              activeVersionSha={store.activeVersionSha}
+              isReverting={store.isReverting}
+              disabled={!isOwner}
+              onLoad={handleLoadVersion}
+            />
+            {liveUrl && (
+              <a
+                href={liveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden h-9 items-center rounded-lg px-3 text-sm text-accent-hover transition hover:bg-surface sm:flex"
+              >
+                {ta('openLive')}
+              </a>
+            )}
+            {isOwner && (
+              <button
+                onClick={() => setShowPublish(true)}
+                className="h-9 rounded-lg bg-accent px-3 text-sm font-semibold text-white transition hover:bg-accent-hover"
+              >
+                {liveUrl ? ta('publishUpdateShort') : ta('publishShort')}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {publishNudge && <div className="border-b border-border p-2">{publishNudge}</div>}
+
+        {/* Desktop: preview on top, the change box below. (react-resizable-panels 4 reads bare numbers as pixels, so sizes are percentages in strings.) */}
+        <div className="hidden md:flex flex-1 min-h-0">
+          <Group orientation="vertical" className="w-full">
+            <Panel defaultSize="55%" minSize="25%">
+              <PreviewPane />
+            </Panel>
+            <Separator className="h-1 bg-border hover:bg-accent transition" />
+            <Panel defaultSize="45%" minSize="25%" maxSize="75%">
+              <ChatPanel onTweak={handleTweak} onLoadVersion={handleLoadVersion} disabled={!isOwner} />
+            </Panel>
+          </Group>
+        </div>
+
+        {/* Phones: preview on top, the change box fixed below. */}
+        <div className="flex md:hidden flex-1 min-h-0 flex-col">
+          <div className="flex-1 min-h-0">
+            <PreviewPane />
+          </div>
+          <div className="shrink-0 h-[45vh] border-t border-border flex flex-col">
+            <ChatPanel onTweak={handleTweak} onLoadVersion={handleLoadVersion} disabled={!isOwner} />
+          </div>
+        </div>
+
+        {dialogs}
+      </div>
+    );
+  }
+
+  // ---- Overview: the preview as the hero, then the actions, then the sections
+  const secondaryBtn = 'flex h-10 items-center gap-2 rounded-lg border border-border px-3.5 text-[15px] font-medium text-foreground transition hover:bg-surface disabled:opacity-60';
+
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-5 sm:px-8 sm:py-8">
+      <Link href="/dashboard" className="-ml-2 inline-flex h-10 items-center gap-1 rounded-lg px-2 text-sm text-muted transition hover:bg-surface hover:text-foreground">
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+        {ta('backToApps')}
+      </Link>
+
+      <div className="mt-3 grid gap-8 md:grid-cols-[300px_minmax(0,1fr)] md:gap-12 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-14">
+        <div className="md:sticky md:top-8 md:self-start">
+          <PhoneFrame
+            title={project.title}
+            html={store.previewHtml}
+            url={liveUrl}
+            onOpen={() => setMode('build')}
+          />
+        </div>
+
+        <div className="min-w-0">
+          <h1 className="font-display text-3xl font-bold sm:text-4xl">{project.title}</h1>
+          {project.description && <p className="mt-2 max-w-[62ch] text-muted">{project.description}</p>}
+          <p className="mt-2 flex flex-wrap gap-x-3 text-sm text-muted">
+            {!isOwner && project.creatorName && <span>{ta('byCreator', { name: project.creatorName })}</span>}
+            <span>{ta('createdAt', { time: ago(project.createdAt) })}</span>
+            {project.viewCount > 0 && <span>{ta('views', { count: project.viewCount })}</span>}
+            {project.forkCount > 0 && <span>{ta('remixes', { count: project.forkCount })}</span>}
+          </p>
+
+          {/* where the app lives */}
+          <div className="mt-4 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+            {liveUrl ? (
+              <>
+                <span className="flex items-center gap-2 text-success">
+                  <span className="h-2 w-2 rounded-full bg-success" />
+                  {ta('status.published')}
+                </span>
+                <a href={liveUrl} target="_blank" rel="noopener noreferrer" className="min-w-0 truncate text-accent-hover hover:underline">
+                  {shortAddress(liveUrl)}
+                </a>
+              </>
+            ) : (
+              <span className="flex items-center gap-2 text-muted">
+                <span className="h-2 w-2 rounded-full bg-subtle" />
+                {ta('notPublished')}
+              </span>
+            )}
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-2">
+            <button
+              onClick={() => setMode('build')}
+              className="flex h-10 items-center gap-2 rounded-lg bg-accent px-4 text-[15px] font-semibold text-white transition hover:bg-accent-hover"
+            >
+              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5L8 5.5z" /></svg>
+              {isOwner ? ta('previewAndChange') : ta('preview')}
+            </button>
+            {isOwner && (
+              <button onClick={() => setShowPublish(true)} className={secondaryBtn}>
+                <svg className="h-4 w-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 21a9 9 0 100-18 9 9 0 000 18zM3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 010 18M12 3a15 15 0 000 18" />
+                </svg>
+                {liveUrl ? ta('managePublishing') : ta('publishToWeb')}
+              </button>
+            )}
+            {isOwner && (
+              <button onClick={() => void handleExportApk()} disabled={isExporting} className={secondaryBtn}>
+                {isExporting ? (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+                ) : (
+                  <svg className="h-4 w-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="6.5" y="2.75" width="11" height="18.5" rx="2.25" strokeWidth={1.75} />
+                    <path strokeLinecap="round" strokeWidth={1.75} d="M10.5 18h3" />
+                  </svg>
+                )}
+                {isExporting ? ta('exporting') : ta('exportAndroid')}
+              </button>
+            )}
+            {liveUrl && (
+              <button onClick={() => void handleShare(liveUrl)} className={secondaryBtn}>
+                <svg className="h-4 w-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 15V3m0 0L8 7m4-4l4 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                </svg>
+                {ta('share')}
+              </button>
+            )}
+            {!isOwner && (
+              <button onClick={() => void handleRemix()} disabled={isRemixing} className={secondaryBtn}>
+                {isRemixing ? ta('remixing') : ta('remix')}
+              </button>
+            )}
+          </div>
+
+          <div aria-live="polite" className="mt-3 space-y-1 text-sm empty:hidden">
+            {isExporting && <p className="text-muted">{ta('exportingHint')}</p>}
+            {exportNote && <p className={exportNote.kind === 'ok' ? 'text-success' : 'text-danger'}>{exportNote.text}</p>}
+            {shareNote && <p className="text-success">{shareNote}</p>}
+            {remixError && <p className="text-danger">{remixError}</p>}
+          </div>
+
+          {publishNudge && <div className="mt-4">{publishNudge}</div>}
+
+          <div className="mt-8">
+            {isOwner && user && <SecretsPanel projectId={id} reloadKey={panelsReloadKey} />}
+            {isOwner && user && <UsagePanel projectId={id} reloadKey={panelsReloadKey} />}
+            {isOwner && user && (
+              <DomainSection
+                projectId={id}
+                userId={user.id}
+                published={!!liveUrl}
+                reloadKey={publishOpenCount}
+                onManage={() => setShowPublish(true)}
+              />
+            )}
+            <VersionsSection
+              versions={store.versions}
+              activeSha={store.activeVersionSha}
+              isReverting={store.isReverting}
+              canRestore={isOwner}
+              onUse={handleLoadVersion}
+            />
+            {project.initialPrompt && (
+              <section className="border-t border-border py-6">
+                <h2 className="font-display text-lg font-semibold">{ta('promptTitle')}</h2>
+                <p className="mt-2 max-w-[66ch] whitespace-pre-wrap text-muted">{project.initialPrompt}</p>
+              </section>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {dialogs}
     </div>
+  );
+}
+
+/** The app running inside a phone outline. Tapping the screen opens the full preview. */
+function PhoneFrame({ title, html, url, onOpen }: { title: string; html: string | null; url: string | null; onOpen: () => void }) {
+  const ta = useTranslations('apps');
+  const hasPreview = !!html || !!url;
+  return (
+    <div className="mx-auto w-[224px] md:w-full">
+      <div className="rounded-[28px] border border-border bg-card p-2">
+        <div className="relative h-[400px] overflow-hidden rounded-[20px] bg-surface md:h-[620px]">
+          {html ? (
+            <iframe srcDoc={html} sandbox="allow-scripts" title={ta('previewOf', { title })} className="h-full w-full border-0 bg-white" />
+          ) : url ? (
+            <iframe src={url} sandbox="allow-scripts allow-same-origin allow-forms" title={ta('previewOf', { title })} className="h-full w-full border-0 bg-white" loading="lazy" />
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
+              <span className="font-display text-5xl font-semibold text-accent-hover/70">{(title.trim().charAt(0) || '?').toUpperCase()}</span>
+              <p className="text-sm text-muted">{ta('noPreview')}</p>
+            </div>
+          )}
+        </div>
+      </div>
+      {hasPreview && (
+        <button onClick={onOpen} className="mx-auto mt-2 flex h-10 items-center rounded-lg px-3 text-sm text-muted transition hover:bg-surface hover:text-foreground">
+          {ta('openFullPreview')}
+        </button>
+      )}
+    </div>
+  );
+}
+
+/** Custom domain: what is connected now, and the way into the publish dialog where it is set up. */
+function DomainSection({ projectId, userId, published, reloadKey, onManage }: { projectId: string; userId: string; published: boolean; reloadKey: number; onManage: () => void }) {
+  const ta = useTranslations('apps');
+  const [status, setStatus] = useState<DomainStatusResponse | null>(null);
+
+  useEffect(() => {
+    if (!published) return;
+    let cancelled = false;
+    api.get<DomainStatusResponse>(`/api/domains/${projectId}?userId=${userId}`)
+      .then((d) => { if (!cancelled) setStatus(d); })
+      .catch(() => { if (!cancelled) setStatus(null); });
+    return () => { cancelled = true; };
+  }, [projectId, userId, published, reloadKey]);
+
+  const domain = published && status?.hasDomain ? status.domain : null; // an unpublished app keeps no domain on screen
+  const state = status?.status;
+  return (
+    <section className="flex flex-col gap-3 border-t border-border py-6 sm:flex-row sm:items-start sm:justify-between">
+      <div className="min-w-0">
+        <h2 className="font-display text-lg font-semibold">{ta('domainTitle')}</h2>
+        {domain ? (
+          <p className="mt-1 flex flex-wrap items-center gap-x-3">
+            <span className="text-foreground">{domain}</span>
+            <span className={cn('text-sm', state === 'active' ? 'text-success' : 'text-warning')}>
+              {state === 'active' ? ta('domainActive') : state === 'verified' ? ta('domainVerified') : ta('domainPending')}
+            </span>
+          </p>
+        ) : (
+          <p className="mt-1 max-w-[60ch] text-muted">{published ? ta('domainNone') : ta('domainNeedsPublish')}</p>
+        )}
+      </div>
+      {published && (
+        <button onClick={onManage} className="flex h-10 shrink-0 items-center self-start rounded-lg border border-border px-4 text-[15px] font-medium transition hover:bg-surface">
+          {domain ? ta('domainManage') : ta('domainConnect')}
+        </button>
+      )}
+    </section>
+  );
+}
+
+const VERSIONS_SHOWN = 5;
+
+/** Every saved version, newest first, with a way back to an earlier one (Android's version history). */
+function VersionsSection({ versions, activeSha, isReverting, canRestore, onUse }: { versions: ProjectVersion[]; activeSha: string | null; isReverting: boolean; canRestore: boolean; onUse: (sha: string) => void }) {
+  const ta = useTranslations('apps');
+  const ago = useRelativeTime();
+  const [all, setAll] = useState(false);
+  const sorted = [...versions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const total = sorted.length;
+  const shown = all ? sorted : sorted.slice(0, VERSIONS_SHOWN);
+
+  return (
+    <section className="border-t border-border py-6">
+      <h2 className="font-display text-lg font-semibold">{ta('versionsTitle')}</h2>
+      {total === 0 ? (
+        <p className="mt-1 text-muted">{ta('versionsEmpty')}</p>
+      ) : (
+        <>
+          <ol className="mt-3 divide-y divide-border">
+            {shown.map((v, i) => {
+              const n = total - i;
+              const active = v.sha === activeSha || (!activeSha && i === 0);
+              return (
+                <li key={v.sha} className="flex items-center gap-3 py-2.5">
+                  <span className={cn('flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold tabular-nums', active ? 'bg-accent text-white' : 'bg-surface text-muted')}>
+                    {n}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-foreground">{v.message.replace(/^Tweak:\s*/i, '').trim() || ta('versionLabel', { n })}</p>
+                    <p className="text-xs text-muted">{ago(v.date)}</p>
+                  </div>
+                  {active ? (
+                    <span className="shrink-0 text-sm text-accent-hover">{ta('versionCurrent')}</span>
+                  ) : canRestore ? (
+                    <button
+                      onClick={() => onUse(v.sha)}
+                      disabled={isReverting}
+                      className="-mr-3 h-10 shrink-0 rounded-lg px-3 text-sm font-medium text-accent-hover transition hover:bg-surface disabled:opacity-50"
+                    >
+                      {ta('versionUse')}
+                    </button>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ol>
+          {total > VERSIONS_SHOWN && (
+            <button onClick={() => setAll((x) => !x)} className="-ml-2 mt-2 h-10 rounded-lg px-2 text-sm text-muted transition hover:bg-surface hover:text-foreground">
+              {all ? ta('versionsFewer') : ta('versionsAll', { count: total })}
+            </button>
+          )}
+        </>
+      )}
+    </section>
   );
 }

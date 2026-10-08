@@ -9,31 +9,31 @@ export const metadata: Metadata = {
 
 export default function SmsPage() {
   return (
-    <div className="theme-paper min-h-screen bg-[#FAF6F1] text-[#17140F]">
+    <div className="min-h-screen bg-background text-foreground">
       <MarketingHeader />
 
       <div className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-4xl font-bold mb-2">Build apps by text</h1>
-        <p className="text-[#17140F]/62 mb-10">
+        <h1 className="font-display text-4xl font-bold mb-2">Build apps by text</h1>
+        <p className="text-muted mb-10">
           Text VibeBuild what you want to build, and we&apos;ll text you back a link to your app.
         </p>
 
-        <div className="space-y-8 text-[#17140F]/70 leading-relaxed text-sm">
+        <div className="space-y-8 text-muted leading-relaxed text-sm">
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">How to opt in</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">How to opt in</h2>
             <p>
               Text any message describing an app you want (for example, <em>&quot;a todo app with dark mode&quot;</em>) to{' '}
-              <a href="sms:+17752788677" className="text-[#5B4CFF] hover:underline font-semibold">+1 (775) 278-8677</a>.
+              <a href="sms:+17752788677" className="text-accent-hover hover:underline font-semibold">+1 (775) 278-8677</a>.
               By sending that first message, you consent to receive SMS messages from VibeBuild
               (operated by KreativeKoalaSolutions LLC) related to your app build requests. You can also
               start the connection from the web by visiting{' '}
-              <Link href="/connect" className="text-[#5B4CFF] hover:underline">vibebuild.cc/connect</Link>{' '}
+              <Link href="/connect" className="text-accent-hover hover:underline">vibebuild.cc/connect</Link>{' '}
               and linking your phone number in account settings.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">What you&apos;ll receive</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">What you&apos;ll receive</h2>
             <p>Once opted in, VibeBuild will text you:</p>
             <ul className="list-disc pl-6 mt-2 space-y-1">
               <li>A confirmation that your build has started</li>
@@ -47,21 +47,21 @@ export default function SmsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">How to opt out</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">How to opt out</h2>
             <p>
               Reply <strong>STOP</strong> at any time to stop receiving messages from VibeBuild. Reply{' '}
               <strong>HELP</strong> for help. For support, email{' '}
-              <a href="mailto:support@vibebuild.cc" className="text-[#5B4CFF] hover:underline">support@vibebuild.cc</a>.
+              <a href="mailto:support@vibebuild.cc" className="text-accent-hover hover:underline">support@vibebuild.cc</a>.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">Privacy</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">Privacy</h2>
             <p>
               Your phone number is used only to deliver the messages described above and is never sold or
               shared for third-party marketing. See our{' '}
-              <Link href="/privacy" className="text-[#5B4CFF] hover:underline">Privacy Policy</Link>{' '}
-              and <Link href="/terms" className="text-[#5B4CFF] hover:underline">Terms of Service</Link> for details.
+              <Link href="/privacy" className="text-accent-hover hover:underline">Privacy Policy</Link>{' '}
+              and <Link href="/terms" className="text-accent-hover hover:underline">Terms of Service</Link> for details.
             </p>
           </section>
         </div>

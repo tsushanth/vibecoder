@@ -40,50 +40,47 @@ export function ChatPanel({ onTweak, disabled }: ChatPanelProps) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-card border-t border-border">
-      {/* Input — sits at the TOP of the chat panel so "Describe a change"
-          is immediately visible at the top of the panel rather than buried
-          below message history. shrink-0 so it can't be clipped. */}
-      <form onSubmit={handleSubmit} className="shrink-0 p-3 border-b border-border flex gap-2 bg-card">
+    <div className="flex h-full flex-col border-t border-border bg-card">
+      {/* Input sits at the TOP of the chat panel so "Describe a change" is immediately visible rather than buried below
+          message history. shrink-0 so it can't be clipped. */}
+      <form onSubmit={handleSubmit} className="flex shrink-0 gap-2 border-b border-border bg-card p-3">
+        <label htmlFor="chat-tweak" className="sr-only">
+          {t('chat.placeholder')}
+        </label>
         <input
+          id="chat-tweak"
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={disabled ? t('chat.readOnlyPlaceholder') : t('chat.placeholder')}
           disabled={isGenerating || disabled || isReverting}
-          className="flex-1 rounded-full border border-border bg-surface px-4 py-2 text-sm outline-none transition focus:border-accent disabled:opacity-50"
+          className="h-10 min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 text-foreground outline-none transition placeholder:text-subtle focus:border-accent disabled:opacity-50"
         />
         <button
           type="submit"
           disabled={!input.trim() || isGenerating || disabled || isReverting}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-white transition hover:bg-accent-hover disabled:opacity-40"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent text-white transition hover:bg-accent-deep disabled:bg-surface disabled:text-subtle"
+          aria-label={t('common.send')}
           title={t('common.send')}
         >
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19V5m0 0l-7 7m7-7l7 7" />
           </svg>
         </button>
       </form>
 
-      {/* Pinned generation banner — sits between the input and the message
-          history while a tweak is in flight, so the user always sees what's
-          happening without having to scroll to the bottom of the chat. */}
+      {/* Pinned generation status: sits between the input and the history while a tweak is in flight, so the person always
+          sees what is happening without scrolling. */}
       {isGenerating && (
-        <div className="shrink-0 px-3 py-2.5 border-b border-border bg-accent/5">
-          <div className="flex items-center gap-2 text-xs">
-            <div className="w-3.5 h-3.5 border-2 border-accent border-t-transparent rounded-full animate-spin shrink-0" />
-            <span className="text-accent font-semibold">
-              {PHASE_LABELS[phase] || t('generation.working')}
-            </span>
-            {progressPercent > 0 && (
-              <span className="text-accent/70 font-medium">{Math.round(progressPercent)}%</span>
-            )}
+        <div className="shrink-0 border-b border-border px-3 py-2.5" aria-live="polite">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-accent border-t-transparent" aria-hidden />
+            <span className="font-medium text-foreground">{PHASE_LABELS[phase] || t('generation.working')}</span>
+            {progressPercent > 0 && <span className="tabular-nums text-muted">{Math.round(progressPercent)}%</span>}
           </div>
-          {message && (
-            <p className="text-[11px] text-subtle mt-1 ml-5 truncate">{message}</p>
-          )}
+          {message && <p className="ml-5.5 mt-1 truncate text-sm text-muted">{message}</p>}
           {progressPercent > 0 && (
-            <div className="mt-2 h-1 bg-accent/10 rounded-full overflow-hidden">
+            <div className="mt-2 h-1 overflow-hidden rounded-full bg-surface">
               <div
                 className="h-full bg-accent transition-[width] duration-300 ease-out"
                 style={{ width: `${Math.min(100, Math.round(progressPercent))}%` }}
@@ -93,50 +90,36 @@ export function ChatPanel({ onTweak, disabled }: ChatPanelProps) {
         </div>
       )}
 
-      {/* Messages */}
-      <div className="flex-1 overflow-auto px-4 py-3 space-y-2.5 min-h-0">
+      <div className="min-h-0 flex-1 space-y-2.5 overflow-auto px-4 py-3">
         {chatMessages.length === 0 && !isGenerating && (
-          <p className="text-xs text-subtle text-center py-4">
-            {t('chat.emptyHint')}
-          </p>
+          <p className="py-4 text-center text-sm text-muted">{t('chat.emptyHint')}</p>
         )}
         {chatMessages.map((msg) => {
-          // Version-bearing assistant messages now live in the top-right
-          // Versions dropdown — skip rendering them here to keep the chat
-          // focused on the prompt-response conversation.
+          // Version-bearing assistant messages live in the Versions menu; skip them here to keep the chat on the conversation.
           if (msg.role === 'assistant' && msg.versionSha) {
             return null;
           }
 
-          // Error message
           if (msg.role === 'assistant' && msg.content.startsWith('Error:')) {
             return (
-              <div
-                key={msg.id}
-                className="max-w-[85%] rounded-2xl rounded-tl-sm border border-danger/20 bg-danger/10 px-3 py-2 text-xs text-danger"
-              >
+              <p key={msg.id} className="max-w-[85%] text-sm text-danger">
                 {msg.content}
-              </div>
+              </p>
             );
           }
 
-          // Regular assistant message (no version)
           if (msg.role === 'assistant') {
             return (
-              <div
-                key={msg.id}
-                className="max-w-[85%] rounded-2xl rounded-tl-sm bg-surface px-3 py-2 text-xs text-foreground"
-              >
+              <p key={msg.id} className="max-w-[85%] text-sm text-foreground">
                 {msg.content}
-              </div>
+              </p>
             );
           }
 
-          // User message
           return (
             <div
               key={msg.id}
-              className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-accent px-3 py-2 text-xs text-white"
+              className="ml-auto w-fit max-w-[85%] whitespace-pre-wrap break-words rounded-xl rounded-tr-sm bg-surface px-3 py-2 text-sm text-foreground"
             >
               {msg.content}
             </div>
@@ -144,7 +127,6 @@ export function ChatPanel({ onTweak, disabled }: ChatPanelProps) {
         })}
         <div ref={messagesEndRef} />
       </div>
-
     </div>
   );
 }

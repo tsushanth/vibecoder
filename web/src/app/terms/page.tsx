@@ -8,16 +8,16 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="theme-paper min-h-screen bg-[#FAF6F1] text-[#17140F]">
+    <div className="min-h-screen bg-background text-foreground">
       <MarketingHeader />
 
       <div className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-4xl font-bold mb-2">Terms of Service</h1>
-        <p className="text-sm text-[#17140F]/40 mb-10">Last updated: March 1, 2026</p>
+        <h1 className="font-display text-4xl font-bold mb-2">Terms of Service</h1>
+        <p className="text-sm text-subtle mb-10">Last updated: March 1, 2026</p>
 
-        <div className="space-y-8 text-[#17140F]/62 leading-relaxed text-sm">
+        <div className="space-y-8 text-muted leading-relaxed text-sm">
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">1. Acceptance of Terms</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">1. Acceptance of Terms</h2>
             <p>
               By accessing or using VibeBuild ("the Service"), operated by KreativeKoalaSolutions LLC ("we", "us", "our"),
               you agree to be bound by these Terms of Service. If you do not agree to these terms, do not use the Service.
@@ -25,7 +25,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">2. Description of Service</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">2. Description of Service</h2>
             <p>
               VibeBuild is an AI-powered platform that enables users to create web applications by providing
               natural language descriptions. The Service includes app generation, hosting, deployment, and community features.
@@ -33,7 +33,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">3. User Accounts</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">3. User Accounts</h2>
             <p>
               You must create an account to use certain features of the Service. You are responsible for maintaining
               the confidentiality of your account credentials and for all activities that occur under your account.
@@ -42,7 +42,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">4. User Content</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">4. User Content</h2>
             <p>
               You retain ownership of the apps and content you create using VibeBuild. By making a project public,
               you grant other users the right to view, fork, and build upon your project. You are solely responsible
@@ -51,7 +51,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">5. Acceptable Use</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">5. Acceptable Use</h2>
             <p>You agree not to use the Service to:</p>
             <ul className="list-disc pl-6 mt-2 space-y-1">
               <li>Create apps containing illegal, harmful, or offensive content</li>
@@ -64,7 +64,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">6. Subscriptions and Payments</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">6. Subscriptions and Payments</h2>
             <p>
               Paid plans are billed monthly or annually as selected. Subscriptions automatically renew unless
               cancelled before the renewal date. Refunds are handled on a case-by-case basis. We reserve the
@@ -73,7 +73,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">7. Intellectual Property</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">7. Intellectual Property</h2>
             <p>
               The VibeBuild platform, including its design, code, AI models, and branding, is the intellectual
               property of KreativeKoalaSolutions LLC. You may not copy, modify, or distribute any part of the
@@ -82,7 +82,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">8. Limitation of Liability</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">8. Limitation of Liability</h2>
             <p>
               VibeBuild is provided "as is" without warranties of any kind. We are not liable for any damages
               arising from your use of the Service, including but not limited to loss of data, revenue, or
@@ -92,7 +92,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">9. Termination</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">9. Termination</h2>
             <p>
               We may suspend or terminate your account if you violate these terms. You may delete your account
               at any time through your account settings. Upon termination, your hosted apps may be removed.
@@ -100,7 +100,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">10. Changes to Terms</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">10. Changes to Terms</h2>
             <p>
               We may update these terms from time to time. We will notify users of material changes via email
               or in-app notification. Continued use of the Service after changes constitutes acceptance of the
@@ -109,10 +109,10 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-[#17140F] mb-3">11. Contact</h2>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">11. Contact</h2>
             <p>
               For questions about these terms, contact us at{' '}
-              <a href="mailto:support@vibebuild.cc" className="text-[#5B4CFF] hover:underline">support@vibebuild.cc</a>.
+              <a href="mailto:support@vibebuild.cc" className="text-accent-hover hover:underline">support@vibebuild.cc</a>.
             </p>
           </section>
         </div>
