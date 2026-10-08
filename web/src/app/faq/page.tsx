@@ -22,7 +22,7 @@ const faqs = [
   },
   {
     q: 'Is VibeBuild free?',
-    a: 'Yes! The free plan includes 10 app generations per day, 3 tweaks per project, public project hosting, and one-click deployment. Our Pro plan ($9.99/month) offers unlimited generations, unlimited tweaks, private projects, custom domains, and priority AI processing.',
+    a: 'Yes. The free plan includes 3 tweaks per project, public project hosting, and one-click deployment. Pro ($9.99 a month) adds unlimited tweaks, private projects, and custom domains.',
   },
   {
     q: 'How does the AI pipeline work?',

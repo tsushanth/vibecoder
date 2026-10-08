@@ -1,1 +1,102 @@
-{}
+{
+  "create": {
+    "hero": {
+      "title": "Was möchtest du bauen?",
+      "help": "Beschreibe, was deine App tun soll. Du kannst sie testen, ändern und veröffentlichen."
+    },
+    "composer": {
+      "placeholder": "Baue eine Wetter-App, die die Vorhersage für meine Stadt zeigt",
+      "build": "Bauen",
+      "attach": "Referenzbild anhängen",
+      "removeImage": "Bild entfernen",
+      "imageAttached": "Referenzbild angehängt",
+      "imageHint": "Dient als visuelle Vorlage für das Design",
+      "voice": "Spracheingabe",
+      "stopVoice": "Spracheingabe beenden",
+      "count": "{count} von {max} Zeichen",
+      "offTopic": "Das klingt nach einer Frage oder einem Thema. Beschreibe, was die App tun soll, zum Beispiel ein Trade-Tracker, der deine Trefferquote zeigt."
+    },
+    "ideas": {
+      "title": "Probier eine Idee",
+      "more": "Neue Ideen vorschlagen",
+      "loading": "Ideen werden gesucht"
+    },
+    "thread": {
+      "label": "Build-Verlauf"
+    },
+    "plan": {
+      "thinking": "Ich denke über deine Idee nach",
+      "title": "Das ist mein Plan",
+      "style": "Stil: {style}",
+      "build": "So bauen",
+      "edit": "Beschreibung bearbeiten"
+    },
+    "build": {
+      "building": "Deine App wird gebaut",
+      "complete": "Build fertig",
+      "failed": "Build abgebrochen",
+      "working": "Wird bearbeitet",
+      "phase": {
+        "generate": "Generieren",
+        "validate": "Prüfen",
+        "fix": "Korrigieren",
+        "polish": "Verfeinern",
+        "verify": "Verifizieren"
+      },
+      "cancel": "Build abbrechen",
+      "endedEarly": "Der Build wurde vor dem Ende gestoppt. Bearbeite die Beschreibung und versuche es erneut.",
+      "failedGeneric": "Der Build wurde nicht fertig. Bearbeite die Beschreibung und versuche es erneut.",
+      "editRetry": "Bearbeiten und erneut versuchen",
+      "newApp": "Neue App",
+      "busyTitle": "Unsere Server sind ausgelastet",
+      "busyBody": "Versuche es in ein paar Minuten erneut. Pro-Builds kommen zuerst dran.",
+      "tryAgain": "Erneut versuchen",
+      "seePro": "Pro ansehen"
+    },
+    "ready": {
+      "title": "Deine App ist fertig",
+      "saving": "Wird in deinen Apps gespeichert",
+      "saved": "In deinen Apps gespeichert. Öffne die Live-Vorschau, um sie zu testen.",
+      "savedNoPreview": "In deinen Apps gespeichert.",
+      "saveFailed": "Nicht gespeichert: {error}. Veröffentlichen und Anpassen brauchen eine gespeicherte App, starte also eine neue App.",
+      "saveFailedGeneric": "Speichern fehlgeschlagen",
+      "published": "Veröffentlicht unter",
+      "openPreview": "Live-Vorschau öffnen",
+      "publish": "Veröffentlichen",
+      "managePublish": "Veröffentlichung verwalten",
+      "tweak": "Anpassen",
+      "openApp": "App-Seite öffnen",
+      "newApp": "Neue App starten"
+    },
+    "feedback": {
+      "question": "Wie war das Ergebnis?",
+      "good": "Gutes Ergebnis",
+      "bad": "Braucht Verbesserung",
+      "thanks": "Danke für dein Feedback"
+    },
+    "tweak": {
+      "placeholder": "Beschreibe eine Änderung",
+      "waitForSave": "Anpassungen sind möglich, sobald die App gespeichert ist",
+      "send": "Änderung senden",
+      "working": "Änderungen werden angewendet",
+      "done": "Fertig. Die Vorschau ist aktualisiert.",
+      "doneVersion": "Fertig. Als Version {version} gespeichert.",
+      "failed": "Diese Änderung hat nicht geklappt: {error}",
+      "failedGeneric": "Diese Änderung hat nicht geklappt. Beschreibe sie anders.",
+      "openPreview": "Vorschau öffnen"
+    },
+    "preview": {
+      "title": "Live-Vorschau",
+      "close": "Vorschau schließen",
+      "reload": "Vorschau neu laden",
+      "device": "Vorschaugröße",
+      "desktop": "Desktop",
+      "tablet": "Tablet",
+      "phone": "Smartphone",
+      "empty": "Deine App erscheint hier, sobald sie gebaut ist"
+    },
+    "versions": {
+      "untitled": "Version"
+    }
+  }
+}

@@ -1,1 +1,102 @@
-{}
+{
+  "create": {
+    "hero": {
+      "title": "O que você quer criar?",
+      "help": "Descreva o que seu app deve fazer. Você pode testar, mudar e publicar."
+    },
+    "composer": {
+      "placeholder": "Crie um app de clima que mostre a previsão da minha cidade",
+      "build": "Criar",
+      "attach": "Anexar imagem de referência",
+      "removeImage": "Remover imagem",
+      "imageAttached": "Imagem de referência anexada",
+      "imageHint": "Usada como guia visual para o design",
+      "voice": "Entrada por voz",
+      "stopVoice": "Parar entrada por voz",
+      "count": "{count} de {max} caracteres",
+      "offTopic": "Isso parece uma pergunta ou um tema. Descreva o que o app deve fazer, por exemplo um registro de operações que mostre sua taxa de acerto."
+    },
+    "ideas": {
+      "title": "Experimente uma ideia",
+      "more": "Sugerir novas ideias",
+      "loading": "Buscando ideias"
+    },
+    "thread": {
+      "label": "Conversa de criação"
+    },
+    "plan": {
+      "thinking": "Pensando na sua ideia",
+      "title": "Este é meu plano",
+      "style": "Estilo: {style}",
+      "build": "Criar assim",
+      "edit": "Editar descrição"
+    },
+    "build": {
+      "building": "Criando seu app",
+      "complete": "Criação concluída",
+      "failed": "Criação interrompida",
+      "working": "Trabalhando nisso",
+      "phase": {
+        "generate": "Gerar",
+        "validate": "Validar",
+        "fix": "Corrigir",
+        "polish": "Refinar",
+        "verify": "Verificar"
+      },
+      "cancel": "Cancelar criação",
+      "endedEarly": "A criação parou antes de terminar. Edite a descrição e tente de novo.",
+      "failedGeneric": "A criação não terminou. Edite a descrição e tente de novo.",
+      "editRetry": "Editar e tentar de novo",
+      "newApp": "Novo app",
+      "busyTitle": "Nossos servidores estão lotados",
+      "busyBody": "Tente de novo em alguns minutos. Criações Pro têm prioridade na fila.",
+      "tryAgain": "Tentar de novo",
+      "seePro": "Ver Pro"
+    },
+    "ready": {
+      "title": "Seu app está pronto",
+      "saving": "Salvando nos seus apps",
+      "saved": "Salvo nos seus apps. Abra a prévia ao vivo para testar.",
+      "savedNoPreview": "Salvo nos seus apps.",
+      "saveFailed": "Não salvo: {error}. Publicar e ajustar exigem um app salvo, então comece um novo app para tentar de novo.",
+      "saveFailedGeneric": "Falha ao salvar",
+      "published": "Publicado em",
+      "openPreview": "Abrir prévia ao vivo",
+      "publish": "Publicar",
+      "managePublish": "Gerenciar publicação",
+      "tweak": "Ajustar",
+      "openApp": "Abrir página do app",
+      "newApp": "Começar um novo app"
+    },
+    "feedback": {
+      "question": "O que achou?",
+      "good": "Bom resultado",
+      "bad": "Precisa melhorar",
+      "thanks": "Obrigado pelo feedback"
+    },
+    "tweak": {
+      "placeholder": "Descreva uma mudança",
+      "waitForSave": "Os ajustes ficam disponíveis quando o app for salvo",
+      "send": "Enviar mudança",
+      "working": "Aplicando mudanças",
+      "done": "Pronto. A prévia foi atualizada.",
+      "doneVersion": "Pronto. Salvo como versão {version}.",
+      "failed": "Essa mudança não foi aplicada: {error}",
+      "failedGeneric": "Essa mudança não foi aplicada. Tente descrevê-la de outro jeito.",
+      "openPreview": "Abrir prévia"
+    },
+    "preview": {
+      "title": "Prévia ao vivo",
+      "close": "Fechar prévia",
+      "reload": "Recarregar prévia",
+      "device": "Tamanho da prévia",
+      "desktop": "Computador",
+      "tablet": "Tablet",
+      "phone": "Celular",
+      "empty": "Seu app aparece aqui quando estiver pronto"
+    },
+    "versions": {
+      "untitled": "Versão"
+    }
+  }
+}

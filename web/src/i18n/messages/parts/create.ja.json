@@ -1,1 +1,102 @@
-{}
+{
+  "create": {
+    "hero": {
+      "title": "何を作りますか？",
+      "help": "アプリでやりたいことを書いてください。試して、変更して、公開できます。"
+    },
+    "composer": {
+      "placeholder": "私の街の天気予報を表示する天気アプリを作って",
+      "build": "作成",
+      "attach": "参考画像を添付",
+      "removeImage": "画像を削除",
+      "imageAttached": "参考画像を添付しました",
+      "imageHint": "デザインの参考として使います",
+      "voice": "音声入力",
+      "stopVoice": "音声入力を停止",
+      "count": "{count} / {max} 文字",
+      "offTopic": "質問やトピックのように見えます。アプリで何をしたいかを書いてください。例：取引を記録して勝率を表示するトラッカー。"
+    },
+    "ideas": {
+      "title": "アイデアを試す",
+      "more": "別のアイデアを提案",
+      "loading": "アイデアを探しています"
+    },
+    "thread": {
+      "label": "作成の会話"
+    },
+    "plan": {
+      "thinking": "アイデアを検討しています",
+      "title": "プランはこちら",
+      "style": "スタイル：{style}",
+      "build": "これで作成",
+      "edit": "説明を編集"
+    },
+    "build": {
+      "building": "アプリを作成中",
+      "complete": "作成完了",
+      "failed": "作成が止まりました",
+      "working": "作業中",
+      "phase": {
+        "generate": "生成",
+        "validate": "検証",
+        "fix": "修正",
+        "polish": "仕上げ",
+        "verify": "確認"
+      },
+      "cancel": "作成をキャンセル",
+      "endedEarly": "作成が途中で止まりました。説明を編集してもう一度お試しください。",
+      "failedGeneric": "作成が完了しませんでした。説明を編集してもう一度お試しください。",
+      "editRetry": "編集して再試行",
+      "newApp": "新しいアプリ",
+      "busyTitle": "サーバーが混み合っています",
+      "busyBody": "数分後にもう一度お試しください。Pro の作成は優先されます。",
+      "tryAgain": "もう一度試す",
+      "seePro": "Pro を見る"
+    },
+    "ready": {
+      "title": "アプリができました",
+      "saving": "アプリに保存中",
+      "saved": "アプリに保存しました。ライブプレビューを開いて試してください。",
+      "savedNoPreview": "アプリに保存しました。",
+      "saveFailed": "保存できませんでした：{error}。公開と調整には保存済みのアプリが必要です。新しいアプリで再度お試しください。",
+      "saveFailedGeneric": "保存に失敗しました",
+      "published": "公開先",
+      "openPreview": "ライブプレビューを開く",
+      "publish": "公開",
+      "managePublish": "公開を管理",
+      "tweak": "調整",
+      "openApp": "アプリのページを開く",
+      "newApp": "新しいアプリを始める"
+    },
+    "feedback": {
+      "question": "いかがでしたか？",
+      "good": "良い結果",
+      "bad": "改善が必要",
+      "thanks": "フィードバックありがとうございます"
+    },
+    "tweak": {
+      "placeholder": "変更内容を入力",
+      "waitForSave": "アプリの保存後に調整できます",
+      "send": "変更を送信",
+      "working": "変更を適用中",
+      "done": "完了しました。プレビューを更新しました。",
+      "doneVersion": "完了しました。バージョン {version} として保存しました。",
+      "failed": "変更を適用できませんでした：{error}",
+      "failedGeneric": "変更を適用できませんでした。別の言い方で試してください。",
+      "openPreview": "プレビューを開く"
+    },
+    "preview": {
+      "title": "ライブプレビュー",
+      "close": "プレビューを閉じる",
+      "reload": "プレビューを再読み込み",
+      "device": "プレビューのサイズ",
+      "desktop": "デスクトップ",
+      "tablet": "タブレット",
+      "phone": "スマートフォン",
+      "empty": "作成が終わるとここにアプリが表示されます"
+    },
+    "versions": {
+      "untitled": "バージョン"
+    }
+  }
+}

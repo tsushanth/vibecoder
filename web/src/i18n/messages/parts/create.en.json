@@ -1,1 +1,102 @@
-{}
+{
+  "create": {
+    "hero": {
+      "title": "What do you want to build?",
+      "help": "Describe what your app should do. You can try it, change it and publish it."
+    },
+    "composer": {
+      "placeholder": "Build a weather app that shows the forecast for my city",
+      "build": "Build",
+      "attach": "Attach a reference image",
+      "removeImage": "Remove image",
+      "imageAttached": "Reference image attached",
+      "imageHint": "Used as a visual guide for the design",
+      "voice": "Voice input",
+      "stopVoice": "Stop voice input",
+      "count": "{count} of {max} characters",
+      "offTopic": "This reads like a question or a topic. Describe what the app should do, for example a tracker that logs trades and shows your win rate."
+    },
+    "ideas": {
+      "title": "Try an idea",
+      "more": "Suggest new ideas",
+      "loading": "Finding ideas"
+    },
+    "thread": {
+      "label": "Build conversation"
+    },
+    "plan": {
+      "thinking": "Thinking through your idea",
+      "title": "Here's my plan",
+      "style": "Style: {style}",
+      "build": "Build this",
+      "edit": "Edit prompt"
+    },
+    "build": {
+      "building": "Building your app",
+      "complete": "Build complete",
+      "failed": "Build stopped",
+      "working": "Working on it",
+      "phase": {
+        "generate": "Generate",
+        "validate": "Validate",
+        "fix": "Fix",
+        "polish": "Polish",
+        "verify": "Verify"
+      },
+      "cancel": "Cancel build",
+      "endedEarly": "The build stopped before it finished. Edit the prompt and try again.",
+      "failedGeneric": "The build did not finish. Edit the prompt and try again.",
+      "editRetry": "Edit and retry",
+      "newApp": "New app",
+      "busyTitle": "Builders are at full capacity",
+      "busyBody": "Try again in a few minutes. Pro builds go to the front of the queue.",
+      "tryAgain": "Try again",
+      "seePro": "See Pro"
+    },
+    "ready": {
+      "title": "Your app is ready",
+      "saving": "Saving to your apps",
+      "saved": "Saved to your apps. Open the live preview to try it.",
+      "savedNoPreview": "Saved to your apps.",
+      "saveFailed": "Not saved: {error}. Publishing and tweaks need a saved app, so start a new app to try again.",
+      "saveFailedGeneric": "Save failed",
+      "published": "Published at",
+      "openPreview": "Open live preview",
+      "publish": "Publish",
+      "managePublish": "Manage publishing",
+      "tweak": "Tweak",
+      "openApp": "Open app page",
+      "newApp": "Start a new app"
+    },
+    "feedback": {
+      "question": "How did we do?",
+      "good": "Good result",
+      "bad": "Needs work",
+      "thanks": "Thanks for the feedback"
+    },
+    "tweak": {
+      "placeholder": "Describe a change",
+      "waitForSave": "Tweaks open once your app is saved",
+      "send": "Send change",
+      "working": "Applying changes",
+      "done": "Done. The preview is updated.",
+      "doneVersion": "Done. Saved as version {version}.",
+      "failed": "That change did not go through: {error}",
+      "failedGeneric": "That change did not go through. Try describing it another way.",
+      "openPreview": "Open preview"
+    },
+    "preview": {
+      "title": "Live preview",
+      "close": "Close preview",
+      "reload": "Reload preview",
+      "device": "Preview size",
+      "desktop": "Desktop",
+      "tablet": "Tablet",
+      "phone": "Phone",
+      "empty": "Your app shows here once it is built"
+    },
+    "versions": {
+      "untitled": "Version"
+    }
+  }
+}

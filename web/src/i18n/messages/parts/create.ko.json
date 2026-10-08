@@ -1,1 +1,102 @@
-{}
+{
+  "create": {
+    "hero": {
+      "title": "무엇을 만들고 싶으세요?",
+      "help": "앱이 할 일을 설명하세요. 직접 써 보고, 바꾸고, 게시할 수 있어요."
+    },
+    "composer": {
+      "placeholder": "내 도시의 일기예보를 보여 주는 날씨 앱을 만들어 줘",
+      "build": "만들기",
+      "attach": "참고 이미지 첨부",
+      "removeImage": "이미지 삭제",
+      "imageAttached": "참고 이미지가 첨부됨",
+      "imageHint": "디자인의 시각적 참고로 사용돼요",
+      "voice": "음성 입력",
+      "stopVoice": "음성 입력 중지",
+      "count": "{count} / {max}자",
+      "offTopic": "질문이나 주제처럼 보여요. 앱이 할 일을 설명해 주세요. 예: 거래를 기록하고 승률을 보여 주는 트래커."
+    },
+    "ideas": {
+      "title": "아이디어 써 보기",
+      "more": "새 아이디어 추천",
+      "loading": "아이디어 찾는 중"
+    },
+    "thread": {
+      "label": "빌드 대화"
+    },
+    "plan": {
+      "thinking": "아이디어를 검토하는 중",
+      "title": "제 계획은 이래요",
+      "style": "스타일: {style}",
+      "build": "이대로 만들기",
+      "edit": "설명 수정"
+    },
+    "build": {
+      "building": "앱을 만드는 중",
+      "complete": "빌드 완료",
+      "failed": "빌드 중단됨",
+      "working": "작업 중",
+      "phase": {
+        "generate": "생성",
+        "validate": "검증",
+        "fix": "수정",
+        "polish": "다듬기",
+        "verify": "확인"
+      },
+      "cancel": "빌드 취소",
+      "endedEarly": "빌드가 끝나기 전에 멈췄어요. 설명을 수정하고 다시 시도하세요.",
+      "failedGeneric": "빌드가 끝나지 않았어요. 설명을 수정하고 다시 시도하세요.",
+      "editRetry": "수정 후 다시 시도",
+      "newApp": "새 앱",
+      "busyTitle": "서버가 가득 찼어요",
+      "busyBody": "몇 분 후 다시 시도하세요. Pro 빌드는 먼저 처리돼요.",
+      "tryAgain": "다시 시도",
+      "seePro": "Pro 보기"
+    },
+    "ready": {
+      "title": "앱이 준비됐어요",
+      "saving": "내 앱에 저장 중",
+      "saved": "내 앱에 저장했어요. 라이브 미리보기를 열어 써 보세요.",
+      "savedNoPreview": "내 앱에 저장했어요.",
+      "saveFailed": "저장 실패: {error}. 게시와 수정에는 저장된 앱이 필요하니 새 앱으로 다시 시도하세요.",
+      "saveFailedGeneric": "저장 실패",
+      "published": "게시 주소",
+      "openPreview": "라이브 미리보기 열기",
+      "publish": "게시",
+      "managePublish": "게시 관리",
+      "tweak": "수정",
+      "openApp": "앱 페이지 열기",
+      "newApp": "새 앱 시작"
+    },
+    "feedback": {
+      "question": "결과가 어땠나요?",
+      "good": "좋은 결과",
+      "bad": "개선 필요",
+      "thanks": "의견 감사합니다"
+    },
+    "tweak": {
+      "placeholder": "바꿀 내용을 설명하세요",
+      "waitForSave": "앱이 저장되면 수정할 수 있어요",
+      "send": "변경 보내기",
+      "working": "변경 사항 적용 중",
+      "done": "완료. 미리보기를 업데이트했어요.",
+      "doneVersion": "완료. 버전 {version}(으)로 저장했어요.",
+      "failed": "변경이 적용되지 않았어요: {error}",
+      "failedGeneric": "변경이 적용되지 않았어요. 다르게 설명해 보세요.",
+      "openPreview": "미리보기 열기"
+    },
+    "preview": {
+      "title": "라이브 미리보기",
+      "close": "미리보기 닫기",
+      "reload": "미리보기 새로고침",
+      "device": "미리보기 크기",
+      "desktop": "데스크톱",
+      "tablet": "태블릿",
+      "phone": "휴대폰",
+      "empty": "빌드가 끝나면 여기에 앱이 표시돼요"
+    },
+    "versions": {
+      "untitled": "버전"
+    }
+  }
+}
