@@ -1,27 +1,28 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Instrument_Sans } from "next/font/google";
+import { Geist_Mono, Instrument_Sans, Bricolage_Grotesque } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import "./globals.css";
 import WebFailureReporter from '@/components/WebFailureReporter'
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
-// Public marketing pages only (see .theme-paper in globals.css) — the
-// authenticated builder keeps Geist.
+// Body and interface text.
 const instrumentSans = Instrument_Sans({
   variable: "--font-instrument",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700"],
+});
+
+// Headlines, plan prices and app names.
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
+  subsets: ["latin", "latin-ext"],
+  weight: ["500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -56,7 +57,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${instrumentSans.variable} antialiased bg-background text-foreground`}
+        className={`${geistMono.variable} ${instrumentSans.variable} ${bricolage.variable} antialiased bg-background text-foreground`}
       >
         <WebFailureReporter />
         <NextIntlClientProvider messages={messages}>
