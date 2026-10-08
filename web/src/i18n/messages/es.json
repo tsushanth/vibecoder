@@ -353,5 +353,12 @@
       "unknown": "Something went wrong loading usage."
     },
     "upgrade": "Upgrade your plan to raise this limit."
+  },
+  "nav": {
+    "label": "Principal",
+    "apps": "Apps",
+    "create": "Crear",
+    "explore": "Explorar",
+    "account": "Cuenta"
   }
 }

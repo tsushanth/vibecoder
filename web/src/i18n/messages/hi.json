@@ -353,5 +353,12 @@
       "unknown": "Something went wrong loading usage."
     },
     "upgrade": "Upgrade your plan to raise this limit."
+  },
+  "nav": {
+    "label": "मुख्य",
+    "apps": "ऐप्स",
+    "create": "बनाएं",
+    "explore": "एक्सप्लोर",
+    "account": "खाता"
   }
 }
