@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.kreativekoala.vibecoder.data.model.SubscriptionStatusResponse
 import com.kreativekoala.vibecoder.data.model.User
 import com.kreativekoala.vibecoder.data.repository.AuthRepository
+import com.kreativekoala.vibecoder.data.repository.toLocalUser
 import com.kreativekoala.vibecoder.data.repository.ProjectRepository
 import com.kreativekoala.vibecoder.data.repository.SubscriptionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -41,16 +42,8 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            // The backend has no profile endpoint, so fetchUserProfile 404s. Fall back
-            // to the local session so the screen shows the real name and email.
-            val fetched = try { authRepository.fetchUserProfile(userId) } catch (_: Exception) { null }
-            val local = authRepository.currentUser
-            val base = fetched ?: User(
-                userId = userId,
-                email = local?.email,
-                displayName = local?.displayName ?: local?.email?.substringBefore('@'),
-                avatarUrl = local?.avatarUrl
-            )
+            // The backend has no profile endpoint, so the name and email come from the session.
+            val base = authRepository.currentUser?.toLocalUser() ?: User(userId = userId)
             _uiState.update { it.copy(user = base) }
 
             try {

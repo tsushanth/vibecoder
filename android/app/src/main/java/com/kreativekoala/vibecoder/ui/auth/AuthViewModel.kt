@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.kreativekoala.vibecoder.data.local.UserPreferences
 import com.kreativekoala.vibecoder.data.model.User
 import com.kreativekoala.vibecoder.data.repository.AuthRepository
+import com.kreativekoala.vibecoder.data.repository.toLocalUser
 import com.kreativekoala.vibecoder.service.FacebookSDKHelper
 import com.kreativekoala.vibecoder.service.FCMTokenManager
 import com.kreativekoala.vibecoder.service.FirebaseAnalyticsHelper
@@ -45,13 +46,9 @@ class AuthViewModel @Inject constructor(
                 _isAuthenticated.value = authUser != null
                 _isAuthResolved.value = true
                 if (authUser != null && _currentUser.value == null) {
-                    try {
-                        val user = authRepository.fetchUserProfile(authUser.uid)
-                        _currentUser.value = user
-                        userPreferences.saveUser(user.userId, user.displayName)
-                    } catch (_: Exception) {
-                        // Profile fetch may fail on first launch before registration
-                    }
+                    val user = authUser.toLocalUser()
+                    _currentUser.value = user
+                    userPreferences.saveUser(user.userId, user.displayName)
                 }
             }
         }

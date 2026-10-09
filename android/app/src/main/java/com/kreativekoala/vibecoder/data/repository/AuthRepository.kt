@@ -30,6 +30,17 @@ data class AuthUser(
     val avatarUrl: String?
 )
 
+/**
+ * The signed-in user as the app knows it from the Supabase session alone. The backend has no
+ * "get user" endpoint, so this is the profile used whenever the server did not return one.
+ */
+fun AuthUser.toLocalUser(): User = User(
+    userId = uid,
+    email = email,
+    displayName = displayName ?: email?.substringBefore('@'),
+    avatarUrl = avatarUrl
+)
+
 @Singleton
 class AuthRepository @Inject constructor(
     private val api: VibeBuildApi,
@@ -136,11 +147,7 @@ class AuthRepository @Inject constructor(
         )
 
         val response = api.register(request)
-        return response.user ?: fetchUserProfile(authUser.uid)
-    }
-
-    suspend fun fetchUserProfile(userId: String): User {
-        return api.getUser(userId)
+        return response.user ?: authUser.toLocalUser()
     }
 
     suspend fun signOut() {
