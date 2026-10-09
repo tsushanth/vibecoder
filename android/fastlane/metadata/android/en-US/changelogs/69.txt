@@ -1,0 +1,1 @@
+Fixes: no more failed profile request on launch and on the Account screen.
