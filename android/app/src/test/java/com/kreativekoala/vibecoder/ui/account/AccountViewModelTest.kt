@@ -40,8 +40,7 @@ class AccountViewModelTest {
     private fun subStatus(tier: String, limits: SubscriptionLimits? = null) =
         SubscriptionStatusResponse(success = true, tier = tier, limits = limits)
 
-    @Test fun profileFetchThrows_fallsBackToLocalSession() = runTest {
-        coEvery { auth.fetchUserProfile("u1") } throws IOException("404")
+    @Test fun profileComesFromTheLocalSession() = runTest {
         coEvery { projects.countMyProjects("u1") } returns 4
         coEvery { subs.getSubscriptionStatus("u1") } returns subStatus("free")
         val vm = AccountViewModel(auth, subs, projects)
@@ -56,21 +55,12 @@ class AccountViewModelTest {
 
     @Test fun localDisplayNameWinsOverEmailPrefix() = runTest {
         every { auth.currentUser } returns AuthUser("u1", "ann@example.com", "Ann Lee", null)
-        coEvery { auth.fetchUserProfile("u1") } throws IOException()
         val vm = AccountViewModel(auth, subs, projects)
         advanceUntilIdle()
         assertEquals("Ann Lee", vm.uiState.value.user!!.displayName)
     }
 
-    @Test fun fetchedProfileIsUsedWhenAvailable() = runTest {
-        coEvery { auth.fetchUserProfile("u1") } returns User(userId = "u1", displayName = "Server Name")
-        val vm = AccountViewModel(auth, subs, projects)
-        advanceUntilIdle()
-        assertEquals("Server Name", vm.uiState.value.user!!.displayName)
-    }
-
     @Test fun projectCount_comes_from_countMyProjects() = runTest {
-        coEvery { auth.fetchUserProfile("u1") } returns User(userId = "u1", totalProjects = 0)
         coEvery { projects.countMyProjects("u1") } returns 230
         val vm = AccountViewModel(auth, subs, projects)
         advanceUntilIdle()
@@ -79,12 +69,11 @@ class AccountViewModelTest {
     }
 
     @Test fun countFailure_keepsUserAndStillLoadsSubscription() = runTest {
-        coEvery { auth.fetchUserProfile("u1") } returns User(userId = "u1", totalProjects = 3)
         coEvery { projects.countMyProjects("u1") } throws IOException()
         coEvery { subs.getSubscriptionStatus("u1") } returns subStatus("pro")
         val vm = AccountViewModel(auth, subs, projects)
         advanceUntilIdle()
-        assertEquals(3, vm.uiState.value.user!!.totalProjects)
+        assertEquals("u1", vm.uiState.value.user!!.userId)
         assertEquals("pro", vm.uiState.value.subscriptionStatus!!.tier)
         assertFalse(vm.uiState.value.isLoading)
     }

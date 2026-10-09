@@ -9,9 +9,6 @@ interface VibeBuildApi {
     @POST("api/auth/register")
     suspend fun register(@Body body: RegisterRequest): RegisterResponse
 
-    @GET("api/users/{userId}")
-    suspend fun getUser(@Path("userId") userId: String): User
-
     // Projects
     @GET("api/projects/my")
     suspend fun getMyProjects(
