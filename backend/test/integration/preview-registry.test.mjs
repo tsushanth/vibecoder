@@ -21,6 +21,7 @@ stubSupabase(supabase, (q) => {
     return { data: [], error: null };
 });
 const { default: router } = await import('../../routes/projects.routes.js');
+supabase.auth.getUser = async (t) => (String(t).startsWith('tok-') ? { data: { user: { id: String(t).slice(4) } }, error: null } : { data: { user: null }, error: { message: 'bad token' } }); // each caller authenticates as the user it claims to be
 
 const realFetch = globalThis.fetch;
 let deployOk = true;
@@ -114,7 +115,7 @@ test('generate (streaming): the manifest in the worker bundle is registered for 
 
 test('revert: after the old bundle is redeployed the manifest of that version is registered for the preview subdomain', async () => {
     reset(); revertMode = true; workerBundle = MANIFEST_BUNDLE;
-    const r = await quiet(() => realFetch(`${srv.base}/api/projects/${PID}/revert/abc1234`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ userId: 'owner-1' }) }));
+    const r = await quiet(() => realFetch(`${srv.base}/api/projects/${PID}/revert/abc1234`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer tok-owner-1' }, body: JSON.stringify({ userId: 'owner-1' }) }));
     assert.equal(r.status, 200, await r.text());
     const sub = `prev-${PID.substring(0, 8)}`;
     assert.deepEqual(calls, [['ensure', sub], ['ensure', PID], ['enabled', PID, false], ['manifest', PID, MANIFEST], ['manifest', sub, MANIFEST], ['copy', sub, PID, { replace: true }], ['enabled', sub, true]]);
@@ -122,7 +123,7 @@ test('revert: after the old bundle is redeployed the manifest of that version is
 
 test('revert: a failed redeploy registers nothing', async () => {
     reset(); revertMode = true; workerBundle = MANIFEST_BUNDLE; deployOk = false;
-    const r = await quiet(() => realFetch(`${srv.base}/api/projects/${PID}/revert/abc1234`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ userId: 'owner-1' }) }));
+    const r = await quiet(() => realFetch(`${srv.base}/api/projects/${PID}/revert/abc1234`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer tok-owner-1' }, body: JSON.stringify({ userId: 'owner-1' }) }));
     assert.equal(r.status, 200); assert.deepEqual(calls, []);
 });
 
