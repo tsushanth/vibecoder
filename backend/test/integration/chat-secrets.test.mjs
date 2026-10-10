@@ -22,6 +22,7 @@ stubSupabase(supabase, (q) => {
     return { data: [], error: null };
 });
 const { default: router } = await import('../../routes/projects.routes.js');
+supabase.auth.getUser = async (t) => (String(t).startsWith('tok-') ? { data: { user: { id: String(t).slice(4) } }, error: null } : { data: { user: null }, error: { message: 'bad token' } }); // each caller authenticates as the user it claims to be
 
 const realFetch = globalThis.fetch;
 const outbound = []; // everything sent to the worker / anthropic
@@ -56,7 +57,7 @@ const capture = async (fn) => {
     console.log = console.warn = console.error = fmt;
     try { return await fn(); } finally { Object.assign(console, origLog); }
 };
-const post = (path, body) => realFetch(`${srv.base}/api/projects${path}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+const post = (path, body) => realFetch(`${srv.base}/api/projects${path}`, { method: 'POST', headers: { 'content-type': 'application/json', ...(body.userId ? { authorization: `Bearer tok-${body.userId}` } : {}) }, body: JSON.stringify(body) });
 const everythingObserved = () => JSON.stringify({ writes, outbound, logged });
 let userSeq = 0; const freshUser = () => `chat-user-${Date.now()}-${userSeq++}`;
 

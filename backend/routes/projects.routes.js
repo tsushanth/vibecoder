@@ -22,6 +22,7 @@ import { filterBrowseProjects } from '../services/browseFilter.js';
 import { reportFailure } from '../lib/failureReporter.js';
 import { registerDeployedApp } from '../services/appRegistry.js';
 import { captureChatSecrets, redactForLog } from '../services/chatSecrets.js';
+import { denyUnlessActor } from '../lib/actAs.js';
 
 const router = express.Router();
 
@@ -1036,6 +1037,7 @@ router.post('/:id/retry', async (req, res) => {
         const { id } = req.params;
         const { userId } = req.body;
         if (!userId) return res.status(400).json({ error: 'userId is required' });
+        if (await denyUnlessActor(req, res, userId)) return;
 
         const { data: project, error: fetchErr } = await supabase
             .from('projects')
@@ -1675,6 +1677,7 @@ router.post('/:id/export-apk', async (req, res) => {
         const { userId, bundle: clientBundle } = req.body;
 
         if (!userId) return res.status(400).json({ error: 'userId is required' });
+        if (await denyUnlessActor(req, res, userId)) return;
 
         // Get project
         const { data: project, error } = await supabase
@@ -1884,6 +1887,7 @@ router.post('/:id/tweak', async (req, res) => {
         if (!userId || !tweakDescription || tweakDescription.trim().length === 0) {
             return res.status(400).json({ error: 'userId and tweakDescription are required' });
         }
+        if (await denyUnlessActor(req, res, userId)) return;
 
         if (tweakDescription.length > 2000) {
             return res.status(400).json({ error: 'Tweak description must be under 2000 characters' });
@@ -2166,6 +2170,7 @@ router.post('/:id/revert/:sha', async (req, res) => {
         if (!userId) {
             return res.status(400).json({ error: 'userId is required' });
         }
+        if (await denyUnlessActor(req, res, userId)) return;
 
         // Verify ownership
         const { data: project, error: projectError } = await supabase
@@ -2284,6 +2289,7 @@ router.patch('/:id', async (req, res) => {
         const { userId, title } = req.body;
 
         if (!userId) return res.status(400).json({ error: 'userId is required' });
+        if (await denyUnlessActor(req, res, userId)) return;
         if (typeof title !== 'string') return res.status(400).json({ error: 'title (string) is required' });
         const trimmed = title.trim();
         if (trimmed.length === 0) return res.status(400).json({ error: 'title cannot be empty' });
@@ -2327,6 +2333,7 @@ router.post('/:id/fork', async (req, res) => {
         const { userId, userName, newTitle } = req.body;
 
         if (!userId) return res.status(400).json({ error: 'userId is required' });
+        if (await denyUnlessActor(req, res, userId)) return;
 
         console.log(`[fork] User ${userId} forking project ${id}`);
 
@@ -2421,6 +2428,7 @@ router.delete('/:id', async (req, res) => {
         const { userId } = req.body;
 
         if (!userId) return res.status(400).json({ error: 'userId is required' });
+        if (await denyUnlessActor(req, res, userId)) return;
 
         // Verify ownership
         const { data: project, error: projectError } = await supabase
