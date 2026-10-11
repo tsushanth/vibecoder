@@ -20,6 +20,7 @@ import { checkUsageLimit, recordUsage, ACTION_TYPES } from '../services/subscrip
 import { sendPushToUser, sendAPNsPush } from '../services/pushService.js';
 import { filterBrowseProjects } from '../services/browseFilter.js';
 import { reportFailure } from '../lib/failureReporter.js';
+import { recordLlm } from '../lib/llmUsageInstance.js';
 import { registerDeployedApp } from '../services/appRegistry.js';
 import { captureChatSecrets, redactForLog } from '../services/chatSecrets.js';
 import { denyUnlessActor } from '../lib/actAs.js';
@@ -1466,6 +1467,7 @@ router.post('/plan', async (req, res) => {
         }
 
         let plan = null;
+        let llmRecorded = false; // exactly one accounting row per upstream attempt
         try {
             const response = await fetch('https://api.anthropic.com/v1/messages', {
                 method: 'POST',
@@ -1479,14 +1481,17 @@ router.post('/plan', async (req, res) => {
                 }),
                 signal: AbortSignal.timeout(15000)
             });
-            if (!response.ok) throw new Error(`Anthropic API error: ${response.status}`);
+            if (!response.ok) { llmRecorded = true; recordLlm({ model: 'claude-haiku-4-5', feature: 'plan', ok: false }); throw new Error(`Anthropic API error: ${response.status}`); }
             const data = await response.json();
+            llmRecorded = true;
+            recordLlm({ model: data.model || 'claude-haiku-4-5', usage: data.usage, feature: 'plan' });
             const text = data.content?.[0]?.text || '';
             const m = text.match(/\{[\s\S]*\}/);
             if (!m) throw new Error('No JSON object in response');
             plan = normalizePlan(JSON.parse(m[0]));
             if (!plan) throw new Error('Plan failed validation');
         } catch (err) {
+            if (!llmRecorded) recordLlm({ model: 'claude-haiku-4-5', feature: 'plan', ok: false }); // network error / timeout / unreadable body
             console.error('[plan] LLM call failed:', err.message);
             reportFailure('plan:llm', err); // say WHY (upstream status/timeout); the route degrades gracefully to a 503
             return res.status(503).json({ error: 'Planning is temporarily unavailable. You can still build directly.' });
@@ -1510,6 +1515,7 @@ router.post('/suggest-ideas', async (req, res) => {
         return res.json({ success: true, suggestions: shuffled.slice(0, 6) });
     }
 
+    let llmRecorded = false; // exactly one accounting row per upstream attempt
     try {
         // Pick 3 random existing suggestions as examples of the format
         const examples = [...BUILT_IN_SUGGESTIONS].sort(() => Math.random() - 0.5).slice(0, 3);
@@ -1542,10 +1548,14 @@ Output ONLY a JSON array of 6 objects with "label" and "prompt" keys. No markdow
         });
 
         if (!response.ok) {
+            llmRecorded = true;
+            recordLlm({ model: 'claude-haiku-4-5', feature: 'plan_ideas', ok: false });
             throw new Error(`Anthropic API error: ${response.status}`);
         }
 
         const data = await response.json();
+        llmRecorded = true;
+        recordLlm({ model: data.model || 'claude-haiku-4-5', usage: data.usage, feature: 'plan_ideas' });
         const text = data.content?.[0]?.text || '';
 
         // Parse JSON from response
@@ -1564,6 +1574,7 @@ Output ONLY a JSON array of 6 objects with "label" and "prompt" keys. No markdow
 
         res.json({ success: true, suggestions: valid });
     } catch (error) {
+        if (!llmRecorded) recordLlm({ model: 'claude-haiku-4-5', feature: 'plan_ideas', ok: false });
         console.error('[suggest-ideas] LLM generation failed:', error.message);
         // Fallback to built-in
         const shuffled = [...BUILT_IN_SUGGESTIONS].sort(() => Math.random() - 0.5);
