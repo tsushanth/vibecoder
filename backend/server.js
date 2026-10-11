@@ -11,6 +11,7 @@ import deployRoutes from './routes/deploy.routes.js';
 import domainsRoutes from './routes/domains.routes.js';
 import telegramRoutes from './routes/telegram.routes.js';
 import { reportCrash } from './lib/failureReporter.js';
+import { flushLlmUsage } from './lib/llmUsageInstance.js';
 import githubRoutes from './routes/github.routes.js';
 import appdataRoutes from './routes/appdata.routes.js';
 import { createSecretsRouter } from './routes/secrets.routes.js';
@@ -129,6 +130,14 @@ for (const evt of ['uncaughtException', 'unhandledRejection']) {
     process.on(evt, (err) => {
         console.error(evt, err);
         reportCrash(evt, err).finally(() => process.exit(1));
+    });
+}
+
+// Graceful shutdown: flush pending Claude-spend rows (capped at 2.5 s), then re-raise the signal with the default
+// handler restored so the exit status and timing are exactly what they were before.
+for (const sig of ['SIGTERM', 'SIGINT']) {
+    process.once(sig, () => {
+        flushLlmUsage(2500).finally(() => process.kill(process.pid, sig));
     });
 }
 

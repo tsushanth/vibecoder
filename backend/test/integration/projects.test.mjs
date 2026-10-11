@@ -206,3 +206,105 @@ test('export-apk: no bundle anywhere -> 400', async () => {
     const r = await quiet(() => post('/pa/export-apk', { userId: 'owner' }));
     assert.equal(r.status, 400);
 });
+
+// ---------------- Claude spend accounting (app "vibebuild") ----------------
+const { buildLlmUsage, setLlmUsageForTests, flushLlmUsage } = await import('../../lib/llmUsageInstance.js');
+const accounting = (extra = {}) => {
+    const sent = []; let status = 204;
+    const fetch = async (u, init) => { sent.push({ u: String(u), key: init.headers['X-Report-Key'], body: JSON.parse(init.body) }); return { ok: status < 300, status }; };
+    const inst = buildLlmUsage({ LLM_USAGE_KEY: 'k-test' }, { fetch, flushMs: 0, ...extra });
+    setLlmUsageForTests(inst);
+    return { inst, sent, setStatus: (s) => { status = s; } };
+};
+const rowsOf = (sent) => sent.flatMap((s) => s.body.items);
+const withUsage = (text, usage = { input_tokens: 1000, output_tokens: 200 }) => () => new Response(JSON.stringify({ model: 'claude-haiku-4-5-20251001', content: [{ type: 'text', text }], usage }), { status: 200 });
+
+test('llm accounting: /plan records tokens and cost under feature "plan"; labels carry no prompt or user id', async () => {
+    process.env.ANTHROPIC_API_KEY = 'sk-test-key';
+    const { inst, sent } = accounting();
+    external = withUsage(GOOD_PLAN);
+    const who = user();
+    const r = await post('/plan', { prompt: 'secret-idea-text', userId: who });
+    assert.equal(r.status, 200);
+    await inst.flush();
+    const rows = rowsOf(sent);
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].feature, 'plan');
+    assert.equal(rows[0].model, 'claude-haiku-4-5');
+    assert.equal(rows[0].input_tokens, 1000); assert.equal(rows[0].output_tokens, 200); assert.equal(rows[0].calls, 1);
+    assert.ok(Math.abs(rows[0].cost_usd - 0.002) < 1e-9); // 1000 * $1/M + 200 * $5/M
+    assert.equal(sent[0].key, 'k-test');
+    assert.doesNotMatch(JSON.stringify(sent), new RegExp(`secret-idea-text|${who}`));
+});
+
+test('llm accounting: /suggest-ideas records under "plan_ideas"', async () => {
+    process.env.ANTHROPIC_API_KEY = 'sk-test-key';
+    const { inst, sent } = accounting();
+    external = withUsage(JSON.stringify([{ label: 'A b', prompt: 'Build a thing' }]), { input_tokens: 500, output_tokens: 900 });
+    const r = await post('/suggest-ideas', {});
+    assert.equal(r.status, 200);
+    await inst.flush();
+    const rows = rowsOf(sent);
+    assert.deepEqual(rows.map((x) => [x.feature, x.input_tokens, x.output_tokens]), [['plan_ideas', 500, 900]]);
+});
+
+test('llm accounting: upstream error and network failure are each one error row, no tokens, route behaviour unchanged', async () => {
+    process.env.ANTHROPIC_API_KEY = 'sk-test-key';
+    const { inst, sent } = accounting();
+    external = () => new Response('{}', { status: 529 });
+    let r = await quiet(() => post('/plan', { prompt: 'todo app', userId: user() }));
+    assert.equal(r.status, 503);
+    external = () => { throw new TypeError('fetch failed'); };
+    r = await quiet(() => post('/plan', { prompt: 'todo app', userId: user() }));
+    assert.equal(r.status, 503);
+    r = await quiet(() => post('/suggest-ideas', {}));
+    assert.equal(r.status, 200); // falls back to the built-in list
+    await inst.flush();
+    const rows = Object.fromEntries(rowsOf(sent).map((x) => [x.feature, x]));
+    assert.equal(rows.plan.errors, 2); assert.equal(rows.plan.calls, 2); assert.equal(rows.plan.input_tokens, 0);
+    assert.equal(rows.plan_ideas.errors, 1);
+});
+
+test('llm accounting: a model reply that fails validation still records the tokens exactly once', async () => {
+    process.env.ANTHROPIC_API_KEY = 'sk-test-key';
+    const { inst, sent } = accounting();
+    external = withUsage('no json here');
+    const r = await quiet(() => post('/plan', { prompt: 'todo app', userId: user() }));
+    assert.equal(r.status, 503);
+    await inst.flush();
+    const row = rowsOf(sent)[0];
+    assert.equal(row.calls, 1); assert.equal(row.errors, 0); assert.equal(row.input_tokens, 1000);
+});
+
+test('llm accounting: nothing is sent without LLM_USAGE_KEY, even when FAILURE_REPORTER_KEY is set', async () => {
+    process.env.ANTHROPIC_API_KEY = 'sk-test-key';
+    const sent = [];
+    const inst = buildLlmUsage({ FAILURE_REPORTER_KEY: 'afr_other', NODE_ENV: 'production' }, { fetch: async (u, i) => { sent.push(u); return { ok: true, status: 204 }; }, flushMs: 0 });
+    assert.equal(inst.enabled, false);
+    setLlmUsageForTests(inst);
+    external = withUsage(GOOD_PLAN);
+    const r = await post('/plan', { prompt: 'todo app', userId: user() });
+    assert.equal(r.status, 200);
+    await inst.flush();
+    assert.deepEqual(sent, []);
+    assert.equal(buildLlmUsage({ LLM_USAGE_KEY: 'k', NODE_ENV: 'production' }).enabled, true);
+});
+
+test('llm accounting: a failing or hanging report never reaches the request; flush is capped', async () => {
+    process.env.ANTHROPIC_API_KEY = 'sk-test-key';
+    const inst = buildLlmUsage({ LLM_USAGE_KEY: 'k-test' }, { fetch: () => { throw new Error('worker down'); }, flushMs: 0, log: () => {} });
+    setLlmUsageForTests(inst);
+    external = withUsage(GOOD_PLAN);
+    const r = await post('/plan', { prompt: 'todo app', userId: user() });
+    assert.equal(r.status, 200);
+    assert.deepEqual((await r.json()).plan.features, ['add', 'remove', 'filter']);
+    await inst.flush(); // resolves, does not throw
+    // a recorder that throws is swallowed
+    setLlmUsageForTests({ record() { throw new Error('boom'); }, flush: () => new Promise(() => {}) });
+    const r2 = await post('/plan', { prompt: 'todo app', userId: user() });
+    assert.equal(r2.status, 200);
+    const t0 = Date.now();
+    await flushLlmUsage(150); // never-resolving flush is abandoned at the cap
+    assert.ok(Date.now() - t0 < 1000);
+    setLlmUsageForTests(buildLlmUsage({}));
+});
