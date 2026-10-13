@@ -32,10 +32,17 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("/Users/sushanthtiruvaipati/Documents/GitHub/AndroidAppKey")
-            storePassword = "REMOVED-CREDENTIAL"
-            keyAlias = "androidappkey"
-            keyPassword = "REMOVED-CREDENTIAL"
+            // Credentials live outside the repo, in ~/.gradle/gradle.properties:
+            // ANDROID_UPLOAD_STORE_FILE, ANDROID_UPLOAD_STORE_PASSWORD, ANDROID_UPLOAD_KEY_ALIAS, ANDROID_UPLOAD_KEY_PASSWORD
+            val uploadStore = providers.gradleProperty("ANDROID_UPLOAD_STORE_FILE").orNull
+            if (uploadStore != null) {
+                storeFile = file(uploadStore)
+                storePassword = providers.gradleProperty("ANDROID_UPLOAD_STORE_PASSWORD").get()
+                keyAlias = providers.gradleProperty("ANDROID_UPLOAD_KEY_ALIAS").get()
+                keyPassword = providers.gradleProperty("ANDROID_UPLOAD_KEY_PASSWORD").get()
+            } else if (gradle.startParameter.taskNames.any { it.contains("Release", ignoreCase = true) }) {
+                throw GradleException("Release signing needs ANDROID_UPLOAD_* in ~/.gradle/gradle.properties (see build.gradle.kts).")
+            }
         }
     }
 
