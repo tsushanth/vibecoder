@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.android.play.core.review.ReviewManagerFactory
 import com.kreativekoala.vibecoder.MainActivity
 import com.kreativekoala.vibecoder.ui.paywall.GenerationLimit
 import com.kreativekoala.vibecoder.R
@@ -64,75 +63,13 @@ fun CreateScreen(
     // No longer forcing screen on — if connection drops, we poll for the result
 
     var showSaveSuccess by remember { mutableStateOf(false) }
-    var ratingStep by remember { mutableIntStateOf(0) } // 0 = hidden, 1 = "enjoying?", 2 = "contact support?"
-
-    // Trigger rating dialog when ViewModel signals it
+    // Ratings: the view model flags "the user has seen a finished build" (a magic moment). RatingKit decides whether to ask
+    // (needs several moments and a few days of use first). No custom "enjoying?" question: Google forbids filtering who sees its dialog.
     LaunchedEffect(uiState.showRatingPrompt) {
         if (uiState.showRatingPrompt) {
-            ratingStep = 1
+            (context as? Activity)?.let { com.kreativekoala.ratingkit.RatingKit.trackAction(it) }
+            viewModel.dismissRatingPrompt()
         }
-    }
-
-    // Two-step rating dialog
-    if (ratingStep == 1) {
-        AlertDialog(
-            onDismissRequest = {
-                ratingStep = 0
-                viewModel.dismissRatingPrompt()
-            },
-            title = { Text("Enjoying VibeBuild?", color = TextPrimary) },
-            text = { Text("We'd love to hear what you think!", color = TextSecondary) },
-            confirmButton = {
-                TextButton(onClick = {
-                    ratingStep = 0
-                    viewModel.dismissRatingPrompt()
-                    val activity = context as? Activity ?: return@TextButton
-                    val manager = ReviewManagerFactory.create(activity)
-                    manager.requestReviewFlow().addOnCompleteListener { request ->
-                        if (request.isSuccessful) {
-                            manager.launchReviewFlow(activity, request.result)
-                        }
-                    }
-                }) {
-                    Text("Yes!", color = VibePurple)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    ratingStep = 2
-                    viewModel.dismissRatingPrompt()
-                }) {
-                    Text("Not really", color = TextSecondary)
-                }
-            },
-            containerColor = DarkSurfaceVariant
-        )
-    }
-
-    if (ratingStep == 2) {
-        AlertDialog(
-            onDismissRequest = { ratingStep = 0 },
-            title = { Text("We're sorry to hear that", color = TextPrimary) },
-            text = { Text("Would you like to contact our support team?", color = TextSecondary) },
-            confirmButton = {
-                TextButton(onClick = {
-                    ratingStep = 0
-                    val intent = Intent(Intent.ACTION_SENDTO).apply {
-                        data = Uri.parse("mailto:support@kreativekoala.llc")
-                        putExtra(Intent.EXTRA_SUBJECT, "VibeBuild Feedback")
-                    }
-                    try { context.startActivity(intent) } catch (_: Exception) {}
-                }) {
-                    Text("Contact Support", color = VibePurple)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { ratingStep = 0 }) {
-                    Text("No thanks", color = TextSecondary)
-                }
-            },
-            containerColor = DarkSurfaceVariant
-        )
     }
 
     // Image picker
