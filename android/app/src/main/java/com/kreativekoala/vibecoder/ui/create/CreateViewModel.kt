@@ -262,12 +262,8 @@ class CreateViewModel @Inject constructor(
     private fun maybeShowRatingPrompt() {
         if (!ratingArmed || _uiState.value.showPreview) return
         ratingArmed = false
-        viewModelScope.launch {
-            if (!userPreferences.hasShownRatingPrompt.first()) {
-                userPreferences.markRatingPromptShown()
-                _uiState.update { it.copy(showRatingPrompt = true) }
-            }
-        }
+        // Every finished build the user looked at is a "moment"; RatingKit applies the day gate, the count and the backoff.
+        _uiState.update { it.copy(showRatingPrompt = true) }
     }
 
     private fun checkPendingGeneration() {
@@ -669,7 +665,10 @@ class CreateViewModel @Inject constructor(
         viewModelScope.launch { userPreferences.clearPendingGeneration() }
         _uiState.update {
             if (it.chatStage == ChatStage.Ready) it
-            else it.copy(chatStage = ChatStage.Failed, buildFailure = message, buildFinishedAtMs = System.currentTimeMillis())
+            else {
+                com.kreativekoala.ratingkit.RatingKit.reportError() // stay quiet for a while after a failed build
+                it.copy(chatStage = ChatStage.Failed, buildFailure = message, buildFinishedAtMs = System.currentTimeMillis())
+            }
         }
     }
 
@@ -716,10 +715,8 @@ class CreateViewModel @Inject constructor(
         }
         saveChatSnapshot(ChatStage.Ready, projectId)
         // Don't pop the rating dialog over the completion card; arm it for later.
-        if (!userPreferences.hasShownRatingPrompt.first()) {
-            ratingArmed = true
-            previewOpened = false
-        }
+        ratingArmed = true
+        previewOpened = false
     }
 
     /** Leave the finished/failed thread and return to a blank composer. */
