@@ -20,6 +20,8 @@ import { checkUsageLimit, recordUsage, ACTION_TYPES } from '../services/subscrip
 import { sendPushToUser, sendAPNsPush } from '../services/pushService.js';
 import { filterBrowseProjects } from '../services/browseFilter.js';
 import { reportFailure } from '../lib/failureReporter.js';
+import { markProjectFailed, FAIL_CLASS } from '../lib/buildFailure.js';
+import { buildFailureRate } from '../lib/buildFailureRateInstance.js';
 import { recordLlm } from '../lib/llmUsageInstance.js';
 import { registerDeployedApp } from '../services/appRegistry.js';
 import { captureChatSecrets, redactForLog } from '../services/chatSecrets.js';
@@ -425,7 +427,8 @@ async function markSuggestionAsUsed(prompt) {
 async function proxyWorkerSSE(workerResponse, res, {
     onResult = null,
     onError = null,
-    label = 'proxy'
+    label = 'proxy',
+    trace = null // optional object; receives workerError (the raw worker message, for the failure classifier only)
 } = {}) {
     if (!workerResponse.body) {
         try { res.write(`data: ${JSON.stringify({ type: 'error', error: 'Build server connection failed' })}\n\n`); res.end(); } catch {}
@@ -492,6 +495,7 @@ async function proxyWorkerSSE(workerResponse, res, {
                             // A build the user asked for failed on the worker. Without this the only trace was a log line,
                             // so a multi-day outage (every build dying at startup) went unnoticed.
                             reportFailure(`${label}:worker_error`, new Error(String(parsed.error || 'worker reported an error').slice(0, 300)));
+                            if (trace) trace.workerError = String(parsed.error || 'worker reported an error');
                             if (onError) {
                                 await onError(parsed, res);
                             } else {
@@ -539,8 +543,11 @@ router.post('/generate', async (req, res) => {
     // `let` inside the try is scoped to the try only, which caused a
     // ReferenceError → process crash whenever the outer catch fired.
     let placeholderProjectId = null;
+    let genPhase = 'setup';
+    let prompt, userId; // hoisted: the catch below needs them (they were block-scoped to the try, so the catch threw a ReferenceError)
     try {
-        let { prompt, userId, userName, framework, referenceImage, deviceToken, source } = req.body;
+        let { userName, framework, referenceImage, deviceToken, source } = req.body;
+        ({ prompt, userId } = req.body);
 
         if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
             return res.status(400).json({ error: 'Project description is required' });
@@ -661,6 +668,7 @@ router.post('/generate', async (req, res) => {
             workerBody.referenceImage = referenceImage;
         }
 
+        genPhase = 'dispatch';
         const workerResponse = clientWantsStream
             // Streaming path holds the connection open for the full build — a single
             // long-lived attempt is correct here, retrying would double-dispatch a build.
@@ -688,7 +696,7 @@ router.post('/generate', async (req, res) => {
                     if (err.quotaExhausted) {
                         res.write(`data: ${JSON.stringify({ type: 'error', error: errorMsg, quotaExhausted: true, resetTime: err.resetTime })}\n\n`);
                         res.end();
-                        if (placeholderProjectId) supabase.from('projects').update({ status: 'failed' }).eq('id', placeholderProjectId).then(() => {});
+                        if (placeholderProjectId) markProjectFailed(supabase, placeholderProjectId, FAIL_CLASS.DISPATCH_ERROR, { phase: 'quota_exhausted', httpStatus: workerResponse.status, path: clientWantsStream ? 'generate_stream' : 'generate_async' }).catch(() => {});
                         return;
                     }
                     if (workerResponse.status === 429) {
@@ -698,11 +706,12 @@ router.post('/generate', async (req, res) => {
                 }
             } catch {}
             if (placeholderProjectId && !systemBusy) {
-                supabase.from('projects').update({ status: 'failed' }).eq('id', placeholderProjectId).then(() => {});
+                markProjectFailed(supabase, placeholderProjectId, FAIL_CLASS.DISPATCH_ERROR, { phase: 'dispatch_http', httpStatus: workerResponse.status, path: clientWantsStream ? 'generate_stream' : 'generate_async' }).catch(() => {});
                 const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
                 if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', `"${shortPrompt}..." is queued. Pro users skip the line — upgrade for priority builds.`).catch(() => {});
             }
-            safeWrite(`data: ${JSON.stringify({ type: 'error', error: errorMsg, systemBusy, projectId: placeholderProjectId })}\n\n`);
+            // safeWrite is local to proxyWorkerSSE; calling it here threw a ReferenceError that fell into the outer catch (double failure write, and a process crash via the catch's own ReferenceError).
+            try { res.write(`data: ${JSON.stringify({ type: 'error', error: errorMsg, systemBusy, projectId: placeholderProjectId })}\n\n`); } catch {}
             try { res.end(); } catch {}
             return;
         }
@@ -717,8 +726,11 @@ router.post('/generate', async (req, res) => {
         }
 
         // SSE proxy path (old app, stream:true) — keep connection open, proxy worker events
+        genPhase = 'stream';
+        const trace = {};
         const resultReceived = await proxyWorkerSSE(workerResponse, res, {
             label: 'generate',
+            trace,
             onResult: async (parsed, res) => {
                 recordGeneration(userId);
 
@@ -841,10 +853,10 @@ router.post('/generate', async (req, res) => {
 
         // If stream ended without a result, mark placeholder failed
         if (!resultReceived && placeholderProjectId) {
-            reportFailure('generate:no_result', new Error('Build ended without a result; project marked failed'));
-            supabase.from('projects').update({ status: 'failed' }).eq('id', placeholderProjectId).then(() => {
+            // build_failed (class NO_RESULT / WORKER_ERROR) replaces the old generate:no_result report.
+            markProjectFailed(supabase, placeholderProjectId, trace.workerError ? FAIL_CLASS.WORKER_ERROR : FAIL_CLASS.NO_RESULT, { phase: 'stream', path: 'generate_stream', message: trace.workerError }).then(() => {
                 console.log(`[generate] Marked ${placeholderProjectId} as failed (no result received)`);
-            });
+            }).catch(() => {});
             const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
             if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', `"${shortPrompt}..." hit a snag. Pro users get priority — upgrade to skip the queue.`).catch(() => {});
         }
@@ -855,7 +867,7 @@ router.post('/generate', async (req, res) => {
 
         // Mark placeholder failed on exception
         if (placeholderProjectId) {
-            supabase.from('projects').update({ status: 'failed' }).eq('id', placeholderProjectId).then(() => {});
+            markProjectFailed(supabase, placeholderProjectId, genPhase === 'dispatch' ? FAIL_CLASS.DISPATCH_ERROR : FAIL_CLASS.UNKNOWN, { phase: genPhase, attempt: genPhase === 'dispatch' && req.body?.stream !== true ? 3 : undefined, errorName: error?.name, message: error?.name === 'TimeoutError' ? 'timeout' : (genPhase === 'dispatch' ? 'dispatch failed' : undefined), path: req.body?.stream === true ? 'generate_stream' : 'generate_async' }).catch(() => {});
             const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
             if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', `"${shortPrompt}..." hit a snag. Pro users get priority — upgrade to skip the queue.`).catch(() => {});
         }
@@ -1077,11 +1089,11 @@ router.post('/:id/retry', async (req, res) => {
                     return;
                 }
                 console.error(`[retry] Worker error ${workerRes.status}: ${errText.substring(0, 200)}`);
-                await supabase.from('projects').update({ status: 'failed' }).eq('id', id);
+                await markProjectFailed(supabase, id, FAIL_CLASS.RETRY_EXHAUSTED, { phase: 'retry_dispatch_http', httpStatus: workerRes.status, attempt: 3, path: 'retry' }).catch(() => {}); // own catch: the outer .catch must not report the same failure twice
             }
         }).catch(async (err) => {
             console.error(`[retry] Worker fetch error: ${err.message}`);
-            await supabase.from('projects').update({ status: 'failed' }).eq('id', id);
+            await markProjectFailed(supabase, id, FAIL_CLASS.RETRY_EXHAUSTED, { phase: 'retry_dispatch', attempt: 3, errorName: err?.name, path: 'retry' }).catch(() => {});
         });
 
     } catch (error) {
@@ -1181,7 +1193,8 @@ router.post('/:id/build-complete', async (req, res) => {
                 sendPushToUser(userId, `"${shortPrompt}" is ready!`, 'Tap to open your app', { projectId: id }).catch(() => {});
             }
         } else {
-            await supabase.from('projects').update({ status: 'failed' }).eq('id', id);
+            // The worker's own message goes to the database only (sanitized), never to the reporter.
+            await markProjectFailed(supabase, id, typeof error === 'string' && error ? FAIL_CLASS.WORKER_ERROR : FAIL_CLASS.NO_RESULT, { phase: 'build_complete', path: 'callback', message: typeof error === 'string' ? error : undefined });
             console.log(`[build-complete] Project ${id} failed: ${error}`);
             if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', 'Retry failed. Pro users get priority — upgrade to skip the queue.').catch(() => {});
         }
@@ -2504,6 +2517,9 @@ router.post('/api/admin/cleanup-stuck-builds', async (req, res) => {
     const secret = req.headers['x-admin-secret'];
     if (secret !== process.env.WORKER_SECRET) return res.status(401).json({ error: 'Unauthorized' });
 
+    // Failure-rate signal (counts only, throttled to one alert per 6 h in-process). Never delays or fails the cleanup.
+    void buildFailureRate.check();
+
     try {
         const cutoff = new Date(Date.now() - 20 * 60 * 1000).toISOString(); // 20 min ago
 
@@ -2518,7 +2534,7 @@ router.post('/api/admin/cleanup-stuck-builds', async (req, res) => {
 
         // Mark all as failed
         const ids = stuckProjects.map(p => p.id);
-        await supabase.from('projects').update({ status: 'failed' }).in('id', ids);
+        await markProjectFailed(supabase, ids, FAIL_CLASS.TIMEOUT_STUCK, { phase: 'cleanup_cron', count: ids.length, path: 'cron' });
 
         // Send push notifications
         for (const project of stuckProjects) {

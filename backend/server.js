@@ -24,6 +24,8 @@ import { supabase } from './config/database.js';
 import { startTierSweep } from './services/tierSync.js';
 import { getSubscriptionStatus } from './services/subscriptionService.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { buildFailureRate } from './lib/buildFailureRateInstance.js';
+import { startFailureRateSweep } from './lib/buildFailureRate.js';
 import { WORKER_URL, WORKER_SECRET } from './config/constants.js';
 
 const app = express();
@@ -144,3 +146,6 @@ for (const sig of ['SIGTERM', 'SIGINT']) {
 app.listen(PORT, () => {
     console.log(`VibeCoder backend running on http://localhost:${PORT}`);
 });
+
+// Failure-rate signal on its own clock too: the cleanup cron is an external scheduler and may not be firing. FAILURE_RATE_SWEEP_MS=0 turns it off.
+if (process.env.NODE_ENV !== 'test' && Number(process.env.FAILURE_RATE_SWEEP_MS ?? 30 * 60_000) > 0) startFailureRateSweep(buildFailureRate, Number(process.env.FAILURE_RATE_SWEEP_MS ?? 30 * 60_000));
