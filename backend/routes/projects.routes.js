@@ -21,6 +21,7 @@ import { sendPushToUser, sendAPNsPush } from '../services/pushService.js';
 import { filterBrowseProjects } from '../services/browseFilter.js';
 import { reportFailure } from '../lib/failureReporter.js';
 import { markProjectFailed, FAIL_CLASS } from '../lib/buildFailure.js';
+import { AUTO_RETRY_FLAG, autoRetryDelayMs, autoRetryMarker, shouldAutoRetry } from '../lib/autoRetry.js';
 import { buildFailureRate } from '../lib/buildFailureRateInstance.js';
 import { recordLlm } from '../lib/llmUsageInstance.js';
 import { registerDeployedApp } from '../services/appRegistry.js';
@@ -655,7 +656,7 @@ router.post('/generate', async (req, res) => {
         // Use async callback path — close SSE after queued event, app polls for result
         // Old app versions (stream:true) still get the SSE proxy path for compatibility
         const clientWantsStream = req.body.stream === true;
-        const callbackUrl = `${process.env.SELF_URL || 'https://vibecoder-api.fly.dev'}/api/projects/${placeholderProjectId}/build-complete`;
+        const callbackUrl = `${process.env.SELF_URL || 'https://vibecoder-api.fly.dev'}/api/projects/${placeholderProjectId}/build-complete?${AUTO_RETRY_FLAG}=1`; // ?ar=1: this first build may be retried once automatically (see lib/autoRetry.js)
         const workerBody = {
             prompt: prompt.trim(),
             userId,
@@ -1128,6 +1129,36 @@ router.post('/:id/feedback', async (req, res) => {
     }
 });
 
+// One automatic, delayed re-dispatch of a build the worker reported failed (flag BUILD_AUTO_RETRY=1, see lib/autoRetry.js).
+// The project stays 'building' meanwhile. The timer is in memory: if the process restarts first, the stuck-build cron marks the
+// project failed as before. Returns true when a retry was scheduled (the caller must then not mark the project failed).
+async function scheduleAutoRetry(id, cls, flag) {
+    const { data: proj } = await supabase.from('projects').select('id, initial_prompt, creator_id, status').eq('id', id).single();
+    if (!proj || !shouldAutoRetry({ cls, flag, projectStatus: proj.status, hasPrompt: !!proj.initial_prompt })) return false;
+    try { await supabase.from('projects').update({ error_reason: autoRetryMarker(cls) }).eq('id', id); } catch { /* column may not exist yet; the retry still runs */ }
+    const delay = autoRetryDelayMs();
+    console.log(`[auto-retry] ${id} ${cls}: re-dispatching in ${Math.round(delay / 1000)}s`);
+    const timer = setTimeout(async () => {
+        try {
+            progressStart(id);
+            // No ?ar flag: a second failure is final.
+            const callbackUrl = `${process.env.SELF_URL || 'https://vibecoder-api.fly.dev'}/api/projects/${id}/build-complete`;
+            const workerRes = await fetchWorkerWithRetry(`${WORKER_URL}/generate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'x-worker-secret': WORKER_SECRET },
+                body: JSON.stringify({ prompt: proj.initial_prompt, userId: proj.creator_id, framework: 'react', stream: false, projectId: id, callbackUrl, callbackSecret: WORKER_SECRET })
+            }, { attempts: 3, timeoutMs: 15000, baseDelayMs: 1000, label: 'auto-retry-dispatch' });
+            if (!workerRes.ok && workerRes.status !== 429) { // 429 = busy: stays 'building', the stuck-build cron owns it (same as /retry)
+                await markProjectFailed(supabase, id, FAIL_CLASS.RETRY_EXHAUSTED, { phase: 'auto_retry_dispatch_http', httpStatus: workerRes.status, attempt: 3, path: 'auto_retry' });
+            }
+        } catch (err) {
+            await markProjectFailed(supabase, id, FAIL_CLASS.RETRY_EXHAUSTED, { phase: 'auto_retry_dispatch', attempt: 3, errorName: err?.name, path: 'auto_retry' }).catch(() => {});
+        }
+    }, delay);
+    timer.unref?.();
+    return true;
+}
+
 // ============================================
 // POST /api/projects/:id/build-complete
 // Callback from worker when a retry build finishes
@@ -1193,8 +1224,12 @@ router.post('/:id/build-complete', async (req, res) => {
                 sendPushToUser(userId, `"${shortPrompt}" is ready!`, 'Tap to open your app', { projectId: id }).catch(() => {});
             }
         } else {
+            const failClass = typeof error === 'string' && error ? FAIL_CLASS.WORKER_ERROR : FAIL_CLASS.NO_RESULT;
+            if (await scheduleAutoRetry(id, failClass, req.query[AUTO_RETRY_FLAG]).catch(() => false)) {
+                return res.json({ success: true, autoRetry: true });
+            }
             // The worker's own message goes to the database only (sanitized), never to the reporter.
-            await markProjectFailed(supabase, id, typeof error === 'string' && error ? FAIL_CLASS.WORKER_ERROR : FAIL_CLASS.NO_RESULT, { phase: 'build_complete', path: 'callback', message: typeof error === 'string' ? error : undefined });
+            await markProjectFailed(supabase, id, failClass, { phase: 'build_complete', path: 'callback', message: typeof error === 'string' ? error : undefined });
             console.log(`[build-complete] Project ${id} failed: ${error}`);
             if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', 'Retry failed. Pro users get priority — upgrade to skip the queue.').catch(() => {});
         }
