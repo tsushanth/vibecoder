@@ -1,5 +1,6 @@
 import express from 'express';
 import Stripe from 'stripe';
+import { reportFailure } from '../lib/failureReporter.js';
 import { supabase } from '../config/database.js';
 import { syncTierLimitsForUser } from '../services/tierSync.js';
 import {
@@ -269,6 +270,7 @@ router.post('/stripe-webhook', express.raw({ type: 'application/json' }), async 
         );
     } catch (err) {
         console.error('[stripe-webhook] Signature verification failed:', err.message);
+        reportFailure('billing:stripe_webhook_signature', new Error('Stripe webhook signature verification failed'));
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
@@ -280,7 +282,7 @@ router.post('/stripe-webhook', express.raw({ type: 'application/json' }), async 
                 const tier = session.metadata?.tier || 'pro';
 
                 if (userId) {
-                    await supabase.from('user_subscriptions').upsert({
+                    const { error: upsertErr } = await supabase.from('user_subscriptions').upsert({
                         user_id: userId,
                         tier,
                         status: 'active',
@@ -290,6 +292,7 @@ router.post('/stripe-webhook', express.raw({ type: 'application/json' }), async 
                         expires_at: null,
                         updated_at: new Date().toISOString(),
                     }, { onConflict: 'user_id' });
+                    if (upsertErr) throw new Error('user_subscriptions upsert failed'); // supabase-js returns errors instead of throwing: without this a paid checkout was dropped silently
 
                     console.log(`[stripe-webhook] Subscription activated: user=${userId}, tier=${tier}`);
                 }
@@ -307,7 +310,7 @@ router.post('/stripe-webhook', express.raw({ type: 'application/json' }), async 
 
                 if (sub) {
                     const isActive = subscription.status === 'active';
-                    await supabase.from('user_subscriptions').update({
+                    const { error: updErr } = await supabase.from('user_subscriptions').update({
                         status: isActive ? 'active' : 'cancelled',
                         tier: isActive ? undefined : 'free',
                         expires_at: subscription.current_period_end
@@ -315,6 +318,7 @@ router.post('/stripe-webhook', express.raw({ type: 'application/json' }), async 
                             : null,
                         updated_at: new Date().toISOString(),
                     }).eq('user_id', sub.user_id);
+                    if (updErr) throw new Error('user_subscriptions update failed');
 
                     console.log(`[stripe-webhook] Subscription ${subscription.status}: user=${sub.user_id}`);
                 }
@@ -340,6 +344,8 @@ router.post('/stripe-webhook', express.raw({ type: 'application/json' }), async 
         }
     } catch (error) {
         console.error('[stripe-webhook] Processing error:', error);
+        // Answered 200 below (Stripe will not retry), so this report is the only signal that a paid event was not applied.
+        reportFailure('billing:stripe_webhook_processing', new Error('Stripe webhook processing failed'), { event_type: String(event?.type ?? '').slice(0, 60) });
     }
 
     // Any subscription event can change a user's tier: re-apply tiers soon (debounced; the periodic sweep is the backstop).

@@ -1,6 +1,7 @@
 import { isReservedSubdomain } from '../services/reservedSubdomains.js';
 import express from 'express';
 import crypto from 'crypto';
+import { reportFailure } from '../lib/failureReporter.js';
 import { supabase } from '../config/database.js';
 import { getActiveDomainMap } from '../services/domainService.js';
 import { WORKER_URL, WORKER_SECRET } from '../config/constants.js';
@@ -135,7 +136,10 @@ router.post('/:projectId/deploy', async (req, res) => {
             status: 'active',
             deployed_at: new Date().toISOString()
         }, { onConflict: 'subdomain' });
-        if (upsertError) console.error('[deploy] deployments upsert error:', upsertError);
+        if (upsertError) {
+            console.error('[deploy] deployments upsert error:', upsertError);
+            reportFailure('deploy:record_upsert', new Error('deployments upsert failed'), { code: String(upsertError.code ?? '').slice(0, 20) });
+        }
 
         // Update project with published URL and clean up preview
         const url = `https://${subdomain}.vibebuild.cc`;

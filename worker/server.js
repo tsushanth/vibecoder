@@ -25,8 +25,18 @@ import { scrubSecrets } from './lib/scrub.js';
 import { loadVibeSdk, injectSdk, withVibeRules } from './lib/vibe.js';
 import { scanGenerated, allowedHostsFor, userMessageForCause } from './lib/scan.js';
 import { requireSecret } from './lib/requireSecret.js';
+import { reportFailure, installCrashHandlers } from './lib/failureReporter.js';
+import { deliverCallback } from './lib/callback.js';
 
 const app = express();
+installCrashHandlers();
+// 500/502/504 the worker returns itself (503 is the quota/readiness answer and has its own alerts). Stable message per route pattern.
+app.use((req, res, next) => {
+    res.on('finish', () => {
+        if ([500, 502, 504].includes(res.statusCode) && req.route?.path) reportFailure(`worker:http_${res.statusCode}`, new Error(`HTTP ${res.statusCode} ${req.method} ${req.route.path}`));
+    });
+    next();
+});
 app.use(express.json({ limit: '50mb' }));
 
 const PORT = process.env.WORKER_PORT || 3456;
@@ -417,6 +427,7 @@ function runClaudeCommand(claudePath, prompt, cwd, requestId, maxTurns = 20) {
             const resetTime = isQuotaError ? (extractResetTime(stderr) || extractResetTime(output) || null) : null;
 
             if (isQuotaError) {
+                if (!quotaExhausted) reportFailure('worker:llm_quota_exhausted', new Error('LLM quota or credit exhausted: every build will fail until it resets')); // once per exhaustion, not per build
                 quotaExhausted = true;
                 if (resetTime) quotaResetTime = resetTime;
                 setTimeout(() => { quotaExhausted = false; quotaResetTime = null; }, 3600000);
@@ -511,13 +522,13 @@ app.post('/generate', authMiddleware, async (req, res) => {
     function sendError(error) {
         if (isSSE) { res.write(`data: ${JSON.stringify({ type: 'error', error })}\n\n`); try { res.end(); } catch {} }
         else if (!callbackUrl) { res.status(503).json({ error }); }
-        if (callbackUrl) fetch(callbackUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'failed', error, userId, secret: callbackSecret }), signal: AbortSignal.timeout(10000) }).catch(() => {});
+        if (callbackUrl) deliverCallback(callbackUrl, { status: 'failed', error, userId, secret: callbackSecret }, 10000, 'failed');
     }
 
     function sendResult(data) {
         if (isSSE) { res.write(`data: ${JSON.stringify({ type: 'result', ...data })}\n\n`); try { res.end(); } catch {} }
         else if (!callbackUrl) { res.json(data); }
-        if (callbackUrl) fetch(callbackUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ bundle: data.bundle, status: 'ready', userId, secret: callbackSecret }), signal: AbortSignal.timeout(30000) }).then(() => console.log(`[${requestId}] Callback sent`)).catch(err => console.error(`[${requestId}] Callback failed: ${err.message}`));
+        if (callbackUrl) deliverCallback(callbackUrl, { bundle: data.bundle, status: 'ready', userId, secret: callbackSecret }, 30000, 'ready').then((ok) => { if (ok) console.log(`[${requestId}] Callback sent`); else console.error(`[${requestId}] Callback failed`); });
     }
 
     console.log(`[${requestId}] Building for ${userId}: "${scrubSecrets(String(prompt)).text.slice(0, 200)}"`);
