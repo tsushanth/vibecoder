@@ -4,12 +4,13 @@ import { spawn } from 'node:child_process';
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs';
+import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 
 const DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'vb-failclosed-'));
 const run = (env, ms = 12000) => new Promise((resolve) => {
-    const child = spawn(process.execPath, ['server.js'], { cwd: DIR, env: { PATH: path.dirname(process.execPath), HOME, OUTCOME_LOG: path.join(HOME, 'o.jsonl'), WORKER_PORT: String(39000 + Math.floor(Math.random() * 900)), ...env }, stdio: ['ignore', 'pipe', 'pipe'] });
+    const child = spawn(process.execPath, ['server.js'], { cwd: DIR, env: { PATH: path.dirname(process.execPath), FAILURE_REPORTER_DISABLED: '1', HOME, OUTCOME_LOG: path.join(HOME, 'o.jsonl'), WORKER_PORT: String(39000 + Math.floor(Math.random() * 900)), ...env }, stdio: ['ignore', 'pipe', 'pipe'] });
     let out = '';
     child.stdout.on('data', (d) => { out += d; }); child.stderr.on('data', (d) => { out += d; });
     const t = setTimeout(() => { child.kill(); resolve({ code: null, out, killed: true }); }, ms);
@@ -30,7 +31,7 @@ test('the worker refuses a too-short WORKER_SECRET without printing it', async (
 test('the worker starts normally with a good WORKER_SECRET', async () => {
     const env = { WORKER_SECRET: 'unit-test-worker-secret-0123456789' };
     const port = 39900 + Math.floor(Math.random() * 90);
-    const child = spawn(process.execPath, ['server.js'], { cwd: DIR, env: { PATH: path.dirname(process.execPath), HOME, OUTCOME_LOG: path.join(HOME, 'o.jsonl'), WORKER_PORT: String(port), ...env }, stdio: 'ignore' });
+    const child = spawn(process.execPath, ['server.js'], { cwd: DIR, env: { PATH: path.dirname(process.execPath), FAILURE_REPORTER_DISABLED: '1', HOME, OUTCOME_LOG: path.join(HOME, 'o.jsonl'), WORKER_PORT: String(port), ...env }, stdio: 'ignore' });
     try {
         let ok = false;
         for (let i = 0; i < 60 && !ok; i++) { try { ok = (await fetch(`http://127.0.0.1:${port}/health`)).ok; } catch { await new Promise((r) => setTimeout(r, 200)); } }
@@ -44,4 +45,23 @@ test('no built-in secret default remains in the worker source', async () => {
     const { spawnSync } = await import('node:child_process');
     const r = spawnSync('git', ['grep', '-nE', "WORKER_SECRET[^|\\n]*\\|\\|[[:space:]]*['\\\"]", '--', 'server.js', 'lib', 'brokerReady.js', 'scripts'], { cwd: DIR, encoding: 'utf8' });
     assert.equal(r.stdout.trim(), '');
+});
+
+test('a refused start in a test child never posts to the failure reporter', async () => {
+    // The child gets a scrubbed env, so it does not inherit NODE_TEST_CONTEXT; the test env must disable the reporter itself.
+    const posts = [];
+    const sink = http.createServer((req, res) => { posts.push(req.url); req.resume(); res.end('{}'); });
+    await new Promise((r) => sink.listen(0, '127.0.0.1', r));
+    try {
+        const r = await run({ FAILURE_REPORTER_URL: `http://127.0.0.1:${sink.address().port}/v1/report` });
+        assert.notEqual(r.code, 0);
+        assert.deepEqual(posts, []);
+    } finally { sink.close(); }
+});
+
+test('every test that spawns the worker disables the failure reporter in the child env', async () => {
+    const { spawnSync } = await import('node:child_process');
+    const files = spawnSync('git', ['grep', '-lE', "spawn\\(process\\.execPath, \\['server\\.js'\\]", '--', 'test'], { cwd: DIR, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
+    assert.ok(files.length >= 4, 'expected the known spawn sites: ' + files.join(','));
+    for (const f of files) assert.match(fs.readFileSync(path.join(DIR, f), 'utf8'), /FAILURE_REPORTER_DISABLED/, f + ' spawns server.js without FAILURE_REPORTER_DISABLED');
 });

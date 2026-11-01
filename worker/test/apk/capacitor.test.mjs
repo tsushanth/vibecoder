@@ -180,7 +180,7 @@ async function withServer(fn) {
     fs.writeFileSync(aapt2, `#!/bin/sh\ncat "${process.env.FAKE_PERMS_FILE || path.join(home, 'perms.txt')}"\n`, { mode: 0o755 });
     fs.writeFileSync(path.join(home, 'perms.txt'), FIXTURE);
     const port = 38000 + Math.floor(Math.random() * 900);
-    const child = spawn(process.execPath, ['server.js'], { cwd: WORKER, stdio: 'ignore', env: { PATH: process.env.PATH + ':' + path.dirname(process.execPath), HOME: home, OUTCOME_LOG: path.join(home, 'o.jsonl'), WORKER_PORT: String(port), WORKER_SECRET: 'unit-test-worker-secret-0123456789', APK_TEMPLATE_DIR: legacy, APK_TEMPLATE_DIR_CAPACITOR: cap, AAPT2: aapt2 } });
+    const child = spawn(process.execPath, ['server.js'], { cwd: WORKER, stdio: 'ignore', env: { PATH: process.env.PATH + ':' + path.dirname(process.execPath), HOME: home, FAILURE_REPORTER_DISABLED: '1', OUTCOME_LOG: path.join(home, 'o.jsonl'), WORKER_PORT: String(port), WORKER_SECRET: 'unit-test-worker-secret-0123456789', APK_TEMPLATE_DIR: legacy, APK_TEMPLATE_DIR_CAPACITOR: cap, AAPT2: aapt2 } });
     try {
         let ok = false;
         for (let i = 0; i < 80 && !ok; i++) { try { ok = (await fetch(`http://127.0.0.1:${port}/health`)).ok; } catch { await new Promise((r) => setTimeout(r, 200)); } }
