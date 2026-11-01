@@ -195,6 +195,8 @@ class CreateViewModel @Inject constructor(
             .putString("projectId", projectId)
             .putString("prompt", s.chatPrompt)
             .putString("planSummary", s.buildPlan?.summary)
+            .putLong("startedAtMs", s.buildStartedAtMs)
+            .putLong("finishedAtMs", s.buildFinishedAtMs ?: 0L)
             .apply()
     }
 
@@ -212,6 +214,10 @@ class CreateViewModel @Inject constructor(
         }
         val prompt = snapshotPrefs.getString("prompt", "") ?: ""
         val summary = snapshotPrefs.getString("planSummary", null)
+        // Snapshots written before the times were saved have none: leave the start at 0 so the timer is hidden, not wrong.
+        val savedStart = snapshotPrefs.getLong("startedAtMs", 0L)
+        val savedFinish = snapshotPrefs.getLong("finishedAtMs", 0L)
+        val timesKnown = savedStart > 0L && savedFinish >= savedStart
         viewModelScope.launch {
             val project = try {
                 projectRepository.getProject(projectId)
@@ -250,7 +256,8 @@ class CreateViewModel @Inject constructor(
                     previewUrl = project.previewUrl,
                     progressPercent = 100.0,
                     buildPhase = "Complete",
-                    buildFinishedAtMs = System.currentTimeMillis()
+                    buildStartedAtMs = if (timesKnown) savedStart else 0L,
+                    buildFinishedAtMs = if (timesKnown) savedFinish else System.currentTimeMillis()
                 )
             }
         }

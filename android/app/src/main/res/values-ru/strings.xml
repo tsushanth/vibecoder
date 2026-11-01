@@ -144,7 +144,7 @@
     <string name="account_settings_theme">Тема</string>
     <string name="account_settings_theme_value">Тёмная</string>
     <string name="account_settings_about">О приложении</string>
-    <string name="account_settings_version">Версия 1.0.0</string>
+    <string name="account_settings_version">Версия %1$s</string>
     <string name="account_settings_language">Язык</string>
 
     <!-- Apps Screen -->
