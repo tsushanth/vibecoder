@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { PricingCTA } from '@/components/landing/PricingCTA';
 import { HeroComposer } from '@/components/landing/HeroComposer';
 import { LiveBuild } from '@/components/landing/LiveBuild';
+import { StoreBadges } from '@/components/landing/StoreBadges';
 import { MobileCtaBar } from '@/components/landing/MobileCtaBar';
 import { MarketingHeader, MarketingFooter } from '@/components/landing/MarketingChrome';
 import { SUBSCRIPTION_TIERS } from '@/lib/constants';
@@ -33,6 +34,7 @@ export default function LandingPage() {
               <div className="mt-9">
                 <HeroComposer />
               </div>
+              <StoreBadges />
             </div>
             <LiveBuild />
           </div>

@@ -1,6 +1,7 @@
 import express from 'express';
 import { supabase, supabaseAdmin } from '../config/database.js';
 import { verifiedUserId } from '../lib/verifiedUser.js';
+import { recordSignupSource } from '../lib/signupSource.js';
 
 export function createAuthRouter({ verifyUser = verifiedUserId } = {}) {
 const router = express.Router();
@@ -60,12 +61,14 @@ async function mayActAs(req, userId, verifyUser) {
 
 router.post('/register', async (req, res) => {
     try {
-        const { userId, email, displayName, avatarUrl } = req.body;
+        const { userId, email, displayName, avatarUrl, signup_source: signupSource } = req.body;
         if (!userId || typeof userId !== 'string') return res.status(400).json({ error: 'userId is required' });
         const verified = await verifyUser(req);
         if (verified && verified !== userId) return res.status(403).json({ error: 'You can only register your own account.' });
 
         if (verified) {
+            // First-touch attribution is recorded only when this call creates the row, never on later sign-ins.
+            const { data: before, error: beforeError } = await supabase.from('users').select('user_id').eq('user_id', userId).maybeSingle();
             // A verified sign-in may create or update its own row, including the email.
             const { data, error } = await supabase
                 .from('users')
@@ -79,6 +82,7 @@ router.post('/register', async (req, res) => {
                 .select()
                 .single();
             if (error) throw error;
+            if (!before && !beforeError) await recordSignupSource(supabase, userId, req, signupSource);
             return res.json({ success: true, user: data });
         }
 
@@ -92,6 +96,7 @@ router.post('/register', async (req, res) => {
             .select()
             .single();
         if (error) throw error;
+        await recordSignupSource(supabase, userId, req, signupSource);
         res.json({ success: true, user: data });
     } catch (error) {
         console.error('Auth register error:', error);

@@ -37,7 +37,6 @@ export function MarketingFooter() {
           <Link href="/blog" className="transition hover:text-foreground">Blog</Link>
           <Link href="/about" className="transition hover:text-foreground">About</Link>
           <Link href="/faq" className="transition hover:text-foreground">FAQ</Link>
-          <Link href="/sms" className="transition hover:text-foreground">Text to build</Link>
           <Link href="/terms" className="transition hover:text-foreground">Terms</Link>
           <Link href="/privacy" className="transition hover:text-foreground">Privacy</Link>
         </div>
