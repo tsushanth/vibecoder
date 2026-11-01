@@ -15,7 +15,7 @@ import * as path from 'path';
 import * as os from 'os';
 import crypto from 'crypto';
 import zlib from 'zlib';
-import { checkBrokerReady } from './brokerReady.js';
+import { checkBuildPathReady } from './brokerReady.js';
 import { OpenRouterClient } from './lib/llm.js';
 import { generateApp } from './lib/generate.js';
 import { fullChecks } from './lib/browsercheck.js';
@@ -445,9 +445,9 @@ function authMiddleware(req, res, next) {
     next();
 }
 
-// Readiness of the build path: can claude-multi get a token from the broker. Authenticated (reveals broker state).
+// Readiness of the build path. Builds routed to the direct generator do not need the Claude broker; the rest do. Authenticated (reveals broker state).
 app.get('/ready', authMiddleware, async (req, res) => {
-    const out = await checkBrokerReady();
+    const out = await checkBuildPathReady({ directPercent: DIRECT_PERCENT, directLlm });
     res.status(out.ready ? 200 : 503).json(out);
 });
 

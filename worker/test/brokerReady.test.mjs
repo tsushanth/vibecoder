@@ -39,3 +39,41 @@ test('an unreadable or empty secret is a failure, not a pass', async () => {
   const empty = await checkBrokerReady({ ...base, readSecret: () => '  \n', fetchImpl: async () => json(200, {}) });
   assert.equal(empty.ready, false);
 });
+
+import { checkBuildPathReady } from '../brokerReady.js';
+
+const brokerDown = async () => ({ ready: false, mode: 'broker', status: 503, reason: 'all accounts failed' });
+const brokerUp = async () => ({ ready: true, mode: 'broker', status: 200 });
+const llm = {};
+
+test('build path: 100% direct is ready without consulting the broker', async () => {
+  let called = false;
+  const out = await checkBuildPathReady({ directPercent: 100, directLlm: llm, checkBroker: async () => { called = true; return brokerDown(); } });
+  assert.deepEqual(out, { ready: true, mode: 'direct', percent: 100 });
+  assert.equal(called, false);
+});
+
+test('build path: 0% direct keeps the broker result exactly', async () => {
+  assert.deepEqual(await checkBuildPathReady({ directPercent: 0, directLlm: llm, checkBroker: brokerDown }), await brokerDown());
+  assert.deepEqual(await checkBuildPathReady({ directPercent: 0, directLlm: null, checkBroker: brokerUp }), await brokerUp());
+  assert.deepEqual(await checkBuildPathReady({ checkBroker: brokerUp }), await brokerUp());
+});
+
+test('build path: a mixed split needs both paths healthy', async () => {
+  const bad = await checkBuildPathReady({ directPercent: 50, directLlm: llm, checkBroker: brokerDown });
+  assert.equal(bad.ready, false);
+  assert.equal(bad.mode, 'mixed');
+  assert.equal(bad.percent, 50);
+  assert.match(bad.reason, /all accounts failed/);
+  const good = await checkBuildPathReady({ directPercent: 50, directLlm: llm, checkBroker: brokerUp });
+  assert.equal(good.ready, true);
+  assert.equal(good.mode, 'mixed');
+});
+
+test('build path: direct enabled without a direct client is not ready, with a reason', async () => {
+  for (const pct of [50, 100]) {
+    const out = await checkBuildPathReady({ directPercent: pct, directLlm: null, checkBroker: brokerUp });
+    assert.equal(out.ready, false);
+    assert.match(out.reason, /no direct LLM client/);
+  }
+});

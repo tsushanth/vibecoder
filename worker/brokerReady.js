@@ -41,3 +41,19 @@ export async function checkBrokerReady({
     try { detail = String((await res.json()).error || '').slice(0, 120); } catch { /* body is optional */ }
     return { ready: false, mode: 'broker', status: res.status, reason: detail || `broker returned ${res.status}` };
 }
+
+/**
+ * Readiness of the whole build path, given how builds are routed.
+ * - directPercent 0: every build uses the Claude CLI, so only the broker matters (unchanged behaviour).
+ * - directPercent 100: every build uses the direct generator, so the broker is not consulted.
+ * - in between: some builds still go through the CLI, so both paths must be healthy.
+ * - directPercent > 0 without a direct client: builds routed to it would fail, so not ready.
+ * @returns {Promise<{ready: boolean, mode: string, percent?: number, status?: number, reason?: string}>}
+ */
+export async function checkBuildPathReady({ directPercent = 0, directLlm = null, checkBroker = checkBrokerReady } = {}) {
+    if (!(directPercent > 0)) return checkBroker();
+    if (!directLlm) return { ready: false, mode: 'direct', percent: directPercent, reason: 'direct generation is enabled but no direct LLM client is configured' };
+    if (directPercent >= 100) return { ready: true, mode: 'direct', percent: 100 };
+    const broker = await checkBroker();
+    return { ...broker, mode: 'mixed', percent: directPercent };
+}
