@@ -26,10 +26,11 @@ test('bad signature -> 400 and one stripe_webhook_signature failure', async () =
     assert.equal(res.status, 400); assert.deepEqual(sent.map((s) => [s.kind, s.flow]), [['failure', 'billing:stripe_webhook_signature']]);
 });
 
-test('a database error while applying a paid checkout is reported (event type only, no user id)', async () => {
+// Was answered 200 (Stripe never retried); now 5xx so Stripe retries the event. The report is unchanged.
+test('a database error while applying a paid checkout answers 5xx for a Stripe retry and is reported (event type only, no user id)', async () => {
     sent.length = 0; dbError = { code: '57P01', message: 'terminating connection' };
     const res = await post(...signed(checkout)); await new Promise((r) => setTimeout(r, 30));
-    assert.equal(res.status, 200);
+    assert.equal(res.status, 500);
     assert.deepEqual(sent.map((s) => [s.flow, s.message, s.context]), [['billing:stripe_webhook_processing', 'Stripe webhook processing failed', { event_type: 'checkout.session.completed' }]]);
     assert.equal(JSON.stringify(sent).includes('user-secret-id'), false);
 });

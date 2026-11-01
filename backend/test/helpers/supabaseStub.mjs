@@ -4,12 +4,12 @@
  * Replace `client.from` (the real client is never contacted).
  */
 export function makeBuilder(table, handler) {
-    const q = { table, op: 'select', filters: [], payload: null, single: false };
+    const q = { table, op: 'select', filters: [], payload: null, single: false, maybe: false };
     const run = () => Promise.resolve(handler(q) ?? { data: null, error: null });
     const b = new Proxy({}, {
         get(_t, prop) {
             if (prop === 'then') return (res, rej) => run().then(res, rej);
-            if (prop === 'single' || prop === 'maybeSingle') return () => { q.single = true; return b; };
+            if (prop === 'single' || prop === 'maybeSingle') return () => { q.single = true; q.maybe = prop === 'maybeSingle'; return b; };
             if (prop === 'insert' || prop === 'update' || prop === 'delete' || prop === 'upsert') {
                 return (payload) => { q.op = prop; q.payload = payload; return b; };
             }

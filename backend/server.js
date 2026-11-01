@@ -5,6 +5,7 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import subscriptionsRoutes from './routes/subscriptions.routes.js';
+import revenuecatWebhookRoutes from './routes/revenuecat.routes.js';
 import projectsRoutes from './routes/projects.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import deployRoutes from './routes/deploy.routes.js';
@@ -123,6 +124,7 @@ app.get('/api/status', async (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectsRoutes);
 app.use('/api/subscriptions', subscriptionsRoutes);
+app.use('/api/webhooks/revenuecat', revenuecatWebhookRoutes);
 app.use('/api/deploy', deployRoutes);
 app.use('/api/domains', domainsRoutes);
 app.use('/api/telegram', telegramRoutes);

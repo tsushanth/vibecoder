@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { reportFailure } from '../lib/failureReporter.js';
 import { supabase } from '../config/database.js';
 import { syncTierLimitsForUser } from '../services/tierSync.js';
+import { createStripeEventProcessor, stripeApiFrom } from '../services/stripeWebhook.js';
 import {
     getSubscriptionStatus,
     verifyReceipt,
@@ -85,7 +86,7 @@ router.post('/verify', async (req, res) => {
         const result = await verifyReceipt(platform, receiptData, userId);
 
         if (!result.success) {
-            return res.status(result.unavailable ? 501 : 400).json({
+            return res.status(result.httpStatus || (result.unavailable ? 501 : 400)).json({
                 error: result.error
             });
         }
@@ -241,6 +242,8 @@ router.post('/create-checkout', async (req, res) => {
             client_reference_id: userId,
             customer_email: email || undefined,
             metadata: { userId, tier },
+            // Lets the webhook rebuild a missing row from the subscription itself when events arrive out of order.
+            subscription_data: { metadata: { userId, tier } },
         });
 
         res.json({ success: true, url: session.url, sessionId: session.id });
@@ -275,77 +278,14 @@ router.post('/stripe-webhook', express.raw({ type: 'application/json' }), async 
     }
 
     try {
-        switch (event.type) {
-            case 'checkout.session.completed': {
-                const session = event.data.object;
-                const userId = session.client_reference_id || session.metadata?.userId;
-                const tier = session.metadata?.tier || 'pro';
-
-                if (userId) {
-                    const { error: upsertErr } = await supabase.from('user_subscriptions').upsert({
-                        user_id: userId,
-                        tier,
-                        status: 'active',
-                        platform: 'web',
-                        product_id: session.subscription,
-                        receipt_data: session.id,
-                        expires_at: null,
-                        updated_at: new Date().toISOString(),
-                    }, { onConflict: 'user_id' });
-                    if (upsertErr) throw new Error('user_subscriptions upsert failed'); // supabase-js returns errors instead of throwing: without this a paid checkout was dropped silently
-
-                    console.log(`[stripe-webhook] Subscription activated: user=${userId}, tier=${tier}`);
-                }
-                break;
-            }
-
-            case 'customer.subscription.deleted':
-            case 'customer.subscription.updated': {
-                const subscription = event.data.object;
-                const { data: sub } = await supabase
-                    .from('user_subscriptions')
-                    .select('user_id')
-                    .eq('product_id', subscription.id)
-                    .single();
-
-                if (sub) {
-                    const isActive = subscription.status === 'active';
-                    const { error: updErr } = await supabase.from('user_subscriptions').update({
-                        status: isActive ? 'active' : 'cancelled',
-                        tier: isActive ? undefined : 'free',
-                        expires_at: subscription.current_period_end
-                            ? new Date(subscription.current_period_end * 1000).toISOString()
-                            : null,
-                        updated_at: new Date().toISOString(),
-                    }).eq('user_id', sub.user_id);
-                    if (updErr) throw new Error('user_subscriptions update failed');
-
-                    console.log(`[stripe-webhook] Subscription ${subscription.status}: user=${sub.user_id}`);
-                }
-                break;
-            }
-
-            case 'invoice.payment_failed': {
-                const invoice = event.data.object;
-                const { data: sub } = await supabase
-                    .from('user_subscriptions')
-                    .select('user_id')
-                    .eq('product_id', invoice.subscription)
-                    .single();
-
-                if (sub) {
-                    await supabase.from('user_subscriptions').update({
-                        status: 'past_due',
-                        updated_at: new Date().toISOString(),
-                    }).eq('user_id', sub.user_id);
-                }
-                break;
-            }
-        }
+        const processor = createStripeEventProcessor({ supabase, api: stripe ? stripeApiFrom(stripe) : null });
+        const result = await processor.process(event);
+        if (result.outcome === 'applied') console.log(`[stripe-webhook] ${event.type} applied`);
     } catch (error) {
-        console.error('[stripe-webhook] Processing error:', error);
-        // Answered 200 below (Stripe will not retry), so this report is the only signal that a paid event was not applied.
+        console.error('[stripe-webhook] Processing error:', error?.message);
         reportFailure('billing:stripe_webhook_processing', new Error('Stripe webhook processing failed'), { event_type: String(event?.type ?? '').slice(0, 60) });
+        // 5xx so Stripe retries (it backs off for up to three days). Everything final (applied, skipped, duplicate, unknown type) is 2xx below.
+        return res.status(500).json({ error: 'Webhook processing failed' });
     }
 
     // Any subscription event can change a user's tier: re-apply tiers soon (debounced; the periodic sweep is the backstop).
