@@ -94,6 +94,27 @@ class ModelParsingTest {
         assertFalse(s.limits!!.unlimited)
     }
 
+    @Test fun subscriptionLimits_realServerPayload_camelCase() {
+        // Captured from GET /api/subscriptions/status on 2026-11-01: the server sends camelCase keys, not snake_case.
+        val s = gson.fromJson(
+            """{"success":true,"tier":"free","status":"active","expiresAt":null,"limits":{"name":"Free","dailyGenerations":10,"tweaksPerProject":3,"canCreatePrivateProjects":false,"priorityQueue":false,"price":"$0"}}""",
+            SubscriptionStatusResponse::class.java
+        )
+        assertEquals(10, s.limits!!.dailyGenerations)
+        assertEquals(3, s.limits!!.tweaksPerProject)
+        assertFalse(s.limits!!.canCreatePrivate)
+    }
+
+    @Test fun subscriptionLimits_camelCase_infinityIsNull() {
+        val s = gson.fromJson(
+            """{"success":true,"tier":"pro","limits":{"name":"Pro","dailyGenerations":null,"tweaksPerProject":null,"canCreatePrivateProjects":true,"priorityQueue":true}}""",
+            SubscriptionStatusResponse::class.java
+        )
+        assertNull(s.limits!!.dailyGenerations)
+        assertTrue(s.limits!!.canCreatePrivate)
+        assertTrue(s.limits!!.priorityQueue)
+    }
+
     @Test fun subscriptionStatus_without_limits() {
         val s = gson.fromJson("""{"success":true,"tier":"free"}""", SubscriptionStatusResponse::class.java)
         assertEquals("free", s.tier)

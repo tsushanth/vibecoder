@@ -144,7 +144,7 @@
     <string name="account_settings_theme">Thème</string>
     <string name="account_settings_theme_value">Sombre</string>
     <string name="account_settings_about">À propos</string>
-    <string name="account_settings_version">Version 1.0.0</string>
+    <string name="account_settings_version">Version %1$s</string>
     <string name="account_settings_language">Langue</string>
 
     <!-- Apps Screen -->

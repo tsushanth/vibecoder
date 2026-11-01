@@ -1,0 +1,2 @@
+Your purchases now follow your signed-in account, so a subscription you buy shows up as Pro everywhere you sign in, and the Account screen updates right after you subscribe or restore.
+Bug fixes and performance improvements.

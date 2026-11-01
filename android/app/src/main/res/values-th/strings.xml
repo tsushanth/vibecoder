@@ -144,7 +144,7 @@
     <string name="account_settings_theme">ธีม</string>
     <string name="account_settings_theme_value">มืด</string>
     <string name="account_settings_about">เกี่ยวกับ</string>
-    <string name="account_settings_version">เวอร์ชัน 1.0.0</string>
+    <string name="account_settings_version">เวอร์ชัน %1$s</string>
     <string name="account_settings_language">ภาษา</string>
 
     <!-- Apps Screen -->

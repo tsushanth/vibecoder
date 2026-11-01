@@ -35,8 +35,6 @@ private fun currentPhaseIndex(phase: String, percent: Double): Int {
     return if (idx >= 0) idx else (percent / 100.0 * BuildPhases.size).toInt().coerceIn(0, BuildPhases.size - 1)
 }
 
-private fun fmt(seconds: Long): String = "%d:%02d".format(seconds / 60, seconds % 60)
-
 /** Replit-Agent-style chat thread: prompt bubble, plan, streaming build progress, preview card, tweak composer. */
 @Composable
 fun BuildChatThread(
@@ -247,7 +245,7 @@ private fun ProgressCard(state: CreateUiState) {
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(building) { while (building) { now = System.currentTimeMillis(); delay(1000) } }
     val end = state.buildFinishedAtMs ?: now
-    val elapsed = ((end - state.buildStartedAtMs) / 1000).coerceAtLeast(0)
+    val elapsedLabel = BuildTimer.label(state.buildStartedAtMs, end)
     val idx = currentPhaseIndex(state.buildPhase, state.progressPercent)
 
     AssistantCard {
@@ -256,7 +254,7 @@ private fun ProgressCard(state: CreateUiState) {
                 when (stage) { ChatStage.Ready -> "Build complete"; ChatStage.Failed -> "Build failed"; else -> "Building your app" },
                 color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 15.sp, modifier = Modifier.weight(1f)
             )
-            Text(fmt(elapsed), color = TextTertiary, fontSize = 12.sp)
+            if (elapsedLabel != null) Text(elapsedLabel, color = TextTertiary, fontSize = 12.sp)
         }
         Spacer(Modifier.height(10.dp))
         BuildPhases.forEachIndexed { i, name ->

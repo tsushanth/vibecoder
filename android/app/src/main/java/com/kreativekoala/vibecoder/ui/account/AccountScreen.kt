@@ -27,9 +27,15 @@ import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import com.kreativekoala.vibecoder.MainActivity
 import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.components.SettingsRow
+import com.kreativekoala.vibecoder.BuildConfig
 import com.kreativekoala.vibecoder.ui.theme.*
+import com.kreativekoala.vibecoder.util.Monetization
 import com.kreativekoala.crosspromokit.models.AppId
 import com.kreativekoala.crosspromokit.view.CrossPromoSection
 
@@ -41,6 +47,13 @@ fun AccountScreen(
     viewModel: AccountViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    // Coming back from the paywall: show the server's view of the subscription (the first resume is the initial load).
+    var firstResume by remember { mutableStateOf(true) }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        if (firstResume) firstResume = false
+        else viewModel.refreshSubscription(expectPaid = MainActivity.isPremiumUser(context))
+    }
     var showSignOutDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
 
@@ -188,36 +201,38 @@ fun AccountScreen(
                 color = TextSecondary
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            if (!Monetization.ALL_FREE) {
+                Spacer(modifier = Modifier.height(8.dp))
 
-            // Subscription badge
-            val tier = uiState.subscriptionStatus?.tier ?: uiState.user?.subscriptionTier ?: "free"
-            Surface(
-                shape = RoundedCornerShape(20.dp),
-                color = when (tier) {
-                    "pro" -> VibePurple.copy(alpha = 0.2f)
-                    "team" -> VibeBlue.copy(alpha = 0.2f)
-                    else -> DarkSurfaceElevated
-                }
-            ) {
-                Text(
-                    text = tier.replaceFirstChar { it.uppercase() },
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-                    style = MaterialTheme.typography.labelLarge,
+                // Subscription badge
+                val tier = uiState.subscriptionStatus?.tier ?: uiState.user?.subscriptionTier ?: "free"
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
                     color = when (tier) {
-                        "pro" -> VibePurple
-                        "team" -> VibeBlue
-                        else -> TextSecondary
-                    },
-                    fontWeight = FontWeight.SemiBold
-                )
+                        "pro" -> VibePurple.copy(alpha = 0.2f)
+                        "team" -> VibeBlue.copy(alpha = 0.2f)
+                        else -> DarkSurfaceElevated
+                    }
+                ) {
+                    Text(
+                        text = tier.replaceFirstChar { it.uppercase() },
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = when (tier) {
+                            "pro" -> VibePurple
+                            "team" -> VibeBlue
+                            else -> TextSecondary
+                        },
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         // Upgrade button (for free users)
-        if ((uiState.subscriptionStatus?.tier ?: "free") == "free") {
+        if (!Monetization.ALL_FREE && (uiState.subscriptionStatus?.tier ?: "free") == "free") {
             Button(
                 onClick = onSubscriptionsClick,
                 modifier = Modifier.fillMaxWidth(),
@@ -260,10 +275,12 @@ fun AccountScreen(
                         label = stringResource(R.string.account_stat_projects),
                         value = "${uiState.user?.totalProjects ?: 0}"
                     )
-                    UsageStat(
-                        label = stringResource(R.string.account_stat_todays_gens),
-                        value = todaysGenerationsText(uiState)
-                    )
+                    todaysGenerationsText(uiState)?.let { text ->
+                        UsageStat(
+                            label = stringResource(R.string.account_stat_todays_gens),
+                            value = text
+                        )
+                    }
                 }
             }
         }
@@ -286,12 +303,14 @@ fun AccountScreen(
             colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant)
         ) {
             Column {
-                SettingsRow(
-                    icon = Icons.Default.CreditCard,
-                    title = stringResource(R.string.account_settings_subscription),
-                    onClick = onSubscriptionsClick
-                )
-                HorizontalDivider(color = DarkBorder)
+                if (!Monetization.ALL_FREE) {
+                    SettingsRow(
+                        icon = Icons.Default.CreditCard,
+                        title = stringResource(R.string.account_settings_subscription),
+                        onClick = onSubscriptionsClick
+                    )
+                    HorizontalDivider(color = DarkBorder)
+                }
                 SettingsRow(
                     icon = Icons.Default.Palette,
                     title = stringResource(R.string.account_settings_theme),
@@ -311,7 +330,7 @@ fun AccountScreen(
                 SettingsRow(
                     icon = Icons.Default.Info,
                     title = stringResource(R.string.account_settings_about),
-                    subtitle = stringResource(R.string.account_settings_version),
+                    subtitle = stringResource(R.string.account_settings_version, BuildConfig.VERSION_NAME),
                     onClick = {}
                 )
             }
@@ -359,10 +378,16 @@ private fun UsageStat(label: String, value: String) {
     }
 }
 
-/** "N" for paid/unlimited tiers, "N/limit" for free (default limit 3). Pro/Team limits are Infinity on the server, which JSON turns into null. */
-internal fun todaysGenerationsText(uiState: AccountUiState): String {
+/**
+ * The "Today's Gens" figure, or null when it should not be shown. While the app is all free there is no daily cap to show against,
+ * so the stat is hidden. Otherwise it is "N/limit" with the limit from the server's subscription status (never a hard-coded
+ * number: the server's free limit has changed over time), "N" for paid or unlimited plans, and "N" when the server sent no limit.
+ */
+internal fun todaysGenerationsText(uiState: AccountUiState, allFree: Boolean = Monetization.ALL_FREE): String? {
+    if (allFree) return null
     val limit = uiState.subscriptionStatus?.limits
     val paidTier = (uiState.subscriptionStatus?.tier ?: uiState.user?.subscriptionTier ?: "free") != "free"
-    return "${uiState.user?.dailyGenerationCount ?: 0}" +
-        if (paidTier || limit?.unlimited == true) "" else "/${limit?.dailyGenerations ?: 3}"
+    val used = uiState.user?.dailyGenerationCount ?: 0
+    val cap = limit?.dailyGenerations
+    return if (paidTier || limit?.unlimited == true || cap == null) "$used" else "$used/$cap"
 }

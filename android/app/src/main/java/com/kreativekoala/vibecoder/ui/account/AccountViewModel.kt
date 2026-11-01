@@ -9,6 +9,8 @@ import com.kreativekoala.vibecoder.data.repository.toLocalUser
 import com.kreativekoala.vibecoder.data.repository.ProjectRepository
 import com.kreativekoala.vibecoder.data.repository.SubscriptionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -58,6 +60,33 @@ class AccountViewModel @Inject constructor(
 
             _uiState.update { it.copy(isLoading = false) }
         }
+    }
+
+    /**
+     * Re-reads the server's subscription status, for when the screen comes back after a purchase or restore. The server entitlement
+     * comes from the RevenueCat webhook, which can land a few seconds after the store confirms, so when the app already knows the
+     * user paid ([expectPaid]) a "free" answer is re-checked a few times before it is shown as final.
+     */
+    fun refreshSubscription(expectPaid: Boolean = false) {
+        val userId = authRepository.currentUser?.uid ?: return
+        viewModelScope.launch {
+            val attempts = if (expectPaid) PAID_SYNC_ATTEMPTS else 1
+            for (i in 1..attempts) {
+                try {
+                    val status = subscriptionRepository.getSubscriptionStatus(userId)
+                    _uiState.update { it.copy(subscriptionStatus = status) }
+                    if (status.tier != "free") return@launch
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {}
+                if (i < attempts) delay(PAID_SYNC_DELAY_MS)
+            }
+        }
+    }
+
+    companion object {
+        private const val PAID_SYNC_ATTEMPTS = 5
+        private const val PAID_SYNC_DELAY_MS = 3_000L
     }
 
     fun signOut() {

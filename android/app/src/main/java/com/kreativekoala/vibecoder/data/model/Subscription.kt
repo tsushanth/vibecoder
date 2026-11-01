@@ -39,9 +39,12 @@ data class SubscriptionStatus(
 )
 
 data class SubscriptionLimits(
-    @SerializedName("daily_generations") val dailyGenerations: Int? = null,
-    @SerializedName("tweaks_per_project") val tweaksPerProject: Int? = null,
-    @SerializedName("can_create_private") val canCreatePrivate: Boolean = false,
-    @SerializedName("priority_queue") val priorityQueue: Boolean = false,
+    // The server (backend/services/subscriptionService.js) sends camelCase keys; the snake_case names are what this model
+    // originally (and wrongly) expected, kept as alternates. Reading only the snake_case keys left every value null, so the
+    // app fell back to a hard-coded limit.
+    @SerializedName("dailyGenerations", alternate = ["daily_generations"]) val dailyGenerations: Int? = null,
+    @SerializedName("tweaksPerProject", alternate = ["tweaks_per_project"]) val tweaksPerProject: Int? = null,
+    @SerializedName("canCreatePrivateProjects", alternate = ["can_create_private"]) val canCreatePrivate: Boolean = false,
+    @SerializedName("priorityQueue", alternate = ["priority_queue"]) val priorityQueue: Boolean = false,
     val unlimited: Boolean = false
 )

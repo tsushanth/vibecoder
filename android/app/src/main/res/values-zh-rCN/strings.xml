@@ -144,7 +144,7 @@
     <string name="account_settings_theme">主题</string>
     <string name="account_settings_theme_value">深色</string>
     <string name="account_settings_about">关于</string>
-    <string name="account_settings_version">版本 1.0.0</string>
+    <string name="account_settings_version">版本 %1$s</string>
     <string name="account_settings_language">语言</string>
 
     <!-- Apps Screen -->

@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.vibecoder.MainActivity
 import com.kreativekoala.vibecoder.ui.paywall.GenerationLimit
+import com.kreativekoala.vibecoder.util.Monetization
 import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.preview.LivePreviewScreen
 import com.kreativekoala.vibecoder.ui.theme.*
@@ -196,19 +197,28 @@ fun CreateScreen(
             onDismissRequest = { viewModel.dismissSystemBusyDialog() },
             title = { Text("🔥 High Demand Right Now") },
             text = {
-                Text("Our builders are at full capacity. Pro users get priority access and build instantly.")
+                Text(
+                    if (Monetization.ALL_FREE) "Our builders are at full capacity right now. Please try again in a few minutes."
+                    else "Our builders are at full capacity. Pro users get priority access and build instantly."
+                )
             },
             confirmButton = {
-                TextButton(onClick = {
-                    viewModel.dismissSystemBusyDialog()
-                    onNavigateToSubscriptions()
-                }) {
-                    Text("⚡ Upgrade to Pro", color = VibePurple)
+                if (Monetization.ALL_FREE) {
+                    TextButton(onClick = { viewModel.dismissSystemBusyDialog() }) { Text(stringResource(R.string.ok)) }
+                } else {
+                    TextButton(onClick = {
+                        viewModel.dismissSystemBusyDialog()
+                        onNavigateToSubscriptions()
+                    }) {
+                        Text("⚡ Upgrade to Pro", color = VibePurple)
+                    }
                 }
             },
             dismissButton = {
-                TextButton(onClick = { viewModel.dismissSystemBusyDialog() }) {
-                    Text(stringResource(R.string.ok))
+                if (!Monetization.ALL_FREE) {
+                    TextButton(onClick = { viewModel.dismissSystemBusyDialog() }) {
+                        Text(stringResource(R.string.ok))
+                    }
                 }
             },
             containerColor = DarkSurfaceVariant

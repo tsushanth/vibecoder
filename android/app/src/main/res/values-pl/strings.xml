@@ -144,7 +144,7 @@
     <string name="account_settings_theme">Motyw</string>
     <string name="account_settings_theme_value">Ciemny</string>
     <string name="account_settings_about">O aplikacji</string>
-    <string name="account_settings_version">Wersja 1.0.0</string>
+    <string name="account_settings_version">Wersja %1$s</string>
     <string name="account_settings_language">Język</string>
 
     <!-- Apps Screen -->

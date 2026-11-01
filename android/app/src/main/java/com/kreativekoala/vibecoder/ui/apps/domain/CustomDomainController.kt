@@ -1,5 +1,6 @@
 package com.kreativekoala.vibecoder.ui.apps.domain
 
+import com.kreativekoala.vibecoder.util.Monetization
 import com.kreativekoala.vibecoder.data.model.ApexRecords
 import com.kreativekoala.vibecoder.data.repository.DomainApi
 import com.kreativekoala.vibecoder.data.repository.DomainFailure
@@ -169,8 +170,8 @@ class CustomDomainController(
                     _state.update {
                         it.copy(
                             work = DomainWork.IDLE,
-                            upgradeRequired = f is DomainFailure.UpgradeRequired,
-                            error = if (f is DomainFailure.UpgradeRequired) null else f.toError()
+                            upgradeRequired = f is DomainFailure.UpgradeRequired && !Monetization.ALL_FREE,
+                            error = if (f is DomainFailure.UpgradeRequired && !Monetization.ALL_FREE) null else f.toError()
                         )
                     }
                 }
@@ -252,7 +253,8 @@ class CustomDomainController(
     fun cancel() { pollJob?.cancel() }
 
     private fun DomainFailure.toError(): DomainError = when (this) {
-        DomainFailure.UpgradeRequired -> DomainError.Other("Custom domains are a Pro feature")
+        DomainFailure.UpgradeRequired ->
+            DomainError.Other(if (Monetization.ALL_FREE) "Custom domains aren't available right now. Please try again later." else "Custom domains are a Pro feature")
         is DomainFailure.InvalidDomain -> DomainError.Validation(message)
         DomainFailure.AlreadyRegistered -> DomainError.AlreadyRegistered
         DomainFailure.Network -> DomainError.Network

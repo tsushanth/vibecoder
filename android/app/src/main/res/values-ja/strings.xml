@@ -144,7 +144,7 @@
     <string name="account_settings_theme">テーマ</string>
     <string name="account_settings_theme_value">ダーク</string>
     <string name="account_settings_about">アプリについて</string>
-    <string name="account_settings_version">バージョン 1.0.0</string>
+    <string name="account_settings_version">バージョン %1$s</string>
     <string name="account_settings_language">言語</string>
 
     <!-- Apps Screen -->

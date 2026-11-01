@@ -8,6 +8,8 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.kreativekoala.vibecoder.data.model.RegisterRequest
 import com.kreativekoala.vibecoder.data.model.User
 import com.kreativekoala.vibecoder.data.remote.VibeBuildApi
+import com.kreativekoala.vibecoder.ui.auth.AuthFailure
+import com.kreativekoala.vibecoder.ui.auth.AuthFailureException
 import com.kreativekoala.vibecoder.util.Constants
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -16,7 +18,9 @@ import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.providers.builtin.IDToken
 import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.transform
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -69,6 +73,20 @@ class AuthRepository @Inject constructor(
     }
 
     /**
+     * The Supabase user id each time a session is established or restored, and null when the user is signed out. The initial and
+     * refresh-failure states say nothing about who is signed in, so they emit nothing.
+     */
+    fun observeUserId(): Flow<String?> {
+        return supabase.auth.sessionStatus.transform { status ->
+            when (status) {
+                is SessionStatus.Authenticated -> status.session.user?.id?.let { emit(it) }
+                is SessionStatus.NotAuthenticated -> emit(null)
+                else -> Unit
+            }
+        }.distinctUntilChanged()
+    }
+
+    /**
      * Returns the currently signed-in user, or null.
      */
     val currentUser: AuthUser?
@@ -114,7 +132,7 @@ class AuthRepository @Inject constructor(
         }
 
         // Step 3: Register with VibeBuild backend
-        val authUser = currentUser ?: throw Exception("Supabase sign-in failed")
+        val authUser = currentUser ?: throw AuthFailureException(AuthFailure.GoogleFailed)
         return registerWithBackend(authUser)
     }
 
@@ -123,7 +141,8 @@ class AuthRepository @Inject constructor(
             this.email = email
             this.password = password
         }
-        val authUser = currentUser ?: throw Exception("Sign-up failed")
+        // No session after a successful sign-up means the project wants the email confirmed before the first sign-in.
+        val authUser = currentUser ?: throw AuthFailureException(AuthFailure.ConfirmEmailToFinish)
         return registerWithBackend(
             authUser.copy(displayName = displayName ?: authUser.displayName)
         )
@@ -134,7 +153,7 @@ class AuthRepository @Inject constructor(
             this.email = email
             this.password = password
         }
-        val authUser = currentUser ?: throw Exception("Sign-in failed")
+        val authUser = currentUser ?: throw AuthFailureException(AuthFailure.Unknown)
         return registerWithBackend(authUser)
     }
 

@@ -1,0 +1,2 @@
+VibeBuild is now completely free. No paywall, no Pro plan, no build limits: every feature is open to everyone.
+Clearer sign-in messages (for example "Wrong email or password"), a correct build timer after the app restarts, and the real app version in Account.

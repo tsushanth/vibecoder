@@ -1,6 +1,7 @@
 package com.kreativekoala.vibecoder.ui.auth
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kreativekoala.vibecoder.data.local.UserPreferences
@@ -23,6 +24,10 @@ class AuthViewModel @Inject constructor(
     private val userPreferences: UserPreferences,
     private val fcmTokenManager: FCMTokenManager
 ) : ViewModel() {
+
+    private companion object {
+        const val TAG = "Auth"
+    }
 
     private val _isAuthenticated = MutableStateFlow(authRepository.currentUser != null)
     val isAuthenticated: StateFlow<Boolean> = _isAuthenticated.asStateFlow()
@@ -68,7 +73,9 @@ class AuthViewModel @Inject constructor(
                 // on every Google sign-in; only fires for first-time users.
                 FacebookSDKHelper.logSignUp("google")
             } catch (e: Exception) {
-                _errorMessage.value = e.message ?: "Sign in failed"
+                AuthErrors.rethrowIfCancelled(e)
+                Log.d(TAG, "Google sign-in failed: ${AuthErrors.logSummary(e)}")
+                _errorMessage.value = AuthErrors.message(e)
             } finally {
                 _isLoading.value = false
             }
@@ -86,7 +93,9 @@ class AuthViewModel @Inject constructor(
                 fcmTokenManager.registerTokenForUser(user.userId)
                 FirebaseAnalyticsHelper.logLogin("email")
             } catch (e: Exception) {
-                _errorMessage.value = e.message ?: "Sign in failed"
+                AuthErrors.rethrowIfCancelled(e)
+                Log.d(TAG, "Email sign-in failed: ${AuthErrors.logSummary(e)}")
+                _errorMessage.value = AuthErrors.message(e)
             } finally {
                 _isLoading.value = false
             }
@@ -105,7 +114,9 @@ class AuthViewModel @Inject constructor(
                 FirebaseAnalyticsHelper.logSignUp("email")
                 FacebookSDKHelper.logSignUp("email")
             } catch (e: Exception) {
-                _errorMessage.value = e.message ?: "Sign up failed"
+                AuthErrors.rethrowIfCancelled(e)
+                Log.d(TAG, "Email sign-up failed: ${AuthErrors.logSummary(e)}")
+                _errorMessage.value = AuthErrors.message(e, signUp = true)
             } finally {
                 _isLoading.value = false
             }

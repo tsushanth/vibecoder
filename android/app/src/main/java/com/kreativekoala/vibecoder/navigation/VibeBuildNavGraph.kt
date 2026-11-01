@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.kreativekoala.vibecoder.MainActivity
 import com.kreativekoala.vibecoder.ui.paywall.GenerationLimit
+import com.kreativekoala.vibecoder.util.Monetization
 import com.kreativekoala.vibecoder.ui.account.SubscriptionPlansScreen
 import com.kreativekoala.vibecoder.ui.apps.ProjectDetailScreen
 import com.kreativekoala.vibecoder.ui.auth.AuthViewModel
@@ -99,8 +100,9 @@ fun VibeBuildNavGraph() {
                     prefs.edit().putBoolean(KEY_ONBOARDING_COMPLETED, true).apply()
                     // people who already subscribe (for example after a reinstall) go straight in
                     val next = if (GenerationLimit.showsPostOnboardingPaywall(MainActivity.isPremiumUser(context))) Screen.Paywall.route else Screen.Main.route
+                    // Clear the whole back stack so nothing earlier (a second onboarding entry, sign-in, landing) is behind it.
                     navController.navigate(next) {
-                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
@@ -108,11 +110,10 @@ fun VibeBuildNavGraph() {
 
         composable(Screen.Paywall.route) {
             SubscriptionPlansScreen(
+                // Closing the post-onboarding paywall always lands on the main screen, whatever is behind it.
                 onBack = {
-                    if (!navController.popBackStack()) {
-                        navController.navigate(Screen.Main.route) {
-                            popUpTo(0) { inclusive = true }
-                        }
+                    navController.navigate(Screen.Main.route) {
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
@@ -126,10 +127,10 @@ fun VibeBuildNavGraph() {
                     }
                 },
                 onNavigateToSubscriptions = {
-                    navController.navigate(Screen.SubscriptionPlans.route)
+                    if (!Monetization.ALL_FREE) navController.navigate(Screen.SubscriptionPlans.route)
                 },
                 onNavigateToHardPaywall = {
-                    navController.navigate(Screen.HardPaywall.route)
+                    if (!Monetization.ALL_FREE) navController.navigate(Screen.HardPaywall.route)
                 },
                 onNavigateToProjectDetail = { projectId ->
                     navController.navigate(Screen.ProjectDetail.createRoute(projectId))
@@ -148,7 +149,7 @@ fun VibeBuildNavGraph() {
             ProjectDetailScreen(
                 projectId = projectId,
                 onBack = { navController.popBackStack() },
-                onUpgrade = { navController.navigate(Screen.SubscriptionPlans.route) }
+                onUpgrade = { if (!Monetization.ALL_FREE) navController.navigate(Screen.SubscriptionPlans.route) }
             )
         }
 

@@ -22,7 +22,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.*
@@ -77,7 +76,6 @@ class CreateViewModelTest {
     private val deploy = mockk<DeployRepository>(relaxed = true)
     private val userPrefs = mockk<UserPreferences>(relaxed = true)
     private val templates = mockk<TemplateRepository>(relaxed = true)
-    private val hasShownRating = MutableStateFlow(false)
 
     private fun prefs(name: String) = prefsByName.getOrPut(name) { FakePrefs() }
     private val snapshot get() = prefs("chat_snapshot")
@@ -91,8 +89,6 @@ class CreateViewModelTest {
         every { templates.all() } returns emptyList()
         every { userPrefs.pendingGenerationPrompt } returns flowOf(null)
         every { userPrefs.pendingGenerationTime } returns flowOf(null)
-        every { userPrefs.hasShownRatingPrompt } returns hasShownRating
-        coEvery { userPrefs.markRatingPromptShown() } coAnswers { hasShownRating.value = true }
         coEvery { projects.getSuggestions() } returns emptyList()
         coEvery { projects.plan(any()) } returns null
         coEvery { projects.getProject(any()) } answers {
@@ -357,6 +353,32 @@ class CreateViewModelTest {
         assertEquals("https://preview/x", s.previewUrl)
     }
 
+    @Test fun snapshot_restore_without_saved_times_has_no_bogus_start() = runTest {
+        // An older snapshot has no times; the start must stay 0 (timer hidden), never "finished minus 0".
+        seedReadySnapshot()
+        val vm = vm(); advanceUntilIdle()
+        val s = vm.uiState.value
+        assertEquals(0L, s.buildStartedAtMs)
+        assertNull(com.kreativekoala.vibecoder.ui.create.BuildTimer.label(s.buildStartedAtMs, s.buildFinishedAtMs ?: 0L))
+    }
+
+    @Test fun snapshot_restore_keeps_the_saved_build_duration() = runTest {
+        seedReadySnapshot()
+        snapshot.map["startedAtMs"] = 1_700_000_000_000L
+        snapshot.map["finishedAtMs"] = 1_700_000_095_000L
+        val vm = vm(); advanceUntilIdle()
+        val s = vm.uiState.value
+        assertEquals("1:35", com.kreativekoala.vibecoder.ui.create.BuildTimer.label(s.buildStartedAtMs, s.buildFinishedAtMs!!))
+    }
+
+    @Test fun snapshot_saves_the_build_times_when_ready() = runTest {
+        val vm = readyVm()
+        val start = snapshot.map["startedAtMs"] as Long
+        val finish = snapshot.map["finishedAtMs"] as Long
+        assertTrue(start > 0L && finish >= start)
+        vm.newChat()
+    }
+
     @Test fun snapshot_for_other_user_is_discarded() = runTest {
         seedReadySnapshot(userId = "someone-else")
         val vm = vm(); advanceUntilIdle()
@@ -400,7 +422,6 @@ class CreateViewModelTest {
     @Test fun rating_not_shown_at_completion() = runTest {
         val vm = readyVm()
         assertFalse(vm.uiState.value.showRatingPrompt)
-        coVerify(exactly = 0) { userPrefs.markRatingPromptShown() }
         vm.newChat()
     }
 
@@ -412,8 +433,7 @@ class CreateViewModelTest {
         assertTrue(vm.uiState.value.showRatingPrompt)
         vm.dismissRatingPrompt()
         vm.openPreview(); vm.closePreview(); advanceUntilIdle()
-        assertFalse(vm.uiState.value.showRatingPrompt)          // once only
-        coVerify(exactly = 1) { userPrefs.markRatingPromptShown() }
+        assertFalse(vm.uiState.value.showRatingPrompt)          // armed once per finished build
     }
 
     @Test fun rating_not_shown_when_closing_preview_never_opened() = runTest {
@@ -435,14 +455,6 @@ class CreateViewModelTest {
         assertTrue(vm.uiState.value.showRatingPrompt)
     }
 
-    @Test fun rating_not_shown_when_already_shown_previously() = runTest {
-        hasShownRating.value = true
-        val vm = readyVm()
-        vm.openPreview(); vm.closePreview(); vm.newChat(); advanceUntilIdle()
-        assertFalse(vm.uiState.value.showRatingPrompt)
-        coVerify(exactly = 0) { userPrefs.markRatingPromptShown() }
-    }
-
     @Test fun rating_not_shown_by_tweak_while_preview_open() = runTest {
         every { projects.tweak(any(), any(), any()) } returns flowOf(SseEvent.Error("nope"))
         val vm = readyVm()
@@ -455,13 +467,13 @@ class CreateViewModelTest {
 
     // ---------- free generation limit ----------
 
-    @Test fun freeLimit_blocks_at_limit_with_hard_paywall() = runTest {
-        prefs("vibebuild_paywall_prefs").map["generation_count"] = MainActivity.FREE_GENERATION_LIMIT
-        val vm = vm(); startBuild(vm)
-        assertTrue(vm.uiState.value.showHardPaywall)
-        assertEquals(ChatStage.Idle, vm.uiState.value.chatStage)
-        coVerify(exactly = 0) { projects.plan(any()) }
-        verify(exactly = 0) { projects.generate(any(), any(), any(), any()) }
+    @Test fun allFree_never_blocks_a_build_even_far_past_the_old_limit() = runTest {
+        // The old client-side cap (a hard paywall at FREE_GENERATION_LIMIT builds) is off while Monetization.ALL_FREE is true.
+        prefs("vibebuild_paywall_prefs").map["generation_count"] = MainActivity.FREE_GENERATION_LIMIT + 500
+        generateEmits(SseEvent.Queued("p1"), SseEvent.Result(projectId = "p1"))
+        val vm = vm(); startBuild(vm); advanceUntilIdle()
+        assertFalse(vm.uiState.value.showHardPaywall)
+        assertEquals(ChatStage.Ready, vm.uiState.value.chatStage)
     }
 
     @Test fun freeLimit_allows_below_limit_and_increments_count() = runTest {
