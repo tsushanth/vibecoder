@@ -1,5 +1,5 @@
 // Webhook event log: de-duplication and out-of-order detection for the Stripe and RevenueCat webhooks.
-// Backed by the optional table vibebuild_billing_events (supabase/migrations/20261101000000_billing_events.sql). Until that
+// Backed by the optional table vibebuild_billing_events (supabase/migrations/20261101000100_billing_events.sql). Until that
 // migration is applied every function here FAILS SOFT: duplicates are not detected and ordering is not enforced from the log
 // (the handlers are idempotent state setters, and RevenueCat rows carry their own ordering marker), and one failure is reported.
 import { reportFailure } from '../lib/failureReporter.js';
