@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { createClient } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 import { api } from '@/lib/api';
+import { captureFirstTouchInBrowser, getSignupSource } from '@/lib/signupSource';
 
 async function loadSubscriptionStatus(userId: string) {
   try {
@@ -25,6 +26,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const supabase = createClient();
+    // First visit on this browser: remember where the person came from, so the signup can carry it.
+    captureFirstTouchInBrowser();
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -40,6 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               session.user.email?.split('@')[0] ||
               'Anonymous',
             avatarUrl: session.user.user_metadata?.avatar_url,
+            signup_source: getSignupSource(),
           })
           .catch(() => {});
 

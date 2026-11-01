@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
 import { api } from '@/lib/api';
+import { getSignupSource } from '@/lib/signupSource';
 
 interface AuthFormProps {
   mode: 'login' | 'signup';
@@ -42,6 +43,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             userId: data.user.id,
             email: data.user.email,
             displayName: displayName || email.split('@')[0],
+            signup_source: getSignupSource(),
           });
         }
       } else {

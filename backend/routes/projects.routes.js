@@ -26,6 +26,7 @@ import { recordLlm } from '../lib/llmUsageInstance.js';
 import { registerDeployedApp } from '../services/appRegistry.js';
 import { captureChatSecrets, redactForLog } from '../services/chatSecrets.js';
 import { denyUnlessActor } from '../lib/actAs.js';
+import { recordSignupSource } from '../lib/signupSource.js';
 
 const router = express.Router();
 
@@ -949,13 +950,16 @@ router.post('/save', async (req, res) => {
         }
 
         // Ensure user exists
-        await supabase
+        const { data: createdUser } = await supabase
             .from('users')
             .upsert({
                 user_id: creatorId,
                 display_name: creatorName || 'Anonymous',
                 subscription_tier: 'free'
-            }, { onConflict: 'user_id', ignoreDuplicates: true });
+            }, { onConflict: 'user_id', ignoreDuplicates: true })
+            .select('user_id');
+        // With ignoreDuplicates only a row this call created comes back, so an existing user keeps their first source.
+        if (createdUser?.length) await recordSignupSource(supabase, creatorId, req, undefined);
 
         const { data, error: dbError } = await supabase
             .from('projects')

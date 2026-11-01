@@ -66,3 +66,39 @@ test('push-token: an anonymous device id (no email on its row) still registers w
     assert.equal((await post('/api/auth/push-token', { userId: 'anon-1', token: 't', platform: 'ios' })).status, 200);
     reset(); assert.equal((await post('/api/auth/push-token', { userId: 'never-seen', token: 't', platform: 'ios' })).status, 200);
 });
+
+// ---- first-touch signup source (migration 20261101000000): recorded on creation only, and never able to break signup
+const sourceUpdates = () => ops.filter((o) => o.table === 'users' && o.op === 'update' && o.payload && 'signup_source_at' in o.payload);
+const postWithUa = async (body, ua) => { const e = console.error; console.error = () => {}; try { return await fetch(`${srv.base}/api/auth/register`, { method: 'POST', headers: { 'content-type': 'application/json', 'user-agent': ua }, body: JSON.stringify(body) }); } finally { console.error = e; } };
+
+test('register: a new anonymous row gets a sanitized signup source and the platform from the user agent', async () => {
+    reset();
+    const r = await postWithUa({ userId: 'anon-2', displayName: 'D', signup_source: { utm_source: 'hn', role: 'admin', landing_path: '/blog?x=1' } }, 'okhttp/4.12.0');
+    assert.equal(r.status, 200);
+    const [u] = sourceUpdates();
+    assert.equal(u.payload.platform, 'android'); assert.equal(u.payload.utm_source, 'hn'); assert.equal(u.payload.landing_path, '/blog');
+    assert.equal('role' in u.payload, false);
+});
+
+test('register: a verified sign-in that creates the row records the source; one that finds an existing row does not', async () => {
+    reset(); verified = 'u9';
+    assert.equal((await postWithUa({ userId: 'u9', email: 'u9@x.com', signup_source: { utm_source: 'a' } }, 'Mozilla/5.0')).status, 200);
+    assert.equal(sourceUpdates().length, 1);
+    ops.length = 0;
+    assert.equal((await postWithUa({ userId: 'u9', email: 'u9@x.com', signup_source: { utm_source: 'b' } }, 'Mozilla/5.0')).status, 200);
+    assert.equal(sourceUpdates().length, 0);
+});
+
+test('register: signup still succeeds when the source columns do not exist yet', async () => {
+    reset();
+    const { supabase: sb } = await import('../../config/database.js');
+    const was = sb.from;
+    sb.from = (table) => {
+        const b = was(table);
+        return new Proxy(b, { get(t, p) { if (p === 'update') return () => ({ eq: () => ({ is: () => Promise.resolve({ error: { code: '42703', message: 'column "platform" of relation "users" does not exist' } }) }) }); const v = t[p]; return typeof v === 'function' ? v.bind(t) : v; } });
+    };
+    try {
+        const r = await postWithUa({ userId: 'anon-3', displayName: 'D', signup_source: { utm_source: 'x' } }, 'Mozilla/5.0');
+        assert.equal(r.status, 200); assert.ok(rows.get('anon-3'));
+    } finally { sb.from = was; }
+});
