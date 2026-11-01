@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +39,7 @@ import com.revenuecat.purchases.PurchaseParams
 import com.revenuecat.purchases.Purchases
 import com.revenuecat.purchases.PurchasesError
 import com.revenuecat.purchases.getOfferingsWith
+import com.revenuecat.purchases.interfaces.UpdatedCustomerInfoListener
 import com.revenuecat.purchases.purchaseWith
 import com.revenuecat.purchases.restorePurchasesWith
 import dagger.hilt.android.AndroidEntryPoint
@@ -107,10 +109,10 @@ class MainActivity : AppCompatActivity() {
         var generationCount by remember { mutableIntStateOf(getGenerationCount(this@MainActivity)) }
 
         // Check subscription status via RevenueCat. Uses restorePurchasesWith
-        // rather than a plain getCustomerInfo() — RevenueCat's local
-        // appUserID is anonymous (no logIn() call anywhere in this app), so
-        // a reinstall or cleared app data starts as a brand-new anonymous
-        // user with no purchase history even though Google Play Billing
+        // rather than a plain getCustomerInfo() — after a reinstall or
+        // cleared app data RevenueCat starts as a brand-new anonymous user
+        // (until VibeBuildApplication logs it in as the signed-in Supabase
+        // user) with no purchase history even though Google Play Billing
         // still knows the account owns an active subscription. restore
         // re-syncs Play Store purchases to the current RC user before
         // reporting entitlements, so a real purchaser doesn't see the
@@ -134,6 +136,18 @@ class MainActivity : AppCompatActivity() {
                     Log.d(TAG, "RC entitlements after restore: active=${customerInfo.entitlements.active.keys}, isPremium=$isActive")
                 }
             )
+        }
+
+        // Signing in switches RevenueCat from the anonymous user to the Supabase user, which can reveal an entitlement the launch
+        // restore did not see. Only ever unlocks here; a downgrade is picked up by the next launch check.
+        DisposableEffect(Unit) {
+            Purchases.sharedInstance.updatedCustomerInfoListener = UpdatedCustomerInfoListener { customerInfo ->
+                if (customerInfo.entitlements.active.isNotEmpty()) {
+                    setPremiumUser(this@MainActivity, true)
+                    isPremium = true
+                }
+            }
+            onDispose { Purchases.sharedInstance.removeUpdatedCustomerInfoListener() }
         }
 
         // The local build counter is reset by clearing the app's data, so once the user is signed in take the server's project count

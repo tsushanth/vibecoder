@@ -16,7 +16,9 @@ import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.providers.builtin.IDToken
 import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.transform
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -66,6 +68,20 @@ class AuthRepository @Inject constructor(
                 else -> null
             }
         }
+    }
+
+    /**
+     * The Supabase user id each time a session is established or restored, and null when the user is signed out. The initial and
+     * refresh-failure states say nothing about who is signed in, so they emit nothing.
+     */
+    fun observeUserId(): Flow<String?> {
+        return supabase.auth.sessionStatus.transform { status ->
+            when (status) {
+                is SessionStatus.Authenticated -> status.session.user?.id?.let { emit(it) }
+                is SessionStatus.NotAuthenticated -> emit(null)
+                else -> Unit
+            }
+        }.distinctUntilChanged()
     }
 
     /**

@@ -86,6 +86,65 @@ class AccountViewModelTest {
         coVerify(exactly = 0) { projects.countMyProjects(any()) }
     }
 
+    // ---- refreshSubscription ----
+
+    @Test fun refresh_replacesTheStatusWithTheServersView() = runTest {
+        coEvery { subs.getSubscriptionStatus("u1") } returnsMany listOf(subStatus("free"), subStatus("pro"))
+        val vm = AccountViewModel(auth, subs, projects)
+        advanceUntilIdle()
+        assertEquals("free", vm.uiState.value.subscriptionStatus!!.tier)
+        vm.refreshSubscription()
+        advanceUntilIdle()
+        assertEquals("pro", vm.uiState.value.subscriptionStatus!!.tier)
+    }
+
+    @Test fun refresh_whenPaidIsExpected_waitsForTheWebhookToLand() = runTest {
+        coEvery { subs.getSubscriptionStatus("u1") } returnsMany
+            listOf(subStatus("free"), subStatus("free"), subStatus("free"), subStatus("pro"))
+        val vm = AccountViewModel(auth, subs, projects)
+        advanceUntilIdle() // initial load: free
+        vm.refreshSubscription(expectPaid = true)
+        advanceUntilIdle()
+        assertEquals("pro", vm.uiState.value.subscriptionStatus!!.tier)
+        coVerify(exactly = 4) { subs.getSubscriptionStatus("u1") }
+    }
+
+    @Test fun refresh_whenPaidIsExpected_givesUpAfterFiveChecks() = runTest {
+        coEvery { subs.getSubscriptionStatus("u1") } returns subStatus("free")
+        val vm = AccountViewModel(auth, subs, projects)
+        advanceUntilIdle()
+        vm.refreshSubscription(expectPaid = true)
+        advanceUntilIdle()
+        coVerify(exactly = 6) { subs.getSubscriptionStatus("u1") } // 1 initial + 5
+        assertEquals("free", vm.uiState.value.subscriptionStatus!!.tier)
+    }
+
+    @Test fun refresh_withoutExpectedPurchase_checksOnce() = runTest {
+        coEvery { subs.getSubscriptionStatus("u1") } returns subStatus("free")
+        val vm = AccountViewModel(auth, subs, projects)
+        advanceUntilIdle()
+        vm.refreshSubscription()
+        advanceUntilIdle()
+        coVerify(exactly = 2) { subs.getSubscriptionStatus("u1") }
+    }
+
+    @Test fun refresh_networkFailure_keepsTheLastStatus() = runTest {
+        coEvery { subs.getSubscriptionStatus("u1") } returns subStatus("pro") andThenThrows IOException()
+        val vm = AccountViewModel(auth, subs, projects)
+        advanceUntilIdle()
+        vm.refreshSubscription()
+        advanceUntilIdle()
+        assertEquals("pro", vm.uiState.value.subscriptionStatus!!.tier)
+    }
+
+    @Test fun refresh_signedOut_doesNothing() = runTest {
+        every { auth.currentUser } returns null
+        val vm = AccountViewModel(auth, subs, projects)
+        vm.refreshSubscription(expectPaid = true)
+        advanceUntilIdle()
+        coVerify(exactly = 0) { subs.getSubscriptionStatus(any()) }
+    }
+
     // ---- "N/limit" text ----
 
     private fun state(tier: String?, limits: SubscriptionLimits?, used: Int = 2, userTier: String = "free") =

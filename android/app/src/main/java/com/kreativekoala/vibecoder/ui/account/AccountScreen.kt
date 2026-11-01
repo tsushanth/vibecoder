@@ -27,6 +27,10 @@ import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import com.kreativekoala.vibecoder.MainActivity
 import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.components.SettingsRow
 import com.kreativekoala.vibecoder.ui.theme.*
@@ -41,6 +45,13 @@ fun AccountScreen(
     viewModel: AccountViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    // Coming back from the paywall: show the server's view of the subscription (the first resume is the initial load).
+    var firstResume by remember { mutableStateOf(true) }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        if (firstResume) firstResume = false
+        else viewModel.refreshSubscription(expectPaid = MainActivity.isPremiumUser(context))
+    }
     var showSignOutDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
 
