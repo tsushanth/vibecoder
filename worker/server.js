@@ -27,6 +27,7 @@ import { scanGenerated, allowedHostsFor, userMessageForCause } from './lib/scan.
 import { requireSecret } from './lib/requireSecret.js';
 import { reportFailure, installCrashHandlers } from './lib/failureReporter.js';
 import { deliverCallback } from './lib/callback.js';
+import { registerGameRoutes } from './lib/gameRoutes.js';
 
 const app = express();
 installCrashHandlers();
@@ -921,6 +922,17 @@ app.get('/versions/:repoName', authMiddleware, async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch version history' });
     }
+});
+
+// ============================================
+// RiddleVerse game endpoints under /game/* (direct generator only; VibeBuild routes above and below are untouched)
+// ============================================
+
+registerGameRoutes(app, {
+    authMiddleware, llm: directLlm, models: DIRECT_MODELS, makeOutcome, zipProjectFolder, listProjectFiles, unzipBundle, projectsDir: PROJECTS_DIR,
+    deadlineMs: parseInt(process.env.DIRECT_DEADLINE_MS || '480000', 10),
+    slot: { acquire: () => { if (activeGenerations >= MAX_CONCURRENT) return false; activeGenerations++; return true; }, release: () => { activeGenerations = Math.max(0, activeGenerations - 1); } },
+    git: { pat: GITHUB_PAT, clone: gitClone, commitAndPush: gitCommitAndPush, init: initProjectRepo, history: getGitCommitHistory },
 });
 
 // ============================================
