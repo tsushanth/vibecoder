@@ -40,7 +40,7 @@ after(() => provider?.close());
 function startWorker(env = {}) {
     return new Promise((resolve, reject) => {
         const port = 38000 + Math.floor(Math.random() * 2000);
-        const child = spawn(process.execPath, ['server.js'], { cwd: WORKER_DIR, env: { PATH: path.dirname(process.execPath), HOME, WORKER_PORT: String(port), WORKER_SECRET: 'test-worker-secret-0123456789', OUTCOME_LOG: OUTCOMES, OPENROUTER_API_KEY: 'fake', OPENROUTER_BASE_URL: `http://127.0.0.1:${PPORT}`, DIRECT_PERCENT: '100', DIRECT_MODELS: 'm1', ...env }, stdio: ['ignore', 'pipe', 'pipe'] });
+        const child = spawn(process.execPath, ['server.js'], { cwd: WORKER_DIR, env: { PATH: path.dirname(process.execPath), HOME, FAILURE_REPORTER_DISABLED: '1', WORKER_PORT: String(port), WORKER_SECRET: 'test-worker-secret-0123456789', OUTCOME_LOG: OUTCOMES, OPENROUTER_API_KEY: 'fake', OPENROUTER_BASE_URL: `http://127.0.0.1:${PPORT}`, DIRECT_PERCENT: '100', DIRECT_MODELS: 'm1', ...env }, stdio: ['ignore', 'pipe', 'pipe'] });
         let out = ''; child.stdout.on('data', (d) => { out += d; }); child.stderr.on('data', (d) => { out += d; });
         child.logs = () => out;
         const t = setTimeout(() => { child.kill(); reject(new Error('worker did not start: ' + out.slice(-300))); }, 15000);
