@@ -6,6 +6,9 @@ import zlib from "zlib";
 import path from "path";
 import { createClient } from "@supabase/supabase-js";
 import { requireSecret } from "./requireSecret.js";
+import { reportFailure, installCrashHandlers, createStreakGate } from "./failureReporter.js";
+
+installCrashHandlers();
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -34,6 +37,8 @@ const supabase = createClient(
 // ---------------------------------------------------------------------------
 
 const domainMap = new Map();
+// A single failed sync is a blip (it runs every 60 s). Five in a row means custom domains are being served from a stale map.
+const domainSyncGate = createStreakGate(5, (why) => reportFailure('deploy:domain_map_sync', new Error('Domain map sync failing for 5 minutes'), { reason: why }));
 
 async function syncDomainMap() {
   try {
@@ -42,6 +47,7 @@ async function syncDomainMap() {
     });
     if (!response.ok) {
       console.warn(`Domain map sync failed: backend returned ${response.status}`);
+      domainSyncGate.fail(String(response.status));
       return;
     }
     const data = await response.json();
@@ -49,9 +55,11 @@ async function syncDomainMap() {
     for (const { domain, subdomain } of data.mappings || []) {
       domainMap.set(domain.toLowerCase(), subdomain.toLowerCase());
     }
+    domainSyncGate.ok();
     if (domainMap.size > 0) console.log(`Domain map synced: ${domainMap.size} custom domain(s)`);
   } catch (err) {
     console.warn("Domain map sync error:", err.message);
+    domainSyncGate.fail('unreachable');
   }
 }
 
@@ -473,6 +481,13 @@ function notFoundPage(subdomain) {
 // ---------------------------------------------------------------------------
 
 const app = express();
+// 500/502/504 this service returns itself (deploy, cleanup, serving). Stable message per route pattern, never the URL (subdomains).
+app.use((req, res, next) => {
+  res.on("finish", () => {
+    if ([500, 502, 504].includes(res.statusCode) && req.route?.path) reportFailure(`deploy:http_${res.statusCode}`, new Error(`HTTP ${res.statusCode} ${req.method} ${req.route.path}`));
+  });
+  next();
+});
 app.use(express.json({ limit: `${Math.ceil(MAX_BUNDLE_SIZE * 1.4)}b` }));
 
 // ---------------------------------------------------------------------------

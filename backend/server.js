@@ -24,12 +24,17 @@ import { supabase } from './config/database.js';
 import { startTierSweep } from './services/tierSync.js';
 import { getSubscriptionStatus } from './services/subscriptionService.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { serverErrorReport } from './middleware/serverErrorReport.js';
+import { buildInvariants } from './lib/buildInvariantsInstance.js';
+import { startInvariantSweep } from './lib/buildInvariants.js';
 import { buildFailureRate } from './lib/buildFailureRateInstance.js';
 import { startFailureRateSweep } from './lib/buildFailureRate.js';
 import { WORKER_URL, WORKER_SECRET } from './config/constants.js';
 
 const app = express();
 app.set('trust proxy', 1);
+// First, so every route below (including the early-mounted ones) is covered: any 5xx nobody reported becomes one backend_error.
+app.use(serverErrorReport());
 // Mounted BEFORE global cors(): appdata does its own per-app CORS (generated-app origins).
 app.use('/api/appdata', appdataRoutes);
 // Key entry for generated apps. Mounted BEFORE the global json parser (50 MB) so its own 8 KB limit applies, and with its own CORS
@@ -149,3 +154,6 @@ app.listen(PORT, () => {
 
 // Failure-rate signal on its own clock too: the cleanup cron is an external scheduler and may not be firing. FAILURE_RATE_SWEEP_MS=0 turns it off.
 if (process.env.NODE_ENV !== 'test' && Number(process.env.FAILURE_RATE_SWEEP_MS ?? 30 * 60_000) > 0) startFailureRateSweep(buildFailureRate, Number(process.env.FAILURE_RATE_SWEEP_MS ?? 30 * 60_000));
+
+// Invariants on the API's own clock (stuck builds, zero ready in 24 h, daily created/ready/failed counters): the external cleanup cron may not be firing. BUILD_INVARIANT_SWEEP_MS=0 turns it off.
+if (process.env.NODE_ENV !== 'test' && Number(process.env.BUILD_INVARIANT_SWEEP_MS ?? 10 * 60_000) > 0) startInvariantSweep(buildInvariants, Number(process.env.BUILD_INVARIANT_SWEEP_MS ?? 10 * 60_000));

@@ -10,6 +10,9 @@ import http from 'http';
 import http2 from 'http2';
 import crypto from 'crypto';
 import { requireSecret } from './requireSecret.js';
+import { reportFailure, installCrashHandlers } from './failureReporter.js';
+
+installCrashHandlers();
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://owvvrljdfnhntwedepkl.supabase.co';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -135,6 +138,9 @@ async function supabaseFetch(path, options = {}) {
             'Content-Type': 'application/json', ...(options.headers || {})
         }
     });
+    // The body is still returned as before (callers treat an error object like an empty result), but a rejected request is no longer silent:
+    // a bad service key made getStaleBuilds() return an error object, which looked like "no stale builds" forever.
+    if (!res.ok) reportFailure('build-monitor:supabase_http', new Error('Supabase request rejected'), { http_status: String(res.status), method: String(options.method || 'GET') });
     if (res.headers.get('content-type')?.includes('json')) return res.json();
     return res.text();
 }
@@ -158,7 +164,9 @@ async function getUserPushTokens(userId) {
     return tokens;
 }
 
-async function markFailed(projectId) {
+/** Every 'failed' this service writes is reported once per class per hour (the API's markProjectFailed does not see these writes). */
+async function markFailed(projectId, cls = 'UNKNOWN') {
+    reportFailure('build-monitor:build_failed', new Error(cls));
     await supabaseFetch(`/projects?id=eq.${projectId}`, {
         method: 'PATCH', headers: { 'Prefer': 'return=minimal' },
         body: JSON.stringify({ status: 'failed' })
@@ -273,7 +281,7 @@ async function processProject(project) {
 
     if (retryCount >= MAX_RETRIES) {
         console.log(`[${id}] Max retries (${MAX_RETRIES}) reached, marking failed`);
-        await markFailed(project.id);
+        await markFailed(project.id, 'MAX_RETRIES');
         const tokens = await getUserPushTokens(project.creator_id);
         const shortTitle = project.title?.length > 40 ? project.title.substring(0, 40) + '...' : (project.title || 'Your app');
         for (const { token, platform } of tokens) {
@@ -315,7 +323,7 @@ async function processProject(project) {
         } catch (err) {
             console.error(`[${id}] Attempt ${attempt + 1} failed: ${err.message}`);
             if (attempt === 4) {
-                await markFailed(project.id);
+                await markFailed(project.id, 'RETRY_EXHAUSTED');
                 return { id: project.id, success: false, reason: err.message };
             }
             await new Promise(r => setTimeout(r, 10000));
@@ -346,6 +354,7 @@ async function runMonitor() {
         console.log('[monitor] Done.');
     } catch (err) {
         console.error('[monitor] Error:', err.message);
+        reportFailure('build-monitor:run_error', new Error('monitor run failed'), { error_name: String(err?.name || 'Error').slice(0, 40) });
     }
 }
 

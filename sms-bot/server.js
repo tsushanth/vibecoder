@@ -1,5 +1,8 @@
 import express from 'express';
 import twilio from 'twilio';
+import { reportFailure, installCrashHandlers } from './failureReporter.js';
+
+installCrashHandlers();
 
 const app = express();
 app.use(express.urlencoded({ extended: false }));
@@ -32,6 +35,7 @@ async function sms(to, body, channel = 'sms') {
     console.log(`[${channel}] Sent to ${to}`);
   } catch (e) {
     console.error(`[${channel}] Failed to ${to}: ${e.message}`);
+    reportFailure('sms-bot:twilio_send_failed', new Error('Twilio message send failed'), { channel, code: String(e?.code ?? '').slice(0, 12) });
   }
 }
 
@@ -80,6 +84,7 @@ async function runBuild(phone, prompt, userId, channel = 'sms') {
   } catch (e) {
     activeBuilds.delete(phone);
     console.error(`[build] ${phone}: ${e.message}`);
+    reportFailure('sms-bot:build_request_failed', new Error(e.message.includes('timeout') ? 'build request timed out' : 'build request failed'), { channel });
     await sms(phone, `❌ Build failed. ${e.message.includes('timeout') ? 'Timed out — try a simpler prompt.' : 'Try again!'}`, channel);
   }
 }
@@ -119,6 +124,7 @@ async function handleInbound(req, res, channel) {
         twimlReply(res, `❌ Invalid or expired code. Visit vibebuild.cc/connect?tg_id=${encodeURIComponent(phone)} to get a new one.`);
       }
     } catch {
+      reportFailure('sms-bot:link_verify_failed', new Error('link code verification call failed'), { channel });
       twimlReply(res, `⚠️ Could not verify code. Try again.`);
     }
     return;
