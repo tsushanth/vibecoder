@@ -51,7 +51,8 @@
       "busyTitle": "构建服务器已满负荷",
       "busyBody": "请几分钟后再试。Pro 构建优先排队。",
       "tryAgain": "重试",
-      "seePro": "了解 Pro"
+      "seePro": "了解 Pro",
+      "busyBodyFree": "请几分钟后再试。"
     },
     "ready": {
       "title": "你的应用已就绪",

@@ -78,7 +78,11 @@
       "deleteError": "Dein Konto wurde nicht gelöscht. Versuch es noch einmal.",
       "deleteSignInAgain": "Melde dich erneut an und lösche dann dein Konto.",
       "cancel": "Abbrechen",
-      "manage": "Abo verwalten"
+      "manage": "Abo verwalten",
+      "freeForNow": "Vorerst kostenlos",
+      "freeForNowDetail": "Alle Funktionen inklusive, keine Kreditkarte. Kostenlos, solange wir wachsen.",
+      "fairUseBuildsToday": "Builds heute",
+      "fairUseTweaks": "Anpassungen pro Projekt"
     }
   }
 }

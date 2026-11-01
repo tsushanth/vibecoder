@@ -7,6 +7,7 @@ import { api, ApiError } from '@/lib/api';
 import { isValidSubdomain } from '@/lib/utils';
 import { deployBody, deployOutcome, describeDestructive, isConfirmationTyped, confirmPhrases, planDestructive, type DeployOutcome, type DestructiveItem, type Tone } from '@/lib/schemaDeploy';
 import type { DeployResponse, DeploymentInfoResponse, DomainStatusResponse, AddDomainResponse, VerifyDomainResponse } from '@/types/api';
+import { effectiveTier } from '@/lib/pricing';
 
 interface Props {
   projectId: string;
@@ -240,7 +241,7 @@ export function PublishDialog({ projectId, userId, subscriptionTier, suggestedSu
     setTimeout(() => setCopied(false), 2000);
   }
 
-  const isPro = subscriptionTier && subscriptionTier !== 'free';
+  const isPro = effectiveTier(subscriptionTier) !== 'free';
   const quietBtn = 'flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border px-3 text-sm font-medium transition hover:bg-surface';
 
   return (

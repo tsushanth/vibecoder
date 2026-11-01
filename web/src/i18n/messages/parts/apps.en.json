@@ -23,7 +23,6 @@
     "deleting": "Deleting...",
     "deleteFailed": "The app was not deleted. Try again.",
     "cancel": "Cancel",
-
     "backToApps": "Apps",
     "notFound": "This app does not exist or is not yours.",
     "byCreator": "By {name}",
@@ -60,12 +59,10 @@
     "notNow": "Not now",
     "upgrade": "Upgrade",
     "promptTitle": "What you asked for",
-
     "keysTitle": "App keys",
     "keyRemoveTitle": "Remove {name}?",
     "keyRemoveBody": "Your app stops working with this service until you add the key again.",
     "usageTitle": "Usage",
-
     "domainTitle": "Custom domain",
     "domainNone": "Use your own address, like myapp.com, instead of the vibebuild.cc one.",
     "domainNeedsPublish": "Publish the app first, then connect a domain you own.",
@@ -74,7 +71,6 @@
     "domainActive": "Active",
     "domainVerified": "Verified, certificate on its way",
     "domainPending": "Waiting for DNS",
-
     "versionsTitle": "Versions",
     "versionsEmpty": "Each change you make is saved here as a version you can go back to.",
     "versionLabel": "Version {n}",
@@ -82,7 +78,6 @@
     "versionUse": "Use this version",
     "versionsAll": "Show all {count}",
     "versionsFewer": "Show fewer",
-
     "publish": {
       "title": "Publish to web",
       "close": "Close",
@@ -121,7 +116,6 @@
       "add": "Add",
       "adding": "Adding..."
     },
-
     "explore": {
       "title": "Explore",
       "subtitle": "Apps people built with VibeBuild. Open one to try it, or remix it into your own.",
@@ -159,6 +153,7 @@
       "emptyCategory": "No apps in this category yet.",
       "loading": "Loading...",
       "loadMore": "Show more"
-    }
+    },
+    "fairUseTitle": "Fair-use limit reached"
   }
 }

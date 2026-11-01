@@ -78,7 +78,11 @@
       "deleteError": "アカウントは削除されませんでした。もう一度お試しください。",
       "deleteSignInAgain": "もう一度サインインしてから、アカウントを削除してください。",
       "cancel": "キャンセル",
-      "manage": "サブスクリプションを管理"
+      "manage": "サブスクリプションを管理",
+      "freeForNow": "当面は無料",
+      "freeForNowDetail": "すべての機能が利用可能で、クレジットカードは不要です。成長するまで無料です。",
+      "fairUseBuildsToday": "今日のビルド数",
+      "fairUseTweaks": "プロジェクトあたりの修正回数"
     }
   }
 }

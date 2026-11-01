@@ -2,19 +2,21 @@
 
 import { useEffect } from 'react';
 import { createClient } from '@/lib/supabase';
-import { useAuthStore } from '@/stores/authStore';
+import { useAuthStore, type FairUse } from '@/stores/authStore';
 import { api } from '@/lib/api';
 import { captureFirstTouchInBrowser, getSignupSource } from '@/lib/signupSource';
 
 async function loadSubscriptionStatus(userId: string) {
   try {
-    const data = await api.get<{ tier: string; status: string; limits?: Record<string, unknown> }>(
+    const data = await api.get<{ tier: string; status: string; limits?: Record<string, unknown>; allFree?: boolean; fairUse?: FairUse }>(
       `/api/subscriptions/status?userId=${userId}`
     );
     useAuthStore.getState().setSubscription({
       tier: data.tier || 'free',
       status: data.status || 'active',
       limits: data.limits as { dailyGenerations: number | string; tweaksPerProject: number | string; canCreatePrivateProjects: boolean } | undefined,
+      allFree: data.allFree,
+      fairUse: data.fairUse,
     });
   } catch {
     useAuthStore.getState().setSubscription({ tier: 'free', status: 'active' });

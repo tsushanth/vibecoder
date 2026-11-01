@@ -51,7 +51,8 @@
       "busyTitle": "サーバーが混み合っています",
       "busyBody": "数分後にもう一度お試しください。Pro の作成は優先されます。",
       "tryAgain": "もう一度試す",
-      "seePro": "Pro を見る"
+      "seePro": "Pro を見る",
+      "busyBodyFree": "数分後にもう一度お試しください。"
     },
     "ready": {
       "title": "アプリができました",

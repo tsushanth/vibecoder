@@ -15,6 +15,7 @@ import { streamSSE } from '@/lib/sse';
 import { extractBundle, buildFileTree, createPreviewHtml } from '@/lib/zip';
 import { api, ApiError } from '@/lib/api';
 import type { SaveProjectResponse, VersionsResponse, RevertResponse } from '@/types/api';
+import { ALL_FREE, effectiveTier } from '@/lib/pricing';
 
 type Stage = 'idle' | 'planning' | 'planReady' | 'building' | 'ready' | 'failed';
 
@@ -47,6 +48,8 @@ const getDesktopServer = () => false;
 
 /** A free-tier limit from the backend (usage check 403/402, or a stream refusal whose text names the limit). */
 function isPlanLimit(err: unknown): boolean {
+  // While everything is free there is no plan to upgrade to: a fair-use 429 is shown as an ordinary message.
+  if (ALL_FREE) return false;
   if (err instanceof ApiError) {
     const d = err.data || {};
     if (d.upgrade === true || err.status === 402) return true;
@@ -169,7 +172,8 @@ export default function NewProjectPage() {
 
       // Check usage limits before kicking off the (more expensive) generation. A free-tier limit goes to the Upgrade screen.
       try {
-        await api.post('/api/subscriptions/usage', { userId: user.id, actionType: 'generation' });
+        // All-free: the build request itself enforces the fair-use limit (HTTP 429 with a friendly message); no separate pre-check.
+        if (!ALL_FREE) await api.post('/api/subscriptions/usage', { userId: user.id, actionType: 'generation' });
       } catch (err) {
         if (run !== runRef.current) return;
         if (isPlanLimit(err)) {
@@ -544,14 +548,16 @@ export default function NewProjectPage() {
                 {failure.busy ? (
                   <>
                     <p className="font-medium text-foreground">{t('create.build.busyTitle')}</p>
-                    <p className="mt-1 max-w-[65ch] text-muted">{t('create.build.busyBody')}</p>
+                    <p className="mt-1 max-w-[65ch] text-muted">{ALL_FREE ? t('create.build.busyBodyFree') : t('create.build.busyBody')}</p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       <button type="button" onClick={() => beginBuild(chatPrompt, chatImage)} className={primaryButton}>
                         {t('create.build.tryAgain')}
                       </button>
-                      <button type="button" onClick={goToUpgrade} className={secondaryButton}>
-                        {t('create.build.seePro')}
-                      </button>
+                      {!ALL_FREE && (
+                        <button type="button" onClick={goToUpgrade} className={secondaryButton}>
+                          {t('create.build.seePro')}
+                        </button>
+                      )}
                     </div>
                   </>
                 ) : (
@@ -765,7 +771,7 @@ export default function NewProjectPage() {
         <PublishDialog
           projectId={savedProjectId}
           userId={user.id}
-          subscriptionTier={subscription?.tier || 'free'}
+          subscriptionTier={effectiveTier(subscription?.tier)}
           onClose={() => setShowPublish(false)}
           onPublished={(url) => setPublishedUrl(url || null)}
         />

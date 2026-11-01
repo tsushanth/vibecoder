@@ -7,12 +7,13 @@ import { useAuthStore } from '@/stores/authStore';
 import { cn } from '@/lib/utils';
 import { afterWelcome, hasOnboarded, markOnboarded } from '@/components/welcome/onboarding';
 import { Spinner } from '@/components/upgrade/Spinner';
+import { ALL_FREE } from '@/lib/pricing';
 
 const STEPS = [1, 2, 3, 4] as const;
 
 /**
  * Android's four onboarding pages as one screen: the steps are a real sequence, so they are numbered and all visible at once,
- * and Next walks through them. Finishing or skipping is remembered, then subscribers go to Create and everyone else to Upgrade.
+ * and Next walks through them. Finishing or skipping is remembered, then everyone goes to Create (Upgrade only when plans are switched back on).
  */
 export default function WelcomePage() {
   const t = useTranslations('account.welcome');
@@ -27,9 +28,9 @@ export default function WelcomePage() {
     setPhase(hasOnboarded() ? 'leaving' : 'showing');
   }, []);
 
-  // the hand-off needs the plan; the auth provider always settles it (free when the lookup fails)
+  // the hand-off needs the plan unless everything is free; the auth provider always settles it (free when the lookup fails)
   useEffect(() => {
-    if (phase === 'leaving' && subscription) router.replace(afterWelcome(subscription.tier));
+    if (phase === 'leaving' && (ALL_FREE || subscription)) router.replace(afterWelcome(subscription?.tier, ALL_FREE));
   }, [phase, subscription, router]);
 
   function finish() {

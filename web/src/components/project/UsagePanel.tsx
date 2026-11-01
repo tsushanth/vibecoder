@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { API_URL } from '@/lib/constants';
 import { withAuth } from '@/lib/authHeader';
+import { ALL_FREE } from '@/lib/pricing';
 import {
   USAGE_DAYS,
   barPercent,
@@ -95,12 +96,12 @@ export function UsagePanel({ projectId, reloadKey }: Props) {
           <h2 id="usage-title" className="font-display text-lg font-semibold">{ta('usageTitle')}</h2>
           <p className={`mt-0.5 ${tone}`} role={status.state === 'full' ? 'alert' : undefined}>
             {headline}
-            {status.state === 'full' && (
+            {status.state === 'full' && (ALL_FREE ? <> {t('usage.contact')}</> : (
               <>
                 {' '}
                 <a href="/settings" className="font-medium text-accent-hover underline">{t('usage.upgrade')}</a>
               </>
-            )}
+            ))}
           </p>
         </div>
         <button

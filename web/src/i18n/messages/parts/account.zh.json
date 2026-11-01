@@ -78,7 +78,11 @@
       "deleteError": "账户未被删除，请重试。",
       "deleteSignInAgain": "请重新登录，然后再删除账户。",
       "cancel": "取消",
-      "manage": "管理订阅"
+      "manage": "管理订阅",
+      "freeForNow": "目前免费",
+      "freeForNowDetail": "包含所有功能，无需信用卡。在我们成长期间免费。",
+      "fairUseBuildsToday": "今日构建次数",
+      "fairUseTweaks": "每个项目的修改次数"
     }
   }
 }

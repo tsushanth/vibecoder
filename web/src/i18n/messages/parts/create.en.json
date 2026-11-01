@@ -51,7 +51,8 @@
       "busyTitle": "Builders are at full capacity",
       "busyBody": "Try again in a few minutes. Pro builds go to the front of the queue.",
       "tryAgain": "Try again",
-      "seePro": "See Pro"
+      "seePro": "See Pro",
+      "busyBodyFree": "Try again in a few minutes."
     },
     "ready": {
       "title": "Your app is ready",

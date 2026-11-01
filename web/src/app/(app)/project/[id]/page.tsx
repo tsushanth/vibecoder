@@ -36,6 +36,7 @@ import type {
   RevertResponse,
 } from '@/types/api';
 import type { ChatMessage } from '@/types/project';
+import { ALL_FREE, effectiveTier } from '@/lib/pricing';
 
 function buildChatFromVersions(
   versions: ProjectVersion[],
@@ -467,21 +468,23 @@ export default function ProjectBuilderPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-background/80" onClick={() => setUsageLimitError(null)} />
           <div role="alertdialog" aria-modal="true" aria-labelledby="limit-title" className="relative w-full max-w-sm rounded-xl border border-border bg-card p-5">
-            <h3 id="limit-title" className="font-display text-lg font-semibold">{ta('limitTitle')}</h3>
+            <h3 id="limit-title" className="font-display text-lg font-semibold">{ALL_FREE ? ta('fairUseTitle') : ta('limitTitle')}</h3>
             <p className="mt-2 text-muted">{usageLimitError}</p>
             <div className="mt-5 flex justify-end gap-2">
               <button
                 onClick={() => setUsageLimitError(null)}
                 className="h-10 rounded-lg border border-border px-4 text-sm font-medium transition hover:bg-surface"
               >
-                {ta('notNow')}
+                {ALL_FREE ? t('common.ok') : ta('notNow')}
               </button>
-              <button
-                onClick={() => { setUsageLimitError(null); router.push('/settings'); }}
-                className="h-10 rounded-lg bg-accent px-4 text-sm font-semibold text-white transition hover:bg-accent-hover"
-              >
-                {ta('upgrade')}
-              </button>
+              {!ALL_FREE && (
+                <button
+                  onClick={() => { setUsageLimitError(null); router.push('/settings'); }}
+                  className="h-10 rounded-lg bg-accent px-4 text-sm font-semibold text-white transition hover:bg-accent-hover"
+                >
+                  {ta('upgrade')}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -491,7 +494,7 @@ export default function ProjectBuilderPage() {
         <PublishDialog
           projectId={id}
           userId={user.id}
-          subscriptionTier={subscription?.tier || 'free'}
+          subscriptionTier={effectiveTier(subscription?.tier)}
           suggestedSubdomain={suggestSubdomain(project.title)}
           onClose={() => { setShowPublish(false); setPublishOpenCount((n) => n + 1); }}
           onPublished={(url) => {

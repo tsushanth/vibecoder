@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { MarketingHeader, MarketingFooter } from '@/components/landing/MarketingChrome';
+import { ALL_FREE } from '@/lib/pricing';
 
 export const metadata: Metadata = {
   title: 'Terms of Service - VibeBuild',
@@ -64,12 +65,19 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-semibold text-foreground mb-3">6. Subscriptions and Payments</h2>
-            <p>
-              Paid plans are billed monthly or annually as selected. Subscriptions automatically renew unless
-              cancelled before the renewal date. Refunds are handled on a case-by-case basis. We reserve the
-              right to change pricing with 30 days' notice.
-            </p>
+            <h2 className="font-display text-xl font-semibold text-foreground mb-3">{ALL_FREE ? '6. Pricing and Fair Use' : '6. Subscriptions and Payments'}</h2>
+            {ALL_FREE ? (
+              <p>
+                VibeBuild is currently free to use. We may apply fair-use limits to keep the Service available for
+                everyone. If we introduce paid plans in the future, we will give notice before any charge applies.
+              </p>
+            ) : (
+              <p>
+                Paid plans are billed monthly or annually as selected. Subscriptions automatically renew unless
+                cancelled before the renewal date. Refunds are handled on a case-by-case basis. We reserve the
+                right to change pricing with 30 days' notice.
+              </p>
+            )}
           </section>
 
           <section>

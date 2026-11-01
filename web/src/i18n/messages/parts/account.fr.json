@@ -78,7 +78,11 @@
       "deleteError": "Votre compte n'a pas été supprimé. Réessayez.",
       "deleteSignInAgain": "Reconnectez-vous, puis supprimez votre compte.",
       "cancel": "Annuler",
-      "manage": "Gérer l'abonnement"
+      "manage": "Gérer l'abonnement",
+      "freeForNow": "Gratuit pour le moment",
+      "freeForNowDetail": "Toutes les fonctionnalités incluses, sans carte bancaire. Gratuit pendant que nous grandissons.",
+      "fairUseBuildsToday": "Créations aujourd'hui",
+      "fairUseTweaks": "Retouches par projet"
     }
   }
 }

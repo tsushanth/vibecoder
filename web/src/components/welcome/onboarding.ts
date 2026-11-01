@@ -18,7 +18,8 @@ export function markOnboarded(): void {
   }
 }
 
-/** Where the welcome screen hands off: subscribers skip the upgrade screen, as on Android. */
-export function afterWelcome(tier: string | undefined | null): string {
+/** Where the welcome screen hands off: straight to Create while everything is free (lib/pricing.ts); otherwise subscribers skip the upgrade screen, as on Android. */
+export function afterWelcome(tier: string | undefined | null, allFree: boolean): string {
+  if (allFree) return '/project/new';
   return tier && tier !== 'free' ? '/project/new' : '/upgrade';
 }

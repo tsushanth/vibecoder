@@ -99,7 +99,7 @@ Each iteration builds on the previous version, so you never lose progress.
 
 When you're happy with your app, click "Publish." VibeBuild gives you a live URL instantly — no server setup, no domain configuration, no hosting fees. Your app is accessible to anyone with the link.
 
-Pro users can connect custom domains for a fully branded experience.
+You can also connect a custom domain for a fully branded experience.
 
 ## Step 5: Share and Get Feedback
 
@@ -125,7 +125,7 @@ All without writing a single line of code.
 
 ## Getting Started
 
-Ready to build? Head to [VibeBuild](https://vibebuild.cc/signup) and create your free account. You get 10 app generations per day on the free plan — enough to prototype and experiment. When you're ready for unlimited generations and custom domains, upgrade to Pro.
+Ready to build? Head to [VibeBuild](https://vibebuild.cc/signup) and create your free account. VibeBuild is free for now, with every feature included and no credit card needed. A generous daily fair-use limit keeps things fair for everyone — plenty to prototype and experiment.
 
 The barrier between having an idea and having a live app has never been lower. What will you build?
     `,
@@ -158,7 +158,7 @@ Lovable (formerly GPT Engineer) specializes in creating React applications with 
 - **Lovable**: Good React code generation, but sometimes over-engineers simple apps with unnecessary abstractions.
 
 ### Deployment
-- **VibeBuild**: One-click deploy to a live URL. Pro users get custom domains. Community sharing built in.
+- **VibeBuild**: One-click deploy to a live URL. Custom domains are included. Community sharing built in.
 - **Bolt**: Preview in browser, but deployment requires manual export or StackBlitz hosting.
 - **Lovable**: Deploys to Netlify or similar services. Requires connecting external accounts.
 
@@ -168,7 +168,7 @@ Lovable (formerly GPT Engineer) specializes in creating React applications with 
 - **Lovable**: Discord community, but no in-app sharing.
 
 ### Pricing
-- **VibeBuild**: Free tier (10 generations/day), Pro at $9.99/month (unlimited)
+- **VibeBuild**: Free for now, every feature included, with a daily fair-use limit
 - **Bolt**: Free tier with limited tokens, Pro at $20/month
 - **Lovable**: Free tier with limited credits, paid plans start at $20/month
 
@@ -334,7 +334,7 @@ If you like the current design but want to change functionality, say so: "Keep t
 "Create a multi-step form wizard with a progress indicator. Step 1: personal info. Step 2: preferences. Step 3: review and submit. Validate each step before allowing next."
 
 ### For Landing Pages
-"Build a SaaS landing page with: hero section with headline and CTA, features grid (6 features with icons), pricing table (free vs pro), testimonials carousel, and footer with links."
+"Build a SaaS landing page with: hero section with headline and CTA, features grid (6 features with icons), pricing table (three plans), testimonials carousel, and footer with links."
 
 ## Deploying and Sharing
 

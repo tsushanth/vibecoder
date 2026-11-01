@@ -51,7 +51,8 @@
       "busyTitle": "I server sono al completo",
       "busyBody": "Riprova tra qualche minuto. Le creazioni Pro hanno la precedenza.",
       "tryAgain": "Riprova",
-      "seePro": "Scopri Pro"
+      "seePro": "Scopri Pro",
+      "busyBodyFree": "Riprova tra qualche minuto."
     },
     "ready": {
       "title": "La tua app è pronta",

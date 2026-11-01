@@ -78,7 +78,11 @@
       "deleteError": "Il tuo account non è stato eliminato. Riprova.",
       "deleteSignInAgain": "Accedi di nuovo, poi elimina il tuo account.",
       "cancel": "Annulla",
-      "manage": "Gestisci abbonamento"
+      "manage": "Gestisci abbonamento",
+      "freeForNow": "Gratis per ora",
+      "freeForNowDetail": "Tutte le funzioni incluse, nessuna carta di credito. Gratis mentre cresciamo.",
+      "fairUseBuildsToday": "Build di oggi",
+      "fairUseTweaks": "Modifiche per progetto"
     }
   }
 }

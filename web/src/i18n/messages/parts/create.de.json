@@ -51,7 +51,8 @@
       "busyTitle": "Unsere Server sind ausgelastet",
       "busyBody": "Versuche es in ein paar Minuten erneut. Pro-Builds kommen zuerst dran.",
       "tryAgain": "Erneut versuchen",
-      "seePro": "Pro ansehen"
+      "seePro": "Pro ansehen",
+      "busyBodyFree": "Versuche es in ein paar Minuten erneut."
     },
     "ready": {
       "title": "Deine App ist fertig",
