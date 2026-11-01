@@ -15,7 +15,6 @@ object Constants {
     const val ENTITLEMENT_PRO = "pro"
     const val ENTITLEMENT_TEAM = "team"
 
-    // Free tier limits
-    const val FREE_DAILY_GENERATION_LIMIT = 3
+    // Free tier limits: the daily generation cap is read from the server's subscription status, not hard-coded here
     const val FREE_TWEAKS_PER_PROJECT = 3
 }

@@ -20,6 +20,31 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** The text shown for a non-200 answer to a streaming request. */
+object SseHttpErrors {
+    private val gson = Gson()
+    const val RATE_LIMIT_FALLBACK = "You've reached the limit for now. Please try again a little later."
+
+    /** The server's own message from a JSON body ("error", then "message"), or null if the body has none. */
+    fun serverMessage(body: String): String? = try {
+        val obj = gson.fromJson(body, JsonObject::class.java)
+        listOf("error", "message").firstNotNullOfOrNull { k ->
+            obj?.get(k)?.takeIf { it.isJsonPrimitive }?.asString?.trim()?.takeIf { it.isNotEmpty() }
+        }
+    } catch (_: Exception) {
+        null
+    }
+
+    /**
+     * HTTP 429 is the fair-use limit: show the server's message plainly (never a paywall, never the status code). Other statuses
+     * keep the "HTTP code: message" form.
+     */
+    fun message(code: Int, body: String): String {
+        val server = serverMessage(body)
+        return if (code == 429) server ?: RATE_LIMIT_FALLBACK else "HTTP $code: ${server ?: body}"
+    }
+}
+
 @Singleton
 class SseStreamReader @Inject constructor() {
 
@@ -58,13 +83,7 @@ class SseStreamReader @Inject constructor() {
             if (!response.isSuccessful) {
                 val errorBody = response.body?.string() ?: "Unknown error"
                 Log.e("SSE", "HTTP error ${response.code}: $errorBody")
-                val errorMessage = try {
-                    gson.fromJson(errorBody, JsonObject::class.java)
-                        ?.get("error")?.asString ?: errorBody
-                } catch (_: Exception) {
-                    errorBody
-                }
-                trySend(SseEvent.Error("HTTP ${response.code}: $errorMessage"))
+                trySend(SseEvent.Error(SseHttpErrors.message(response.code, errorBody)))
                 close()
                 return@callbackFlow
             }

@@ -28,6 +28,7 @@ import com.kreativekoala.vibecoder.service.TikTokHelper
 import com.kreativekoala.vibecoder.navigation.VibeBuildNavGraph
 import com.kreativekoala.vibecoder.ui.paywall.GenerationLimit
 import com.kreativekoala.vibecoder.ui.paywall.PaywallHost
+import com.kreativekoala.vibecoder.util.Monetization
 import com.kreativekoala.vibecoder.data.repository.AuthRepository
 import com.kreativekoala.vibecoder.data.repository.ProjectRepository
 import javax.inject.Inject
@@ -105,6 +106,12 @@ class MainActivity : AppCompatActivity() {
 
     @Composable
     private fun AppContentWithPaywallGate() {
+        // The app is free for everyone: no entitlement check, no limit gate, straight to the app.
+        if (Monetization.ALL_FREE) {
+            VibeBuildNavGraph()
+            return
+        }
+
         var isPremium by remember { mutableStateOf<Boolean?>(null) }
         var generationCount by remember { mutableIntStateOf(getGenerationCount(this@MainActivity)) }
 

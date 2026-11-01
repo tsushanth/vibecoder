@@ -12,22 +12,29 @@ class GenerationLimitTest {
     }
 
     @Test fun hardPaywallAtTheLimitForNonSubscribersOnly() {
-        assertFalse(GenerationLimit.isOverLimit(premium = false, count = 29))
-        assertTrue(GenerationLimit.isOverLimit(premium = false, count = 30))
-        assertTrue(GenerationLimit.isOverLimit(premium = false, count = 31))
-        assertFalse(GenerationLimit.isOverLimit(premium = true, count = 500))
+        assertFalse(GenerationLimit.isOverLimit(premium = false, count = 29, allFree = false))
+        assertTrue(GenerationLimit.isOverLimit(premium = false, count = 30, allFree = false))
+        assertTrue(GenerationLimit.isOverLimit(premium = false, count = 31, allFree = false))
+        assertFalse(GenerationLimit.isOverLimit(premium = true, count = 500, allFree = false))
     }
 
     @Test fun upsellStartsOneBuildBeforeTheLimit() {
-        assertFalse(GenerationLimit.showsUpsell(premium = false, count = 28))
-        assertTrue(GenerationLimit.showsUpsell(premium = false, count = 29))
-        assertTrue(GenerationLimit.showsUpsell(premium = false, count = 30))
-        assertFalse(GenerationLimit.showsUpsell(premium = true, count = 29))
+        assertFalse(GenerationLimit.showsUpsell(premium = false, count = 28, allFree = false))
+        assertTrue(GenerationLimit.showsUpsell(premium = false, count = 29, allFree = false))
+        assertTrue(GenerationLimit.showsUpsell(premium = false, count = 30, allFree = false))
+        assertFalse(GenerationLimit.showsUpsell(premium = true, count = 29, allFree = false))
     }
 
     @Test fun subscribersSkipThePaywallAfterOnboarding() {
-        assertTrue(GenerationLimit.showsPostOnboardingPaywall(premium = false))
-        assertFalse(GenerationLimit.showsPostOnboardingPaywall(premium = true))
+        assertTrue(GenerationLimit.showsPostOnboardingPaywall(premium = false, allFree = false))
+        assertFalse(GenerationLimit.showsPostOnboardingPaywall(premium = true, allFree = false))
+    }
+
+    @Test fun nothingIsGatedWhileTheAppIsAllFree() {
+        assertTrue(com.kreativekoala.vibecoder.util.Monetization.ALL_FREE)
+        assertFalse(GenerationLimit.isOverLimit(premium = false, count = 10_000))
+        assertFalse(GenerationLimit.showsUpsell(premium = false, count = 10_000))
+        assertFalse(GenerationLimit.showsPostOnboardingPaywall(premium = false))
     }
 
     @Test fun theActivityConstantIsTheSameLimit() {

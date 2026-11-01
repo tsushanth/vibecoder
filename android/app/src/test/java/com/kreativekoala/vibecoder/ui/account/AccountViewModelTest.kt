@@ -153,27 +153,35 @@ class AccountViewModelTest {
             subscriptionStatus = tier?.let { subStatus(it, limits) }
         )
 
-    @Test fun freeTier_showsLimit() {
-        assertEquals("2/5", todaysGenerationsText(state("free", SubscriptionLimits(dailyGenerations = 5))))
+    @Test fun freeTier_showsLimit_fromTheServer() {
+        assertEquals("2/5", todaysGenerationsText(state("free", SubscriptionLimits(dailyGenerations = 5)), allFree = false))
+        assertEquals("2/10", todaysGenerationsText(state("free", SubscriptionLimits(dailyGenerations = 10)), allFree = false))
     }
 
-    @Test fun freeTier_missingLimit_defaultsTo3() {
-        assertEquals("2/3", todaysGenerationsText(state("free", null)))
-        assertEquals("2/3", todaysGenerationsText(state(null, null)))
+    @Test fun freeTier_missingLimit_showsOnlyTheCount_neverAStaleCap() {
+        assertEquals("2", todaysGenerationsText(state("free", null), allFree = false))
+        assertEquals("2", todaysGenerationsText(state(null, null), allFree = false))
+        assertEquals("2", todaysGenerationsText(state("free", SubscriptionLimits()), allFree = false))
     }
 
     @Test fun proTier_infinityLimitNull_showsNoSlashLimit() {
-        val text = todaysGenerationsText(state("pro", SubscriptionLimits(dailyGenerations = null)))
+        val text = todaysGenerationsText(state("pro", SubscriptionLimits(dailyGenerations = null)), allFree = false)
         assertEquals("2", text)
-        assertFalse(text.contains("/"))
+        assertFalse(text!!.contains("/"))
     }
 
     @Test fun teamTier_and_unlimitedFlag_showNoLimit() {
-        assertEquals("2", todaysGenerationsText(state("team", null)))
-        assertEquals("2", todaysGenerationsText(state("free", SubscriptionLimits(unlimited = true))))
+        assertEquals("2", todaysGenerationsText(state("team", null), allFree = false))
+        assertEquals("2", todaysGenerationsText(state("free", SubscriptionLimits(unlimited = true)), allFree = false))
     }
 
     @Test fun proFromUserRecord_whenNoSubscriptionStatus() {
-        assertEquals("2", todaysGenerationsText(state(null, null, userTier = "pro")))
+        assertEquals("2", todaysGenerationsText(state(null, null, userTier = "pro"), allFree = false))
+    }
+
+    @Test fun allFree_hidesTheCounter() {
+        assertTrue(com.kreativekoala.vibecoder.util.Monetization.ALL_FREE)
+        assertNull(todaysGenerationsText(state("free", SubscriptionLimits(dailyGenerations = 10))))
+        assertNull(todaysGenerationsText(state("free", null)))
     }
 }

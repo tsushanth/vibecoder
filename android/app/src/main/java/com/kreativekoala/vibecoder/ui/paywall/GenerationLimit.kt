@@ -1,6 +1,11 @@
 package com.kreativekoala.vibecoder.ui.paywall
 
-/** The free-plan build limit, as pure rules (the counter itself lives in the app's preferences). */
+import com.kreativekoala.vibecoder.util.Monetization
+
+/**
+ * The free-plan build limit, as pure rules (the counter itself lives in the app's preferences). Every rule is off while
+ * [Monetization.ALL_FREE] is true; pass allFree = false to get the paid-plan behaviour.
+ */
 object GenerationLimit {
     const val FREE_LIMIT = 30
 
@@ -11,11 +16,13 @@ object GenerationLimit {
     fun merge(local: Int, server: Int): Int = maxOf(local, server)
 
     /** The hard paywall: not a subscriber and the limit is reached. */
-    fun isOverLimit(premium: Boolean, count: Int, limit: Int = FREE_LIMIT): Boolean = !premium && count >= limit
+    fun isOverLimit(premium: Boolean, count: Int, limit: Int = FREE_LIMIT, allFree: Boolean = Monetization.ALL_FREE): Boolean =
+        !allFree && !premium && count >= limit
 
     /** The soft upsell inside the build chat starts one build before the limit. */
-    fun showsUpsell(premium: Boolean, count: Int, limit: Int = FREE_LIMIT): Boolean = !premium && count >= limit - 1
+    fun showsUpsell(premium: Boolean, count: Int, limit: Int = FREE_LIMIT, allFree: Boolean = Monetization.ALL_FREE): Boolean =
+        !allFree && !premium && count >= limit - 1
 
     /** After onboarding only people who do not already subscribe are offered the paywall. */
-    fun showsPostOnboardingPaywall(premium: Boolean): Boolean = !premium
+    fun showsPostOnboardingPaywall(premium: Boolean, allFree: Boolean = Monetization.ALL_FREE): Boolean = !allFree && !premium
 }
