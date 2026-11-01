@@ -49,7 +49,14 @@ export function startTierSweep({ supabase, proxyAdmin, getStatus, intervalMs = 1
             try {
                 const { data, error } = await supabase.from('user_subscriptions').select('user_id').in('tier', ['pro', 'team']);
                 if (error) throw error;
-                for (const r of data || []) await syncTierLimitsForUser({ supabase, proxyAdmin, userId: r.user_id, getStatus, log });
+                // Everyone with a published app is included too: while VIBEBUILD_ALL_FREE is on every user resolves to Pro (5x caps),
+                // and when it is turned off the same pass puts those apps back to their real tier. Syncing is idempotent (no write when
+                // the limits already match), so the extra users cost one read per app.
+                const ids = new Set((data || []).map((r) => r.user_id));
+                const dep = await supabase.from('deployments').select('user_id').eq('status', 'active');
+                if (dep.error) log(`[tier] sweep deployments read failed code=${dep.error.code || 'error'}`);
+                else for (const r of dep.data || []) if (r.user_id) ids.add(r.user_id);
+                for (const userId of ids) await syncTierLimitsForUser({ supabase, proxyAdmin, userId, getStatus, log });
             } catch (e) { log(`[tier] sweep failed code=${e?.code || 'error'}`); }
         })().finally(() => { running = null; });
         return running;

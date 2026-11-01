@@ -17,6 +17,8 @@ import {
     SUGGESTIONS_CACHE_REFRESH_INTERVAL
 } from '../config/constants.js';
 import { checkUsageLimit, recordUsage, ACTION_TYPES } from '../services/subscriptionService.js';
+import { allFreeEnabled, whenAllFree } from '../lib/allFree.js';
+import { fairUseBody, reportIfDailyBuildsHigh } from '../services/fairUse.js';
 import { sendPushToUser, sendAPNsPush } from '../services/pushService.js';
 import { filterBrowseProjects } from '../services/browseFilter.js';
 import { reportFailure } from '../lib/failureReporter.js';
@@ -590,8 +592,15 @@ router.post('/generate', async (req, res) => {
             return res.status(429).json({ error: 'Rate limit exceeded. Try again in an hour.' });
         }
 
-        // Subscription usage check disabled until tables are created
-        // TODO: Re-enable when user_subscriptions and subscription_usage tables exist
+        // Fair-use daily cap (only while VIBEBUILD_ALL_FREE is on; the old tier check stays disabled as before).
+        // 429 with a friendly body, never a paywall; a usage-lookup failure allows the build (services/fairUse.js).
+        if (allFreeEnabled() && userId) {
+            const fair = await checkUsageLimit(userId, ACTION_TYPES.generation);
+            if (!fair.allowed && fair.fairUse) {
+                console.log(`[generate] Fair-use daily limit reached: used=${fair.used} limit=${fair.limit}`);
+                return res.status(429).json(fairUseBody(fair));
+            }
+        }
 
         // Move any credential the creator pasted into the vault and keep only the redacted text from here on, so it is never
         // saved, logged or sent to the worker, even when the proxy is down. The id is chosen now so the secrets can be filed
@@ -702,14 +711,14 @@ router.post('/generate', async (req, res) => {
                     }
                     if (workerResponse.status === 429) {
                         systemBusy = true;
-                        errorMsg = 'Our builders are at full capacity right now. Pro users get priority access — upgrade to skip the queue.';
+                        errorMsg = whenAllFree('Our builders are at full capacity right now. Please try again in a few minutes.', 'Our builders are at full capacity right now. Pro users get priority access — upgrade to skip the queue.');
                     }
                 }
             } catch {}
             if (placeholderProjectId && !systemBusy) {
                 markProjectFailed(supabase, placeholderProjectId, FAIL_CLASS.DISPATCH_ERROR, { phase: 'dispatch_http', httpStatus: workerResponse.status, path: clientWantsStream ? 'generate_stream' : 'generate_async' }).catch(() => {});
                 const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
-                if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', `"${shortPrompt}..." is queued. Pro users skip the line — upgrade for priority builds.`).catch(() => {});
+                if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', whenAllFree(`"${shortPrompt}..." is queued. Please try again in a few minutes.`, `"${shortPrompt}..." is queued. Pro users skip the line — upgrade for priority builds.`)).catch(() => {});
             }
             // safeWrite is local to proxyWorkerSSE; calling it here threw a ReferenceError that fell into the outer catch (double failure write, and a process crash via the catch's own ReferenceError).
             try { res.write(`data: ${JSON.stringify({ type: 'error', error: errorMsg, systemBusy, projectId: placeholderProjectId })}\n\n`); } catch {}
@@ -721,7 +730,7 @@ router.post('/generate', async (req, res) => {
         if (!clientWantsStream) {
             console.log(`[generate] Dispatched async build for ${placeholderProjectId}, closing SSE`);
             recordGeneration(userId);
-            if (userId) recordUsage(userId, ACTION_TYPES.generation).catch(() => {});
+            if (userId) recordUsage(userId, ACTION_TYPES.generation).then(() => allFreeEnabled() && reportIfDailyBuildsHigh()).catch(() => {});
             try { res.end(); } catch {}
             return;
         }
@@ -758,7 +767,7 @@ router.post('/generate', async (req, res) => {
                     let finalProjectId = savedProjectId; // declared outside the try so the push notification below can use it
                     try {
                         // Record usage for subscription tracking
-                        if (userId) await recordUsage(userId, ACTION_TYPES.generation);
+                        if (userId) { await recordUsage(userId, ACTION_TYPES.generation); if (allFreeEnabled()) reportIfDailyBuildsHigh(); }
 
                         finalProjectId = savedProjectId;
                         if (finalProjectId) {
@@ -859,7 +868,7 @@ router.post('/generate', async (req, res) => {
                 console.log(`[generate] Marked ${placeholderProjectId} as failed (no result received)`);
             }).catch(() => {});
             const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
-            if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', `"${shortPrompt}..." hit a snag. Pro users get priority — upgrade to skip the queue.`).catch(() => {});
+            if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', whenAllFree(`"${shortPrompt}..." hit a snag. Please try again in a few minutes.`, `"${shortPrompt}..." hit a snag. Pro users get priority — upgrade to skip the queue.`)).catch(() => {});
         }
         try { res.end(); } catch {}
 
@@ -870,7 +879,7 @@ router.post('/generate', async (req, res) => {
         if (placeholderProjectId) {
             markProjectFailed(supabase, placeholderProjectId, genPhase === 'dispatch' ? FAIL_CLASS.DISPATCH_ERROR : FAIL_CLASS.UNKNOWN, { phase: genPhase, attempt: genPhase === 'dispatch' && req.body?.stream !== true ? 3 : undefined, errorName: error?.name, message: error?.name === 'TimeoutError' ? 'timeout' : (genPhase === 'dispatch' ? 'dispatch failed' : undefined), path: req.body?.stream === true ? 'generate_stream' : 'generate_async' }).catch(() => {});
             const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
-            if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', `"${shortPrompt}..." hit a snag. Pro users get priority — upgrade to skip the queue.`).catch(() => {});
+            if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', whenAllFree(`"${shortPrompt}..." hit a snag. Please try again in a few minutes.`, `"${shortPrompt}..." hit a snag. Pro users get priority — upgrade to skip the queue.`)).catch(() => {});
         }
 
         if (res.headersSent) {
@@ -1200,7 +1209,7 @@ router.post('/:id/build-complete', async (req, res) => {
             // The worker's own message goes to the database only (sanitized), never to the reporter.
             await markProjectFailed(supabase, id, typeof error === 'string' && error ? FAIL_CLASS.WORKER_ERROR : FAIL_CLASS.NO_RESULT, { phase: 'build_complete', path: 'callback', message: typeof error === 'string' ? error : undefined });
             console.log(`[build-complete] Project ${id} failed: ${error}`);
-            if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', 'Retry failed. Pro users get priority — upgrade to skip the queue.').catch(() => {});
+            if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', whenAllFree('Retry failed. Please try again in a few minutes.', 'Retry failed. Pro users get priority — upgrade to skip the queue.')).catch(() => {});
         }
         res.json({ success: true });
     } catch (err) {
@@ -1940,6 +1949,10 @@ router.post('/:id/tweak', async (req, res) => {
 
         // 2. Check subscription usage limit for tweaks
         const limitCheck = await checkUsageLimit(userId, ACTION_TYPES.tweak, id);
+        if (!limitCheck.allowed && limitCheck.fairUse) {
+            console.log(`[tweak] Fair-use limit reached: used=${limitCheck.used} limit=${limitCheck.limit}`);
+            return res.status(429).json(fairUseBody(limitCheck));
+        }
         if (!limitCheck.allowed) {
             console.log(`[tweak] Usage limit exceeded: ${limitCheck.error}`);
             return res.status(403).json({
@@ -2544,7 +2557,7 @@ router.post('/api/admin/cleanup-stuck-builds', async (req, res) => {
         for (const project of stuckProjects) {
             if (project.creator_id) {
                 const shortPrompt = (project.initial_prompt || 'Your app').substring(0, 40);
-                sendPushToUser(project.creator_id, 'Builders are overloaded 🔥', `"${shortPrompt}..." is in queue. Upgrade to Pro for priority builds that skip the line.`).catch(() => {});
+                sendPushToUser(project.creator_id, 'Builders are overloaded 🔥', whenAllFree(`"${shortPrompt}..." is in queue. Please try again in a few minutes.`, `"${shortPrompt}..." is in queue. Upgrade to Pro for priority builds that skip the line.`)).catch(() => {});
             }
         }
 

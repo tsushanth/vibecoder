@@ -2,6 +2,8 @@ import { supabase } from '../config/database.js';
 import { ENTITLED_STATUSES, UUID_RE } from '../lib/entitlementState.js';
 import { reportFailure } from '../lib/failureReporter.js';
 import { revenueCatRestConfigured, syncUserFromRevenueCat } from './revenueCat.js';
+import { allFreeEnabled, fairUseConfig } from '../lib/allFree.js';
+import { checkFairUse } from './fairUse.js';
 
 // Subscription tiers and limits
 const SUBSCRIPTION_TIERS = {
@@ -40,12 +42,40 @@ const ACTION_TYPES = {
     createPrivate: 'create_private'
 };
 
+/** What every user gets while VIBEBUILD_ALL_FREE is on: Pro's capabilities with the fair-use numbers as the only caps. */
+export function allFreeLimits() {
+    const f = fairUseConfig();
+    return { ...SUBSCRIPTION_TIERS.pro, name: 'Free for now', dailyGenerations: f.dailyGenerations, tweaksPerProject: f.tweaksPerProject, price: '$0' };
+}
+
 /**
- * Get user's subscription status
+ * Get user's subscription status. While the all-free switch is on (lib/allFree.js) every user resolves to full Pro capabilities,
+ * and the tier the stored row would have given is still reported as data (storedTier / storedStatus / storedExpiresAt); no row is rewritten.
  * @param {string} userId - User ID
  * @returns {object} Subscription status
  */
 export async function getSubscriptionStatus(userId) {
+    const stored = await getStoredSubscriptionStatus(userId);
+    if (!allFreeEnabled()) return stored;
+    if (!userId) return stored;
+    // A failed lookup (success:false) also resolves to full access: nobody loses features because a table read failed.
+    return {
+        success: true,
+        tier: 'pro',
+        status: 'active',
+        expiresAt: null,
+        platform: stored.platform,
+        limits: allFreeLimits(),
+        allFree: true,
+        storedTier: stored.success ? stored.tier : 'free',
+        storedStatus: stored.success ? stored.status : 'active',
+        storedExpiresAt: stored.success ? stored.expiresAt ?? null : null,
+        ...(stored.originalTier !== undefined && { originalTier: stored.originalTier }),
+    };
+}
+
+/** The old resolution, from the user_subscriptions row alone (what the tier would be with the switch off). */
+export async function getStoredSubscriptionStatus(userId) {
     try {
         if (!userId) {
             return {
@@ -140,6 +170,15 @@ export async function checkUsageLimit(userId, actionType, projectId = null) {
         }
 
         // Get subscription status
+        // All-free mode: fair-use caps only, no tiers (services/fairUse.js). Fails open on a usage lookup error.
+        if (allFreeEnabled()) {
+            try { return await checkFairUse(userId, actionType, projectId); } catch (e) {
+                console.error('[subscription] fair-use check failed (allowing):', e?.message);
+                reportFailure('fair_use:check_failed', new Error('Fair-use check failed; request allowed'));
+                return { allowed: true, tier: 'pro', allFree: true, degraded: true };
+            }
+        }
+
         const subStatus = await getSubscriptionStatus(userId);
         if (!subStatus.success) {
             return {

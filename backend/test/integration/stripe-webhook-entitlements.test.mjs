@@ -1,4 +1,5 @@
 import '../helpers/env.mjs';
+import '../helpers/legacyTiers.mjs';
 process.env.STRIPE_SECRET_KEY = 'sk_test_dummy_for_signature_helper';
 process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_secret_value';
 delete process.env.STRIPE_PRO_PRICE_ID; delete process.env.STRIPE_TEAM_PRICE_ID;

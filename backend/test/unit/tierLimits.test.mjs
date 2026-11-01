@@ -78,3 +78,16 @@ test('a failing subscriptions query is logged by code and the sweep survives', a
     const s = startTierSweep({ supabase: db, proxyAdmin: fakeAdmin(), getStatus: async () => ({ tier: 'pro' }), intervalMs: 0, log: q.log }); await s.runOnce();
     assert.match(q.l[0], /sweep failed code=XX000/); s.stop();
 });
+
+test('the sweep also covers users who only have published apps (no paid row): while everyone is Pro (VIBEBUILD_ALL_FREE on) their apps get the 5x caps', async () => {
+    const q = quiet(); const a = fakeAdmin();
+    const tier = 'pro'; // what getSubscriptionStatus returns for a never-subscribed user while VIBEBUILD_ALL_FREE is on
+    const db = { from: (tbl) => { const b = { select: () => b, in: () => b, eq: () => b, then: (res) => Promise.resolve(
+        tbl === 'user_subscriptions' ? { data: [], error: null }
+        : tbl === 'deployments' && b._cols === undefined ? { data: [{ user_id: 'free-user', subdomain: 'app-one' }], error: null }
+        : { data: [{ subdomain: 'app-one' }], error: null }).then(res) }; return b; } };
+    const s = startTierSweep({ supabase: db, proxyAdmin: a, getStatus: async () => ({ tier }), intervalMs: 0, log: q.log });
+    await s.runOnce();
+    const set1 = a.calls.filter((c) => c[0] === 'set'); assert.equal(set1.length, 1); assert.equal(set1[0][2].rowCap, 100000);
+    s.stop();
+});
