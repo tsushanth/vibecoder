@@ -28,6 +28,7 @@ import { requireSecret } from './lib/requireSecret.js';
 import { reportFailure, installCrashHandlers } from './lib/failureReporter.js';
 import { deliverCallback } from './lib/callback.js';
 import { registerGameRoutes } from './lib/gameRoutes.js';
+import { createSlotTracker } from './lib/slots.js';
 
 const app = express();
 installCrashHandlers();
@@ -148,8 +149,8 @@ function getQuotaErrorMessage() {
         : 'AI usage limit reached. The service typically resets at 8am Pacific Time. Please try again later.';
 }
 
-let activeGenerations = 0;
 const MAX_CONCURRENT = parseInt(process.env.MAX_CONCURRENT || '2');
+const slots = createSlotTracker(MAX_CONCURRENT, (kind) => console.warn(`[slots] anomaly: ${kind} (active=${slots.active})`));
 
 // ============================================
 // CLAUDE.md
@@ -466,7 +467,7 @@ app.get('/ready', authMiddleware, async (req, res) => {
 app.get('/health', (req, res) => {
     let cliAvailable = false, cliPath = '';
     try { cliPath = findClaudeCLI(); cliAvailable = true; } catch {}
-    res.json({ healthy: true, cliAvailable, cliPath, activeGenerations, maxConcurrent: MAX_CONCURRENT, quotaExhausted, quotaResetTime, uptime: process.uptime(), direct: { enabled: !!directLlm, percent: DIRECT_PERCENT, models: DIRECT_MODELS, breakersOpen: DIRECT_MODELS.filter((m) => directLlm?.isOpen(m)) }, vibe: { enabled: VIBE_ON } });
+    res.json({ healthy: true, cliAvailable, cliPath, activeGenerations: slots.active, maxConcurrent: MAX_CONCURRENT, quotaExhausted, quotaResetTime, uptime: process.uptime(), direct: { enabled: !!directLlm, percent: DIRECT_PERCENT, models: DIRECT_MODELS, breakersOpen: DIRECT_MODELS.filter((m) => directLlm?.isOpen(m)) }, vibe: { enabled: VIBE_ON } });
 });
 
 // ============================================
@@ -481,7 +482,7 @@ app.post('/generate', authMiddleware, async (req, res) => {
         return res.status(400).json({ error: 'App description is required' });
     }
 
-    if (activeGenerations >= MAX_CONCURRENT) {
+    if (slots.full()) {
         return res.status(429).json({ error: 'Worker busy. Try again in a moment.' });
     }
 
@@ -490,7 +491,7 @@ app.post('/generate', authMiddleware, async (req, res) => {
         return res.status(503).json({ error: getQuotaErrorMessage(), quotaExhausted: true, resetTime: quotaResetTime });
     }
 
-    activeGenerations++;
+    const releaseSlot = slots.acquire();
     const startTime = Date.now();
     const requestId = `app-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
     const outcome = makeOutcome(requestId, 'generate', direct);
@@ -563,7 +564,7 @@ Every feature must be fully implemented and working. No TODOs, no placeholders, 
         outcome.run = result;
 
         if (!result.success) {
-            activeGenerations = Math.max(0, activeGenerations - 1);
+            releaseSlot();
             if (result.quotaError) return sendError(getQuotaErrorMessage());
             if (direct && result.cause === 'scan_failed') return sendError(userMessageForCause('scan_failed'));
             // Check if files were created despite non-zero exit
@@ -583,7 +584,7 @@ Every feature must be fully implemented and working. No TODOs, no placeholders, 
             if (htmlFiles.length > 0) {
                 fs.renameSync(path.join(projectDir, htmlFiles[0]), path.join(projectDir, 'index.html'));
             } else {
-                activeGenerations = Math.max(0, activeGenerations - 1);
+                releaseSlot();
                 return sendError('No app files were created. Please try again with a different description.');
             }
         }
@@ -613,7 +614,7 @@ Every feature must be fully implemented and working. No TODOs, no placeholders, 
         sendError('Internal worker error. Please try again.');
     } finally {
         outcome.finish();
-        activeGenerations = Math.max(0, activeGenerations - 1);
+        releaseSlot();
         if (projectDir) setTimeout(() => cleanupProjectFolder(projectDir), 120000);
     }
 });
@@ -627,11 +628,11 @@ app.post('/customize', authMiddleware, async (req, res) => {
 
     if (!parentBundle) return res.status(400).json({ error: 'parentBundle is required' });
     if (!customizeDescription) return res.status(400).json({ error: 'customizeDescription is required' });
-    if (activeGenerations >= MAX_CONCURRENT) return res.status(429).json({ error: 'Worker busy.' });
+    if (slots.full()) return res.status(429).json({ error: 'Worker busy.' });
     const direct = useDirect();
     if (!direct && quotaExhausted) return res.status(503).json({ error: getQuotaErrorMessage(), quotaExhausted: true });
 
-    activeGenerations++;
+    const releaseSlot = slots.acquire();
     const startTime = Date.now();
     const requestId = `cust-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
     const outcome = makeOutcome(requestId, 'customize', direct);
@@ -683,11 +684,11 @@ Read all existing files first, then apply the changes. Keep all features working
         outcome.run = result;
 
         if (direct && !result.success) {
-            activeGenerations = Math.max(0, activeGenerations - 1);
+            releaseSlot();
             return sendError(userMessageForCause(result.cause, 'Could not apply the customization. Please try again.'));
         }
         if (!result.success && result.quotaError) {
-            activeGenerations = Math.max(0, activeGenerations - 1);
+            releaseSlot();
             return sendError(getQuotaErrorMessage());
         }
 
@@ -703,7 +704,7 @@ Read all existing files first, then apply the changes. Keep all features working
         sendError('Internal error during customization.');
     } finally {
         outcome.finish();
-        activeGenerations = Math.max(0, activeGenerations - 1);
+        releaseSlot();
         if (projectDir) setTimeout(() => cleanupProjectFolder(projectDir), 120000);
     }
 });
@@ -813,11 +814,11 @@ app.post('/tweak', authMiddleware, async (req, res) => {
     if (!tweakDescription) return res.status(400).json({ error: 'tweakDescription is required' });
     if (!repoName) return res.status(400).json({ error: 'repoName is required' });
     if (!GITHUB_PAT) return res.status(503).json({ error: 'Git not configured' });
-    if (activeGenerations >= MAX_CONCURRENT) return res.status(429).json({ error: 'Worker busy.' });
+    if (slots.full()) return res.status(429).json({ error: 'Worker busy.' });
     const direct = useDirect();
     if (!direct && quotaExhausted) return res.status(503).json({ error: getQuotaErrorMessage(), quotaExhausted: true });
 
-    activeGenerations++;
+    const releaseSlot = slots.acquire();
     const startTime = Date.now();
     const requestId = `tweak-${(projectId || 'x').substring(0, 8)}-${Date.now()}`;
     const outcome = makeOutcome(requestId, 'tweak', direct);
@@ -864,7 +865,7 @@ app.post('/tweak', authMiddleware, async (req, res) => {
             fs.renameSync(path.join(repoDir, '.git'), path.join(projectDir, '.git'));
             fs.rmSync(repoDir, { recursive: true, force: true });
         } catch (err) {
-            activeGenerations = Math.max(0, activeGenerations - 1);
+            releaseSlot();
             return sendError(`Failed to clone repo: ${err.message}`);
         }
 
@@ -880,11 +881,11 @@ app.post('/tweak', authMiddleware, async (req, res) => {
         outcome.run = result;
 
         if (direct && !result.success) {
-            activeGenerations = Math.max(0, activeGenerations - 1);
+            releaseSlot();
             return sendError(userMessageForCause(result.cause, 'Could not apply the change. Please try again.'));
         }
         if (!result.success && result.quotaError) {
-            activeGenerations = Math.max(0, activeGenerations - 1);
+            releaseSlot();
             return sendError(getQuotaErrorMessage());
         }
 
@@ -905,7 +906,7 @@ app.post('/tweak', authMiddleware, async (req, res) => {
         sendError('Internal error during tweak.');
     } finally {
         outcome.finish();
-        activeGenerations = Math.max(0, activeGenerations - 1);
+        releaseSlot();
         if (projectDir) setTimeout(() => cleanupProjectFolder(projectDir), 120000);
     }
 });
@@ -931,7 +932,7 @@ app.get('/versions/:repoName', authMiddleware, async (req, res) => {
 registerGameRoutes(app, {
     authMiddleware, llm: directLlm, models: DIRECT_MODELS, makeOutcome, zipProjectFolder, listProjectFiles, unzipBundle, projectsDir: PROJECTS_DIR,
     deadlineMs: parseInt(process.env.DIRECT_DEADLINE_MS || '480000', 10),
-    slot: { acquire: () => { if (activeGenerations >= MAX_CONCURRENT) return false; activeGenerations++; return true; }, release: () => { activeGenerations = Math.max(0, activeGenerations - 1); } },
+    slot: (() => { const held = []; return { acquire: () => { if (slots.full()) return false; held.push(slots.acquire()); return true; }, release: () => { const r = held.pop(); if (r) r(); } }; })(),
     git: { pat: GITHUB_PAT, clone: gitClone, commitAndPush: gitCommitAndPush, init: initProjectRepo, history: getGitCommitHistory },
 });
 
