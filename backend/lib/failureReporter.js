@@ -6,7 +6,7 @@
 const ENDPOINT = process.env.FAILURE_REPORTER_URL || 'https://app-failure-reporter.t-sushanth.workers.dev/v1/report';
 const KEY = process.env.FAILURE_REPORTER_KEY || 'afr_271ab956be760e9f9b82ef912577ed22';
 const APP_VERSION = process.env.FLY_IMAGE_REF || process.env.K_REVISION || process.env.npm_package_version || 'unknown';
-const DISABLED = process.env.FAILURE_REPORTER_DISABLED === '1' || process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development';
+const DISABLED = process.env.FAILURE_REPORTER_DISABLED === '1' || process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development' || !!process.env.NODE_TEST_CONTEXT; // node --test exports NODE_TEST_CONTEXT: never post test errors to the production reporter
 
 let sink = null;
 /** Tests only: capture reports instead of sending (also bypasses the silent-in-tests switch). */

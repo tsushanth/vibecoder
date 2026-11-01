@@ -37,3 +37,14 @@ test('reporter is silent under NODE_ENV=test unless a sink is set', async () => 
     const got = []; reportFailure('x', new Error('silent')); _setSink((r) => got.push(r)); reportFailure('x', new Error('seen'), { a: '1' }); await new Promise((r) => setTimeout(r, 10)); _setSink(null);
     assert.deepEqual(got, [{ kind: 'failure', flow: 'x', message: 'seen', context: { a: '1' } }]);
 });
+
+test('under node --test the reporter never posts to the production endpoint (a stray reportFailure once emailed the owner as vibebuild/x)', async () => {
+    const calls = []; const real = globalThis.fetch;
+    globalThis.fetch = async (...a) => { calls.push(a); return new Response('{}', { status: 200 }); };
+    try {
+        assert.ok(process.env.NODE_TEST_CONTEXT, 'sanity: running under the node test runner');
+        reportFailure('x', new Error('must not leave the process'));
+        await new Promise((r) => setTimeout(r, 20));
+    } finally { globalThis.fetch = real; }
+    assert.equal(calls.length, 0, 'no network call to the reporter');
+});
