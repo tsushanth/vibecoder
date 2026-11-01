@@ -28,7 +28,7 @@ const bricolage = Bricolage_Grotesque({
 export const metadata: Metadata = {
   title: "VibeBuild - Describe Your App, We Build It",
   description:
-    "Build fully functional web apps by describing what you want. AI-powered 5-phase pipeline generates, validates, and deploys your app in minutes.",
+    "Build fully functional web apps by describing what you want. AI-powered 5-phase pipeline generates, validates, and deploys your app in minutes. Free for now, every feature, no credit card.",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "VibeBuild - Describe Your App, We Build It",
     description:
-      "Build fully functional web apps by describing what you want. AI-powered app builder.",
+      "Build fully functional web apps by describing what you want. AI-powered app builder. Free for now, no credit card.",
     siteName: "VibeBuild",
     type: "website",
   },

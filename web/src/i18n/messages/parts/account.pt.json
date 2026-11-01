@@ -78,7 +78,11 @@
       "deleteError": "Sua conta não foi excluída. Tente de novo.",
       "deleteSignInAgain": "Entre de novo e depois exclua sua conta.",
       "cancel": "Cancelar",
-      "manage": "Gerenciar assinatura"
+      "manage": "Gerenciar assinatura",
+      "freeForNow": "Grátis por enquanto",
+      "freeForNowDetail": "Todos os recursos incluídos, sem cartão de crédito. Grátis enquanto crescemos.",
+      "fairUseBuildsToday": "Builds hoje",
+      "fairUseTweaks": "Ajustes por projeto"
     }
   }
 }

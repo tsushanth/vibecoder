@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { MarketingHeader, MarketingFooter } from '@/components/landing/MarketingChrome';
+import { ALL_FREE } from '@/lib/pricing';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy - VibeBuild',
@@ -45,7 +46,7 @@ export default function PrivacyPage() {
             <ul className="list-disc pl-6 space-y-1">
               <li>To provide and operate the Service</li>
               <li>To process your app generation requests</li>
-              <li>To manage your account and subscriptions</li>
+              <li>{ALL_FREE ? 'To manage your account' : 'To manage your account and subscriptions'}</li>
               <li>To improve our AI models and platform quality</li>
               <li>To communicate important updates and changes</li>
               <li>To detect and prevent fraud or abuse</li>
@@ -67,7 +68,7 @@ export default function PrivacyPage() {
             <h2 className="font-display text-xl font-semibold text-foreground mb-3">5. Public Projects</h2>
             <p>
               When you make a project public, its title, description, creator name, and generated app content
-              are visible to all users in the community gallery. You can make projects private (Pro plan) or
+              are visible to all users in the community gallery. You can make projects private{ALL_FREE ? '' : ' (Pro plan)'} or
               delete them at any time.
             </p>
           </section>

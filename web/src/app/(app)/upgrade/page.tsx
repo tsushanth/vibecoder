@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/stores/authStore';
@@ -9,12 +10,29 @@ import { PlanCompare } from '@/components/upgrade/PlanCompare';
 import { Spinner } from '@/components/upgrade/Spinner';
 import { ManageBillingButton } from '@/components/upgrade/ManageBillingButton';
 import { useCheckout } from '@/components/upgrade/useCheckout';
+import { ALL_FREE } from '@/lib/pricing';
 
 /**
  * The web's paywall, after Android's LocalPaywall: a close control, what Pro adds over Free, one plan (Pro, monthly), and a
  * Continue button pinned at the bottom so it never needs a scroll. Subscribers see their plan instead.
  */
 export default function UpgradePage() {
+  const router = useRouter();
+  // While everything is free (lib/pricing.ts) there is nothing to buy: go straight to Create.
+  useEffect(() => {
+    if (ALL_FREE) router.replace('/project/new');
+  }, [router]);
+  if (ALL_FREE) {
+    return (
+      <div className="fixed inset-0 z-50 flex bg-background">
+        <Spinner label="" />
+      </div>
+    );
+  }
+  return <PaywallPage />;
+}
+
+function PaywallPage() {
   const t = useTranslations('account.upgrade');
   const router = useRouter();
   const subscription = useAuthStore((s) => s.subscription);

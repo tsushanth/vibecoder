@@ -1,4 +1,5 @@
 import './../helpers/env.mjs';
+import '../helpers/legacyTiers.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { stubSupabase, eqOf } from '../helpers/supabaseStub.mjs';

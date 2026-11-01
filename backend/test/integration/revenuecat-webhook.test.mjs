@@ -1,4 +1,5 @@
 import '../helpers/env.mjs';
+import '../helpers/legacyTiers.mjs';
 import test, { before, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import express from 'express';

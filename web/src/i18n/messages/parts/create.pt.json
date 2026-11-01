@@ -51,7 +51,8 @@
       "busyTitle": "Nossos servidores estão lotados",
       "busyBody": "Tente de novo em alguns minutos. Criações Pro têm prioridade na fila.",
       "tryAgain": "Tentar de novo",
-      "seePro": "Ver Pro"
+      "seePro": "Ver Pro",
+      "busyBodyFree": "Tente novamente em alguns minutos."
     },
     "ready": {
       "title": "Seu app está pronto",

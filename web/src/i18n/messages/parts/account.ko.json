@@ -78,7 +78,11 @@
       "deleteError": "계정이 삭제되지 않았습니다. 다시 시도하세요.",
       "deleteSignInAgain": "다시 로그인한 후 계정을 삭제하세요.",
       "cancel": "취소",
-      "manage": "구독 관리"
+      "manage": "구독 관리",
+      "freeForNow": "당분간 무료",
+      "freeForNowDetail": "모든 기능 포함, 신용카드 불필요. 성장하는 동안 무료입니다.",
+      "fairUseBuildsToday": "오늘의 빌드",
+      "fairUseTweaks": "프로젝트당 수정 횟수"
     }
   }
 }

@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/stores/authStore';
 import { createClient } from '@/lib/supabase';
 import { SUBSCRIPTION_TIERS } from '@/lib/constants';
+import { ALL_FREE } from '@/lib/pricing';
 import { api, ApiError } from '@/lib/api';
 import { SUPPORTED_LOCALES } from '@/i18n/locales';
 import { cn } from '@/lib/utils';
@@ -191,17 +192,25 @@ function AccountScreen() {
   const name = user?.user_metadata?.full_name || user?.email?.split('@')[0] || t('defaultName');
   const avatarUrl = user?.user_metadata?.avatar_url as string | undefined;
   const unlimited = tc('unlimited');
-  const stats = [
-    ...(appCount !== null ? [{ label: t('statApps'), value: String(appCount) }] : []),
-    { label: t('statGenerations'), value: limitText(subscription?.limits?.dailyGenerations, tierInfo.dailyGenerations, unlimited) },
-    { label: t('statTweaks'), value: limitText(subscription?.limits?.tweaksPerProject, tierInfo.tweaksPerProject, unlimited) },
-  ];
+  const fairDaily = subscription?.fairUse?.dailyGenerations;
+  const fairTweaks = subscription?.fairUse?.tweaksPerProject;
+  const stats = ALL_FREE
+    ? [
+        ...(appCount !== null ? [{ label: t('statApps'), value: String(appCount) }] : []),
+        ...(fairDaily ? [{ label: t('fairUseBuildsToday'), value: `${fairDaily.used} / ${fairDaily.limit}` }] : []),
+        ...(fairTweaks ? [{ label: t('fairUseTweaks'), value: String(fairTweaks.limit) }] : []),
+      ]
+    : [
+        ...(appCount !== null ? [{ label: t('statApps'), value: String(appCount) }] : []),
+        { label: t('statGenerations'), value: limitText(subscription?.limits?.dailyGenerations, tierInfo.dailyGenerations, unlimited) },
+        { label: t('statTweaks'), value: limitText(subscription?.limits?.tweaksPerProject, tierInfo.tweaksPerProject, unlimited) },
+      ];
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-8 md:py-14">
       <h1 className="sr-only">{t('title')}</h1>
 
-      {checkoutSuccess && (
+      {!ALL_FREE && checkoutSuccess && (
         <div role="status" className="mb-6 flex items-center gap-2 rounded-xl border border-success/25 bg-success/10 px-4 py-3 text-[15px] font-medium text-success">
           <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -231,13 +240,13 @@ function AccountScreen() {
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <h2 id="plan-heading" className="font-display text-[20px] font-bold">
-                {t('planNamed', { plan: tierInfo.name })}
+                {ALL_FREE ? t('freeForNow') : t('planNamed', { plan: tierInfo.name })}
               </h2>
-              {paid && <span className="rounded-full bg-accent/20 px-2.5 py-0.5 text-[13px] font-semibold text-accent-hover">{t('active')}</span>}
+              {!ALL_FREE && paid && <span className="rounded-full bg-accent/20 px-2.5 py-0.5 text-[13px] font-semibold text-accent-hover">{t('active')}</span>}
             </div>
-            <p className="mt-0.5 text-[15px] text-muted">{paid ? t('planPaidDetail') : t('planFreeDetail')}</p>
+            <p className="mt-0.5 text-[15px] text-muted">{ALL_FREE ? t('freeForNowDetail') : paid ? t('planPaidDetail') : t('planFreeDetail')}</p>
           </div>
-          {!paid && (
+          {!ALL_FREE && !paid && (
             <Link
               href="/upgrade"
               className="flex h-10 items-center rounded-lg bg-accent px-4 text-[15px] font-semibold text-white transition-colors hover:bg-accent-deep"
@@ -245,32 +254,34 @@ function AccountScreen() {
               {t('upgrade')}
             </Link>
           )}
-          {paid && (
+          {!ALL_FREE && paid && (
             <ManageBillingButton
               className="flex h-10 items-center rounded-lg border border-border px-4 text-[15px] font-medium transition-colors hover:bg-surface"
               label={t('manage')}
             />
           )}
         </div>
-        <dl className="grid border-t border-border" style={{ gridTemplateColumns: `repeat(${stats.length}, minmax(0, 1fr))` }}>
+        {stats.length > 0 && <dl className="grid border-t border-border" style={{ gridTemplateColumns: `repeat(${stats.length}, minmax(0, 1fr))` }}>
           {stats.map((s, i) => (
             <div key={s.label} className={cn('flex flex-col justify-between px-4 py-4 sm:px-5', i > 0 && 'border-l border-border')}>
               <dt className="text-[13px] leading-snug text-muted">{s.label}</dt>
               <dd className={cn('mt-1 font-display font-bold tabular-nums', /^\d+$/.test(s.value) ? 'text-[22px]' : 'break-words text-[17px] sm:text-[22px]')}>{s.value}</dd>
             </div>
           ))}
-        </dl>
+        </dl>}
       </section>
 
       {/* Settings */}
       <section className="mt-10" aria-labelledby="settings-heading">
         <h2 id="settings-heading" className="mb-1 text-[15px] font-semibold text-muted">{t('settings')}</h2>
         <div className="divide-y divide-border border-y border-border">
-          <Link href="/upgrade" className={rowClass}>
-            <span className="flex-1">{t('subscription')}</span>
-            <span className="text-muted">{tierInfo.name}</span>
-            <Chevron />
-          </Link>
+          {!ALL_FREE && (
+            <Link href="/upgrade" className={rowClass}>
+              <span className="flex-1">{t('subscription')}</span>
+              <span className="text-muted">{tierInfo.name}</span>
+              <Chevron />
+            </Link>
+          )}
           <label className={cn(rowClass, 'cursor-pointer')}>
             <span className="flex-1">{t('language')}</span>
             <select

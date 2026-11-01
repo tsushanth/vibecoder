@@ -6,12 +6,15 @@ import { syncTierLimitsForUser } from '../services/tierSync.js';
 import { createStripeEventProcessor, stripeApiFrom } from '../services/stripeWebhook.js';
 import {
     getSubscriptionStatus,
+    allFreeLimits,
     verifyReceipt,
     recordUsage,
     checkUsageLimit,
     SUBSCRIPTION_TIERS,
     ACTION_TYPES
 } from '../services/subscriptionService.js';
+import { fairUseBody, fairUseSnapshot } from '../services/fairUse.js';
+import { allFreeEnabled } from '../lib/allFree.js';
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
@@ -46,13 +49,25 @@ router.get('/status', async (req, res) => {
             });
         }
 
+        // allFree mode: tier is 'pro' for everyone, the stored plan is shown as data, and the only caps are the fair-use numbers.
+        // Optional ?projectId= adds that project's tweak count. Off mode: exactly the old body plus allFree:false.
+        const extra = result.allFree
+            ? {
+                storedTier: result.storedTier,
+                storedStatus: result.storedStatus,
+                storedExpiresAt: result.storedExpiresAt,
+                fairUse: await fairUseSnapshot(userId, typeof req.query.projectId === 'string' ? req.query.projectId : null)
+            }
+            : {};
         res.json({
             success: true,
             tier: result.tier,
             status: result.status,
             expiresAt: result.expiresAt,
             platform: result.platform,
-            limits: result.limits
+            limits: result.limits,
+            allFree: !!result.allFree,
+            ...extra
         });
 
     } catch (error) {
@@ -142,6 +157,7 @@ router.post('/usage', async (req, res) => {
         // Check if user can perform this action
         const limitCheck = await checkUsageLimit(userId, actionType, projectId);
 
+        if (!limitCheck.allowed && limitCheck.fairUse) return res.status(429).json(fairUseBody(limitCheck));
         if (!limitCheck.allowed) {
             return res.status(403).json({
                 error: limitCheck.error,
@@ -186,6 +202,20 @@ router.post('/usage', async (req, res) => {
  */
 router.get('/plans', (req, res) => {
     try {
+        // While everything is free there is nothing to buy: one plan, no price, so no client can render a plan comparison.
+        if (allFreeEnabled()) {
+            const l = allFreeLimits();
+            return res.json({
+                success: true,
+                allFree: true,
+                plans: [{
+                    tier: 'pro',
+                    name: l.name,
+                    price: '$0',
+                    features: { dailyGenerations: l.dailyGenerations, tweaksPerProject: l.tweaksPerProject, privateProjects: true, priorityQueue: true, collaboration: false }
+                }]
+            });
+        }
         const plans = Object.entries(SUBSCRIPTION_TIERS).map(([tier, info]) => ({
             tier,
             name: info.name,
@@ -218,6 +248,10 @@ router.get('/plans', (req, res) => {
  */
 router.post('/create-checkout', async (req, res) => {
     try {
+        // Dormant while VIBEBUILD_ALL_FREE is on: nobody should be charged for features everyone already has. The Stripe code below is untouched.
+        if (allFreeEnabled()) {
+            return res.status(409).json({ error: 'VibeBuild is free for now. There is nothing to buy.', allFree: true });
+        }
         if (!stripe) {
             return res.status(500).json({ error: 'Stripe is not configured' });
         }

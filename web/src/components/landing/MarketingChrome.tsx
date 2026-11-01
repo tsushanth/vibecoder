@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ALL_FREE } from '@/lib/pricing';
 
 // Header and footer of the public pages (landing, about, faq, blog, browse, legal). Same palette and logo as the app.
 
@@ -12,7 +13,7 @@ export function MarketingHeader() {
         </Link>
         <nav className="flex items-center gap-6" aria-label="Main">
           <Link href="/browse" className="hidden text-sm text-muted transition hover:text-foreground sm:inline">Explore</Link>
-          <Link href="/#pricing" className="hidden text-sm text-muted transition hover:text-foreground sm:inline">Pricing</Link>
+          <Link href="/#pricing" className="hidden text-sm text-muted transition hover:text-foreground sm:inline">{ALL_FREE ? 'Free' : 'Pricing'}</Link>
           <Link href="/blog" className="hidden text-sm text-muted transition hover:text-foreground sm:inline">Blog</Link>
           <Link href="/login" className="text-sm text-muted transition hover:text-foreground">Sign in</Link>
           <Link href="/signup" className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-hover">

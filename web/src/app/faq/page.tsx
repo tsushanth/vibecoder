@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { MarketingHeader, MarketingFooter } from '@/components/landing/MarketingChrome';
+import { ALL_FREE } from '@/lib/pricing';
 
 export const metadata: Metadata = {
   title: 'FAQ - VibeBuild | Frequently Asked Questions',
-  description: 'Frequently asked questions about VibeBuild, the AI-powered app builder. Learn about pricing, features, deployment, and more.',
+  description: 'Frequently asked questions about VibeBuild, the AI-powered app builder. Learn about features, deployment, and more. VibeBuild is free for now.',
 };
 
 const faqs = [
@@ -22,7 +23,9 @@ const faqs = [
   },
   {
     q: 'Is VibeBuild free?',
-    a: 'Yes. The free plan includes 3 tweaks per project, public project hosting, and one-click deployment. Pro ($9.99 a month) adds unlimited tweaks, private projects, and custom domains.',
+    a: ALL_FREE
+      ? 'Yes. VibeBuild is free for now: every feature, no credit card. That includes private projects, custom domains, and one-click deployment. It stays free while we grow, with a fair-use daily limit on builds so everyone gets a turn.'
+      : 'Yes. The free plan includes 3 tweaks per project, public project hosting, and one-click deployment. Pro ($9.99 a month) adds unlimited tweaks, private projects, and custom domains.',
   },
   {
     q: 'How does the AI pipeline work?',
@@ -34,11 +37,11 @@ const faqs = [
   },
   {
     q: 'How do I deploy my app?',
-    a: 'Click the "Publish" button and your app gets a live URL instantly. No server setup or hosting configuration needed. Pro users can also connect custom domains.',
+    a: 'Click the "Publish" button and your app gets a live URL instantly. No server setup or hosting configuration needed. ' + (ALL_FREE ? 'You can also connect your own custom domain.' : 'Pro users can also connect custom domains.'),
   },
   {
     q: 'Can other people see my apps?',
-    a: 'By default, apps are public and visible in the community gallery. Pro users can create private projects that only they can access.',
+    a: 'By default, apps are public and visible in the community gallery. ' + (ALL_FREE ? 'You can also create private projects that only you can access.' : 'Pro users can create private projects that only they can access.'),
   },
   {
     q: 'What is forking?',
@@ -49,8 +52,10 @@ const faqs = [
     a: 'Yes! VibeBuild has native apps for both iOS and Android, so you can build and manage apps from anywhere. Your projects sync across all devices.',
   },
   {
-    q: 'What happens if my free generations run out?',
-    a: 'Free plan generations reset daily. You can also upgrade to Pro for unlimited generations at any time.',
+    q: ALL_FREE ? 'Is there a limit on how much I can build?' : 'What happens if my free generations run out?',
+    a: ALL_FREE
+      ? 'There is a generous fair-use limit on builds per day so everyone gets a turn. If you reach it, come back the next day and keep building.'
+      : 'Free plan generations reset daily. You can also upgrade to Pro for unlimited generations at any time.',
   },
   {
     q: 'How do I get help or report a bug?',

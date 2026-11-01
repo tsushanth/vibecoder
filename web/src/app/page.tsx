@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { FreeForNowCTA } from '@/components/landing/FreeForNowCTA';
+import { ALL_FREE } from '@/lib/pricing';
 import { PricingCTA } from '@/components/landing/PricingCTA';
 import { HeroComposer } from '@/components/landing/HeroComposer';
 import { LiveBuild } from '@/components/landing/LiveBuild';
@@ -57,37 +59,49 @@ export default function LandingPage() {
 
         <section id="pricing" className="scroll-mt-16 border-t border-border px-5 py-20 sm:px-6">
           <div className="mx-auto max-w-6xl">
-            <h2 className="font-display text-3xl font-bold sm:text-4xl">Start free, upgrade when you need more</h2>
-            <div className="mt-12 grid gap-12 md:grid-cols-2 md:gap-0 md:divide-x md:divide-border">
-              <div className="flex flex-col md:pr-12">
-                <h3 className="font-display text-xl font-semibold">{SUBSCRIPTION_TIERS.free.name}</h3>
-                <p className="mt-3 flex items-baseline gap-1.5"><span className="font-display text-5xl font-bold">$0</span><span className="text-muted">forever</span></p>
-                <ul className="mb-8 mt-6 flex-1 space-y-2.5 text-[15px] text-muted">
-                  <li>Build and publish apps</li>
-                  <li>3 tweaks per project</li>
-                  <li>Public projects</li>
-                  <li>Explore and remix what others built</li>
-                </ul>
-                <PricingCTA tier="free" label="Start free" highlighted={false} />
+            {ALL_FREE ? (
+              <div className="max-w-2xl">
+                <h2 className="font-display text-3xl font-bold sm:text-4xl">Free for now</h2>
+                <p className="mt-4 text-lg leading-relaxed text-muted">Every feature, no credit card. Free while we grow.</p>
+                <div className="mt-8">
+                  <FreeForNowCTA />
+                </div>
               </div>
-              <div className="flex flex-col md:pl-12">
-                <h3 className="font-display text-xl font-semibold">{SUBSCRIPTION_TIERS.pro.name}</h3>
-                <p className="mt-3 flex items-baseline gap-1.5"><span className="font-display text-5xl font-bold">$9.99</span><span className="text-muted">a month</span></p>
-                <ul className="mb-8 mt-6 flex-1 space-y-2.5 text-[15px] text-muted">
-                  <li>Unlimited generations and tweaks</li>
-                  <li>Private projects</li>
-                  <li>Your own domain</li>
-                </ul>
-                <PricingCTA tier="pro" label="Upgrade to Pro" highlighted />
-              </div>
-            </div>
+            ) : (
+              <>
+                <h2 className="font-display text-3xl font-bold sm:text-4xl">Start free, upgrade when you need more</h2>
+                <div className="mt-12 grid gap-12 md:grid-cols-2 md:gap-0 md:divide-x md:divide-border">
+                <div className="flex flex-col md:pr-12">
+                  <h3 className="font-display text-xl font-semibold">{SUBSCRIPTION_TIERS.free.name}</h3>
+                  <p className="mt-3 flex items-baseline gap-1.5"><span className="font-display text-5xl font-bold">$0</span><span className="text-muted">forever</span></p>
+                  <ul className="mb-8 mt-6 flex-1 space-y-2.5 text-[15px] text-muted">
+                    <li>Build and publish apps</li>
+                    <li>3 tweaks per project</li>
+                    <li>Public projects</li>
+                    <li>Explore and remix what others built</li>
+                  </ul>
+                  <PricingCTA tier="free" label="Start free" highlighted={false} />
+                </div>
+                <div className="flex flex-col md:pl-12">
+                  <h3 className="font-display text-xl font-semibold">{SUBSCRIPTION_TIERS.pro.name}</h3>
+                  <p className="mt-3 flex items-baseline gap-1.5"><span className="font-display text-5xl font-bold">$9.99</span><span className="text-muted">a month</span></p>
+                  <ul className="mb-8 mt-6 flex-1 space-y-2.5 text-[15px] text-muted">
+                    <li>Unlimited generations and tweaks</li>
+                    <li>Private projects</li>
+                    <li>Your own domain</li>
+                  </ul>
+                  <PricingCTA tier="pro" label="Upgrade to Pro" highlighted />
+                </div>
+                </div>
+              </>
+            )}
           </div>
         </section>
 
         <section className="border-t border-border px-5 py-24 sm:px-6">
           <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="font-display text-3xl font-bold sm:text-4xl">What will you build?</h2>
-            <Link href="/signup" className="rounded-lg bg-accent px-7 py-3.5 text-base font-semibold text-white transition hover:bg-accent-hover">Start building free</Link>
+            <Link href="/signup" className="rounded-lg bg-accent px-7 py-3.5 text-base font-semibold text-white transition hover:bg-accent-hover">{ALL_FREE ? 'Start building' : 'Start building free'}</Link>
           </div>
         </section>
       </main>

@@ -51,7 +51,8 @@
       "busyTitle": "Los servidores están al máximo",
       "busyBody": "Inténtalo de nuevo en unos minutos. Las creaciones Pro van primero en la cola.",
       "tryAgain": "Reintentar",
-      "seePro": "Ver Pro"
+      "seePro": "Ver Pro",
+      "busyBodyFree": "Inténtalo de nuevo en unos minutos."
     },
     "ready": {
       "title": "Tu app está lista",

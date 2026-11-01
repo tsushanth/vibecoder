@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import http2 from 'http2';
 import nodemailer from 'nodemailer';
 import { supabase } from '../config/database.js';
+import { allFreeEnabled } from '../lib/allFree.js';
 
 // ============================================
 // Email fallback (Gmail SMTP)
@@ -17,7 +18,8 @@ const emailTransport = EMAIL_PASS ? nodemailer.createTransport({
 async function sendEmail(to, title, body, isAppReady = false) {
     if (!emailTransport || !to) return;
     try {
-        const upsellBlock = isAppReady ? `
+        // No Pro upsell while VIBEBUILD_ALL_FREE is on (everything is free).
+        const upsellBlock = isAppReady && !allFreeEnabled() ? `
             <div style="margin-top:24px;padding:16px;background:#f5f3ff;border-radius:12px;border-left:4px solid #6366f1">
                 <p style="margin:0 0 8px;font-weight:700;color:#4f46e5">⚡ Go Pro — Never Wait Again</p>
                 <p style="margin:0 0 12px;color:#4b5563;font-size:14px">Free users share builder capacity. Pro users get <strong>priority builds</strong>, faster generation, and unlimited apps — no delays, no failures.</p>
@@ -28,7 +30,7 @@ async function sendEmail(to, title, body, isAppReady = false) {
             from: `"VibeBuild" <${EMAIL_USER}>`,
             to,
             subject: title,
-            text: `${body}\n\nUpgrade to Pro for priority builds and no delays: https://play.google.com/store/apps/details?id=com.kreativekoala.vibercoder`,
+            text: allFreeEnabled() ? body : `${body}\n\nUpgrade to Pro for priority builds and no delays: https://play.google.com/store/apps/details?id=com.kreativekoala.vibercoder`,
             html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
                 <img src="https://vibebuild.app/icon.png" width="48" style="margin-bottom:16px" onerror="this.style.display='none'">
                 <h2 style="color:#111827;margin:0 0 8px">${title}</h2>

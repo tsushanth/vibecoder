@@ -51,7 +51,8 @@
       "busyTitle": "서버가 가득 찼어요",
       "busyBody": "몇 분 후 다시 시도하세요. Pro 빌드는 먼저 처리돼요.",
       "tryAgain": "다시 시도",
-      "seePro": "Pro 보기"
+      "seePro": "Pro 보기",
+      "busyBodyFree": "몇 분 후에 다시 시도하세요."
     },
     "ready": {
       "title": "앱이 준비됐어요",

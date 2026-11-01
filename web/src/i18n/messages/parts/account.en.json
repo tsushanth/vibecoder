@@ -78,7 +78,11 @@
       "deleteError": "Your account wasn't deleted. Try again.",
       "deleteSignInAgain": "Sign in again, then delete your account.",
       "cancel": "Cancel",
-      "manage": "Manage subscription"
+      "manage": "Manage subscription",
+      "freeForNow": "Free for now",
+      "freeForNowDetail": "Every feature is included, no credit card. Free while we grow.",
+      "fairUseBuildsToday": "Builds today",
+      "fairUseTweaks": "Tweaks per project"
     }
   }
 }
