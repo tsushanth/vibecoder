@@ -8,6 +8,8 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.kreativekoala.vibecoder.data.model.RegisterRequest
 import com.kreativekoala.vibecoder.data.model.User
 import com.kreativekoala.vibecoder.data.remote.VibeBuildApi
+import com.kreativekoala.vibecoder.ui.auth.AuthFailure
+import com.kreativekoala.vibecoder.ui.auth.AuthFailureException
 import com.kreativekoala.vibecoder.util.Constants
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -130,7 +132,7 @@ class AuthRepository @Inject constructor(
         }
 
         // Step 3: Register with VibeBuild backend
-        val authUser = currentUser ?: throw Exception("Supabase sign-in failed")
+        val authUser = currentUser ?: throw AuthFailureException(AuthFailure.GoogleFailed)
         return registerWithBackend(authUser)
     }
 
@@ -139,7 +141,8 @@ class AuthRepository @Inject constructor(
             this.email = email
             this.password = password
         }
-        val authUser = currentUser ?: throw Exception("Sign-up failed")
+        // No session after a successful sign-up means the project wants the email confirmed before the first sign-in.
+        val authUser = currentUser ?: throw AuthFailureException(AuthFailure.ConfirmEmailToFinish)
         return registerWithBackend(
             authUser.copy(displayName = displayName ?: authUser.displayName)
         )
@@ -150,7 +153,7 @@ class AuthRepository @Inject constructor(
             this.email = email
             this.password = password
         }
-        val authUser = currentUser ?: throw Exception("Sign-in failed")
+        val authUser = currentUser ?: throw AuthFailureException(AuthFailure.Unknown)
         return registerWithBackend(authUser)
     }
 
