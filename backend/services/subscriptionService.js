@@ -1,4 +1,7 @@
 import { supabase } from '../config/database.js';
+import { ENTITLED_STATUSES, UUID_RE } from '../lib/entitlementState.js';
+import { reportFailure } from '../lib/failureReporter.js';
+import { revenueCatRestConfigured, syncUserFromRevenueCat } from './revenueCat.js';
 
 // Subscription tiers and limits
 const SUBSCRIPTION_TIERS = {
@@ -98,7 +101,8 @@ export async function getSubscriptionStatus(userId) {
         const expiresAt = data.expires_at ? new Date(data.expires_at) : null;
         const isExpired = expiresAt && expiresAt < now;
 
-        const effectiveTier = (isExpired || data.status !== 'active') ? 'free' : data.tier;
+        // Entitled statuses: active, trialing, and past_due (bounded grace: the webhooks stamp expires_at, see lib/entitlementState.js).
+        const effectiveTier = (isExpired || !ENTITLED_STATUSES.has(data.status)) ? 'free' : data.tier;
 
         return {
             success: true,
@@ -377,16 +381,36 @@ export async function recordUsage(userId, actionType, projectId = null) {
 }
 
 /**
- * Store receipt verification is NOT implemented: no App Store or Play Store check exists, so a receipt string must never
- * grant a tier. Paid access is granted only by the signature-verified Stripe webhook (and, for mobile, by the purchase
- * provider the clients use). This always refuses, without reading or writing anything.
- * @returns {object} { success: false, unavailable: true, error }
+ * "Verify" for mobile purchases. A receipt string from the client is NEVER trusted and never read: the answer comes from
+ * RevenueCat's REST API, asked about `userId` as the RevenueCat app user id (so the app must have called Purchases.logIn with the
+ * Supabase user id first). It re-reads what the store says that account holds and writes the same user_subscriptions row the
+ * RevenueCat webhook writes, so it is a repair/"sync now" path, not the primary one (the webhook is).
+ *
+ * Needs the server secret REVENUECAT_SECRET_API_KEY. While it is unset (today's production) this stays the old 501 "unavailable"
+ * answer and touches nothing: nothing grants a tier from a receipt string, and the webhook path still covers purchases.
+ * TODO(owner): set REVENUECAT_SECRET_API_KEY on Fly to turn this on; without it, RevenueCat TRANSFER events (anonymous -> logged-in
+ * id) cannot be resolved either.
+ * @returns {object} { success, tier?, expiresAt?, productId?, duplicate?, unavailable?, httpStatus?, error? }
  */
 export async function verifyReceipt(platform, receiptData, userId) {
     if (!platform || !receiptData || !userId) {
         return { success: false, error: 'platform, receiptData, and userId are required' };
     }
-    return { success: false, unavailable: true, error: 'Store receipt verification is not available' };
+    if (!revenueCatRestConfigured()) {
+        return { success: false, unavailable: true, error: 'Store receipt verification is not available' };
+    }
+    if (!UUID_RE.test(String(userId))) return { success: false, error: 'userId must be the account id' };
+    try {
+        const r = await syncUserFromRevenueCat(supabase, userId);
+        if (r.outcome === 'applied' && r.entitlement?.active) {
+            return { success: true, tier: r.entitlement.tier, expiresAt: r.entitlement.expiresAtMs ? new Date(r.entitlement.expiresAtMs).toISOString() : null, productId: r.entitlement.productId };
+        }
+        if (r.reason === 'other_active_source') return { success: true, duplicate: true, message: 'Account already has an active subscription' };
+        return { success: false, error: 'No active store subscription found for this account' };
+    } catch {
+        reportFailure('billing:revenuecat_verify', new Error('RevenueCat verify failed'));
+        return { success: false, httpStatus: 502, error: 'Could not reach the purchase provider' };
+    }
 }
 
 export { SUBSCRIPTION_TIERS, ACTION_TYPES };
