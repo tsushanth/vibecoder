@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import type { ProjectSummary, BrowseResponse } from '@/types/api';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { thumbSrc } from '@/lib/thumbProxy';
 
 // List pieces shared by Apps (/dashboard) and Explore (/community, /browse): a small phone-shaped preview, a row per app,
 // and the Explore list with search, categories and sort as on Android.
@@ -47,9 +48,12 @@ const THUMB_VIRTUAL_WIDTH = 390; // the live app is laid out at phone width, the
 export function AppThumb({ project, width = 60, building = false }: { project: ProjectSummary; width?: number; building?: boolean }) {
   const height = Math.round(width * 4 / 3);
   const [loaded, setLoaded] = useState(false);
+  // The stored screenshot can be missing or slow to render; the letter tile underneath is the fallback.
+  const [imgFailed, setImgFailed] = useState(false);
   const scale = width / THUMB_VIRTUAL_WIDTH;
+  const thumb = thumbSrc(project.thumbnail_url);
   const initial = (project.title || '?').trim().charAt(0).toUpperCase() || '?';
-  const live = !building && !project.thumbnail_url && project.published_url;
+  const live = !building && !thumb && project.published_url;
 
   return (
     <div
@@ -60,9 +64,9 @@ export function AppThumb({ project, width = 60, building = false }: { project: P
       <div className="absolute inset-0 flex items-center justify-center bg-accent/10">
         {!building && <span className="font-display font-semibold text-accent-hover" style={{ fontSize: Math.round(width * 0.4) }}>{initial}</span>}
       </div>
-      {!building && project.thumbnail_url && (
+      {!building && thumb && !imgFailed && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={project.thumbnail_url} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+        <img src={thumb} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" onError={() => setImgFailed(true)} />
       )}
       {live && (
         <div
