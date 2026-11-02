@@ -25,6 +25,16 @@
       "title": "Parti da un modello",
       "use": "Usa il modello {title}"
     },
+    "notify": {
+      "ask": "Avvisami quando è pronta",
+      "armed": "Ti avviseremo qui quando sarà pronta. Tieni aperta questa scheda.",
+      "readyTitle": "La tua app è pronta",
+      "readyBody": "Apri VibeBuild per vederla in anteprima e pubblicarla.",
+      "failedTitle": "La creazione si è interrotta",
+      "failedBody": "Apri VibeBuild per vedere cosa è successo e riprovare.",
+      "tabReady": "App pronta",
+      "tabFailed": "Creazione interrotta"
+    },
     "thread": {
       "label": "Conversazione di creazione"
     },

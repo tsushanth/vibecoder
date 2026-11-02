@@ -161,6 +161,9 @@
       "loading": "Loading...",
       "loadMore": "Show more"
     },
-    "fairUseTitle": "Fair-use limit reached"
+    "fairUseTitle": "Fair-use limit reached",
+    "statusBanner": {
+      "default": "Builds are temporarily unavailable. Check back soon."
+    }
   }
 }

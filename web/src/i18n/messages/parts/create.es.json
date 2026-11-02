@@ -25,6 +25,16 @@
       "title": "Empieza desde una plantilla",
       "use": "Usar la plantilla {title}"
     },
+    "notify": {
+      "ask": "Avísame cuando termine",
+      "armed": "Te avisaremos aquí cuando termine. Mantén esta pestaña abierta.",
+      "readyTitle": "Tu app está lista",
+      "readyBody": "Abre VibeBuild para verla y publicarla.",
+      "failedTitle": "Tu compilación se detuvo",
+      "failedBody": "Abre VibeBuild para ver qué pasó y volver a intentarlo.",
+      "tabReady": "App lista",
+      "tabFailed": "Compilación detenida"
+    },
     "thread": {
       "label": "Conversación de creación"
     },

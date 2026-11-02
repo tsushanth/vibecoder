@@ -25,6 +25,16 @@
       "title": "从模板开始",
       "use": "使用模板「{title}」"
     },
+    "notify": {
+      "ask": "完成后通知我",
+      "armed": "完成后我们会在这里通知你。请保持此标签页打开。",
+      "readyTitle": "你的应用已完成",
+      "readyBody": "打开 VibeBuild 即可预览和发布。",
+      "failedTitle": "构建已停止",
+      "failedBody": "打开 VibeBuild 查看发生了什么并重试。",
+      "tabReady": "应用已完成",
+      "tabFailed": "构建已停止"
+    },
     "thread": {
       "label": "构建对话"
     },

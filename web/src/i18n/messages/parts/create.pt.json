@@ -25,6 +25,16 @@
       "title": "Comece com um modelo",
       "use": "Usar o modelo {title}"
     },
+    "notify": {
+      "ask": "Avisar quando terminar",
+      "armed": "Avisaremos você aqui quando terminar. Mantenha esta aba aberta.",
+      "readyTitle": "Seu app está pronto",
+      "readyBody": "Abra o VibeBuild para visualizar e publicar.",
+      "failedTitle": "Sua criação foi interrompida",
+      "failedBody": "Abra o VibeBuild para ver o que aconteceu e tentar de novo.",
+      "tabReady": "App pronto",
+      "tabFailed": "Criação interrompida"
+    },
     "thread": {
       "label": "Conversa de criação"
     },

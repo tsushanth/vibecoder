@@ -25,6 +25,16 @@
       "title": "テンプレートから始める",
       "use": "テンプレート「{title}」を使う"
     },
+    "notify": {
+      "ask": "完了したら通知する",
+      "armed": "完了したらここで通知します。このタブは開いたままにしてください。",
+      "readyTitle": "アプリが完成しました",
+      "readyBody": "VibeBuild を開いてプレビューと公開ができます。",
+      "failedTitle": "ビルドが停止しました",
+      "failedBody": "VibeBuild を開いて状況を確認し、もう一度お試しください。",
+      "tabReady": "アプリ完成",
+      "tabFailed": "ビルド停止"
+    },
     "thread": {
       "label": "作成の会話"
     },

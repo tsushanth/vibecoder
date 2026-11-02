@@ -161,6 +161,9 @@
       "loading": "Cargando...",
       "loadMore": "Mostrar más"
     },
-    "fairUseTitle": "Límite de uso justo alcanzado"
+    "fairUseTitle": "Límite de uso justo alcanzado",
+    "statusBanner": {
+      "default": "Las compilaciones no están disponibles por ahora. Vuelve pronto."
+    }
   }
 }
