@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { api } from '@/lib/api';
 import type { SuggestionsResponse } from '@/types/api';
+import { STARTER_TEMPLATES, templatePrompt, type StarterTemplate } from '@/lib/starterTemplates';
 
 const LOCALE_BCP47: Record<string, string> = {
   en: 'en-US', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', ja: 'ja-JP',
@@ -189,6 +190,11 @@ export function PromptInput({ onSubmit, isGenerating, initialPrompt, initialImag
     textareaRef.current?.focus();
   }
 
+  function pickTemplate(template: StarterTemplate) {
+    setPrompt(templatePrompt(template));
+    textareaRef.current?.focus();
+  }
+
   const iconButton =
     'flex h-10 w-10 items-center justify-center rounded-lg text-muted transition hover:bg-surface hover:text-foreground';
 
@@ -300,7 +306,36 @@ export function PromptInput({ onSubmit, isGenerating, initialPrompt, initialImag
       </form>
 
       {!isGenerating && (
-        <div className="mt-10">
+        <section className="mt-8" aria-labelledby="create-templates-title">
+          <h2 id="create-templates-title" className="text-sm font-medium text-muted">{t('create.templates.title')}</h2>
+          {/* Template names and descriptions are English only; the prompt they fill in is what gets built. */}
+          <ul className="-mx-1 mt-2 flex snap-x gap-2.5 overflow-x-auto px-1 pb-2">
+            {STARTER_TEMPLATES.map((tpl) => (
+              <li key={tpl.slug} className="shrink-0 snap-start">
+                <button
+                  type="button"
+                  onClick={() => pickTemplate(tpl)}
+                  aria-label={t('create.templates.use', { title: tpl.title })}
+                  className="flex h-[116px] w-[220px] flex-col justify-between rounded-xl border border-border bg-surface p-3 text-left transition hover:border-accent/50"
+                >
+                  <span className="flex items-center gap-1.5 text-xs text-muted">
+                    <span>{tpl.difficulty}</span>
+                    <span aria-hidden>·</span>
+                    <span className="truncate">{tpl.category}</span>
+                  </span>
+                  <span>
+                    <span className="block truncate text-sm font-semibold text-foreground">{tpl.title}</span>
+                    <span className="mt-0.5 line-clamp-2 block text-xs text-muted">{tpl.description}</span>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {!isGenerating && (
+        <div className="mt-8">
           <div className="flex items-baseline justify-between gap-4">
             <h2 className="text-sm font-medium text-muted">{t('create.ideas.title')}</h2>
             <button

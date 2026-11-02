@@ -21,6 +21,10 @@
       "more": "Neue Ideen vorschlagen",
       "loading": "Ideen werden gesucht"
     },
+    "templates": {
+      "title": "Mit einer Vorlage starten",
+      "use": "Vorlage {title} verwenden"
+    },
     "thread": {
       "label": "Build-Verlauf"
     },
