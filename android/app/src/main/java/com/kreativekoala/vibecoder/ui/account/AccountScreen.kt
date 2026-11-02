@@ -55,6 +55,7 @@ fun AccountScreen(
         else viewModel.refreshSubscription(expectPaid = MainActivity.isPremiumUser(context))
     }
     var showSignOutDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
 
     val supportedLanguages = listOf(
@@ -115,6 +116,67 @@ fun AccountScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showLanguageDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+            containerColor = DarkSurfaceVariant
+        )
+    }
+
+    // The account is gone and the session has ended: leave through the same exit as signing out.
+    LaunchedEffect(uiState.deleteState) {
+        if (uiState.deleteState is DeleteAccountState.Deleted) {
+            showDeleteDialog = false
+            onSignOut()
+        }
+    }
+
+    if (showDeleteDialog) {
+        val deleteState = uiState.deleteState
+        val deleting = deleteState is DeleteAccountState.Deleting
+        AlertDialog(
+            onDismissRequest = {
+                if (!deleting) {
+                    showDeleteDialog = false
+                    viewModel.dismissDeleteError()
+                }
+            },
+            title = { Text(stringResource(R.string.account_dialog_delete_title)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.account_dialog_delete_message))
+                    if (deleteState is DeleteAccountState.Failed) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = stringResource(
+                                if (deleteState.reason == DeleteFailure.SignInAgain) R.string.account_delete_sign_in_again
+                                else R.string.account_delete_error
+                            ),
+                            color = ErrorRed,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { viewModel.deleteAccount() }, enabled = !deleting) {
+                    if (deleting) {
+                        CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = ErrorRed)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.account_deleting), color = ErrorRed)
+                    } else {
+                        Text(stringResource(R.string.account_delete_account), color = ErrorRed)
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        viewModel.dismissDeleteError()
+                    },
+                    enabled = !deleting
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             },
@@ -353,6 +415,16 @@ fun AccountScreen(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(stringResource(R.string.sign_out), fontWeight = FontWeight.SemiBold)
+        }
+
+        // Account deletion (Google Play requires an in-app path). Kept quiet: it sits under Sign out and always asks first.
+        TextButton(
+            onClick = { showDeleteDialog = true },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(Icons.Default.DeleteForever, contentDescription = null, tint = ErrorRed)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(stringResource(R.string.account_delete_account), color = ErrorRed)
         }
 
         CrossPromoSection(currentApp = AppId.VIBEBUILD)

@@ -134,6 +134,12 @@
     <!-- Account Screen -->
     <string name="account_dialog_sign_out_title">Sign Out</string>
     <string name="account_dialog_sign_out_message">Are you sure you want to sign out?</string>
+    <string name="account_delete_account">Delete account</string>
+    <string name="account_dialog_delete_title">Delete your account?</string>
+    <string name="account_dialog_delete_message">This permanently deletes your account, your apps and all their versions. This cannot be undone.</string>
+    <string name="account_deleting">Deleting…</string>
+    <string name="account_delete_error">Your account was not deleted. Check your connection and try again.</string>
+    <string name="account_delete_sign_in_again">For your security, sign out and sign in again, then delete your account.</string>
     <string name="account_cd_profile_photo">Profile photo</string>
     <string name="account_default_display_name">User</string>
     <string name="account_section_usage">Usage</string>

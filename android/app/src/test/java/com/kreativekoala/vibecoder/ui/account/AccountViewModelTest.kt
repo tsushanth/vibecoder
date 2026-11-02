@@ -22,6 +22,9 @@ import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import okhttp3.ResponseBody.Companion.toResponseBody
+import retrofit2.HttpException
+import retrofit2.Response
 import java.io.IOException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -183,5 +186,65 @@ class AccountViewModelTest {
         assertTrue(com.kreativekoala.vibecoder.util.Monetization.ALL_FREE)
         assertNull(todaysGenerationsText(state("free", SubscriptionLimits(dailyGenerations = 10))))
         assertNull(todaysGenerationsText(state("free", null)))
+    }
+
+    // ---- delete account ----
+
+    private fun httpError(code: Int) = HttpException(Response.error<Any>(code, "{}".toResponseBody()))
+
+    @Test fun deleteAccount_success_deletesOnceAndEndsDone() = runTest {
+        val vm = AccountViewModel(auth, subs, projects)
+        advanceUntilIdle()
+        assertEquals(DeleteAccountState.Idle, vm.uiState.value.deleteState)
+        vm.deleteAccount()
+        assertEquals(DeleteAccountState.Deleting, vm.uiState.value.deleteState)
+        advanceUntilIdle()
+        assertEquals(DeleteAccountState.Deleted, vm.uiState.value.deleteState)
+        coVerify(exactly = 1) { auth.deleteAccount() }
+    }
+
+    @Test fun deleteAccount_whileDeleting_isIgnored() = runTest {
+        val vm = AccountViewModel(auth, subs, projects)
+        advanceUntilIdle()
+        vm.deleteAccount()
+        vm.deleteAccount()
+        advanceUntilIdle()
+        coVerify(exactly = 1) { auth.deleteAccount() }
+    }
+
+    @Test fun deleteAccount_401_asksToSignInAgain() = runTest {
+        coEvery { auth.deleteAccount() } throws httpError(401)
+        val vm = AccountViewModel(auth, subs, projects)
+        advanceUntilIdle()
+        vm.deleteAccount()
+        advanceUntilIdle()
+        assertEquals(DeleteAccountState.Failed(DeleteFailure.SignInAgain), vm.uiState.value.deleteState)
+    }
+
+    @Test fun deleteAccount_serverError_andNetworkFailure_areRetryableErrors() = runTest {
+        coEvery { auth.deleteAccount() } throws httpError(500) andThenThrows IOException() andThen Unit
+        val vm = AccountViewModel(auth, subs, projects)
+        advanceUntilIdle()
+        vm.deleteAccount(); advanceUntilIdle()
+        assertEquals(DeleteAccountState.Failed(DeleteFailure.Other), vm.uiState.value.deleteState)
+        vm.deleteAccount(); advanceUntilIdle()
+        assertEquals(DeleteAccountState.Failed(DeleteFailure.Other), vm.uiState.value.deleteState)
+        vm.deleteAccount(); advanceUntilIdle() // a failed attempt can be tried again
+        assertEquals(DeleteAccountState.Deleted, vm.uiState.value.deleteState)
+        coVerify(exactly = 3) { auth.deleteAccount() }
+    }
+
+    @Test fun dismissDeleteError_returnsToIdle_butNeverClearsADeletingState() = runTest {
+        coEvery { auth.deleteAccount() } throws IOException()
+        val vm = AccountViewModel(auth, subs, projects)
+        advanceUntilIdle()
+        vm.deleteAccount(); advanceUntilIdle()
+        vm.dismissDeleteError()
+        assertEquals(DeleteAccountState.Idle, vm.uiState.value.deleteState)
+        coEvery { auth.deleteAccount() } coAnswers { kotlinx.coroutines.delay(1_000) }
+        vm.deleteAccount()
+        vm.dismissDeleteError()
+        assertEquals(DeleteAccountState.Deleting, vm.uiState.value.deleteState)
+        advanceUntilIdle()
     }
 }

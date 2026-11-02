@@ -9,6 +9,10 @@ interface VibeBuildApi {
     @POST("api/auth/register")
     suspend fun register(@Body body: RegisterRequest): RegisterResponse
 
+    /** Deletes the signed-in user's account and data. The backend checks the bearer token, not the id in the body. */
+    @HTTP(method = "DELETE", path = "api/auth/account", hasBody = true)
+    suspend fun deleteAccount(@Body body: DeleteRequest): SuccessResponse
+
     // Projects
     @GET("api/projects/my")
     suspend fun getMyProjects(
