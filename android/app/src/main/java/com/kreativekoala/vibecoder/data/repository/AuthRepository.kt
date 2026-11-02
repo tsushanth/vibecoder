@@ -5,6 +5,7 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.kreativekoala.vibecoder.data.model.DeleteRequest
 import com.kreativekoala.vibecoder.data.model.RegisterRequest
 import com.kreativekoala.vibecoder.data.model.User
 import com.kreativekoala.vibecoder.data.remote.VibeBuildApi
@@ -17,6 +18,7 @@ import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.providers.builtin.IDToken
 import io.github.jan.supabase.auth.status.SessionStatus
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -171,5 +173,23 @@ class AuthRepository @Inject constructor(
 
     suspend fun signOut() {
         supabase.auth.signOut()
+    }
+
+    /**
+     * Deletes the signed-in user's account and all their data on the server (the same call the web settings page makes), then
+     * ends the local session. A failure of the server call is thrown so the caller can show it and the person can try again.
+     * Once the server has deleted the account, a failure to sign out does not matter: the session is dropped locally instead.
+     */
+    suspend fun deleteAccount() {
+        val uid = currentUser?.uid ?: throw IllegalStateException("Not signed in")
+        api.deleteAccount(DeleteRequest(uid))
+        try {
+            supabase.auth.signOut()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            // The login is already gone on the server, so revoking its token there can fail.
+            supabase.auth.clearSession()
+        }
     }
 }
