@@ -21,6 +21,10 @@
       "more": "Suggest new ideas",
       "loading": "Finding ideas"
     },
+    "templates": {
+      "title": "Start from a template",
+      "use": "Use the {title} template"
+    },
     "thread": {
       "label": "Build conversation"
     },

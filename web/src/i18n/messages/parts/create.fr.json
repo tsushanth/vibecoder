@@ -21,6 +21,10 @@
       "more": "Proposer d'autres idées",
       "loading": "Recherche d'idées"
     },
+    "templates": {
+      "title": "Partir d'un modèle",
+      "use": "Utiliser le modèle {title}"
+    },
     "thread": {
       "label": "Conversation de création"
     },

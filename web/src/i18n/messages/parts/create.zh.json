@@ -21,6 +21,10 @@
       "more": "换一批想法",
       "loading": "正在寻找想法"
     },
+    "templates": {
+      "title": "从模板开始",
+      "use": "使用模板「{title}」"
+    },
     "thread": {
       "label": "构建对话"
     },
