@@ -33,7 +33,7 @@ const faqs = [
   },
   {
     q: 'Can I edit the generated code?',
-    a: 'Yes. While VibeBuild is designed for natural language interaction, you can also view and edit the generated HTML, CSS, and JavaScript directly in the built-in code editor.',
+    a: 'Not directly yet. VibeBuild does not have a code editor. You change your app by describing the change in the chat, for example "make the header blue", and VibeBuild updates the code for you. Every change is saved as a version, so you can go back to an earlier one at any time.',
   },
   {
     q: 'How do I deploy my app?',

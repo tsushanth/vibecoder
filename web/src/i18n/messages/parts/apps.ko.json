@@ -161,6 +161,9 @@
       "loading": "불러오는 중...",
       "loadMore": "더 보기"
     },
-    "fairUseTitle": "공정 사용 한도에 도달했습니다"
+    "fairUseTitle": "공정 사용 한도에 도달했습니다",
+    "statusBanner": {
+      "default": "빌드를 일시적으로 사용할 수 없습니다. 잠시 후 다시 확인해 주세요."
+    }
   }
 }

@@ -25,6 +25,16 @@
       "title": "Mit einer Vorlage starten",
       "use": "Vorlage {title} verwenden"
     },
+    "notify": {
+      "ask": "Benachrichtige mich, wenn es fertig ist",
+      "armed": "Wir benachrichtigen dich hier, sobald es fertig ist. Lass diesen Tab geöffnet.",
+      "readyTitle": "Deine App ist fertig",
+      "readyBody": "Öffne VibeBuild, um sie anzusehen und zu veröffentlichen.",
+      "failedTitle": "Dein Build wurde gestoppt",
+      "failedBody": "Öffne VibeBuild, um zu sehen, was passiert ist, und es erneut zu versuchen.",
+      "tabReady": "App fertig",
+      "tabFailed": "Build gestoppt"
+    },
     "thread": {
       "label": "Build-Verlauf"
     },

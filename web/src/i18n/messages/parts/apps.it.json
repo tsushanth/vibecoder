@@ -161,6 +161,9 @@
       "loading": "Caricamento...",
       "loadMore": "Mostra altre"
     },
-    "fairUseTitle": "Limite di uso equo raggiunto"
+    "fairUseTitle": "Limite di uso equo raggiunto",
+    "statusBanner": {
+      "default": "La creazione di app non è disponibile al momento. Riprova a breve."
+    }
   }
 }

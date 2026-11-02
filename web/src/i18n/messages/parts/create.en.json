@@ -25,6 +25,16 @@
       "title": "Start from a template",
       "use": "Use the {title} template"
     },
+    "notify": {
+      "ask": "Notify me when it's done",
+      "armed": "We will notify you here when it's done. Keep this tab open.",
+      "readyTitle": "Your app is ready",
+      "readyBody": "Open VibeBuild to preview and publish it.",
+      "failedTitle": "Your build stopped",
+      "failedBody": "Open VibeBuild to see what happened and try again.",
+      "tabReady": "App ready",
+      "tabFailed": "Build stopped"
+    },
     "thread": {
       "label": "Build conversation"
     },

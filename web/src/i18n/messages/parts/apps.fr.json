@@ -161,6 +161,9 @@
       "loading": "Chargement...",
       "loadMore": "Afficher plus"
     },
-    "fairUseTitle": "Limite d'usage raisonnable atteinte"
+    "fairUseTitle": "Limite d'usage raisonnable atteinte",
+    "statusBanner": {
+      "default": "La création d'applications est temporairement indisponible. Revenez bientôt."
+    }
   }
 }

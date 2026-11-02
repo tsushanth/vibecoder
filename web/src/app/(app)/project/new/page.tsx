@@ -8,6 +8,7 @@ import { useGenerationStore } from '@/stores/generationStore';
 import { useProjectStore } from '@/stores/projectStore';
 import { PromptInput } from '@/components/builder/PromptInput';
 import { GenerationProgress } from '@/components/builder/GenerationProgress';
+import { NotifyWhenDone } from '@/components/builder/NotifyWhenDone';
 import { PreviewPane } from '@/components/builder/PreviewPane';
 import { PublishDialog } from '@/components/builder/PublishDialog';
 import { VersionsPopover } from '@/components/builder/VersionsPopover';
@@ -553,6 +554,7 @@ export default function NewProjectPage() {
                   finishedAt={buildFinishedAt}
                   log={stage === 'building' ? buildLog.slice(0, -1) : []}
                 />
+                <NotifyWhenDone stage={stage === 'building' ? 'building' : stage === 'ready' ? 'ready' : 'failed'} />
               </AssistantTurn>
             )}
 

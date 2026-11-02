@@ -161,6 +161,9 @@
       "loading": "Carregando...",
       "loadMore": "Mostrar mais"
     },
-    "fairUseTitle": "Limite de uso justo atingido"
+    "fairUseTitle": "Limite de uso justo atingido",
+    "statusBanner": {
+      "default": "A criação de apps está temporariamente indisponível. Volte em breve."
+    }
   }
 }
