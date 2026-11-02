@@ -14,6 +14,7 @@ import { VersionsPopover } from '@/components/builder/VersionsPopover';
 import { streamSSE } from '@/lib/sse';
 import { extractBundle, buildFileTree, createPreviewHtml } from '@/lib/zip';
 import { api, ApiError } from '@/lib/api';
+import { planSaveAfterBuild } from '@/lib/buildSave';
 import type { SaveProjectResponse, VersionsResponse, RevertResponse } from '@/types/api';
 import { ALL_FREE, effectiveTier } from '@/lib/pricing';
 
@@ -204,9 +205,14 @@ export default function NewProjectPage() {
           abortRef.current.signal
         );
 
+        // The backend creates the project row when the build is queued and fills it in when the build finishes.
+        let queuedProjectId: string | null = null;
+
         for await (const event of stream) {
           if (run !== runRef.current) return;
-          if (event.type === 'status') {
+          if (event.type === 'queued') {
+            queuedProjectId = event.projectId || null;
+          } else if (event.type === 'status') {
             updateProgress({
               phase: event.phase,
               message: event.message,
@@ -243,22 +249,29 @@ export default function NewProjectPage() {
             // Desktop has room for the preview beside the thread, so open it; on phones the person opens the sheet.
             if (getDesktop()) setPreviewOpen(true);
 
-            // Save in the background so the app lands in Apps and can be tweaked and published.
-            const title = prompt.length > 60 ? prompt.substring(0, 60).trim() + '...' : prompt;
-            try {
-              const saveData = await api.post<SaveProjectResponse>('/api/projects/save', {
-                title,
-                description: prompt,
-                bundle: event.bundle,
-                creatorId: user.id,
-                creatorName: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous',
-                initialPrompt: prompt,
-                isPublic: true,
-              });
-              if (run === runRef.current) setSavedProjectId(saveData.projectId);
-            } catch (err) {
-              console.error('Save failed:', err);
-              if (run === runRef.current) setSaveError(err instanceof Error ? err.message : t('create.ready.saveFailedGeneric'));
+            // The backend already saved this build to its own project row (reported on the stream), so use that row and do
+            // not POST /save, which always inserts a second one. Only an older backend or a failed placeholder insert
+            // sends no id; then save from here so the app still lands in Apps and can be tweaked and published.
+            const savePlan = planSaveAfterBuild({ resultProjectId: event.projectId, queuedProjectId });
+            if (savePlan.kind === 'server') {
+              setSavedProjectId(savePlan.projectId);
+            } else {
+              const title = prompt.length > 60 ? prompt.substring(0, 60).trim() + '...' : prompt;
+              try {
+                const saveData = await api.post<SaveProjectResponse>('/api/projects/save', {
+                  title,
+                  description: prompt,
+                  bundle: event.bundle,
+                  creatorId: user.id,
+                  creatorName: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous',
+                  initialPrompt: prompt,
+                  isPublic: true,
+                });
+                if (run === runRef.current) setSavedProjectId(saveData.projectId);
+              } catch (err) {
+                console.error('Save failed:', err);
+                if (run === runRef.current) setSaveError(err instanceof Error ? err.message : t('create.ready.saveFailedGeneric'));
+              }
             }
           } else if (event.type === 'error') {
             setError(event.error, event.systemBusy);
