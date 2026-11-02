@@ -1,1 +1,35 @@
-{}
+{
+  "auth": {
+    "forgot": {
+      "link": "忘记密码？",
+      "title": "重置密码",
+      "help": "输入你的邮箱，我们会发送一个链接，供你设置新密码。",
+      "email": "邮箱",
+      "send": "发送重置链接",
+      "sending": "发送中",
+      "sent": "如果该邮箱对应的账号存在，重置链接已在路上。可能需要几分钟，也请查看垃圾邮件文件夹。请在当前浏览器中打开链接。",
+      "googleHint": "通过 Google 注册的？请返回并使用“通过 Google 继续”。",
+      "back": "返回登录",
+      "failed": "我们无法发送邮件，请稍后重试。"
+    },
+    "reset": {
+      "checking": "正在检查你的链接",
+      "invalidTitle": "此链接无法使用",
+      "invalidHelp": "重置链接会过期，并且只能在发起请求的浏览器中使用一次。请返回登录页，选择“忘记密码？”获取新链接。",
+      "backToSignIn": "返回登录",
+      "doneTitle": "密码已更新",
+      "doneHelp": "你已使用新密码登录。",
+      "continue": "继续",
+      "title": "设置新密码",
+      "help": "为你的账号输入新密码。",
+      "newPassword": "新密码",
+      "placeholder": "至少 6 个字符",
+      "confirmPassword": "确认新密码",
+      "save": "保存密码",
+      "saving": "保存中",
+      "tooShort": "请至少使用 6 个字符。",
+      "mismatch": "两次输入的密码不一致。",
+      "failed": "我们无法更新你的密码，请重试。"
+    }
+  }
+}

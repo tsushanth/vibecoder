@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase';
 import { api } from '@/lib/api';
 import { getSignupSource } from '@/lib/signupSource';
+import { ForgotPasswordPanel } from './ForgotPasswordPanel';
 
 interface AuthFormProps {
   mode: 'login' | 'signup';
@@ -15,6 +17,8 @@ const field = 'w-full rounded-lg border border-border bg-surface px-4 py-3 text-
 
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
+  const t = useTranslations('auth.forgot');
+  const [view, setView] = useState<'form' | 'forgot'>('form');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -70,6 +74,8 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   const login = mode === 'login';
 
+  if (login && view === 'forgot') return <ForgotPasswordPanel initialEmail={email} onBack={() => setView('form')} />;
+
   return (
     <div className="mx-auto w-full max-w-sm">
       <h1 className="font-display text-3xl font-bold">{login ? 'Welcome back' : 'Create your account'}</h1>
@@ -105,6 +111,14 @@ export function AuthForm({ mode }: AuthFormProps) {
             </button>
           </div>
         </div>
+
+        {login && (
+          <div className="-mt-1 text-right">
+            <button type="button" onClick={() => setView('forgot')} className="text-sm font-medium text-accent-hover hover:underline">
+              {t('link')}
+            </button>
+          </div>
+        )}
 
         {error && (
           <div role="alert" className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
