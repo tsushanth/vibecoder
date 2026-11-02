@@ -1,1 +1,35 @@
-{}
+{
+  "auth": {
+    "forgot": {
+      "link": "¿Olvidaste tu contraseña?",
+      "title": "Restablece tu contraseña",
+      "help": "Escribe tu correo y te enviaremos un enlace para elegir una contraseña nueva.",
+      "email": "Correo electrónico",
+      "send": "Enviar enlace",
+      "sending": "Enviando",
+      "sent": "Si existe una cuenta con ese correo, el enlace va en camino. Puede tardar unos minutos, así que revisa también la carpeta de spam. Abre el enlace en este mismo navegador.",
+      "googleHint": "¿Te registraste con Google? Vuelve atrás y usa Continuar con Google.",
+      "back": "Volver a iniciar sesión",
+      "failed": "No pudimos enviar el correo. Inténtalo de nuevo en un momento."
+    },
+    "reset": {
+      "checking": "Comprobando tu enlace",
+      "invalidTitle": "Este enlace no funcionó",
+      "invalidHelp": "Los enlaces caducan y solo funcionan una vez, en el navegador desde el que los pediste. Vuelve a iniciar sesión y elige ¿Olvidaste tu contraseña? para obtener uno nuevo.",
+      "backToSignIn": "Volver a iniciar sesión",
+      "doneTitle": "Contraseña actualizada",
+      "doneHelp": "Ya iniciaste sesión con tu nueva contraseña.",
+      "continue": "Continuar",
+      "title": "Elige una contraseña nueva",
+      "help": "Escribe una contraseña nueva para tu cuenta.",
+      "newPassword": "Contraseña nueva",
+      "placeholder": "Al menos 6 caracteres",
+      "confirmPassword": "Confirma la contraseña nueva",
+      "save": "Guardar contraseña",
+      "saving": "Guardando",
+      "tooShort": "Usa al menos 6 caracteres.",
+      "mismatch": "Las dos contraseñas no coinciden.",
+      "failed": "No pudimos actualizar tu contraseña. Inténtalo de nuevo."
+    }
+  }
+}

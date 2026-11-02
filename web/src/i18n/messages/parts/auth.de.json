@@ -1,1 +1,35 @@
-{}
+{
+  "auth": {
+    "forgot": {
+      "link": "Passwort vergessen?",
+      "title": "Passwort zurücksetzen",
+      "help": "Gib deine E-Mail-Adresse ein, und wir senden dir einen Link, um ein neues Passwort zu wählen.",
+      "email": "E-Mail",
+      "send": "Link senden",
+      "sending": "Wird gesendet",
+      "sent": "Wenn es zu dieser E-Mail-Adresse ein Konto gibt, ist ein Link unterwegs. Das kann ein paar Minuten dauern, sieh also auch im Spam-Ordner nach. Öffne den Link in diesem Browser.",
+      "googleHint": "Mit Google registriert? Geh zurück und nutze Weiter mit Google.",
+      "back": "Zurück zur Anmeldung",
+      "failed": "Wir konnten die E-Mail nicht senden. Versuche es gleich noch einmal."
+    },
+    "reset": {
+      "checking": "Link wird geprüft",
+      "invalidTitle": "Dieser Link hat nicht funktioniert",
+      "invalidHelp": "Links laufen ab und funktionieren nur einmal, in dem Browser, der sie angefordert hat. Geh zurück zur Anmeldung und wähle Passwort vergessen?, um einen neuen zu erhalten.",
+      "backToSignIn": "Zurück zur Anmeldung",
+      "doneTitle": "Passwort aktualisiert",
+      "doneHelp": "Du bist mit deinem neuen Passwort angemeldet.",
+      "continue": "Weiter",
+      "title": "Neues Passwort wählen",
+      "help": "Gib ein neues Passwort für dein Konto ein.",
+      "newPassword": "Neues Passwort",
+      "placeholder": "Mindestens 6 Zeichen",
+      "confirmPassword": "Neues Passwort bestätigen",
+      "save": "Passwort speichern",
+      "saving": "Wird gespeichert",
+      "tooShort": "Verwende mindestens 6 Zeichen.",
+      "mismatch": "Die beiden Passwörter stimmen nicht überein.",
+      "failed": "Wir konnten dein Passwort nicht aktualisieren. Versuche es erneut."
+    }
+  }
+}

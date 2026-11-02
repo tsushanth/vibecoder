@@ -1,1 +1,35 @@
-{}
+{
+  "auth": {
+    "forgot": {
+      "link": "Esqueceu a senha?",
+      "title": "Redefina sua senha",
+      "help": "Digite seu e-mail e enviaremos um link para você escolher uma nova senha.",
+      "email": "E-mail",
+      "send": "Enviar link",
+      "sending": "Enviando",
+      "sent": "Se existir uma conta com esse e-mail, o link está a caminho. Pode levar alguns minutos, então confira também a pasta de spam. Abra o link neste mesmo navegador.",
+      "googleHint": "Cadastrou-se com o Google? Volte e use Continuar com o Google.",
+      "back": "Voltar para o login",
+      "failed": "Não foi possível enviar o e-mail. Tente novamente em instantes."
+    },
+    "reset": {
+      "checking": "Verificando seu link",
+      "invalidTitle": "Este link não funcionou",
+      "invalidHelp": "Os links expiram e só funcionam uma vez, no navegador que os solicitou. Volte para o login e escolha Esqueceu a senha? para receber um novo.",
+      "backToSignIn": "Voltar para o login",
+      "doneTitle": "Senha atualizada",
+      "doneHelp": "Você entrou com sua nova senha.",
+      "continue": "Continuar",
+      "title": "Escolha uma nova senha",
+      "help": "Digite uma nova senha para sua conta.",
+      "newPassword": "Nova senha",
+      "placeholder": "Pelo menos 6 caracteres",
+      "confirmPassword": "Confirme a nova senha",
+      "save": "Salvar senha",
+      "saving": "Salvando",
+      "tooShort": "Use pelo menos 6 caracteres.",
+      "mismatch": "As duas senhas não coincidem.",
+      "failed": "Não foi possível atualizar sua senha. Tente novamente."
+    }
+  }
+}

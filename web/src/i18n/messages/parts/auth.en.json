@@ -1,1 +1,35 @@
-{}
+{
+  "auth": {
+    "forgot": {
+      "link": "Forgot password?",
+      "title": "Reset your password",
+      "help": "Enter your email and we will send you a link to choose a new password.",
+      "email": "Email",
+      "send": "Send reset link",
+      "sending": "Sending",
+      "sent": "If an account exists for that email, a reset link is on its way. It can take a few minutes, so check your spam folder too. Open the link in this same browser.",
+      "googleHint": "Signed up with Google? Go back and use Continue with Google instead.",
+      "back": "Back to sign in",
+      "failed": "We could not send the email. Try again in a moment."
+    },
+    "reset": {
+      "checking": "Checking your link",
+      "invalidTitle": "This link did not work",
+      "invalidHelp": "Reset links expire and only work once, in the browser that asked for them. Go back to sign in and choose Forgot password? to get a new one.",
+      "backToSignIn": "Back to sign in",
+      "doneTitle": "Password updated",
+      "doneHelp": "You are signed in with your new password.",
+      "continue": "Continue",
+      "title": "Choose a new password",
+      "help": "Enter a new password for your account.",
+      "newPassword": "New password",
+      "placeholder": "At least 6 characters",
+      "confirmPassword": "Confirm new password",
+      "save": "Save password",
+      "saving": "Saving",
+      "tooShort": "Use at least 6 characters.",
+      "mismatch": "The two passwords do not match.",
+      "failed": "We could not update your password. Try again."
+    }
+  }
+}

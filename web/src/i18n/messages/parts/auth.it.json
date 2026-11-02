@@ -1,1 +1,35 @@
-{}
+{
+  "auth": {
+    "forgot": {
+      "link": "Password dimenticata?",
+      "title": "Reimposta la password",
+      "help": "Inserisci la tua email e ti invieremo un link per scegliere una nuova password.",
+      "email": "Email",
+      "send": "Invia il link",
+      "sending": "Invio in corso",
+      "sent": "Se esiste un account con questa email, il link è in arrivo. Potrebbero volerci alcuni minuti, quindi controlla anche la cartella spam. Apri il link in questo stesso browser.",
+      "googleHint": "Ti sei registrato con Google? Torna indietro e usa Continua con Google.",
+      "back": "Torna all'accesso",
+      "failed": "Non è stato possibile inviare l'email. Riprova tra un momento."
+    },
+    "reset": {
+      "checking": "Controllo del link in corso",
+      "invalidTitle": "Questo link non ha funzionato",
+      "invalidHelp": "I link scadono e funzionano una sola volta, nel browser che li ha richiesti. Torna all'accesso e scegli Password dimenticata? per ottenerne uno nuovo.",
+      "backToSignIn": "Torna all'accesso",
+      "doneTitle": "Password aggiornata",
+      "doneHelp": "Hai effettuato l'accesso con la nuova password.",
+      "continue": "Continua",
+      "title": "Scegli una nuova password",
+      "help": "Inserisci una nuova password per il tuo account.",
+      "newPassword": "Nuova password",
+      "placeholder": "Almeno 6 caratteri",
+      "confirmPassword": "Conferma la nuova password",
+      "save": "Salva la password",
+      "saving": "Salvataggio in corso",
+      "tooShort": "Usa almeno 6 caratteri.",
+      "mismatch": "Le due password non coincidono.",
+      "failed": "Non è stato possibile aggiornare la password. Riprova."
+    }
+  }
+}

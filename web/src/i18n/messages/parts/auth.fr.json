@@ -1,1 +1,35 @@
-{}
+{
+  "auth": {
+    "forgot": {
+      "link": "Mot de passe oublié ?",
+      "title": "Réinitialisez votre mot de passe",
+      "help": "Saisissez votre e-mail et nous vous enverrons un lien pour choisir un nouveau mot de passe.",
+      "email": "E-mail",
+      "send": "Envoyer le lien",
+      "sending": "Envoi en cours",
+      "sent": "Si un compte existe pour cet e-mail, un lien est en route. Cela peut prendre quelques minutes, pensez donc à vérifier vos spams. Ouvrez le lien dans ce même navigateur.",
+      "googleHint": "Inscrit avec Google ? Revenez en arrière et utilisez Continuer avec Google.",
+      "back": "Retour à la connexion",
+      "failed": "Nous n'avons pas pu envoyer l'e-mail. Réessayez dans un instant."
+    },
+    "reset": {
+      "checking": "Vérification de votre lien",
+      "invalidTitle": "Ce lien n'a pas fonctionné",
+      "invalidHelp": "Les liens expirent et ne fonctionnent qu'une fois, dans le navigateur qui les a demandés. Retournez à la connexion et choisissez Mot de passe oublié ? pour en obtenir un nouveau.",
+      "backToSignIn": "Retour à la connexion",
+      "doneTitle": "Mot de passe mis à jour",
+      "doneHelp": "Vous êtes connecté avec votre nouveau mot de passe.",
+      "continue": "Continuer",
+      "title": "Choisissez un nouveau mot de passe",
+      "help": "Saisissez un nouveau mot de passe pour votre compte.",
+      "newPassword": "Nouveau mot de passe",
+      "placeholder": "Au moins 6 caractères",
+      "confirmPassword": "Confirmez le nouveau mot de passe",
+      "save": "Enregistrer le mot de passe",
+      "saving": "Enregistrement",
+      "tooShort": "Utilisez au moins 6 caractères.",
+      "mismatch": "Les deux mots de passe ne correspondent pas.",
+      "failed": "Nous n'avons pas pu mettre à jour votre mot de passe. Réessayez."
+    }
+  }
+}
