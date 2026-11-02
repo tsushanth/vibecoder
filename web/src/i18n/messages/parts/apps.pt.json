@@ -5,6 +5,13 @@
     "create": "Criar um app",
     "loadFailed": "Seus apps não carregaram. Verifique sua conexão e tente de novo.",
     "retry": "Tentar de novo",
+    "retryBuild": "Tentar de novo",
+    "retryBuildLabel": "Tentar criar {title} de novo",
+    "retryError": {
+      "failed": "Não foi possível reiniciar a criação. Tente novamente.",
+      "notFailed": "Este app já está sendo criado ou já terminou. Mostrando o estado atual.",
+      "noPrompt": "Este app não tem uma descrição salva para ser recriado. Descreva-o de novo em Criar."
+    },
     "emptyTitle": "Nenhum app ainda",
     "emptyBody": "Descreva um app em Criar e o VibeBuild o constrói. Ele aparece aqui, pronto para visualizar e publicar.",
     "emptyExplore": "Ver o que outras pessoas criaram",

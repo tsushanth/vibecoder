@@ -5,6 +5,13 @@
     "create": "앱 만들기",
     "loadFailed": "앱을 불러오지 못했습니다. 연결을 확인하고 다시 시도하세요.",
     "retry": "다시 시도",
+    "retryBuild": "다시 시도",
+    "retryBuildLabel": "{title} 빌드 다시 시도",
+    "retryError": {
+      "failed": "빌드를 다시 시작하지 못했습니다. 다시 시도해 주세요.",
+      "notFailed": "이 앱은 이미 빌드 중이거나 완료되었습니다. 현재 상태를 표시합니다.",
+      "noPrompt": "이 앱에는 다시 빌드할 저장된 설명이 없습니다. 만들기에서 다시 설명해 주세요."
+    },
     "emptyTitle": "아직 앱이 없습니다",
     "emptyBody": "만들기에서 앱을 설명하면 VibeBuild가 만들어 줍니다. 여기에 나타나며 미리 보고 게시할 수 있습니다.",
     "emptyExplore": "다른 사람이 만든 앱 보기",

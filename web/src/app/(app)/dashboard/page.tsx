@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { api, ApiError } from '@/lib/api';
 import { ProjectRow, appStatus, type OwnedProject } from '@/components/project/ProjectCard';
 import type { MyProjectsResponse } from '@/types/api';
+import { canRetry, retryErrorKey, withStatus } from '@/lib/retryBuild';
 
 const REFRESH_WHILE_BUILDING_MS = 15_000; // as on Android: look again while any app is still building
 
@@ -21,6 +22,8 @@ export default function DashboardPage() {
   const [pendingDelete, setPendingDelete] = useState<OwnedProject | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [retryErrors, setRetryErrors] = useState<Record<string, string>>({});
+  const retryingRef = useRef<Set<string>>(new Set());
 
   const loadProjects = useCallback(async (quiet = false) => {
     if (!user) return;
@@ -48,6 +51,29 @@ export default function DashboardPage() {
     const id = setInterval(() => void loadProjects(true), REFRESH_WHILE_BUILDING_MS);
     return () => clearInterval(id);
   }, [hasBuilding, loadProjects]);
+
+  /** Restart a failed build. The app flips to "building" at once; the 15 s refresh below picks up the result. */
+  async function retryBuild(p: OwnedProject) {
+    if (!user || !canRetry(p) || retryingRef.current.has(p.id)) return;
+    retryingRef.current.add(p.id);
+    setRetryErrors((prev) => {
+      const rest = { ...prev };
+      delete rest[p.id];
+      return rest;
+    });
+    setProjects((prev) => withStatus(prev, p.id, 'building'));
+    try {
+      await api.post(`/api/projects/${p.id}/retry`, { userId: user.id });
+    } catch (err) {
+      const key = retryErrorKey(err instanceof ApiError ? err.status : undefined, err instanceof Error ? err.message : undefined);
+      // "not failed" means it is already running or done (another tab, or a double tap): show the server's state instead.
+      if (key === 'notFailed') void loadProjects(true);
+      else setProjects((prev) => withStatus(prev, p.id, 'failed'));
+      setRetryErrors((prev) => ({ ...prev, [p.id]: t(`retryError.${key}`) }));
+    } finally {
+      retryingRef.current.delete(p.id);
+    }
+  }
 
   async function confirmDelete() {
     if (!user || !pendingDelete) return;
@@ -108,6 +134,8 @@ export default function DashboardPage() {
               project={p}
               onOpen={() => router.push(`/project/${p.id}`)}
               onDelete={() => { setDeleteError(null); setPendingDelete(p); }}
+              onRetry={() => void retryBuild(p)}
+              retryError={retryErrors[p.id]}
             />
           ))}
         </ul>

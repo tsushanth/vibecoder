@@ -5,6 +5,13 @@
     "create": "创建应用",
     "loadFailed": "你的应用没有加载出来。请检查网络后重试。",
     "retry": "重试",
+    "retryBuild": "重试",
+    "retryBuildLabel": "重试构建 {title}",
+    "retryError": {
+      "failed": "无法重新开始构建，请重试。",
+      "notFailed": "此应用已在构建或已完成，已显示其当前状态。",
+      "noPrompt": "此应用没有保存用于重新构建的描述。请在“创建”中重新描述它。"
+    },
     "emptyTitle": "还没有应用",
     "emptyBody": "在“创建”中描述一个应用，VibeBuild 就会把它做出来。它会出现在这里，可以预览和发布。",
     "emptyExplore": "看看别人做了什么",
