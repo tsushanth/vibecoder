@@ -9,9 +9,17 @@ export interface SSEStatusEvent {
   estimatedSecondsRemaining?: number;
 }
 
+/** Sent right after the backend creates the project row for this build. */
+export interface SSEQueuedEvent {
+  type: 'queued';
+  projectId: string;
+}
+
 export interface SSEResultEvent {
   type: 'result';
   success: boolean;
+  /** The project row the backend already saved this build to. Absent from older backends. */
+  projectId?: string | null;
   generationId?: string;
   bundle: string;
   bundleSize: number;
@@ -45,4 +53,4 @@ export interface SSEProjectFile {
   type: string;
 }
 
-export type SSEEvent = SSEStatusEvent | SSEResultEvent | SSEErrorEvent;
+export type SSEEvent = SSEQueuedEvent | SSEStatusEvent | SSEResultEvent | SSEErrorEvent;
