@@ -5,6 +5,13 @@
     "create": "Create an app",
     "loadFailed": "Your apps did not load. Check your connection and try again.",
     "retry": "Try again",
+    "retryBuild": "Retry build",
+    "retryBuildLabel": "Retry building {title}",
+    "retryError": {
+      "failed": "The build was not restarted. Try again.",
+      "notFailed": "This app is already building or finished. Showing its current state.",
+      "noPrompt": "This app has no saved description to rebuild from. Describe it again on Create."
+    },
     "emptyTitle": "No apps yet",
     "emptyBody": "Describe an app on Create and VibeBuild builds it. It shows up here, ready to preview and publish.",
     "emptyExplore": "See what others built",

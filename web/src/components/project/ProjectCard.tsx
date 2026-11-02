@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { canRetry } from '@/lib/retryBuild';
 import type { ProjectSummary, BrowseResponse } from '@/types/api';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -10,7 +11,7 @@ import { cn } from '@/lib/utils';
 // and the Explore list with search, categories and sort as on Android.
 
 /** A project as /api/projects/my returns it: the summary plus its build status. */
-export type OwnedProject = ProjectSummary & { status?: string | null };
+export type OwnedProject = ProjectSummary & { status?: string | null; initial_prompt?: string | null };
 
 // ---- time
 
@@ -147,7 +148,20 @@ export function StatusLine({ project }: { project: OwnedProject }) {
 
 // ---- owner row (Apps)
 
-export function ProjectRow({ project, onOpen, onDelete }: { project: OwnedProject; onOpen: () => void; onDelete: () => void }) {
+export function ProjectRow({
+  project,
+  onOpen,
+  onDelete,
+  onRetry,
+  retryError,
+}: {
+  project: OwnedProject;
+  onOpen: () => void;
+  onDelete: () => void;
+  /** Offered on a failed app that still has its prompt; restarts the build. */
+  onRetry?: () => void;
+  retryError?: string | null;
+}) {
   const t = useTranslations('apps');
   const ago = useRelativeTime();
   const building = appStatus(project) === 'building';
@@ -163,9 +177,24 @@ export function ProjectRow({ project, onOpen, onDelete }: { project: OwnedProjec
         </h2>
         {project.description && <p className="truncate text-sm text-muted">{project.description}</p>}
         <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5">
-          <div className="relative z-10 min-w-0 max-w-full"><StatusLine project={project} /></div>
+          <div className="relative z-10 flex min-w-0 max-w-full items-center gap-3">
+            <StatusLine project={project} />
+            {onRetry && canRetry(project) && (
+              <button
+                type="button"
+                onClick={onRetry}
+                aria-label={t('retryBuildLabel', { title: project.title })}
+                className="h-8 shrink-0 rounded-lg border border-border px-3 text-sm font-medium text-foreground transition hover:bg-surface"
+              >
+                {t('retryBuild')}
+              </button>
+            )}
+          </div>
           <span className="text-xs text-subtle">{t('updated', { time: ago(project.updated_at || project.created_at) })}</span>
         </div>
+        {retryError && appStatus(project) === 'failed' && (
+          <p role="alert" className="mt-1 text-sm text-danger">{retryError}</p>
+        )}
       </div>
       <button
         onClick={onDelete}
