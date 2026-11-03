@@ -16,7 +16,7 @@ CARACTERISTICAS
 - Guardar y gestionar: Mantiene todas tus apps generadas organizadas en un solo lugar
 - Tarjetas de sugerencias: Inspirate con ideas creativas de apps para probar
 - Progreso en tiempo real: Observa el proceso de creacion con actualizaciones de estado en vivo
-- Suscripcion Pro: Desbloquea generaciones ilimitadas con VibeBuild Pro
+- Todas las funciones incluidas: Gratis mientras crecemos, sin suscripcion
 
 CREADO PARA TODOS
 - Estudiantes aprendiendo a programar
@@ -25,6 +25,6 @@ CREADO PARA TODOS
 - Desarrolladores probando conceptos rapidamente
 - Cualquier persona curiosa por crear apps
 
-VibeBuild Pro desbloquea generaciones ilimitadas de apps. Los usuarios gratuitos tienen un limite diario de generaciones para explorar la plataforma.
+VibeBuild es gratis mientras crecemos y todas las funciones estan incluidas. Un limite diario de uso justo en las creaciones mantiene la plataforma equitativa para todos.
 
 Privacidad: Solo recopilamos los datos minimos necesarios para ejecutar el servicio (correo electronico para autenticacion, tus indicaciones para la generacion). Nunca compartimos tus datos con terceros.

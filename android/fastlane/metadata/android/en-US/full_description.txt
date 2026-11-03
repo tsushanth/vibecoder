@@ -16,7 +16,7 @@ FEATURES
 - Save and Manage: Keep all your generated apps organized in one place
 - Suggestion Cards: Get inspired with creative app ideas to try
 - Real-Time Progress: Watch the build process with live status updates
-- Pro Subscription: Unlock unlimited generations with VibeBuild Pro
+- All Features Included: Free while we grow, no subscription needed
 
 BUILT FOR EVERYONE
 - Students learning to code
@@ -25,6 +25,6 @@ BUILT FOR EVERYONE
 - Developers rapidly testing concepts
 - Anyone curious about building apps
 
-VibeBuild Pro unlocks unlimited app generations. Free users get a daily generation limit to explore the platform.
+VibeBuild is free while we grow, and all features are included. A fair-use daily limit on builds keeps things fair for everyone.
 
 Privacy: We only collect the minimum data needed to run the service (email for auth, your prompts for generation). We never share your data with third parties.
