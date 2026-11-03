@@ -24,7 +24,7 @@ const faqs = [
   {
     q: 'Is VibeBuild free?',
     a: ALL_FREE
-      ? 'Yes. VibeBuild is free for now: every feature, no credit card. That includes private projects, custom domains, and one-click deployment. It stays free while we grow, with a fair-use daily limit on builds so everyone gets a turn.'
+      ? 'Yes. VibeBuild is free while we grow: every feature is included, no credit card. That includes private projects, custom domains, and one-click deployment. A fair-use daily limit on builds gives everyone a turn.'
       : 'Yes. The free plan includes 3 tweaks per project, public project hosting, and one-click deployment. Pro ($9.99 a month) adds unlimited tweaks, private projects, and custom domains.',
   },
   {

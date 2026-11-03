@@ -15,7 +15,6 @@ VibeCoder is a Replit clone for iOS that lets you create, edit, and deploy web a
 - **Chat-Based Refinement** - Conversational tweaking ("Add a delete button", "Make it dark mode")
 - **One-Tap Deploy** - Publish to `https://<your-app>.vibecoder.app`
 - **Community Browse** - Discover, fork, and customize others' apps
-- **Creator Earnings** - 55% revenue share for app creators
 
 ---
 
@@ -144,35 +143,11 @@ open VibeCoder.xcodeproj
 
 ---
 
-## 💰 Monetization
+## 💰 Pricing
 
-### Coin System
+VibeBuild is free while we grow, and all features are included. There is no paywall and no Pro plan today. A fair-use limit on builds per day keeps things fair for everyone, and pricing may change in the future.
 
-**Coin Packs:**
-- 100 coins = $0.99
-- 500 coins = $3.99 (5% bonus)
-- 1,200 coins = $7.99 (20% bonus)
-
-**Costs:**
-- **AI Generation**: 20 coins (3 free per day)
-- **Tweak/Refine**: 10 coins (5 free per project)
-- **Fork/Customize**: 10 coins
-
-### Creator Revenue Share
-
-Creators earn **55% of all coins** spent on their projects:
-- When someone forks your project
-- When someone tweaks your project after free quota
-- Minimum payout: 1,000 coins ($7 USD)
-- Payout via Stripe Connect
-
-### Optional Subscription
-
-**VibeCoder Pro** - $9.99/month:
-- Unlimited AI generations
-- 20 free tweaks per project
-- Priority build queue
-- Remove ads
+The billing code (Stripe, RevenueCat, subscription tiers) is still in the repo but is switched off by a single flag: `VIBEBUILD_ALL_FREE` on the backend, `NEXT_PUBLIC_VIBEBUILD_ALL_FREE` on the web, and `Monetization.ALL_FREE` on Android.
 
 ---
 
