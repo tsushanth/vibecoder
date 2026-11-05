@@ -16,9 +16,11 @@ const rows = {
     'ok-2': P({ id: 'ok-2', title: 'Second', initial_prompt: 'A completely different long prompt' }),
 };
 let projectRow = null; // used by progress/export-apk lookups
+let dbError = null; // when set, every projects query fails with this error (a real database failure, not "no rows")
 let strictSelect = false; // when true a single-row lookup returns only the columns the route asked for
 stubSupabase(supabase, (q) => {
     if (q.table !== 'projects') return { data: [], error: null };
+    if (dbError) return { data: null, error: dbError };
     if (q.single && eqOf(q, 'id') === projectRow?.id && strictSelect) {
         const cols = String(q.filters.find((f) => f[0] === 'select')?.[1] || '*').split(',').map((c) => c.trim());
         return { data: cols.includes('*') ? projectRow : Object.fromEntries(cols.filter((c) => c in projectRow).map((c) => [c, projectRow[c]])), error: null };
@@ -158,6 +160,54 @@ test('progress GET: failed status, userId ownership check, retry uses updated_at
     projectRow = { id: 'pr', creator_id: 'u1', status: 'building', created_at: old, updated_at: new Date().toISOString() };
     const r = await (await getProgress('pr')).json();
     assert.equal(r.phase, 'generate', 'retry timeline restarts from updated_at, not the original created_at');
+});
+
+// ---------------- GET /:id and GET /:id/files: missing project is 404, real DB failure stays 500 ----------------
+test('GET /:id: unknown or deleted project id is 404 {error: "Project not found"}, not 500', async () => {
+    projectRow = null;
+    const r = await quiet(() => realFetch(url('/no-such-project')));
+    assert.equal(r.status, 404); assert.deepEqual(await r.json(), { error: 'Project not found' });
+});
+
+test('GET /:id: an existing project is still returned (200) and its play count update is fired', async () => {
+    projectRow = { id: 'gp', title: 'Got', creator_id: 'owner', bundle: 'QUJD', github_repo: null, play_count: 1 };
+    const r = await quiet(() => realFetch(url('/gp')));
+    assert.equal(r.status, 200);
+    const b = await r.json();
+    assert.equal(b.success, true); assert.equal(b.project.id, 'gp'); assert.equal(b.project.bundle, 'QUJD');
+});
+
+test('GET /:id: a real database error (not "no rows") is still a 500', async () => {
+    projectRow = { id: 'gp', title: 'Got', creator_id: 'owner', bundle: 'QUJD', github_repo: null };
+    dbError = { code: '57P01', message: 'terminating connection due to administrator command' };
+    try {
+        const r = await quiet(() => realFetch(url('/gp')));
+        assert.equal(r.status, 500); assert.deepEqual(await r.json(), { error: 'Failed to fetch project' });
+    } finally { dbError = null; }
+});
+
+test('GET /:id/files: unknown project is 404 "Project not found"; project without bundle keeps its own 404; real DB error is 500', async () => {
+    projectRow = null;
+    let r = await quiet(() => realFetch(url('/no-such-project/files')));
+    assert.equal(r.status, 404); assert.deepEqual(await r.json(), { error: 'Project not found' });
+    projectRow = { id: 'nb', bundle: null };
+    r = await quiet(() => realFetch(url('/nb/files')));
+    assert.equal(r.status, 404); assert.deepEqual(await r.json(), { error: 'Project or bundle not found' });
+    dbError = { code: '57P01', message: 'connection lost' };
+    try {
+        r = await quiet(() => realFetch(url('/nb/files')));
+        assert.equal(r.status, 500);
+    } finally { dbError = null; }
+});
+
+test('sibling lookups keep their existing 404s for a missing project (progress, retry, tweak, versions, patch, fork, delete)', async () => {
+    projectRow = null;
+    const body = { userId: 'u1', tweakDescription: 'make it blue' };
+    for (const [m, p, b] of [['GET', '/gone/versions'], ['POST', '/gone/retry', { userId: 'u1' }], ['POST', '/gone/tweak', body],
+        ['PATCH', '/gone', { userId: 'u1', title: 'x' }], ['POST', '/gone/fork', { userId: 'u1' }], ['DELETE', '/gone', { userId: 'u1' }]]) {
+        const r = await quiet(() => realFetch(url(p), { method: m, headers: { 'Content-Type': 'application/json' }, body: b ? JSON.stringify(b) : undefined }));
+        assert.equal(r.status, 404, `${m} ${p}`); assert.deepEqual(await r.json(), { error: 'Project not found' }, `${m} ${p}`);
+    }
 });
 
 // ---------------- export-apk ----------------
