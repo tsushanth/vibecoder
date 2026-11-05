@@ -1795,6 +1795,8 @@ router.get('/:id', async (req, res) => {
             .eq('id', id)
             .single();
 
+        // PGRST116 = .single() matched no rows (unknown or deleted id): a 404, not a server error. Anything else is a real failure.
+        if (error?.code === 'PGRST116') return res.status(404).json({ error: 'Project not found' });
         if (error) throw error;
         if (!data) return res.status(404).json({ error: 'Project not found' });
 
@@ -1865,6 +1867,7 @@ router.get('/:id/files', async (req, res) => {
             .eq('id', id)
             .single();
 
+        if (error?.code === 'PGRST116') return res.status(404).json({ error: 'Project not found' });
         if (error) throw error;
         if (!data || !data.bundle) return res.status(404).json({ error: 'Project or bundle not found' });
 
