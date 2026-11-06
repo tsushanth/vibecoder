@@ -4,6 +4,8 @@ import assert from 'node:assert/strict';
 import express from 'express';
 import { listen } from '../helpers/http.mjs';
 import { stubSupabase, eqOf } from '../helpers/supabaseStub.mjs';
+import { _setSink } from '../../lib/failureReporter.js';
+import { serverErrorReport } from '../../middleware/serverErrorReport.js';
 const { supabase } = await import('../../config/database.js');
 
 const P = (o) => ({ id: 'x', title: 'Nice App', creator_id: 'u1', creator_name: 'Sam', preview_url: 'p.png',
@@ -87,7 +89,7 @@ test('plan: well-formed plan with stubbed Anthropic; key only in server->Anthrop
     assert.equal(seen.u.href, 'https://api.anthropic.com/v1/messages');
     assert.equal(seen.o.headers['x-api-key'], 'sk-test-key');
     const sent = JSON.parse(seen.o.body);
-    assert.equal(sent.messages[0].content, 'todo app'); assert.ok(sent.max_tokens <= 400);
+    assert.equal(sent.messages[0].content, 'todo app'); assert.equal(sent.max_tokens, 600);
     assert.doesNotMatch(JSON.stringify(body), /sk-test/);
 });
 
@@ -99,6 +101,53 @@ test('plan: unusable model output / upstream failure -> 503 (never 500, no leak)
         assert.equal(r.status, 503);
         assert.doesNotMatch(await r.text(), /sk-test|ECONNRESET/);
     }
+});
+
+test('plan: a bad first reply is retried once and the good second reply is returned', async () => {
+    process.env.ANTHROPIC_API_KEY = 'sk-test-key';
+    const replies = [claude('{"summary":"s","features":[]}'), claude(GOOD_PLAN)]; let n = 0;
+    external = () => replies[n++]();
+    const r = await quiet(() => post('/plan', { prompt: 'todo', userId: user() }));
+    assert.equal(r.status, 200); assert.equal(n, 2);
+    assert.equal((await r.json()).plan.summary, 'A todo app');
+});
+
+test('plan: two bad replies -> exactly 2 calls, one 503; no retry for upstream errors', async () => {
+    process.env.ANTHROPIC_API_KEY = 'sk-test-key';
+    let n = 0; external = () => { n++; return claude('no json')(); };
+    assert.equal((await quiet(() => post('/plan', { prompt: 'todo', userId: user() }))).status, 503); assert.equal(n, 2);
+    n = 0; external = () => { n++; return claude('{}', 529)(); };
+    assert.equal((await quiet(() => post('/plan', { prompt: 'todo', userId: user() }))).status, 503); assert.equal(n, 1);
+});
+
+test('plan: failed reply is logged server-side (stop_reason + 200 chars, secrets/emails stripped), never in the external report', async () => {
+    process.env.ANTHROPIC_API_KEY = 'sk-test-key';
+    const reports = []; _setSink((x) => reports.push(x));
+    const logs = []; const orig = console.error; console.error = (...a) => logs.push(a.join(' '));
+    const bad = 'Sure! mail me at bob@example.com key sk-ant-api03-' + 'a'.repeat(60) + ' ' + 'x'.repeat(400);
+    external = () => new Response(JSON.stringify({ content: [{ type: 'text', text: bad }], stop_reason: 'max_tokens' }), { status: 200 });
+    try { assert.equal((await post('/plan', { prompt: 'todo', userId: user() })).status, 503); } finally { console.error = orig; _setSink(null); }
+    const diag = logs.find((l) => l.includes('unusable model reply'));
+    assert.ok(diag.includes('stop_reason=max_tokens'));
+    assert.doesNotMatch(diag, /bob@example\.com|sk-ant|a{32}/);
+    assert.ok(diag.length < 330);
+    assert.equal(reports.length, 1); assert.equal(reports[0].flow, 'plan:llm');
+    assert.doesNotMatch(JSON.stringify(reports), /Sure|bob@|stop_reason|max_tokens/);
+});
+
+test('plan: one failure = one report (serverErrorReport skips a response plan:llm already reported)', async () => {
+    process.env.ANTHROPIC_API_KEY = 'sk-test-key';
+    const reports = []; _setSink((x) => reports.push(x));
+    const mw = []; const app = express(); app.use(express.json());
+    app.use(serverErrorReport({ report: (...a) => mw.push(a) })); app.use('/api/projects', router);
+    const s2 = await listen(app);
+    external = claude('no json');
+    try {
+        const r = await quiet(() => realFetch(`${s2.base}/api/projects/plan`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: 'todo', userId: user() }) }));
+        assert.equal(r.status, 503); await r.text(); await new Promise((r2) => setTimeout(r2, 50));
+    } finally { _setSink(null); await s2.close(); }
+    assert.equal(reports.filter((x) => x.flow === 'plan:llm').length, 1);
+    assert.deepEqual(mw, []);
 });
 
 test('plan: 20/hour rate limit per user, other users unaffected', async () => {
@@ -323,7 +372,7 @@ test('llm accounting: a model reply that fails validation still records the toke
     assert.equal(r.status, 503);
     await inst.flush();
     const row = rowsOf(sent)[0];
-    assert.equal(row.calls, 1); assert.equal(row.errors, 0); assert.equal(row.input_tokens, 1000);
+    assert.equal(row.calls, 2); assert.equal(row.errors, 0); assert.equal(row.input_tokens, 2000); // the one bounded retry is a second accounted attempt
 });
 
 test('llm accounting: nothing is sent without LLM_USAGE_KEY, even when FAILURE_REPORTER_KEY is set', async () => {
