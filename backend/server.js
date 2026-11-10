@@ -20,6 +20,7 @@ import { createSecretsRouter } from './routes/secrets.routes.js';
 import { createUsageRouter } from './routes/usage.routes.js';
 import { createSchemaPlanRouter } from './routes/schemaPlan.routes.js';
 import { createBillingPortalRouter } from './routes/billingPortal.routes.js';
+import { createThumbnailRouter } from './routes/thumbnail.routes.js';
 import Stripe from 'stripe';
 import { createProxyAdmin } from './services/proxyAdmin.js';
 import { supabase } from './config/database.js';
@@ -47,6 +48,8 @@ const proxyAdmin = createProxyAdmin({ baseUrl: process.env.PROXY_ADMIN_URL, toke
 app.use('/api/projects/:id/secrets', cors({ origin: WEB_ORIGINS }), createSecretsRouter({ proxyAdmin }));
 app.use('/api/projects/:id/usage', cors({ origin: WEB_ORIGINS }), createUsageRouter({ proxyAdmin }));
 app.use('/api/projects/:id/schema', cors({ origin: WEB_ORIGINS }), createSchemaPlanRouter({ proxyAdmin }));
+// App thumbnails over https (the stored URL is the plain-http screenshot service). Public images: no auth, no CORS needed for <img>.
+app.use('/api/projects/:id/thumbnail', createThumbnailRouter());
 // Stripe customer portal (cancel, card, invoices) for the caller's own web subscription. Token-authenticated, its own CORS, no body.
 const portalStripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 app.use('/api/subscriptions/portal', cors({ origin: WEB_ORIGINS }), createBillingPortalRouter({ stripe: portalStripe, configurationId: process.env.STRIPE_PORTAL_CONFIGURATION_ID, returnUrl: `${process.env.WEB_APP_URL || 'https://vibebuild.cc'}/settings` }));

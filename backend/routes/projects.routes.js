@@ -21,6 +21,7 @@ import { checkUsageLimit, recordUsage, ACTION_TYPES } from '../services/subscrip
 import { allFreeEnabled, whenAllFree } from '../lib/allFree.js';
 import { fairUseBody, reportIfDailyBuildsHigh } from '../services/fairUse.js';
 import { sendPushToUser, sendAPNsPush } from '../services/pushService.js';
+import { withHttpsThumbnail } from '../lib/thumbnailService.js';
 import { filterBrowseProjects } from '../services/browseFilter.js';
 import { reportFailure } from '../lib/failureReporter.js';
 import { markProjectFailed, FAIL_CLASS, _deps as failureDeps } from '../lib/buildFailure.js';
@@ -243,6 +244,12 @@ function normalizePlan(raw) {
 // Server-log-only view of a bad model reply: secrets/emails/long tokens stripped, 200 chars. Never send this to the reporter.
 function planLogSnippet(text) {
     return JSON.stringify(redactForLog(String(text)).replace(/[^\s@]+@[^\s@]+\.[^\s@]+/g, '[email]').replace(/[A-Za-z0-9_\-]{32,}/g, '[token]').slice(0, 200));
+}
+
+// The https origin this request reached us on (behind Fly's proxy, trust proxy is on), for absolute links in responses.
+function apiOrigin(req) {
+    const host = req.get('host');
+    return /^[a-z0-9.-]+(:\d{1,5})?$/i.test(host || '') ? `${req.protocol}://${host}` : 'https://vibecoder-api.fly.dev';
 }
 
 // ============================================
@@ -1053,7 +1060,9 @@ router.get('/browse', (req, res) => {
             );
         }
 
-        const page = source.slice(parsedOffset, parsedOffset + parsedLimit);
+        // Stored thumbnails are plain-http screenshot URLs; hand clients this API's https thumbnail route instead (rows are not changed).
+        const origin = apiOrigin(req);
+        const page = source.slice(parsedOffset, parsedOffset + parsedLimit).map((p) => withHttpsThumbnail(p, origin));
         const totalCount = source.length;
 
         res.json({
@@ -1674,9 +1683,10 @@ router.get('/my', async (req, res) => {
 
         if (error) throw error;
 
+        const origin = apiOrigin(req);
         res.json({
             success: true,
-            projects: data || [],
+            projects: (data || []).map((p) => withHttpsThumbnail(p, origin)),
             totalCount: count || 0,
             hasMore: (parsedOffset + parsedLimit) < (count || 0)
         });
