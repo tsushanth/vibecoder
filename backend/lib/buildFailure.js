@@ -24,7 +24,11 @@ export const FAIL_CLASS = Object.freeze({
 });
 
 /** Swappable in tests. */
-export const _deps = { report: reportFailure };
+export const _deps = {
+    report: reportFailure,
+    // Set by the routes: (supabase, ids, klass, info) -> records a build_failed usage event. Must not throw; ignored when unset.
+    onFailed: null,
+};
 
 const CONTEXT_KEYS = ['phase', 'httpStatus', 'attempt', 'planTier', 'path', 'errorName', 'count'];
 const SAFE_VALUE = /^[A-Za-z0-9_.:\- ]{1,40}$/;
@@ -94,6 +98,7 @@ export async function markProjectFailed(supabase, ids, cls, info = {}) {
     const q = supabase.from('projects').update({ status: 'failed' });
     const { error } = await (Array.isArray(ids) ? q.in('id', ids) : q.eq('id', ids));
     if (error) return; // nothing was written; do not claim a reason for a project that is not marked failed
+    try { _deps.onFailed?.(supabase, ids, klass, info); } catch { /* a usage event must never break a status write */ }
 
     const detail = sanitizeReason(info.message);
     const reason = (detail ? `${klass}: ${detail}` : klass).slice(0, MAX_REASON);

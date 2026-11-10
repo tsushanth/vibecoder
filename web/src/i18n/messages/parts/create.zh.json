@@ -112,6 +112,18 @@
     },
     "versions": {
       "untitled": "版本"
+    },
+    "survey": {
+      "question": "你今天想做什么？",
+      "hint": "可选。点一下即可，无需输入。",
+      "game_or_fun": "一个游戏或好玩的东西",
+      "personal_tool": "给自己用的工具或记录器",
+      "work_or_business": "用于工作或生意的东西",
+      "learning": "用来学习或练习的东西",
+      "just_trying": "没有特别的，只是试试看",
+      "something_else": "其他",
+      "skip": "跳过",
+      "thanks": "谢谢，这能帮助我们决定改进什么。"
     }
   }
 }

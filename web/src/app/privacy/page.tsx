@@ -34,6 +34,8 @@ export default function PrivacyPage() {
             <h3 className="text-base font-semibold text-foreground mt-4 mb-2">Usage Data</h3>
             <p>We collect information about how you use the Service, including app generation prompts, project metadata, and feature usage patterns. This helps us improve the AI pipeline and user experience.</p>
 
+            <p className="mt-2">We keep first-party usage events (for example sign-ups, when a build starts and whether it succeeded, publishes, error and limit codes, and your answer if you choose to answer a one-question survey) to run and improve the service. These events do not include the text of your prompts.</p>
+
             <h3 className="text-base font-semibold text-foreground mt-4 mb-2">Device Information</h3>
             <p>We collect standard technical information such as browser type, operating system, device type, and IP address for analytics and security purposes.</p>
 

@@ -9,6 +9,7 @@ import { useProjectStore } from '@/stores/projectStore';
 import { PromptInput } from '@/components/builder/PromptInput';
 import { GenerationProgress } from '@/components/builder/GenerationProgress';
 import { NotifyWhenDone } from '@/components/builder/NotifyWhenDone';
+import { FirstBuildSurvey } from '@/components/builder/FirstBuildSurvey';
 import { PreviewPane } from '@/components/builder/PreviewPane';
 import { PublishDialog } from '@/components/builder/PublishDialog';
 import { VersionsPopover } from '@/components/builder/VersionsPopover';
@@ -693,6 +694,8 @@ export default function NewProjectPage() {
                     </div>
                   </div>
                 </div>
+
+                <FirstBuildSurvey projectId={savedProjectId} />
 
                 {tweaks.map((turn, i) => (
                   <div key={turn.id} className="space-y-6">

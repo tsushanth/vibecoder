@@ -112,6 +112,18 @@
     },
     "versions": {
       "untitled": "Version"
+    },
+    "survey": {
+      "question": "Was wolltest du heute bauen?",
+      "hint": "Optional. Ein Tipp, kein Tippen nötig.",
+      "game_or_fun": "Ein Spiel oder etwas Lustiges",
+      "personal_tool": "Ein Tool oder Tracker für mich selbst",
+      "work_or_business": "Etwas für meine Arbeit oder mein Geschäft",
+      "learning": "Etwas zum Lernen oder Üben",
+      "just_trying": "Nichts Bestimmtes, ich probiere es nur aus",
+      "something_else": "Etwas anderes",
+      "skip": "Überspringen",
+      "thanks": "Danke, das hilft uns zu entscheiden, was wir verbessern."
     }
   }
 }

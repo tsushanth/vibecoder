@@ -23,7 +23,9 @@ import { fairUseBody, reportIfDailyBuildsHigh } from '../services/fairUse.js';
 import { sendPushToUser, sendAPNsPush } from '../services/pushService.js';
 import { filterBrowseProjects } from '../services/browseFilter.js';
 import { reportFailure } from '../lib/failureReporter.js';
-import { markProjectFailed, FAIL_CLASS } from '../lib/buildFailure.js';
+import { markProjectFailed, FAIL_CLASS, _deps as failureDeps } from '../lib/buildFailure.js';
+import { appEvents, buildEvents, sourceFromRequest } from '../lib/appEventsInstance.js';
+import { promptLengthBucket } from '../lib/appEvents.js';
 import { buildFailureRate } from '../lib/buildFailureRateInstance.js';
 import { recordLlm } from '../lib/llmUsageInstance.js';
 import { registerDeployedApp } from '../services/appRegistry.js';
@@ -38,6 +40,9 @@ import { logFirstBuildStarted } from '../lib/funnel.js';
 import { recordSignupSource } from '../lib/signupSource.js';
 
 const router = express.Router();
+
+// Every build that is marked failed (from any path, including the cleanup sweep) is also recorded as a build_failed usage event.
+failureDeps.onFailed = (_sb, ids, klass, info) => { void buildEvents.buildFailed(ids, { code: klass, status: Number(info?.httpStatus) || undefined }); };
 
 // ============================================
 // Worker dispatch with retry/backoff
@@ -590,6 +595,7 @@ router.post('/generate', async (req, res) => {
         }
 
         if (!checkRateLimit(userId)) {
+            appEvents.emit('rate_limited', { userId, props: { cap: 'hourly_generation', status: 429, source: sourceFromRequest(req) } });
             return res.status(429).json({ error: 'Rate limit exceeded. Try again in an hour.' });
         }
 
@@ -599,6 +605,7 @@ router.post('/generate', async (req, res) => {
             const fair = await checkUsageLimit(userId, ACTION_TYPES.generation);
             if (!fair.allowed && fair.fairUse) {
                 console.log(`[generate] Fair-use daily limit reached: used=${fair.used} limit=${fair.limit}`);
+                appEvents.emit('rate_limited', { userId, props: { cap: 'daily_generations', status: 429, source: sourceFromRequest(req) } });
                 return res.status(429).json(fairUseBody(fair));
             }
         }
@@ -651,6 +658,9 @@ router.post('/generate', async (req, res) => {
         } catch (e) {
             console.error(`[generate] Placeholder creation failed: ${e.message}`);
         }
+
+        // Usage event: the build was accepted (rate limits passed). Only the length bucket of the prompt is kept, never the text.
+        buildEvents.buildStarted({ projectId: placeholderProjectId, userId, source: sourceFromRequest(req), prompt, kind: 'new' });
 
         // The async path (new apps) hands the result back through the project row, so without one the build would finish
         // and be lost. Say so instead of silently building. Streaming clients (old apps) get the result on the stream.
@@ -708,6 +718,7 @@ router.post('/generate', async (req, res) => {
                     const err = await workerResponse.json();
                     errorMsg = err.error || errorMsg;
                     if (err.quotaExhausted) {
+                        appEvents.emit('rate_limited', { userId, props: { cap: 'worker_quota', status: 429, source: sourceFromRequest(req) } });
                         res.write(`data: ${JSON.stringify({ type: 'error', error: errorMsg, quotaExhausted: true, resetTime: err.resetTime })}\n\n`);
                         res.end();
                         if (placeholderProjectId) markProjectFailed(supabase, placeholderProjectId, FAIL_CLASS.DISPATCH_ERROR, { phase: 'quota_exhausted', httpStatus: workerResponse.status, path: clientWantsStream ? 'generate_stream' : 'generate_async' }).catch(() => {});
@@ -715,6 +726,7 @@ router.post('/generate', async (req, res) => {
                     }
                     if (workerResponse.status === 429) {
                         systemBusy = true;
+                        appEvents.emit('rate_limited', { userId, props: { cap: 'worker_busy', status: 429, source: sourceFromRequest(req) } });
                         errorMsg = whenAllFree('Our builders are at full capacity right now. Please try again in a few minutes.', 'Our builders are at full capacity right now. Pro users get priority access — upgrade to skip the queue.');
                     }
                 }
@@ -747,6 +759,7 @@ router.post('/generate', async (req, res) => {
             trace,
             onResult: async (parsed, res) => {
                 recordGeneration(userId);
+                buildEvents.buildReady(placeholderProjectId, { userId, source: sourceFromRequest(req) });
 
                 const generationId = `gen-${Date.now()}-${crypto.randomUUID().split('-')[0]}`;
                 const savedProjectId = placeholderProjectId;
@@ -912,6 +925,7 @@ router.post('/save', async (req, res) => {
             const limitCheck = await checkUsageLimit(creatorId, ACTION_TYPES.createPrivate);
             if (!limitCheck.allowed) {
                 console.log(`[save] Private project not allowed: ${limitCheck.error}`);
+                appEvents.emit('paywall_or_cap_shown', { userId: creatorId, props: { cap: 'private_tier', status: 403, source: sourceFromRequest(req) } });
                 return res.status(403).json({
                     error: limitCheck.error,
                     requiresTier: limitCheck.requiresTier,
@@ -1081,6 +1095,7 @@ router.post('/:id/retry', async (req, res) => {
         // Reset to building
         await supabase.from('projects').update({ status: 'building' }).eq('id', id);
         progressStart(id);
+        buildEvents.buildStarted({ projectId: id, userId, source: sourceFromRequest(req), prompt: project.initial_prompt, kind: 'retry' });
 
         // Fire-and-forget dispatch to worker — worker result updates this same project
         res.json({ success: true, projectId: id });
@@ -1158,6 +1173,7 @@ router.post('/:id/build-complete', async (req, res) => {
         if (bundle && status === 'ready') {
             await supabase.from('projects').update({ bundle, status: 'ready' }).eq('id', id);
             console.log(`[build-complete] Project ${id} ready`);
+            buildEvents.buildReady(id, { userId: typeof userId === 'string' ? userId : undefined });
 
             // Auto-deploy preview + capture thumbnail
             try {
@@ -1485,9 +1501,11 @@ router.post('/plan', async (req, res) => {
         }
         const limitKey = (typeof userId === 'string' && userId) ? `u:${userId}` : `ip:${req.ip}`;
         if (!checkPlanRateLimit(limitKey)) {
+            appEvents.emit('rate_limited', { userId, props: { cap: 'plan_hourly', status: 429, source: sourceFromRequest(req) } });
             return res.status(429).json({ error: 'Too many plan requests. Try again later.' });
         }
 
+        buildEvents.planRequested(userId); // so the next build knows the plan step was not skipped
         const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
         if (!ANTHROPIC_API_KEY) {
             reportFailure('plan:config', new Error('ANTHROPIC_API_KEY is not set'));
@@ -1936,6 +1954,8 @@ router.get('/:id/files', async (req, res) => {
 // Checks subscription limits, proxies to worker with SSE.
 // ============================================
 router.post('/:id/tweak', async (req, res) => {
+    let tweakOutcome = null;     // 'tweak_ready' | 'tweak_failed' once recorded, so the usage event is written once
+    let tweakDoneRef = null;     // set once the tweak has started; the catch below uses it
     try {
         const { id } = req.params;
         let { userId, tweakDescription } = req.body;
@@ -1972,10 +1992,12 @@ router.post('/:id/tweak', async (req, res) => {
         const limitCheck = await checkUsageLimit(userId, ACTION_TYPES.tweak, id);
         if (!limitCheck.allowed && limitCheck.fairUse) {
             console.log(`[tweak] Fair-use limit reached: used=${limitCheck.used} limit=${limitCheck.limit}`);
+            appEvents.emit('rate_limited', { userId, props: { cap: 'tweaks_per_project', status: 429, source: sourceFromRequest(req) } });
             return res.status(429).json(fairUseBody(limitCheck));
         }
         if (!limitCheck.allowed) {
             console.log(`[tweak] Usage limit exceeded: ${limitCheck.error}`);
+            appEvents.emit('paywall_or_cap_shown', { userId, props: { cap: 'tweak_tier', status: 403, source: sourceFromRequest(req) } });
             return res.status(403).json({
                 error: limitCheck.error,
                 used: limitCheck.used,
@@ -2038,6 +2060,16 @@ router.post('/:id/tweak', async (req, res) => {
         // 4. Record usage for subscription tracking
         await recordUsage(userId, ACTION_TYPES.tweak, id);
         console.log(`[tweak] Usage recorded for user ${userId} on project ${id}`);
+        const tweakSource = sourceFromRequest(req);
+        const tweakStartedAt = Date.now();
+        tweakOutcome = null;
+        appEvents.emit('tweak_started', { userId, props: { source: tweakSource, prompt_length_bucket: promptLengthBucket(tweakDescription.length) } });
+        const tweakDone = (event, code, status) => {
+            if (tweakOutcome) return;
+            tweakOutcome = event;
+            appEvents.emit(event, { userId, props: { duration_ms: Date.now() - tweakStartedAt, source: tweakSource, error_code: code, status } });
+        };
+        tweakDoneRef = tweakDone;
 
         // 5. Set up SSE streaming to client
         setupSSE(res);
@@ -2066,15 +2098,19 @@ router.post('/:id/tweak', async (req, res) => {
                 errorMsg = err.error || errorMsg;
             } catch {}
 
+            tweakDone('tweak_failed', 'WORKER_HTTP', workerResponse.status);
             res.write(`data: ${JSON.stringify({ type: 'error', error: errorMsg })}\n\n`);
             res.end();
             return;
         }
 
         // Stream SSE from worker to client
+        const tweakTrace = {};
         const resultReceived = await proxyWorkerSSE(workerResponse, res, {
             label: 'tweak',
+            trace: tweakTrace,
             onResult: async (parsed, res) => {
+                tweakDone('tweak_ready');
                 // Update the project's bundle in DB
                 const updateData = {
                     bundle: parsed.bundle,
@@ -2145,10 +2181,12 @@ router.post('/:id/tweak', async (req, res) => {
             }
         });
 
+        if (!resultReceived) tweakDone('tweak_failed', tweakTrace.workerError ? 'WORKER_ERROR' : 'NO_RESULT');
         res.end();
 
     } catch (error) {
         console.error('[tweak] Error:', error.message);
+        tweakDoneRef?.('tweak_failed', error?.name === 'TimeoutError' ? 'TIMEOUT' : 'UNKNOWN');
 
         if (res.headersSent) {
             res.write(`data: ${JSON.stringify({ type: 'error', error: 'Server error during tweak' })}\n\n`);
@@ -2422,6 +2460,7 @@ router.post('/:id/fork', async (req, res) => {
         const limitCheck = await checkUsageLimit(userId, ACTION_TYPES.fork);
         if (!limitCheck.allowed) {
             console.log(`[fork] Usage limit exceeded: ${limitCheck.error}`);
+            appEvents.emit('paywall_or_cap_shown', { userId, props: { cap: 'fork_tier', status: 403, source: sourceFromRequest(req) } });
             return res.status(403).json({
                 error: limitCheck.error,
                 requiresTier: limitCheck.requiresTier,
@@ -2547,6 +2586,7 @@ router.delete('/:id', async (req, res) => {
         refreshBrowseCache();
 
         console.log(`[delete] Project ${id} deleted by user ${userId}`);
+        appEvents.emit('project_deleted', { userId, props: { source: sourceFromRequest(req) } });
 
         res.json({ success: true });
 

@@ -112,6 +112,18 @@
     },
     "versions": {
       "untitled": "Version"
+    },
+    "survey": {
+      "question": "What were you hoping to make today?",
+      "hint": "Optional. One tap, no typing.",
+      "game_or_fun": "A game or something fun",
+      "personal_tool": "A tool or tracker for myself",
+      "work_or_business": "Something for my work or business",
+      "learning": "Something to learn or practice",
+      "just_trying": "Nothing specific, just trying it out",
+      "something_else": "Something else",
+      "skip": "Skip",
+      "thanks": "Thanks, that helps us decide what to improve."
     }
   }
 }

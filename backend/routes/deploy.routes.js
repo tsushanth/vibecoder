@@ -13,6 +13,7 @@ import { getSubscriptionStatus } from '../services/subscriptionService.js';
 import { verifiedUserId } from '../lib/verifiedUser.js';
 import { denyUnlessActor } from '../lib/actAs.js';
 import { removeSites, projectSiteSubdomains } from '../lib/siteRemoval.js';
+import { appEvents, sourceFromRequest } from '../lib/appEventsInstance.js';
 
 const DEPLOY_SERVER_URL = process.env.DEPLOY_SERVER_URL || 'http://localhost:4000';
 const INTERNAL_SECRET = requireSecret('INTERNAL_SECRET');
@@ -171,6 +172,7 @@ router.post('/:projectId/deploy', async (req, res) => {
         // The plan sets the size of the app's usage caps (Free defaults, Pro and Team larger). Never fails the deploy.
         try { await applyTierLimits(req.app.locals.proxyAdmin, subdomain, (await getSubscriptionStatus(userId)).tier); } catch { /* the periodic sweep corrects it */ }
 
+        appEvents.emit('publish', { userId, props: { source: sourceFromRequest(req) } });
         res.json({ success: true, url, ...(result.schemaStatus ? { schemaStatus: result.schemaStatus } : {}), ...(result.jobsStatus ? { jobsStatus: result.jobsStatus } : {}), ...(result.schemaStatus === 'needs_confirmation' ? { destructive: result.destructive || [] } : {}) });
     } catch (error) {
         console.error('Deploy error:', error);
@@ -200,6 +202,7 @@ router.delete('/:projectId/deploy', async (req, res) => {
 
         // Take the site itself down. A deploy-server failure must not undo the unpublish; the caller is told so it can retry.
         const { failed } = await removeSites(projectSiteSubdomains({ deployments: deployed }));
+        appEvents.emit('unpublish', { userId, props: { source: sourceFromRequest(req) } });
         res.json({ success: true, ...(failed.length ? { siteRemoval: 'failed' } : {}) });
     } catch (error) {
         console.error('Undeploy error:', error);

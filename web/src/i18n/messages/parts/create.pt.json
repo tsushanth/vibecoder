@@ -112,6 +112,18 @@
     },
     "versions": {
       "untitled": "Versão"
+    },
+    "survey": {
+      "question": "O que você esperava criar hoje?",
+      "hint": "Opcional. Um toque, sem digitar.",
+      "game_or_fun": "Um jogo ou algo divertido",
+      "personal_tool": "Uma ferramenta ou um acompanhamento para mim",
+      "work_or_business": "Algo para o meu trabalho ou negócio",
+      "learning": "Algo para aprender ou praticar",
+      "just_trying": "Nada específico, só estou testando",
+      "something_else": "Outra coisa",
+      "skip": "Pular",
+      "thanks": "Obrigado, isso nos ajuda a decidir o que melhorar."
     }
   }
 }
