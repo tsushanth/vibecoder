@@ -29,6 +29,7 @@ import { recordLlm } from '../lib/llmUsageInstance.js';
 import { registerDeployedApp } from '../services/appRegistry.js';
 import { captureChatSecrets, redactForLog } from '../services/chatSecrets.js';
 import { denyUnlessActor } from '../lib/actAs.js';
+import { removeSites, projectSiteSubdomains } from '../lib/siteRemoval.js';
 import { looksLikePastedCode } from '../lib/promptGuard.js';
 import { deriveTitle } from '../lib/projectTitle.js';
 import { publicCreatorName, withPublicCreator } from '../lib/creatorHandle.js';
@@ -2489,7 +2490,7 @@ router.delete('/:id', async (req, res) => {
         // Verify ownership
         const { data: project, error: projectError } = await supabase
             .from('projects')
-            .select('id, creator_id, github_repo')
+            .select('id, creator_id, github_repo, preview_url')
             .eq('id', id)
             .single();
 
@@ -2500,6 +2501,10 @@ router.delete('/:id', async (req, res) => {
         if (project.creator_id !== userId) {
             return res.status(403).json({ error: 'Only the project creator can delete this project' });
         }
+
+        // The sites to take off the deploy server, read now because the rows that name them are deleted next.
+        const { data: siteRows } = await supabase.from('deployments').select('subdomain').eq('project_id', id);
+        const sites = projectSiteSubdomains({ deployments: siteRows, previewUrl: project.preview_url });
 
         // Remove the project's deployments first: they reference the project, so leaving the row (even marked deleted) made
         // deleting any published project fail with a foreign key error.
@@ -2516,6 +2521,10 @@ router.delete('/:id', async (req, res) => {
             .eq('id', id);
 
         if (deleteError) throw deleteError;
+
+        // The published site and the preview must not outlive the project. Only after the rows are gone, so a failed delete leaves
+        // the site up; a deploy-server failure is logged and reported but never blocks the delete.
+        await removeSites(sites);
 
         // If project had a GitHub repo, notify worker to clean up (fire-and-forget)
         if (project.github_repo) {

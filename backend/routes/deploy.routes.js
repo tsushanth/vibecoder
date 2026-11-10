@@ -11,6 +11,8 @@ import { registerDeployedApp, disableDeployedApp } from '../services/appRegistry
 import { applyTierLimits } from '../services/tierSync.js';
 import { getSubscriptionStatus } from '../services/subscriptionService.js';
 import { verifiedUserId } from '../lib/verifiedUser.js';
+import { denyUnlessActor } from '../lib/actAs.js';
+import { removeSites, projectSiteSubdomains } from '../lib/siteRemoval.js';
 
 const DEPLOY_SERVER_URL = process.env.DEPLOY_SERVER_URL || 'http://localhost:4000';
 const INTERNAL_SECRET = requireSecret('INTERNAL_SECRET');
@@ -175,15 +177,26 @@ router.post('/:projectId/deploy', async (req, res) => {
 router.delete('/:projectId/deploy', async (req, res) => {
     try {
         const { projectId } = req.params;
-        const { userId } = req.body;
+        const userId = req.body?.userId;
+        if (!userId || typeof userId !== 'string') return res.status(400).json({ error: 'userId is required' });
 
+        // The id in the body is not proof (creator ids are public): a real account must send its own token, which must be this user's.
+        if (await denyUnlessActor(req, res, userId, { verifyUser: req.app.locals.verifyUser || verifiedUserId })) return;
+
+        const { data: project, error: projectError } = await supabase.from('projects').select('creator_id').eq('id', projectId).single();
+        if (projectError || !project) return res.status(404).json({ error: 'Project not found' });
+        if (project.creator_id !== userId) return res.status(403).json({ error: 'Only the project creator can unpublish this project' });
+
+        // Rows of any status are read, so repeating an unpublish that could not reach the deploy server tries the removal again.
         const { data: deployed } = await supabase.from('deployments').select('subdomain').eq('project_id', projectId).eq('user_id', userId);
         await supabase.from('deployments').update({ status: 'deleted' }).eq('project_id', projectId).eq('user_id', userId);
         await supabase.from('projects').update({ published_url: null }).eq('id', projectId);
 
         for (const d of deployed || []) await disableDeployedApp(req.app.locals.proxyAdmin, d.subdomain);
 
-        res.json({ success: true });
+        // Take the site itself down. A deploy-server failure must not undo the unpublish; the caller is told so it can retry.
+        const { failed } = await removeSites(projectSiteSubdomains({ deployments: deployed }));
+        res.json({ success: true, ...(failed.length ? { siteRemoval: 'failed' } : {}) });
     } catch (error) {
         console.error('Undeploy error:', error);
         res.status(500).json({ error: 'Failed to remove deployment' });

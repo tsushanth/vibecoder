@@ -84,9 +84,9 @@ test('a proxy failure does not fail the undeploy, and an unconfigured proxy is s
     assert.equal((await quiet(() => del(srvNoProxy, { userId: 'owner-1' }))).status, 200); assert.deepEqual(calls, []);
 });
 
-test('undeploying as a different user disables nothing', async () => {
+test('undeploying as a user who does not own the project is refused and disables nothing', async () => {
     reset();
-    assert.equal((await quiet(() => del(srv, { userId: 'someone-else' }))).status, 200);
+    assert.equal((await quiet(() => del(srv, { userId: 'someone-else' }))).status, 403);
     assert.deepEqual(calls, []);
 });
 
