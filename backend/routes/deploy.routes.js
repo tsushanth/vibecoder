@@ -1,3 +1,4 @@
+import { deployServerHeaders } from '../lib/deployServerAuth.js';
 import { isReservedSubdomain } from '../services/reservedSubdomains.js';
 import express from 'express';
 import crypto from 'crypto';
@@ -29,7 +30,7 @@ router.post('/preview', async (req, res) => {
         // Send to deploy server
         const deployResponse = await fetch(`${DEPLOY_SERVER_URL}/deploy`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: deployServerHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({ subdomain, bundle })
         });
 
@@ -118,7 +119,7 @@ router.post('/:projectId/deploy', async (req, res) => {
         // Send to deploy server
         const deployResponse = await fetch(`${DEPLOY_SERVER_URL}/deploy`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: deployServerHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({ subdomain, bundle })
         });
 
@@ -151,7 +152,7 @@ router.post('/:projectId/deploy', async (req, res) => {
             const previewSubdomain = proj.preview_url.replace('https://', '').split('.')[0];
             fetch(`${DEPLOY_SERVER_URL}/cleanup`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: deployServerHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify({ subdomain: previewSubdomain })
             }).catch(() => {});
             console.log(`[deploy] Cleaned up preview: ${previewSubdomain}`);

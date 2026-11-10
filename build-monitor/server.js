@@ -262,9 +262,10 @@ function buildProjectHTTP(project) {
 async function deployPreview(projectId, bundle) {
     try {
         const subdomain = `preview-${projectId.substring(0, 12)}`;
+        // The deploy server only accepts publishes that carry the shared secret; without INTERNAL_SECRET set here this preview is skipped.
         const res = await fetch(`${DEPLOY_URL}/deploy`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'x-internal-secret': process.env.INTERNAL_SECRET || '' },
             body: JSON.stringify({ subdomain, bundle })
         });
         if (res.ok) return `https://${subdomain}.vibecoder.app`;
