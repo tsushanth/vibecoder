@@ -659,14 +659,14 @@ router.post('/generate', async (req, res) => {
             console.error(`[generate] Placeholder creation failed: ${e.message}`);
         }
 
-        // Usage event: the build was accepted (rate limits passed). Only the length bucket of the prompt is kept, never the text.
-        buildEvents.buildStarted({ projectId: placeholderProjectId, userId, source: sourceFromRequest(req), prompt, kind: 'new' });
-
         // The async path (new apps) hands the result back through the project row, so without one the build would finish
         // and be lost. Say so instead of silently building. Streaming clients (old apps) get the result on the stream.
         if (!placeholderProjectId && req.body.stream !== true) {
             return res.status(500).json({ error: 'Could not start your build. Please try again.' });
         }
+
+        // Usage event: the build was accepted (rate limits passed and a project row, or the stream path, to carry it). Only the length bucket of the prompt is kept, never the text.
+        buildEvents.buildStarted({ projectId: placeholderProjectId, userId, source: sourceFromRequest(req), prompt, kind: 'new' });
 
         // Set up SSE
         setupSSE(res);
