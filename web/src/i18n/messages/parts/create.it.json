@@ -112,6 +112,18 @@
     },
     "versions": {
       "untitled": "Versione"
+    },
+    "survey": {
+      "question": "Cosa speravi di creare oggi?",
+      "hint": "Facoltativo. Un tocco, senza scrivere.",
+      "game_or_fun": "Un gioco o qualcosa di divertente",
+      "personal_tool": "Uno strumento o un tracker per me",
+      "work_or_business": "Qualcosa per il mio lavoro o la mia attività",
+      "learning": "Qualcosa per imparare o esercitarsi",
+      "just_trying": "Niente di preciso, sto solo provando",
+      "something_else": "Altro",
+      "skip": "Salta",
+      "thanks": "Grazie, ci aiuta a decidere cosa migliorare."
     }
   }
 }

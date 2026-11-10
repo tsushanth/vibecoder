@@ -112,6 +112,18 @@
     },
     "versions": {
       "untitled": "버전"
+    },
+    "survey": {
+      "question": "오늘 무엇을 만들고 싶으셨나요?",
+      "hint": "선택 사항입니다. 한 번 탭하면 되고 입력할 필요 없습니다.",
+      "game_or_fun": "게임이나 재미있는 것",
+      "personal_tool": "나를 위한 도구나 트래커",
+      "work_or_business": "업무나 사업용",
+      "learning": "배우거나 연습하기 위한 것",
+      "just_trying": "특별한 건 없고 그냥 써보는 중",
+      "something_else": "기타",
+      "skip": "건너뛰기",
+      "thanks": "감사합니다. 무엇을 개선할지 정하는 데 도움이 됩니다."
     }
   }
 }

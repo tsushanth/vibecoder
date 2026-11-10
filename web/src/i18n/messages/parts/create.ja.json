@@ -112,6 +112,18 @@
     },
     "versions": {
       "untitled": "バージョン"
+    },
+    "survey": {
+      "question": "今日は何を作りたかったですか？",
+      "hint": "任意です。タップするだけで、入力は不要です。",
+      "game_or_fun": "ゲームや楽しいもの",
+      "personal_tool": "自分用のツールやトラッカー",
+      "work_or_business": "仕事やビジネス向けのもの",
+      "learning": "学習や練習のためのもの",
+      "just_trying": "特になし、試しに使っているだけ",
+      "something_else": "その他",
+      "skip": "スキップ",
+      "thanks": "ありがとうございます。改善点を決める参考にします。"
     }
   }
 }

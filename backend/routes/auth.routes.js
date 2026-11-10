@@ -3,6 +3,7 @@ import { supabase, supabaseAdmin } from '../config/database.js';
 import { verifiedUserId } from '../lib/verifiedUser.js';
 import { recordSignupSource } from '../lib/signupSource.js';
 import { removeSites, disableSiteApps, projectSiteSubdomains } from '../lib/siteRemoval.js';
+import { appEvents, buildEvents, sourceFromRequest } from '../lib/appEventsInstance.js';
 
 export function createAuthRouter({ verifyUser = verifiedUserId } = {}) {
 const router = express.Router();
@@ -42,6 +43,8 @@ router.delete('/account', async (req, res) => {
         await run('coin_transactions', (q) => q.delete().eq('user_id', userId));
         await run('user_coins', (q) => q.delete().eq('user_id', userId));
         await run('users', (q) => q.delete().eq('user_id', userId));
+        // The person's usage events go with the account (best effort: the table may not exist yet, which must never block a deletion).
+        await appEvents.deleteForUser(userId);
         // Only remove the login once the data is gone, so a failed attempt can be retried.
         if (failed.length) return res.status(500).json({ error: 'Could not delete all account data. Please try again.', failed });
 
@@ -53,6 +56,8 @@ router.delete('/account', async (req, res) => {
             }
         }
 
+        // Kept without the user id, so deletions can still be counted.
+        appEvents.emit('account_deleted', { props: { source: sourceFromRequest(req) } });
         res.json({ success: true, message: 'Account deleted successfully' });
     } catch (error) {
         console.error('Account deletion error:', error);
@@ -93,7 +98,13 @@ router.post('/register', async (req, res) => {
                 .select()
                 .single();
             if (error) throw error;
-            if (!before && !beforeError) await recordSignupSource(supabase, userId, req, signupSource);
+            if (!before && !beforeError) {
+                await recordSignupSource(supabase, userId, req, signupSource);
+                appEvents.emit('signup_completed', { userId, props: { source: sourceFromRequest(req) } });
+            } else if (before && buildEvents.loginDue(userId)) {
+                // The web app registers on every page load with a session, so this is the closest server-side signal to "opened the app".
+                appEvents.emit('login', { userId, props: { source: sourceFromRequest(req) } });
+            }
             return res.json({ success: true, user: data });
         }
 
@@ -108,6 +119,7 @@ router.post('/register', async (req, res) => {
             .single();
         if (error) throw error;
         await recordSignupSource(supabase, userId, req, signupSource);
+        appEvents.emit('signup_completed', { userId, props: { source: sourceFromRequest(req) } });
         res.json({ success: true, user: data });
     } catch (error) {
         console.error('Auth register error:', error);
