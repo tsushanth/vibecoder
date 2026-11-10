@@ -1,3 +1,4 @@
+import { deployServerHeaders } from '../lib/deployServerAuth.js';
 import { apkHostFor } from '../lib/apkHost.js';
 import express from 'express';
 import { supabase } from '../config/database.js';
@@ -795,7 +796,7 @@ router.post('/generate', async (req, res) => {
                                 const previewSubdomain = `preview-${finalProjectId.substring(0, 12)}`;
                                 const deployRes = await fetch(`${DEPLOY_SERVER_URL}/deploy`, {
                                     method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
+                                    headers: deployServerHeaders({ 'Content-Type': 'application/json' }),
                                     body: JSON.stringify({ subdomain: previewSubdomain, bundle: parsed.bundle }),
                                     signal: AbortSignal.timeout(30000)
                                 });
@@ -1162,7 +1163,7 @@ router.post('/:id/build-complete', async (req, res) => {
                 const previewSubdomain = `prev-${id.substring(0, 8)}`;
                 const deployRes = await fetch(`${DEPLOY_SERVER_URL}/deploy`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: deployServerHeaders({ 'Content-Type': 'application/json' }),
                     body: JSON.stringify({ subdomain: previewSubdomain, bundle }),
                     signal: AbortSignal.timeout(30000)
                 });
@@ -2105,7 +2106,7 @@ router.post('/:id/tweak', async (req, res) => {
                         try {
                             const dr = await fetch(`${DEPLOY_SERVER_URL}/deploy`, {
                                 method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
+                                headers: deployServerHeaders({ 'Content-Type': 'application/json' }),
                                 body: JSON.stringify({ subdomain: sub, bundle: parsed.bundle }),
                                 signal: AbortSignal.timeout(30000),
                             });
@@ -2303,7 +2304,7 @@ router.post('/:id/revert/:sha', async (req, res) => {
                 try {
                     const dr = await fetch(`${DEPLOY_SERVER_URL}/deploy`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: deployServerHeaders({ 'Content-Type': 'application/json' }),
                         body: JSON.stringify({ subdomain: sub, bundle: revertData.bundle }),
                         signal: AbortSignal.timeout(30000),
                     });

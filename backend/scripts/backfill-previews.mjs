@@ -8,6 +8,7 @@
 //
 // Idempotent: only touches rows where preview_url IS NULL.
 
+import { deployServerHeaders } from '../lib/deployServerAuth.js';
 import { createClient } from '@supabase/supabase-js';
 import 'dotenv/config';
 
@@ -28,7 +29,7 @@ async function deployPreview(id, bundle) {
     const subdomain = `prev-${id.substring(0, 8)}`;
     const res = await fetch(`${DEPLOY_SERVER_URL}/deploy`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: deployServerHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ subdomain, bundle }),
         signal: AbortSignal.timeout(45000)
     });

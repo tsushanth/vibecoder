@@ -7,6 +7,7 @@ import zlib from "zlib";
 import path from "path";
 import { createClient } from "@supabase/supabase-js";
 import { requireSecret } from "./requireSecret.js";
+import { requireInternal } from "./internalAuth.js";
 import { reportFailure, installCrashHandlers, createStreakGate } from "./failureReporter.js";
 
 installCrashHandlers();
@@ -497,7 +498,7 @@ app.get("/health", async (_req, res) => {
 // POST /deploy
 // ---------------------------------------------------------------------------
 
-app.post("/deploy", async (req, res) => {
+app.post("/deploy", requireInternal(INTERNAL_SECRET), async (req, res) => {
   try {
     const { subdomain, bundle } = req.body || {};
     if (!subdomain || !bundle) {
@@ -550,7 +551,7 @@ app.post("/deploy", async (req, res) => {
 // DELETE /deploy/:subdomain
 // ---------------------------------------------------------------------------
 
-app.delete("/deploy/:subdomain", async (req, res) => {
+app.delete("/deploy/:subdomain", requireInternal(INTERNAL_SECRET), async (req, res) => {
   const subdomain = req.params.subdomain.toLowerCase().trim();
   if (!isValidSubdomain(subdomain)) return res.status(400).json({ error: "Invalid subdomain" });
   await deleteSubdomainFromStorage(subdomain);
@@ -562,7 +563,7 @@ app.delete("/deploy/:subdomain", async (req, res) => {
 // POST /cleanup — Remove a preview deployment's files from storage
 // ---------------------------------------------------------------------------
 
-app.post("/cleanup", async (req, res) => {
+app.post("/cleanup", requireInternal(INTERNAL_SECRET), async (req, res) => {
   try {
     const { subdomain } = req.body || {};
     if (!subdomain) return res.status(400).json({ error: "subdomain required" });
