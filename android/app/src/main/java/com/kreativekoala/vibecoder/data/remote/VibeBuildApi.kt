@@ -24,6 +24,13 @@ interface VibeBuildApi {
     @GET("api/projects/{id}")
     suspend fun getProject(@Path("id") id: String): ProjectDetailResponse
 
+    /** Lists or unlists the project on Explore. Only the creator may call it. */
+    @PATCH("api/projects/{id}")
+    suspend fun setListing(
+        @Path("id") id: String,
+        @Body body: UpdateListingRequest
+    ): SuccessResponse
+
     @HTTP(method = "DELETE", path = "api/projects/{id}", hasBody = true)
     suspend fun deleteProject(
         @Path("id") id: String,

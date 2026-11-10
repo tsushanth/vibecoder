@@ -303,4 +303,7 @@
     <!-- Facebook SDK Configuration -->
     <string name="facebook_app_id">2361731814322648</string>
     <string name="facebook_client_token">32ed2eb93cd2e41e4a113956d7f53d03</string>
+    <string name="explore_listing_title">Show on Explore</string>
+    <string name="explore_listing_hint">Let other people find this app on the public Explore page, where they can open and remix it. Your name appears as a first name and initial. Off by default.</string>
+    <string name="explore_listing_failed">The setting was not saved. Try again.</string>
 </resources>

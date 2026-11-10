@@ -62,6 +62,9 @@ data class SaveProjectResponse(
 
 data class DeleteRequest(val userId: String)
 
+/** PATCH /api/projects/{id}: whether the project is listed on the public Explore page. */
+data class UpdateListingRequest(val userId: String, val isPublic: Boolean)
+
 data class ForkRequest(
     val userId: String,
     val userName: String?,

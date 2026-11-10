@@ -289,4 +289,7 @@
     <string name="paywall_retry">Erneut versuchen</string>
     <string name="paywall_error_purchase">Der Kauf konnte nicht abgeschlossen werden. Bitte versuche es erneut.</string>
     <string name="paywall_restore_none">Für dieses Google-Konto wurde kein aktives Abo gefunden.</string>
+    <string name="explore_listing_title">In Entdecken anzeigen</string>
+    <string name="explore_listing_hint">Andere können diese App auf der öffentlichen Seite Entdecken finden, öffnen und remixen. Dein Name erscheint als Vorname mit Initiale. Standardmäßig aus.</string>
+    <string name="explore_listing_failed">Die Einstellung wurde nicht gespeichert. Versuche es erneut.</string>
 </resources>

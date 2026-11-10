@@ -10,7 +10,8 @@ data class Project(
     @SerializedName("creator_id") val creatorId: String? = null,
     @SerializedName("creator_name") val creatorName: String? = null,
     @SerializedName("project_type") val projectType: String = "web_app",
-    @SerializedName("is_public") val isPublic: Boolean = true,
+    // GET /api/projects/{id} sends camelCase, the list endpoints send snake_case
+    @SerializedName(value = "is_public", alternate = ["isPublic"]) val isPublic: Boolean = true,
     @SerializedName("is_featured") val isFeatured: Boolean = false,
     @SerializedName("play_count") val playCount: Int = 0,
     @SerializedName("view_count") val viewCount: Int = 0,

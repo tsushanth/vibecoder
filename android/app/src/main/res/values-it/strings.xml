@@ -289,4 +289,7 @@
     <string name="paywall_retry">Riprova</string>
     <string name="paywall_error_purchase">Non è stato possibile completare l\'acquisto. Riprova.</string>
     <string name="paywall_restore_none">Nessun abbonamento attivo trovato per questo account Google.</string>
+    <string name="explore_listing_title">Mostra in Esplora</string>
+    <string name="explore_listing_hint">Permetti ad altre persone di trovare questa app nella pagina pubblica Esplora, dove possono aprirla e remixarla. Il tuo nome appare come nome e iniziale. Disattivato per impostazione predefinita.</string>
+    <string name="explore_listing_failed">L\'impostazione non è stata salvata. Riprova.</string>
 </resources>

@@ -289,4 +289,7 @@
     <string name="paywall_retry">Tentar novamente</string>
     <string name="paywall_error_purchase">Não foi possível concluir a compra. Tente novamente.</string>
     <string name="paywall_restore_none">Nenhuma assinatura ativa foi encontrada para esta conta Google.</string>
+    <string name="explore_listing_title">Mostrar no Explorar</string>
+    <string name="explore_listing_hint">Deixe outras pessoas encontrarem este app na página pública Explorar, onde podem abri-lo e remixá-lo. Seu nome aparece como primeiro nome e inicial. Desativado por padrão.</string>
+    <string name="explore_listing_failed">A configuração não foi salva. Tente novamente.</string>
 </resources>

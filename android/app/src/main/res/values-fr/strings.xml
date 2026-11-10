@@ -289,4 +289,7 @@
     <string name="paywall_retry">Réessayer</string>
     <string name="paywall_error_purchase">L\'achat n\'a pas pu être finalisé. Veuillez réessayer.</string>
     <string name="paywall_restore_none">Aucun abonnement actif trouvé pour ce compte Google.</string>
+    <string name="explore_listing_title">Afficher dans Explorer</string>
+    <string name="explore_listing_hint">Permettez à d\'autres personnes de trouver cette app sur la page publique Explorer, où elles peuvent l\'ouvrir et la remixer. Votre nom apparaît sous la forme d\'un prénom et d\'une initiale. Désactivé par défaut.</string>
+    <string name="explore_listing_failed">Le réglage n\'a pas été enregistré. Réessayez.</string>
 </resources>
