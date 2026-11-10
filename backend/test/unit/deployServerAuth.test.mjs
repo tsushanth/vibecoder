@@ -4,8 +4,8 @@ import { readFileSync } from 'node:fs';
 import { deployServerHeaders } from '../../lib/deployServerAuth.js';
 
 test('adds the shared secret and keeps the other headers', () => {
-    const h = deployServerHeaders({ 'Content-Type': 'application/json' }, { INTERNAL_SECRET: 'abc' });
-    assert.deepEqual(h, { 'Content-Type': 'application/json', 'x-internal-secret': 'abc' });
+    const h = deployServerHeaders({ 'Content-Type': 'application/json' }, { INTERNAL_SECRET: 'unit-test-internal-secret-0123456789' });
+    assert.deepEqual(h, { 'Content-Type': 'application/json', 'x-internal-secret': 'unit-test-internal-secret-0123456789' });
 });
 
 test('every POST to the deploy server in routes and scripts goes through the helper', () => {
