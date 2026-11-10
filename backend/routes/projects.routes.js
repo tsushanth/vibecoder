@@ -28,6 +28,7 @@ import { recordLlm } from '../lib/llmUsageInstance.js';
 import { registerDeployedApp } from '../services/appRegistry.js';
 import { captureChatSecrets, redactForLog } from '../services/chatSecrets.js';
 import { denyUnlessActor } from '../lib/actAs.js';
+import { looksLikePastedCode } from '../lib/promptGuard.js';
 import { deriveTitle } from '../lib/projectTitle.js';
 import { recordSignupSource } from '../lib/signupSource.js';
 
@@ -571,19 +572,7 @@ router.post('/generate', async (req, res) => {
         const promptForLog = redactForLog(prompt);
 
         // Block code injection and malicious prompts
-        const lowerPrompt = prompt.toLowerCase();
-        const codePatterns = [
-            'import os', 'import subprocess', 'import asyncio', 'import sys',
-            'require(', 'eval(', 'exec(', 'system(',
-            'subprocess.', 'os.system', 'os.popen',
-            'child_process', 'puppeteer', 'selenium',
-            'websocket.server', 'websockets.connect',
-            '#!/', 'bash -c',
-            'rm -rf', 'chmod ', 'chown ',
-            'def __', 'if __name__',
-            'document.cookie', 'window.location.href='
-        ];
-        if (codePatterns.some(p => lowerPrompt.includes(p))) {
+        if (looksLikePastedCode(prompt)) {
             console.warn(`[generate] BLOCKED malicious prompt from ${userId}: "${promptForLog.substring(0, 100)}"`);
             return res.status(400).json({ error: 'Please describe your app idea in plain language instead of pasting code.' });
         }
