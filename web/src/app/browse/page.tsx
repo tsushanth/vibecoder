@@ -1,47 +1,61 @@
-'use client';
+import type { Metadata } from 'next';
+import { PublicBrowse } from '@/components/project/PublicBrowse';
+import { API_URL } from '@/lib/constants';
+import { appUrl, itemListJsonLd, jsonLdString, pickItems, type BrowseItem } from '@/lib/browseSeo';
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { ExploreList } from '@/components/project/ProjectCard';
-import { MarketingHeader, MarketingFooter } from '@/components/landing/MarketingChrome';
+export const metadata: Metadata = {
+  title: 'Apps people built - VibeBuild',
+  description: 'Browse apps that people described in plain words and VibeBuild built. Open one to try it, or remix it into your own.',
+  alternates: { canonical: 'https://vibebuild.cc/browse' },
+  openGraph: {
+    title: 'Apps people built - VibeBuild',
+    description: 'Browse apps that people described in plain words and VibeBuild built.',
+    url: 'https://vibebuild.cc/browse',
+    siteName: 'VibeBuild',
+    type: 'website',
+  },
+};
 
-// Explore for signed-out visitors: the same list as the app's Explore tab inside the public site chrome.
-export default function PublicBrowsePage() {
-  const router = useRouter();
-  const t = useTranslations('apps.explore');
+// Re-fetched at most once an hour; a failed or slow API simply leaves the crawler list out.
+export const revalidate = 3600;
 
-  return (
-    <div className="min-h-screen bg-background text-foreground">
-      <MarketingHeader />
+async function firstApps(): Promise<BrowseItem[]> {
+  try {
+    const res = await fetch(`${API_URL}/api/projects/browse?limit=12&sort=popular`, {
+      next: { revalidate: 3600 },
+      signal: AbortSignal.timeout(4000),
+    });
+    if (!res.ok) return [];
+    const body = (await res.json()) as { projects?: unknown };
+    return pickItems(body.projects);
+  } catch {
+    return [];
+  }
+}
 
-      <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
-        <header className="pb-6">
-          <h1 className="font-display text-4xl font-bold sm:text-5xl">{t('publicTitle')}</h1>
-          <p className="mt-3 max-w-[60ch] text-lg text-muted">{t('publicSubtitle')}</p>
-        </header>
+// Explore for signed-out visitors. The grid is rendered in the browser; the first apps are also in the HTML for crawlers.
+export default async function PublicBrowsePage() {
+  const items = await firstApps();
+  const ld = itemListJsonLd(items);
+  const crawlerList =
+    items.length > 0 ? (
+      <>
+        {ld && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(ld) }} />}
+        <noscript>
+          <ul className="mt-6 space-y-2">
+            {items.map((it) => {
+              const url = appUrl(it);
+              return (
+                <li key={it.id}>
+                  {url ? <a href={url} className="font-medium text-accent-hover">{it.title}</a> : <span className="font-medium">{it.title}</span>}
+                  {it.description ? <span className="text-muted"> - {it.description}</span> : null}
+                </li>
+              );
+            })}
+          </ul>
+        </noscript>
+      </>
+    ) : null;
 
-        <ExploreList
-          defaultSort="popular"
-          onRemix={() => router.push('/signup')}
-          onOpenUnpublished={() => router.push('/signup')}
-        />
-
-        <section className="mt-16 flex flex-col items-start justify-between gap-5 border-t border-border pt-10 sm:flex-row sm:items-center">
-          <div>
-            <h2 className="font-display text-2xl font-semibold">{t('ctaTitle')}</h2>
-            <p className="mt-1 max-w-[56ch] text-muted">{t('ctaBody')}</p>
-          </div>
-          <Link
-            href="/signup"
-            className="flex h-11 shrink-0 items-center rounded-lg bg-accent px-6 text-[15px] font-semibold text-white transition hover:bg-accent-hover"
-          >
-            {t('ctaButton')}
-          </Link>
-        </section>
-      </main>
-
-      <MarketingFooter />
-    </div>
-  );
+  return <PublicBrowse crawlerList={crawlerList} />;
 }

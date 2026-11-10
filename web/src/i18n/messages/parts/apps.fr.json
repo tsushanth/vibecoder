@@ -121,7 +121,10 @@
       "verify": "Vérifier le DNS",
       "verifying": "Vérification...",
       "add": "Ajouter",
-      "adding": "Ajout..."
+      "adding": "Ajout...",
+      "listTitle": "Afficher dans Explorer",
+      "listHint": "Permettez à d'autres personnes de trouver cette app sur la page publique Explorer, où elles peuvent l'ouvrir et la remixer. Votre nom apparaît sous la forme d'un prénom et d'une initiale. Désactivé par défaut.",
+      "listFailed": "Le réglage n'a pas été enregistré. Réessayez."
     },
     "explore": {
       "title": "Explorer",

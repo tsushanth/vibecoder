@@ -30,6 +30,19 @@ class ApiClient {
     return res.json();
   }
 
+  async patch<T>(path: string, body?: Record<string, unknown>): Promise<T> {
+    const res = await fetch(`${this.baseUrl}${path}`, {
+      method: 'PATCH',
+      headers: await withAuth({ 'Content-Type': 'application/json' }),
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+      throw new ApiError(err.error || `HTTP ${res.status}`, res.status, err);
+    }
+    return res.json();
+  }
+
   async delete<T>(path: string, body?: Record<string, unknown>): Promise<T> {
     const res = await fetch(`${this.baseUrl}${path}`, {
       method: 'DELETE',

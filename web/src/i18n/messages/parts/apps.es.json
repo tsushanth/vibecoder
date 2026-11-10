@@ -121,7 +121,10 @@
       "verify": "Comprobar DNS",
       "verifying": "Comprobando...",
       "add": "Añadir",
-      "adding": "Añadiendo..."
+      "adding": "Añadiendo...",
+      "listTitle": "Mostrar en Explorar",
+      "listHint": "Permite que otras personas encuentren esta app en la página pública Explorar, donde pueden abrirla y remezclarla. Tu nombre aparece como nombre y una inicial. Desactivado por defecto.",
+      "listFailed": "No se guardó el ajuste. Inténtalo de nuevo."
     },
     "explore": {
       "title": "Explorar",

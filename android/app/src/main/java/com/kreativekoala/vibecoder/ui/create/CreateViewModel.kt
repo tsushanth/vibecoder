@@ -17,6 +17,7 @@ import com.kreativekoala.vibecoder.data.repository.AuthRepository
 import com.kreativekoala.vibecoder.data.repository.DeployRepository
 import com.kreativekoala.vibecoder.data.repository.ProjectRepository
 import com.kreativekoala.vibecoder.data.repository.SubscriptionRepository
+import com.kreativekoala.vibecoder.service.FirebaseAnalyticsHelper
 import com.kreativekoala.vibecoder.util.NotificationHelper
 import kotlinx.coroutines.flow.first
 import com.kreativekoala.vibecoder.util.ZipExtractor
@@ -444,6 +445,12 @@ class CreateViewModel @Inject constructor(
             )
         }
 
+        // A short prompt without an image skips the plan step: one tap, straight to the build.
+        if (!PlanPolicy.shouldAskForPlan(prompt, image != null)) {
+            beginBuild()
+            return
+        }
+
         // Optional plan step: if the endpoint is missing/slow/fails, go straight to building.
         planJob = viewModelScope.launch {
             val plan = withTimeoutOrNull(10_000) { projectRepository.plan(prompt) }
@@ -502,6 +509,10 @@ class CreateViewModel @Inject constructor(
         generationJob = viewModelScope.launch {
             // Persist generation state so we can recover if app is killed
             userPreferences.savePendingGeneration(prompt)
+            // Funnel marker: the first build started on this install (the count is read before it is incremented).
+            if (MainActivity.getGenerationCount(appContext) == 0) {
+                FirebaseAnalyticsHelper.logFirstBuildStarted(hasReferenceImage = image != null)
+            }
             // Track generation count for paywall
             MainActivity.incrementGenerationCount(appContext)
 

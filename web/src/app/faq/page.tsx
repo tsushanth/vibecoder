@@ -41,7 +41,7 @@ const faqs = [
   },
   {
     q: 'Can other people see my apps?',
-    a: 'By default, apps are public and visible in the community gallery. ' + (ALL_FREE ? 'You can also create private projects that only you can access.' : 'Pro users can create private projects that only they can access.'),
+    a: 'New apps are not listed anywhere: only you see them in your Apps tab. If you publish one, anyone with its link can open it. You can also choose "Show on Explore" in the Publish dialog to list it on the public Explore page, where your name appears as a first name and an initial. You can turn it off again at any time.',
   },
   {
     q: 'What is forking?',

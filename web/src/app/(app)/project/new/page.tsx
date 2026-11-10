@@ -18,6 +18,8 @@ import { api, ApiError } from '@/lib/api';
 import { planSaveAfterBuild } from '@/lib/buildSave';
 import type { SaveProjectResponse, VersionsResponse, RevertResponse } from '@/types/api';
 import { ALL_FREE, effectiveTier } from '@/lib/pricing';
+import { takePendingPrompt } from '@/lib/pendingPrompt';
+import { shouldAskForPlan } from '@/lib/planPolicy';
 
 type Stage = 'idle' | 'planning' | 'planReady' | 'building' | 'ready' | 'failed';
 
@@ -35,8 +37,6 @@ interface TweakTurn {
   error?: string;
 }
 
-/** The landing page carries a typed prompt across sign-in under this key. */
-const PENDING_PROMPT_KEY = 'vb_pending_prompt';
 const PLAN_TIMEOUT_MS = 10_000;
 const DESKTOP_QUERY = '(min-width: 1024px)';
 
@@ -107,17 +107,18 @@ export default function NewProjectPage() {
   const [showPublish, setShowPublish] = useState(false);
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
 
-  // A prompt typed on the landing page before sign-in: prefill and focus the composer once, never start the build.
+  // A prompt typed on the landing page before sign-up: the person already pressed "Build it" there, so the build starts as soon as
+  // they arrive (no second Build press, no plan step). The prompt shows in the thread with a Cancel button, and Cancel puts the
+  // text back in the composer to edit. The same fair-use cap and cost alert apply: this goes through the normal build request.
+  const landingStartRef = useRef(false);
   useEffect(() => {
-    let pending: string | null = null;
-    try {
-      pending = sessionStorage.getItem(PENDING_PROMPT_KEY);
-      if (pending !== null) sessionStorage.removeItem(PENDING_PROMPT_KEY);
-    } catch {}
-    if (pending && pending.trim()) {
-      setDraft((d) => ({ prompt: pending!.slice(0, 2000), focus: true, key: d.key + 1 }));
-    }
-  }, []);
+    if (!user || landingStartRef.current) return;
+    const pending = takePendingPrompt();
+    if (!pending) return;
+    landingStartRef.current = true;
+    startFlow(pending, undefined, { auto: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   // Leaving the page stops a running build stream.
   useEffect(() => () => abortRef.current?.abort(), []);
@@ -157,7 +158,7 @@ export default function NewProjectPage() {
   }
 
   const beginBuild = useCallback(
-    async (prompt: string, referenceImage?: string) => {
+    async (prompt: string, referenceImage?: string, opts?: { auto?: boolean }) => {
       if (!user) return;
       const run = ++runRef.current;
 
@@ -198,6 +199,8 @@ export default function NewProjectPage() {
             userName: user.user_metadata?.full_name || user.email?.split('@')[0],
             framework: 'react',
             referenceImage,
+            // Funnel marker for the server log: set when the build started without the person pressing Build (landing prompt).
+            ...(opts?.auto ? { autoStart: true, entry: 'landing_prompt' } : {}),
             // The backend defaults to an async queued+poll flow (the mobile app's model); this client only understands the
             // held-open SSE stream, which the backend still proxies when asked. Without this, generate silently returns to
             // idle after a single "queued" event with no progress and no error.
@@ -266,7 +269,6 @@ export default function NewProjectPage() {
                   creatorId: user.id,
                   creatorName: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous',
                   initialPrompt: prompt,
-                  isPublic: true,
                 });
                 if (run === runRef.current) setSavedProjectId(saveData.projectId);
               } catch (err) {
@@ -308,7 +310,12 @@ export default function NewProjectPage() {
   );
 
   /** Send: show the prompt in the thread, ask for a short plan, and fall back to building directly if planning is unavailable. */
-  async function handleSubmit(prompt: string, referenceImage?: string) {
+  function handleSubmit(prompt: string, referenceImage?: string) {
+    return startFlow(prompt, referenceImage, { auto: false });
+  }
+
+  /** `auto`: the prompt came from the landing page, so build straight away. Otherwise a short prompt without an image also skips the plan step. */
+  async function startFlow(prompt: string, referenceImage: string | undefined, { auto }: { auto: boolean }) {
     if (!user) return;
     const run = ++runRef.current;
     useProjectStore.getState().reset();
@@ -319,6 +326,11 @@ export default function NewProjectPage() {
     setTweaks([]);
     setPublishedUrl(null);
     setPreviewOpen(false);
+
+    if (auto || !shouldAskForPlan(prompt, !!referenceImage)) {
+      void beginBuild(prompt, referenceImage, { auto });
+      return;
+    }
     setStage('planning');
 
     let nextPlan: BuildPlan | null = null;

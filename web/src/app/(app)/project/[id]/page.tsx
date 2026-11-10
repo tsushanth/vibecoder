@@ -496,6 +496,8 @@ export default function ProjectBuilderPage() {
           userId={user.id}
           subscriptionTier={effectiveTier(subscription?.tier)}
           suggestedSubdomain={suggestSubdomain(project.title)}
+          isListed={!!project.isPublic}
+          onListedChange={(listed) => { if (store.project) store.setProject({ ...store.project, isPublic: listed }); }}
           onClose={() => { setShowPublish(false); setPublishOpenCount((n) => n + 1); }}
           onPublished={(url) => {
             if (store.project) {

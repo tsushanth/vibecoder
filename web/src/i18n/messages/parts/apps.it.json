@@ -121,7 +121,10 @@
       "verify": "Verifica DNS",
       "verifying": "Verifica in corso...",
       "add": "Aggiungi",
-      "adding": "Aggiunta..."
+      "adding": "Aggiunta...",
+      "listTitle": "Mostra in Esplora",
+      "listHint": "Permetti ad altre persone di trovare questa app nella pagina pubblica Esplora, dove possono aprirla e remixarla. Il tuo nome appare come nome e iniziale. Disattivato per impostazione predefinita.",
+      "listFailed": "L'impostazione non è stata salvata. Riprova."
     },
     "explore": {
       "title": "Esplora",

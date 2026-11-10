@@ -121,7 +121,10 @@
       "verify": "Check DNS",
       "verifying": "Checking...",
       "add": "Add",
-      "adding": "Adding..."
+      "adding": "Adding...",
+      "listTitle": "Show on Explore",
+      "listHint": "Let other people find this app on the public Explore page, where they can open and remix it. Your name appears as a first name and initial. Off by default.",
+      "listFailed": "The setting was not saved. Try again."
     },
     "explore": {
       "title": "Explore",
