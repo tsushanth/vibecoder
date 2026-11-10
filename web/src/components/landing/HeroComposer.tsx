@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
+import { savePendingPrompt } from '@/lib/pendingPrompt';
 
 // Real starter prompts, matching the labels shipped in the product's own suggestion list (backend/routes/projects.routes.js).
 const CHIPS = [
@@ -12,7 +13,7 @@ const CHIPS = [
   { label: 'Recipe finder', prompt: 'Build a recipe search app with ingredient-based filtering, step-by-step cooking instructions, and the ability to save favourites' },
 ];
 
-/** The landing page's prompt box. The text is kept in sessionStorage across sign-up so the Create page can pick it up. */
+/** The landing page's prompt box. The text is kept across sign-up (lib/pendingPrompt.ts) and the Create page starts the build from it. */
 export function HeroComposer() {
   const [prompt, setPrompt] = useState('');
   const router = useRouter();
@@ -20,7 +21,7 @@ export function HeroComposer() {
 
   function go() {
     const q = prompt.trim();
-    try { if (q) sessionStorage.setItem('vb_pending_prompt', q); } catch { /* storage blocked: the person types it again */ }
+    savePendingPrompt(q); // kept through signup or login; the Create page starts the build from it
     router.push(user ? '/project/new' : '/signup');
   }
 

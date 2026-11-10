@@ -111,6 +111,14 @@ object FirebaseAnalyticsHelper {
         logEvent("generation_started", params)
     }
 
+    /** Activation funnel: the first build started on this install (sign-up to first build). */
+    fun logFirstBuildStarted(hasReferenceImage: Boolean = false) {
+        val params = Bundle().apply {
+            putBoolean("has_reference_image", hasReferenceImage)
+        }
+        logEvent("signup_to_first_build_started", params)
+    }
+
     fun logGenerationCompleted(durationSeconds: Long? = null) {
         val params = Bundle().apply {
             durationSeconds?.let { putLong("duration_seconds", it) }

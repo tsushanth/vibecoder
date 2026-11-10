@@ -30,6 +30,9 @@ import { captureChatSecrets, redactForLog } from '../services/chatSecrets.js';
 import { denyUnlessActor } from '../lib/actAs.js';
 import { looksLikePastedCode } from '../lib/promptGuard.js';
 import { deriveTitle } from '../lib/projectTitle.js';
+import { publicCreatorName, withPublicCreator } from '../lib/creatorHandle.js';
+import { parsePatchBody } from '../lib/projectPatch.js';
+import { logFirstBuildStarted } from '../lib/funnel.js';
 import { recordSignupSource } from '../lib/signupSource.js';
 
 const router = express.Router();
@@ -288,8 +291,9 @@ async function refreshBrowseCache() {
         if (popularResult.error) throw popularResult.error;
 
         // Filter out test/junk/duplicate projects from public browse
-        browseCache.newest = filterBrowseProjects(newestResult.data || []);
-        browseCache.popular = filterBrowseProjects(popularResult.data || []);
+        // The creator name is stored as typed at signup (often a full name); only a first name and initial, or a handle, is public.
+        browseCache.newest = filterBrowseProjects(newestResult.data || []).map(withPublicCreator);
+        browseCache.popular = filterBrowseProjects(popularResult.data || []).map(withPublicCreator);
         browseCache.totalCount = browseCache.newest.length;
         browseCache.lastRefreshed = Date.now();
 
@@ -619,7 +623,7 @@ router.post('/generate', async (req, res) => {
                     creator_id: userId,
                     creator_name: userName || 'VibeBuild User',
                     initial_prompt: prompt,
-                    is_public: true,
+                    is_public: false, // unlisted until the creator chooses to show it on Explore (PATCH /:id { isPublic: true })
                     project_type: 'web_app',
                     creation_method: source === 'telegram' ? 'telegram' : 'ai_generated',
                     status: 'building'
@@ -630,6 +634,14 @@ router.post('/generate', async (req, res) => {
             if (!phErr && placeholder) {
                 placeholderProjectId = placeholder.id;
                 progressStart(placeholderProjectId);
+                // Activation funnel: logs only when this is the account's first build (lib/funnel.js). Never blocks the build.
+                logFirstBuildStarted(supabase, {
+                    userId,
+                    projectId: placeholderProjectId,
+                    autoStart: req.body.autoStart === true,
+                    entry: req.body.entry,
+                    platform: /okhttp/i.test(String(req.get('user-agent') || '')) ? 'android' : 'web',
+                });
                 console.log(`[generate] Placeholder project created: ${placeholderProjectId}`);
             } else {
                 console.error(`[generate] Placeholder creation failed code=${phErr?.code || 'none'}`);
@@ -769,7 +781,7 @@ router.post('/generate', async (req, res) => {
                             const { data: saved } = await supabase.from('projects').insert({
                                 title, description: prompt, bundle: parsed.bundle,
                                 creator_id: userId, creator_name: userName || 'VibeBuild User',
-                                initial_prompt: prompt, is_public: true,
+                                initial_prompt: prompt, is_public: false,
                                 project_type: 'web_app', creation_method: 'ai_generated', status: 'ready'
                             }).select('id').single();
                             if (saved) finalProjectId = saved.id;
@@ -884,18 +896,17 @@ router.post('/generate', async (req, res) => {
 // ============================================
 router.post('/save', async (req, res) => {
     try {
-        let { title, description, bundle, creatorId, creatorName, initialPrompt, framework, isPublic } = req.body;
+        let { title, description, bundle, creatorId, creatorName, initialPrompt, framework } = req.body;
+        // Listing on Explore is opt-in: only an explicit `listed: true` lists the project. Older app versions send
+        // isPublic: true with every save, so that field is deliberately ignored here.
+        const listed = req.body.listed === true;
 
         if (!title || !bundle || !creatorId) {
             return res.status(400).json({ error: 'title, bundle, and creatorId are required' });
         }
 
-        // Truncate title to fit DB varchar constraint
-        const redactedTitle = redactForLog(title);
-        const safeTitle = redactedTitle.length > 180 ? redactedTitle.substring(0, 180).trim() + '...' : redactedTitle;
-
-        // If user wants to create a private project, check subscription
-        if (isPublic === false) {
+        // A client that explicitly asks for a private project still goes through the plan check (free while VIBEBUILD_ALL_FREE is on).
+        if (req.body.isPublic === false) {
             const limitCheck = await checkUsageLimit(creatorId, ACTION_TYPES.createPrivate);
             if (!limitCheck.allowed) {
                 console.log(`[save] Private project not allowed: ${limitCheck.error}`);
@@ -907,8 +918,12 @@ router.post('/save', async (req, res) => {
             }
         }
 
+        // Truncate title to fit DB varchar constraint
+        const redactedTitle = redactForLog(title);
+        const safeTitle = redactedTitle.length > 180 ? redactedTitle.substring(0, 180).trim() + '...' : redactedTitle;
+
         const projectId = crypto.randomUUID();
-        // This text is stored on a (by default public) project and reused as the retry prompt: keep only the redacted version.
+        // This text is stored on a project that may later be listed publicly and reused as the retry prompt: keep only the redacted version.
         // The prompt (or, without one, the description) is captured into the vault; the other fields are redacted only, so a
         // key repeated across fields is stored once.
         if (typeof initialPrompt === 'string') {
@@ -967,7 +982,7 @@ router.post('/save', async (req, res) => {
                 project_type: 'web_app',
                 initial_prompt: initialPrompt || null,
                 github_repo: githubRepo,
-                is_public: isPublic !== false,
+                is_public: listed,
                 play_count: 0,
                 fork_count: 0,
                 free_tweaks_remaining: FREE_TWEAKS_DEFAULT
@@ -1828,7 +1843,7 @@ router.get('/:id', async (req, res) => {
                 bundle,
                 githubRepo: data.github_repo,
                 creatorId: data.creator_id,
-                creatorName: data.creator_name,
+                creatorName: publicCreatorName(data.creator_name, data.creator_id),
                 projectType: data.project_type,
                 viewCount: data.view_count,
                 playCount: data.play_count,
@@ -2327,14 +2342,12 @@ router.post('/:id/revert/:sha', async (req, res) => {
 router.patch('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { userId, title } = req.body;
+        const { userId, title, isPublic } = req.body;
 
         if (!userId) return res.status(400).json({ error: 'userId is required' });
         if (await denyUnlessActor(req, res, userId)) return;
-        if (typeof title !== 'string') return res.status(400).json({ error: 'title (string) is required' });
-        const trimmed = title.trim();
-        if (trimmed.length === 0) return res.status(400).json({ error: 'title cannot be empty' });
-        if (trimmed.length > 180) return res.status(400).json({ error: 'title must be 180 chars or fewer' });
+        const update = parsePatchBody({ title, isPublic });
+        if (update.error) return res.status(400).json({ error: update.error });
 
         // Ownership check
         const { data: project, error: projectError } = await supabase
@@ -2343,11 +2356,11 @@ router.patch('/:id', async (req, res) => {
             .eq('id', id)
             .single();
         if (projectError || !project) return res.status(404).json({ error: 'Project not found' });
-        if (project.creator_id !== userId) return res.status(403).json({ error: 'Only the project creator can rename' });
+        if (project.creator_id !== userId) return res.status(403).json({ error: 'Only the project creator can change this project' });
 
         const { data, error } = await supabase
             .from('projects')
-            .update({ title: trimmed, updated_at: new Date().toISOString() })
+            .update({ ...update.fields, updated_at: new Date().toISOString() })
             .eq('id', id)
             .select()
             .single();
@@ -2356,7 +2369,8 @@ router.patch('/:id', async (req, res) => {
             console.error(`[patch] DB update failed for ${id}: ${error.message}`);
             return res.status(500).json({ error: 'Could not save the new title' });
         }
-        console.log(`[patch] Project ${id} renamed to "${trimmed}"`);
+        console.log(`[patch] Project ${id} updated: ${Object.keys(update.fields).join(', ')}`);
+        if ('is_public' in update.fields) refreshBrowseCache();
         res.json({ success: true, project: data });
     } catch (err) {
         console.error('[patch] Error:', err.message);
@@ -2421,13 +2435,13 @@ router.post('/:id/fork', async (req, res) => {
             .insert({
                 id: forkId,
                 title: forkTitle,
-                description: `Forked from "${original.title}" by ${original.creator_name}. ${original.description || ''}`.substring(0, 500),
+                description: `Forked from "${original.title}" by ${publicCreatorName(original.creator_name, original.creator_id)}. ${original.description || ''}`.substring(0, 500),
                 bundle: original.bundle,
                 creator_id: userId,
                 creator_name: userName || 'Anonymous',
                 project_type: original.project_type || 'web_app',
                 initial_prompt: original.initial_prompt,
-                is_public: true,
+                is_public: false, // a fork is unlisted until its new owner lists it
                 play_count: 0,
                 fork_count: 0,
                 free_tweaks_remaining: FREE_TWEAKS_DEFAULT

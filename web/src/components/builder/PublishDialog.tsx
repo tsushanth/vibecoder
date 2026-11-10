@@ -15,11 +15,14 @@ interface Props {
   subscriptionTier?: string;
   /** Prefilled address for an app that is not published yet (the title in lowercase with hyphens, as on Android). */
   suggestedSubdomain?: string;
+  /** Whether the app is listed on Explore right now. New builds are not listed until the person turns this on. */
+  isListed?: boolean;
+  onListedChange?: (listed: boolean) => void;
   onClose: () => void;
   onPublished: (url: string) => void;
 }
 
-export function PublishDialog({ projectId, userId, subscriptionTier, suggestedSubdomain, onClose, onPublished }: Props) {
+export function PublishDialog({ projectId, userId, subscriptionTier, suggestedSubdomain, isListed = false, onListedChange, onClose, onPublished }: Props) {
   const t = useTranslations();
   const ta = useTranslations('apps.publish');
   const [subdomain, setSubdomain] = useState(suggestedSubdomain ?? '');
@@ -32,6 +35,11 @@ export function PublishDialog({ projectId, userId, subscriptionTier, suggestedSu
   const [isUndeploying, setIsUndeploying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // Whether the app is shown on the public Explore page. Off by default; changing it saves straight away.
+  const [listed, setListed] = useState(isListed);
+  const [isListing, setIsListing] = useState(false);
+  const [listError, setListError] = useState<string | null>(null);
 
   // Schema / jobs results of the last deploy, and the destructive-change confirmation
   const [outcome, setOutcome] = useState<DeployOutcome | null>(null);
@@ -234,6 +242,20 @@ export function PublishDialog({ projectId, userId, subscriptionTier, suggestedSu
     }
   }
 
+  async function handleListedChange(next: boolean) {
+    setListError(null);
+    setIsListing(true);
+    try {
+      await api.patch(`/api/projects/${projectId}`, { userId, isPublic: next });
+      setListed(next);
+      onListedChange?.(next);
+    } catch {
+      setListError(ta('listFailed'));
+    } finally {
+      setIsListing(false);
+    }
+  }
+
   function handleCopy() {
     if (!liveUrl) return;
     navigator.clipboard.writeText(liveUrl);
@@ -242,6 +264,24 @@ export function PublishDialog({ projectId, userId, subscriptionTier, suggestedSu
   }
 
   const isPro = effectiveTier(subscriptionTier) !== 'free';
+  const exploreToggle = (
+    <div className="mt-5 border-t border-border pt-5">
+      <label className="flex cursor-pointer items-start gap-3">
+        <input
+          type="checkbox"
+          checked={listed}
+          disabled={isListing}
+          onChange={(e) => void handleListedChange(e.target.checked)}
+          className="mt-1 h-4 w-4 shrink-0 accent-[var(--color-accent)]"
+        />
+        <span className="min-w-0">
+          <span className="block font-medium text-foreground">{ta('listTitle')}</span>
+          <span className="mt-0.5 block text-sm text-muted">{ta('listHint')}</span>
+        </span>
+      </label>
+      {listError && <p role="alert" className="mt-2 text-sm text-danger">{listError}</p>}
+    </div>
+  );
   const quietBtn = 'flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border px-3 text-sm font-medium transition hover:bg-surface';
 
   return (
@@ -334,6 +374,8 @@ export function PublishDialog({ projectId, userId, subscriptionTier, suggestedSu
                   </div>
                 )}
               </div>
+
+              {exploreToggle}
 
               {/* Custom domain */}
               <div className="mt-5 border-t border-border pt-5">
@@ -450,6 +492,7 @@ export function PublishDialog({ projectId, userId, subscriptionTier, suggestedSu
                 {isDeploying && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />}
                 {isDeploying ? ta('publishing') : ta('publish')}
               </button>
+              {exploreToggle}
             </form>
           )}
 

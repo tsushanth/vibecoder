@@ -1,5 +1,6 @@
 import { injectAppId } from "./appId.js";
 import { stripPrivateFiles } from "./publishFilter.js";
+import { promoScript } from "./promoBar.js";
 import express from "express";
 import { Buffer } from "buffer";
 import zlib from "zlib";
@@ -292,18 +293,6 @@ const ADSENSE_CLIENT_ID = process.env.ADSENSE_CLIENT_ID || '';
 const ADSENSE_AD_SLOT = process.env.ADSENSE_AD_SLOT || '';
 
 
-// Apple UGC guideline (1.2) requires a takedown affordance visible on every
-// public page that hosts user-generated content. The "Report" link uses a
-// mailto with the page's URL pre-filled so abuse@ can act within 24 hours.
-const PROMO_SCRIPT = `
-<!-- VibeBuild Promo -->
-<div id="vb-ad" style="position:fixed;bottom:0;left:0;right:0;z-index:999999;background:#111;border-top:1px solid #333;padding:8px 12px;display:flex;align-items:center;gap:8px;font-family:system-ui;font-size:13px;color:#ccc">
-  <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Built with <a href="https://vibebuild.cc" target="_blank" style="color:#7c3aed;text-decoration:none;font-weight:600">VibeBuild</a></span>
-  <a href="#" onclick="event.preventDefault();var u=encodeURIComponent(location.href);location.href='mailto:abuse@kreativekoala.com?subject=Report%20VibeBuild%20page&body=URL%3A%20'+u+'%0A%0AReason%3A%20';" style="color:#888;text-decoration:underline;font-size:11px;white-space:nowrap">Report</a>
-  <a href="https://vibebuild.cc" target="_blank" style="background:#7c3aed;color:#fff;padding:4px 12px;border-radius:12px;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap">Try Free</a>
-</div>
-<style>#vb-ad a:hover{opacity:0.9}body{padding-bottom:44px!important}</style>
-`;
 const ADSENSE_SCRIPT = ADSENSE_CLIENT_ID && ADSENSE_AD_SLOT ? `
 <!-- VibeBuild AdSense -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}" crossorigin="anonymous"></script>
@@ -314,8 +303,8 @@ const ADSENSE_SCRIPT = ADSENSE_CLIENT_ID && ADSENSE_AD_SLOT ? `
 <style>body{padding-bottom:60px!important}</style>
 ` : null;
 
-function injectAds(html, mode) {
-  const script = (mode === 'adsense' && ADSENSE_SCRIPT) ? ADSENSE_SCRIPT : PROMO_SCRIPT;
+function injectAds(html, mode, subdomain) {
+  const script = (mode === 'adsense' && ADSENSE_SCRIPT) ? ADSENSE_SCRIPT : promoScript(subdomain);
   if (html.includes('</body>')) {
     return html.replace('</body>', script + '</body>');
   }
@@ -385,7 +374,7 @@ async function serveFromStorage(subdomain, reqPath, res, { presetAppId = false }
     // Inject promo banner into all HTML pages
     // When AdSense is approved, switch to: const adMode = await getAdMode(subdomain);
     if (ext === ".html" || ext === ".htm") {
-      let html = injectAds(body.toString("utf-8"), "promo");
+      let html = injectAds(body.toString("utf-8"), "promo", subdomain);
       if (presetAppId) html = injectAppId(html, subdomain);
       body = Buffer.from(html);
     }

@@ -3,7 +3,8 @@
 const PLAY_BASE = 'https://play.google.com/store/apps/details?id=com.kreativekoala.vibecoder';
 
 /** Google Play listing, tagged so installs started from the landing page can be told apart. */
-export const PLAY_STORE_URL = `${PLAY_BASE}&utm_source=vibebuild_web&utm_medium=landing`;
+// `referrer` is what Google Play passes to the app after install (and shows in Play Console acquisition reports).
+export const PLAY_STORE_URL = `${PLAY_BASE}&utm_source=vibebuild_web&utm_medium=landing&referrer=${encodeURIComponent('utm_source=vibebuild_web&utm_medium=landing&utm_campaign=play_badge')}`;
 
 /**
  * App Store URL for the iOS app. EMPTY ON PURPOSE: the iOS badge is hidden until this holds a verified, live

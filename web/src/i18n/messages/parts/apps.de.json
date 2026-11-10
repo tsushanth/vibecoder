@@ -121,7 +121,10 @@
       "verify": "DNS prüfen",
       "verifying": "Wird geprüft...",
       "add": "Hinzufügen",
-      "adding": "Wird hinzugefügt..."
+      "adding": "Wird hinzugefügt...",
+      "listTitle": "In Entdecken anzeigen",
+      "listHint": "Andere können diese App auf der öffentlichen Seite Entdecken finden, öffnen und remixen. Dein Name erscheint als Vorname mit Initiale. Standardmäßig aus.",
+      "listFailed": "Die Einstellung wurde nicht gespeichert. Versuche es erneut."
     },
     "explore": {
       "title": "Entdecken",
