@@ -7,6 +7,9 @@
 
 const MIN_PROMPT_LENGTH = 15;
 const EMAIL_PATTERN = /^\S+@\S+\.\S+$/;
+// Role-play or system-prompt text pasted into the prompt box ("Act as a principal engineer...", "You are an expert...",
+// "[SOME_MODE_ENGAGED] ..."). It is not an app description, and its first words make a meaningless public title.
+const PREAMBLE_PATTERN = /^(?:act as\b|you are\b|you're\b|your task\b|\[[a-z0-9_ .-]{2,40}\])/;
 
 export function normalizePrompt(prompt) {
     return (prompt || '').trim().toLowerCase().replace(/\s+/g, ' ');
@@ -25,6 +28,7 @@ export function isRealProject(p) {
     const prompt = normalizePrompt(p.initial_prompt);
     if (prompt.length < MIN_PROMPT_LENGTH) return false;
     if (EMAIL_PATTERN.test(prompt) || EMAIL_PATTERN.test(title)) return false;
+    if (PREAMBLE_PATTERN.test(prompt)) return false;
     return true;
 }
 
