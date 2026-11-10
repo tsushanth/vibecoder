@@ -118,12 +118,11 @@ export default function PrivacyPage() {
           <section>
             <h2 className="font-display text-xl font-semibold text-foreground mb-3">9. SMS / Text Messaging</h2>
             <p>
-              If you text VibeBuild to generate an app or link your account, we collect your phone number and
-              message content to operate that feature. No mobile information will be shared with third parties
-              or affiliates for marketing or promotional purposes. Message and data rates may apply, and message
-              frequency varies. Reply STOP to opt out at any time, or HELP for help. See{' '}
-              <a href="/sms" className="text-accent-hover hover:underline">vibebuild.cc/sms</a> for details on how
-              to opt in and out.
+              Building apps by text message is currently not available and we are not sending text messages. If you
+              texted VibeBuild or linked a phone number in the past and want that phone number or those messages
+              deleted, contact us at support@vibebuild.cc. Phone numbers were used only to run that feature and were
+              never shared with third parties or affiliates for marketing or promotional purposes. See{' '}
+              <a href="/sms" className="text-accent-hover hover:underline">vibebuild.cc/sms</a> for the current status.
             </p>
           </section>
 
