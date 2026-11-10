@@ -112,7 +112,11 @@ class CreateViewModelTest {
 
     private val plan = BuildPlan(summary = "A todo app", features = listOf("Add", "Delete"), style = "Dark")
 
-    private fun TestScope.startBuild(vm: CreateViewModel, prompt: String = "make a todo app") {
+    /** Longer than PlanPolicy.SHORT_PROMPT_MAX_CHARS, so the build goes through the plan step as these tests expect. */
+    private val longPrompt = "make a todo app with a dark theme, due dates, drag to reorder, and a weekly summary screen. " +
+        "Keep the layout simple, big tap targets, and save everything on the device so it works offline."
+
+    private fun TestScope.startBuild(vm: CreateViewModel, prompt: String = longPrompt) {
         advanceUntilIdle()
         vm.updatePrompt(prompt)
         vm.startGeneration()
@@ -138,10 +142,10 @@ class CreateViewModelTest {
         advanceUntilIdle()
         assertEquals(ChatStage.Idle, vm.uiState.value.chatStage)
 
-        vm.updatePrompt("make a todo app")
+        vm.updatePrompt(longPrompt)
         vm.startGeneration()
         assertEquals(ChatStage.Planning, vm.uiState.value.chatStage)
-        assertEquals("make a todo app", vm.uiState.value.chatPrompt)
+        assertEquals(longPrompt, vm.uiState.value.chatPrompt)
         assertEquals("", vm.uiState.value.prompt)
 
         gate.complete(plan)
@@ -170,12 +174,22 @@ class CreateViewModelTest {
 
     @Test fun editPrompt_returns_to_idle_with_prompt_restored() = runTest {
         coEvery { projects.plan(any()) } returns plan
-        val vm = vm(); startBuild(vm, "my idea"); advanceUntilIdle()
+        val vm = vm(); startBuild(vm, longPrompt); advanceUntilIdle()
         assertEquals(ChatStage.PlanReady, vm.uiState.value.chatStage)
         vm.editPrompt()
         assertEquals(ChatStage.Idle, vm.uiState.value.chatStage)
-        assertEquals("my idea", vm.uiState.value.prompt)
+        assertEquals(longPrompt, vm.uiState.value.prompt)
         assertNull(vm.uiState.value.buildPlan)
+    }
+
+    @Test fun shortPrompt_skipsThePlanAndBuildsAtOnce() = runTest {
+        generateEmits(SseEvent.Queued("p1"), thenHang = true)
+        val vm = vm(); startBuild(vm, "A pomodoro timer with a task list")
+        runCurrent()
+        assertEquals(ChatStage.Building, vm.uiState.value.chatStage)
+        assertNull(vm.uiState.value.buildPlan)
+        coVerify(exactly = 0) { projects.plan(any()) }
+        vm.cancelGeneration()
     }
 
     @Test fun noPlan_goesStraightToBuilding() = runTest {
@@ -313,7 +327,7 @@ class CreateViewModelTest {
         assertEquals("Ready", snapshot.map["stage"])
         assertEquals("p1", snapshot.map["projectId"])
         assertEquals("u1", snapshot.map["userId"])
-        assertEquals("make a todo app", snapshot.map["prompt"])
+        assertEquals(longPrompt, snapshot.map["prompt"])
         vm.newChat()
     }
 

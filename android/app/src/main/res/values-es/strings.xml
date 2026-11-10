@@ -289,4 +289,7 @@
     <string name="paywall_retry">Reintentar</string>
     <string name="paywall_error_purchase">No se pudo completar la compra. Inténtalo de nuevo.</string>
     <string name="paywall_restore_none">No se encontró ninguna suscripción activa para esta cuenta de Google.</string>
+    <string name="explore_listing_title">Mostrar en Explorar</string>
+    <string name="explore_listing_hint">Permite que otras personas encuentren esta app en la página pública Explorar, donde pueden abrirla y remezclarla. Tu nombre aparece como nombre y una inicial. Desactivado por defecto.</string>
+    <string name="explore_listing_failed">No se guardó el ajuste. Inténtalo de nuevo.</string>
 </resources>

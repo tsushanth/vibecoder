@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kreativekoala.vibecoder.ui.theme.*
+import com.kreativekoala.vibecoder.ui.apps.explore.ExploreListingSection
 import com.kreativekoala.vibecoder.ui.apps.keys.AppKeysSection
 import kotlinx.coroutines.delay
 
@@ -153,6 +154,12 @@ fun BuildChatThread(
                 // If the app needs keys (third-party APIs, Stripe) this card shows what is missing, open, right where the build ends;
                 // it shows nothing for an app that needs none.
                 (state.buildProjectId ?: state.savedProjectId)?.let { AppKeysSection(projectId = it) }
+
+                // New builds are not shown on Explore until the creator turns this on
+                (state.buildProjectId ?: state.savedProjectId)?.let {
+                    Spacer(Modifier.height(8.dp))
+                    ExploreListingSection(projectId = it)
+                }
 
                 state.tweakTurns.forEachIndexed { i, turn ->
                     UserBubble(turn.text)
