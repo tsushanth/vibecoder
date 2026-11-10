@@ -24,8 +24,10 @@ supabase.auth.getUser = async (t) => (String(t).startsWith('tok-') ? { data: { u
 const { default: deployRouter } = await import('../../routes/deploy.routes.js');
 const { default: projects } = await import('../../routes/projects.routes.js');
 const { createAuthRouter } = await import('../../routes/auth.routes.js');
-const { removeSites, projectSiteSubdomains } = await import('../../lib/siteRemoval.js');
+const { removeSites, disableSiteApps, projectSiteSubdomains } = await import('../../lib/siteRemoval.js');
 
+const proxyCalls = []; let proxyFails = false;
+const proxy = { configured: true, setEnabled: async (app, on) => { proxyCalls.push([app, on]); if (proxyFails) throw Object.assign(new Error('x'), { code: 'unreachable' }); } };
 const realFetch = globalThis.fetch; let srv; let deployServer = []; let deployServerStatus = 200; let deployServerThrows = false;
 const origLog = { log: console.log, warn: console.warn, error: console.error };
 before(async () => {
@@ -36,12 +38,12 @@ before(async () => {
         if (deployServerThrows) return Promise.reject(new Error('connect ECONNREFUSED'));
         return Promise.resolve(new Response('{}', { status: deployServerStatus }));
     };
-    const app = express(); app.use(express.json()); app.locals.proxyAdmin = { configured: false };
+    const app = express(); app.use(express.json()); app.locals.proxyAdmin = proxy;
     app.use('/api/deploy', deployRouter); app.use('/api/projects', projects); app.use('/api/auth', createAuthRouter());
     srv = await listen(app);
 });
 after(async () => { globalThis.fetch = realFetch; Object.assign(console, origLog); await srv.close(); });
-const reset = () => { writes.length = 0; deployServer = []; deployServerStatus = 200; deployServerThrows = false; projectOwner = 'owner'; deployRows = [{ subdomain: 'my-app' }]; previewUrl = null; deploymentsDeleteFails = false; projectsDeleteFails = false; };
+const reset = () => { proxyCalls.length = 0; proxyFails = false; writes.length = 0; deployServer = []; deployServerStatus = 200; deployServerThrows = false; projectOwner = 'owner'; deployRows = [{ subdomain: 'my-app' }]; previewUrl = null; deploymentsDeleteFails = false; projectsDeleteFails = false; };
 const call = async (method, path, body, token) => {
     console.log = console.warn = console.error = () => {};
     try { return await realFetch(`${srv.base}${path}`, { method, headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify(body) }); }
@@ -168,4 +170,47 @@ test('removeSites: an unreachable deploy server is tried once, not once per site
     reset(); deployServerThrows = true;
     const r = await removeSites(['a-one', 'b-two', 'c-three'], { log: () => {} });
     assert.deepEqual(r, { removed: [], failed: ['a-one', 'b-two', 'c-three'] }); assert.equal(deployServer.length, 1);
+});
+
+test('project delete: the data-proxy apps of the site and the preview are switched off, before the site is removed', async () => {
+    reset(); previewUrl = 'https://preview-0123456789ab.vibebuild.cc'; deployRows = [{ subdomain: 'my-app' }, { subdomain: 'second-app' }];
+    const r = await call('DELETE', '/api/projects/p1', { userId: 'owner' }, 'tok-owner'); await r.text();
+    assert.equal(r.status, 200);
+    assert.deepEqual(proxyCalls, [['my-app', false], ['second-app', false], ['preview-0123456789ab', false]]);
+});
+
+test('project delete: a proxy outage does not block the delete or the site removal; a refused or foreign delete disables nothing', async () => {
+    reset(); proxyFails = true;
+    let r = await call('DELETE', '/api/projects/p1', { userId: 'owner' }, 'tok-owner'); await r.text();
+    assert.equal(r.status, 200); assert.equal(deployServer.length, 1);
+    reset();
+    r = await call('DELETE', '/api/projects/p1', { userId: 'other' }, 'tok-other'); await r.text();
+    assert.equal(r.status, 403); assert.deepEqual(proxyCalls, []);
+    reset(); deploymentsDeleteFails = true;
+    r = await call('DELETE', '/api/projects/p1', { userId: 'owner' }, 'tok-owner'); await r.text();
+    assert.equal(r.status, 500); assert.deepEqual(proxyCalls, []);
+});
+
+test('account delete: the data-proxy apps of every site and preview are switched off; nothing without the account\'s token', async () => {
+    reset(); previewUrl = 'https://preview-0123456789ab.vibebuild.cc'; deployRows = [{ subdomain: 'my-app' }];
+    let r = await call('DELETE', '/api/auth/account', {}, 'tok-owner'); await r.text();
+    assert.equal(r.status, 200); assert.deepEqual(proxyCalls.map((c) => c.join(':')).sort(), ['my-app:false', 'preview-0123456789ab:false']);
+    reset(); r = await call('DELETE', '/api/auth/account', {}); await r.text();
+    assert.equal(r.status, 401); assert.deepEqual(proxyCalls, []);
+    reset(); projectsDeleteFails = true; r = await call('DELETE', '/api/auth/account', {}, 'tok-owner'); await r.text();
+    assert.equal(r.status, 500); assert.deepEqual(proxyCalls, []);
+    reset(); proxyFails = true; r = await call('DELETE', '/api/auth/account', {}, 'tok-owner'); await r.text();
+    assert.equal(r.status, 200);
+});
+
+test('disableSiteApps: idempotent, skips duplicates, never throws, ignores an unconfigured proxy', async () => {
+    reset(); const quiet = () => {};
+    assert.deepEqual(await disableSiteApps(proxy, ['my-app', 'my-app', 'preview-abc123'], { log: quiet }), { disabled: ['my-app', 'preview-abc123'], failed: [] });
+    assert.deepEqual(await disableSiteApps(proxy, ['my-app'], { log: quiet }), { disabled: ['my-app'], failed: [] });
+    proxyFails = true;
+    assert.deepEqual(await disableSiteApps(proxy, ['my-app'], { log: quiet }), { disabled: [], failed: ['my-app'] });
+    proxy.setEnabled = async () => { throw Object.assign(new Error('x'), { code: 'unknown_app' }); };
+    assert.deepEqual(await disableSiteApps(proxy, ['my-app'], { log: quiet }), { disabled: ['my-app'], failed: [] });
+    assert.deepEqual(await disableSiteApps({ configured: false }, ['my-app'], { log: quiet }), { disabled: [], failed: ['my-app'] });
+    assert.deepEqual(await disableSiteApps(proxy, [], { log: quiet }), { disabled: [], failed: [] });
 });

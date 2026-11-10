@@ -29,7 +29,7 @@ import { recordLlm } from '../lib/llmUsageInstance.js';
 import { registerDeployedApp } from '../services/appRegistry.js';
 import { captureChatSecrets, redactForLog } from '../services/chatSecrets.js';
 import { denyUnlessActor } from '../lib/actAs.js';
-import { removeSites, projectSiteSubdomains } from '../lib/siteRemoval.js';
+import { removeSites, disableSiteApps, projectSiteSubdomains } from '../lib/siteRemoval.js';
 import { looksLikePastedCode } from '../lib/promptGuard.js';
 import { deriveTitle } from '../lib/projectTitle.js';
 import { publicCreatorName, withPublicCreator } from '../lib/creatorHandle.js';
@@ -1715,6 +1715,8 @@ router.get('/:id/progress', async (req, res) => {
     }
 });
 
+const UUID_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 // ============================================
 // GET /api/projects/:id
 // Returns project metadata + base64 bundle
@@ -1802,6 +1804,8 @@ router.post('/:id/export-apk', async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        // Project ids are uuids. Anything else (a probe of /api/projects/public, a stale link) is a plain not-found, not a database error.
+        if (!UUID_ID.test(id)) return res.status(404).json({ error: 'Project not found' });
 
         const { data, error } = await supabase
             .from('projects')
@@ -2524,6 +2528,7 @@ router.delete('/:id', async (req, res) => {
 
         // The published site and the preview must not outlive the project. Only after the rows are gone, so a failed delete leaves
         // the site up; a deploy-server failure is logged and reported but never blocks the delete.
+        await disableSiteApps(req.app.locals.proxyAdmin, sites);
         await removeSites(sites);
 
         // If project had a GitHub repo, notify worker to clean up (fire-and-forget)

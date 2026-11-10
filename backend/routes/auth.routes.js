@@ -2,7 +2,7 @@ import express from 'express';
 import { supabase, supabaseAdmin } from '../config/database.js';
 import { verifiedUserId } from '../lib/verifiedUser.js';
 import { recordSignupSource } from '../lib/signupSource.js';
-import { removeSites, projectSiteSubdomains } from '../lib/siteRemoval.js';
+import { removeSites, disableSiteApps, projectSiteSubdomains } from '../lib/siteRemoval.js';
 
 export function createAuthRouter({ verifyUser = verifiedUserId } = {}) {
 const router = express.Router();
@@ -36,6 +36,7 @@ router.delete('/account', async (req, res) => {
         // user retries. A deploy-server failure is logged and reported but never blocks the deletion.
         if (!failed.includes('projects')) {
             const sites = [...new Set([...projectSiteSubdomains({ deployments: siteRows }), ...(mine || []).flatMap((p) => projectSiteSubdomains({ previewUrl: p.preview_url }))])];
+            await disableSiteApps(req.app.locals.proxyAdmin, sites);
             await removeSites(sites);
         }
         await run('coin_transactions', (q) => q.delete().eq('user_id', userId));

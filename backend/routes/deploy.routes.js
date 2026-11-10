@@ -56,6 +56,10 @@ router.post('/:projectId/deploy', async (req, res) => {
         const { userId, subdomain } = req.body;
         if (!userId || !subdomain) return res.status(400).json({ error: 'userId and subdomain are required' });
 
+        // The id in the body is not proof (creator ids are public): a real account must send its own token, which must be this user's.
+        // Anonymous device ids have no account to protect and still publish without one. Checked before any project is read or deployed.
+        if (await denyUnlessActor(req, res, userId, { verifyUser: req.app.locals.verifyUser || verifiedUserId })) return;
+
         // Validate subdomain
         if (!/^[a-z0-9][a-z0-9-]{1,60}[a-z0-9]$/.test(subdomain)) {
             return res.status(400).json({ error: 'Invalid subdomain. Use lowercase letters, numbers, and hyphens.' });
@@ -232,6 +236,7 @@ router.post('/:projectId/ads', async (req, res) => {
 
         if (!userId) return res.status(400).json({ error: 'userId is required' });
         if (typeof enabled !== 'boolean') return res.status(400).json({ error: 'enabled (boolean) is required' });
+        if (await denyUnlessActor(req, res, userId, { verifyUser: req.app.locals.verifyUser || verifiedUserId })) return;
 
         // Verify ownership
         const { data: project } = await supabase.from('projects').select('creator_id').eq('id', projectId).single();
