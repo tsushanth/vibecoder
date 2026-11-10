@@ -76,3 +76,16 @@ test('a junk project earlier in the list does not shadow a real duplicate prompt
     const real = good({ id: 'real' });
     assert.deepEqual(filterBrowseProjects([junk, real]).map((p) => p.id), ['real']);
 });
+
+for (const prompt of [
+    'Act as a Principal Software Architect and Full-Stack Engineer. Build me a dashboard',
+    'You are an expert Senior Full-Stack Mobile App Developer and UI/UX Designer',
+    "You're a world class designer, make a landing page",
+    '[FORGE_V2_ENGAGED]\nFORGE_V2_MASTER // VER 2.20.0',
+]) test(`rejects a pasted role-play preamble: ${prompt.slice(0, 24)}`, () => assert.equal(isRealProject(good({ initial_prompt: prompt })), false));
+
+for (const prompt of [
+    'Build an actuary retirement calculator',
+    'Build a game where you are a pirate collecting treasure',
+    'A tracker for [mood] entries with a calendar',
+]) test(`keeps a normal prompt: ${prompt.slice(0, 24)}`, () => assert.equal(isRealProject(good({ initial_prompt: prompt })), true));
