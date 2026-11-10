@@ -15,7 +15,8 @@ import 'dotenv/config';
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
 const DEPLOY_SERVER_URL = 'https://vibecoder-deploy.fly.dev';
-const SCREENSHOT_SERVICE_URL = 'http://178.156.231.255:3465';
+const SCREENSHOT_SERVICE_URL = process.env.SCREENSHOT_SERVICE_URL || 'http://178.156.231.255:3465';
+const BASE_DOMAIN = process.env.BASE_DOMAIN || 'vibebuild.cc';
 
 const args = process.argv.slice(2);
 const APPLY = args.includes('--apply');
@@ -37,7 +38,7 @@ async function deployPreview(id, bundle) {
         const body = await res.text().catch(() => '');
         throw new Error(`deploy HTTP ${res.status}: ${body.substring(0, 150)}`);
     }
-    return { subdomain, previewUrl: `https://${subdomain}.vibecoder.app` };
+    return { subdomain, previewUrl: `https://${subdomain}.${BASE_DOMAIN}` };
 }
 
 function thumbnailUrlFor(previewUrl) {
