@@ -12,7 +12,7 @@ import { SUBSCRIPTION_TIERS } from '@/lib/constants';
 const STEPS = [
   { title: 'Describe', detail: 'Say what you want in plain English, or start from an idea.' },
   { title: 'Generate', detail: 'VibeBuild plans the app, writes it, and checks that it runs.' },
-  { title: 'Preview', detail: 'Your app opens live in seconds. Ask for changes the way you asked for the app.' },
+  { title: 'Preview', detail: 'Your app opens live in about a minute. Ask for changes the way you asked for the app.' },
   { title: 'Publish', detail: 'One tap gives it a web address you can share.' },
 ];
 
