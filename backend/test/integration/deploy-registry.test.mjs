@@ -130,12 +130,17 @@ test('a deploy only allows destructive schema changes when the request says allo
 });
 
 test('confirming a destructive change without a verified owner token is 403 and nothing is deployed or pushed', async () => {
-    for (const token of [undefined, 'tok-other', 'tok-bogus']) {
+    // Publishing itself now needs the owner's token for a real account, so another user's token is refused before the schema check.
+    // Only the anonymous-id path (no account row, no token) can still reach the destructive-confirmation check.
+    for (const token of [undefined, 'tok-bogus']) {
         reset();
         const r = await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app', allowDestructiveSchema: true }, 'proj-schema', token));
         assert.equal(r.status, 403, String(token)); assert.equal((await r.json()).error, 'destructive_confirmation_requires_owner');
         assert.deepEqual(calls, [], String(token));
     }
+    reset();
+    const other = await quiet(() => post(srv, { userId: 'owner-1', subdomain: 'my-app', allowDestructiveSchema: true }, 'proj-schema', 'tok-other'));
+    assert.equal(other.status, 403); assert.deepEqual(calls, []);
 });
 
 test('a needs_confirmation answer carries the destructive list (names only) and a normal deploy needs no token', async () => {

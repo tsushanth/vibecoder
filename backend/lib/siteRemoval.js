@@ -4,6 +4,7 @@
 import { DEPLOY_SERVER_URL } from '../config/constants.js';
 import { deployServerHeaders } from './deployServerAuth.js';
 import { reportFailure } from './failureReporter.js';
+import { disableDeployedApp } from '../services/appRegistry.js';
 
 const SUBDOMAIN = /^[a-z0-9][a-z0-9-]{1,60}[a-z0-9]$/;
 const PREVIEW = /^preview-[a-z0-9-]+$/;
@@ -42,4 +43,17 @@ export async function removeSites(subdomains, { fetchImpl = globalThis.fetch, ba
     }
     if (failed.length) reportFailure('deploy:site_removal', new Error('site removal failed'), { failed: String(failed.length), total: String(names.length) });
     return { removed, failed };
+}
+
+/** Switches the data-proxy app of each subdomain off, so a deleted site's backing app stops answering. Idempotent (an app that was
+ *  never registered, or is already off, counts as done), runs every name, and never throws. Returns { disabled, failed }. */
+export async function disableSiteApps(proxyAdmin, subdomains, { log = console.warn } = {}) {
+    const disabled = []; const failed = [];
+    for (const name of [...new Set(subdomains || [])]) {
+        let ok = false;
+        try { ok = await disableDeployedApp(proxyAdmin, name, log); } catch { ok = false; }
+        // disableDeployedApp is false both for a proxy failure and when the proxy is not configured or the name is not valid.
+        (ok ? disabled : failed).push(name);
+    }
+    return { disabled, failed };
 }

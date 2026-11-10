@@ -214,23 +214,34 @@ test('progress GET: failed status, userId ownership check, retry uses updated_at
 // ---------------- GET /:id and GET /:id/files: missing project is 404, real DB failure stays 500 ----------------
 test('GET /:id: unknown or deleted project id is 404 {error: "Project not found"}, not 500', async () => {
     projectRow = null;
-    const r = await quiet(() => realFetch(url('/no-such-project')));
+    const r = await quiet(() => realFetch(url('/'+'11111111-2222-4333-8444-555555555555')));
     assert.equal(r.status, 404); assert.deepEqual(await r.json(), { error: 'Project not found' });
 });
 
+test('GET /:id: an id that is not a uuid (e.g. /api/projects/public) is 404 without touching the database', async () => {
+    projectRow = { id: 'public', title: 'x', creator_id: 'owner', bundle: 'QUJD', github_repo: null };
+    dbError = { code: '22P02', message: 'invalid input syntax for type uuid: "public"' };
+    try {
+        for (const bad of ['public', 'no-such-project', '123', 'null']) {
+            const r = await quiet(() => realFetch(url('/' + bad)));
+            assert.equal(r.status, 404, bad); assert.deepEqual(await r.json(), { error: 'Project not found' });
+        }
+    } finally { dbError = null; }
+});
+
 test('GET /:id: an existing project is still returned (200) and its play count update is fired', async () => {
-    projectRow = { id: 'gp', title: 'Got', creator_id: 'owner', bundle: 'QUJD', github_repo: null, play_count: 1 };
-    const r = await quiet(() => realFetch(url('/gp')));
+    projectRow = { id: '11111111-2222-4333-8444-555555555555', title: 'Got', creator_id: 'owner', bundle: 'QUJD', github_repo: null, play_count: 1 };
+    const r = await quiet(() => realFetch(url('/'+'11111111-2222-4333-8444-555555555555')));
     assert.equal(r.status, 200);
     const b = await r.json();
-    assert.equal(b.success, true); assert.equal(b.project.id, 'gp'); assert.equal(b.project.bundle, 'QUJD');
+    assert.equal(b.success, true); assert.equal(b.project.id, '11111111-2222-4333-8444-555555555555'); assert.equal(b.project.bundle, 'QUJD');
 });
 
 test('GET /:id: a real database error (not "no rows") is still a 500', async () => {
-    projectRow = { id: 'gp', title: 'Got', creator_id: 'owner', bundle: 'QUJD', github_repo: null };
+    projectRow = { id: '11111111-2222-4333-8444-555555555555', title: 'Got', creator_id: 'owner', bundle: 'QUJD', github_repo: null };
     dbError = { code: '57P01', message: 'terminating connection due to administrator command' };
     try {
-        const r = await quiet(() => realFetch(url('/gp')));
+        const r = await quiet(() => realFetch(url('/'+'11111111-2222-4333-8444-555555555555')));
         assert.equal(r.status, 500); assert.deepEqual(await r.json(), { error: 'Failed to fetch project' });
     } finally { dbError = null; }
 });
