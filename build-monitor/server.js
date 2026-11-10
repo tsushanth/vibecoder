@@ -268,7 +268,7 @@ async function deployPreview(projectId, bundle) {
             headers: { 'Content-Type': 'application/json', 'x-internal-secret': process.env.INTERNAL_SECRET || '' },
             body: JSON.stringify({ subdomain, bundle })
         });
-        if (res.ok) return `https://${subdomain}.vibecoder.app`;
+        if (res.ok) return `https://${subdomain}.${process.env.BASE_DOMAIN || 'vibebuild.cc'}`;
     } catch {}
     return null;
 }
