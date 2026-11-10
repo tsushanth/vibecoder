@@ -28,6 +28,7 @@ import { recordLlm } from '../lib/llmUsageInstance.js';
 import { registerDeployedApp } from '../services/appRegistry.js';
 import { captureChatSecrets, redactForLog } from '../services/chatSecrets.js';
 import { denyUnlessActor } from '../lib/actAs.js';
+import { deriveTitle } from '../lib/projectTitle.js';
 import { recordSignupSource } from '../lib/signupSource.js';
 
 const router = express.Router();
@@ -618,12 +619,7 @@ router.post('/generate', async (req, res) => {
 
         // Create placeholder project in "building" state so it shows in My Projects immediately
         try {
-            let title = prompt.trim()
-                .replace(/^(build|create|make|design|develop)\s+(a|an|the|me\s+a|me\s+an)?\s*/i, '')
-                .replace(/\s+(with|that|where|which|for|using|featuring|including|and\s+a)\s+.*/i, '')
-                .split(/\s+/).slice(0, 5).join(' ')
-                .substring(0, 50) || 'My App';
-            title = title.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            const title = deriveTitle(prompt);
 
             const { data: placeholder, error: phErr } = await supabase
                 .from('projects')
@@ -780,12 +776,7 @@ router.post('/generate', async (req, res) => {
                             console.log(`[generate] Updated project ${finalProjectId} with bundle`);
                         } else {
                             // Fallback: create new project if placeholder wasn't created
-                            let title = prompt.trim()
-                                .replace(/^(build|create|make|design|develop)\s+(a|an|the|me\s+a|me\s+an)?\s*/i, '')
-                                .replace(/\s+(with|that|where|which|for|using|featuring|including|and\s+a)\s+.*/i, '')
-                                .split(/\s+/).slice(0, 5).join(' ')
-                                .substring(0, 50) || 'My App';
-                            title = title.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                            const title = deriveTitle(prompt);
                             const { data: saved } = await supabase.from('projects').insert({
                                 title, description: prompt, bundle: parsed.bundle,
                                 creator_id: userId, creator_name: userName || 'VibeBuild User',
