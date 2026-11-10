@@ -2,6 +2,7 @@ import express from 'express';
 import { supabase, supabaseAdmin } from '../config/database.js';
 import { verifiedUserId } from '../lib/verifiedUser.js';
 import { recordSignupSource } from '../lib/signupSource.js';
+import { removeSites, projectSiteSubdomains } from '../lib/siteRemoval.js';
 
 export function createAuthRouter({ verifyUser = verifiedUserId } = {}) {
 const router = express.Router();
@@ -23,11 +24,20 @@ router.delete('/account', async (req, res) => {
             const { error } = await build(supabase.from(table));
             if (error) { failed.push(table); console.warn(`Warning: failed to delete from ${table}:`, error.message); }
         };
-        const { data: mine } = await supabase.from('projects').select('id').eq('creator_id', userId);
+        const { data: mine } = await supabase.from('projects').select('id, preview_url').eq('creator_id', userId);
         const projectIds = (mine || []).map((p) => p.id);
+        // The sites to take off the deploy server, read now because the rows that name them are deleted next.
+        let siteRows = [];
+        if (projectIds.length) { const { data } = await supabase.from('deployments').select('subdomain').in('project_id', projectIds); siteRows = data || []; }
         await run('project_chats', (q) => q.delete().eq('user_id', userId));
         if (projectIds.length) await run('deployments', (q) => q.delete().in('project_id', projectIds));
         await run('projects', (q) => q.delete().eq('creator_id', userId));
+        // Once the projects are gone nothing names their sites any more, so take them down now, even if a later step fails and the
+        // user retries. A deploy-server failure is logged and reported but never blocks the deletion.
+        if (!failed.includes('projects')) {
+            const sites = [...new Set([...projectSiteSubdomains({ deployments: siteRows }), ...(mine || []).flatMap((p) => projectSiteSubdomains({ previewUrl: p.preview_url }))])];
+            await removeSites(sites);
+        }
         await run('coin_transactions', (q) => q.delete().eq('user_id', userId));
         await run('user_coins', (q) => q.delete().eq('user_id', userId));
         await run('users', (q) => q.delete().eq('user_id', userId));
