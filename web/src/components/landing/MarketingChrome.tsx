@@ -40,6 +40,7 @@ export function MarketingFooter() {
           <Link href="/faq" className="transition hover:text-foreground">FAQ</Link>
           <Link href="/terms" className="transition hover:text-foreground">Terms</Link>
           <Link href="/privacy" className="transition hover:text-foreground">Privacy</Link>
+          <Link href="/delete-account" className="transition hover:text-foreground">Delete account</Link>
         </div>
         <p className="text-sm text-subtle">&copy; {new Date().getFullYear()} VibeBuild</p>
       </div>
