@@ -14,7 +14,7 @@ export default function PrivacyPage() {
 
       <div className="max-w-3xl mx-auto px-6 py-12">
         <h1 className="font-display text-4xl font-bold mb-2">Privacy Policy</h1>
-        <p className="text-sm text-subtle mb-10">Last updated: November 10, 2026</p>
+        <p className="text-sm text-subtle mb-10">Last updated: November 11, 2026</p>
 
         <div className="space-y-8 text-muted leading-relaxed text-sm">
           <section>
@@ -67,7 +67,7 @@ export default function PrivacyPage() {
             <p>We do not sell your personal information. We may share data with:</p>
             <ul className="list-disc pl-6 mt-2 space-y-1">
               <li><strong className="text-foreground">Service providers</strong> — hosting (Fly.io), database and file storage (Supabase), sign-in and push notifications (Google, Firebase), purchase management (RevenueCat), and analytics and attribution partners (Google Firebase Analytics, Meta, TikTok) that help us operate the Service</li>
-              <li><strong className="text-foreground">AI providers</strong> — your app prompts and the generated code are sent to AI model providers (currently Anthropic) for processing. Do not put personal information in prompts</li>
+              <li><strong className="text-foreground">AI providers</strong> — your app prompts and, when you edit an app, its files are sent to AI model providers to build it. Our build server sends builds to models offered through OpenRouter from OpenAI, Moonshot AI and DeepSeek, and can also run builds with Anthropic (Claude); short &quot;plan&quot; and &quot;ideas&quot; requests, which contain only your prompt, go to Anthropic. These providers process the text under their own terms. We try to remove passwords and API keys that you paste into a prompt before it is sent on, but this only catches common formats, so do not put personal information or secrets in prompts</li>
               <li><strong className="text-foreground">Legal requirements</strong> — when required by law, court order, or governmental authority</li>
             </ul>
           </section>
@@ -87,7 +87,7 @@ export default function PrivacyPage() {
               We retain your account data and projects as long as your account is active. You can delete your
               account in the app (Account, then Delete account) or on the website (Settings, then Delete account), or
               ask us by email; see <a href="/delete-account" className="text-accent-hover hover:underline">how to delete your account</a>.
-              Deleting an account removes your profile, projects, chats and coin history; we remove any remaining
+              Deleting an account removes your profile, projects (including the private copy of each app&apos;s code and its preview screenshot), keys you added for your generated apps, chats and coin history; we remove any remaining
               personal data within 30 days, except where retention is required by law. Data held by Google, Meta,
               TikTok and our other providers follows their own policies. Anonymous, aggregated data may be retained
               indefinitely for analytics purposes.

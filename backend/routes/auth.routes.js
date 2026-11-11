@@ -4,8 +4,12 @@ import { verifiedUserId } from '../lib/verifiedUser.js';
 import { recordSignupSource } from '../lib/signupSource.js';
 import { removeSites, disableSiteApps, projectSiteSubdomains } from '../lib/siteRemoval.js';
 import { appEvents, buildEvents, sourceFromRequest } from '../lib/appEventsInstance.js';
+import { deleteAccountExternalData } from '../lib/accountCleanup.js';
 
-export function createAuthRouter({ verifyUser = verifiedUserId } = {}) {
+// `externalCleanup` removes what lives outside the main database (GitHub repos, screenshots, stored keys); injectable for tests.
+const defaultExternalCleanup = (args) => deleteAccountExternalData({ ...args, storage: (supabaseAdmin || supabase).storage });
+
+export function createAuthRouter({ verifyUser = verifiedUserId, externalCleanup = defaultExternalCleanup, admin = supabaseAdmin } = {}) {
 const router = express.Router();
 
 // DELETE /api/auth/account - Delete user account and all associated data
@@ -25,18 +29,26 @@ router.delete('/account', async (req, res) => {
             const { error } = await build(supabase.from(table));
             if (error) { failed.push(table); console.warn(`Warning: failed to delete from ${table}:`, error.message); }
         };
-        const { data: mine } = await supabase.from('projects').select('id, preview_url').eq('creator_id', userId);
+        const { data: mine, error: mineError } = await supabase.from('projects').select('id, preview_url, github_repo').eq('creator_id', userId);
+        // Without the project list the repos, screenshots and keys cannot be found, and the login must not be removed over data we could not see.
+        if (mineError) return res.status(500).json({ error: 'Could not delete all account data. Please try again.', failed: ['projects'] });
         const projectIds = (mine || []).map((p) => p.id);
         // The sites to take off the deploy server, read now because the rows that name them are deleted next.
         let siteRows = [];
         if (projectIds.length) { const { data } = await supabase.from('deployments').select('subdomain').in('project_id', projectIds); siteRows = data || []; }
+        const sites = [...new Set([...projectSiteSubdomains({ deployments: siteRows }), ...(mine || []).flatMap((p) => projectSiteSubdomains({ previewUrl: p.preview_url }))])];
+        // The private GitHub repos, preview screenshots and stored app keys are removed FIRST, while the rows that name them still exist: if
+        // any step fails the request stops here with everything else intact, and a retry finds the same list (each step is idempotent).
+        if (projectIds.length) {
+            const external = await externalCleanup({ projects: mine, subdomains: sites, proxyAdmin: req.app.locals.proxyAdmin });
+            if (external.failed.length) return res.status(500).json({ error: 'Could not delete all account data. Please try again.', failed: external.failed });
+        }
         await run('project_chats', (q) => q.delete().eq('user_id', userId));
         if (projectIds.length) await run('deployments', (q) => q.delete().in('project_id', projectIds));
         await run('projects', (q) => q.delete().eq('creator_id', userId));
         // Once the projects are gone nothing names their sites any more, so take them down now, even if a later step fails and the
         // user retries. A deploy-server failure is logged and reported but never blocks the deletion.
         if (!failed.includes('projects')) {
-            const sites = [...new Set([...projectSiteSubdomains({ deployments: siteRows }), ...(mine || []).flatMap((p) => projectSiteSubdomains({ previewUrl: p.preview_url }))])];
             await disableSiteApps(req.app.locals.proxyAdmin, sites);
             await removeSites(sites);
         }
@@ -49,8 +61,8 @@ router.delete('/account', async (req, res) => {
         if (failed.length) return res.status(500).json({ error: 'Could not delete all account data. Please try again.', failed });
 
         // Delete auth user via admin API if available
-        if (supabaseAdmin) {
-            const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+        if (admin) {
+            const { error: authError } = await admin.auth.admin.deleteUser(userId);
             if (authError) {
                 console.warn('Warning: failed to delete auth user:', authError.message);
             }
