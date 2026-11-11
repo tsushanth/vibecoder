@@ -39,7 +39,7 @@ before(async () => {
         return Promise.resolve(new Response('{}', { status: deployServerStatus }));
     };
     const app = express(); app.use(express.json()); app.locals.proxyAdmin = proxy;
-    app.use('/api/deploy', deployRouter); app.use('/api/projects', projects); app.use('/api/auth', createAuthRouter());
+    app.use('/api/deploy', deployRouter); app.use('/api/projects', projects); app.use('/api/auth', createAuthRouter({ externalCleanup: async () => ({ failed: [] }) }));
     srv = await listen(app);
 });
 after(async () => { globalThis.fetch = realFetch; Object.assign(console, origLog); await srv.close(); });

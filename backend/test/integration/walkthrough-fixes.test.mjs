@@ -22,7 +22,7 @@ stubSupabase(supabase, (q) => {
 const { default: projects } = await import('../../routes/projects.routes.js');
 const { createAuthRouter } = await import('../../routes/auth.routes.js');
 let verified = 'u1'; // what the access token proves; null = no or bad token
-const auth = createAuthRouter({ verifyUser: async () => verified });
+const auth = createAuthRouter({ verifyUser: async () => verified, externalCleanup: async () => ({ failed: [] }) }); // external cleanup has its own tests (account-deletion-cleanup)
 
 const realFetch = globalThis.fetch; let workerCalls = 0, srv;
 before(async () => {

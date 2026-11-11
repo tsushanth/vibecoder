@@ -48,7 +48,7 @@ const sse = (...evts) => new Response(evts.map((e) => `data: ${JSON.stringify(e)
 before(async () => {
     globalThis.fetch = (url, o = {}) => { const u = new URL(String(url)); if (u.hostname === '127.0.0.1') return realFetch(url, o); if (u.hostname === 'worker.test') return Promise.resolve().then(() => worker(u, o)); return Promise.resolve(new Response('{}', { status: 200 })); };
     const app = express(); app.set('trust proxy', true); app.use(express.json());
-    app.use('/api/projects', projects); app.use('/api/auth', createAuthRouter({ verifyUser })); app.use('/api/events', createEventsRouter({ verifyUser })); app.use('/api/deploy', deploy);
+    app.use('/api/projects', projects); app.use('/api/auth', createAuthRouter({ verifyUser, externalCleanup: async () => ({ failed: [] }) })); app.use('/api/events', createEventsRouter({ verifyUser })); app.use('/api/deploy', deploy);
     app.locals.verifyUser = verifyUser;
     srv = await listen(app);
     await new Promise((r) => setTimeout(r, 100));

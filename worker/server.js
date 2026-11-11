@@ -26,6 +26,7 @@ import { loadVibeSdk, injectSdk, withVibeRules } from './lib/vibe.js';
 import { scanGenerated, allowedHostsFor, userMessageForCause } from './lib/scan.js';
 import { requireSecret } from './lib/requireSecret.js';
 import { reportFailure, installCrashHandlers } from './lib/failureReporter.js';
+import { deleteAppRepo } from './lib/githubRepo.js';
 import { deliverCallback } from './lib/callback.js';
 import { registerGameRoutes } from './lib/gameRoutes.js';
 import { createSlotTracker } from './lib/slots.js';
@@ -957,6 +958,20 @@ app.get('/bundle/:repoName', authMiddleware, async (req, res) => {
     } finally {
         try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
     }
+});
+
+// ============================================
+// DELETE /repo/:repoName  (account deletion)
+// Deletes the app's private repo. 200 { deleted } also when the repo was already gone; any other outcome is an error so the
+// caller can retry. Only app-<projectId> repos in the configured org can be named.
+// ============================================
+
+app.delete('/repo/:repoName', authMiddleware, async (req, res) => {
+    if (!GITHUB_PAT) return res.status(503).json({ error: 'Git not configured' });
+    const out = await deleteAppRepo({ pat: GITHUB_PAT, org: GITHUB_ORG, repoName: req.params.repoName });
+    if (out.ok) return res.json({ success: true, deleted: !out.alreadyGone, alreadyGone: out.alreadyGone });
+    console.warn(`[repo-delete] GitHub answered ${out.status || 'no response'}`);   // status only: no repo name, no user data
+    res.status(out.status === 400 ? 400 : 502).json({ error: 'Failed to delete repo' });
 });
 
 // ============================================
