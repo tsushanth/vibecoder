@@ -1,30 +1,27 @@
-VibeBuild trasforma le tue idee in app funzionanti usando l'IA. Descrivi semplicemente cosa vuoi creare con le tue parole, e VibeBuild genera un'applicazione web completamente funzionante in pochi secondi. Crea e gestisci le tue app anche sul web su vibebuild.cc.
+VibeBuild è un creatore di app con l'IA, gratuito, per Android. Descrivi con parole tue l'app che vuoi, guarda l'IA costruirla, provala in anteprima nell'app e pubblicala sul tuo link latuaapp.vibebuild.cc. Non serve saper programmare.
 
-Nessuna esperienza di programmazione necessaria. Che tu sia un principiante che esplora lo sviluppo di app o un professionista che crea prototipi rapidamente, VibeBuild rende tutto semplice.
+Vuoi creare un'app da una descrizione? Scrivi qualcosa come "un tracker delle spese con tema scuro" e VibeBuild la genera per te. È un creatore di app senza codice per chi ha un'idea ma non programma, e un modo rapido per gli sviluppatori di provare un'idea. Se ti piace il vibe coding, qui tu descrivi e l'IA scrive il codice.
 
 COME FUNZIONA
-1. Descrivi la tua idea di app in poche parole o frasi
-2. Guarda l'IA costruire la tua app in tempo reale con una vista di avanzamento dal vivo
-3. Visualizza l'anteprima della tua app istantaneamente nell'applicazione
-4. Salva le tue creazioni e accedi in qualsiasi momento
-5. Pubblica sul web e condividi la tua app su tuaapp.vibebuild.cc
+1. Descrivi l'idea della tua app in poche parole o frasi
+2. Segui l'avanzamento della creazione in tempo reale
+3. Guarda l'anteprima della tua app direttamente in VibeBuild
+4. Perfezionala chattando con l'IA: cambia colori, funzioni e layout
+5. Pubblicala sul web e condividi il link latuaapp.vibebuild.cc
 
-FUNZIONALITA
-- Generazione con IA: Descrivi qualsiasi idea di app e ottieni codice funzionante generato istantaneamente
-- Anteprima dal vivo: Vedi la tua app in esecuzione subito dopo la generazione
-- Pubblicazione sul web: Condividi la tua app su tuaapp.vibebuild.cc, accessibile da qualsiasi browser
-- Salva e gestisci: Tieni tutte le tue app generate organizzate in un unico posto
-- Schede suggerimenti: Lasciati ispirare da idee creative di app da provare
-- Avanzamento in tempo reale: Segui il processo di creazione con aggiornamenti di stato dal vivo
-- Tutte le funzioni incluse: Gratis mentre cresciamo, nessun abbonamento necessario
+VibeBuild crea app web: l'app pubblicata funziona in qualsiasi browser e non è un'app nativa.
 
-CREATO PER TUTTI
-- Studenti che imparano a programmare
-- Imprenditori che creano prototipi di idee per startup
-- Designer che creano mockup interattivi
-- Sviluppatori che testano rapidamente concetti
-- Chiunque sia curioso di creare app
+FUNZIONI
+- Crea app con l'IA: descrivi l'idea e ottieni un'app web funzionante
+- Anteprima dal vivo nell'app
+- Modifiche tramite chat con l'IA
+- Pubblicazione su latuaapp.vibebuild.cc: scegli tu il sottodominio
+- Salva e gestisci le tue app qui e sul web, su vibebuild.cc
+- Esplora le app create dalla community
+- Schede con idee per iniziare
 
-VibeBuild e gratis mentre cresciamo e tutte le funzioni sono incluse. Un limite giornaliero di uso equo sulle creazioni permette a tutti di avere il proprio turno.
+GRATIS PER ORA
+VibeBuild è gratuito per ora, mentre cresciamo: nessuna carta di credito e nessun abbonamento. Si applica un uso equo: fino a 30 creazioni al giorno e 50 modifiche per progetto (limiti attuali, possono cambiare). Per creare app serve un account gratuito (e-mail o Google).
 
-Privacy: Raccogliamo solo i dati minimi necessari per far funzionare il servizio (e-mail per l'autenticazione, i tuoi prompt per la generazione). Non condividiamo mai i tuoi dati con terze parti.
+PRIVACY
+Le tue descrizioni vengono inviate a fornitori di IA per generare la tua app. Maggiori informazioni: vibebuild.cc/privacy

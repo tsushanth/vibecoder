@@ -1,1 +1,1 @@
-VibeBuild
+VibeBuild: AI App Builder

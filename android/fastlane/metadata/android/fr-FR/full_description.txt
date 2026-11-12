@@ -1,30 +1,27 @@
-VibeBuild transforme vos idees en applications fonctionnelles grace a l'IA. Decrivez simplement ce que vous voulez creer en quelques mots, et VibeBuild genere une application web entierement fonctionnelle en quelques secondes. Creez et gerez aussi vos apps sur le web sur vibebuild.cc.
+VibeBuild est un créateur d'apps avec l'IA, gratuit, pour Android. Décrivez avec vos mots l'app que vous voulez, regardez l'IA la construire, prévisualisez-la dans l'application et publiez-la sur votre propre lien monapp.vibebuild.cc. Aucune connaissance en programmation n'est nécessaire.
 
-Aucune experience en programmation requise. Que vous soyez un debutant explorant le developpement d'applications ou un professionnel creant rapidement des prototypes, VibeBuild rend tout simple.
+Envie de créer une app à partir d'une simple description ? Écrivez par exemple « un suivi de budget avec thème sombre » et VibeBuild la génère pour vous. C'est un créateur d'apps sans code pour ceux qui ont une idée mais ne programment pas, et un moyen rapide pour les développeurs de tester une idée. Si vous aimez le vibe coding, ici vous décrivez et l'IA écrit le code.
 
-COMMENT CA MARCHE
-1. Decrivez votre idee d'application en quelques mots ou phrases
-2. Regardez l'IA construire votre app en temps reel avec une vue de progression en direct
-3. Previsualisez votre app instantanement dans l'application
-4. Sauvegardez vos creations et accedez-y a tout moment
-5. Publiez sur le web et partagez votre app sur votreapp.vibebuild.cc
+COMMENT ÇA MARCHE
+1. Décrivez l'idée de votre app en quelques mots ou phrases
+2. Suivez la progression de la création en direct
+3. Prévisualisez votre app directement dans VibeBuild
+4. Ajustez-la en discutant avec l'IA : couleurs, fonctions et mise en page
+5. Publiez-la sur le web et partagez le lien monapp.vibebuild.cc
 
-FONCTIONNALITES
-- Generation par IA : Decrivez n'importe quelle idee d'app et obtenez du code fonctionnel genere instantanement
-- Apercu en direct : Voyez votre app fonctionner immediatement apres la generation
-- Publication sur le web : Partagez votre app sur votreapp.vibebuild.cc, accessible depuis n'importe quel navigateur
-- Sauvegarder et gerer : Gardez toutes vos apps generees organisees en un seul endroit
-- Cartes de suggestions : Inspirez-vous avec des idees creatives d'apps a essayer
-- Progression en temps reel : Suivez le processus de creation avec des mises a jour en direct
-- Toutes les fonctionnalites incluses : Gratuit pendant que nous grandissons, sans abonnement
+VibeBuild crée des apps web : votre app publiée fonctionne dans n'importe quel navigateur et n'est pas une app native.
 
-CONCU POUR TOUS
-- Etudiants apprenant a coder
-- Entrepreneurs creant des prototypes d'idees de startups
-- Designers creant des maquettes interactives
-- Developpeurs testant rapidement des concepts
-- Toute personne curieuse de creer des applications
+FONCTIONS
+- Créez des apps avec l'IA : décrivez l'idée et obtenez une app web fonctionnelle
+- Aperçu en direct dans l'application
+- Ajustements par chat avec l'IA
+- Publication sur monapp.vibebuild.cc : vous choisissez le sous-domaine
+- Enregistrez et gérez vos apps ici et sur le web, sur vibebuild.cc
+- Explorez les apps créées par la communauté
+- Cartes d'idées pour démarrer
 
-VibeBuild est gratuit pendant que nous grandissons, et toutes les fonctionnalites sont incluses. Une limite quotidienne d'utilisation equitable sur les creations garantit que chacun a son tour.
+GRATUIT POUR L'INSTANT
+VibeBuild est gratuit pour l'instant, le temps de grandir : sans carte bancaire et sans abonnement. Une utilisation raisonnable s'applique : jusqu'à 30 créations par jour et 50 ajustements par projet (limites actuelles, susceptibles de changer). Pour créer des apps, il faut un compte gratuit (e-mail ou Google).
 
-Confidentialite : Nous ne collectons que le minimum de donnees necessaires au fonctionnement du service (e-mail pour l'authentification, vos descriptions pour la generation). Nous ne partageons jamais vos donnees avec des tiers.
+CONFIDENTIALITÉ
+Vos descriptions sont envoyées à des fournisseurs d'IA pour générer votre app. En savoir plus : vibebuild.cc/privacy
