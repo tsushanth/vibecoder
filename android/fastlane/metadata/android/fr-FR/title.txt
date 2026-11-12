@@ -1,1 +1,1 @@
-VibeBuild
+VibeBuild: Créateur d'apps IA

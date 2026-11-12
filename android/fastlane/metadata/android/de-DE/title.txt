@@ -1,1 +1,1 @@
-VibeBuild
+VibeBuild: KI-App-Builder

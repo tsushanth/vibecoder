@@ -1,30 +1,27 @@
-VibeBuild turns your ideas into working apps using AI. Just describe what you want to build in plain English, and VibeBuild generates a fully functional web app in seconds. Also build and manage your apps on the web at vibebuild.cc.
+VibeBuild is a free AI app builder for Android. Describe the app you want in plain English, watch the AI build it, preview it right in the app, then publish it to your own yourapp.vibebuild.cc link. No coding needed.
 
-No coding experience needed. Whether you are a beginner exploring app development or a pro rapidly prototyping ideas, VibeBuild makes it effortless.
+Want to create an app from a prompt? Type something like "a budget tracker with a dark theme" and VibeBuild builds it for you. It is a no-code app maker for people who have an idea but do not write code, and a quick way for developers to try one out. If you like vibe coding, this is vibe coding with a preview and a link: you describe, the AI writes the code.
 
 HOW IT WORKS
 1. Describe your app idea in a few words or sentences
-2. Watch as AI builds your app in real-time with a live progress view
-3. Preview your app instantly right in the app
-4. Save your creations and access them anytime
-5. Publish to the web and share your app at yourapp.vibebuild.cc
+2. Watch the build progress live
+3. Preview your app right inside VibeBuild
+4. Tweak it by chatting with the AI: change colors, features and layout
+5. Publish it to the web and share your yourapp.vibebuild.cc link
+
+VibeBuild builds web apps. Your published app runs in any browser; it is not a native app.
 
 FEATURES
-- AI-Powered Generation: Describe any app idea and get working code generated instantly
-- Live Preview: See your app running immediately after generation
-- Publish to the Web: Share your app live at yourapp.vibebuild.cc — accessible from any browser
-- Save and Manage: Keep all your generated apps organized in one place
-- Suggestion Cards: Get inspired with creative app ideas to try
-- Real-Time Progress: Watch the build process with live status updates
-- All Features Included: Free while we grow, no subscription needed
+- Build apps with AI: describe the idea and get a working web app
+- Live preview inside the app
+- Tweak with AI chat
+- Publish to yourapp.vibebuild.cc: you choose the subdomain
+- Save and manage your apps here, and on the web at vibebuild.cc
+- Explore apps made by the community
+- Idea cards to get you started
 
-BUILT FOR EVERYONE
-- Students learning to code
-- Entrepreneurs prototyping startup ideas
-- Designers creating interactive mockups
-- Developers rapidly testing concepts
-- Anyone curious about building apps
+FREE FOR NOW
+VibeBuild is free for now while we grow: no credit card and no subscription. Fair use applies: up to 30 builds a day and 50 tweaks per project (current limits, they may change). You need a free account (email or Google) to build.
 
-VibeBuild is free while we grow, and all features are included. A fair-use daily limit on builds keeps things fair for everyone.
-
-Privacy: We only collect the minimum data needed to run the service (email for auth, your prompts for generation). We never share your data with third parties.
+PRIVACY
+Your prompts are sent to AI providers to generate your app. Details: vibebuild.cc/privacy
