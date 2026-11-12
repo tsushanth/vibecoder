@@ -36,6 +36,7 @@ import com.kreativekoala.vibecoder.ui.components.SettingsRow
 import com.kreativekoala.vibecoder.BuildConfig
 import com.kreativekoala.vibecoder.ui.theme.*
 import com.kreativekoala.vibecoder.util.Monetization
+import com.kreativekoala.vibecoder.util.PlayStoreLinks
 import com.kreativekoala.crosspromokit.models.AppId
 import com.kreativekoala.crosspromokit.view.CrossPromoSection
 
@@ -387,6 +388,12 @@ fun AccountScreen(
                         .firstOrNull { currentLocale.startsWith(it.first.split("-")[0]) }
                         ?.let { stringResource(it.second) } ?: stringResource(R.string.language_english),
                     onClick = { showLanguageDialog = true }
+                )
+                HorizontalDivider(color = DarkBorder)
+                SettingsRow(
+                    icon = Icons.Default.Star,
+                    title = stringResource(R.string.account_settings_rate),
+                    onClick = { PlayStoreLinks.openListing(context) }
                 )
                 HorizontalDivider(color = DarkBorder)
                 SettingsRow(

@@ -10,6 +10,7 @@ import com.kreativekoala.vibecoder.service.RevenueCatIdentitySync
 import com.kreativekoala.vibecoder.service.TikTokHelper
 import com.kreativekoala.vibecoder.util.NotificationHelper
 import com.kreativekoala.ratingkit.RatingKit
+import com.kreativekoala.vibecoder.util.RatingConfig
 import com.revenuecat.purchases.LogLevel
 import com.revenuecat.purchases.Purchases
 import com.revenuecat.purchases.PurchasesConfiguration
@@ -43,7 +44,7 @@ class VibeBuildApplication : Application() {
         TikTokHelper.initialize(this)
 
         // Initialize RatingKit
-        RatingKit.init(this, appId = "vibebuild")
+        RatingKit.init(this, appId = "vibebuild", config = RatingConfig.VIBEBUILD)
 
         // Initialize RevenueCat
         Purchases.logLevel = if (BuildConfig.DEBUG) LogLevel.DEBUG else LogLevel.WARN

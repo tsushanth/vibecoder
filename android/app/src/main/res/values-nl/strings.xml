@@ -144,6 +144,7 @@
     <string name="account_settings_theme">Thema</string>
     <string name="account_settings_theme_value">Donker</string>
     <string name="account_settings_about">Over</string>
+    <string name="account_settings_rate">VibeBuild beoordelen</string>
     <string name="account_settings_version">Versie %1$s</string>
     <string name="account_settings_language">Taal</string>
 

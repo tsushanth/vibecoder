@@ -144,6 +144,7 @@
     <string name="account_settings_theme">Giao diện</string>
     <string name="account_settings_theme_value">Tối</string>
     <string name="account_settings_about">Giới thiệu</string>
+    <string name="account_settings_rate">Đánh giá VibeBuild</string>
     <string name="account_settings_version">Phiên bản %1$s</string>
     <string name="account_settings_language">Ngôn ngữ</string>
 

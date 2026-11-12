@@ -66,6 +66,11 @@ fun ProjectDetailScreen(
         wasExportingApk = uiState.isExportingApk
     }
 
+    // Any visible error on this screen (preview, deploy, tweak, APK export): keep the rating prompt quiet for a while.
+    LaunchedEffect(uiState.errorMessage) {
+        if (uiState.errorMessage != null) RatingKit.reportError()
+    }
+
     // Deploy subdomain dialog
     if (uiState.showDeployDialog) {
         AlertDialog(

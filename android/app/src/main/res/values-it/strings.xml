@@ -144,6 +144,7 @@
     <string name="account_settings_theme">Tema</string>
     <string name="account_settings_theme_value">Scuro</string>
     <string name="account_settings_about">Info</string>
+    <string name="account_settings_rate">Valuta VibeBuild</string>
     <string name="account_settings_version">Versione %1$s</string>
     <string name="account_settings_language">Lingua</string>
 

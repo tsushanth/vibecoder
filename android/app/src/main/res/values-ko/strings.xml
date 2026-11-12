@@ -144,6 +144,7 @@
     <string name="account_settings_theme">테마</string>
     <string name="account_settings_theme_value">다크</string>
     <string name="account_settings_about">정보</string>
+    <string name="account_settings_rate">VibeBuild 평가하기</string>
     <string name="account_settings_version">버전 %1$s</string>
     <string name="account_settings_language">언어</string>
 

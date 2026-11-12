@@ -144,6 +144,7 @@
     <string name="account_settings_theme">थीम</string>
     <string name="account_settings_theme_value">डार्क</string>
     <string name="account_settings_about">जानकारी</string>
+    <string name="account_settings_rate">VibeBuild को रेट करें</string>
     <string name="account_settings_version">संस्करण %1$s</string>
     <string name="account_settings_language">भाषा</string>
 

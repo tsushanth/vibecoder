@@ -144,6 +144,7 @@
     <string name="account_settings_theme">Tema</string>
     <string name="account_settings_theme_value">Madilim</string>
     <string name="account_settings_about">Tungkol</string>
+    <string name="account_settings_rate">I-rate ang VibeBuild</string>
     <string name="account_settings_version">Bersyon %1$s</string>
     <string name="account_settings_language">Wika</string>
 
