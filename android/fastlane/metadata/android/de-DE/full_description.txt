@@ -1,30 +1,27 @@
-VibeBuild verwandelt deine Ideen mithilfe von KI in funktionierende Apps. Beschreibe einfach, was du erstellen moechtest, und VibeBuild generiert in Sekunden eine voll funktionsfaehige Web-App. Erstelle und verwalte deine Apps auch im Web auf vibebuild.cc.
+VibeBuild ist ein kostenloser KI-App-Builder für Android. Beschreibe in eigenen Worten, welche App du möchtest, sieh der KI beim Bauen zu, schau dir die App direkt in der App an und veröffentliche sie unter deinem eigenen Link deineapp.vibebuild.cc. Programmierkenntnisse sind nicht nötig.
 
-Keine Programmiererfahrung noetig. Egal ob du ein Anfaenger bist, der App-Entwicklung erkundet, oder ein Profi, der schnell Prototypen erstellt - VibeBuild macht es muehelos.
+Du willst eine App aus einer Beschreibung erstellen? Schreibe zum Beispiel "ein Haushaltsbuch mit dunklem Design", und VibeBuild erstellt sie für dich. Es ist ein No-Code-App-Maker für alle, die eine Idee haben, aber nicht programmieren, und eine schnelle Möglichkeit für Entwickler, eine Idee auszuprobieren. Wenn du Vibe-Coding magst: Du beschreibst, die KI schreibt den Code.
 
-SO FUNKTIONIERT ES
-1. Beschreibe deine App-Idee in wenigen Worten oder Saetzen
-2. Beobachte, wie die KI deine App in Echtzeit mit einer Live-Fortschrittsanzeige erstellt
-3. Sieh dir deine App sofort in der Anwendung an
-4. Speichere deine Kreationen und greife jederzeit darauf zu
-5. Veroeffentliche im Web und teile deine App unter deineapp.vibebuild.cc
+SO FUNKTIONIERT'S
+1. Beschreibe deine App-Idee in wenigen Worten oder Sätzen
+2. Verfolge den Baufortschritt live
+3. Sieh dir die Vorschau deiner App direkt in VibeBuild an
+4. Verfeinere sie im Chat mit der KI: Farben, Funktionen und Layout ändern
+5. Veröffentliche sie im Web und teile den Link deineapp.vibebuild.cc
+
+VibeBuild erstellt Web-Apps: Deine veröffentlichte App läuft in jedem Browser und ist keine native App.
 
 FUNKTIONEN
-- KI-gesteuerte Generierung: Beschreibe jede App-Idee und erhalte sofort funktionierenden Code
-- Live-Vorschau: Sieh deine App sofort nach der Generierung in Aktion
-- Im Web veroeffentlichen: Teile deine App unter deineapp.vibebuild.cc - von jedem Browser aus zugaenglich
-- Speichern und verwalten: Behalte alle generierten Apps uebersichtlich an einem Ort
-- Vorschlagskarten: Lass dich von kreativen App-Ideen inspirieren
-- Echtzeit-Fortschritt: Verfolge den Erstellungsprozess mit Live-Statusupdates
-- Alle Funktionen inklusive: Kostenlos, solange wir wachsen, kein Abo noetig
+- Apps mit KI erstellen: Idee beschreiben und eine funktionierende Web-App erhalten
+- Live-Vorschau in der App
+- Änderungen per KI-Chat
+- Veröffentlichung unter deineapp.vibebuild.cc: Du wählst die Subdomain
+- Apps speichern und verwalten, hier und im Web unter vibebuild.cc
+- Apps der Community entdecken
+- Ideenkarten für den Einstieg
 
-FUER ALLE GEMACHT
-- Schueler und Studenten, die Programmieren lernen
-- Unternehmer, die Startup-Ideen als Prototypen umsetzen
-- Designer, die interaktive Mockups erstellen
-- Entwickler, die Konzepte schnell testen
-- Alle, die neugierig auf App-Entwicklung sind
+VORERST KOSTENLOS
+VibeBuild ist vorerst kostenlos, solange wir wachsen: keine Kreditkarte, kein Abo. Es gilt eine faire Nutzung: bis zu 30 Erstellungen pro Tag und 50 Änderungen pro Projekt (aktuelle Limits, sie können sich ändern). Zum Erstellen von Apps brauchst du ein kostenloses Konto (E-Mail oder Google).
 
-VibeBuild ist kostenlos, solange wir wachsen, und alle Funktionen sind enthalten. Ein faires Tageslimit fuer Erstellungen sorgt dafuer, dass alle zum Zug kommen.
-
-Datenschutz: Wir erfassen nur die minimal notwendigen Daten fuer den Betrieb des Dienstes (E-Mail zur Authentifizierung, deine Eingaben fuer die Generierung). Wir geben deine Daten niemals an Dritte weiter.
+DATENSCHUTZ
+Deine Beschreibungen werden zur Erstellung deiner App an KI-Anbieter gesendet. Mehr dazu: vibebuild.cc/privacy
