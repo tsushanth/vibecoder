@@ -9,7 +9,14 @@
  *   export RESEND_API_KEY=re_xxxx
  *   export SUPABASE_URL=https://owvvrljdfnhntwedepkl.supabase.co
  *   export SUPABASE_SERVICE_ROLE_KEY=eyJ...
+ *   export UNSUB_SECRET=...      # signs the one-click unsubscribe link (macOS Keychain: service UNSUB_SECRET, account unsubscribe)
+ *   export SUPPRESSION_SUPABASE_URL=...          # the SummaryAI project: it holds public.outreach_suppressions
+ *   export SUPPRESSION_SUPABASE_SERVICE_KEY=...  # (VibeBuild users live in a different project, so these are required)
  *   npx tsx scripts/send-promo.ts
+ *
+ * Every email carries the signed unsubscribe footer + List-Unsubscribe/List-Unsubscribe-Post headers (list "vb").
+ * Everyone in outreach_suppressions and Apple private-relay addresses are skipped; if the suppression table cannot be
+ * read, nothing is sent. The run aborts without UNSUB_SECRET (no unsigned sends).
  *
  * Optional:
  *   DRY_RUN=true   — log without sending
@@ -24,6 +31,8 @@ const __dirname = path.dirname(new URL(import.meta.url).pathname);
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 import * as dotenv from "dotenv";
+import { buildPromoMessage, filterRecipients } from "./lib/promo-mail.mjs";
+import { loadSuppressions } from "./lib/unsubscribe.mjs";
 
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
@@ -35,6 +44,7 @@ const ONLY_STEP = process.env.STEP ? parseInt(process.env.STEP) : null;
 const SUPABASE_URL = process.env.SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const RESEND_API_KEY = process.env.RESEND_API_KEY!;
+let suppressed: Set<string> = new Set();
 
 const TOUCH2_DELAY_DAYS = 3;
 const TOUCH3_DELAY_DAYS = 7;
@@ -261,6 +271,13 @@ async function sendBatch(
   subject: string
 ) {
   if (!users.length) { log(`No users for ${template}. Skipping.`); return; }
+
+  // Drop unsubscribed/suppressed addresses and Apple private-relay addresses before anything is built or sent.
+  const filtered = filterRecipients(users, suppressed);
+  users = filtered.allowed as User[];
+  log(`${template}: ${filtered.counts.candidates} candidates, ${filtered.counts.suppressed} suppressed, ${filtered.counts.relay} Apple relay, ${filtered.counts.no_email} without email`);
+  if (!users.length) { log(`No sendable users for ${template}. Skipping.`); return; }
+
   log(`Sending ${template} to ${users.length} users${DRY_RUN ? " (DRY RUN)" : ""}…`);
 
   const resend = getResend();
@@ -268,16 +285,19 @@ async function sendBatch(
 
   for (const user of users) {
     if (!user.email) continue;
-    if (DRY_RUN) { log(`[DRY RUN] Would send ${template} → ${user.email}`); sent++; continue; }
+    // Footer + List-Unsubscribe headers. Throws if UNSUB_SECRET is missing, so nothing goes out unsigned.
+    const message = buildPromoMessage({ from: FROM, to: user.email, subject, html: buildHtml(user.display_name) });
+    if (DRY_RUN) { log(`[DRY RUN] Would send ${template} (unsubscribe link + headers attached)`); sent++; continue; }
 
     try {
-      await resend.emails.send({ from: FROM, to: user.email, subject, html: buildHtml(user.display_name) });
+      const { error } = await resend.emails.send(message);
+      if (error) throw new Error(error.message);
       await recordSend(user.user_id, user.email, template);
       sent++;
-      log(`Sent ${template} → ${user.email}`);
+      log(`Sent ${template}`);
     } catch (err: any) {
       failed++;
-      log(`FAILED ${template} → ${user.email}: ${err?.message}`);
+      log(`FAILED ${template}: ${err?.message}`);
     }
     await new Promise((r) => setTimeout(r, 600));
   }
@@ -290,6 +310,17 @@ async function sendBatch(
 async function main() {
   if (!RESEND_API_KEY) { console.error("ERROR: RESEND_API_KEY required"); process.exit(1); }
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) { console.error("ERROR: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY required"); process.exit(1); }
+
+  if (!process.env.UNSUB_SECRET) { console.error("ERROR: UNSUB_SECRET required (signs the unsubscribe link)"); process.exit(1); }
+  if (!process.env.SUPPRESSION_SUPABASE_URL || !process.env.SUPPRESSION_SUPABASE_SERVICE_KEY) {
+    console.error("ERROR: SUPPRESSION_SUPABASE_URL and SUPPRESSION_SUPABASE_SERVICE_KEY required (the SummaryAI project holds outreach_suppressions)");
+    process.exit(1);
+  }
+  // Fail closed: if the suppression table cannot be read this throws and nothing is sent.
+  suppressed = await loadSuppressions({
+    supabaseUrl: process.env.SUPPRESSION_SUPABASE_URL,
+    serviceKey: process.env.SUPPRESSION_SUPABASE_SERVICE_KEY,
+  });
 
   log("=== VibeBuild Email Drip Sequence ===");
   log(`Dry run: ${DRY_RUN} | Step: ${ONLY_STEP ?? "all"}`);
