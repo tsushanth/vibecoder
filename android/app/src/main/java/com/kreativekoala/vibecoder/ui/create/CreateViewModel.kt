@@ -268,9 +268,11 @@ class CreateViewModel @Inject constructor(
     // looked at the result (opened + closed the preview) or moved on (tweak / new chat).
 
     private fun maybeShowRatingPrompt() {
-        if (!ratingArmed || _uiState.value.showPreview) return
+        // Only after the user actually opened the finished build's preview (a build with nothing to preview never counts),
+        // and not while the preview is still on screen.
+        if (!ratingArmed || !previewOpened || _uiState.value.showPreview) return
         ratingArmed = false
-        // Every finished build the user looked at is a "moment"; RatingKit applies the day gate, the count and the backoff.
+        // Every finished build the user looked at is a "moment"; RatingKit applies the count (see RatingConfig), the quiet period and the backoff.
         _uiState.update { it.copy(showRatingPrompt = true) }
     }
 
@@ -732,8 +734,8 @@ class CreateViewModel @Inject constructor(
             )
         }
         saveChatSnapshot(ChatStage.Ready, projectId)
-        // Don't pop the rating dialog over the completion card; arm it for later.
-        ratingArmed = true
+        // Don't pop the rating dialog over the completion card; arm it for later (only if there is something to preview).
+        ratingArmed = dir != null || previewUrl != null
         previewOpened = false
     }
 
@@ -981,6 +983,7 @@ class CreateViewModel @Inject constructor(
     }
 
     private fun markLastTweak(turns: List<TweakTurn>, ok: Boolean): List<TweakTurn> {
+        if (!ok) com.kreativekoala.ratingkit.RatingKit.reportError() // visible "tweak didn't go through": stay quiet for a while
         val i = turns.indexOfLast { it.done == null }
         return if (i < 0) turns else turns.toMutableList().also { it[i] = it[i].copy(done = ok) }
     }

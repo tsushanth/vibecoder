@@ -456,17 +456,28 @@ class CreateViewModelTest {
         assertFalse(vm.uiState.value.showRatingPrompt)
     }
 
-    @Test fun rating_shown_on_tweak() = runTest {
+    @Test fun rating_not_shown_on_tweak_if_preview_never_opened() = runTest {
         every { projects.tweak(any(), any(), any()) } returns flowOf(SseEvent.Error("nope"))
         val vm = readyVm()
         vm.tweakProject("make it blue"); advanceUntilIdle()
-        assertTrue(vm.uiState.value.showRatingPrompt)
+        assertFalse(vm.uiState.value.showRatingPrompt)
     }
 
-    @Test fun rating_shown_on_new_chat() = runTest {
+    @Test fun rating_not_shown_on_new_chat_if_preview_never_opened() = runTest {
         val vm = readyVm()
         vm.newChat(); advanceUntilIdle()
-        assertTrue(vm.uiState.value.showRatingPrompt)
+        assertFalse(vm.uiState.value.showRatingPrompt)
+    }
+
+    @Test fun rating_not_shown_for_a_build_with_nothing_to_preview() = runTest {
+        generateEmits(SseEvent.Queued("p1"), SseEvent.Result(projectId = "p1"))
+        coEvery { projects.getProject("p1") } returns null
+        val vm = vm()
+        startBuild(vm)
+        advanceUntilIdle()
+        assertEquals(ChatStage.Ready, vm.uiState.value.chatStage)
+        vm.openPreview(); vm.closePreview(); advanceUntilIdle()
+        assertFalse(vm.uiState.value.showRatingPrompt)
     }
 
     @Test fun rating_not_shown_by_tweak_while_preview_open() = runTest {

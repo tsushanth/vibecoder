@@ -144,6 +144,7 @@
     <string name="account_settings_theme">Tema</string>
     <string name="account_settings_theme_value">Gelap</string>
     <string name="account_settings_about">Tentang</string>
+    <string name="account_settings_rate">Nilai VibeBuild</string>
     <string name="account_settings_version">Versi %1$s</string>
     <string name="account_settings_language">Bahasa</string>
 

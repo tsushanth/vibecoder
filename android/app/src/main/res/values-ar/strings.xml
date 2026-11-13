@@ -144,6 +144,7 @@
     <string name="account_settings_theme">المظهر</string>
     <string name="account_settings_theme_value">داكن</string>
     <string name="account_settings_about">حول</string>
+    <string name="account_settings_rate">قيّم VibeBuild</string>
     <string name="account_settings_version">الإصدار %1$s</string>
     <string name="account_settings_language">اللغة</string>
 

@@ -144,6 +144,7 @@
     <string name="account_settings_theme">Tema</string>
     <string name="account_settings_theme_value">Koyu</string>
     <string name="account_settings_about">Hakkında</string>
+    <string name="account_settings_rate">VibeBuild\'i değerlendir</string>
     <string name="account_settings_version">Sürüm %1$s</string>
     <string name="account_settings_language">Dil</string>
 
