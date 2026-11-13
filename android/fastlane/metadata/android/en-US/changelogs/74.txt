@@ -1,0 +1,1 @@
+New: a Rate VibeBuild row in Account settings, and the rating request now appears once after you open a finished build, instead of rarely or never.
