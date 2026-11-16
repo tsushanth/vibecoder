@@ -1,5 +1,7 @@
 package com.kreativekoala.vibecoder.ui.main
 
+import com.kreativekoala.vibecoder.R
+import androidx.compose.ui.res.stringResource
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
@@ -57,10 +59,10 @@ fun MainScreen(
 ) {
     val context = LocalContext.current
     val tabs = listOf(
-        TabItem("Apps", Icons.Filled.Folder, Icons.Outlined.FolderOpen),
-        TabItem("Create", Icons.Filled.AddCircle, Icons.Outlined.AddCircleOutline),
-        TabItem("Browse", Icons.Filled.Explore, Icons.Outlined.Explore),
-        TabItem("Account", Icons.Filled.AccountCircle, Icons.Outlined.AccountCircle)
+        TabItem(stringResource(R.string.tab_apps), Icons.Filled.Folder, Icons.Outlined.FolderOpen),
+        TabItem(stringResource(R.string.tab_create), Icons.Filled.AddCircle, Icons.Outlined.AddCircleOutline),
+        TabItem(stringResource(R.string.tab_browse_nav), Icons.Filled.Explore, Icons.Outlined.Explore),
+        TabItem(stringResource(R.string.tab_account), Icons.Filled.AccountCircle, Icons.Outlined.AccountCircle)
     )
 
     var selectedTabIndex by remember { mutableIntStateOf(1) }
@@ -123,7 +125,7 @@ fun MainScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = systemMessage ?: "Builds temporarily unavailable. Check back soon!",
+                        text = systemMessage ?: stringResource(R.string.main_builds_unavailable),
                         color = Color.White,
                         fontSize = 13.sp,
                         modifier = Modifier.weight(1f)
@@ -149,7 +151,7 @@ fun MainScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "✨ Build apps via Telegram! @Vibebuilder_bot",
+                        text = stringResource(R.string.main_telegram_banner),
                         color = Color.White,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Medium,
@@ -164,7 +166,7 @@ fun MainScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription = "Dismiss",
+                            contentDescription = stringResource(R.string.close),
                             tint = Color.White,
                             modifier = Modifier.size(16.dp)
                         )

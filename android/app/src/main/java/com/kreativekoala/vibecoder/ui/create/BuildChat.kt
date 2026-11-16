@@ -1,5 +1,7 @@
 package com.kreativekoala.vibecoder.ui.create
 
+import com.kreativekoala.vibecoder.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -28,7 +30,9 @@ import kotlinx.coroutines.delay
 
 private val Green = Color(0xFF34D399)
 private val Red = Color(0xFFF87171)
+// Matched against the English phase names the server sends; the labels shown to the person are the resources below.
 private val BuildPhases = listOf("Generate", "Validate", "Fix", "Polish", "Verify")
+private val BuildPhaseLabels = listOf(R.string.build_phase_generate, R.string.build_phase_validate, R.string.build_phase_fix, R.string.build_phase_polish, R.string.build_phase_verify)
 
 private fun currentPhaseIndex(phase: String, percent: Double): Int {
     val p = phase.lowercase()
@@ -70,7 +74,7 @@ fun BuildChatThread(
 
             state.buildPlan?.let { plan ->
                 AssistantCard {
-                    Text("Here's my plan", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    Text(stringResource(R.string.build_chat_plan_title), color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                     if (plan.summary.isNotBlank()) {
                         Spacer(Modifier.height(6.dp)); Text(plan.summary, color = TextSecondary, fontSize = 14.sp)
                     }
@@ -83,15 +87,15 @@ fun BuildChatThread(
                     if (stage == ChatStage.PlanReady) {
                         Spacer(Modifier.height(12.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = onConfirmPlan, colors = ButtonDefaults.buttonColors(containerColor = VibePurple)) { Text("Build this") }
-                            OutlinedButton(onClick = onEditPrompt) { Text("Edit prompt", color = TextSecondary) }
+                            Button(onClick = onConfirmPlan, colors = ButtonDefaults.buttonColors(containerColor = VibePurple)) { Text(stringResource(R.string.build_chat_build_this)) }
+                            OutlinedButton(onClick = onEditPrompt) { Text(stringResource(R.string.build_chat_edit_prompt), color = TextSecondary) }
                         }
                     }
                 }
             }
 
             if (stage == ChatStage.Planning) {
-                AssistantCard { WorkingLine("Thinking through your idea") }
+                AssistantCard { WorkingLine(stringResource(R.string.build_chat_thinking)) }
             }
 
             if (stage == ChatStage.Building || stage == ChatStage.Ready || stage == ChatStage.Failed) {
@@ -100,11 +104,11 @@ fun BuildChatThread(
 
             if (stage == ChatStage.Failed) {
                 AssistantCard {
-                    Text(state.buildFailure ?: "Something went wrong.", color = Red, fontSize = 14.sp)
+                    Text(state.buildFailure ?: stringResource(R.string.build_chat_failed_default), color = Red, fontSize = 14.sp)
                     Spacer(Modifier.height(10.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(onClick = onEditPrompt, colors = ButtonDefaults.buttonColors(containerColor = VibePurple)) { Text("Edit & retry") }
-                        OutlinedButton(onClick = onNewApp) { Text("New app", color = TextSecondary) }
+                        Button(onClick = onEditPrompt, colors = ButtonDefaults.buttonColors(containerColor = VibePurple)) { Text(stringResource(R.string.build_chat_edit_retry)) }
+                        OutlinedButton(onClick = onNewApp) { Text(stringResource(R.string.build_chat_new_app), color = TextSecondary) }
                     }
                 }
             }
@@ -115,40 +119,40 @@ fun BuildChatThread(
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Column(Modifier.padding(12.dp)) {
-                        Text("This is your last free build", color = Color(0xFF818CF8), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        Text(stringResource(R.string.build_chat_upsell_title), color = Color(0xFF818CF8), fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         Spacer(Modifier.height(4.dp))
-                        Text("Upgrade to Pro for unlimited apps, priority builds, and no wait times.", color = TextSecondary, fontSize = 12.sp)
+                        Text(stringResource(R.string.build_chat_upsell_body), color = TextSecondary, fontSize = 12.sp)
                         Spacer(Modifier.height(8.dp))
-                        Button(onClick = onUpgrade, colors = ButtonDefaults.buttonColors(containerColor = VibePurple)) { Text("Upgrade to Pro") }
+                        Button(onClick = onUpgrade, colors = ButtonDefaults.buttonColors(containerColor = VibePurple)) { Text(stringResource(R.string.upgrade_to_pro)) }
                     }
                 }
             }
 
             if (stage == ChatStage.Ready) {
                 AssistantCard {
-                    Text("Your app is ready", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    Text(stringResource(R.string.build_chat_ready_title), color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                     Spacer(Modifier.height(4.dp))
                     val hasPreview = state.bundleDir != null || state.previewUrl != null
                     Text(
-                        if (hasPreview) "Saved to My Projects. Open the live preview to try it." else "Saved to My Projects.",
+                        if (hasPreview) stringResource(R.string.build_chat_saved_with_preview) else stringResource(R.string.build_chat_saved),
                         color = TextSecondary, fontSize = 13.sp
                     )
-                    state.deployedUrl?.let { Spacer(Modifier.height(4.dp)); Text("Published: $it", color = Green, fontSize = 12.sp) }
+                    state.deployedUrl?.let { Spacer(Modifier.height(4.dp)); Text(stringResource(R.string.build_chat_published, it), color = Green, fontSize = 12.sp) }
                     Spacer(Modifier.height(10.dp))
                     if (hasPreview) {
                         Button(
                             onClick = onOpenPreview, modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(containerColor = VibePurple)
-                        ) { Text("Open live preview") }
+                        ) { Text(stringResource(R.string.build_chat_open_live_preview)) }
                         Spacer(Modifier.height(8.dp))
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(onClick = {}, enabled = false) { Text("Saved") }
-                        OutlinedButton(onClick = onPublish, enabled = hasPreview) { Text("Publish", color = VibePurple) }
-                        OutlinedButton(onClick = { focus.requestFocus() }) { Text("Tweak", color = VibePurple) }
+                        OutlinedButton(onClick = {}, enabled = false) { Text(stringResource(R.string.build_chat_saved_button)) }
+                        OutlinedButton(onClick = onPublish, enabled = hasPreview) { Text(stringResource(R.string.publish), color = VibePurple) }
+                        OutlinedButton(onClick = { focus.requestFocus() }) { Text(stringResource(R.string.build_chat_tweak), color = VibePurple) }
                     }
                     Spacer(Modifier.height(6.dp))
-                    TextButton(onClick = onNewApp) { Text("Start a new app", color = TextSecondary) }
+                    TextButton(onClick = onNewApp) { Text(stringResource(R.string.build_chat_start_new), color = TextSecondary) }
                 }
 
                 // If the app needs keys (third-party APIs, Stripe) this card shows what is missing, open, right where the build ends;
@@ -165,15 +169,15 @@ fun BuildChatThread(
                     UserBubble(turn.text)
                     AssistantCard {
                         when (turn.done) {
-                            null -> WorkingLine(state.tweakPhase.ifBlank { "Applying changes" })
+                            null -> WorkingLine(state.tweakPhase.ifBlank { stringResource(R.string.build_chat_tweak_applying) })
                             true -> Text(
-                                "Done. Updated the preview" + if (i == state.tweakTurns.lastIndex) "." else " (v${i + 2}).",
+                                if (i == state.tweakTurns.lastIndex) stringResource(R.string.build_chat_tweak_done) else stringResource(R.string.build_chat_tweak_done_version, i + 2),
                                 color = Green, fontSize = 13.sp
                             )
-                            false -> Text("That tweak didn't go through.", color = Red, fontSize = 13.sp)
+                            false -> Text(stringResource(R.string.build_chat_tweak_failed), color = Red, fontSize = 13.sp)
                         }
                         if (turn.done == true && i == state.tweakTurns.lastIndex && (state.bundleDir != null || state.previewUrl != null)) {
-                            TextButton(onClick = onOpenPreview) { Text("Open preview", color = VibePurple) }
+                            TextButton(onClick = onOpenPreview) { Text(stringResource(R.string.build_chat_open_preview), color = VibePurple) }
                         }
                     }
                 }
@@ -192,7 +196,7 @@ fun BuildChatThread(
                 TextField(
                     value = tweakText, onValueChange = { tweakText = it },
                     modifier = Modifier.weight(1f).focusRequester(focus),
-                    placeholder = { Text("Describe a change...", color = TextTertiary) },
+                    placeholder = { Text(stringResource(R.string.build_chat_tweak_hint), color = TextTertiary) },
                     maxLines = 4,
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent,
@@ -204,10 +208,10 @@ fun BuildChatThread(
                 FilledIconButton(
                     onClick = { onTweak(tweakText); tweakText = "" }, enabled = canSend,
                     colors = IconButtonDefaults.filledIconButtonColors(containerColor = VibePurple, disabledContainerColor = DarkSurfaceElevated)
-                ) { Icon(Icons.Default.ArrowUpward, contentDescription = "Send tweak", tint = if (canSend) TextPrimary else TextTertiary) }
+                ) { Icon(Icons.Default.ArrowUpward, contentDescription = stringResource(R.string.build_chat_send_tweak), tint = if (canSend) TextPrimary else TextTertiary) }
             }
             ChatStage.Building, ChatStage.Planning -> Box(Modifier.fillMaxWidth().padding(12.dp), contentAlignment = Alignment.Center) {
-                OutlinedButton(onClick = onCancel) { Text("Cancel build", color = TextSecondary) }
+                OutlinedButton(onClick = onCancel) { Text(stringResource(R.string.build_chat_cancel), color = TextSecondary) }
             }
             else -> {}
         }
@@ -258,13 +262,13 @@ private fun ProgressCard(state: CreateUiState) {
     AssistantCard {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                when (stage) { ChatStage.Ready -> "Build complete"; ChatStage.Failed -> "Build failed"; else -> "Building your app" },
+                when (stage) { ChatStage.Ready -> stringResource(R.string.build_chat_stage_complete); ChatStage.Failed -> stringResource(R.string.build_chat_stage_failed); else -> stringResource(R.string.build_chat_stage_building) },
                 color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 15.sp, modifier = Modifier.weight(1f)
             )
             if (elapsedLabel != null) Text(elapsedLabel, color = TextTertiary, fontSize = 12.sp)
         }
         Spacer(Modifier.height(10.dp))
-        BuildPhases.forEachIndexed { i, name ->
+        BuildPhaseLabels.forEachIndexed { i, labelRes ->
             val done = stage == ChatStage.Ready || i < idx
             val active = building && i == idx
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 3.dp)) {
@@ -273,7 +277,7 @@ private fun ProgressCard(state: CreateUiState) {
                     tint = if (done) Green else if (active) VibePurple else TextTertiary, modifier = Modifier.size(18.dp)
                 )
                 Spacer(Modifier.width(8.dp))
-                Text(name, color = if (done || active) TextPrimary else TextTertiary, fontSize = 13.sp,
+                Text(stringResource(labelRes), color = if (done || active) TextPrimary else TextTertiary, fontSize = 13.sp,
                     fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal)
             }
         }
@@ -284,7 +288,7 @@ private fun ProgressCard(state: CreateUiState) {
         }
         if (building) {
             Spacer(Modifier.height(10.dp))
-            WorkingLine(state.buildDetail.ifBlank { "Working on it" })
+            WorkingLine(state.buildDetail.ifBlank { stringResource(R.string.build_chat_working) })
             Spacer(Modifier.height(8.dp))
             LinearProgressIndicator(
                 progress = { (state.progressPercent / 100.0).toFloat().coerceIn(0f, 1f) },

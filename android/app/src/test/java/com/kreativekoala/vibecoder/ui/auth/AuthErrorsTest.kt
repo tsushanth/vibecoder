@@ -117,6 +117,14 @@ class AuthErrorsTest {
         assertSafe(AuthErrors.message(e))
     }
 
+    @Test fun everyMessageHasALocalizedResourceAndViceVersa() {
+        for (f in AuthFailure.entries) for (signUp in listOf(false, true)) {
+            assertEquals("$f signUp=$signUp", AuthErrors.message(f, signUp) == null, AuthErrors.messageRes(f, signUp) == null)
+        }
+        assertNull(AuthErrors.uiError(GetCredentialCancellationException("user cancelled")))
+        assertEquals(AuthFailure.WrongCredentials, AuthErrors.uiError(AuthFailureException(AuthFailure.WrongCredentials))!!.failure)
+    }
+
     @Test fun logSummaryNeverContainsTheExceptionMessage() {
         val rest = rest(400, "invalid_credentials", "Invalid login credentials", AuthErrorCode.InvalidCredentials)
         for (e in listOf(rest, IllegalStateException(leaky), IOException(leaky))) {
