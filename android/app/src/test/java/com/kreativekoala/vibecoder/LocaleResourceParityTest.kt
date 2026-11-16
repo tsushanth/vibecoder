@@ -45,7 +45,7 @@ class LocaleResourceParityTest {
     }
 
     private val ignoredKeys = setOf("default_web_client_id", "app_id", "gcm_defaultSenderId", "google_api_key", "google_app_id",
-        "firebase_database_url", "google_storage_bucket", "project_id", "google_crash_reporting_api_key")
+        "facebook_app_id", "facebook_client_token", "fb_login_protocol_scheme", "firebase_database_url", "google_storage_bucket", "project_id", "google_crash_reporting_api_key")
 
     private val spec = Regex("""%(?:\d+\$)?[-#+0,(]*\d*(?:\.\d+)?[sdfxXeEgGcb]|%%""")
     private fun specs(s: String) = spec.findAll(s).map { it.value.replace(Regex("""^%\d+\$"""), "%") }.sorted().toList()

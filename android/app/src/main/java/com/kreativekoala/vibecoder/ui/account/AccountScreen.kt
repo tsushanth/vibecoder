@@ -63,6 +63,7 @@ fun AccountScreen(
     val supportedLanguages = listOf(
         "en", "es", "fr", "de", "ja", "zh-CN", "ko", "pt-BR", "it", "hi",
         "ar", "id", "ms", "nl", "pl", "ru", "th", "tl", "tr", "vi",
+        "cs", "el", "fi", "hu", "ro", "sv", "uk",
     )
 
     val currentLocale = AppCompatDelegate.getApplicationLocales().toLanguageTags().ifEmpty { "en" }
