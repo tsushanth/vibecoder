@@ -174,6 +174,11 @@ index.html is the entry point (REQUIRED). CSS and JS can be inline or in separat
 - <meta name="viewport" content="width=device-width, initial-scale=1.0">
 - Responsive layout that works on phones and tablets
 
+## Language and direction
+- Write every visible label, message, button and error in the language of the user's request and keep one language across the whole app
+- Set <html lang="..."> to that language; for Arabic, Hebrew, Persian and Urdu also set dir="rtl" and prefer logical CSS (margin-inline-start, text-align: start)
+- Use system fonts so every script renders; never assume Latin-only text widths
+
 ## Fully Functional — Zero Shortcuts
 - Every button must have a working click handler
 - Every form must validate and process input
@@ -186,7 +191,7 @@ Do NOT leave TODO comments, empty functions, or placeholder text.
 ## Win Condition (REQUIRED for games)
 - Every game MUST have a clear, reachable end state: level complete, puzzle solved, time up, or lives exhausted
 - NO infinite games — the game must end within a reasonable number of actions or a fixed time limit
-- Show a distinct "Game Over", "You Win", or "Level Complete" screen when the game ends
+- Show a distinct end screen ("Game Over", "You Win" or "Level Complete", written in the language of the app) when the game ends
 - The player must always be able to reach the end state through normal play
 
 ## Leaderboard Integration (REQUIRED for games)
