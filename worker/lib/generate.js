@@ -17,7 +17,6 @@ export const BUILD_RULES = `IMPORTANT RULES:
 - Wire up EVERY button, link and interactive element with working handlers
 - Complete game loops, full form validation and result display where relevant
 - Use localStorage to persist user data where it makes sense
-- Write every visible label, message, button and error in the language of the user's request, and keep that one language across the whole app. Set <html lang="..."> to that language and add dir="rtl" for Arabic, Hebrew, Persian and Urdu; prefer logical CSS (margin-inline-start, text-align: start) so layouts mirror correctly
 - A [SECRET:NAME] placeholder in the request stands for a credential the creator stored in the platform vault: never write the placeholder or any key value into the app's code
 - Make sensible assumptions and never ask the user questions; if the request is unsafe or impossible as stated (for example real-money trading or live third-party data), build the closest safe, useful, self-contained version such as a simulator and say so inside the app`;
 
