@@ -1,0 +1,1 @@
+VibeBuild is now available in 26 languages: pick yours in the Account settings. The build chat, bottom tabs, sign-in messages and account deletion are translated. Translations are machine-made and may read oddly in places.
