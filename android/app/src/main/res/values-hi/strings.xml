@@ -290,4 +290,24 @@
     <string name="paywall_retry">फिर कोशिश करें</string>
     <string name="paywall_error_purchase">खरीदारी पूरी नहीं हो सकी। कृपया फिर कोशिश करें।</string>
     <string name="paywall_restore_none">इस Google खाते के लिए कोई सक्रिय सब्सक्रिप्शन नहीं मिला।</string>
+
+    <!-- needs native review (machine translation) -->
+    <string name="account_delete_account">अकाउंट हटाएं</string>
+    <string name="account_dialog_delete_title">अपना अकाउंट हटाएं?</string>
+    <string name="account_dialog_delete_message">इससे आपका अकाउंट, आपके ऐप्स और उनके सभी वर्शन हमेशा के लिए हट जाएंगे। इसे पूर्ववत नहीं किया जा सकता।</string>
+    <string name="account_deleting">हटाया जा रहा है…</string>
+    <string name="account_delete_error">आपका अकाउंट नहीं हटा। अपना कनेक्शन जांचें और फिर कोशिश करें।</string>
+    <string name="account_delete_sign_in_again">आपकी सुरक्षा के लिए, साइन आउट करके फिर से साइन इन करें, फिर अपना अकाउंट हटाएं।</string>
+    <string name="version_history">वर्शन हिस्ट्री</string>
+    <string name="version_history_subtitle">आपका हर बदलाव एक नए वर्शन के रूप में सहेजा जाता है</string>
+    <string name="version_current">मौजूदा</string>
+    <string name="version_use_this">यह वर्शन उपयोग करें</string>
+    <string name="version_use_title">यह वर्शन बहाल करें?</string>
+    <string name="version_use_message">इससे आपका मौजूदा वर्शन बदल जाएगा। चिंता न करें — आप हिस्ट्री से कभी भी किसी भी वर्शन पर वापस जा सकते हैं।</string>
+    <string name="version_use_confirm">यह वर्शन उपयोग करें</string>
+    <string name="version_restoring">वर्शन बहाल हो रहा है…</string>
+    <string name="version_empty">अभी कोई वर्शन हिस्ट्री नहीं है। वर्शन ट्रैक करना शुरू करने के लिए कुछ बदलाव करें!</string>
+    <string name="explore_listing_title">एक्सप्लोर पर दिखाएं</string>
+    <string name="explore_listing_hint">दूसरे लोग इस ऐप को सार्वजनिक एक्सप्लोर पेज पर ढूंढ सकें, जहां वे इसे खोल और रीमिक्स कर सकते हैं। आपका नाम पहले नाम और आद्याक्षर के रूप में दिखता है। डिफ़ॉल्ट रूप से बंद।</string>
+    <string name="explore_listing_failed">सेटिंग सहेजी नहीं गई। फिर कोशिश करें।</string>
 </resources>

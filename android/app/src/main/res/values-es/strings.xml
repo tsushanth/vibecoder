@@ -293,4 +293,21 @@
     <string name="explore_listing_title">Mostrar en Explorar</string>
     <string name="explore_listing_hint">Permite que otras personas encuentren esta app en la página pública Explorar, donde pueden abrirla y remezclarla. Tu nombre aparece como nombre y una inicial. Desactivado por defecto.</string>
     <string name="explore_listing_failed">No se guardó el ajuste. Inténtalo de nuevo.</string>
+
+    <!-- needs native review (machine translation) -->
+    <string name="account_delete_account">Eliminar cuenta</string>
+    <string name="account_dialog_delete_title">¿Eliminar tu cuenta?</string>
+    <string name="account_dialog_delete_message">Esto elimina de forma permanente tu cuenta, tus apps y todas sus versiones. Esta acción no se puede deshacer.</string>
+    <string name="account_deleting">Eliminando…</string>
+    <string name="account_delete_error">No se eliminó tu cuenta. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="account_delete_sign_in_again">Por tu seguridad, cierra sesión e inicia sesión de nuevo, y luego elimina tu cuenta.</string>
+    <string name="version_history">Historial de versiones</string>
+    <string name="version_history_subtitle">Cada cambio que haces se guarda como una versión nueva</string>
+    <string name="version_current">Actual</string>
+    <string name="version_use_this">Usar esta versión</string>
+    <string name="version_use_title">¿Restaurar esta versión?</string>
+    <string name="version_use_message">Esto reemplazará tu versión actual. No te preocupes, siempre puedes volver a cualquier versión desde el historial.</string>
+    <string name="version_use_confirm">Usar esta versión</string>
+    <string name="version_restoring">Restaurando versión…</string>
+    <string name="version_empty">Aún no hay historial de versiones. ¡Haz algunos cambios para empezar a registrar versiones!</string>
 </resources>

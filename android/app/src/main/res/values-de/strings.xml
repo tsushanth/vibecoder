@@ -293,4 +293,21 @@
     <string name="explore_listing_title">In Entdecken anzeigen</string>
     <string name="explore_listing_hint">Andere können diese App auf der öffentlichen Seite Entdecken finden, öffnen und remixen. Dein Name erscheint als Vorname mit Initiale. Standardmäßig aus.</string>
     <string name="explore_listing_failed">Die Einstellung wurde nicht gespeichert. Versuche es erneut.</string>
+
+    <!-- needs native review (machine translation) -->
+    <string name="account_delete_account">Konto löschen</string>
+    <string name="account_dialog_delete_title">Dein Konto löschen?</string>
+    <string name="account_dialog_delete_message">Dadurch werden dein Konto, deine Apps und alle ihre Versionen dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.</string>
+    <string name="account_deleting">Wird gelöscht…</string>
+    <string name="account_delete_error">Dein Konto wurde nicht gelöscht. Prüfe deine Verbindung und versuche es erneut.</string>
+    <string name="account_delete_sign_in_again">Aus Sicherheitsgründen: Melde dich ab und wieder an und lösche dann dein Konto.</string>
+    <string name="version_history">Versionsverlauf</string>
+    <string name="version_history_subtitle">Jede Änderung wird als neue Version gespeichert</string>
+    <string name="version_current">Aktuell</string>
+    <string name="version_use_this">Diese Version verwenden</string>
+    <string name="version_use_title">Diese Version wiederherstellen?</string>
+    <string name="version_use_message">Dadurch wird deine aktuelle Version ersetzt. Keine Sorge: Du kannst im Verlauf jederzeit zu jeder Version zurückwechseln.</string>
+    <string name="version_use_confirm">Diese Version verwenden</string>
+    <string name="version_restoring">Version wird wiederhergestellt…</string>
+    <string name="version_empty">Noch kein Versionsverlauf. Nimm Änderungen vor, um Versionen zu erfassen!</string>
 </resources>

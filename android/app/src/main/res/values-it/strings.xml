@@ -293,4 +293,21 @@
     <string name="explore_listing_title">Mostra in Esplora</string>
     <string name="explore_listing_hint">Permetti ad altre persone di trovare questa app nella pagina pubblica Esplora, dove possono aprirla e remixarla. Il tuo nome appare come nome e iniziale. Disattivato per impostazione predefinita.</string>
     <string name="explore_listing_failed">L\'impostazione non è stata salvata. Riprova.</string>
+
+    <!-- needs native review (machine translation) -->
+    <string name="account_delete_account">Elimina account</string>
+    <string name="account_dialog_delete_title">Eliminare il tuo account?</string>
+    <string name="account_dialog_delete_message">Questo elimina definitivamente il tuo account, le tue app e tutte le loro versioni. Questa azione non può essere annullata.</string>
+    <string name="account_deleting">Eliminazione…</string>
+    <string name="account_delete_error">Il tuo account non è stato eliminato. Controlla la connessione e riprova.</string>
+    <string name="account_delete_sign_in_again">Per la tua sicurezza, esci e accedi di nuovo, poi elimina il tuo account.</string>
+    <string name="version_history">Cronologia versioni</string>
+    <string name="version_history_subtitle">Ogni modifica che fai viene salvata come nuova versione</string>
+    <string name="version_current">Attuale</string>
+    <string name="version_use_title">Ripristinare questa versione?</string>
+    <string name="version_use_this">Usa questa versione</string>
+    <string name="version_use_message">Questo sostituirà la tua versione attuale. Niente paura: puoi sempre tornare a qualsiasi versione dalla cronologia.</string>
+    <string name="version_use_confirm">Usa questa versione</string>
+    <string name="version_restoring">Ripristino della versione…</string>
+    <string name="version_empty">Ancora nessuna cronologia versioni. Fai qualche modifica per iniziare a tracciare le versioni!</string>
 </resources>

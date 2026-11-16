@@ -290,4 +290,24 @@
     <string name="paywall_retry">حاول مرة أخرى</string>
     <string name="paywall_error_purchase">تعذر إتمام الشراء. يرجى المحاولة مرة أخرى.</string>
     <string name="paywall_restore_none">لم يتم العثور على اشتراك نشط لحساب Google هذا.</string>
+
+    <!-- needs native review (machine translation) -->
+    <string name="account_delete_account">حذف الحساب</string>
+    <string name="account_dialog_delete_title">حذف حسابك؟</string>
+    <string name="account_dialog_delete_message">سيؤدي هذا إلى حذف حسابك وتطبيقاتك وجميع إصداراتها نهائيًا. لا يمكن التراجع عن ذلك.</string>
+    <string name="account_deleting">جارٍ الحذف…</string>
+    <string name="account_delete_error">لم يتم حذف حسابك. تحقق من اتصالك وحاول مرة أخرى.</string>
+    <string name="account_delete_sign_in_again">لأمانك، سجّل الخروج ثم سجّل الدخول مرة أخرى، ثم احذف حسابك.</string>
+    <string name="version_history">سجل الإصدارات</string>
+    <string name="version_history_subtitle">كل تغيير تجريه يُحفظ كإصدار جديد</string>
+    <string name="version_current">الحالي</string>
+    <string name="version_use_this">استخدام هذا الإصدار</string>
+    <string name="version_use_title">استعادة هذا الإصدار؟</string>
+    <string name="version_use_message">سيحل هذا محل إصدارك الحالي. لا تقلق، يمكنك دائمًا العودة إلى أي إصدار من السجل.</string>
+    <string name="version_use_confirm">استخدام هذا الإصدار</string>
+    <string name="version_restoring">جارٍ استعادة الإصدار…</string>
+    <string name="version_empty">لا يوجد سجل إصدارات بعد. أجرِ بعض التغييرات لبدء تتبع الإصدارات!</string>
+    <string name="explore_listing_title">العرض في استكشاف</string>
+    <string name="explore_listing_hint">اسمح للآخرين بالعثور على هذا التطبيق في صفحة استكشاف العامة، حيث يمكنهم فتحه وإعادة مزجه. يظهر اسمك على هيئة الاسم الأول متبوعًا بحرف واحد. متوقف افتراضيًا.</string>
+    <string name="explore_listing_failed">لم يتم حفظ الإعداد. حاول مرة أخرى.</string>
 </resources>

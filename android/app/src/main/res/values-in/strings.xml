@@ -290,4 +290,24 @@
     <string name="paywall_retry">Coba lagi</string>
     <string name="paywall_error_purchase">Pembelian tidak dapat diselesaikan. Silakan coba lagi.</string>
     <string name="paywall_restore_none">Tidak ada langganan aktif untuk akun Google ini.</string>
+
+    <!-- needs native review (machine translation) -->
+    <string name="account_delete_account">Hapus akun</string>
+    <string name="account_dialog_delete_title">Hapus akun Anda?</string>
+    <string name="account_dialog_delete_message">Ini akan menghapus akun, aplikasi, dan semua versinya secara permanen. Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="account_deleting">Menghapus…</string>
+    <string name="account_delete_error">Akun Anda tidak dihapus. Periksa koneksi Anda lalu coba lagi.</string>
+    <string name="account_delete_sign_in_again">Demi keamanan Anda, keluar lalu masuk lagi, kemudian hapus akun Anda.</string>
+    <string name="version_history">Riwayat Versi</string>
+    <string name="version_history_subtitle">Setiap perubahan yang Anda buat disimpan sebagai versi baru</string>
+    <string name="version_current">Saat ini</string>
+    <string name="version_use_this">Gunakan versi ini</string>
+    <string name="version_use_title">Pulihkan versi ini?</string>
+    <string name="version_use_message">Ini akan menggantikan versi Anda saat ini. Tenang, Anda selalu dapat beralih kembali ke versi mana pun dari riwayat.</string>
+    <string name="version_use_confirm">Gunakan versi ini</string>
+    <string name="version_restoring">Memulihkan versi…</string>
+    <string name="version_empty">Belum ada riwayat versi. Buat beberapa perubahan untuk mulai melacak versi!</string>
+    <string name="explore_listing_title">Tampilkan di Jelajahi</string>
+    <string name="explore_listing_hint">Biarkan orang lain menemukan aplikasi ini di halaman Jelajahi publik, tempat mereka dapat membuka dan me-remix-nya. Nama Anda tampil sebagai nama depan dan inisial. Nonaktif secara default.</string>
+    <string name="explore_listing_failed">Pengaturan tidak tersimpan. Coba lagi.</string>
 </resources>
