@@ -3,6 +3,7 @@ package com.kreativekoala.vibecoder.ui.auth
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
+import com.kreativekoala.vibecoder.R
 import io.github.jan.supabase.auth.exception.AuthErrorCode
 import io.github.jan.supabase.auth.exception.AuthRestException
 import io.github.jan.supabase.auth.exception.AuthWeakPasswordException
@@ -26,6 +27,9 @@ enum class AuthFailure {
     Server,
     Unknown
 }
+
+/** A failure to show on the sign-in screen; the screen turns it into text in the app language with [AuthErrors.messageRes]. */
+class AuthUiError(val failure: AuthFailure, val signUp: Boolean)
 
 /** Thrown by the repository for a failure it detects itself (not from the network library), carrying only the reason. */
 class AuthFailureException(val failure: AuthFailure) : Exception(failure.name)
@@ -67,6 +71,30 @@ object AuthErrors {
     }
 
     fun message(e: Throwable, signUp: Boolean = false): String? = message(classify(e, signUp), signUp)
+
+    /** The same text as [message], as a string resource so the screen shows it in the app language; null when nothing should be shown. */
+    @androidx.annotation.StringRes
+    fun messageRes(failure: AuthFailure, signUp: Boolean = false): Int? = when (failure) {
+        AuthFailure.WrongCredentials -> R.string.auth_error_wrong_credentials
+        AuthFailure.EmailNotConfirmed -> R.string.auth_error_email_not_confirmed
+        AuthFailure.ConfirmEmailToFinish -> R.string.auth_error_confirm_email_to_finish
+        AuthFailure.RateLimited -> R.string.auth_error_rate_limited
+        AuthFailure.Network -> R.string.auth_error_network
+        AuthFailure.WeakPassword -> R.string.auth_error_weak_password
+        AuthFailure.InvalidEmail -> R.string.auth_error_invalid_email
+        AuthFailure.AlreadyRegistered -> R.string.auth_error_already_registered
+        AuthFailure.GoogleCancelled -> null
+        AuthFailure.GoogleNoAccount -> R.string.auth_error_google_no_account
+        AuthFailure.GoogleFailed -> R.string.auth_error_google_failed
+        AuthFailure.Server -> R.string.auth_error_server
+        AuthFailure.Unknown -> if (signUp) R.string.auth_error_sign_up_failed else R.string.auth_error_sign_in_failed
+    }
+
+    /** What the screen shows for a failure, or null when nothing should be shown (the person cancelled). */
+    fun uiError(e: Throwable, signUp: Boolean = false): AuthUiError? {
+        val failure = classify(e, signUp)
+        return if (messageRes(failure, signUp) == null) null else AuthUiError(failure, signUp)
+    }
 
     /**
      * A log-safe one-line description: the exception class and, for server errors, the status and error code. Never the exception

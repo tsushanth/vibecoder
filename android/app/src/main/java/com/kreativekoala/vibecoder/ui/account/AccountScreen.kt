@@ -59,17 +59,11 @@ fun AccountScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
 
+    // Exactly the languages that have a values-XX folder and an entry in res/xml/locales_config.xml.
     val supportedLanguages = listOf(
-        "en" to R.string.language_english,
-        "es" to R.string.language_spanish,
-        "fr" to R.string.language_french,
-        "de" to R.string.language_german,
-        "ja" to R.string.language_japanese,
-        "zh-CN" to R.string.language_chinese,
-        "ko" to R.string.language_korean,
-        "pt-BR" to R.string.language_portuguese,
-        "it" to R.string.language_italian,
-        "hi" to R.string.language_hindi,
+        "en", "es", "fr", "de", "ja", "zh-CN", "ko", "pt-BR", "it", "hi",
+        "ar", "id", "ms", "nl", "pl", "ru", "th", "tl", "tr", "vi",
+        "cs", "el", "fi", "hu", "ro", "sv", "uk",
     )
 
     val currentLocale = AppCompatDelegate.getApplicationLocales().toLanguageTags().ifEmpty { "en" }
@@ -81,7 +75,7 @@ fun AccountScreen(
             title = { Text(stringResource(R.string.language_picker_title)) },
             text = {
                 Column {
-                    supportedLanguages.forEach { (code, nameRes) ->
+                    supportedLanguages.forEach { code ->
                         val isSelected = currentLocale.startsWith(code.split("-")[0])
                         Row(
                             modifier = Modifier
@@ -107,7 +101,7 @@ fun AccountScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = stringResource(nameRes),
+                                text = languageEndonym(code),
                                 color = if (isSelected) VibePurple else TextPrimary,
                                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
                             )
@@ -384,9 +378,7 @@ fun AccountScreen(
                 SettingsRow(
                     icon = Icons.Default.Language,
                     title = stringResource(R.string.account_settings_language),
-                    subtitle = supportedLanguages
-                        .firstOrNull { currentLocale.startsWith(it.first.split("-")[0]) }
-                        ?.let { stringResource(it.second) } ?: stringResource(R.string.language_english),
+                    subtitle = languageEndonym(supportedLanguages.firstOrNull { currentLocale.startsWith(it.split("-")[0]) } ?: "en"),
                     onClick = { showLanguageDialog = true }
                 )
                 HorizontalDivider(color = DarkBorder)
@@ -469,4 +461,10 @@ internal fun todaysGenerationsText(uiState: AccountUiState, allFree: Boolean = M
     val used = uiState.user?.dailyGenerationCount ?: 0
     val cap = limit?.dailyGenerations
     return if (paidTier || limit?.unlimited == true || cap == null) "$used" else "$used/$cap"
+}
+
+/** A language's own name ("Español", "العربية", "हिन्दी"), so people find their language whatever the app is currently showing. */
+private fun languageEndonym(code: String): String {
+    val locale = java.util.Locale.forLanguageTag(code)
+    return locale.getDisplayLanguage(locale).replaceFirstChar { it.titlecase(locale) }
 }

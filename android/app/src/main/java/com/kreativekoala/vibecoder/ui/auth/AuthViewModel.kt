@@ -42,8 +42,8 @@ class AuthViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+    private val _errorMessage = MutableStateFlow<AuthUiError?>(null)
+    val errorMessage: StateFlow<AuthUiError?> = _errorMessage.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -75,7 +75,7 @@ class AuthViewModel @Inject constructor(
             } catch (e: Exception) {
                 AuthErrors.rethrowIfCancelled(e)
                 Log.d(TAG, "Google sign-in failed: ${AuthErrors.logSummary(e)}")
-                _errorMessage.value = AuthErrors.message(e)
+                _errorMessage.value = AuthErrors.uiError(e)
             } finally {
                 _isLoading.value = false
             }
@@ -95,7 +95,7 @@ class AuthViewModel @Inject constructor(
             } catch (e: Exception) {
                 AuthErrors.rethrowIfCancelled(e)
                 Log.d(TAG, "Email sign-in failed: ${AuthErrors.logSummary(e)}")
-                _errorMessage.value = AuthErrors.message(e)
+                _errorMessage.value = AuthErrors.uiError(e)
             } finally {
                 _isLoading.value = false
             }
@@ -116,7 +116,7 @@ class AuthViewModel @Inject constructor(
             } catch (e: Exception) {
                 AuthErrors.rethrowIfCancelled(e)
                 Log.d(TAG, "Email sign-up failed: ${AuthErrors.logSummary(e)}")
-                _errorMessage.value = AuthErrors.message(e, signUp = true)
+                _errorMessage.value = AuthErrors.uiError(e, signUp = true)
             } finally {
                 _isLoading.value = false
             }

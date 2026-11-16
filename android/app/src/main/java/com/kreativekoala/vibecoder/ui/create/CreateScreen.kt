@@ -152,14 +152,14 @@ fun CreateScreen(
             if (showClosePublishPrompt) {
                 AlertDialog(
                     onDismissRequest = { showClosePublishPrompt = false },
-                    title = { Text("Save your app?", color = TextPrimary) },
-                    text = { Text("Your app hasn't been saved yet. Would you like to save it before closing?", color = TextSecondary) },
+                    title = { Text(stringResource(R.string.create_save_prompt_title), color = TextPrimary) },
+                    text = { Text(stringResource(R.string.create_save_prompt_body), color = TextSecondary) },
                     confirmButton = {
                         TextButton(onClick = {
                             showClosePublishPrompt = false
                             viewModel.saveProject()
                         }) {
-                            Text("Save", color = VibePurple)
+                            Text(stringResource(R.string.save), color = VibePurple)
                         }
                     },
                     dismissButton = {
@@ -167,7 +167,7 @@ fun CreateScreen(
                             showClosePublishPrompt = false
                             viewModel.dismissPreview()
                         }) {
-                            Text("Discard", color = TextSecondary)
+                            Text(stringResource(R.string.create_discard), color = TextSecondary)
                         }
                     },
                     containerColor = DarkSurfaceVariant
@@ -195,11 +195,11 @@ fun CreateScreen(
     if (uiState.showSystemBusyDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissSystemBusyDialog() },
-            title = { Text("🔥 High Demand Right Now") },
+            title = { Text(stringResource(R.string.create_busy_title)) },
             text = {
                 Text(
-                    if (Monetization.ALL_FREE) "Our builders are at full capacity right now. Please try again in a few minutes."
-                    else "Our builders are at full capacity. Pro users get priority access and build instantly."
+                    if (Monetization.ALL_FREE) stringResource(R.string.create_busy_body_free)
+                    else stringResource(R.string.create_busy_body_pro)
                 )
             },
             confirmButton = {
@@ -210,7 +210,7 @@ fun CreateScreen(
                         viewModel.dismissSystemBusyDialog()
                         onNavigateToSubscriptions()
                     }) {
-                        Text("⚡ Upgrade to Pro", color = VibePurple)
+                        Text(stringResource(R.string.create_busy_upgrade), color = VibePurple)
                     }
                 }
             },

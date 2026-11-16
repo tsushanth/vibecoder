@@ -116,7 +116,7 @@ fun SignInScreen(
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
-                        text = errorMessage ?: "",
+                        text = errorMessage?.let { AuthErrors.messageRes(it.failure, it.signUp) }?.let { stringResource(it) } ?: "",
                         modifier = Modifier.padding(16.dp),
                         color = ErrorRed,
                         style = MaterialTheme.typography.bodyMedium,

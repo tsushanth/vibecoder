@@ -233,7 +233,7 @@ fun LivePreviewScreen(
                     Spacer(modifier = Modifier.height(12.dp))
                     OutlinedTextField(
                         value = subdomain,
-                        onValueChange = { subdomain = it.lowercase().filter { c -> c.isLetterOrDigit() || c == '-' } },
+                        onValueChange = { subdomain = it.lowercase().filter { c -> c in 'a'..'z' || c in '0'..'9' || c == '-' } }, // ASCII only: the server rejects anything else
                         placeholder = { Text(stringResource(R.string.preview_deploy_placeholder), color = TextTertiary) },
                         suffix = { Text(stringResource(R.string.preview_deploy_domain_suffix), color = TextSecondary) },
                         singleLine = true,
