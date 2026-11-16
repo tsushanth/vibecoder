@@ -73,6 +73,14 @@ android {
         unitTests.isReturnDefaultValues = true
     }
 
+    // The in-app language picker offers languages other than the device language; ship every language in the base APK so it
+    // also works on Android 8-12 (Play otherwise delivers only the device language's strings).
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
