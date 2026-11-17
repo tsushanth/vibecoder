@@ -193,7 +193,7 @@ fun VersionHistorySheet(
                                     // Description + date
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
-                                            text = formatVersionMessage(version.message),
+                                            text = formatVersionMessage(version.message, stringResource(R.string.version_initial)),
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = TextPrimary,
                                             maxLines = 2,
@@ -243,11 +243,11 @@ fun VersionHistorySheet(
     }
 }
 
-private fun formatVersionMessage(message: String): String {
+private fun formatVersionMessage(message: String, initialLabel: String): String {
     // Clean up commit messages like "Tweak: Added dark mode" → "Added dark mode"
     return message
         .removePrefix("Tweak: ")
         .removePrefix("tweak: ")
         .removePrefix("Initial app creation")
-        .ifBlank { "Initial version" }
+        .ifBlank { initialLabel }
 }

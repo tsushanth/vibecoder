@@ -120,13 +120,13 @@ fun ProjectCardItem(
                             )
                             Spacer(modifier = Modifier.height(10.dp))
                             Text(
-                                "Building your app...",
+                                stringResource(R.string.project_card_building),
                                 style = MaterialTheme.typography.titleSmall,
                                 color = VibePurple,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                "This takes about 5 minutes",
+                                stringResource(R.string.project_card_takes_5_min),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = TextTertiary
                             )
@@ -142,7 +142,7 @@ fun ProjectCardItem(
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                "Build failed",
+                                stringResource(R.string.build_chat_stage_failed),
                                 style = MaterialTheme.typography.titleSmall,
                                 color = ErrorRed,
                                 fontWeight = FontWeight.Bold
@@ -154,7 +154,7 @@ fun ProjectCardItem(
                                     colors = ButtonDefaults.buttonColors(containerColor = VibePurple),
                                     contentPadding = PaddingValues(horizontal = 20.dp, vertical = 6.dp)
                                 ) {
-                                    Text("Retry", style = MaterialTheme.typography.labelMedium)
+                                    Text(stringResource(R.string.retry), style = MaterialTheme.typography.labelMedium)
                                 }
                             }
                         }

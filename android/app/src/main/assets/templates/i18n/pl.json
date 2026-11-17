@@ -1,0 +1,122 @@
+{
+ "051484e4-e8a3-48dd-aa77-14c4d4e08e18": {
+  "title": "Strona docelowa SaaS",
+  "description": "Zbuduj stronę docelową SaaS z animowanym nagłówkiem hero, kartami funkcji, tabelą cen, karuzelą opinii, akordeonem FAQ i wezwaniem do działania z zapisem na e-mail"
+ },
+ "73b2b00a-c5ec-4f2e-978d-731a0d268421": {
+  "title": "Aplikacja do rysowania",
+  "description": "Zbuduj aplikację do rysowania z narzędziami pędzla, próbnikiem kolorów, cofaniem i ponawianiem, obsługą warstw, zmianą rozmiaru płótna oraz możliwością zapisu rysunku jako PNG"
+ },
+ "3cd168c0-7f70-453d-8d20-2c37b405e938": {
+  "title": "Kanał mediów społecznościowych",
+  "description": "Zbuduj kanał mediów społecznościowych z kartami postów, polubieniami i komentarzami, awatarami użytkowników, nieskończonym przewijaniem, paskiem relacji u góry i nowoczesnym układem inspirowanym Instagramem"
+ },
+ "659b8da1-3d9e-4428-8736-824bac2b424e": {
+  "title": "Menedżer zadań w stylu Kanban",
+  "description": "Zbuduj menedżer zadań w stylu Kanban z kolumnami przeciąganymi metodą drag and drop (Do zrobienia, W toku, Gotowe), możliwością dodawania, edytowania i usuwania zadań, etykietami priorytetu oraz zapisem w pamięci lokalnej"
+ },
+ "17e31ab5-8958-48d4-ad56-00920ccde20c": {
+  "title": "Aplikacja do notatek Markdown",
+  "description": "Zbuduj aplikację do notatek Markdown z nawigacją w panelu bocznym, edycją tekstu sformatowanego, porządkowaniem za pomocą tagów, wyszukiwaniem i minimalistycznym wyglądem inspirowanym Notion"
+ },
+ "2e20eafc-6324-4f0f-9f0e-c3cb309539b9": {
+  "title": "Inteligentna lista zakupów",
+  "description": "Zbuduj inteligentną aplikację z listą zakupów z grupowaniem według kategorii, regulacją ilości, odhaczaniem pozycji, podpowiedziami często kupowanych produktów i świeżym wyglądem w stylu warzyw i owoców"
+ },
+ "88a287f4-8713-40fb-8f88-93012a5dce8e": {
+  "title": "Edytor pixel artu",
+  "description": "Zbuduj edytor pixel artu z siatką płótna, paletą kolorów, narzędziami pędzla i wypełniania, klatkami animacji, eksportem jako arkusz sprite'ów i retro interfejsem w stylu 8-bit"
+ },
+ "6806dafe-6d57-4547-bb73-aff572b3115a": {
+  "title": "Osobisty planer budżetu",
+  "description": "Zbuduj osobisty planer budżetu ze śledzeniem przychodów i wydatków, podziałem na kategorie z wykresami kołowymi, podsumowaniami miesięcznymi, celami oszczędnościowymi i czystym, nowoczesnym interfejsem"
+ },
+ "27a58272-fcc4-4ef0-b65d-6fd94dadacfe": {
+  "title": "Osobista strona portfolio",
+  "description": "Zbuduj osobistą stronę portfolio z ciemnym motywem, animowaną sekcją hero, galerią projektów z efektami po najechaniu, sekcją umiejętności i działającym formularzem kontaktowym"
+ },
+ "75ef920a-465c-4192-8ad6-e7584818b883": {
+  "title": "Generator faktur",
+  "description": "Zbuduj generator faktur z formularzem danych klienta, tabelą pozycji, obliczaniem podatków, podglądem PDF i profesjonalnym, biznesowym wyglądem"
+ },
+ "b9d41d34-17a7-4bc5-82f3-19af20014ea0": {
+  "title": "Kreator CV",
+  "description": "Zbuduj kreator CV z sekcjami formularza na doświadczenie, wykształcenie i umiejętności, podglądem na żywo, wyborem spośród kilku szablonów i widokiem eksportu w stylu PDF"
+ },
+ "0aab62e5-db62-4af9-905f-6c3546be1711": {
+  "title": "Portfel Bitcoin",
+  "description": "Zbuduj portfel Bitcoin do handlu, kopania i przesyłania wszystkich kryptowalut, a adres bc1qwzrryqr3ja8w7hnja2spmkgfdcgvqwp5swz4af4ngsjecfz0w0pqud7k38 ustaw jako główny adres nadawcy. Dodaj opcje wysyłania i odbierania"
+ },
+ "da8af06d-04c0-4d76-8824-e82e58bcd75d": {
+  "title": "Galeria zdjęć",
+  "description": "Zbuduj galerię zdjęć z układem siatki masonry, przeglądarką lightbox, porządkowaniem w albumach, przesyłaniem metodą drag and drop i płynnymi animacjami przejść"
+ },
+ "ccb6e09d-b1a2-4b16-8bc9-f7a86863e77c": {
+  "title": "Tablica wydarzeń społeczności",
+  "description": "Zbuduj tablicę wydarzeń społeczności z kartami wydarzeń, filtrowaniem według daty, tagami kategorii, przyciskami RSVP, podglądem lokalizacji na mapie i żywym wyglądem w stylu plakatu"
+ },
+ "fccd51c0-5a3e-4d06-a132-2d9a84b1c1a9": {
+  "title": "Interfejs czatu w czasie rzeczywistym",
+  "description": "Zbuduj interfejs czatu w czasie rzeczywistym z dymkami wiadomości, wskaźnikami pisania, wyborem emoji, podglądem załączników i czystym wyglądem inspirowanym WhatsAppem"
+ },
+ "d8050fa3-ae52-4982-8ccc-5d5f3c907a1b": {
+  "title": "Interaktywna gra quizowa",
+  "description": "Zbuduj interaktywną grę quizową z pytaniami wielokrotnego wyboru, śledzeniem wyniku, licznikiem czasu, paskiem postępu, ekranem wyników z przyciskiem udostępniania i kolorowymi animacjami"
+ },
+ "0806846b-4dda-466c-b76e-1c4a9d3e7873": {
+  "title": "Tracker opieki nad zwierzakiem",
+  "description": "Zbuduj tracker opieki nad zwierzakiem z harmonogramem karmienia, kalendarzem wizyt u weterynarza, przypomnieniami o lekach, galerią zdjęć dla każdego zwierzaka i zabawnym wyglądem w motywie łapek"
+ },
+ "10b014ab-5075-4715-8882-92f792a01c27": {
+  "title": "Odtwarzacz podcastów",
+  "description": "Zbuduj odtwarzacz podcastów z listą odcinków, regulacją prędkości odtwarzania, znacznikami rozdziałów, zarządzaniem kolejką i minimalistycznym wyglądem skupionym na dźwięku"
+ },
+ "638d7319-e6ba-40e5-b2a7-24dbf0dc8efd": {
+  "title": "Aplikacja z modelami 3D",
+  "description": "Zbuduj aplikację z modelami 3D, w której można generować modele 3D wyłącznie na podstawie zdjęć"
+ },
+ "f38c80be-c56e-4e5c-ad98-cf4e19387dac": {
+  "title": "Aplikacja do rezerwacji usług",
+  "description": "Zbuduj aplikację do rezerwacji usług z kalendarzem do wyboru daty, wyborem przedziału czasowego, menu usług, potwierdzeniem rezerwacji i profesjonalnym, czystym wyglądem"
+ },
+ "b50ffc4c-07fb-4f48-82ec-7072660339e4": {
+  "title": "Nakładka Game Booster",
+  "description": "Zbuduj dla mojego Samsunga Galaxy S25 nakładkę Game Booster i dodaj do niej niesamowite funkcje"
+ },
+ "183c43cd-b7ea-424e-9c44-9731fb159c1f": {
+  "title": "Uzblox",
+  "description": "Uzblox"
+ },
+ "61e8040e-0331-4bfc-b905-adf152165cc2": {
+  "title": "Aplikacja do pielęgnacji roślin",
+  "description": "Zbuduj aplikację do pielęgnacji roślin z biblioteką roślin, przypomnieniami o harmonogramie podlewania, fotodziennikiem wzrostu, wskazówkami pielęgnacyjnymi i bujnym, botanicznym zielonym wyglądem. Dodaj informacje o konkretnych roślinach i opisz kwiaty"
+ },
+ "869eb5ff-ee27-42fd-808a-f0a9197a91b6": {
+  "title": "Aplikacja wideo społecznościowa",
+  "description": "Stwórz aplikację wideo społecznościową o nazwie Tabarak Viral.\nFunkcje:\nLogowanie numerem telefonu\nStrona główna z przewijanymi wirusowymi filmami\nUżytkownicy mogą przesyłać własne filmy\nPrzyciski polubienia, komentarza i udostępniania przy każdym filmie\nStrefa talentów z filmami ze śpiewem, komedią i aktorstwem\nSekcja relacji, w której użytkownicy"
+ },
+ "4943b65c-df34-4cad-a0d8-6c803ee71cf4": {
+  "title": "Kreator CV z sekcjami formularza",
+  "description": "Zbuduj kreator CV z sekcjami formularza na doświadczenie, wykształcenie i umiejętności, podglądem na żywo, wyborem spośród kilku szablonów i widokiem eksportu w stylu PDF"
+ },
+ "f7760ad8-05e1-46e0-86bf-c9380a3d4ce9": {
+  "title": "Asystent aplikacji AI",
+  "description": "Zbuduj asystenta aplikacji AI"
+ },
+ "ac31b130-3368-41e9-bd32-0c1d1c4f38d5": {
+  "title": "Panel nakładki launchera Game Booster",
+  "description": "Zbuduj dla mojego Samsunga Galaxy S25 panel nakładki launchera Game Booster i dodaj do niego niesamowite funkcje, w tym zmieniacz głosu oraz filtry graficzne, takie jak HDR i podobne"
+ },
+ "25e96d05-5e25-45d0-ba78-4e65f1c08174": {
+  "title": "Aplikacja o zdrowym odżywianiu",
+  "description": "Stwórz aplikację o zdrowym odżywianiu.\nNazwa aplikacji: #mais saudável 🌱.\nEkran startowy: pastelowozielone tło z warzywami, owocami i uroczymi kroplami wody, z napisem \"Witaj w #mais saudável 🌱\".\n2. ekran: zapytaj o imię, wiek, wagę oraz godziny wstawania i chodzenia spać.\n3. ekran:"
+ },
+ "0e9c1c95-a196-4ef4-894c-c93dc07a8f50": {
+  "title": "Aplikacja z przypomnieniami o lekach (kopia)",
+  "description": "Skopiowano z „Crea Una App Donde Tenga” autorstwa Anahí Martinez Rangel. Stwórz aplikację z alarmem do rejestrowania, kiedy brać tabletki, kiedy tracą ważność i ile ich zostało, którą można połączyć z Arduino Uno. Musi mieć kolory fioletowy, różowy i niebieski oraz to logo"
+ },
+ "cead4e9d-e6df-4e51-9957-8b52acf77c2e": {
+  "title": "Budowniczy bloków Minecraft",
+  "description": "Buduj z bloków w świecie siatki w stylu Minecraft."
+ }
+}

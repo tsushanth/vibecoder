@@ -1,0 +1,122 @@
+{
+ "051484e4-e8a3-48dd-aa77-14c4d4e08e18": {
+  "title": "Landing page SaaS",
+  "description": "Crea una landing page SaaS con hero animato, schede delle funzionalità, tabella dei prezzi, carosello di testimonianze, FAQ a fisarmonica e una call to action con iscrizione via e-mail"
+ },
+ "73b2b00a-c5ec-4f2e-978d-731a0d268421": {
+  "title": "App di disegno",
+  "description": "Crea un'app di disegno con strumenti pennello, selettore colori, annulla/ripeti, supporto ai livelli, ridimensionamento della tela e possibilità di salvare l'opera come PNG"
+ },
+ "3cd168c0-7f70-453d-8d20-2c37b405e938": {
+  "title": "Feed di social media",
+  "description": "Crea un feed di social media con schede dei post, interazioni di mi piace/commenti, avatar degli utenti, scorrimento infinito, barra delle storie in alto e un layout moderno ispirato a Instagram"
+ },
+ "659b8da1-3d9e-4428-8736-824bac2b424e": {
+  "title": "Gestore di attività in stile Kanban",
+  "description": "Crea un gestore di attività in stile Kanban con colonne drag and drop (Da fare, In corso, Fatto), possibilità di aggiungere/modificare/eliminare attività, etichette di priorità e salvataggio nella memoria locale"
+ },
+ "17e31ab5-8958-48d4-ad56-00920ccde20c": {
+  "title": "App di note Markdown",
+  "description": "Crea un'app di note Markdown con navigazione laterale, editor di testo avanzato, organizzazione per tag, funzione di ricerca e un design minimale ispirato a Notion"
+ },
+ "2e20eafc-6324-4f0f-9f0e-c3cb309539b9": {
+  "title": "App intelligente per la lista della spesa",
+  "description": "Crea un'app intelligente per la lista della spesa con raggruppamento per categoria, regolazione delle quantità, articoli da spuntare, suggerimenti sugli acquisti frequenti e un design fresco a tema frutta e verdura"
+ },
+ "88a287f4-8713-40fb-8f88-93012a5dce8e": {
+  "title": "Editor di pixel art",
+  "description": "Crea un editor di pixel art con tela a griglia, tavolozza di colori, strumenti pennello e riempimento, fotogrammi di animazione, esportazione come sprite sheet e un'interfaccia retrò a tema 8 bit"
+ },
+ "6806dafe-6d57-4547-bb73-aff572b3115a": {
+  "title": "Pianificatore di budget personale",
+  "description": "Crea un pianificatore di budget personale con monitoraggio di entrate e uscite, ripartizione per categoria con grafici a torta, riepiloghi mensili, obiettivi di risparmio e un'interfaccia moderna e pulita"
+ },
+ "27a58272-fcc4-4ef0-b65d-6fd94dadacfe": {
+  "title": "Sito portfolio personale",
+  "description": "Crea un sito portfolio personale con tema scuro, sezione hero animata, galleria di progetti con effetti al passaggio del mouse, sezione competenze e un modulo di contatto funzionante"
+ },
+ "75ef920a-465c-4192-8ad6-e7584818b883": {
+  "title": "Generatore di fatture",
+  "description": "Crea un generatore di fatture con modulo per i dati del cliente, tabella delle voci, calcolo delle imposte, anteprima PDF e un design professionale a tema business"
+ },
+ "b9d41d34-17a7-4bc5-82f3-19af20014ea0": {
+  "title": "Creatore di curriculum",
+  "description": "Crea un creatore di curriculum con sezioni modulo per esperienza, istruzione e competenze, anteprima dal vivo, più modelli tra cui scegliere e una vista di esportazione in stile PDF"
+ },
+ "0aab62e5-db62-4af9-905f-6c3546be1711": {
+  "title": "Portafoglio Bitcoin",
+  "description": "Crea un portafoglio bitcoin per il trading, il mining e il trasferimento di tutte le criptovalute, e imposta bc1qwzrryqr3ja8w7hnja2spmkgfdcgvqwp5swz4af4ngsjecfz0w0pqud7k38 come mittente principale; aggiungi opzioni per inviare e ricevere"
+ },
+ "da8af06d-04c0-4d76-8824-e82e58bcd75d": {
+  "title": "Galleria fotografica",
+  "description": "Crea una galleria fotografica con griglia masonry, visualizzatore lightbox, organizzazione in album, caricamento drag and drop e animazioni di transizione fluide"
+ },
+ "ccb6e09d-b1a2-4b16-8bc9-f7a86863e77c": {
+  "title": "Bacheca eventi della comunità",
+  "description": "Crea una bacheca di eventi della comunità con schede evento, filtro per data, tag di categoria, pulsanti RSVP, anteprime della posizione sulla mappa e un design vivace in stile locandina"
+ },
+ "fccd51c0-5a3e-4d06-a132-2d9a84b1c1a9": {
+  "title": "Interfaccia chat in tempo reale",
+  "description": "Crea un'interfaccia chat in tempo reale con fumetti dei messaggi, indicatori di digitazione, selettore di emoji, anteprime degli allegati e un design pulito ispirato a WhatsApp"
+ },
+ "d8050fa3-ae52-4982-8ccc-5d5f3c907a1b": {
+  "title": "Gioco quiz interattivo",
+  "description": "Crea un gioco quiz interattivo con domande a scelta multipla, tracciamento del punteggio, timer, barra di avanzamento, schermata dei risultati con pulsante di condivisione e animazioni colorate"
+ },
+ "0806846b-4dda-466c-b76e-1c4a9d3e7873": {
+  "title": "Tracker per la cura degli animali",
+  "description": "Crea un tracker per la cura degli animali con orari dei pasti, calendario delle visite veterinarie, promemoria per i farmaci, galleria fotografica per ogni animale e un design giocoso a tema impronte di zampe"
+ },
+ "10b014ab-5075-4715-8882-92f792a01c27": {
+  "title": "Lettore di podcast",
+  "description": "Crea un lettore di podcast con elenco degli episodi, controlli della velocità di riproduzione, indicatori dei capitoli, gestione della coda e un design minimale incentrato sull'audio"
+ },
+ "638d7319-e6ba-40e5-b2a7-24dbf0dc8efd": {
+  "title": "App di modelli 3D",
+  "description": "Crea un'app di modelli 3D con cui si possono generare modelli 3D partendo solo da foto"
+ },
+ "f38c80be-c56e-4e5c-ad98-cf4e19387dac": {
+  "title": "App di prenotazione servizi",
+  "description": "Crea un'app di prenotazione servizi con selettore della data a calendario, scelta della fascia oraria, menu dei servizi, conferma della prenotazione e un design professionale e pulito"
+ },
+ "b50ffc4c-07fb-4f48-82ec-7072660339e4": {
+  "title": "Overlay game booster",
+  "description": "Crea per me un overlay game booster per il mio Samsung Galaxy S25 e aggiungi funzionalità davvero spettacolari"
+ },
+ "183c43cd-b7ea-424e-9c44-9731fb159c1f": {
+  "title": "Uzblox",
+  "description": "Uzblox"
+ },
+ "61e8040e-0331-4bfc-b905-adf152165cc2": {
+  "title": "App per la cura delle piante",
+  "description": "Crea un'app per la cura delle piante con una libreria di piante, promemoria del programma di irrigazione, diario fotografico della crescita, consigli di cura e un design rigoglioso a tema verde botanico; aggiungi informazioni su piante specifiche e descrivi i fiori"
+ },
+ "869eb5ff-ee27-42fd-808a-f0a9197a91b6": {
+  "title": "App video per social media",
+  "description": "Crea un'app video per social media chiamata Tabarak Viral.\nFunzionalità:\nAccesso con numero di telefono\nHome page con scorrimento di video virali\nGli utenti possono caricare i propri video\nPulsanti mi piace, commenta e condividi su ogni video\nZona talenti per video di canto, comicità e recitazione\nSezione storie dove gli utenti"
+ },
+ "4943b65c-df34-4cad-a0d8-6c803ee71cf4": {
+  "title": "Creatore di curriculum con sezioni modulo",
+  "description": "Crea un creatore di curriculum con sezioni modulo per esperienza, istruzione e competenze, anteprima dal vivo, più modelli tra cui scegliere e una vista di esportazione in stile PDF"
+ },
+ "f7760ad8-05e1-46e0-86bf-c9380a3d4ce9": {
+  "title": "Assistente app AI",
+  "description": "Crea un assistente app AI"
+ },
+ "ac31b130-3368-41e9-bd32-0c1d1c4f38d5": {
+  "title": "Pannello overlay launcher game booster",
+  "description": "Crea per me un pannello overlay launcher game booster per il mio Samsung Galaxy S25 e aggiungi funzionalità davvero spettacolari; aggiungi un modificatore di voce, filtri grafici come HDR e simili"
+ },
+ "25e96d05-5e25-45d0-ba78-4e65f1c08174": {
+  "title": "App per l'alimentazione sana",
+  "description": "Crea un'app sull'alimentazione sana.\nNome dell'app: #mais saudável 🌱.\nSchermata iniziale: sfondo verde pastello con verdure, frutta e simpatiche gocce d'acqua, con la scritta «Benvenuto/a in #mais saudável 🌱».\n2ª schermata: chiedere nome, età, peso e l'orario in cui la persona si sveglia e va a dormire.\n3ª schermata:"
+ },
+ "0e9c1c95-a196-4ef4-894c-c93dc07a8f50": {
+  "title": "App promemoria pillole (Fork)",
+  "description": "Biforcata da «Crea Una App Donde Tenga» di Anahí Martinez Rangel. Crea un'app con una sveglia per registrare quando prendere le pillole, quando scadono e quante ne restano, che si possa collegare ad Arduino Uno; deve avere i colori viola, rosa e blu e questo logo con il nome"
+ },
+ "cead4e9d-e6df-4e51-9957-8b52acf77c2e": {
+  "title": "Costruttore di blocchi Minecraft",
+  "description": "Costruisci con i blocchi in un mondo a griglia in stile Minecraft."
+ }
+}

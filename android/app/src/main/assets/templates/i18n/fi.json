@@ -1,0 +1,122 @@
+{
+ "051484e4-e8a3-48dd-aa77-14c4d4e08e18": {
+  "title": "SaaS-laskeutumissivu",
+  "description": "Rakenna SaaS-laskeutumissivu, jossa on animoitu pääosio, ominaisuuskortit, hinnasto, suosituskaruselli, UKK-haitari ja toimintakehotus sähköpostitilauksella"
+ },
+ "73b2b00a-c5ec-4f2e-978d-731a0d268421": {
+  "title": "Piirtosovellus",
+  "description": "Rakenna piirtosovellus, jossa on siveltimet, värinvalitsin, kumoa/tee uudelleen, tasotuki, piirtoalueen koon muutto ja mahdollisuus tallentaa teos PNG-kuvana"
+ },
+ "3cd168c0-7f70-453d-8d20-2c37b405e938": {
+  "title": "Sosiaalisen median syöte",
+  "description": "Rakenna sosiaalisen median syöte, jossa on julkaisukortit, tykkäys- ja kommenttitoiminnot, käyttäjien profiilikuvat, päättymätön vieritys, tarinapalkki ylhäällä ja moderni Instagramin inspiroima ulkoasu"
+ },
+ "659b8da1-3d9e-4428-8736-824bac2b424e": {
+  "title": "Kanban-tyylinen tehtävienhallinta",
+  "description": "Rakenna Kanban-tyylinen tehtävienhallinta, jossa on vedä ja pudota -sarakkeet (Tekemättä, Työn alla, Valmis), mahdollisuus lisätä, muokata ja poistaa tehtäviä, tärkeysmerkinnät ja tallennus paikalliseen tallennustilaan"
+ },
+ "17e31ab5-8958-48d4-ad56-00920ccde20c": {
+  "title": "Markdown-muistiinpanosovellus",
+  "description": "Rakenna Markdown-muistiinpanosovellus, jossa on sivupalkkinavigointi, rikastetun tekstin muokkaus, tunnisteisiin perustuva järjestely, haku ja Notionin inspiroima minimalistinen ulkoasu"
+ },
+ "2e20eafc-6324-4f0f-9f0e-c3cb309539b9": {
+  "title": "Älykäs ostoslistasovellus",
+  "description": "Rakenna älykäs ostoslistasovellus, jossa on ryhmittely kategorioittain, määrän säätö, tuotteiden merkitseminen ostetuiksi, ehdotukset usein ostetuista tuotteista ja raikas tuoretuotteiden värittämä ulkoasu"
+ },
+ "88a287f4-8713-40fb-8f88-93012a5dce8e": {
+  "title": "Pikselitaiteen muokkain",
+  "description": "Rakenna pikselitaiteen muokkain, jossa on ruudukkopohjainen piirtoalue, värivalikoima, sivellin- ja täyttötyökalut, animaatiokehykset, vienti sprite-arkkina ja retrotyylinen 8-bittinen käyttöliittymä"
+ },
+ "6806dafe-6d57-4547-bb73-aff572b3115a": {
+  "title": "Henkilökohtainen budjettisuunnittelija",
+  "description": "Rakenna henkilökohtainen budjettisuunnittelija, jossa on tulojen ja menojen seuranta, kategorioiden erittely ympyräkaavioilla, kuukausiyhteenvedot, säästötavoitteet ja selkeä moderni käyttöliittymä"
+ },
+ "27a58272-fcc4-4ef0-b65d-6fd94dadacfe": {
+  "title": "Henkilökohtainen portfoliosivusto",
+  "description": "Rakenna henkilökohtainen portfoliosivusto, jossa on tumma teema, animoitu pääosio, projektigalleria hover-tehosteilla, taito-osio ja toimiva yhteydenottolomake"
+ },
+ "75ef920a-465c-4192-8ad6-e7584818b883": {
+  "title": "Laskugeneraattori",
+  "description": "Rakenna laskugeneraattori, jossa on asiakastietolomake, rivitaulukko, verolaskenta, PDF-esikatselu ja ammattimainen yritysilmeinen ulkoasu"
+ },
+ "b9d41d34-17a7-4bc5-82f3-19af20014ea0": {
+  "title": "CV-rakentaja",
+  "description": "Rakenna CV-rakentaja, jossa on lomake-osiot työkokemukselle, koulutukselle ja taidoille, reaaliaikainen esikatselu, useita mallipohjia ja PDF-tyylinen vientinäkymä"
+ },
+ "0aab62e5-db62-4af9-905f-6c3546be1711": {
+  "title": "Bitcoin-lompakko",
+  "description": "Rakenna bitcoin-lompakko kaikkien kryptovaluuttojen kaupankäyntiin, louhintaan ja siirtoihin ja aseta tämä osoite pääasialliseksi lähettäjäksi: bc1qwzrryqr3ja8w7hnja2spmkgfdcgvqwp5swz4af4ngsjecfz0w0pqud7k38. Lisää vaihtoehdot lähettämiselle ja vastaanottamiselle"
+ },
+ "da8af06d-04c0-4d76-8824-e82e58bcd75d": {
+  "title": "Kuvagalleria",
+  "description": "Rakenna kuvagalleria, jossa on masonry-ruudukkoasettelu, lightbox-katselu, albumijärjestely, vedä ja pudota -lataus ja sujuvat siirtymäanimaatiot"
+ },
+ "ccb6e09d-b1a2-4b16-8bc9-f7a86863e77c": {
+  "title": "Yhteisön tapahtumataulu",
+  "description": "Rakenna yhteisön tapahtumataulu, jossa on tapahtumakortit, päivämääräsuodatus, kategoriatunnisteet, osallistumispainikkeet, karttaesikatselut paikoista ja eloisa julistetyylinen ulkoasu"
+ },
+ "fccd51c0-5a3e-4d06-a132-2d9a84b1c1a9": {
+  "title": "Reaaliaikainen keskustelunäkymä",
+  "description": "Rakenna reaaliaikainen keskustelunäkymä, jossa on viestikuplat, kirjoitusilmaisimet, emojivalitsin, liitetiedostojen esikatselut ja selkeä WhatsAppin inspiroima ulkoasu"
+ },
+ "d8050fa3-ae52-4982-8ccc-5d5f3c907a1b": {
+  "title": "Interaktiivinen tietovisapeli",
+  "description": "Rakenna interaktiivinen tietovisapeli, jossa on monivalintakysymykset, pisteiden seuranta, ajastin, edistymispalkki, tulosnäkymä jakopainikkeella ja värikkäät animaatiot"
+ },
+ "0806846b-4dda-466c-b76e-1c4a9d3e7873": {
+  "title": "Lemmikin hoidon seuranta",
+  "description": "Rakenna lemmikin hoidon seuranta, jossa on ruokinta-aikataulut, eläinlääkärikäyntien kalenteri, lääkemuistutukset, valokuvagalleria jokaiselle lemmikille ja leikkisä tassunjälkiteemainen ulkoasu"
+ },
+ "10b014ab-5075-4715-8882-92f792a01c27": {
+  "title": "Podcast-soitin",
+  "description": "Rakenna podcast-soitin, jossa on jaksoluettelo, toistonopeuden säädöt, lukumerkit, jonon hallinta ja minimalistinen äänikeskeinen ulkoasu"
+ },
+ "638d7319-e6ba-40e5-b2a7-24dbf0dc8efd": {
+  "title": "3D-mallisovellus",
+  "description": "Rakenna 3D-mallisovellus, jolla voi luoda 3D-malleja pelkistä kuvista"
+ },
+ "f38c80be-c56e-4e5c-ad98-cf4e19387dac": {
+  "title": "Palveluiden varaussovellus",
+  "description": "Rakenna palveluiden varaussovellus, jossa on kalenterin päivämäärävalitsin, aikavälin valinta, palveluvalikko, varausvahvistus ja ammattimainen selkeä ulkoasu"
+ },
+ "b50ffc4c-07fb-4f48-82ec-7072660339e4": {
+  "title": "Pelinkiihdytin-peittokuva",
+  "description": "Rakenna minulle pelinkiihdytin-peittokuva Samsung Galaxy s25 -puhelimelleni ja lisää siihen todella makeita ominaisuuksia"
+ },
+ "183c43cd-b7ea-424e-9c44-9731fb159c1f": {
+  "title": "Uzblox",
+  "description": "Uzblox"
+ },
+ "61e8040e-0331-4bfc-b905-adf152165cc2": {
+  "title": "Kasvien hoitosovellus",
+  "description": "Rakenna kasvien hoitosovellus, jossa on kasvikirjasto, kastelun aikataulumuistutukset, kasvun valokuvapäiväkirja, hoitovinkit ja rehevä vihreäsävyinen kasviteemainen ulkoasu; lisää tietoa tietyistä kasveista ja kuvaile kukkia"
+ },
+ "869eb5ff-ee27-42fd-808a-f0a9197a91b6": {
+  "title": "Sosiaalisen median videosovellus",
+  "description": "Luo sosiaalisen median videosovellus nimeltä Tabarak Viral.\nOminaisuudet:\nKirjautuminen puhelinnumerolla\nEtusivu, jolla vieritettäviä virusvideoita\nKäyttäjät voivat ladata omia videoitaan\nTykkäys-, kommentti- ja jakopainikkeet jokaisessa videossa\nLahjakkuusalue laulu-, komedia- ja näyttelyvideoille\nTarinaosio, jossa k"
+ },
+ "4943b65c-df34-4cad-a0d8-6c803ee71cf4": {
+  "title": "CV-rakentaja lomake-osioilla",
+  "description": "Rakenna CV-rakentaja, jossa on lomake-osiot työkokemukselle, koulutukselle ja taidoille, reaaliaikainen esikatselu, useita mallipohjia ja PDF-tyylinen vientinäkymä"
+ },
+ "f7760ad8-05e1-46e0-86bf-c9380a3d4ce9": {
+  "title": "AI-sovellusavustaja",
+  "description": "Rakenna AI-sovellusavustaja"
+ },
+ "ac31b130-3368-41e9-bd32-0c1d1c4f38d5": {
+  "title": "Pelinkiihdyttimen käynnistin-peittopaneeli",
+  "description": "Rakenna minulle pelinkiihdyttimen käynnistin-peittopaneeli Samsung Galaxy s25 -puhelimelleni ja lisää siihen todella makeita ominaisuuksia, äänenmuuntaja ja grafiikkasuodattimia, kuten HDR ja vastaavia"
+ },
+ "25e96d05-5e25-45d0-ba78-4e65f1c08174": {
+  "title": "Terveellisen ruokavalion sovellus",
+  "description": "Luo sovellus terveellisestä ruokavaliosta.\nSovelluksen nimi: #mais saudável 🌱.\nAloitusnäyttö: pastellinvihreä tausta, jossa on vihanneksia, hedelmiä ja söpöjä vesipisaroita, ja teksti Seja bem vindo (a) só #mais saudável 🌱.\n2. näyttö: kysy henkilön nimi, ikä, paino sekä heräämis- ja nukkumaanmenoaika.\n3. näyttö:"
+ },
+ "0e9c1c95-a196-4ef4-894c-c93dc07a8f50": {
+  "title": "Lääkemuistutus (Fork)",
+  "description": "Fork sovelluksesta \"Crea Una App Donde Tenga\", tekijä Anahí Martinez Rangel. Luo sovellus, jossa on hälytys, joka kirjaa, milloin lääkkeet otetaan, milloin ne vanhenevat ja kuinka monta on jäljellä, ja joka voidaan yhdistää Arduino Unoon; värien tulee olla violetti, vaaleanpunainen ja sininen, ja siinä tulee olla tämä logo nimellä"
+ },
+ "cead4e9d-e6df-4e51-9957-8b52acf77c2e": {
+  "title": "Minecraft-lohkorakentaja",
+  "description": "Rakenna lohkoilla Minecraft-tyylisessä ruudukkomaailmassa."
+ }
+}

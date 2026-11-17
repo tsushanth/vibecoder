@@ -11,6 +11,7 @@ import com.kreativekoala.vibecoder.data.model.ProgressEvent
 import com.kreativekoala.vibecoder.data.model.Project
 import com.kreativekoala.vibecoder.data.model.SseEvent
 import com.kreativekoala.vibecoder.data.model.Suggestion
+import com.kreativekoala.vibecoder.util.AppLanguage
 import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.data.local.UserPreferences
 import com.kreativekoala.vibecoder.data.repository.AuthRepository
@@ -114,6 +115,7 @@ class CreateViewModel @Inject constructor(
 
     private var generationJob: Job? = null
 
+    // Offline fallback only (English). When online the server sends the ideas in the app language (see AppLanguage).
     private val allSuggestions = listOf(
         Suggestion("Portfolio Site", "Build a personal portfolio website with a dark theme, animated hero section, project gallery with hover effects, skills section, and a working contact form"),
         Suggestion("Task Manager", "Build a Kanban-style task manager with drag and drop columns (To Do, In Progress, Done), ability to add/edit/delete tasks, priority labels, and local storage persistence"),
@@ -175,6 +177,7 @@ class CreateViewModel @Inject constructor(
     // properties in declaration order, so a later declaration would still be null there.
     private val snapshotPrefs = appContext.getSharedPreferences("chat_snapshot", Context.MODE_PRIVATE)
     private var ratingArmed = false
+    private var loadedLanguage: String? = null // the language the idea chips/templates were loaded for
     private var previewOpened = false
     private var planJob: Job? = null
     private var progressJob: Job? = null
@@ -306,18 +309,33 @@ class CreateViewModel @Inject constructor(
         }
     }
 
+    /** Called by the screen with the language it is showing; reloads the language-dependent lists when it changed. */
+    fun onAppLanguage(lang: String) {
+        if (loadedLanguage == null || loadedLanguage == lang) { loadedLanguage = lang; return }
+        loadedLanguage = lang
+        _uiState.update { it.copy(templates = templateRepository.all(), suggestions = emptyList()) }
+        loadSuggestions()
+    }
+
     private fun loadSuggestions() {
-        // Show random 6 from the full pool immediately
-        _uiState.update { it.copy(suggestions = getRandomSuggestions()) }
+        // English: show random 6 from the full pool immediately. Another language: the server returns the ideas translated, so
+        // wait for it rather than flash English chips first; the English list below is the offline fallback.
+        val lang = AppLanguage.current()
+        loadedLanguage = lang
+        val english = lang == "en"
+        if (english) _uiState.update { it.copy(suggestions = getRandomSuggestions()) }
 
         viewModelScope.launch {
             try {
                 val suggestions = projectRepository.getSuggestions()
                 if (suggestions.isNotEmpty()) {
                     _uiState.update { it.copy(suggestions = suggestions) }
+                } else if (!english) {
+                    _uiState.update { it.copy(suggestions = getRandomSuggestions()) }
                 }
             } catch (e: Exception) {
                 Log.e("Create", "Failed to load suggestions: ${e.message}")
+                if (!english) _uiState.update { it.copy(suggestions = getRandomSuggestions()) }
             }
         }
     }

@@ -28,10 +28,18 @@ enum class DomainStatus {
     }
 }
 
+/** Why a typed domain was rejected before asking the server; the screen shows the matching string resource. */
+enum class DomainInvalid { EMPTY, TOO_LONG, NO_EXTENSION, BAD_CHARACTERS, NOT_A_DOMAIN, OWN_ADDRESS }
+
 enum class DomainWork { IDLE, LOADING, ADDING, VERIFYING, REMOVING }
 
 sealed class DomainError {
-    data class Validation(val message: String) : DomainError()
+    /** Our own input check ([kind]) or a message the server sent ([message], not translatable). */
+    data class Validation(val message: String? = null, val kind: DomainInvalid? = null) : DomainError()
+    /** Custom domains need Pro. */
+    data object ProRequired : DomainError()
+    /** Custom domains are switched off right now (everything is free, so there is nothing to upgrade to). */
+    data object Unavailable : DomainError()
     data object AlreadyRegistered : DomainError()
     data object Network : DomainError()
     /** DNS not visible yet; carries what we expected so the user can compare with their DNS panel. */
@@ -72,17 +80,17 @@ object DomainValidator {
         return s.trimEnd('.')
     }
 
-    /** null when valid, else a user-facing message. */
-    fun error(raw: String): String? {
+    /** null when valid, else why it was rejected. */
+    fun error(raw: String): DomainInvalid? {
         val d = normalize(raw)
-        if (d.isEmpty()) return "Enter a domain like www.example.com"
-        if (d.length > 253) return "That domain is too long"
+        if (d.isEmpty()) return DomainInvalid.EMPTY
+        if (d.length > 253) return DomainInvalid.TOO_LONG
         val labels = d.split('.')
-        if (labels.size < 2) return "Include the extension, like example.com"
-        if (labels.any { !label.matches(it) }) return "Use only letters, numbers and hyphens"
+        if (labels.size < 2) return DomainInvalid.NO_EXTENSION
+        if (labels.any { !label.matches(it) }) return DomainInvalid.BAD_CHARACTERS
         val tld = labels.last()
-        if (tld.length < 2 || tld.all { it.isDigit() }) return "That doesn't look like a valid domain"
-        if (d == "vibebuild.cc" || d.endsWith(".vibebuild.cc")) return "Use your own domain, not a vibebuild.cc address"
+        if (tld.length < 2 || tld.all { it.isDigit() }) return DomainInvalid.NOT_A_DOMAIN
+        if (d == "vibebuild.cc" || d.endsWith(".vibebuild.cc")) return DomainInvalid.OWN_ADDRESS
         return null
     }
 
@@ -145,8 +153,8 @@ class CustomDomainController(
         val id = deploymentId ?: return
         val userId = userIdProvider() ?: return
         if (_state.value.work != DomainWork.IDLE) return
-        val msg = DomainValidator.error(_state.value.input)
-        if (msg != null) { _state.update { it.copy(error = DomainError.Validation(msg)) }; return }
+        val invalid = DomainValidator.error(_state.value.input)
+        if (invalid != null) { _state.update { it.copy(error = DomainError.Validation(kind = invalid)) }; return }
         val domain = DomainValidator.normalize(_state.value.input)
         _state.update { it.copy(work = DomainWork.ADDING, error = null) }
         scope.launch {
@@ -254,8 +262,8 @@ class CustomDomainController(
 
     private fun DomainFailure.toError(): DomainError = when (this) {
         DomainFailure.UpgradeRequired ->
-            DomainError.Other(if (Monetization.ALL_FREE) "Custom domains aren't available right now. Please try again later." else "Custom domains are a Pro feature")
-        is DomainFailure.InvalidDomain -> DomainError.Validation(message)
+            if (Monetization.ALL_FREE) DomainError.Unavailable else DomainError.ProRequired
+        is DomainFailure.InvalidDomain -> DomainError.Validation(message = message)
         DomainFailure.AlreadyRegistered -> DomainError.AlreadyRegistered
         DomainFailure.Network -> DomainError.Network
         is DomainFailure.Other -> DomainError.Other(message)

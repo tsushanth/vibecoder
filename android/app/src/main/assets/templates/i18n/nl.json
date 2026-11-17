@@ -1,0 +1,122 @@
+{
+ "051484e4-e8a3-48dd-aa77-14c4d4e08e18": {
+  "title": "SaaS-landingspagina",
+  "description": "Bouw een SaaS-landingspagina met een geanimeerde hero, featurekaarten, prijstabel, testimonialcarrousel, FAQ-accordeon en een call-to-action met aanmelding via e-mail"
+ },
+ "73b2b00a-c5ec-4f2e-978d-731a0d268421": {
+  "title": "Tekenapp",
+  "description": "Bouw een tekenapp met penseelgereedschappen, kleurkiezer, ongedaan maken/opnieuw uitvoeren, ondersteuning voor lagen, canvas vergroten of verkleinen en de mogelijkheid om tekeningen als PNG op te slaan"
+ },
+ "3cd168c0-7f70-453d-8d20-2c37b405e938": {
+  "title": "Socialmediafeed",
+  "description": "Bouw een socialmediafeed met berichtkaarten, like- en reactiefuncties, gebruikersavatars, oneindig scrollen, een verhalenbalk bovenaan en een moderne lay-out geïnspireerd op Instagram"
+ },
+ "659b8da1-3d9e-4428-8736-824bac2b424e": {
+  "title": "Takenbeheer in Kanban-stijl",
+  "description": "Bouw een takenbeheer in Kanban-stijl met sleepbare kolommen (Te doen, Bezig, Klaar), de mogelijkheid om taken toe te voegen, te bewerken en te verwijderen, prioriteitslabels en opslag in lokale opslag"
+ },
+ "17e31ab5-8958-48d4-ad56-00920ccde20c": {
+  "title": "Markdown-notitie-app",
+  "description": "Bouw een markdown-notitie-app met zijbalknavigatie, rich-textbewerking, organisatie met tags, zoekfunctie en een minimalistisch ontwerp geïnspireerd op Notion"
+ },
+ "2e20eafc-6324-4f0f-9f0e-c3cb309539b9": {
+  "title": "Slimme boodschappenlijst-app",
+  "description": "Bouw een slimme boodschappenlijst-app met groepering per categorie, aantalregelaars, afvinkbare items, suggesties voor vaak gekochte producten en een ontwerp met een thema van vers fruit en groenten"
+ },
+ "88a287f4-8713-40fb-8f88-93012a5dce8e": {
+  "title": "Pixelart-editor",
+  "description": "Bouw een pixelart-editor met rastercanvas, kleurenpalet, penseel- en vulgereedschappen, animatieframes, export als spritesheet en een retro 8-bit-interface"
+ },
+ "6806dafe-6d57-4547-bb73-aff572b3115a": {
+  "title": "Persoonlijke budgetplanner",
+  "description": "Bouw een persoonlijke budgetplanner met het bijhouden van inkomsten en uitgaven, categorieoverzichten met cirkeldiagrammen, maandoverzichten, spaardoelen en een strakke, moderne interface"
+ },
+ "27a58272-fcc4-4ef0-b65d-6fd94dadacfe": {
+  "title": "Persoonlijke portfoliowebsite",
+  "description": "Bouw een persoonlijke portfoliowebsite met een donker thema, een geanimeerde hero-sectie, een projectgalerij met hover-effecten, een vaardighedensectie en een werkend contactformulier"
+ },
+ "75ef920a-465c-4192-8ad6-e7584818b883": {
+  "title": "Factuurgenerator",
+  "description": "Bouw een factuurgenerator met een formulier voor klantgegevens, een tabel met factuurregels, belastingberekeningen, PDF-voorbeeld en een professioneel zakelijk ontwerp"
+ },
+ "b9d41d34-17a7-4bc5-82f3-19af20014ea0": {
+  "title": "Cv-maker",
+  "description": "Bouw een cv-maker met formuliersecties voor werkervaring, opleiding en vaardigheden, live voorbeeld, meerdere sjablonen om uit te kiezen en een exportweergave in PDF-stijl"
+ },
+ "0aab62e5-db62-4af9-905f-6c3546be1711": {
+  "title": "Bitcoin-wallet",
+  "description": "Bouw een Bitcoin-wallet voor het verhandelen, minen en overmaken van alle cryptovaluta, en maak van bc1qwzrryqr3ja8w7hnja2spmkgfdcgvqwp5swz4af4ngsjecfz0w0pqud7k38 het belangrijkste verzendadres. Voeg opties toe voor verzenden en ontvangen"
+ },
+ "da8af06d-04c0-4d76-8824-e82e58bcd75d": {
+  "title": "Fotogalerij",
+  "description": "Bouw een fotogalerij met een masonry-rasterlay-out, lightbox-viewer, albumindeling, uploaden via slepen en neerzetten en vloeiende overgangsanimaties"
+ },
+ "ccb6e09d-b1a2-4b16-8bc9-f7a86863e77c": {
+  "title": "Evenementenbord voor de buurt",
+  "description": "Bouw een evenementenbord voor de buurt met evenementkaarten, filteren op datum, categorietags, RSVP-knoppen, kaartvoorbeelden van locaties en een levendig ontwerp in posterstijl"
+ },
+ "fccd51c0-5a3e-4d06-a132-2d9a84b1c1a9": {
+  "title": "Realtime chatinterface",
+  "description": "Bouw een realtime chatinterface met berichtballonnen, typindicatoren, emoji-kiezer, voorbeelden van bijlagen en een strak ontwerp geïnspireerd op WhatsApp"
+ },
+ "d8050fa3-ae52-4982-8ccc-5d5f3c907a1b": {
+  "title": "Interactief quizspel",
+  "description": "Bouw een interactief quizspel met meerkeuzevragen, scorebijhouding, timer, voortgangsbalk, een resultatenscherm met deelknop en kleurrijke animaties"
+ },
+ "0806846b-4dda-466c-b76e-1c4a9d3e7873": {
+  "title": "Huisdierverzorgingstracker",
+  "description": "Bouw een huisdierverzorgingstracker met voederschema's, een agenda voor afspraken bij de dierenarts, medicijnherinneringen, een fotogalerij per huisdier en een speels ontwerp met een thema van pootafdrukken"
+ },
+ "10b014ab-5075-4715-8882-92f792a01c27": {
+  "title": "Podcastspeler",
+  "description": "Bouw een podcastspeler met een afleveringslijst, bediening van de afspeelsnelheid, hoofdstukmarkeringen, wachtrijbeheer en een minimalistisch, op audio gericht ontwerp"
+ },
+ "638d7319-e6ba-40e5-b2a7-24dbf0dc8efd": {
+  "title": "3D-modelapp",
+  "description": "Bouw een 3D-modelapp waarmee u 3D-modellen kunt genereren op basis van alleen foto's"
+ },
+ "f38c80be-c56e-4e5c-ad98-cf4e19387dac": {
+  "title": "Boekingsapp voor diensten",
+  "description": "Bouw een boekingsapp voor diensten met een agenda met datumkiezer, selectie van tijdsloten, een dienstenmenu, boekingsbevestiging en een professioneel, strak ontwerp"
+ },
+ "b50ffc4c-07fb-4f48-82ec-7072660339e4": {
+  "title": "Game-booster-overlay",
+  "description": "Bouw een game-booster-overlay voor mijn Samsung Galaxy S25 en voeg er stoere functies aan toe"
+ },
+ "183c43cd-b7ea-424e-9c44-9731fb159c1f": {
+  "title": "Uzblox",
+  "description": "Uzblox"
+ },
+ "61e8040e-0331-4bfc-b905-adf152165cc2": {
+  "title": "Plantenverzorgingsapp",
+  "description": "Bouw een plantenverzorgingsapp met een plantenbibliotheek, herinneringen voor het gietschema, een fotodagboek van de groei, verzorgingstips en een weelderig botanisch groen ontwerp. Voeg informatie over specifieke planten toe en beschrijf bloemen"
+ },
+ "869eb5ff-ee27-42fd-808a-f0a9197a91b6": {
+  "title": "Socialmedia-video-app",
+  "description": "Maak een socialmedia-video-app genaamd Tabarak Viral.\nFuncties:\nInloggen met telefoonnummer\nStartpagina met scrollende virale video's\nGebruikers kunnen hun eigen video's uploaden\nLike-, reactie- en deelknoppen bij elke video\nTalentzone voor zang-, comedy- en acteervideo's\nVerhalensectie waar gebruikers"
+ },
+ "4943b65c-df34-4cad-a0d8-6c803ee71cf4": {
+  "title": "Cv-maker met formuliersecties",
+  "description": "Bouw een cv-maker met formuliersecties voor werkervaring, opleiding en vaardigheden, live voorbeeld, meerdere sjablonen om uit te kiezen en een exportweergave in PDF-stijl"
+ },
+ "f7760ad8-05e1-46e0-86bf-c9380a3d4ce9": {
+  "title": "AI-appassistent",
+  "description": "Bouw een AI-appassistent"
+ },
+ "ac31b130-3368-41e9-bd32-0c1d1c4f38d5": {
+  "title": "Game-booster-launcher-overlaypaneel",
+  "description": "Bouw een game-booster-launcher-overlaypaneel voor mijn Samsung Galaxy S25 en voeg er stoere functies aan toe, zoals een stemveranderaar en grafische filters zoals HDR en dergelijke"
+ },
+ "25e96d05-5e25-45d0-ba78-4e65f1c08174": {
+  "title": "App voor gezonde voeding",
+  "description": "Maak een app over gezonde voeding.\nNaam van de app: #mais saudável 🌱.\nStartscherm: pastelgroene achtergrond met groenten, fruit en schattige waterdruppels, met de tekst \"Welkom bij #mais saudável 🌱\".\n2e scherm: vraag om de naam, leeftijd en het gewicht van de persoon en de tijden waarop die wakker wordt en gaat slapen.\n3e scherm:"
+ },
+ "0e9c1c95-a196-4ef4-894c-c93dc07a8f50": {
+  "title": "Medicijnherinneringsapp (Fork)",
+  "description": "Gekopieerd (fork) van “Crea Una App Donde Tenga” door Anahí Martinez Rangel. Maak een app met een alarm om vast te leggen wanneer pillen moeten worden ingenomen, wanneer ze verlopen en hoeveel er nog over zijn, die aan een Arduino Uno kan worden gekoppeld. De app moet de kleuren paars, roze en blauw hebben en dit logo bevatten"
+ },
+ "cead4e9d-e6df-4e51-9957-8b52acf77c2e": {
+  "title": "Minecraft-blokkenbouwer",
+  "description": "Bouw met blokken in een rasterwereld in Minecraft-stijl."
+ }
+}

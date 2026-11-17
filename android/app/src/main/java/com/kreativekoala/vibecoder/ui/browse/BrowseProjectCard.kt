@@ -1,5 +1,7 @@
 package com.kreativekoala.vibecoder.ui.browse
 
+import com.kreativekoala.vibecoder.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -111,7 +113,7 @@ fun BrowseProjectCard(
                             tint = TextPrimary
                         )
                         Text(
-                            text = if (project.forkCount > 0) "Remix ${project.forkCount}" else "Remix",
+                            text = if (project.forkCount > 0) stringResource(R.string.browse_remix_count, project.forkCount) else stringResource(R.string.browse_remix),
                             style = MaterialTheme.typography.labelSmall,
                             color = TextPrimary
                         )

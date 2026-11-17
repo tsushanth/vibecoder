@@ -1,0 +1,122 @@
+{
+ "051484e4-e8a3-48dd-aa77-14c4d4e08e18": {
+  "title": "SaaS Açılış Sayfası",
+  "description": "Animasyonlu bir ana bölüm, özellik kartları, fiyat tablosu, referans karuseli, SSS akordeonu ve e-posta kaydı içeren bir harekete geçirici mesaj bölümü olan bir SaaS açılış sayfası oluştur"
+ },
+ "73b2b00a-c5ec-4f2e-978d-731a0d268421": {
+  "title": "Çizim Uygulaması",
+  "description": "Fırça araçları, renk seçici, geri al/yinele, katman desteği, tuval yeniden boyutlandırma ve çizimi PNG olarak kaydetme özelliği olan bir çizim uygulaması oluştur"
+ },
+ "3cd168c0-7f70-453d-8d20-2c37b405e938": {
+  "title": "Sosyal Medya Akışı",
+  "description": "Gönderi kartları, beğeni/yorum etkileşimleri, kullanıcı avatarları, sonsuz kaydırma, üstte hikâye çubuğu ve Instagram'dan ilham alan modern bir düzen içeren bir sosyal medya akışı oluştur"
+ },
+ "659b8da1-3d9e-4428-8736-824bac2b424e": {
+  "title": "Kanban Tarzı Görev Yöneticisi",
+  "description": "Sürükle ve bırak sütunları (Yapılacak, Devam Ediyor, Tamamlandı), görev ekleme/düzenleme/silme, öncelik etiketleri ve yerel depolamada kalıcılık içeren Kanban tarzı bir görev yöneticisi oluştur"
+ },
+ "17e31ab5-8958-48d4-ad56-00920ccde20c": {
+  "title": "Markdown Not Uygulaması",
+  "description": "Kenar çubuğu gezintisi, zengin metin düzenleme, etiket tabanlı düzenleme, arama işlevi ve Notion'dan ilham alan minimal bir tasarım içeren bir Markdown not uygulaması oluştur"
+ },
+ "2e20eafc-6324-4f0f-9f0e-c3cb309539b9": {
+  "title": "Akıllı Alışveriş Listesi Uygulaması",
+  "description": "Kategoriye göre gruplama, miktar ayarlayıcıları, ürünleri işaretleme, sık alınanlar önerileri ve taze sebze-meyve temalı ferah bir tasarım içeren akıllı bir alışveriş listesi uygulaması oluştur"
+ },
+ "88a287f4-8713-40fb-8f88-93012a5dce8e": {
+  "title": "Piksel Sanat Editörü",
+  "description": "Izgara tuval, renk paleti, fırça ve doldurma araçları, animasyon kareleri, sprite sheet olarak dışa aktarma ve retro 8 bit temalı bir arayüz içeren bir piksel sanat editörü oluştur"
+ },
+ "6806dafe-6d57-4547-bb73-aff572b3115a": {
+  "title": "Kişisel Bütçe Planlayıcı",
+  "description": "Gelir ve gider takibi, pasta grafikli kategori dökümleri, aylık özetler, tasarruf hedefleri ve temiz, modern bir arayüz içeren kişisel bir bütçe planlayıcı oluştur"
+ },
+ "27a58272-fcc4-4ef0-b65d-6fd94dadacfe": {
+  "title": "Kişisel Portfolyo Sitesi",
+  "description": "Koyu tema, animasyonlu ana bölüm, üzerine gelince efekt veren proje galerisi, beceriler bölümü ve çalışan bir iletişim formu içeren kişisel bir portfolyo web sitesi oluştur"
+ },
+ "75ef920a-465c-4192-8ad6-e7584818b883": {
+  "title": "Fatura Oluşturucu",
+  "description": "Müşteri bilgileri formu, kalem tablosu, vergi hesaplamaları, PDF önizlemesi ve profesyonel, iş temalı bir tasarım içeren bir fatura oluşturucu oluştur"
+ },
+ "b9d41d34-17a7-4bc5-82f3-19af20014ea0": {
+  "title": "Özgeçmiş Oluşturucu",
+  "description": "Deneyim, eğitim ve beceriler için form bölümleri, canlı önizleme, birden fazla şablon seçeneği ve PDF tarzı dışa aktarma görünümü içeren bir özgeçmiş oluşturucu oluştur"
+ },
+ "0aab62e5-db62-4af9-905f-6c3546be1711": {
+  "title": "Bitcoin Cüzdanı",
+  "description": "Tüm kripto para birimlerinin alım satımı, madenciliği ve transferi için bir bitcoin cüzdanı oluştur ve bc1qwzrryqr3ja8w7hnja2spmkgfdcgvqwp5swz4af4ngsjecfz0w0pqud7k38 adresini ana gönderici yap; gönderme ve alma seçeneği ekle"
+ },
+ "da8af06d-04c0-4d76-8824-e82e58bcd75d": {
+  "title": "Fotoğraf Galerisi",
+  "description": "Masonry ızgara düzeni, ışık kutusu görüntüleyici, albüm düzenleme, sürükle ve bırak yükleme ve akıcı geçiş animasyonları içeren bir fotoğraf galerisi oluştur"
+ },
+ "ccb6e09d-b1a2-4b16-8bc9-f7a86863e77c": {
+  "title": "Topluluk Etkinlik Panosu",
+  "description": "Etkinlik kartları, tarih filtreleme, kategori etiketleri, katılım (RSVP) düğmeleri, harita konum önizlemeleri ve canlı, afiş tarzı bir tasarım içeren bir topluluk etkinlik panosu oluştur"
+ },
+ "fccd51c0-5a3e-4d06-a132-2d9a84b1c1a9": {
+  "title": "Gerçek Zamanlı Sohbet Arayüzü",
+  "description": "Mesaj balonları, yazıyor göstergeleri, emoji seçici, dosya eki önizlemeleri ve WhatsApp'tan ilham alan temiz bir tasarım içeren gerçek zamanlı bir sohbet arayüzü oluştur"
+ },
+ "d8050fa3-ae52-4982-8ccc-5d5f3c907a1b": {
+  "title": "Etkileşimli Bilgi Yarışması Oyunu",
+  "description": "Çoktan seçmeli sorular, puan takibi, zamanlayıcı, ilerleme çubuğu, paylaş düğmeli sonuç ekranı ve renkli animasyonlar içeren etkileşimli bir bilgi yarışması oyunu oluştur"
+ },
+ "0806846b-4dda-466c-b76e-1c4a9d3e7873": {
+  "title": "Evcil Hayvan Bakım Takipçisi",
+  "description": "Beslenme programları, veteriner randevu takvimi, ilaç hatırlatıcıları, her evcil hayvan için fotoğraf galerisi ve eğlenceli, pati izi temalı bir tasarım içeren bir evcil hayvan bakım takipçisi oluştur"
+ },
+ "10b014ab-5075-4715-8882-92f792a01c27": {
+  "title": "Podcast Oynatıcı",
+  "description": "Bölüm listesi, oynatma hızı kontrolleri, bölüm işaretleyicileri, kuyruk yönetimi ve minimal, ses odaklı bir tasarım içeren bir podcast oynatıcı oluştur"
+ },
+ "638d7319-e6ba-40e5-b2a7-24dbf0dc8efd": {
+  "title": "3D Model Uygulaması",
+  "description": "Yalnızca fotoğraflardan 3D modeller üretebileceğin bir 3D model uygulaması oluştur"
+ },
+ "f38c80be-c56e-4e5c-ad98-cf4e19387dac": {
+  "title": "Hizmet Rezervasyon Uygulaması",
+  "description": "Takvimli tarih seçici, saat dilimi seçimi, hizmet menüsü, rezervasyon onayı ve profesyonel, temiz bir tasarım içeren bir hizmet rezervasyon uygulaması oluştur"
+ },
+ "b50ffc4c-07fb-4f48-82ec-7072660339e4": {
+  "title": "Oyun Hızlandırıcı Katmanı",
+  "description": "Samsung Galaxy S25'im için bir oyun hızlandırıcı katmanı oluştur ve ona harika özellikler ekle"
+ },
+ "183c43cd-b7ea-424e-9c44-9731fb159c1f": {
+  "title": "Uzblox",
+  "description": "Uzblox"
+ },
+ "61e8040e-0331-4bfc-b905-adf152165cc2": {
+  "title": "Bitki Bakım Uygulaması",
+  "description": "Bitki kütüphanesi, sulama programı hatırlatıcıları, büyüme fotoğraf günlüğü, bakım ipuçları ve gür, botanik yeşil temalı bir tasarım içeren bir bitki bakım uygulaması oluştur; belirli bitkiler hakkında bilgi ekle ve çiçekleri tanımla"
+ },
+ "869eb5ff-ee27-42fd-808a-f0a9197a91b6": {
+  "title": "Sosyal Medya Video Uygulaması",
+  "description": "Tabarak Viral adında bir sosyal medya video uygulaması oluştur.\nÖzellikler:\nTelefon numarasıyla giriş\nKaydırılan viral videoların olduğu ana sayfa\nKullanıcılar kendi videolarını yükleyebilir\nHer videoda beğen, yorum yap ve paylaş düğmeleri\nŞarkı, komedi ve oyunculuk videoları için yetenek alanı\nHikâye bölümü, burada k"
+ },
+ "4943b65c-df34-4cad-a0d8-6c803ee71cf4": {
+  "title": "Form Bölümlü Özgeçmiş Oluşturucu",
+  "description": "Deneyim, eğitim ve beceriler için form bölümleri, canlı önizleme, birden fazla şablon seçeneği ve PDF tarzı dışa aktarma görünümü içeren bir özgeçmiş oluşturucu oluştur"
+ },
+ "f7760ad8-05e1-46e0-86bf-c9380a3d4ce9": {
+  "title": "Yapay Zeka Uygulama Asistanı",
+  "description": "Yapay zeka uygulama asistanı oluştur"
+ },
+ "ac31b130-3368-41e9-bd32-0c1d1c4f38d5": {
+  "title": "Oyun Hızlandırıcı Başlatıcı Katman Paneli",
+  "description": "Samsung Galaxy S25'im için bir oyun hızlandırıcı başlatıcı katman paneli oluştur ve ona harika özellikler, ses değiştirici ile HDR gibi grafik filtreleri ve benzeri şeyler ekle"
+ },
+ "25e96d05-5e25-45d0-ba78-4e65f1c08174": {
+  "title": "Sağlıklı Beslenme Uygulaması",
+  "description": "Sağlıklı beslenme hakkında bir uygulama oluştur.\nUygulama adı: #mais saudável 🌱.\nAna ekran: sevimli sebzeler, meyveler ve su damlalarıyla pastel yeşil arka plan, üzerinde #mais saudável 🌱'e Hoş Geldiniz yazısı.\n2. ekran: kişinin adını, yaşını, kilosunu ve uyanma ile uyuma saatini iste.\n3. ekran:"
+ },
+ "0e9c1c95-a196-4ef4-894c-c93dc07a8f50": {
+  "title": "İlaç Hatırlatıcı Uygulaması (Kopya)",
+  "description": "\"Crea Una App Donde Tenga\" uygulamasının Anahí Martinez Rangel tarafından oluşturulmuş kopyası. İlaçların ne zaman alınacağını, son kullanma tarihlerini ve kaç tane kaldığını kaydetmek için alarmı olan, Arduino Uno'ya bağlanabilen bir uygulama oluştur; mor, pembe ve mavi renklere sahip olsun ve bu logoyu isimle birlikte taşısın"
+ },
+ "cead4e9d-e6df-4e51-9957-8b52acf77c2e": {
+  "title": "Minecraft Blok Oluşturucu",
+  "description": "Minecraft tarzı ızgara bir dünyada bloklarla inşa et."
+ }
+}

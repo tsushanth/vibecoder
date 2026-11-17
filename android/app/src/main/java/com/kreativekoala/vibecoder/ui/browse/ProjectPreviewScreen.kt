@@ -146,13 +146,13 @@ fun ProjectPreviewScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "Preview unavailable",
+                            text = stringResource(R.string.project_preview_unavailable),
                             style = MaterialTheme.typography.titleMedium,
                             color = TextSecondary
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "This app's preview could not be loaded.",
+                            text = stringResource(R.string.project_preview_unavailable_body),
                             style = MaterialTheme.typography.bodyMedium,
                             color = TextSecondary
                         )

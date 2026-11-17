@@ -1,0 +1,122 @@
+{
+ "051484e4-e8a3-48dd-aa77-14c4d4e08e18": {
+  "title": "Pagină de destinație SaaS",
+  "description": "Construiește o pagină de destinație SaaS cu secțiune hero animată, carduri de funcții, tabel de prețuri, carusel de testimoniale, acordeon FAQ și un îndemn la acțiune cu înscriere prin e-mail"
+ },
+ "73b2b00a-c5ec-4f2e-978d-731a0d268421": {
+  "title": "Aplicație de desen",
+  "description": "Construiește o aplicație de desen cu instrumente de pensulă, selector de culori, anulare/refacere, suport pentru straturi, redimensionarea pânzei și posibilitatea de a salva desenul ca PNG"
+ },
+ "3cd168c0-7f70-453d-8d20-2c37b405e938": {
+  "title": "Flux de rețea socială",
+  "description": "Construiește un flux de rețea socială cu carduri de postări, interacțiuni de apreciere/comentare, avataruri de utilizatori, derulare infinită, bară de povești în partea de sus și un aspect modern inspirat de Instagram"
+ },
+ "659b8da1-3d9e-4428-8736-824bac2b424e": {
+  "title": "Manager de sarcini în stil Kanban",
+  "description": "Construiește un manager de sarcini în stil Kanban cu coloane drag and drop (De făcut, În lucru, Finalizat), posibilitatea de a adăuga/edita/șterge sarcini, etichete de prioritate și păstrarea datelor în stocarea locală"
+ },
+ "17e31ab5-8958-48d4-ad56-00920ccde20c": {
+  "title": "Aplicație de notițe Markdown",
+  "description": "Construiește o aplicație de notițe Markdown cu navigare în bara laterală, editare de text îmbogățit, organizare pe etichete, funcție de căutare și un design minimalist inspirat de Notion"
+ },
+ "2e20eafc-6324-4f0f-9f0e-c3cb309539b9": {
+  "title": "Aplicație inteligentă pentru lista de cumpărături",
+  "description": "Construiește o aplicație inteligentă pentru lista de cumpărături cu grupare pe categorii, reglarea cantităților, bifarea produselor, sugestii de produse cumpărate frecvent și un design cu tematică de produse proaspete"
+ },
+ "88a287f4-8713-40fb-8f88-93012a5dce8e": {
+  "title": "Editor de pixel art",
+  "description": "Construiește un editor de pixel art cu pânză în grilă, paletă de culori, instrumente de pensulă și umplere, cadre de animație, export ca sprite sheet și o interfață retro cu tematică 8-bit"
+ },
+ "6806dafe-6d57-4547-bb73-aff572b3115a": {
+  "title": "Planificator de buget personal",
+  "description": "Construiește un planificator de buget personal cu urmărirea veniturilor și cheltuielilor, defalcare pe categorii cu diagrame circulare, rezumate lunare, obiective de economii și o interfață modernă și curată"
+ },
+ "27a58272-fcc4-4ef0-b65d-6fd94dadacfe": {
+  "title": "Site de portofoliu personal",
+  "description": "Construiește un site de portofoliu personal cu temă întunecată, secțiune hero animată, galerie de proiecte cu efecte la trecerea cursorului, secțiune de abilități și un formular de contact funcțional"
+ },
+ "75ef920a-465c-4192-8ad6-e7584818b883": {
+  "title": "Generator de facturi",
+  "description": "Construiește un generator de facturi cu formular pentru datele clientului, tabel cu linii de produse, calcul al taxelor, previzualizare PDF și un design profesional cu tematică de afaceri"
+ },
+ "b9d41d34-17a7-4bc5-82f3-19af20014ea0": {
+  "title": "Creator de CV",
+  "description": "Construiește un creator de CV cu secțiuni de formular pentru experiență, studii și abilități, previzualizare live, mai multe șabloane la alegere și o vizualizare de export în stil PDF"
+ },
+ "0aab62e5-db62-4af9-905f-6c3546be1711": {
+  "title": "Portofel Bitcoin",
+  "description": "Construiește un portofel Bitcoin pentru tranzacționarea, minarea și transferul tuturor criptomonedelor și setează bc1qwzrryqr3ja8w7hnja2spmkgfdcgvqwp5swz4af4ngsjecfz0w0pqud7k38 ca expeditor principal. Adaugă opțiuni pentru trimitere și primire"
+ },
+ "da8af06d-04c0-4d76-8824-e82e58bcd75d": {
+  "title": "Galerie foto",
+  "description": "Construiește o galerie foto cu aspect de grilă masonry, vizualizator lightbox, organizare pe albume, încărcare prin drag and drop și animații de tranziție fluide"
+ },
+ "ccb6e09d-b1a2-4b16-8bc9-f7a86863e77c": {
+  "title": "Panou de evenimente comunitare",
+  "description": "Construiește un panou de evenimente comunitare cu carduri de evenimente, filtrare după dată, etichete de categorie, butoane RSVP, previzualizări ale locației pe hartă și un design vibrant în stil de afiș"
+ },
+ "fccd51c0-5a3e-4d06-a132-2d9a84b1c1a9": {
+  "title": "Interfață de chat în timp real",
+  "description": "Construiește o interfață de chat în timp real cu baloane de mesaje, indicatori de scriere, selector de emoji, previzualizări ale atașamentelor și un design curat inspirat de WhatsApp"
+ },
+ "d8050fa3-ae52-4982-8ccc-5d5f3c907a1b": {
+  "title": "Joc interactiv de tip quiz",
+  "description": "Construiește un joc interactiv de tip quiz cu întrebări cu variante multiple de răspuns, urmărirea scorului, cronometru, bară de progres, ecran de rezultate cu buton de distribuire și animații colorate"
+ },
+ "0806846b-4dda-466c-b76e-1c4a9d3e7873": {
+  "title": "Tracker pentru îngrijirea animalelor",
+  "description": "Construiește un tracker pentru îngrijirea animalelor de companie cu programe de hrănire, calendar de programări la veterinar, mementouri pentru medicamente, galerie foto pentru fiecare animal și un design jucăuș cu tematică de lăbuțe"
+ },
+ "10b014ab-5075-4715-8882-92f792a01c27": {
+  "title": "Player de podcasturi",
+  "description": "Construiește un player de podcasturi cu listă de episoade, controale pentru viteza de redare, marcaje de capitole, gestionarea cozii și un design minimalist centrat pe audio"
+ },
+ "638d7319-e6ba-40e5-b2a7-24dbf0dc8efd": {
+  "title": "Aplicație de modele 3D",
+  "description": "Construiește o aplicație de modele 3D în care poți genera modele 3D doar din fotografii"
+ },
+ "f38c80be-c56e-4e5c-ad98-cf4e19387dac": {
+  "title": "Aplicație de rezervare servicii",
+  "description": "Construiește o aplicație de rezervare servicii cu selector de dată în calendar, alegerea intervalului orar, meniu de servicii, confirmarea rezervării și un design profesional și curat"
+ },
+ "b50ffc4c-07fb-4f48-82ec-7072660339e4": {
+  "title": "Overlay Game Booster",
+  "description": "Construiește-mi un overlay Game Booster pentru Samsung Galaxy S25 și adaugă-i funcții senzaționale"
+ },
+ "183c43cd-b7ea-424e-9c44-9731fb159c1f": {
+  "title": "Uzblox",
+  "description": "Uzblox"
+ },
+ "61e8040e-0331-4bfc-b905-adf152165cc2": {
+  "title": "Aplicație pentru îngrijirea plantelor",
+  "description": "Construiește o aplicație pentru îngrijirea plantelor cu bibliotecă de plante, mementouri pentru programul de udare, jurnal foto al creșterii, sfaturi de îngrijire și un design verde botanic, luxuriant. Adaugă informații despre anumite plante și descrie florile"
+ },
+ "869eb5ff-ee27-42fd-808a-f0a9197a91b6": {
+  "title": "Aplicație video de socializare",
+  "description": "Creează o aplicație video de socializare numită Tabarak Viral.\nFuncții:\nAutentificare cu număr de telefon\nPagină principală cu videoclipuri virale care se derulează\nUtilizatorii pot încărca propriile videoclipuri\nButoane de apreciere, comentare și distribuire la fiecare videoclip\nZonă de talente pentru videoclipuri cu cântat, comedie și actorie\nSecțiune de povești unde utilizatorii"
+ },
+ "4943b65c-df34-4cad-a0d8-6c803ee71cf4": {
+  "title": "Creator de CV cu secțiuni de formular",
+  "description": "Construiește un creator de CV cu secțiuni de formular pentru experiență, studii și abilități, previzualizare live, mai multe șabloane la alegere și o vizualizare de export în stil PDF"
+ },
+ "f7760ad8-05e1-46e0-86bf-c9380a3d4ce9": {
+  "title": "Asistent de aplicații cu AI",
+  "description": "Construiește un asistent de aplicații cu AI"
+ },
+ "ac31b130-3368-41e9-bd32-0c1d1c4f38d5": {
+  "title": "Panou overlay launcher Game Booster",
+  "description": "Construiește-mi un panou overlay launcher Game Booster pentru Samsung Galaxy S25 și adaugă-i funcții senzaționale, inclusiv schimbător de voce și filtre grafice precum HDR și altele asemenea"
+ },
+ "25e96d05-5e25-45d0-ba78-4e65f1c08174": {
+  "title": "Aplicație despre alimentația sănătoasă",
+  "description": "Creează o aplicație despre alimentația sănătoasă.\nNumele aplicației: #mais saudável 🌱.\nEcranul de start: fundal verde pastel cu legume, fructe și picături de apă simpatice, cu textul \"Bun venit la #mais saudável 🌱\".\nEcranul 2: cere numele persoanei, vârsta, greutatea și ora la care se trezește și se culcă.\nEcranul 3:"
+ },
+ "0e9c1c95-a196-4ef4-894c-c93dc07a8f50": {
+  "title": "Aplicație de mementouri pentru medicamente (Fork)",
+  "description": "Fork după „Crea Una App Donde Tenga” de Anahí Martinez Rangel. Creează o aplicație cu o alarmă pentru a înregistra când se iau pastilele, când expiră și câte au mai rămas, care să poată fi conectată la un Arduino Uno. Trebuie să aibă culorile mov, roz și albastru și să includă acest logo"
+ },
+ "cead4e9d-e6df-4e51-9957-8b52acf77c2e": {
+  "title": "Constructor de blocuri Minecraft",
+  "description": "Construiește cu blocuri într-o lume în grilă în stilul Minecraft."
+ }
+}

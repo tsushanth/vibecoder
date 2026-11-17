@@ -46,10 +46,10 @@ interface VibeBuildApi {
     ): BrowseResponse
 
     @GET("api/projects/suggestions")
-    suspend fun getSuggestions(@Query("count") count: Int = 6): SuggestionsResponse
+    suspend fun getSuggestions(@Query("count") count: Int = 6, @Query("lang") lang: String? = null): SuggestionsResponse
 
     @POST("api/projects/suggest-ideas")
-    suspend fun suggestNewIdeas(): SuggestionsResponse
+    suspend fun suggestNewIdeas(@Body body: SuggestIdeasRequest): SuggestionsResponse
 
     /** Live build progress. Backend may not implement this yet (404 -> caller falls back to polling). */
     @GET("api/projects/{id}/progress")

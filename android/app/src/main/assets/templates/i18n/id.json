@@ -1,0 +1,122 @@
+{
+ "051484e4-e8a3-48dd-aa77-14c4d4e08e18": {
+  "title": "Landing Page SaaS",
+  "description": "Buat landing page SaaS dengan hero beranimasi, kartu fitur, tabel harga, carousel testimoni, FAQ accordion, dan ajakan bertindak dengan pendaftaran email"
+ },
+ "73b2b00a-c5ec-4f2e-978d-731a0d268421": {
+  "title": "Aplikasi Menggambar",
+  "description": "Buat aplikasi menggambar dengan alat kuas, pemilih warna, undo/redo, dukungan layer, perubahan ukuran kanvas, dan kemampuan menyimpan karya sebagai PNG"
+ },
+ "3cd168c0-7f70-453d-8d20-2c37b405e938": {
+  "title": "Feed Media Sosial",
+  "description": "Buat feed media sosial dengan kartu postingan, interaksi suka/komentar, avatar pengguna, infinite scroll, bilah cerita di bagian atas, dan tata letak modern bergaya Instagram"
+ },
+ "659b8da1-3d9e-4428-8736-824bac2b424e": {
+  "title": "Pengelola Tugas ala Kanban",
+  "description": "Buat pengelola tugas ala Kanban dengan kolom drag and drop (Yang Harus Dikerjakan, Sedang Dikerjakan, Selesai), kemampuan menambah/mengedit/menghapus tugas, label prioritas, dan penyimpanan di penyimpanan lokal"
+ },
+ "17e31ab5-8958-48d4-ad56-00920ccde20c": {
+  "title": "Aplikasi Catatan Markdown",
+  "description": "Buat aplikasi catatan markdown dengan navigasi sidebar, pengeditan teks kaya, pengorganisasian berbasis tag, fitur pencarian, dan desain minimalis bergaya Notion"
+ },
+ "2e20eafc-6324-4f0f-9f0e-c3cb309539b9": {
+  "title": "Aplikasi Daftar Belanja Pintar",
+  "description": "Buat aplikasi daftar belanja pintar dengan pengelompokan kategori, pengatur jumlah, item yang bisa dicentang, saran barang yang sering dibeli, dan desain segar bertema sayur dan buah"
+ },
+ "88a287f4-8713-40fb-8f88-93012a5dce8e": {
+  "title": "Editor Pixel Art",
+  "description": "Buat editor pixel art dengan kanvas grid, palet warna, alat kuas dan isi warna, frame animasi, ekspor sebagai sprite sheet, dan antarmuka retro bertema 8-bit"
+ },
+ "6806dafe-6d57-4547-bb73-aff572b3115a": {
+  "title": "Perencana Anggaran Pribadi",
+  "description": "Buat perencana anggaran pribadi dengan pelacakan pemasukan dan pengeluaran, rincian kategori dengan diagram lingkaran, ringkasan bulanan, target tabungan, dan UI modern yang bersih"
+ },
+ "27a58272-fcc4-4ef0-b65d-6fd94dadacfe": {
+  "title": "Situs Portofolio Pribadi",
+  "description": "Buat situs portofolio pribadi dengan tema gelap, bagian hero beranimasi, galeri proyek dengan efek hover, bagian keahlian, dan formulir kontak yang berfungsi"
+ },
+ "75ef920a-465c-4192-8ad6-e7584818b883": {
+  "title": "Pembuat Faktur",
+  "description": "Buat pembuat faktur dengan formulir detail klien, tabel item, perhitungan pajak, pratinjau PDF, dan desain profesional bertema bisnis"
+ },
+ "b9d41d34-17a7-4bc5-82f3-19af20014ea0": {
+  "title": "Pembuat CV",
+  "description": "Buat pembuat CV dengan bagian formulir untuk pengalaman, pendidikan, dan keahlian, pratinjau langsung, beberapa pilihan template, dan tampilan ekspor bergaya PDF"
+ },
+ "0aab62e5-db62-4af9-905f-6c3546be1711": {
+  "title": "Dompet Bitcoin",
+  "description": "Buat dompet bitcoin untuk perdagangan, penambangan, dan transfer semua mata uang kripto, dan jadikan bc1qwzrryqr3ja8w7hnja2spmkgfdcgvqwp5swz4af4ngsjecfz0w0pqud7k38 sebagai pengirim utama; tambahkan opsi untuk mengirim dan menerima"
+ },
+ "da8af06d-04c0-4d76-8824-e82e58bcd75d": {
+  "title": "Galeri Foto",
+  "description": "Buat galeri foto dengan tata letak grid masonry, penampil lightbox, pengelompokan album, unggah drag-and-drop, dan animasi transisi yang halus"
+ },
+ "ccb6e09d-b1a2-4b16-8bc9-f7a86863e77c": {
+  "title": "Papan Acara Komunitas",
+  "description": "Buat papan acara komunitas dengan kartu acara, penyaringan tanggal, tag kategori, tombol RSVP, pratinjau lokasi di peta, dan desain semarak bergaya poster"
+ },
+ "fccd51c0-5a3e-4d06-a132-2d9a84b1c1a9": {
+  "title": "Antarmuka Obrolan Real-time",
+  "description": "Buat antarmuka obrolan real-time dengan balon pesan, indikator mengetik, pemilih emoji, pratinjau lampiran file, dan desain bersih bergaya WhatsApp"
+ },
+ "d8050fa3-ae52-4982-8ccc-5d5f3c907a1b": {
+  "title": "Game Kuis Interaktif",
+  "description": "Buat game kuis interaktif dengan pertanyaan pilihan ganda, pelacakan skor, timer, bilah kemajuan, layar hasil dengan tombol bagikan, dan animasi berwarna-warni"
+ },
+ "0806846b-4dda-466c-b76e-1c4a9d3e7873": {
+  "title": "Pelacak Perawatan Hewan Peliharaan",
+  "description": "Buat pelacak perawatan hewan peliharaan dengan jadwal makan, kalender janji dokter hewan, pengingat obat, galeri foto untuk setiap hewan, dan desain ceria bertema jejak kaki"
+ },
+ "10b014ab-5075-4715-8882-92f792a01c27": {
+  "title": "Pemutar Podcast",
+  "description": "Buat pemutar podcast dengan daftar episode, kontrol kecepatan pemutaran, penanda bab, pengelolaan antrean, dan desain minimalis yang berfokus pada audio"
+ },
+ "638d7319-e6ba-40e5-b2a7-24dbf0dc8efd": {
+  "title": "Aplikasi Model 3D",
+  "description": "Buat aplikasi model 3D yang bisa menghasilkan model 3D hanya dari gambar"
+ },
+ "f38c80be-c56e-4e5c-ad98-cf4e19387dac": {
+  "title": "Aplikasi Pemesanan Layanan",
+  "description": "Buat aplikasi pemesanan layanan dengan pemilih tanggal kalender, pemilihan slot waktu, menu layanan, konfirmasi pemesanan, dan desain profesional yang bersih"
+ },
+ "b50ffc4c-07fb-4f48-82ec-7072660339e4": {
+  "title": "Overlay Game Booster",
+  "description": "Buatkan saya overlay game booster untuk Samsung Galaxy S25 saya dan tambahkan fitur-fitur yang keren banget"
+ },
+ "183c43cd-b7ea-424e-9c44-9731fb159c1f": {
+  "title": "Uzblox",
+  "description": "Uzblox"
+ },
+ "61e8040e-0331-4bfc-b905-adf152165cc2": {
+  "title": "Aplikasi Perawatan Tanaman",
+  "description": "Buat aplikasi perawatan tanaman dengan pustaka tanaman, pengingat jadwal penyiraman, jurnal foto pertumbuhan, tips perawatan, dan desain rimbun bertema hijau botani; tambahkan informasi tentang tanaman tertentu dan deskripsikan bunga"
+ },
+ "869eb5ff-ee27-42fd-808a-f0a9197a91b6": {
+  "title": "Aplikasi Video Media Sosial",
+  "description": "Buat aplikasi video media sosial bernama Tabarak Viral.\nFitur:\nMasuk dengan nomor telepon\nHalaman beranda dengan video viral yang bisa digulir\nPengguna dapat mengunggah video mereka sendiri\nTombol suka, komentar, dan bagikan di setiap video\nZona bakat untuk video menyanyi, komedi, dan akting\nBagian cerita tempat pengguna"
+ },
+ "4943b65c-df34-4cad-a0d8-6c803ee71cf4": {
+  "title": "Pembuat CV dengan Bagian Formulir",
+  "description": "Buat pembuat CV dengan bagian formulir untuk pengalaman, pendidikan, dan keahlian, pratinjau langsung, beberapa pilihan template, dan tampilan ekspor bergaya PDF"
+ },
+ "f7760ad8-05e1-46e0-86bf-c9380a3d4ce9": {
+  "title": "Asisten Aplikasi AI",
+  "description": "Buat asisten aplikasi AI"
+ },
+ "ac31b130-3368-41e9-bd32-0c1d1c4f38d5": {
+  "title": "Panel Overlay Launcher Game Booster",
+  "description": "Buatkan saya panel overlay launcher game booster untuk Samsung Galaxy S25 saya dan tambahkan fitur-fitur yang keren banget; tambahkan pengubah suara, filter grafis seperti HDR, dan hal-hal semacam itu"
+ },
+ "25e96d05-5e25-45d0-ba78-4e65f1c08174": {
+  "title": "Aplikasi Makan Sehat",
+  "description": "Buat aplikasi tentang makan sehat.\nNama aplikasi: #mais saudável 🌱.\nLayar awal: latar hijau pastel dengan sayuran, buah, dan tetesan air yang lucu, bertuliskan \"Selamat datang di #mais saudável 🌱\".\nLayar ke-2: meminta nama, usia, berat badan, serta jam bangun dan jam tidur pengguna.\nLayar ke-3:"
+ },
+ "0e9c1c95-a196-4ef4-894c-c93dc07a8f50": {
+  "title": "Aplikasi Pengingat Obat (Salinan)",
+  "description": "Disalin dari \"Crea Una App Donde Tenga\" oleh Anahí Martinez Rangel. Buat aplikasi dengan alarm untuk mencatat kapan harus minum pil, kapan kedaluwarsa, dan berapa yang tersisa, serta bisa dihubungkan ke Arduino Uno; harus berwarna ungu, merah muda, dan biru, dengan logo ini beserta nama"
+ },
+ "cead4e9d-e6df-4e51-9957-8b52acf77c2e": {
+  "title": "Pembuat Blok Minecraft",
+  "description": "Bangun dengan blok di dunia grid bergaya Minecraft."
+ }
+}
