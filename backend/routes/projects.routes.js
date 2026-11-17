@@ -2238,20 +2238,24 @@ router.get('/:id/versions', async (req, res) => {
             });
         }
 
-        // Fetch from worker
-        const workerResponse = await fetch(
-            `${WORKER_URL}/versions/${project.github_repo}?limit=${limit}`,
-            {
-                headers: { 'x-worker-secret': WORKER_SECRET },
-                signal: AbortSignal.timeout(15000)
-            }
-        );
-
-        if (!workerResponse.ok) {
-            throw new Error(`Worker error ${workerResponse.status}`);
+        // Fetch from worker. Version history is an optional extra: projects built before the repo move live in the older GitHub
+        // org, which the worker (current org only) answers with a 500. That, or an unreachable worker, is an empty history
+        // here, never a 500 for the app.
+        let data;
+        try {
+            const workerResponse = await fetch(
+                `${WORKER_URL}/versions/${encodeURIComponent(project.github_repo)}?limit=${limit}`,
+                {
+                    headers: { 'x-worker-secret': WORKER_SECRET },
+                    signal: AbortSignal.timeout(15000)
+                }
+            );
+            if (!workerResponse.ok) throw new Error(`Worker error ${workerResponse.status}`);
+            data = await workerResponse.json();
+        } catch (workerErr) {
+            console.warn(`[versions] History unavailable for project ${id}: ${workerErr.message}`);
+            return res.json({ success: true, versions: [], hasRepo: true, unavailable: true });
         }
-
-        const data = await workerResponse.json();
         console.log(`[versions] Got ${data.versions?.length || 0} versions for project ${id}`);
 
         res.json({
