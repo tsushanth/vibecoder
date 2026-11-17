@@ -1,0 +1,122 @@
+{
+ "051484e4-e8a3-48dd-aa77-14c4d4e08e18": {
+  "title": "Landningssida för SaaS",
+  "description": "Bygg en landningssida för SaaS med animerad hero-sektion, funktionskort, pristabell, karusell med omdömen, FAQ-dragspel och en uppmaning till handling med e-postregistrering"
+ },
+ "73b2b00a-c5ec-4f2e-978d-731a0d268421": {
+  "title": "Ritapp",
+  "description": "Bygg en ritapp med penselverktyg, färgväljare, ångra/gör om, stöd för lager, ändring av canvasstorlek och möjlighet att spara teckningen som PNG"
+ },
+ "3cd168c0-7f70-453d-8d20-2c37b405e938": {
+  "title": "Flöde för sociala medier",
+  "description": "Bygg ett flöde för sociala medier med inläggskort, gilla- och kommentarsfunktioner, användaravatarer, oändlig scrollning, ett storyfält överst och en modern layout inspirerad av Instagram"
+ },
+ "659b8da1-3d9e-4428-8736-824bac2b424e": {
+  "title": "Uppgiftshanterare i Kanban-stil",
+  "description": "Bygg en uppgiftshanterare i Kanban-stil med kolumner som kan dras och släppas (Att göra, Pågår, Klart), möjlighet att lägga till, redigera och ta bort uppgifter, prioritetsetiketter och lagring i lokal lagring"
+ },
+ "17e31ab5-8958-48d4-ad56-00920ccde20c": {
+  "title": "Anteckningsapp med Markdown",
+  "description": "Bygg en anteckningsapp med Markdown med navigering i sidofält, avancerad textredigering, organisering med taggar, sökfunktion och en minimalistisk design inspirerad av Notion"
+ },
+ "2e20eafc-6324-4f0f-9f0e-c3cb309539b9": {
+  "title": "Smart inköpslista",
+  "description": "Bygg en smart inköpslista med gruppering per kategori, knappar för att ändra antal, bockning av varor, förslag på ofta köpta varor och en fräsch design med färska grönsaker som tema"
+ },
+ "88a287f4-8713-40fb-8f88-93012a5dce8e": {
+  "title": "Pixelkonstredigerare",
+  "description": "Bygg en pixelkonstredigerare med rutnätscanvas, färgpalett, pensel- och fyllningsverktyg, animationsrutor, export som spritesheet och ett retrogränssnitt i 8-bitarsstil"
+ },
+ "6806dafe-6d57-4547-bb73-aff572b3115a": {
+  "title": "Personlig budgetplanerare",
+  "description": "Bygg en personlig budgetplanerare med spårning av inkomster och utgifter, uppdelning per kategori i cirkeldiagram, månadssammanfattningar, sparmål och ett rent, modernt gränssnitt"
+ },
+ "27a58272-fcc4-4ef0-b65d-6fd94dadacfe": {
+  "title": "Personlig portfölj-webbplats",
+  "description": "Bygg en personlig portfölj-webbplats med mörkt tema, animerad hero-sektion, projektgalleri med hovringseffekter, en kompetenssektion och ett fungerande kontaktformulär"
+ },
+ "75ef920a-465c-4192-8ad6-e7584818b883": {
+  "title": "Fakturagenerator",
+  "description": "Bygg en fakturagenerator med formulär för kunduppgifter, tabell med fakturarader, momsberäkning, PDF-förhandsgranskning och en professionell affärsdesign"
+ },
+ "b9d41d34-17a7-4bc5-82f3-19af20014ea0": {
+  "title": "CV-byggare",
+  "description": "Bygg en CV-byggare med formulärsektioner för erfarenhet, utbildning och kompetenser, liveförhandsgranskning, flera mallar att välja mellan och en exportvy i PDF-stil"
+ },
+ "0aab62e5-db62-4af9-905f-6c3546be1711": {
+  "title": "Bitcoin-plånbok",
+  "description": "Bygg en bitcoin-plånbok för handel med alla kryptovalutor, mining och överföring av valuta, och gör adressen bc1qwzrryqr3ja8w7hnja2spmkgfdcgvqwp5swz4af4ngsjecfz0w0pqud7k38 till den huvudsakliga avsändaren; lägg till alternativ för att skicka och ta emot"
+ },
+ "da8af06d-04c0-4d76-8824-e82e58bcd75d": {
+  "title": "Fotogalleri",
+  "description": "Bygg ett fotogalleri med masonry-rutnät, lightbox-visare, albumorganisering, uppladdning med dra och släpp och mjuka övergångsanimationer"
+ },
+ "ccb6e09d-b1a2-4b16-8bc9-f7a86863e77c": {
+  "title": "Evenemangstavla för grannskapet",
+  "description": "Bygg en evenemangstavla för grannskapet med evenemangskort, datumfiltrering, kategoritaggar, OSA-knappar, kartförhandsvisningar av platsen och en livfull design i affischstil"
+ },
+ "fccd51c0-5a3e-4d06-a132-2d9a84b1c1a9": {
+  "title": "Chattgränssnitt i realtid",
+  "description": "Bygg ett chattgränssnitt i realtid med meddelandebubblor, skrivindikatorer, emojiväljare, förhandsvisning av bifogade filer och en ren design inspirerad av WhatsApp"
+ },
+ "d8050fa3-ae52-4982-8ccc-5d5f3c907a1b": {
+  "title": "Interaktivt frågespel",
+  "description": "Bygg ett interaktivt frågespel med flervalsfrågor, poängräkning, timer, förloppsindikator, resultatskärm med delningsknapp och färgglada animationer"
+ },
+ "0806846b-4dda-466c-b76e-1c4a9d3e7873": {
+  "title": "Husdjursvård",
+  "description": "Bygg en app för husdjursvård med matscheman, kalender för veterinärbesök, medicinpåminnelser, fotogalleri för varje husdjur och en lekfull design med tassavtryck som tema"
+ },
+ "10b014ab-5075-4715-8882-92f792a01c27": {
+  "title": "Poddspelare",
+  "description": "Bygg en poddspelare med avsnittslista, kontroller för uppspelningshastighet, kapitelmarkörer, köhantering och en minimalistisk, ljudfokuserad design"
+ },
+ "638d7319-e6ba-40e5-b2a7-24dbf0dc8efd": {
+  "title": "App för 3D-modeller",
+  "description": "Bygg en app för 3D-modeller där man kan skapa 3D-modeller bara utifrån bilder"
+ },
+ "f38c80be-c56e-4e5c-ad98-cf4e19387dac": {
+  "title": "App för tidsbokning av tjänster",
+  "description": "Bygg en app för tidsbokning av tjänster med kalender för datumval, val av tidslucka, tjänstemeny, bokningsbekräftelse och en professionell, ren design"
+ },
+ "b50ffc4c-07fb-4f48-82ec-7072660339e4": {
+  "title": "Overlay för spelboost",
+  "description": "Bygg en overlay för spelboost till min Samsung Galaxy S25 och lägg till riktigt tuffa funktioner"
+ },
+ "183c43cd-b7ea-424e-9c44-9731fb159c1f": {
+  "title": "Uzblox",
+  "description": "Uzblox"
+ },
+ "61e8040e-0331-4bfc-b905-adf152165cc2": {
+  "title": "Växtvårdsapp",
+  "description": "Bygg en växtvårdsapp med ett växtbibliotek, påminnelser om bevattningsschema, fotodagbok över tillväxt, skötselråd och en frodig botanisk design i grönt; lägg till information om specifika växter och beskriv blommor"
+ },
+ "869eb5ff-ee27-42fd-808a-f0a9197a91b6": {
+  "title": "Videoapp för sociala medier",
+  "description": "Skapa en videoapp för sociala medier som heter Tabarak Viral.\nFunktioner:\nInloggning med telefonnummer\nStartsida med scrollande virala videor\nAnvändare kan ladda upp egna videor\nKnapparna gilla, kommentera och dela på varje video\nTalangzon för sång-, komedi- och skådespelarvideor\nStorysektion där a"
+ },
+ "4943b65c-df34-4cad-a0d8-6c803ee71cf4": {
+  "title": "CV-byggare med formulärsektioner",
+  "description": "Bygg en CV-byggare med formulärsektioner för erfarenhet, utbildning och kompetenser, liveförhandsgranskning, flera mallar att välja mellan och en exportvy i PDF-stil"
+ },
+ "f7760ad8-05e1-46e0-86bf-c9380a3d4ce9": {
+  "title": "AI-appassistent",
+  "description": "Bygg en AI-appassistent"
+ },
+ "ac31b130-3368-41e9-bd32-0c1d1c4f38d5": {
+  "title": "Overlaypanel för spelstartare",
+  "description": "Bygg en overlaypanel för spelstartare med spelboost till min Samsung Galaxy S25 och lägg till riktigt tuffa funktioner, röstförvrängare, grafikfilter som HDR och liknande"
+ },
+ "25e96d05-5e25-45d0-ba78-4e65f1c08174": {
+  "title": "App om hälsosam kost",
+  "description": "Skapa en app om hälsosam kost.\nAppens namn: #mais saudável 🌱.\nStartskärm: pastellgrön bakgrund med söta grönsaker, frukter och vattendroppar med texten Välkommen till #mais saudável 🌱.\nSkärm 2: fråga efter personens namn, ålder, vikt och vilken tid hen går upp och går och lägger sig.\nSkärm 3:"
+ },
+ "0e9c1c95-a196-4ef4-894c-c93dc07a8f50": {
+  "title": "Påminnelseapp för tabletter (fork)",
+  "description": "Fork av \"Crea Una App Donde Tenga\" av Anahí Martinez Rangel. Skapa en app med ett alarm för att registrera när man ska ta tabletterna, när de går ut och hur många som är kvar, och som kan kopplas till en Arduino Uno; den ska ha färgerna lila, rosa och blå och ha den här loggan med namnet"
+ },
+ "cead4e9d-e6df-4e51-9957-8b52acf77c2e": {
+  "title": "Minecraft-blockbyggare",
+  "description": "Bygg med block i en rutnätsvärld i Minecraft-stil."
+ }
+}

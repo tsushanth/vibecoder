@@ -1,0 +1,122 @@
+{
+ "051484e4-e8a3-48dd-aa77-14c4d4e08e18": {
+  "title": "SaaS Landing Page",
+  "description": "Gumawa ng SaaS landing page na may animated na hero, mga feature card, pricing table, testimonial carousel, FAQ accordion, at call-to-action na may email signup"
+ },
+ "73b2b00a-c5ec-4f2e-978d-731a0d268421": {
+  "title": "Drawing App",
+  "description": "Gumawa ng drawing app na may mga brush tool, color picker, undo/redo, suporta sa layer, pagpapalit ng laki ng canvas, at kakayahang i-save ang artwork bilang PNG"
+ },
+ "3cd168c0-7f70-453d-8d20-2c37b405e938": {
+  "title": "Social Media Feed",
+  "description": "Gumawa ng social media feed na may mga post card, like/comment na interaksyon, avatar ng user, infinite scroll, stories bar sa itaas, at modernong layout na hango sa Instagram"
+ },
+ "659b8da1-3d9e-4428-8736-824bac2b424e": {
+  "title": "Task Manager na Estilong Kanban",
+  "description": "Gumawa ng task manager na estilong Kanban na may mga column na drag and drop (To Do, In Progress, Done), kakayahang magdagdag/mag-edit/mag-delete ng task, mga priority label, at local storage persistence"
+ },
+ "17e31ab5-8958-48d4-ad56-00920ccde20c": {
+  "title": "Markdown Notes App",
+  "description": "Gumawa ng markdown notes app na may sidebar navigation, rich text editing, organisasyon gamit ang tag, search, at minimal na disenyong hango sa Notion"
+ },
+ "2e20eafc-6324-4f0f-9f0e-c3cb309539b9": {
+  "title": "Smart Grocery List App",
+  "description": "Gumawa ng smart grocery list app na may paggrupo ayon sa kategorya, pang-adjust ng dami, pag-check ng mga item, mga suhestiyon ng madalas bilhin, at sariwang disenyong may temang sariwang gulay at prutas"
+ },
+ "88a287f4-8713-40fb-8f88-93012a5dce8e": {
+  "title": "Pixel Art Editor",
+  "description": "Gumawa ng pixel art editor na may grid canvas, color palette, brush at fill tool, mga animation frame, pag-export bilang sprite sheet, at retro na 8-bit na interface"
+ },
+ "6806dafe-6d57-4547-bb73-aff572b3115a": {
+  "title": "Personal Budget Planner",
+  "description": "Gumawa ng personal budget planner na may pagsubaybay sa kita at gastos, breakdown ayon sa kategorya na may pie chart, buwanang buod, mga layunin sa pag-iipon, at malinis at modernong UI"
+ },
+ "27a58272-fcc4-4ef0-b65d-6fd94dadacfe": {
+  "title": "Personal Portfolio Website",
+  "description": "Gumawa ng personal portfolio website na may dark theme, animated na hero section, project gallery na may hover effect, skills section, at gumaganang contact form"
+ },
+ "75ef920a-465c-4192-8ad6-e7584818b883": {
+  "title": "Invoice Generator",
+  "description": "Gumawa ng invoice generator na may form para sa detalye ng kliyente, line item table, kalkulasyon ng buwis, PDF preview, at propesyonal na disenyong pang-negosyo"
+ },
+ "b9d41d34-17a7-4bc5-82f3-19af20014ea0": {
+  "title": "Resume Builder",
+  "description": "Gumawa ng resume builder na may mga seksyon ng form para sa karanasan, edukasyon, at kasanayan, live preview, maraming pagpipiliang template, at PDF-style na export view"
+ },
+ "0aab62e5-db62-4af9-905f-6c3546be1711": {
+  "title": "Bitcoin Wallet",
+  "description": "Gumawa ng bitcoin wallet para sa lahat ng cryptocurrency trading, mining, at paglilipat ng pera, at gawing pangunahing nagpapadala ang bc1qwzrryqr3ja8w7hnja2spmkgfdcgvqwp5swz4af4ngsjecfz0w0pqud7k38; magdagdag ng opsyon para sa pagpapadala at pagtanggap"
+ },
+ "da8af06d-04c0-4d76-8824-e82e58bcd75d": {
+  "title": "Photo Gallery",
+  "description": "Gumawa ng photo gallery na may masonry grid layout, lightbox viewer, organisasyon ng album, drag-and-drop na upload, at makinis na transition animation"
+ },
+ "ccb6e09d-b1a2-4b16-8bc9-f7a86863e77c": {
+  "title": "Community Event Board",
+  "description": "Gumawa ng community event board na may mga event card, pag-filter ayon sa petsa, mga category tag, RSVP button, preview ng lokasyon sa mapa, at makulay na disenyong estilong poster"
+ },
+ "fccd51c0-5a3e-4d06-a132-2d9a84b1c1a9": {
+  "title": "Real-time Chat Interface",
+  "description": "Gumawa ng real-time chat interface na may mga message bubble, typing indicator, emoji picker, preview ng mga attachment na file, at malinis na disenyong hango sa WhatsApp"
+ },
+ "d8050fa3-ae52-4982-8ccc-5d5f3c907a1b": {
+  "title": "Interactive Quiz Game",
+  "description": "Gumawa ng interactive quiz game na may multiple choice na tanong, pagsubaybay sa iskor, timer, progress bar, results screen na may share button, at makukulay na animation"
+ },
+ "0806846b-4dda-466c-b76e-1c4a9d3e7873": {
+  "title": "Pet Care Tracker",
+  "description": "Gumawa ng pet care tracker na may mga iskedyul ng pagpapakain, kalendaryo ng appointment sa beterinaryo, paalala sa gamot, photo gallery para sa bawat alaga, at masayang disenyong may temang bakas ng paa"
+ },
+ "10b014ab-5075-4715-8882-92f792a01c27": {
+  "title": "Podcast Player",
+  "description": "Gumawa ng podcast player na may listahan ng episode, kontrol sa bilis ng playback, mga chapter marker, pamamahala ng queue, at minimal na disenyong nakatuon sa audio"
+ },
+ "638d7319-e6ba-40e5-b2a7-24dbf0dc8efd": {
+  "title": "3D Model App",
+  "description": "Gumawa ng 3D model app kung saan makakagawa ka ng mga 3D model mula lang sa mga larawan"
+ },
+ "f38c80be-c56e-4e5c-ad98-cf4e19387dac": {
+  "title": "Service Booking App",
+  "description": "Gumawa ng service booking app na may calendar date picker, pagpili ng time slot, menu ng serbisyo, kumpirmasyon ng booking, at propesyonal at malinis na disenyo"
+ },
+ "b50ffc4c-07fb-4f48-82ec-7072660339e4": {
+  "title": "Game Booster Overlay",
+  "description": "Gumawa ng game booster overlay para sa Samsung Galaxy S25 ko at lagyan ng mga astig na feature"
+ },
+ "183c43cd-b7ea-424e-9c44-9731fb159c1f": {
+  "title": "Uzblox",
+  "description": "Uzblox"
+ },
+ "61e8040e-0331-4bfc-b905-adf152165cc2": {
+  "title": "Plant Care App",
+  "description": "Gumawa ng plant care app na may plant library, mga paalala sa iskedyul ng pagdidilig, photo journal ng paglaki, mga tip sa pag-aalaga, at luntiang disenyong may temang botanikal na berde; magdagdag ng impormasyon tungkol sa mga partikular na halaman at ilarawan ang mga bulaklak"
+ },
+ "869eb5ff-ee27-42fd-808a-f0a9197a91b6": {
+  "title": "Social Media Video App",
+  "description": "Gumawa ng social media video app na tinatawag na Tabarak Viral.\nMga Feature:\nMag-login gamit ang numero ng telepono\nHome page na may mga nag-i-scroll na viral na video\nMakakapag-upload ang mga user ng sarili nilang video\nMga like, comment, at share button sa bawat video\nTalent zone para sa mga video ng pagkanta, komedya, at pag-arte\nStory section kung saan m"
+ },
+ "4943b65c-df34-4cad-a0d8-6c803ee71cf4": {
+  "title": "Resume Builder na may mga Seksyon ng Form",
+  "description": "Gumawa ng resume builder na may mga seksyon ng form para sa karanasan, edukasyon, at kasanayan, live preview, maraming pagpipiliang template, at PDF-style na export view"
+ },
+ "f7760ad8-05e1-46e0-86bf-c9380a3d4ce9": {
+  "title": "AI App Assistant",
+  "description": "Gumawa ng AI app assistant"
+ },
+ "ac31b130-3368-41e9-bd32-0c1d1c4f38d5": {
+  "title": "Game Booster Launcher Overlay Panel",
+  "description": "Gumawa ng game booster launcher overlay panel para sa Samsung Galaxy S25 ko at lagyan ng mga astig na feature, voice changer, graphics filter tulad ng HDR at mga katulad nito"
+ },
+ "25e96d05-5e25-45d0-ba78-4e65f1c08174": {
+  "title": "App Tungkol sa Malusog na Pagkain",
+  "description": "Gumawa ng app tungkol sa malusog na pagkain.\nPangalan ng app: #mais saudável 🌱.\nUnang screen: pastel na berdeng background na may mga cute na gulay, prutas, at patak ng tubig na may nakasulat na Maligayang pagdating sa #mais saudável 🌱.\nIkalawang screen: hingin ang pangalan, edad, timbang, at oras ng paggising at pagtulog ng tao.\nIkatlong screen:"
+ },
+ "0e9c1c95-a196-4ef4-894c-c93dc07a8f50": {
+  "title": "Pill Reminder App (Fork)",
+  "description": "Fork mula sa \"Crea Una App Donde Tenga\" ni Anahí Martinez Rangel. Gumawa ng app na may alarma para itala kung kailan iinom ng mga tableta, kailan mag-e-expire, at ilan na lang ang natitira, at na maikokonekta sa Arduino Uno; dapat may kulay na lila, rosas, at asul, at may logong ito kasama ang pangalan"
+ },
+ "cead4e9d-e6df-4e51-9957-8b52acf77c2e": {
+  "title": "Minecraft Block Builder",
+  "description": "Magbuo gamit ang mga block sa isang grid world na estilong Minecraft."
+ }
+}

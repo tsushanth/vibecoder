@@ -206,7 +206,7 @@ fun LivePreviewScreen(
                 ) {
                     Icon(Icons.Default.TrendingUp, contentDescription = null, tint = VibeGreen.copy(alpha = 0.5f), modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Monetize (Coming Soon)", color = VibeGreen.copy(alpha = 0.5f), fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.live_preview_monetize_soon), color = VibeGreen.copy(alpha = 0.5f), fontWeight = FontWeight.SemiBold)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -458,7 +458,7 @@ fun LivePreviewScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (feedbackSent != null) "Thanks for your feedback!" else "How's this?",
+                    text = stringResource(if (feedbackSent != null) R.string.live_preview_feedback_thanks else R.string.live_preview_feedback_ask),
                     style = MaterialTheme.typography.bodySmall,
                     color = TextSecondary,
                     modifier = Modifier.weight(1f)
@@ -470,7 +470,7 @@ fun LivePreviewScreen(
                 ) {
                     Icon(
                         if (feedbackSent == "up") Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp,
-                        contentDescription = "Thumbs up",
+                        contentDescription = stringResource(R.string.cd_thumbs_up),
                         tint = if (feedbackSent == "up") SuccessGreen else TextSecondary,
                         modifier = Modifier.size(20.dp)
                     )
@@ -482,7 +482,7 @@ fun LivePreviewScreen(
                 ) {
                     Icon(
                         if (feedbackSent == "down") Icons.Filled.ThumbDown else Icons.Outlined.ThumbDown,
-                        contentDescription = "Thumbs down",
+                        contentDescription = stringResource(R.string.cd_thumbs_down),
                         tint = if (feedbackSent == "down") ErrorRed else TextSecondary,
                         modifier = Modifier.size(20.dp)
                     )
@@ -546,7 +546,7 @@ fun LivePreviewScreen(
                                     .weight(1f)
                                     .focusRequester(tweakFocusRequester),
                                 placeholder = {
-                                    Text("What would you like to change?", color = TextTertiary)
+                                    Text(stringResource(R.string.live_preview_change_hint), color = TextTertiary)
                                 },
                                 enabled = !isTweaking,
                                 singleLine = true,
@@ -594,7 +594,7 @@ fun LivePreviewScreen(
                                 ) {
                                     Icon(
                                         Icons.Default.Send,
-                                        contentDescription = "Send tweak",
+                                        contentDescription = stringResource(R.string.build_chat_send_tweak),
                                         tint = if (tweakText.isNotBlank()) VibePurple else TextTertiary
                                     )
                                 }
@@ -614,7 +614,7 @@ fun LivePreviewScreen(
                 ) {
                     Icon(
                         Icons.Default.Edit,
-                        contentDescription = "Improve this app",
+                        contentDescription = stringResource(R.string.cd_improve_app),
                         tint = Color.White
                     )
                 }

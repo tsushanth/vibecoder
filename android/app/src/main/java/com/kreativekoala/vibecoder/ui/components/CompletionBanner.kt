@@ -1,5 +1,7 @@
 package com.kreativekoala.vibecoder.ui.components
 
+import com.kreativekoala.vibecoder.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -60,7 +62,7 @@ fun CompletionBanner(
                 ) {
                     Icon(
                         Icons.Default.Close,
-                        contentDescription = "Dismiss",
+                        contentDescription = stringResource(R.string.cd_dismiss),
                         tint = TextPrimary,
                         modifier = Modifier.size(16.dp)
                     )

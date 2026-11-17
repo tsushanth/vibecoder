@@ -1,0 +1,122 @@
+{
+ "051484e4-e8a3-48dd-aa77-14c4d4e08e18": {
+  "title": "Úvodní stránka SaaS",
+  "description": "Vytvořte úvodní stránku pro SaaS s animovanou úvodní sekcí, kartami funkcí, ceníkem, karuselem referencí, rozbalovacími častými dotazy a výzvou k akci s přihlášením k odběru e-mailu"
+ },
+ "73b2b00a-c5ec-4f2e-978d-731a0d268421": {
+  "title": "Aplikace na kreslení",
+  "description": "Vytvořte aplikaci na kreslení s nástroji štětců, výběrem barev, vracením a opakováním kroků, podporou vrstev, změnou velikosti plátna a možností uložit výtvor jako PNG"
+ },
+ "3cd168c0-7f70-453d-8d20-2c37b405e938": {
+  "title": "Feed sociální sítě",
+  "description": "Vytvořte feed sociální sítě s kartami příspěvků, interakcemi líbí se/komentář, avatary uživatelů, nekonečným posouváním, lištou příběhů nahoře a moderním rozvržením inspirovaným Instagramem"
+ },
+ "659b8da1-3d9e-4428-8736-824bac2b424e": {
+  "title": "Správce úkolů ve stylu Kanban",
+  "description": "Vytvořte správce úkolů ve stylu Kanban se sloupci přetahovanými myší (K udělání, Probíhá, Hotovo), možností přidávat, upravovat a mazat úkoly, štítky priority a ukládáním do místního úložiště"
+ },
+ "17e31ab5-8958-48d4-ad56-00920ccde20c": {
+  "title": "Aplikace na poznámky v Markdownu",
+  "description": "Vytvořte aplikaci na poznámky v Markdownu s navigací v postranním panelu, úpravou formátovaného textu, organizací pomocí štítků, vyhledáváním a minimalistickým designem inspirovaným Notionem"
+ },
+ "2e20eafc-6324-4f0f-9f0e-c3cb309539b9": {
+  "title": "Chytrý nákupní seznam",
+  "description": "Vytvořte aplikaci s chytrým nákupním seznamem se seskupením podle kategorií, úpravou množství, odškrtáváním položek, návrhy často kupovaných věcí a svěžím designem laděným do čerstvé zeleniny a ovoce"
+ },
+ "88a287f4-8713-40fb-8f88-93012a5dce8e": {
+  "title": "Editor pixel artu",
+  "description": "Vytvořte editor pixel artu s mřížkovým plátnem, paletou barev, nástroji štětce a výplně, animačními snímky, exportem jako sprite sheet a retro rozhraním ve stylu 8 bitů"
+ },
+ "6806dafe-6d57-4547-bb73-aff572b3115a": {
+  "title": "Osobní plánovač rozpočtu",
+  "description": "Vytvořte osobní plánovač rozpočtu se sledováním příjmů a výdajů, rozpisem podle kategorií s výsečovými grafy, měsíčními přehledy, spořicími cíli a čistým moderním rozhraním"
+ },
+ "27a58272-fcc4-4ef0-b65d-6fd94dadacfe": {
+  "title": "Osobní portfolio web",
+  "description": "Vytvořte osobní portfolio web s tmavým motivem, animovanou úvodní sekcí, galerií projektů s efekty po najetí myší, sekcí dovedností a funkčním kontaktním formulářem"
+ },
+ "75ef920a-465c-4192-8ad6-e7584818b883": {
+  "title": "Generátor faktur",
+  "description": "Vytvořte generátor faktur s formulářem pro údaje o klientovi, tabulkou položek, výpočtem daní, náhledem PDF a profesionálním podnikatelským designem"
+ },
+ "b9d41d34-17a7-4bc5-82f3-19af20014ea0": {
+  "title": "Tvůrce životopisů",
+  "description": "Vytvořte tvůrce životopisů s formulářovými sekcemi pro praxi, vzdělání a dovednosti, živým náhledem, výběrem z více šablon a exportním zobrazením ve stylu PDF"
+ },
+ "0aab62e5-db62-4af9-905f-6c3546be1711": {
+  "title": "Bitcoinová peněženka",
+  "description": "Vytvořte bitcoinovou peněženku pro obchodování se všemi kryptoměnami, těžbu a převody měny a nastavte tuto adresu jako hlavního odesílatele: bc1qwzrryqr3ja8w7hnja2spmkgfdcgvqwp5swz4af4ngsjecfz0w0pqud7k38. Přidejte možnosti odesílání a příjmu"
+ },
+ "da8af06d-04c0-4d76-8824-e82e58bcd75d": {
+  "title": "Fotogalerie",
+  "description": "Vytvořte fotogalerii s mozaikovým rozvržením mřížky, prohlížečem lightbox, organizací do alb, nahráváním přetažením a plynulými přechodovými animacemi"
+ },
+ "ccb6e09d-b1a2-4b16-8bc9-f7a86863e77c": {
+  "title": "Nástěnka komunitních akcí",
+  "description": "Vytvořte nástěnku komunitních akcí s kartami událostí, filtrováním podle data, štítky kategorií, tlačítky potvrzení účasti, náhledy míst na mapě a pestrým designem ve stylu plakátu"
+ },
+ "fccd51c0-5a3e-4d06-a132-2d9a84b1c1a9": {
+  "title": "Chatovací rozhraní v reálném čase",
+  "description": "Vytvořte chatovací rozhraní v reálném čase s bublinami zpráv, indikátory psaní, výběrem emoji, náhledy příloh a čistým designem inspirovaným WhatsAppem"
+ },
+ "d8050fa3-ae52-4982-8ccc-5d5f3c907a1b": {
+  "title": "Interaktivní kvízová hra",
+  "description": "Vytvořte interaktivní kvízovou hru s otázkami s výběrem z více možností, sledováním skóre, časovačem, ukazatelem postupu, obrazovkou s výsledky s tlačítkem sdílení a barevnými animacemi"
+ },
+ "0806846b-4dda-466c-b76e-1c4a9d3e7873": {
+  "title": "Sledování péče o mazlíčky",
+  "description": "Vytvořte aplikaci pro sledování péče o mazlíčky s plány krmení, kalendářem návštěv veterináře, připomínkami léků, galerií fotek pro každého mazlíčka a hravým designem s tlapkami"
+ },
+ "10b014ab-5075-4715-8882-92f792a01c27": {
+  "title": "Přehrávač podcastů",
+  "description": "Vytvořte přehrávač podcastů se seznamem epizod, ovládáním rychlosti přehrávání, značkami kapitol, správou fronty a minimalistickým designem zaměřeným na audio"
+ },
+ "638d7319-e6ba-40e5-b2a7-24dbf0dc8efd": {
+  "title": "Aplikace s 3D modely",
+  "description": "Vytvořte aplikaci s 3D modely, ve které lze generovat 3D modely pouze z fotografií"
+ },
+ "f38c80be-c56e-4e5c-ad98-cf4e19387dac": {
+  "title": "Aplikace pro rezervaci služeb",
+  "description": "Vytvořte aplikaci pro rezervaci služeb s výběrem data v kalendáři, výběrem časových slotů, nabídkou služeb, potvrzením rezervace a profesionálním čistým designem"
+ },
+ "b50ffc4c-07fb-4f48-82ec-7072660339e4": {
+  "title": "Překryv pro zrychlení her",
+  "description": "Vytvořte mi překryv pro zrychlení her pro můj Samsung Galaxy s25 a přidejte do něj opravdu skvělé funkce"
+ },
+ "183c43cd-b7ea-424e-9c44-9731fb159c1f": {
+  "title": "Uzblox",
+  "description": "Uzblox"
+ },
+ "61e8040e-0331-4bfc-b905-adf152165cc2": {
+  "title": "Aplikace pro péči o rostliny",
+  "description": "Vytvořte aplikaci pro péči o rostliny s knihovnou rostlin, připomínkami plánu zalévání, fotodeníkem růstu, tipy na péči a bujarým botanickým designem v zelených tónech; přidejte informace o konkrétních rostlinách a popis květin"
+ },
+ "869eb5ff-ee27-42fd-808a-f0a9197a91b6": {
+  "title": "Aplikace pro videa na sociálních sítích",
+  "description": "Vytvořte aplikaci pro videa na sociálních sítích s názvem Tabarak Viral.\nFunkce:\nPřihlášení pomocí telefonního čísla\nDomovská stránka s posouvatelnými virálními videi\nUživatelé mohou nahrávat vlastní videa\nTlačítka líbí se, komentář a sdílení u každého videa\nTalentová zóna pro videa se zpěvem, komedií a hereckými výkony\nSekce příběhů, kde u"
+ },
+ "4943b65c-df34-4cad-a0d8-6c803ee71cf4": {
+  "title": "Tvůrce životopisů s formulářovými sekcemi",
+  "description": "Vytvořte tvůrce životopisů s formulářovými sekcemi pro praxi, vzdělání a dovednosti, živým náhledem, výběrem z více šablon a exportním zobrazením ve stylu PDF"
+ },
+ "f7760ad8-05e1-46e0-86bf-c9380a3d4ce9": {
+  "title": "Asistent aplikací s AI",
+  "description": "Vytvořte asistenta aplikací s AI"
+ },
+ "ac31b130-3368-41e9-bd32-0c1d1c4f38d5": {
+  "title": "Překryvný panel launcheru pro zrychlení her",
+  "description": "Vytvořte mi překryvný panel launcheru pro zrychlení her pro můj Samsung Galaxy s25 a přidejte do něj opravdu skvělé funkce, měnič hlasu a grafické filtry jako HDR a podobně"
+ },
+ "25e96d05-5e25-45d0-ba78-4e65f1c08174": {
+  "title": "Aplikace o zdravém stravování",
+  "description": "Vytvořte aplikaci o zdravém stravování.\nNázev aplikace: #mais saudável 🌱.\nÚvodní obrazovka: pastelově zelené pozadí se zeleninou, ovocem a roztomilými kapkami vody s nápisem Seja bem vindo (a) só #mais saudável 🌱.\n2. obrazovka: zeptat se na jméno, věk, váhu a čas vstávání a spaní.\n3. obrazovka:"
+ },
+ "0e9c1c95-a196-4ef4-894c-c93dc07a8f50": {
+  "title": "Připomínač léků (Fork)",
+  "description": "Fork aplikace \"Crea Una App Donde Tenga\" od Anahí Martinez Rangel. Vytvořte aplikaci s budíkem, který eviduje, kdy si vzít léky, kdy jim končí platnost a kolik jich zbývá, a kterou lze propojit s Arduino Uno; musí mít fialovou, růžovou a modrou barvu a toto logo s náz"
+ },
+ "cead4e9d-e6df-4e51-9957-8b52acf77c2e": {
+  "title": "Stavitel bloků Minecraft",
+  "description": "Stavějte z bloků ve světě tvořeném mřížkou ve stylu Minecraftu."
+ }
+}

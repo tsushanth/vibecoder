@@ -429,13 +429,13 @@ fun ProjectDetailScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = uiState.apkExportProgress.ifEmpty { "Building APK..." },
+                                text = uiState.apkExportProgress.ifEmpty { stringResource(R.string.project_detail_building_apk) },
                                 fontWeight = FontWeight.SemiBold
                             )
                         } else {
                             Icon(Icons.Default.PhoneAndroid, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Export Android App", fontWeight = FontWeight.SemiBold)
+                            Text(stringResource(R.string.project_detail_export_android), fontWeight = FontWeight.SemiBold)
                         }
                     }
 
@@ -469,7 +469,7 @@ fun ProjectDetailScreen(
                         ) {
                             Text("\uD83C\uDF4E", style = MaterialTheme.typography.titleMedium)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Preview on iPhone (Expo Go)", color = VibePurple, fontWeight = FontWeight.SemiBold)
+                            Text(stringResource(R.string.project_detail_preview_iphone), color = VibePurple, fontWeight = FontWeight.SemiBold)
                         }
                     }
 
@@ -508,7 +508,7 @@ fun ProjectDetailScreen(
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Text(
-                                            "Monetization",
+                                            stringResource(R.string.monetize_section_title),
                                             style = MaterialTheme.typography.titleSmall,
                                             color = TextPrimary,
                                             fontWeight = FontWeight.SemiBold
@@ -519,7 +519,7 @@ fun ProjectDetailScreen(
                                         shape = RoundedCornerShape(8.dp)
                                     ) {
                                         Text(
-                                            "Coming Soon",
+                                            stringResource(R.string.project_detail_coming_soon),
                                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                                             style = MaterialTheme.typography.labelSmall,
                                             color = VibePurple,
@@ -529,7 +529,7 @@ fun ProjectDetailScreen(
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = "Earn revenue from ads shown on your deployed app. Ad monetization is currently under review and will be available soon.",
+                                    text = stringResource(R.string.project_detail_ads_review),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = TextTertiary
                                 )

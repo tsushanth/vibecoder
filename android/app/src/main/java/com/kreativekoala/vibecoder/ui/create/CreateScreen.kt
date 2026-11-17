@@ -48,6 +48,9 @@ fun CreateScreen(
     viewModel: CreateViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    // The view model outlives a language change; reload the idea chips and templates in the new language.
+    val appLanguage = com.kreativekoala.vibecoder.util.AppLanguage.current()
+    LaunchedEffect(appLanguage) { viewModel.onAppLanguage(appLanguage) }
     val context = LocalContext.current
 
     // Triggered when startGeneration() blocks the free-build cap. Navigates to

@@ -42,11 +42,11 @@ private fun ProUpsellBanner(onClick: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Star, contentDescription = null, tint = VibeYellow, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
-                Text("Pro users never wait", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                Text(stringResource(R.string.apps_pro_never_wait), color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 15.sp)
             }
             Spacer(Modifier.height(4.dp))
             Text(
-                "Free builders are shared — Pro gets you priority queue, faster builds, and no failures.",
+                stringResource(R.string.apps_pro_never_wait_body),
                 color = TextSecondary,
                 fontSize = 13.sp,
                 lineHeight = 18.sp
@@ -58,7 +58,7 @@ private fun ProUpsellBanner(onClick: () -> Unit) {
                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text("Upgrade to Pro", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                Text(stringResource(R.string.upgrade_to_pro), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
             }
         }
     }

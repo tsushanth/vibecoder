@@ -40,6 +40,9 @@ data class SuggestionsResponse(
     val suggestions: List<Suggestion> = emptyList()
 )
 
+/** Body of POST suggest-ideas: the app language, so the ideas are written in it. */
+data class SuggestIdeasRequest(val language: String)
+
 data class Suggestion(
     val label: String,
     val prompt: String

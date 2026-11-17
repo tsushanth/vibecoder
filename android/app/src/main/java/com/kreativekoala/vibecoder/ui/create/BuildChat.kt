@@ -82,7 +82,7 @@ fun BuildChatThread(
                         Spacer(Modifier.height(4.dp)); Text("\u2022 $it", color = TextSecondary, fontSize = 13.sp)
                     }
                     if (plan.style.isNotBlank()) {
-                        Spacer(Modifier.height(6.dp)); Text("Style: ${plan.style}", color = TextTertiary, fontSize = 12.sp)
+                        Spacer(Modifier.height(6.dp)); Text(stringResource(R.string.build_chat_style, plan.style), color = TextTertiary, fontSize = 12.sp)
                     }
                     if (stage == ChatStage.PlanReady) {
                         Spacer(Modifier.height(12.dp))

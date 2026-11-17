@@ -1,0 +1,122 @@
+{
+ "051484e4-e8a3-48dd-aa77-14c4d4e08e18": {
+  "title": "Trang đích SaaS",
+  "description": "Tạo một trang đích SaaS với phần hero có hiệu ứng, thẻ tính năng, bảng giá, băng chuyền đánh giá của khách hàng, phần câu hỏi thường gặp dạng thu gọn và lời kêu gọi hành động kèm đăng ký email"
+ },
+ "73b2b00a-c5ec-4f2e-978d-731a0d268421": {
+  "title": "Ứng dụng vẽ",
+  "description": "Tạo một ứng dụng vẽ với công cụ cọ, bộ chọn màu, hoàn tác/làm lại, hỗ trợ lớp, đổi kích thước canvas và khả năng lưu tác phẩm dưới dạng PNG"
+ },
+ "3cd168c0-7f70-453d-8d20-2c37b405e938": {
+  "title": "Bảng tin mạng xã hội",
+  "description": "Tạo một bảng tin mạng xã hội với thẻ bài đăng, tương tác thích/bình luận, ảnh đại diện người dùng, cuộn vô hạn, thanh story ở trên cùng và bố cục hiện đại lấy cảm hứng từ Instagram"
+ },
+ "659b8da1-3d9e-4428-8736-824bac2b424e": {
+  "title": "Trình quản lý công việc kiểu Kanban",
+  "description": "Tạo một trình quản lý công việc kiểu Kanban với các cột kéo thả (Cần làm, Đang làm, Hoàn thành), khả năng thêm/sửa/xóa công việc, nhãn mức độ ưu tiên và lưu trữ cục bộ"
+ },
+ "17e31ab5-8958-48d4-ad56-00920ccde20c": {
+  "title": "Ứng dụng ghi chú Markdown",
+  "description": "Tạo một ứng dụng ghi chú Markdown với thanh điều hướng bên, trình soạn thảo văn bản đa dạng, sắp xếp theo thẻ, chức năng tìm kiếm và thiết kế tối giản lấy cảm hứng từ Notion"
+ },
+ "2e20eafc-6324-4f0f-9f0e-c3cb309539b9": {
+  "title": "Ứng dụng danh sách mua sắm thông minh",
+  "description": "Tạo một ứng dụng danh sách mua sắm thông minh với nhóm theo danh mục, nút điều chỉnh số lượng, đánh dấu đã mua, gợi ý các món hay mua và thiết kế tươi mát theo chủ đề rau củ quả"
+ },
+ "88a287f4-8713-40fb-8f88-93012a5dce8e": {
+  "title": "Trình chỉnh sửa Pixel Art",
+  "description": "Tạo một trình chỉnh sửa pixel art với canvas dạng lưới, bảng màu, công cụ cọ và tô màu, các khung hoạt ảnh, xuất dưới dạng sprite sheet và giao diện 8-bit phong cách retro"
+ },
+ "6806dafe-6d57-4547-bb73-aff572b3115a": {
+  "title": "Trình lập kế hoạch ngân sách cá nhân",
+  "description": "Tạo một trình lập kế hoạch ngân sách cá nhân với theo dõi thu nhập và chi tiêu, phân tích theo danh mục bằng biểu đồ tròn, tổng kết hàng tháng, mục tiêu tiết kiệm và giao diện hiện đại, gọn gàng"
+ },
+ "27a58272-fcc4-4ef0-b65d-6fd94dadacfe": {
+  "title": "Trang web portfolio cá nhân",
+  "description": "Tạo một trang web portfolio cá nhân với chủ đề tối, phần hero có hiệu ứng, thư viện dự án có hiệu ứng khi di chuột, phần kỹ năng và biểu mẫu liên hệ hoạt động được"
+ },
+ "75ef920a-465c-4192-8ad6-e7584818b883": {
+  "title": "Trình tạo hóa đơn",
+  "description": "Tạo một trình tạo hóa đơn với biểu mẫu thông tin khách hàng, bảng các mục hàng, tính thuế, xem trước PDF và thiết kế chuyên nghiệp theo phong cách doanh nghiệp"
+ },
+ "b9d41d34-17a7-4bc5-82f3-19af20014ea0": {
+  "title": "Trình tạo CV",
+  "description": "Tạo một trình tạo CV với các phần biểu mẫu cho kinh nghiệm, học vấn và kỹ năng, xem trước trực tiếp, nhiều mẫu để lựa chọn và chế độ xem xuất dạng PDF"
+ },
+ "0aab62e5-db62-4af9-905f-6c3546be1711": {
+  "title": "Ví Bitcoin",
+  "description": "Tạo một ví bitcoin cho giao dịch mọi loại tiền mã hóa, khai thác và chuyển tiền, đồng thời đặt bc1qwzrryqr3ja8w7hnja2spmkgfdcgvqwp5swz4af4ngsjecfz0w0pqud7k38 làm địa chỉ gửi chính; thêm tùy chọn gửi và nhận"
+ },
+ "da8af06d-04c0-4d76-8824-e82e58bcd75d": {
+  "title": "Thư viện ảnh",
+  "description": "Tạo một thư viện ảnh với bố cục lưới masonry, trình xem lightbox, sắp xếp theo album, tải lên bằng kéo thả và hiệu ứng chuyển cảnh mượt mà"
+ },
+ "ccb6e09d-b1a2-4b16-8bc9-f7a86863e77c": {
+  "title": "Bảng sự kiện cộng đồng",
+  "description": "Tạo một bảng sự kiện cộng đồng với thẻ sự kiện, lọc theo ngày, thẻ danh mục, nút RSVP, xem trước vị trí trên bản đồ và thiết kế sống động theo phong cách áp phích"
+ },
+ "fccd51c0-5a3e-4d06-a132-2d9a84b1c1a9": {
+  "title": "Giao diện chat thời gian thực",
+  "description": "Tạo một giao diện chat thời gian thực với bong bóng tin nhắn, chỉ báo đang nhập, bộ chọn emoji, xem trước tệp đính kèm và thiết kế gọn gàng lấy cảm hứng từ WhatsApp"
+ },
+ "d8050fa3-ae52-4982-8ccc-5d5f3c907a1b": {
+  "title": "Trò chơi đố vui tương tác",
+  "description": "Tạo một trò chơi đố vui tương tác với câu hỏi trắc nghiệm, theo dõi điểm số, bộ đếm thời gian, thanh tiến trình, màn hình kết quả có nút chia sẻ và hiệu ứng nhiều màu sắc"
+ },
+ "0806846b-4dda-466c-b76e-1c4a9d3e7873": {
+  "title": "Trình theo dõi chăm sóc thú cưng",
+  "description": "Tạo một trình theo dõi chăm sóc thú cưng với lịch cho ăn, lịch hẹn thú y, nhắc uống thuốc, thư viện ảnh cho từng thú cưng và thiết kế vui nhộn theo chủ đề dấu chân"
+ },
+ "10b014ab-5075-4715-8882-92f792a01c27": {
+  "title": "Trình phát podcast",
+  "description": "Tạo một trình phát podcast với danh sách tập, điều khiển tốc độ phát, đánh dấu chương, quản lý hàng đợi và thiết kế tối giản tập trung vào âm thanh"
+ },
+ "638d7319-e6ba-40e5-b2a7-24dbf0dc8efd": {
+  "title": "Ứng dụng mô hình 3D",
+  "description": "Tạo một ứng dụng mô hình 3D cho phép tạo mô hình 3D chỉ từ hình ảnh"
+ },
+ "f38c80be-c56e-4e5c-ad98-cf4e19387dac": {
+  "title": "Ứng dụng đặt lịch dịch vụ",
+  "description": "Tạo một ứng dụng đặt lịch dịch vụ với bộ chọn ngày dạng lịch, chọn khung giờ, thực đơn dịch vụ, xác nhận đặt lịch và thiết kế chuyên nghiệp, gọn gàng"
+ },
+ "b50ffc4c-07fb-4f48-82ec-7072660339e4": {
+  "title": "Lớp phủ tăng tốc game",
+  "description": "Tạo cho tôi một lớp phủ tăng tốc game cho Samsung Galaxy S25 của tôi và thêm các tính năng thật ấn tượng"
+ },
+ "183c43cd-b7ea-424e-9c44-9731fb159c1f": {
+  "title": "Uzblox",
+  "description": "Uzblox"
+ },
+ "61e8040e-0331-4bfc-b905-adf152165cc2": {
+  "title": "Ứng dụng chăm sóc cây",
+  "description": "Tạo một ứng dụng chăm sóc cây với thư viện cây, nhắc lịch tưới nước, nhật ký ảnh sinh trưởng, mẹo chăm sóc và thiết kế xanh mướt theo chủ đề thực vật; thêm thông tin về các loại cây cụ thể và mô tả các loài hoa"
+ },
+ "869eb5ff-ee27-42fd-808a-f0a9197a91b6": {
+  "title": "Ứng dụng video mạng xã hội",
+  "description": "Tạo một ứng dụng video mạng xã hội tên là Tabarak Viral.\nTính năng:\nĐăng nhập bằng số điện thoại\nTrang chủ với các video viral cuộn liên tục\nNgười dùng có thể tải lên video của riêng mình\nNút thích, bình luận và chia sẻ trên mọi video\nKhu tài năng cho video hát, hài và diễn xuất\nPhần story nơi u"
+ },
+ "4943b65c-df34-4cad-a0d8-6c803ee71cf4": {
+  "title": "Trình tạo CV với các phần biểu mẫu",
+  "description": "Tạo một trình tạo CV với các phần biểu mẫu cho kinh nghiệm, học vấn và kỹ năng, xem trước trực tiếp, nhiều mẫu để lựa chọn và chế độ xem xuất dạng PDF"
+ },
+ "f7760ad8-05e1-46e0-86bf-c9380a3d4ce9": {
+  "title": "Trợ lý AI",
+  "description": "Tạo một ứng dụng trợ lý AI"
+ },
+ "ac31b130-3368-41e9-bd32-0c1d1c4f38d5": {
+  "title": "Bảng lớp phủ khởi chạy tăng tốc game",
+  "description": "Tạo cho tôi một bảng lớp phủ khởi chạy tăng tốc game cho Samsung Galaxy S25 của tôi, thêm các tính năng thật ấn tượng, thêm đổi giọng nói và bộ lọc đồ họa như HDR và những thứ tương tự"
+ },
+ "25e96d05-5e25-45d0-ba78-4e65f1c08174": {
+  "title": "Ứng dụng về ăn uống lành mạnh",
+  "description": "Tạo một ứng dụng về ăn uống lành mạnh.\nTên ứng dụng: #maisSaudavel 🌱.\nMàn hình chính: nền xanh lá pastel với rau củ, trái cây và những giọt nước dễ thương, có dòng chữ Chào mừng bạn đến với #maisSaudavel 🌱.\nMàn hình thứ 2: hỏi tên, tuổi, cân nặng và giờ thức dậy, giờ đi ngủ của người dùng.\nMàn hình thứ 3:"
+ },
+ "0e9c1c95-a196-4ef4-894c-c93dc07a8f50": {
+  "title": "Ứng dụng nhắc uống thuốc (bản sao)",
+  "description": "Bản sao của \"Crea Una App Donde Tenga\" của Anahí Martinez Rangel. Tạo một ứng dụng có báo thức để ghi lại khi nào cần uống thuốc, khi nào thuốc hết hạn và còn lại bao nhiêu viên, có thể kết nối với Arduino Uno, phải có màu tím, hồng và xanh dương, và có logo này cùng với tên"
+ },
+ "cead4e9d-e6df-4e51-9957-8b52acf77c2e": {
+  "title": "Trình xây khối Minecraft",
+  "description": "Xây dựng bằng các khối trong một thế giới dạng lưới phong cách Minecraft."
+ }
+}

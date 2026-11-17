@@ -155,7 +155,7 @@ fun BrowseContent(
                     modifier = Modifier.fillMaxSize().weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("No apps in this category yet", color = TextSecondary)
+                    Text(stringResource(R.string.browse_empty_category), color = TextSecondary)
                 }
             }
 

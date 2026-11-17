@@ -25,6 +25,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.kreativekoala.vibecoder.R
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -50,7 +52,7 @@ fun CustomDomainSection(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("Custom domain", style = MaterialTheme.typography.titleSmall, color = TextPrimary, fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.custom_domain_title), style = MaterialTheme.typography.titleSmall, color = TextPrimary, fontWeight = FontWeight.SemiBold)
             when {
                 s.work == DomainWork.LOADING -> CircularProgressIndicator(Modifier.size(20.dp), color = VibePurple, strokeWidth = 2.dp)
                 s.hasDomain -> DomainDetails(s, c)
@@ -63,10 +65,10 @@ fun CustomDomainSection(
     if (s.confirmingRemove) {
         AlertDialog(
             onDismissRequest = { c.cancelRemove() },
-            title = { Text("Remove ${s.domain}?") },
-            text = { Text("Visitors will stop reaching your app at this address. Your vibebuild.cc link keeps working.") },
-            confirmButton = { TextButton(onClick = { c.confirmRemove() }) { Text("Remove", color = MaterialTheme.colorScheme.error) } },
-            dismissButton = { TextButton(onClick = { c.cancelRemove() }) { Text("Cancel") } }
+            title = { Text(stringResource(R.string.custom_domain_remove_title, s.domain.orEmpty())) },
+            text = { Text(stringResource(R.string.custom_domain_remove_body)) },
+            confirmButton = { TextButton(onClick = { c.confirmRemove() }) { Text(stringResource(R.string.app_keys_remove), color = MaterialTheme.colorScheme.error) } },
+            dismissButton = { TextButton(onClick = { c.cancelRemove() }) { Text(stringResource(R.string.cancel)) } }
         )
     }
 }
@@ -75,15 +77,15 @@ fun CustomDomainSection(
 @Composable
 private fun AddDomain(s: CustomDomainState, c: CustomDomainController, onUpgrade: () -> Unit) {
     if (s.upgradeRequired) {
-        Text("Connecting your own domain is a Pro feature.", color = TextSecondary, style = MaterialTheme.typography.bodySmall)
+        Text(stringResource(R.string.custom_domain_pro_only), color = TextSecondary, style = MaterialTheme.typography.bodySmall)
         Button(
             onClick = onUpgrade,
             colors = ButtonDefaults.buttonColors(containerColor = VibePurple),
             shape = RoundedCornerShape(10.dp)
-        ) { Text("Upgrade to Pro") }
+        ) { Text(stringResource(R.string.upgrade_to_pro)) }
         return
     }
-    Text("Use your own address, like www.yourbrand.com.", color = TextSecondary, style = MaterialTheme.typography.bodySmall)
+    Text(stringResource(R.string.custom_domain_hint), color = TextSecondary, style = MaterialTheme.typography.bodySmall)
     // When the field gains focus, scroll it (plus the Add button below it) above the keyboard.
     val requester = remember { BringIntoViewRequester() }
     val scope = rememberCoroutineScope()
@@ -116,7 +118,7 @@ private fun AddDomain(s: CustomDomainState, c: CustomDomainController, onUpgrade
         shape = RoundedCornerShape(10.dp)
     ) {
         if (s.work == DomainWork.ADDING) CircularProgressIndicator(Modifier.size(18.dp), color = TextPrimary, strokeWidth = 2.dp)
-        else Text("Add domain")
+        else Text(stringResource(R.string.custom_domain_add))
     }
 }
 
@@ -127,9 +129,9 @@ private fun DomainDetails(s: CustomDomainState, c: CustomDomainController) {
 
     // Progress: Waiting for DNS -> Issuing certificate -> Live
     val (label, live) = when (s.status) {
-        DomainStatus.ACTIVE -> "Live" to true
-        DomainStatus.DNS_VERIFIED, DomainStatus.SSL_PROVISIONING -> "Issuing certificate (can take a minute or two)..." to false
-        else -> "Waiting for DNS" to false
+        DomainStatus.ACTIVE -> stringResource(R.string.live) to true
+        DomainStatus.DNS_VERIFIED, DomainStatus.SSL_PROVISIONING -> stringResource(R.string.custom_domain_status_issuing) to false
+        else -> stringResource(R.string.custom_domain_status_waiting) to false
     }
     Row(verticalAlignment = Alignment.CenterVertically) {
         if (live) Icon(Icons.Default.Check, null, tint = VibeGreen, modifier = Modifier.size(18.dp))
@@ -146,20 +148,20 @@ private fun DomainDetails(s: CustomDomainState, c: CustomDomainController) {
                 onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://${s.domain}"))) },
                 colors = ButtonDefaults.buttonColors(containerColor = VibePurple),
                 shape = RoundedCornerShape(10.dp), modifier = Modifier.weight(1f)
-            ) { Text("Open") }
+            ) { Text(stringResource(R.string.open)) }
         } else {
             Button(
                 onClick = { c.verify() },
                 enabled = s.work == DomainWork.IDLE && !s.polling,
                 colors = ButtonDefaults.buttonColors(containerColor = VibePurple),
                 shape = RoundedCornerShape(10.dp), modifier = Modifier.weight(1f)
-            ) { Text(if (s.polling || s.work == DomainWork.VERIFYING) "Checking..." else "Verify") }
+            ) { Text(stringResource(if (s.polling || s.work == DomainWork.VERIFYING) R.string.custom_domain_checking else R.string.build_phase_verify)) }
         }
         OutlinedButton(
             onClick = { c.requestRemove() },
             enabled = s.work == DomainWork.IDLE,
             shape = RoundedCornerShape(10.dp), modifier = Modifier.weight(1f)
-        ) { Text("Remove", color = MaterialTheme.colorScheme.error) }
+        ) { Text(stringResource(R.string.app_keys_remove), color = MaterialTheme.colorScheme.error) }
     }
 }
 
@@ -167,16 +169,16 @@ private fun DomainDetails(s: CustomDomainState, c: CustomDomainController) {
 private fun DnsInstructions(s: CustomDomainState) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            "Add this at your domain provider (GoDaddy, Namecheap, Cloudflare...). DNS changes can take a few minutes to spread.",
+            stringResource(R.string.custom_domain_dns_instructions),
             color = TextSecondary, style = MaterialTheme.typography.bodySmall
         )
         if (s.isApex && (s.apexA.isNotEmpty() || s.apexAaaa.isNotEmpty())) {
-            Text("Root domain records", color = TextPrimary, style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.custom_domain_root_records), color = TextPrimary, style = MaterialTheme.typography.labelLarge)
             s.apexA.forEach { RecordRow("A", "@", it) }
             s.apexAaaa.forEach { RecordRow("AAAA", "@", it) }
         } else if (s.isApex) {
             Text(
-                "This is a root domain. Many providers can't point it with a CNAME; use www.${s.domain} instead, or use your provider's ALIAS/ANAME record to the target below.",
+                stringResource(R.string.custom_domain_apex_warning, s.domain.orEmpty()),
                 color = VibeOrange, style = MaterialTheme.typography.bodySmall
             )
             s.cnameTarget?.let { RecordRow("ALIAS/CNAME", "@", it) }
@@ -185,7 +187,7 @@ private fun DnsInstructions(s: CustomDomainState) {
             s.cnameTarget?.let { RecordRow("CNAME", host, it) }
         }
         if (!s.txtValue.isNullOrBlank()) {
-            Text("Or, verify ownership with a TXT record instead", color = TextSecondary, style = MaterialTheme.typography.labelMedium)
+            Text(stringResource(R.string.custom_domain_txt_alt), color = TextSecondary, style = MaterialTheme.typography.labelMedium)
             RecordRow("TXT", s.txtRecord ?: "_vibebuilder.${s.domain}", s.txtValue)
         }
     }
@@ -201,11 +203,11 @@ private fun RecordRow(type: String, name: String, value: String) {
     ) {
         Row(Modifier.padding(start = 12.dp, top = 6.dp, bottom = 6.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text("$type  ·  Name: $name", color = TextTertiary, style = MaterialTheme.typography.labelSmall)
+                Text(stringResource(R.string.custom_domain_record_label, type, name), color = TextTertiary, style = MaterialTheme.typography.labelSmall)
                 Text(value, color = TextPrimary, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall)
             }
             IconButton(onClick = { clipboard.setText(AnnotatedString(value)) }) {
-                Icon(Icons.Default.ContentCopy, contentDescription = "Copy $type value", tint = VibePurple, modifier = Modifier.size(18.dp))
+                Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.custom_domain_copy_value, type), tint = VibePurple, modifier = Modifier.size(18.dp))
             }
         }
     }
@@ -214,19 +216,29 @@ private fun RecordRow(type: String, name: String, value: String) {
 @Composable
 private fun ErrorText(e: DomainError, s: CustomDomainState) {
     val msg = when (e) {
-        is DomainError.Validation -> e.message
-        DomainError.AlreadyRegistered -> "That domain is already connected to another app. Remove it there first, or use a different domain."
-        DomainError.Network -> "Couldn't reach VibeBuild. Check your connection and try again."
+        is DomainError.Validation -> e.kind?.let { stringResource(invalidDomainRes(it)) } ?: e.message.orEmpty()
+        DomainError.ProRequired -> stringResource(R.string.custom_domain_pro_feature)
+        DomainError.Unavailable -> stringResource(R.string.custom_domain_unavailable)
+        DomainError.AlreadyRegistered -> stringResource(R.string.custom_domain_err_already)
+        DomainError.Network -> stringResource(R.string.custom_domain_err_network)
         is DomainError.DnsNotFound -> buildString {
-            append("We can't see your DNS record yet. ")
-            val expected = if (s.isApex && s.apexA.isNotEmpty()) "the A records above"
-            else e.expectedCname?.let { "a CNAME pointing to $it" }
-            if (expected != null) append("Expected $expected")
-            if (!e.expectedTxt.isNullOrBlank()) append(", or a TXT record with value ${e.expectedTxt}")
-            append(". Changes can take up to a few hours; try again shortly.")
+            append(stringResource(R.string.custom_domain_err_dns))
+            if (s.isApex && s.apexA.isNotEmpty()) append("\n").append(stringResource(R.string.custom_domain_dns_expect_a))
+            else e.expectedCname?.let { append("\n").append(stringResource(R.string.custom_domain_dns_expect_cname, it)) }
+            if (!e.expectedTxt.isNullOrBlank()) append("\n").append(stringResource(R.string.custom_domain_dns_expect_txt, e.expectedTxt))
         }
-        DomainError.PollTimeout -> "Still issuing the certificate. This can take a few minutes. Tap Verify to check again."
+        DomainError.PollTimeout -> stringResource(R.string.custom_domain_err_poll_timeout)
         is DomainError.Other -> e.message
     }
     Text(msg, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+}
+
+@androidx.annotation.StringRes
+internal fun invalidDomainRes(kind: DomainInvalid): Int = when (kind) {
+    DomainInvalid.EMPTY -> R.string.domain_invalid_empty
+    DomainInvalid.TOO_LONG -> R.string.domain_invalid_too_long
+    DomainInvalid.NO_EXTENSION -> R.string.domain_invalid_extension
+    DomainInvalid.BAD_CHARACTERS -> R.string.domain_invalid_characters
+    DomainInvalid.NOT_A_DOMAIN -> R.string.domain_invalid_generic
+    DomainInvalid.OWN_ADDRESS -> R.string.domain_invalid_own_address
 }

@@ -1,5 +1,7 @@
 package com.kreativekoala.vibecoder.ui.create
 
+import com.kreativekoala.vibecoder.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -33,7 +35,7 @@ fun TemplateRow(
 ) {
     Column(modifier = modifier) {
         Text(
-            text = "Templates · tap to start",
+            text = stringResource(R.string.templates_row_title),
             style = MaterialTheme.typography.bodySmall,
             color = TextPrimary.copy(alpha = 0.6f),
             modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
@@ -68,8 +70,8 @@ private fun TemplateCard(template: Template, onClick: () -> Unit) {
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Badge(text = template.difficulty, color = colorFor(template.difficulty))
-                Badge(text = template.category, color = DarkSurfaceElevated)
+                Badge(text = difficultyLabel(template.difficulty), color = colorFor(template.difficulty))
+                Badge(text = categoryLabel(template.category), color = DarkSurfaceElevated)
             }
             Column {
                 Text(
@@ -80,7 +82,7 @@ private fun TemplateCard(template: Template, onClick: () -> Unit) {
                     maxLines = 2,
                 )
                 Text(
-                    text = "by ${template.creator}",
+                    text = stringResource(R.string.template_by, template.creator),
                     style = MaterialTheme.typography.labelSmall,
                     color = TextPrimary.copy(alpha = 0.55f),
                     maxLines = 1,
@@ -105,6 +107,27 @@ private fun Badge(text: String, color: Color) {
             fontWeight = FontWeight.Bold,
         )
     }
+}
+
+/** The catalog stores English values; show them in the app language (unknown values are shown as they are). */
+@Composable
+private fun difficultyLabel(value: String): String = when (value.lowercase()) {
+    "beginner" -> stringResource(R.string.template_difficulty_beginner)
+    "intermediate" -> stringResource(R.string.template_difficulty_intermediate)
+    "advanced" -> stringResource(R.string.template_difficulty_advanced)
+    else -> value
+}
+
+@Composable
+private fun categoryLabel(value: String): String = when (value.lowercase()) {
+    "finance" -> stringResource(R.string.template_category_finance)
+    "forms & input" -> stringResource(R.string.template_category_forms_input)
+    "games & canvas" -> stringResource(R.string.template_category_games_canvas)
+    "layouts" -> stringResource(R.string.template_category_layouts)
+    "mobile uis" -> stringResource(R.string.template_category_mobile_uis)
+    "productivity" -> stringResource(R.string.template_category_productivity)
+    "visual / animation" -> stringResource(R.string.template_category_visual_animation)
+    else -> value
 }
 
 private fun colorFor(difficulty: String): Color = when (difficulty.lowercase()) {

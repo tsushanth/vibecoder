@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.kreativekoala.vibecoder.data.model.*
 import com.kreativekoala.vibecoder.data.remote.SseStreamReader
 import com.kreativekoala.vibecoder.data.remote.VibeBuildApi
+import com.kreativekoala.vibecoder.util.AppLanguage
 import com.kreativekoala.vibecoder.util.Constants
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -85,12 +86,12 @@ class ProjectRepository @Inject constructor(
     }
 
     suspend fun getSuggestions(): List<Suggestion> {
-        val response = api.getSuggestions()
+        val response = api.getSuggestions(lang = AppLanguage.current())
         return response.suggestions
     }
 
     suspend fun suggestNewIdeas(): List<Suggestion> {
-        val response = api.suggestNewIdeas()
+        val response = api.suggestNewIdeas(SuggestIdeasRequest(AppLanguage.current()))
         return response.suggestions
     }
 
