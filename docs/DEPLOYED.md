@@ -1,5 +1,16 @@
 # Deployed releases (Play)
 
+## 2.7.0 (versionCode 76): production, 20% staged rollout, 2026-11-17
+- Built from origin/main c5c5ace (tag `play/2.7.0-76`), clean tree. AAB sha256: 59c071bf2314daacc8a4639b923a3471197374be454cdab0417db7887572f8cb
+- Play production track read back after commit: 2.7.0 (76) inProgress userFraction 0.2; 2.6.0 (75) completed.
+- Contents: PR #119 (Create-screen idea chips and templates in the app language, ~67 strings moved out of Kotlin, all 26 languages, machine translated, needs native review) and #120 (version bump). Backend side (#117, #118) is deployed, see below.
+- Not covered: error text built inside view models (CreateViewModel, SubscriptionViewModel, ProjectPreviewViewModel), server-sent messages, notification channel name, sample projects in BrowseViewModel. No device test was run.
+- Rollback: halt the rollout in Play Console (2.6.0 (75) stays completed for everyone else); to withdraw it, re-upload 2.6.0 content as a new versionCode, since a versionCode cannot be reused.
+
+## Backend (2026-11-17, idea suggestions in the app language)
+- Fly app `vibecoder-api`: release v64 from origin/main 48089cd (PRs #117 and #118), image deployment-01M7NWTRS7CBMFG1DRAX1DRQXG (v63 = #117 alone, deployment-01M7NWQ0QTS2H9GGXSN0SQ7FXR). `npm test` 765/765. /api/health healthy; GET /api/projects/suggestions?lang=de|ja|es|hi|ar|zh returns translated items, no lang returns English as before.
+- Rollback: `flyctl releases rollback 62 -a vibecoder-api` (v62 image from the earlier entry below). Old app versions send no lang and are unaffected either way.
+
 ## 2.6.0 (versionCode 75): production, 20% staged rollout, 2026-11-16
 - Release commit (built from): 27ddee9 (tag `play/2.6.0-75`). origin/main at upload time had one later commit that only touches Play listing metadata (1410825); the Android app paths are identical (git diff 27ddee9 origin/main -- android/app is empty).
 - AAB sha256: 8496f01a9767d599d2468275d59f2815803fb3a1eeb38af24cefc9916c9b8b8f
