@@ -32,6 +32,7 @@ export function normalizeLang(raw) {
 export function languageName(tag) { return LANG_NAMES[tag] || 'English'; }
 
 const hashOf = (s) => createHash('sha1').update(`${s.label}\u0000${s.prompt}`).digest('hex').slice(0, 16);
+const BATCH_SIZE = 3;
 const clean = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 
 export function createSuggestionTranslator({
@@ -39,7 +40,7 @@ export function createSuggestionTranslator({
     fetchImpl = (...a) => globalThis.fetch(...a),
     recordLlm = defaultRecordLlm,
     now = () => Date.now(),
-    timeoutMs = 8000,
+    timeoutMs = 10000,
     failureCooldownMs = 60000,
     maxCacheEntries = 5000,
     log = (m) => console.error(m),
@@ -123,21 +124,26 @@ export function createSuggestionTranslator({
             });
             const cooling = failedAt.has(lang) && now() - failedAt.get(lang) < failureCooldownMs;
             if (missing.length && !cooling) {
-                const batch = missing.map((i) => items[i]);
-                const run = callModel(lang, batch).then((out) => {
-                    failedAt.delete(lang);
-                    out.forEach((t, j) => { if (t) remember(keys[missing[j]], batch[j], t); });
-                    return out;
-                }).catch((e) => {
-                    failedAt.set(lang, now());
-                    log(`[suggestions-i18n] ${lang} translation failed: ${e.message}`);
-                    return [];
-                });
-                for (const i of missing) {
-                    inflight.set(keys[i], run);
-                    run.finally(() => inflight.delete(keys[i]));
+                // Small parallel batches: each finishes well inside the timeout even for scripts that cost many tokens
+                // (Hindi, Thai, Arabic), and each batch is cached on its own so partial progress is kept.
+                for (let at = 0; at < missing.length; at += BATCH_SIZE) {
+                    const idxs = missing.slice(at, at + BATCH_SIZE);
+                    const batch = idxs.map((i) => items[i]);
+                    const run = callModel(lang, batch).then((out) => {
+                        failedAt.delete(lang);
+                        out.forEach((t, j) => { if (t) remember(keys[idxs[j]], batch[j], t); });
+                        return out;
+                    }).catch((e) => {
+                        failedAt.set(lang, now());
+                        log(`[suggestions-i18n] ${lang} translation failed: ${e.message}`);
+                        return [];
+                    });
+                    for (const i of idxs) {
+                        inflight.set(keys[i], run);
+                        run.finally(() => inflight.delete(keys[i]));
+                    }
+                    waits.push(run);
                 }
-                waits.push(run);
             }
             await Promise.all(waits);
             return items.map((s, i) => cache.get(keys[i]) || s);
