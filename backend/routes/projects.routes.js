@@ -29,6 +29,7 @@ import { appEvents, buildEvents, sourceFromRequest } from '../lib/appEventsInsta
 import { promptLengthBucket } from '../lib/appEvents.js';
 import { buildFailureRate } from '../lib/buildFailureRateInstance.js';
 import { recordLlm } from '../lib/llmUsageInstance.js';
+import { normalizeLang, languageName, suggestionTranslator } from '../lib/suggestionI18n.js';
 import { registerDeployedApp } from '../services/appRegistry.js';
 import { captureChatSecrets, redactForLog } from '../services/chatSecrets.js';
 import { denyUnlessActor } from '../lib/actAs.js';
@@ -427,7 +428,7 @@ async function markSuggestionAsUsed(prompt) {
             .from('project_suggestions')
             .update({ status: 'used', used_at: new Date().toISOString() })
             .eq('status', 'active')
-            .eq('prompt', prompt)
+            .eq('prompt', suggestionTranslator.englishPromptFor(prompt)) // a translated chip maps back to its English row
             .select('id, label');
 
         if (error) {
@@ -1582,6 +1583,10 @@ router.post('/suggest-ideas', async (req, res) => {
         return res.json({ success: true, suggestions: shuffled.slice(0, 6) });
     }
 
+    // Optional app language (old clients send none and get English, exactly as before).
+    const lang = normalizeLang(req.body?.language ?? req.body?.lang);
+    const languageRule = lang === 'en' ? '' : `\n\nWrite every "label" and every "prompt" in ${languageName(lang)} (the examples below are English; do not copy their language). Keep brand names as they are.`;
+
     let llmRecorded = false; // exactly one accounting row per upstream attempt
     try {
         // Pick 3 random existing suggestions as examples of the format
@@ -1604,7 +1609,7 @@ router.post('/suggest-ideas', async (req, res) => {
 
 Each idea needs a short label (2-3 words) and a detailed prompt (1-2 sentences describing what to build, including specific features and design direction).
 
-Ideas should be diverse — mix utility apps, creative tools, games, dashboards, and fun interactive experiences. Be creative and surprising — avoid generic ideas like "todo list" or "calculator".
+Ideas should be diverse — mix utility apps, creative tools, games, dashboards, and fun interactive experiences. Be creative and surprising — avoid generic ideas like "todo list" or "calculator".${languageRule}
 
 Here are examples of the format (DO NOT repeat these):
 ${examplesText}
@@ -1654,12 +1659,13 @@ Output ONLY a JSON array of 6 objects with "label" and "prompt" keys. No markdow
 // Returns random project idea prompts from the pre-generated pool.
 // No DB hit — served instantly from memory.
 // ============================================
-router.get('/suggestions', (req, res) => {
+// Optional ?lang=<primary tag> (see lib/suggestionI18n.js): the same items, translated lazily and cached in memory.
+// No lang (old app versions), English, or any translation failure returns the English items as before.
+router.get('/suggestions', async (req, res) => {
     const count = Math.min(parseInt(req.query.count) || 6, 10);
-    res.json({
-        success: true,
-        suggestions: getRandomSuggestions(count)
-    });
+    const picked = getRandomSuggestions(count);
+    const suggestions = await suggestionTranslator.localize(picked, req.query.lang);
+    res.json({ success: true, suggestions });
 });
 
 // ============================================
