@@ -418,3 +418,51 @@ test('llm accounting: a failing or hanging report never reaches the request; flu
     assert.ok(Date.now() - t0 < 1000);
     setLlmUsageForTests(buildLlmUsage({}));
 });
+
+// ---------------- suggestion language ----------------
+const getJson = async (p) => (await realFetch(url(p))).json();
+const echoTranslate = (calls) => (u, opts) => {
+    const body = JSON.parse(opts.body); calls.push(body);
+    const input = JSON.parse(body.messages[0].content.match(/Input JSON:\n(\[.*\])\n/s)?.[1] || 'null');
+    const text = input ? JSON.stringify(input.map((o) => ({ i: o.i, label: `DE ${o.label}`, prompt: `DE ${o.prompt}` }))) : JSON.stringify([{ label: 'Ein Wort', prompt: 'Baue etwas' }]);
+    return new Response(JSON.stringify({ content: [{ type: 'text', text }] }), { status: 200 });
+};
+
+test('GET /suggestions: no lang (old app versions) and lang=en are English and never call the model', async () => {
+    process.env.ANTHROPIC_API_KEY = 'sk-test-key';
+    const calls = []; external = echoTranslate(calls);
+    for (const q of ['', '?lang=en', '?lang=xx', '?lang=../x']) {
+        const r = await getJson(`/suggestions${q}`);
+        assert.equal(r.success, true);
+        assert.equal(r.suggestions.length, 6);
+        for (const s of r.suggestions) { assert.ok(s.label && s.prompt); assert.doesNotMatch(s.label, /^DE /); }
+    }
+    assert.equal(calls.length, 0);
+});
+
+test('GET /suggestions?lang=de returns translated items; a failing model returns English, never an error', async () => {
+    process.env.ANTHROPIC_API_KEY = 'sk-test-key';
+    const calls = []; external = echoTranslate(calls);
+    const r = await getJson('/suggestions?lang=de&count=4');
+    assert.equal(r.suggestions.length, 4);
+    for (const s of r.suggestions) { assert.match(s.label, /^DE /); assert.match(s.prompt, /^DE Build/); }
+    assert.match(calls[0].messages[0].content, /German/);
+    external = () => { throw new TypeError('fetch failed'); };
+    const f = await quiet(() => getJson('/suggestions?lang=fr'));
+    assert.equal(f.success, true);
+    assert.equal(f.suggestions.length, 6);
+    for (const s of f.suggestions) assert.match(s.prompt, /^Build /);
+});
+
+test('POST /suggest-ideas: language asks the model for that language; no language leaves the request as before', async () => {
+    process.env.ANTHROPIC_API_KEY = 'sk-test-key';
+    const seen = []; external = (u, opts) => { seen.push(JSON.parse(opts.body).messages[0].content); return new Response(JSON.stringify({ content: [{ type: 'text', text: JSON.stringify([{ label: 'A b', prompt: 'Build a thing' }]) }] }), { status: 200 }); };
+    assert.equal((await post('/suggest-ideas', {})).status, 200);
+    assert.equal((await post('/suggest-ideas', { language: 'ja' })).status, 200);
+    assert.equal((await post('/suggest-ideas', { language: 'pt-BR' })).status, 200);
+    assert.equal((await post('/suggest-ideas', { language: 'zz' })).status, 200);
+    assert.doesNotMatch(seen[0], /Write every/);
+    assert.match(seen[1], /Write every "label" and every "prompt" in Japanese/);
+    assert.match(seen[2], /in Brazilian Portuguese/);
+    assert.doesNotMatch(seen[3], /Write every/);
+});
