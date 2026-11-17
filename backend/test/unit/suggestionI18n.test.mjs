@@ -117,3 +117,11 @@ test('the cache is bounded', async () => {
     for (let i = 0; i < 6; i++) await t.localize([{ label: `L${i}`, prompt: `P${i}` }], 'pl');
     assert.ok(t._stats().cached <= 3);
 });
+
+test('larger requests are split into small batches that are translated in parallel', async () => {
+    const api = fakeApi(); const t = make(api);
+    const many = Array.from({ length: 7 }, (_, i) => ({ label: `L${i}`, prompt: `P${i}` }));
+    const out = await t.localize(many, 'hi');
+    assert.equal(api.calls.length, 3); // 3 + 3 + 1
+    assert.deepEqual(out, many.map((s) => ({ label: `T:${s.label}`, prompt: `T:${s.prompt}` })));
+});
