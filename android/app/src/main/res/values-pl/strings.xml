@@ -436,4 +436,84 @@
     <string name="template_category_mobile_uis">Interfejsy mobilne</string>
     <string name="template_category_productivity">Produktywność</string>
     <string name="template_category_visual_animation">Wizualne / animacje</string>
+
+    <!-- Added 2026-11-17: machine translated, needs native review -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">Wszystkie</string>
+    <string name="browse_filter_games">Gry</string>
+    <string name="browse_filter_tools">Narzędzia</string>
+    <string name="browse_filter_sites">Strony</string>
+    <string name="browse_filter_trackers">Trackery</string>
+    <string name="browse_sort_newest">Najnowsze</string>
+    <string name="browse_sort_popular">Popularne</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">Więcej od nas</string>
+    <string name="promo_tagline_clearvoice">Wyraźne notatki głosowe z czyszczeniem AI</string>
+    <string name="promo_tagline_audexa">Twoje osobiste radio AI</string>
+    <string name="promo_tagline_readaloud">Słuchaj dowolnego artykułu w drodze</string>
+    <string name="promo_tagline_scribeai">Transkrybuj i podsumowuj wszystko</string>
+    <string name="promo_tagline_meetingmind">Automatyczne notatki z każdego spotkania</string>
+    <string name="promo_tagline_riddleverse">Codzienne zagadki tworzone przez AI</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">Generowanie aplikacji</string>
+    <string name="notif_channel_generation_desc">Powiadamia, gdy aplikacja zostanie wygenerowana</string>
+    <string name="notif_generation_ready_title">Twoja aplikacja jest gotowa!</string>
+    <string name="notif_generation_ready_body">Dotknij, aby otworzyć projekt w Aplikacje</string>
+    <string name="notif_project_ready_title">\"%1$s\" jest gotowa!</string>
+    <string name="notif_project_ready_body">Dotknij, aby otworzyć aplikację</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">Zespół VibeBuild</string>
+    <string name="sample_todo_title">Aplikacja lista zadań</string>
+    <string name="sample_todo_desc">Przejrzysty tracker zadań z kategoriami i terminami.</string>
+    <string name="sample_pomodoro_title">Timer Pomodoro</string>
+    <string name="sample_pomodoro_desc">Timer koncentracji z interwałami pracy i przerw.</string>
+    <string name="sample_weather_title">Panel pogodowy</string>
+    <string name="sample_weather_desc">Aktualna pogoda i prognoza na 5 dni dla dowolnego miasta.</string>
+    <string name="sample_recipes_title">Wyszukiwarka przepisów</string>
+    <string name="sample_recipes_desc">Znajdź przepisy po składnikach, które masz w domu.</string>
+    <string name="sample_budget_title">Tracker budżetu</string>
+    <string name="sample_budget_desc">Śledź wydatki i wizualizuj, gdzie trafiają twoje pieniądze.</string>
+    <string name="sample_quiz_title">Gra quizowa</string>
+    <string name="sample_quiz_desc">Quiz wielokategoriowy z śledzeniem wyników.</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">Nie udało się skopiować: %1$s</string>
+    <string name="err_load_plans">Nie można załadować planów: %1$s</string>
+    <string name="err_purchase_failed">Zakup nie powiódł się: %1$s</string>
+    <string name="err_restore_failed">Przywracanie nie powiodło się: %1$s</string>
+    <string name="err_delete_failed">Nie udało się usunąć: %1$s</string>
+    <string name="err_preview_create">Nie można utworzyć podglądu</string>
+    <string name="err_preview_failed">Podgląd nie powiódł się: %1$s</string>
+    <string name="err_deploy_retry">Wdrożenie nie powiodło się. Spróbuj ponownie.</string>
+    <string name="err_deploy_failed">Wdrożenie nie powiodło się: %1$s</string>
+    <string name="err_sign_in_changes">Zaloguj się, aby wprowadzić zmiany</string>
+    <string name="err_failed_reason">Niepowodzenie: %1$s</string>
+    <string name="err_versions_load">Nie można załadować historii wersji</string>
+    <string name="err_version_restore">Nie można przywrócić wersji</string>
+    <string name="err_ads_update">Nie udało się zaktualizować reklam: %1$s</string>
+    <string name="err_sign_in_export">Zaloguj się, aby wyeksportować APK</string>
+    <string name="err_export_failed">Eksport nie powiódł się: %1$s</string>
+    <string name="err_apk_installer">Zapisano APK, ale nie można otworzyć instalatora. Sprawdź folder Pobrane.</string>
+    <string name="err_sign_in_generate">Zaloguj się, aby generować projekty</string>
+    <string name="err_sign_in_tweak">Zaloguj się, aby modyfikować projekty</string>
+    <string name="err_no_project_tweak">Brak projektu do modyfikacji</string>
+    <string name="err_save_before_tweak">Nie udało się zapisać przed modyfikacją: %1$s</string>
+    <string name="err_save_project">Nie udało się zapisać projektu</string>
+    <string name="err_tweak_failed">Modyfikacja nie powiodła się: %1$s</string>
+    <string name="err_build_start">Nie udało się rozpocząć budowania. Spróbuj ponownie.</string>
+    <string name="err_build_failed">Budowanie nie powiodło się. Spróbuj ponownie.</string>
+    <string name="err_build_maybe_running">Twoja aplikacja może być wciąż budowana. Sprawdź Aplikacje za chwilę.</string>
+    <string name="err_prompt_looks_like_code">Twój opis wygląda jak kod, a nie opis aplikacji. Opisz aplikację, którą chcesz zbudować, zwykłym językiem.</string>
+    <string name="err_prompt_no_code">Opisz swój pomysł na aplikację zwykłym językiem zamiast kodem.</string>
+    <string name="err_prompt_no_urls">Opisz swój pomysł na aplikację własnymi słowami zamiast wklejać adresy URL.</string>
+    <string name="progress_checking_app">Sprawdzanie aplikacji...</string>
+    <string name="progress_may_still_build">Twoja aplikacja może być wciąż budowana</string>
+    <string name="progress_starting_build">Rozpoczynanie budowania...</string>
+    <string name="progress_applying_changes">Stosowanie zmian...</string>
+    <string name="progress_building_android">Budowanie aplikacji Android...</string>
+    <string name="progress_saving_apk">Zapisywanie APK...</string>
+    <string name="stt_prompt">Opisz swój pomysł na aplikację...</string>
+    <string name="err_rate_limit">Osiągnięto limit. Spróbuj ponownie za chwilę.</string>
+    <string name="err_stream_empty">Pusta treść odpowiedzi</string>
+    <string name="err_stream_error">Błąd strumienia</string>
+    <string name="err_unknown">Nieznany błąd</string>
 </resources>

@@ -389,4 +389,84 @@
     <string name="template_category_mobile_uis">Мобільні інтерфейси</string>
     <string name="template_category_productivity">Продуктивність</string>
     <string name="template_category_visual_animation">Візуал / Анімація</string>
+
+    <!-- Added 2026-11-17: machine translated, needs native review -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">Усі</string>
+    <string name="browse_filter_games">Ігри</string>
+    <string name="browse_filter_tools">Інструменти</string>
+    <string name="browse_filter_sites">Сайти</string>
+    <string name="browse_filter_trackers">Трекери</string>
+    <string name="browse_sort_newest">Найновіші</string>
+    <string name="browse_sort_popular">Популярні</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">Більше від нас</string>
+    <string name="promo_tagline_clearvoice">Чіткі голосові нотатки з очищенням ШІ</string>
+    <string name="promo_tagline_audexa">Ваше особисте радіо зі ШІ</string>
+    <string name="promo_tagline_readaloud">Слухайте будь-яку статтю на ходу</string>
+    <string name="promo_tagline_scribeai">Транскрибуйте та узагальнюйте будь-що</string>
+    <string name="promo_tagline_meetingmind">Автонотатки для кожної наради</string>
+    <string name="promo_tagline_riddleverse">Щоденні головоломки від ШІ</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">Генерація застосунку</string>
+    <string name="notif_channel_generation_desc">Сповіщає, коли застосунок згенеровано</string>
+    <string name="notif_generation_ready_title">Ваш застосунок готовий!</string>
+    <string name="notif_generation_ready_body">Торкніться, щоб відкрити проєкт у Застосунках</string>
+    <string name="notif_project_ready_title">«%1$s» готовий!</string>
+    <string name="notif_project_ready_body">Торкніться, щоб відкрити застосунок</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">Команда VibeBuild</string>
+    <string name="sample_todo_title">Застосунок списку справ</string>
+    <string name="sample_todo_desc">Зручний трекер завдань з категоріями та термінами.</string>
+    <string name="sample_pomodoro_title">Таймер Pomodoro</string>
+    <string name="sample_pomodoro_desc">Таймер фокусування з інтервалами роботи та перерв.</string>
+    <string name="sample_weather_title">Панель погоди</string>
+    <string name="sample_weather_desc">Поточна погода та прогноз на 5 днів для будь-якого міста.</string>
+    <string name="sample_recipes_title">Пошук рецептів</string>
+    <string name="sample_recipes_desc">Знаходьте рецепти за інгредієнтами, що є вдома.</string>
+    <string name="sample_budget_title">Трекер бюджету</string>
+    <string name="sample_budget_desc">Відстежуйте витрати та візуалізуйте, куди йдуть гроші.</string>
+    <string name="sample_quiz_title">Гра-вікторина</string>
+    <string name="sample_quiz_desc">Вікторина з кількома категоріями та підрахунком балів.</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">Не вдалося розгалузити: %1$s</string>
+    <string name="err_load_plans">Не вдалося завантажити плани: %1$s</string>
+    <string name="err_purchase_failed">Не вдалося придбати: %1$s</string>
+    <string name="err_restore_failed">Не вдалося відновити: %1$s</string>
+    <string name="err_delete_failed">Не вдалося видалити: %1$s</string>
+    <string name="err_preview_create">Не вдалося створити попередній перегляд</string>
+    <string name="err_preview_failed">Попередній перегляд не вдався: %1$s</string>
+    <string name="err_deploy_retry">Не вдалося розгорнути. Спробуйте ще раз.</string>
+    <string name="err_deploy_failed">Не вдалося розгорнути: %1$s</string>
+    <string name="err_sign_in_changes">Увійдіть, щоб вносити зміни</string>
+    <string name="err_failed_reason">Помилка: %1$s</string>
+    <string name="err_versions_load">Не вдалося завантажити історію версій</string>
+    <string name="err_version_restore">Не вдалося відновити версію</string>
+    <string name="err_ads_update">Не вдалося оновити рекламу: %1$s</string>
+    <string name="err_sign_in_export">Увійдіть, щоб експортувати APK</string>
+    <string name="err_export_failed">Не вдалося експортувати: %1$s</string>
+    <string name="err_apk_installer">APK збережено, але не вдалося відкрити встановлювач. Перевірте папку Завантаження.</string>
+    <string name="err_sign_in_generate">Увійдіть, щоб генерувати проєкти</string>
+    <string name="err_sign_in_tweak">Увійдіть, щоб налаштовувати проєкти</string>
+    <string name="err_no_project_tweak">Немає проєкту для налаштування</string>
+    <string name="err_save_before_tweak">Не вдалося зберегти перед налаштуванням: %1$s</string>
+    <string name="err_save_project">Не вдалося зберегти проєкт</string>
+    <string name="err_tweak_failed">Не вдалося налаштувати: %1$s</string>
+    <string name="err_build_start">Не вдалося розпочати збірку. Спробуйте ще раз.</string>
+    <string name="err_build_failed">Збірка не вдалася. Спробуйте ще раз.</string>
+    <string name="err_build_maybe_running">Ваш застосунок, можливо, ще збирається. Перевірте Застосунки за хвилину.</string>
+    <string name="err_prompt_looks_like_code">Ваш запит схожий на код, а не на опис застосунку. Опишіть застосунок, який хочете створити, звичайною мовою.</string>
+    <string name="err_prompt_no_code">Опишіть ідею застосунку звичайною мовою замість коду.</string>
+    <string name="err_prompt_no_urls">Опишіть ідею застосунку своїми словами замість вставлення посилань.</string>
+    <string name="progress_checking_app">Перевіряємо ваш застосунок...</string>
+    <string name="progress_may_still_build">Ваш застосунок, можливо, ще збирається</string>
+    <string name="progress_starting_build">Розпочинаємо збірку...</string>
+    <string name="progress_applying_changes">Застосовуємо зміни...</string>
+    <string name="progress_building_android">Збираємо застосунок Android...</string>
+    <string name="progress_saving_apk">Зберігаємо APK...</string>
+    <string name="stt_prompt">Опишіть свою ідею застосунку...</string>
+    <string name="err_rate_limit">Ви досягли ліміту. Спробуйте трохи пізніше.</string>
+    <string name="err_stream_empty">Порожнє тіло відповіді</string>
+    <string name="err_stream_error">Помилка потоку</string>
+    <string name="err_unknown">Невідома помилка</string>
 </resources>

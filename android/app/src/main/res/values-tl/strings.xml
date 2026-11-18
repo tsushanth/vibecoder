@@ -436,4 +436,84 @@
     <string name="template_category_mobile_uis">Mga Mobile UI</string>
     <string name="template_category_productivity">Produktibidad</string>
     <string name="template_category_visual_animation">Visual / Animation</string>
+
+    <!-- Added 2026-11-17: machine translated, needs native review -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">Lahat</string>
+    <string name="browse_filter_games">Laro</string>
+    <string name="browse_filter_tools">Tools</string>
+    <string name="browse_filter_sites">Sites</string>
+    <string name="browse_filter_trackers">Trackers</string>
+    <string name="browse_sort_newest">Pinakabago</string>
+    <string name="browse_sort_popular">Sikat</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">Iba pa mula sa amin</string>
+    <string name="promo_tagline_clearvoice">Malinaw na voice memos na may AI cleanup</string>
+    <string name="promo_tagline_audexa">Ang iyong personal na AI radio</string>
+    <string name="promo_tagline_readaloud">Makinig sa anumang artikulo kahit saan</string>
+    <string name="promo_tagline_scribeai">Mag-transcribe at mag-summarize ng kahit ano</string>
+    <string name="promo_tagline_meetingmind">Auto-notes sa bawat meeting</string>
+    <string name="promo_tagline_riddleverse">Araw-araw na AI-crafted puzzles</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">Paggawa ng App</string>
+    <string name="notif_channel_generation_desc">Mag-notify kapag tapos na ang iyong app</string>
+    <string name="notif_generation_ready_title">Handa na ang iyong app!</string>
+    <string name="notif_generation_ready_body">Tap para buksan ang iyong project sa Mga App</string>
+    <string name="notif_project_ready_title">Handa na ang \"%1$s\"!</string>
+    <string name="notif_project_ready_body">Tap para buksan ang iyong app</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">VibeBuild Team</string>
+    <string name="sample_todo_title">Todo List App</string>
+    <string name="sample_todo_desc">Malinis na task tracker na may categories at due dates.</string>
+    <string name="sample_pomodoro_title">Pomodoro Timer</string>
+    <string name="sample_pomodoro_desc">Focus timer na may work at break intervals.</string>
+    <string name="sample_weather_title">Weather Dashboard</string>
+    <string name="sample_weather_desc">Kasalukuyang panahon at 5-day forecast para sa anumang city.</string>
+    <string name="sample_recipes_title">Recipe Finder</string>
+    <string name="sample_recipes_desc">Maghanap ng recipes gamit ang ingredients sa bahay.</string>
+    <string name="sample_budget_title">Budget Tracker</string>
+    <string name="sample_budget_desc">Subaybayan ang gastos at tingnan kung saan napupunta ang pera.</string>
+    <string name="sample_quiz_title">Trivia Quiz Game</string>
+    <string name="sample_quiz_desc">Multi-category quiz na may score tracking.</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">Nabigo ang pag-fork: %1$s</string>
+    <string name="err_load_plans">Hindi ma-load ang plans: %1$s</string>
+    <string name="err_purchase_failed">Nabigo ang pagbili: %1$s</string>
+    <string name="err_restore_failed">Nabigo ang pag-restore: %1$s</string>
+    <string name="err_delete_failed">Hindi ma-delete: %1$s</string>
+    <string name="err_preview_create">Hindi makagawa ng preview</string>
+    <string name="err_preview_failed">Nabigo ang preview: %1$s</string>
+    <string name="err_deploy_retry">Nabigo ang pag-deploy. Subukan ulit.</string>
+    <string name="err_deploy_failed">Nabigo ang pag-deploy: %1$s</string>
+    <string name="err_sign_in_changes">Mag-sign in para gumawa ng changes</string>
+    <string name="err_failed_reason">Nabigo: %1$s</string>
+    <string name="err_versions_load">Hindi ma-load ang version history</string>
+    <string name="err_version_restore">Hindi ma-restore ang version</string>
+    <string name="err_ads_update">Nabigo ang pag-update ng ads: %1$s</string>
+    <string name="err_sign_in_export">Mag-sign in para mag-export ng APK</string>
+    <string name="err_export_failed">Nabigo ang pag-export: %1$s</string>
+    <string name="err_apk_installer">Na-save ang APK pero hindi mabuksan ang installer. Tingnan ang Downloads folder.</string>
+    <string name="err_sign_in_generate">Mag-sign in para gumawa ng projects</string>
+    <string name="err_sign_in_tweak">Mag-sign in para mag-tweak ng projects</string>
+    <string name="err_no_project_tweak">Walang project na ite-tweak</string>
+    <string name="err_save_before_tweak">Nabigo ang pag-save bago mag-tweak: %1$s</string>
+    <string name="err_save_project">Nabigo ang pag-save ng project</string>
+    <string name="err_tweak_failed">Nabigo ang pag-tweak: %1$s</string>
+    <string name="err_build_start">Hindi masimulan ang build. Subukan ulit.</string>
+    <string name="err_build_failed">Nabigo ang build. Subukan ulit.</string>
+    <string name="err_build_maybe_running">Maaaring ginagawa pa rin ang iyong app. Tingnan ang Mga App mamaya.</string>
+    <string name="err_prompt_looks_like_code">Ang iyong prompt ay mukhang code, hindi paglalarawan ng app. Ilarawan ang app na gusto mong gawin sa simple na wika.</string>
+    <string name="err_prompt_no_code">Ilarawan ang iyong app idea sa simple na wika, hindi sa code.</string>
+    <string name="err_prompt_no_urls">Ilarawan ang iyong app idea sa sariling salita, huwag mag-paste ng URLs.</string>
+    <string name="progress_checking_app">Tinitingnan ang iyong app...</string>
+    <string name="progress_may_still_build">Maaaring ginagawa pa rin ang iyong app</string>
+    <string name="progress_starting_build">Sinisimulan ang build...</string>
+    <string name="progress_applying_changes">Inilalapat ang mga changes...</string>
+    <string name="progress_building_android">Ginagawa ang Android app...</string>
+    <string name="progress_saving_apk">Sine-save ang APK...</string>
+    <string name="stt_prompt">Ilarawan ang iyong app idea...</string>
+    <string name="err_rate_limit">Naabot mo na ang limit sa ngayon. Subukan ulit mamaya.</string>
+    <string name="err_stream_empty">Walang laman ang response</string>
+    <string name="err_stream_error">Stream error</string>
+    <string name="err_unknown">Hindi alam na error</string>
 </resources>

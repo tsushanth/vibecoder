@@ -74,7 +74,7 @@ fun BrowseScreen(
                                 DropdownMenuItem(
                                     text = {
                                         Text(
-                                            text = option.label,
+                                            text = stringResource(option.labelRes),
                                             color = if (uiState.sortOption == option) VibePurple else TextPrimary
                                         )
                                     },
@@ -121,7 +121,7 @@ fun BrowseContent(
                 FilterChip(
                     selected = selected,
                     onClick = { onSelectCategory(cat) },
-                    label = { Text(cat.label) },
+                    label = { Text(stringResource(cat.labelRes)) },
                     colors = FilterChipDefaults.filterChipColors(
                         containerColor = DarkSurfaceVariant,
                         labelColor = TextSecondary,

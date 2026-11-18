@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import java.util.Locale
 
 class SpeechRecognizerHelper(
+    private val prompt: String,
     private val onResult: (String) -> Unit
 ) {
     fun createIntent(): Intent {
@@ -19,7 +20,7 @@ class SpeechRecognizerHelper(
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
             )
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-            putExtra(RecognizerIntent.EXTRA_PROMPT, "Describe your app idea...")
+            putExtra(RecognizerIntent.EXTRA_PROMPT, prompt)
         }
     }
 
@@ -38,7 +39,8 @@ class SpeechRecognizerHelper(
 fun rememberSpeechRecognizer(
     onResult: (String) -> Unit
 ): Pair<SpeechRecognizerHelper, () -> Unit> {
-    val helper = remember { SpeechRecognizerHelper(onResult) }
+    val prompt = androidx.compose.ui.res.stringResource(com.kreativekoala.vibecoder.R.string.stt_prompt)
+    val helper = remember(prompt) { SpeechRecognizerHelper(prompt, onResult) }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()

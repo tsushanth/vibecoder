@@ -389,4 +389,84 @@
     <string name="template_category_mobile_uis">Mobilgränssnitt</string>
     <string name="template_category_productivity">Produktivitet</string>
     <string name="template_category_visual_animation">Visuellt / Animation</string>
+
+    <!-- Added 2026-11-17: machine translated, needs native review -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">Alla</string>
+    <string name="browse_filter_games">Spel</string>
+    <string name="browse_filter_tools">Verktyg</string>
+    <string name="browse_filter_sites">Sajter</string>
+    <string name="browse_filter_trackers">Trackers</string>
+    <string name="browse_sort_newest">Nyaste</string>
+    <string name="browse_sort_popular">Populära</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">Mer från oss</string>
+    <string name="promo_tagline_clearvoice">Tydliga röstmemon med AI-rensning</string>
+    <string name="promo_tagline_audexa">Din personliga AI-radio</string>
+    <string name="promo_tagline_readaloud">Lyssna på artiklar när du är på språng</string>
+    <string name="promo_tagline_scribeai">Transkribera och sammanfatta vad som helst</string>
+    <string name="promo_tagline_meetingmind">Automatiska anteckningar för varje möte</string>
+    <string name="promo_tagline_riddleverse">Dagliga AI-skapade pussel</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">Appgenerering</string>
+    <string name="notif_channel_generation_desc">Meddelar när din app är klar</string>
+    <string name="notif_generation_ready_title">Din app är klar!</string>
+    <string name="notif_generation_ready_body">Tryck för att öppna projektet i Appar</string>
+    <string name="notif_project_ready_title">\"%1$s\" är klar!</string>
+    <string name="notif_project_ready_body">Tryck för att öppna appen</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">VibeBuild-teamet</string>
+    <string name="sample_todo_title">Att göra-app</string>
+    <string name="sample_todo_desc">En ren uppgiftshanterare med kategorier och datum.</string>
+    <string name="sample_pomodoro_title">Pomodoro-timer</string>
+    <string name="sample_pomodoro_desc">Fokustimer med arbets- och pausintervaller.</string>
+    <string name="sample_weather_title">Väderpanel</string>
+    <string name="sample_weather_desc">Aktuellt väder och 5-dygnsprognos för valfri stad.</string>
+    <string name="sample_recipes_title">Receptsökare</string>
+    <string name="sample_recipes_desc">Hitta recept efter ingredienser du har hemma.</string>
+    <string name="sample_budget_title">Budgethanterare</string>
+    <string name="sample_budget_desc">Spåra utgifter och se vart pengarna tar vägen.</string>
+    <string name="sample_quiz_title">Triviafrågespel</string>
+    <string name="sample_quiz_desc">Flerkatgoriquiz med poängräkning.</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">Fork misslyckades: %1$s</string>
+    <string name="err_load_plans">Kunde inte ladda planer: %1$s</string>
+    <string name="err_purchase_failed">Köp misslyckades: %1$s</string>
+    <string name="err_restore_failed">Återställning misslyckades: %1$s</string>
+    <string name="err_delete_failed">Radering misslyckades: %1$s</string>
+    <string name="err_preview_create">Kunde inte skapa förhandsgranskning</string>
+    <string name="err_preview_failed">Förhandsgranskning misslyckades: %1$s</string>
+    <string name="err_deploy_retry">Driftsättning misslyckades. Försök igen.</string>
+    <string name="err_deploy_failed">Driftsättning misslyckades: %1$s</string>
+    <string name="err_sign_in_changes">Logga in för att göra ändringar</string>
+    <string name="err_failed_reason">Misslyckades: %1$s</string>
+    <string name="err_versions_load">Kunde inte ladda versionshistorik</string>
+    <string name="err_version_restore">Kunde inte återställa version</string>
+    <string name="err_ads_update">Uppdatering av annonser misslyckades: %1$s</string>
+    <string name="err_sign_in_export">Logga in för att exportera APK</string>
+    <string name="err_export_failed">Export misslyckades: %1$s</string>
+    <string name="err_apk_installer">APK sparad men installationsprogrammet kunde inte öppnas. Kontrollera mappen Hämtningar.</string>
+    <string name="err_sign_in_generate">Logga in för att generera projekt</string>
+    <string name="err_sign_in_tweak">Logga in för att justera projekt</string>
+    <string name="err_no_project_tweak">Inget projekt att justera</string>
+    <string name="err_save_before_tweak">Sparning innan justering misslyckades: %1$s</string>
+    <string name="err_save_project">Sparning av projekt misslyckades</string>
+    <string name="err_tweak_failed">Justering misslyckades: %1$s</string>
+    <string name="err_build_start">Kunde inte starta bygget. Försök igen.</string>
+    <string name="err_build_failed">Bygget misslyckades. Försök igen.</string>
+    <string name="err_build_maybe_running">Din app kanske fortfarande byggs. Kolla Appar om en minut.</string>
+    <string name="err_prompt_looks_like_code">Din text ser ut som kod, inte en appbeskrivning. Beskriv appen du vill bygga i vanligt språk.</string>
+    <string name="err_prompt_no_code">Beskriv din appidé i vanligt språk istället för kod.</string>
+    <string name="err_prompt_no_urls">Beskriv din appidé med egna ord istället för att klistra in webbadresser.</string>
+    <string name="progress_checking_app">Letar efter din app...</string>
+    <string name="progress_may_still_build">Din app kanske fortfarande byggs</string>
+    <string name="progress_starting_build">Startar bygget...</string>
+    <string name="progress_applying_changes">Tillämpar ändringar...</string>
+    <string name="progress_building_android">Bygger Android-app...</string>
+    <string name="progress_saving_apk">Sparar APK...</string>
+    <string name="stt_prompt">Beskriv din appidé...</string>
+    <string name="err_rate_limit">Du har nått gränsen för tillfället. Försök igen lite senare.</string>
+    <string name="err_stream_empty">Tom svarstext</string>
+    <string name="err_stream_error">Strömfel</string>
+    <string name="err_unknown">Okänt fel</string>
 </resources>

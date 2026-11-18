@@ -1,5 +1,7 @@
 package com.kreativekoala.vibecoder.ui.apps
 
+import com.kreativekoala.vibecoder.R
+import com.kreativekoala.vibecoder.util.appString
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -55,8 +57,8 @@ class AppsViewModel @Inject constructor(
                 if (newlyReady.isNotEmpty()) {
                     NotificationHelper.showGenerationComplete(
                         appContext,
-                        title = "\"${newlyReady.first().title}\" is ready!",
-                        body = "Tap to open your app"
+                        title = appContext.appString(R.string.notif_project_ready_title, newlyReady.first().title),
+                        body = appContext.appString(R.string.notif_project_ready_body)
                     )
                 }
 
@@ -108,8 +110,8 @@ class AppsViewModel @Inject constructor(
                         if (project.status == "ready") {
                             NotificationHelper.showGenerationComplete(
                                 appContext,
-                                title = "\"${project.title}\" is ready!",
-                                body = "Tap to open your app"
+                                title = appContext.appString(R.string.notif_project_ready_title, project.title),
+                                body = appContext.appString(R.string.notif_project_ready_body)
                             )
                         }
                         return@launch
@@ -155,7 +157,7 @@ class AppsViewModel @Inject constructor(
                     state.copy(projects = state.projects.filter { it.id != projectId })
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(errorMessage = "Failed to delete: ${e.message}") }
+                _uiState.update { it.copy(errorMessage = appContext.appString(R.string.err_delete_failed, e.message ?: "")) }
             }
         }
     }

@@ -389,4 +389,84 @@
     <string name="template_category_mobile_uis">Mobilní UI</string>
     <string name="template_category_productivity">Produktivita</string>
     <string name="template_category_visual_animation">Vizuální / Animace</string>
+
+    <!-- Added 2026-11-17: machine translated, needs native review -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">Vše</string>
+    <string name="browse_filter_games">Hry</string>
+    <string name="browse_filter_tools">Nástroje</string>
+    <string name="browse_filter_sites">Weby</string>
+    <string name="browse_filter_trackers">Trackery</string>
+    <string name="browse_sort_newest">Nejnovější</string>
+    <string name="browse_sort_popular">Oblíbené</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">Další od nás</string>
+    <string name="promo_tagline_clearvoice">Křišťálově čisté hlasové poznámky s AI úpravou</string>
+    <string name="promo_tagline_audexa">Vaše osobní AI rádio</string>
+    <string name="promo_tagline_readaloud">Poslouchejte články na cestách</string>
+    <string name="promo_tagline_scribeai">Přepisujte a sumarizujte cokoliv</string>
+    <string name="promo_tagline_meetingmind">Automatické poznámky z každé schůzky</string>
+    <string name="promo_tagline_riddleverse">Denní hádanky vytvořené AI</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">Generování aplikací</string>
+    <string name="notif_channel_generation_desc">Upozorní, když je vaše aplikace hotová</string>
+    <string name="notif_generation_ready_title">Vaše aplikace je hotová!</string>
+    <string name="notif_generation_ready_body">Klepnutím otevřete projekt v Aplikacích</string>
+    <string name="notif_project_ready_title">\"%1$s\" je hotová!</string>
+    <string name="notif_project_ready_body">Klepnutím otevřete aplikaci</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">Tým VibeBuild</string>
+    <string name="sample_todo_title">Aplikace úkolů</string>
+    <string name="sample_todo_desc">Přehledný správce úkolů s kategoriemi a termíny.</string>
+    <string name="sample_pomodoro_title">Pomodoro časovač</string>
+    <string name="sample_pomodoro_desc">Časovač na soustředění s intervaly práce a přestávek.</string>
+    <string name="sample_weather_title">Přehled počasí</string>
+    <string name="sample_weather_desc">Aktuální počasí a 5denní předpověď pro jakékoliv město.</string>
+    <string name="sample_recipes_title">Vyhledávač receptů</string>
+    <string name="sample_recipes_desc">Najděte recepty podle surovin, které máte doma.</string>
+    <string name="sample_budget_title">Správce rozpočtu</string>
+    <string name="sample_budget_desc">Sledujte výdaje a vizualizujte, kam vaše peníze jdou.</string>
+    <string name="sample_quiz_title">Kvízová hra</string>
+    <string name="sample_quiz_desc">Kvíz s více kategoriemi a sledováním skóre.</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">Duplikace selhala: %1$s</string>
+    <string name="err_load_plans">Plány se nepodařilo načíst: %1$s</string>
+    <string name="err_purchase_failed">Nákup selhal: %1$s</string>
+    <string name="err_restore_failed">Obnovení selhalo: %1$s</string>
+    <string name="err_delete_failed">Smazání se nezdařilo: %1$s</string>
+    <string name="err_preview_create">Náhled se nepodařilo vytvořit</string>
+    <string name="err_preview_failed">Náhled selhal: %1$s</string>
+    <string name="err_deploy_retry">Nasazení selhalo. Zkuste to prosím znovu.</string>
+    <string name="err_deploy_failed">Nasazení selhalo: %1$s</string>
+    <string name="err_sign_in_changes">Pro provádění změn se prosím přihlaste</string>
+    <string name="err_failed_reason">Selhalo: %1$s</string>
+    <string name="err_versions_load">Historie verzí se nepodařila načíst</string>
+    <string name="err_version_restore">Verzi se nepodařilo obnovit</string>
+    <string name="err_ads_update">Aktualizace reklam selhala: %1$s</string>
+    <string name="err_sign_in_export">Pro export APK se prosím přihlaste</string>
+    <string name="err_export_failed">Export selhal: %1$s</string>
+    <string name="err_apk_installer">APK uložen, ale instalátor se nepodařilo otevřít. Zkontrolujte složku Stažené soubory.</string>
+    <string name="err_sign_in_generate">Pro generování projektů se prosím přihlaste</string>
+    <string name="err_sign_in_tweak">Pro úpravy projektů se prosím přihlaste</string>
+    <string name="err_no_project_tweak">Žádný projekt k úpravě</string>
+    <string name="err_save_before_tweak">Uložení před úpravou selhalo: %1$s</string>
+    <string name="err_save_project">Uložení projektu se nezdařilo</string>
+    <string name="err_tweak_failed">Úprava selhala: %1$s</string>
+    <string name="err_build_start">Sestavení se nepodařilo spustit. Zkuste to prosím znovu.</string>
+    <string name="err_build_failed">Sestavení selhalo. Zkuste to prosím znovu.</string>
+    <string name="err_build_maybe_running">Vaše aplikace se možná stále sestavuje. Zkontrolujte Aplikace za chvíli.</string>
+    <string name="err_prompt_looks_like_code">Váš popis vypadá jako kód, ne jako popis aplikace. Popište prosím aplikaci, kterou chcete vytvořit, běžnou řečí.</string>
+    <string name="err_prompt_no_code">Popište prosím nápad na aplikaci běžnou řečí místo kódu.</string>
+    <string name="err_prompt_no_urls">Popište prosím nápad na aplikaci vlastními slovy místo vkládání URL.</string>
+    <string name="progress_checking_app">Kontrola vaší aplikace...</string>
+    <string name="progress_may_still_build">Vaše aplikace se možná stále sestavuje</string>
+    <string name="progress_starting_build">Spouštění sestavení...</string>
+    <string name="progress_applying_changes">Aplikování změn...</string>
+    <string name="progress_building_android">Sestavování aplikace pro Android...</string>
+    <string name="progress_saving_apk">Ukládání APK...</string>
+    <string name="stt_prompt">Popište nápad na aplikaci...</string>
+    <string name="err_rate_limit">Dosáhli jste limitu. Zkuste to prosím později.</string>
+    <string name="err_stream_empty">Prázdná odpověď</string>
+    <string name="err_stream_error">Chyba streamu</string>
+    <string name="err_unknown">Neznámá chyba</string>
 </resources>

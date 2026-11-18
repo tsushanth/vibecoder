@@ -389,4 +389,84 @@
     <string name="template_category_mobile_uis">Mobiilikäyttöliittymät</string>
     <string name="template_category_productivity">Tuottavuus</string>
     <string name="template_category_visual_animation">Visuaalinen / animaatio</string>
+
+    <!-- Added 2026-11-17: machine translated, needs native review -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">Kaikki</string>
+    <string name="browse_filter_games">Pelit</string>
+    <string name="browse_filter_tools">Työkalut</string>
+    <string name="browse_filter_sites">Sivustot</string>
+    <string name="browse_filter_trackers">Seurantasovellukset</string>
+    <string name="browse_sort_newest">Uusimmat</string>
+    <string name="browse_sort_popular">Suositut</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">Lisää meiltä</string>
+    <string name="promo_tagline_clearvoice">Kirkkaat äänimuistiot tekoälyn siivouksella</string>
+    <string name="promo_tagline_audexa">Henkilökohtainen tekoälyradiosi</string>
+    <string name="promo_tagline_readaloud">Kuuntele mitä tahansa artikkelia liikkeellä</string>
+    <string name="promo_tagline_scribeai">Litteroi ja tiivistä mitä tahansa</string>
+    <string name="promo_tagline_meetingmind">Automaattiset muistiinpanot jokaiseen kokoukseen</string>
+    <string name="promo_tagline_riddleverse">Päivittäiset tekoälyn luomat pulmatehtävät</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">Sovelluksen luonti</string>
+    <string name="notif_channel_generation_desc">Ilmoittaa, kun sovelluksesi on valmis</string>
+    <string name="notif_generation_ready_title">Sovelluksesi on valmis!</string>
+    <string name="notif_generation_ready_body">Avaa projektisi napauttamalla Sovellukset-välilehdellä</string>
+    <string name="notif_project_ready_title">\"%1$s\" on valmis!</string>
+    <string name="notif_project_ready_body">Avaa sovelluksesi napauttamalla</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">VibeBuild-tiimi</string>
+    <string name="sample_todo_title">Tehtävälistasovellus</string>
+    <string name="sample_todo_desc">Selkeä tehtävienseuranta kategorioilla ja määräajoilla.</string>
+    <string name="sample_pomodoro_title">Pomodoro-ajastin</string>
+    <string name="sample_pomodoro_desc">Keskittymisajastin työ- ja taukojaksoilla.</string>
+    <string name="sample_weather_title">Sääkooste</string>
+    <string name="sample_weather_desc">Tämänhetkinen sää ja 5 päivän ennuste mihin tahansa kaupunkiin.</string>
+    <string name="sample_recipes_title">Reseptihaku</string>
+    <string name="sample_recipes_desc">Löydä reseptejä kotona olevien ainesten perusteella.</string>
+    <string name="sample_budget_title">Budjettiseuranta</string>
+    <string name="sample_budget_desc">Seuraa menoja ja näe, mihin rahasi menevät.</string>
+    <string name="sample_quiz_title">Tietovisapeli</string>
+    <string name="sample_quiz_desc">Monessa kategoriassa oleva visa pisteiden seurannalla.</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">Haaroitus epäonnistui: %1$s</string>
+    <string name="err_load_plans">Suunnitelmien lataus epäonnistui: %1$s</string>
+    <string name="err_purchase_failed">Osto epäonnistui: %1$s</string>
+    <string name="err_restore_failed">Palautus epäonnistui: %1$s</string>
+    <string name="err_delete_failed">Poisto epäonnistui: %1$s</string>
+    <string name="err_preview_create">Esikatselun luonti epäonnistui</string>
+    <string name="err_preview_failed">Esikatselu epäonnistui: %1$s</string>
+    <string name="err_deploy_retry">Julkaisu epäonnistui. Yritä uudelleen.</string>
+    <string name="err_deploy_failed">Julkaisu epäonnistui: %1$s</string>
+    <string name="err_sign_in_changes">Kirjaudu sisään tehdäksesi muutoksia</string>
+    <string name="err_failed_reason">Epäonnistui: %1$s</string>
+    <string name="err_versions_load">Versiohistorian lataus epäonnistui</string>
+    <string name="err_version_restore">Version palautus epäonnistui</string>
+    <string name="err_ads_update">Mainosten päivitys epäonnistui: %1$s</string>
+    <string name="err_sign_in_export">Kirjaudu sisään viedäksesi APK:n</string>
+    <string name="err_export_failed">Vienti epäonnistui: %1$s</string>
+    <string name="err_apk_installer">APK tallennettu, mutta asennusohjelmaa ei voitu avata. Tarkista Lataukset-kansio.</string>
+    <string name="err_sign_in_generate">Kirjaudu sisään luodaksesi projekteja</string>
+    <string name="err_sign_in_tweak">Kirjaudu sisään muokataksesi projekteja</string>
+    <string name="err_no_project_tweak">Ei muokattavaa projektia</string>
+    <string name="err_save_before_tweak">Tallennus ennen muokkausta epäonnistui: %1$s</string>
+    <string name="err_save_project">Projektin tallennus epäonnistui</string>
+    <string name="err_tweak_failed">Muokkaus epäonnistui: %1$s</string>
+    <string name="err_build_start">Koonnin aloitus epäonnistui. Yritä uudelleen.</string>
+    <string name="err_build_failed">Koonti epäonnistui. Yritä uudelleen.</string>
+    <string name="err_build_maybe_running">Sovellustasi saatetaan vielä koota. Tarkista Sovellukset hetken kuluttua.</string>
+    <string name="err_prompt_looks_like_code">Kuvauksesi näyttää koodilta eikä sovelluskuvaukselta. Kuvaile haluamasi sovellus arkikielellä.</string>
+    <string name="err_prompt_no_code">Kuvaile sovellusideasi arkikielellä koodin sijaan.</string>
+    <string name="err_prompt_no_urls">Kuvaile sovellusideasi omin sanoin URL-osoitteiden liittämisen sijaan.</string>
+    <string name="progress_checking_app">Tarkistetaan sovellustasi...</string>
+    <string name="progress_may_still_build">Sovellustasi saatetaan vielä koota</string>
+    <string name="progress_starting_build">Aloitetaan koonti...</string>
+    <string name="progress_applying_changes">Toteutetaan muutoksia...</string>
+    <string name="progress_building_android">Kootaan Android-sovellusta...</string>
+    <string name="progress_saving_apk">Tallennetaan APK:ta...</string>
+    <string name="stt_prompt">Kuvaile sovellusideasi...</string>
+    <string name="err_rate_limit">Olet saavuttanut rajan toistaiseksi. Yritä hetken kuluttua uudelleen.</string>
+    <string name="err_stream_empty">Tyhjä vastaus</string>
+    <string name="err_stream_error">Suoratoistovirhe</string>
+    <string name="err_unknown">Tuntematon virhe</string>
 </resources>

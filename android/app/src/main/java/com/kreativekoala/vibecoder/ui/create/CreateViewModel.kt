@@ -1,5 +1,6 @@
 package com.kreativekoala.vibecoder.ui.create
 
+import com.kreativekoala.vibecoder.util.appString
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -295,8 +296,8 @@ class CreateViewModel @Inject constructor(
                             chatStage = ChatStage.Building,
                             chatPrompt = pendingPrompt,
                             buildStartedAtMs = pendingTime,
-                            buildPhase = "Checking for your app...",
-                            buildDetail = "Your app may still be building",
+                            buildPhase = appContext.appString(R.string.progress_checking_app),
+                            buildDetail = appContext.appString(R.string.progress_may_still_build),
                             progressPercent = 0.0
                         )
                     }
@@ -388,19 +389,19 @@ class CreateViewModel @Inject constructor(
             "document.cookie", "window.location"
         )
         if (codePatterns.any { lower.contains(it) }) {
-            return "Your prompt looks like code, not an app description. Please describe the app you'd like to build in plain language."
+            return appContext.appString(R.string.err_prompt_looks_like_code)
         }
 
         // Block prompts that are mostly code (high special character ratio)
         val codeChars = prompt.count { it in "{}();=<>[]" }
         if (codeChars > prompt.length * 0.1 && prompt.length > 50) {
-            return "Please describe your app idea in plain language instead of code."
+            return appContext.appString(R.string.err_prompt_no_code)
         }
 
         // Block URLs (except for design inspiration references)
         val urlPattern = Regex("https?://\\S+", RegexOption.IGNORE_CASE)
         if (urlPattern.containsMatchIn(prompt)) {
-            return "Please describe your app idea in your own words instead of pasting URLs."
+            return appContext.appString(R.string.err_prompt_no_urls)
         }
 
         return null
@@ -427,7 +428,7 @@ class CreateViewModel @Inject constructor(
         }
 
         val userId = authRepository.currentUser?.uid ?: run {
-            _uiState.update { it.copy(errorMessage = "Please sign in to generate projects") }
+            _uiState.update { it.copy(errorMessage = appContext.appString(R.string.err_sign_in_generate)) }
             return
         }
         val userName = authRepository.currentUser?.displayName ?: "VibeBuild User"
@@ -507,7 +508,7 @@ class CreateViewModel @Inject constructor(
         val prompt = s.chatPrompt
         val image = s.chatImageBase64
         val userId = authRepository.currentUser?.uid ?: run {
-            _uiState.update { it.copy(chatStage = ChatStage.Idle, prompt = prompt, errorMessage = "Please sign in to generate projects") }
+            _uiState.update { it.copy(chatStage = ChatStage.Idle, prompt = prompt, errorMessage = appContext.appString(R.string.err_sign_in_generate)) }
             return
         }
         val userName = authRepository.currentUser?.displayName ?: "VibeBuild User"
@@ -521,7 +522,7 @@ class CreateViewModel @Inject constructor(
                 chatStage = ChatStage.Building,
                 buildStartedAtMs = System.currentTimeMillis(),
                 buildPhase = "Generate",
-                buildDetail = "Starting your build...",
+                buildDetail = appContext.appString(R.string.progress_starting_build),
                 progressPercent = 0.0
             )
         }
@@ -585,7 +586,7 @@ class CreateViewModel @Inject constructor(
             }
             // Stream closed. Without a projectId we can never learn the outcome.
             if (queuedProjectId == null && _uiState.value.chatStage == ChatStage.Building) {
-                failBuild("Couldn't start your build. Please try again.")
+                failBuild(appContext.appString(R.string.err_build_start))
             }
         }
     }
@@ -624,7 +625,7 @@ class CreateViewModel @Inject constructor(
             var tick = 0
             while (_uiState.value.chatStage == ChatStage.Building) {
                 if (System.currentTimeMillis() - started > 12 * 60_000L) {
-                    failBuild("Your app may still be building. Check My Projects in a minute.")
+                    failBuild(appContext.appString(R.string.err_build_maybe_running))
                     return@launch
                 }
                 delay(2_000)
@@ -645,13 +646,13 @@ class CreateViewModel @Inject constructor(
                         }
                         when (p.status.lowercase()) {
                             "ready" -> { finishReady(projectId, null, null); return@launch }
-                            "failed" -> { failBuild(p.error ?: "The build failed. Please try again."); return@launch }
+                            "failed" -> { failBuild(p.error ?: appContext.appString(R.string.err_build_failed)); return@launch }
                         }
                     } else if (tick % 5 == 0) {
                         val project = projectRepository.getProject(projectId)
                         when (project?.status?.lowercase()) {
                             "ready" -> { finishReady(projectId, null, null); return@launch }
-                            "failed" -> { failBuild("The build failed. Please try again."); return@launch }
+                            "failed" -> { failBuild(appContext.appString(R.string.err_build_failed)); return@launch }
                         }
                     }
                 } catch (e: CancellationException) {
@@ -694,7 +695,7 @@ class CreateViewModel @Inject constructor(
                     Log.d("Create", "Poll attempt $attempt failed: ${e.message}")
                 }
             }
-            failBuild("Your app may still be building. Check 'My Projects' in a minute.")
+            failBuild(appContext.appString(R.string.err_build_maybe_running))
         }
     }
 
@@ -906,7 +907,7 @@ class CreateViewModel @Inject constructor(
         if (desc.isEmpty()) return
 
         val userId = authRepository.currentUser?.uid ?: run {
-            _uiState.update { it.copy(errorMessage = "Please sign in to tweak projects") }
+            _uiState.update { it.copy(errorMessage = appContext.appString(R.string.err_sign_in_tweak)) }
             return
         }
         val userName = authRepository.currentUser?.displayName ?: "VibeBuild User"
@@ -923,7 +924,7 @@ class CreateViewModel @Inject constructor(
             if (projectId == null) {
                 val currentState = _uiState.value
                 val bundleBase64 = currentState.bundleBase64 ?: run {
-                    _uiState.update { it.copy(errorMessage = "No project to tweak") }
+                    _uiState.update { it.copy(errorMessage = appContext.appString(R.string.err_no_project_tweak)) }
                     return@launch
                 }
                 val title = currentState.prompt.trim()
@@ -944,17 +945,17 @@ class CreateViewModel @Inject constructor(
                     )
                     _uiState.update { it.copy(savedProjectId = projectId) }
                 } catch (e: Exception) {
-                    _uiState.update { it.copy(errorMessage = "Failed to save before tweaking: ${e.message}") }
+                    _uiState.update { it.copy(errorMessage = appContext.appString(R.string.err_save_before_tweak, e.message ?: "")) }
                     return@launch
                 }
             }
 
             if (projectId == null) {
-                _uiState.update { it.copy(errorMessage = "Failed to save project") }
+                _uiState.update { it.copy(errorMessage = appContext.appString(R.string.err_save_project)) }
                 return@launch
             }
 
-            _uiState.update { it.copy(isTweaking = true, tweakPhase = "Applying changes...") }
+            _uiState.update { it.copy(isTweaking = true, tweakPhase = appContext.appString(R.string.progress_applying_changes)) }
 
             try {
                 projectRepository.tweak(
@@ -994,7 +995,7 @@ class CreateViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(isTweaking = false, tweakPhase = "", errorMessage = "Tweak failed: ${e.message}", tweakTurns = markLastTweak(it.tweakTurns, false))
+                    it.copy(isTweaking = false, tweakPhase = "", errorMessage = appContext.appString(R.string.err_tweak_failed, e.message ?: ""), tweakTurns = markLastTweak(it.tweakTurns, false))
                 }
             }
         }

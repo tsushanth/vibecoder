@@ -436,4 +436,84 @@
     <string name="template_category_mobile_uis">Мобильные интерфейсы</string>
     <string name="template_category_productivity">Продуктивность</string>
     <string name="template_category_visual_animation">Визуал / Анимация</string>
+
+    <!-- Added 2026-11-17: machine translated, needs native review -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">Все</string>
+    <string name="browse_filter_games">Игры</string>
+    <string name="browse_filter_tools">Инструменты</string>
+    <string name="browse_filter_sites">Сайты</string>
+    <string name="browse_filter_trackers">Трекеры</string>
+    <string name="browse_sort_newest">Новые</string>
+    <string name="browse_sort_popular">Популярные</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">Другие наши приложения</string>
+    <string name="promo_tagline_clearvoice">Чёткие голосовые заметки с ИИ-очисткой</string>
+    <string name="promo_tagline_audexa">Ваше личное ИИ-радио</string>
+    <string name="promo_tagline_readaloud">Слушайте любые статьи на ходу</string>
+    <string name="promo_tagline_scribeai">Расшифровка и краткое изложение всего</string>
+    <string name="promo_tagline_meetingmind">Автозаметки для каждой встречи</string>
+    <string name="promo_tagline_riddleverse">Ежедневные головоломки от ИИ</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">Создание приложений</string>
+    <string name="notif_channel_generation_desc">Уведомляет о завершении создания приложения</string>
+    <string name="notif_generation_ready_title">Ваше приложение готово!</string>
+    <string name="notif_generation_ready_body">Нажмите, чтобы открыть проект в разделе Приложения</string>
+    <string name="notif_project_ready_title">\"%1$s\" готово!</string>
+    <string name="notif_project_ready_body">Нажмите, чтобы открыть приложение</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">Команда VibeBuild</string>
+    <string name="sample_todo_title">Список задач</string>
+    <string name="sample_todo_desc">Удобный трекер задач с категориями и сроками.</string>
+    <string name="sample_pomodoro_title">Таймер Pomodoro</string>
+    <string name="sample_pomodoro_desc">Таймер фокусировки с рабочими интервалами и перерывами.</string>
+    <string name="sample_weather_title">Погодная панель</string>
+    <string name="sample_weather_desc">Текущая погода и прогноз на 5 дней для любого города.</string>
+    <string name="sample_recipes_title">Поиск рецептов</string>
+    <string name="sample_recipes_desc">Находите рецепты по имеющимся у вас продуктам.</string>
+    <string name="sample_budget_title">Учёт бюджета</string>
+    <string name="sample_budget_desc">Отслеживайте расходы и визуализируйте траты.</string>
+    <string name="sample_quiz_title">Викторина</string>
+    <string name="sample_quiz_desc">Многокатегорийная викторина с отслеживанием счёта.</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">Не удалось скопировать: %1$s</string>
+    <string name="err_load_plans">Не удалось загрузить тарифы: %1$s</string>
+    <string name="err_purchase_failed">Покупка не удалась: %1$s</string>
+    <string name="err_restore_failed">Восстановление не удалось: %1$s</string>
+    <string name="err_delete_failed">Не удалось удалить: %1$s</string>
+    <string name="err_preview_create">Не удалось создать предпросмотр</string>
+    <string name="err_preview_failed">Предпросмотр не удался: %1$s</string>
+    <string name="err_deploy_retry">Развёртывание не удалось. Попробуйте снова.</string>
+    <string name="err_deploy_failed">Развёртывание не удалось: %1$s</string>
+    <string name="err_sign_in_changes">Войдите, чтобы вносить изменения</string>
+    <string name="err_failed_reason">Ошибка: %1$s</string>
+    <string name="err_versions_load">Не удалось загрузить историю версий</string>
+    <string name="err_version_restore">Не удалось восстановить версию</string>
+    <string name="err_ads_update">Не удалось обновить рекламу: %1$s</string>
+    <string name="err_sign_in_export">Войдите, чтобы экспортировать APK</string>
+    <string name="err_export_failed">Экспорт не удался: %1$s</string>
+    <string name="err_apk_installer">APK сохранён, но не удалось открыть установщик. Проверьте папку «Загрузки».</string>
+    <string name="err_sign_in_generate">Войдите, чтобы создавать проекты</string>
+    <string name="err_sign_in_tweak">Войдите, чтобы изменять проекты</string>
+    <string name="err_no_project_tweak">Нет проекта для изменения</string>
+    <string name="err_save_before_tweak">Не удалось сохранить перед изменением: %1$s</string>
+    <string name="err_save_project">Не удалось сохранить проект</string>
+    <string name="err_tweak_failed">Изменение не удалось: %1$s</string>
+    <string name="err_build_start">Не удалось начать сборку. Попробуйте снова.</string>
+    <string name="err_build_failed">Сборка не удалась. Попробуйте снова.</string>
+    <string name="err_build_maybe_running">Возможно, сборка ещё выполняется. Проверьте Приложения через минуту.</string>
+    <string name="err_prompt_looks_like_code">Ваш запрос похож на код, а не на описание приложения. Опишите приложение простым языком.</string>
+    <string name="err_prompt_no_code">Опишите идею приложения простым языком, а не кодом.</string>
+    <string name="err_prompt_no_urls">Опишите идею приложения своими словами, не вставляйте ссылки.</string>
+    <string name="progress_checking_app">Проверяем ваше приложение...</string>
+    <string name="progress_may_still_build">Возможно, сборка ещё выполняется</string>
+    <string name="progress_starting_build">Начинаем сборку...</string>
+    <string name="progress_applying_changes">Применяем изменения...</string>
+    <string name="progress_building_android">Собираем Android-приложение...</string>
+    <string name="progress_saving_apk">Сохраняем APK...</string>
+    <string name="stt_prompt">Опишите идею приложения...</string>
+    <string name="err_rate_limit">Вы достигли лимита. Попробуйте чуть позже.</string>
+    <string name="err_stream_empty">Пустой ответ</string>
+    <string name="err_stream_error">Ошибка потока</string>
+    <string name="err_unknown">Неизвестная ошибка</string>
 </resources>

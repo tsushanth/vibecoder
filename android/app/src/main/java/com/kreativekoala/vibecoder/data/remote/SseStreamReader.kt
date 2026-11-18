@@ -1,10 +1,14 @@
 package com.kreativekoala.vibecoder.data.remote
 
+import android.content.Context
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.kreativekoala.vibecoder.data.model.SseEvent
+import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.util.Constants
+import com.kreativekoala.vibecoder.util.appString
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -23,7 +27,7 @@ import javax.inject.Singleton
 /** The text shown for a non-200 answer to a streaming request. */
 object SseHttpErrors {
     private val gson = Gson()
-    const val RATE_LIMIT_FALLBACK = "You've reached the limit for now. Please try again a little later."
+    const val RATE_LIMIT_FALLBACK = "You've reached the limit for now. Please try again a little later." // i18n-ok: English default; the app passes err_rate_limit
 
     /** The server's own message from a JSON body ("error", then "message"), or null if the body has none. */
     fun serverMessage(body: String): String? = try {
@@ -39,14 +43,16 @@ object SseHttpErrors {
      * HTTP 429 is the fair-use limit: show the server's message plainly (never a paywall, never the status code). Other statuses
      * keep the "HTTP code: message" form.
      */
-    fun message(code: Int, body: String): String {
+    fun message(code: Int, body: String, rateLimitFallback: String = RATE_LIMIT_FALLBACK): String {
         val server = serverMessage(body)
-        return if (code == 429) server ?: RATE_LIMIT_FALLBACK else "HTTP $code: ${server ?: body}"
+        return if (code == 429) server ?: rateLimitFallback else "HTTP $code: ${server ?: body}"
     }
 }
 
 @Singleton
-class SseStreamReader @Inject constructor() {
+class SseStreamReader @Inject constructor(
+    @ApplicationContext private val appContext: Context
+) {
 
     private val sseClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
@@ -83,14 +89,14 @@ class SseStreamReader @Inject constructor() {
             if (!response.isSuccessful) {
                 val errorBody = response.body?.string() ?: "Unknown error"
                 Log.e("SSE", "HTTP error ${response.code}: $errorBody")
-                trySend(SseEvent.Error(SseHttpErrors.message(response.code, errorBody)))
+                trySend(SseEvent.Error(SseHttpErrors.message(response.code, errorBody, appContext.appString(R.string.err_rate_limit))))
                 close()
                 return@callbackFlow
             }
 
             val inputStream = response.body?.byteStream()
             if (inputStream == null) {
-                trySend(SseEvent.Error("Empty response body"))
+                trySend(SseEvent.Error(appContext.appString(R.string.err_stream_empty)))
                 close()
                 return@callbackFlow
             }
@@ -137,7 +143,7 @@ class SseStreamReader @Inject constructor() {
         } catch (e: Exception) {
             Log.e("SSE", "Stream error: ${e.message}", e)
             if (!call.isCanceled()) {
-                trySend(SseEvent.Error(e.message ?: "Stream error"))
+                trySend(SseEvent.Error(e.message ?: appContext.appString(R.string.err_stream_error)))
             }
         }
 
@@ -155,7 +161,7 @@ class SseStreamReader @Inject constructor() {
                 "status" -> gson.fromJson(json, SseEvent.Status::class.java)
                 "result" -> gson.fromJson(json, SseEvent.Result::class.java)
                 "error" -> SseEvent.Error(
-                    obj.get("error")?.asString ?: "Unknown error"
+                    obj.get("error")?.asString ?: appContext.appString(R.string.err_unknown)
                 )
                 else -> {
                     when {

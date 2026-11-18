@@ -435,4 +435,84 @@
     <string name="template_category_mobile_uis">Mobile UIs</string>
     <string name="template_category_productivity">Productivity</string>
     <string name="template_category_visual_animation">Visual / Animation</string>
+
+    <!-- Hard-coded English moved out of Kotlin -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">All</string>
+    <string name="browse_filter_games">Games</string>
+    <string name="browse_filter_tools">Tools</string>
+    <string name="browse_filter_sites">Sites</string>
+    <string name="browse_filter_trackers">Trackers</string>
+    <string name="browse_sort_newest">Newest</string>
+    <string name="browse_sort_popular">Popular</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">More from us</string>
+    <string name="promo_tagline_clearvoice">Crisp voice memos with AI cleanup</string>
+    <string name="promo_tagline_audexa">Your personal AI radio</string>
+    <string name="promo_tagline_readaloud">Listen to any article on the go</string>
+    <string name="promo_tagline_scribeai">Transcribe and summarize anything</string>
+    <string name="promo_tagline_meetingmind">Auto-notes for every meeting</string>
+    <string name="promo_tagline_riddleverse">Daily AI-crafted puzzles</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">App Generation</string>
+    <string name="notif_channel_generation_desc">Notifies when your app is done generating</string>
+    <string name="notif_generation_ready_title">Your app is ready!</string>
+    <string name="notif_generation_ready_body">Tap to open your project in My Apps</string>
+    <string name="notif_project_ready_title">\"%1$s\" is ready!</string>
+    <string name="notif_project_ready_body">Tap to open your app</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">VibeBuild Team</string>
+    <string name="sample_todo_title">Todo List App</string>
+    <string name="sample_todo_desc">A clean task tracker with categories and due dates.</string>
+    <string name="sample_pomodoro_title">Pomodoro Timer</string>
+    <string name="sample_pomodoro_desc">Focus timer with work and break intervals.</string>
+    <string name="sample_weather_title">Weather Dashboard</string>
+    <string name="sample_weather_desc">Current weather and 5-day forecast for any city.</string>
+    <string name="sample_recipes_title">Recipe Finder</string>
+    <string name="sample_recipes_desc">Find recipes by ingredients you have at home.</string>
+    <string name="sample_budget_title">Budget Tracker</string>
+    <string name="sample_budget_desc">Track expenses and visualize where your money goes.</string>
+    <string name="sample_quiz_title">Trivia Quiz Game</string>
+    <string name="sample_quiz_desc">Multi-category quiz with score tracking.</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">Fork failed: %1$s</string>
+    <string name="err_load_plans">Could not load plans: %1$s</string>
+    <string name="err_purchase_failed">Purchase failed: %1$s</string>
+    <string name="err_restore_failed">Restore failed: %1$s</string>
+    <string name="err_delete_failed">Failed to delete: %1$s</string>
+    <string name="err_preview_create">Could not create preview</string>
+    <string name="err_preview_failed">Preview failed: %1$s</string>
+    <string name="err_deploy_retry">Deploy failed. Please try again.</string>
+    <string name="err_deploy_failed">Deploy failed: %1$s</string>
+    <string name="err_sign_in_changes">Please sign in to make changes</string>
+    <string name="err_failed_reason">Failed: %1$s</string>
+    <string name="err_versions_load">Could not load version history</string>
+    <string name="err_version_restore">Could not restore version</string>
+    <string name="err_ads_update">Failed to update ads: %1$s</string>
+    <string name="err_sign_in_export">Please sign in to export APK</string>
+    <string name="err_export_failed">Export failed: %1$s</string>
+    <string name="err_apk_installer">APK saved but could not open installer. Check your Downloads folder.</string>
+    <string name="err_sign_in_generate">Please sign in to generate projects</string>
+    <string name="err_sign_in_tweak">Please sign in to tweak projects</string>
+    <string name="err_no_project_tweak">No project to tweak</string>
+    <string name="err_save_before_tweak">Failed to save before tweaking: %1$s</string>
+    <string name="err_save_project">Failed to save project</string>
+    <string name="err_tweak_failed">Tweak failed: %1$s</string>
+    <string name="err_build_start">Couldn\'t start your build. Please try again.</string>
+    <string name="err_build_failed">The build failed. Please try again.</string>
+    <string name="err_build_maybe_running">Your app may still be building. Check My Projects in a minute.</string>
+    <string name="err_prompt_looks_like_code">Your prompt looks like code, not an app description. Please describe the app you\'d like to build in plain language.</string>
+    <string name="err_prompt_no_code">Please describe your app idea in plain language instead of code.</string>
+    <string name="err_prompt_no_urls">Please describe your app idea in your own words instead of pasting URLs.</string>
+    <string name="progress_checking_app">Checking for your app...</string>
+    <string name="progress_may_still_build">Your app may still be building</string>
+    <string name="progress_starting_build">Starting your build...</string>
+    <string name="progress_applying_changes">Applying changes...</string>
+    <string name="progress_building_android">Building Android app...</string>
+    <string name="progress_saving_apk">Saving APK...</string>
+    <string name="stt_prompt">Describe your app idea...</string>
+    <string name="err_rate_limit">You\'ve reached the limit for now. Please try again a little later.</string>
+    <string name="err_stream_empty">Empty response body</string>
+    <string name="err_stream_error">Stream error</string>
+    <string name="err_unknown">Unknown error</string>
 </resources>

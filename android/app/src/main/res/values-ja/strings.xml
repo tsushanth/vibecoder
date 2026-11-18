@@ -436,4 +436,84 @@
     <string name="template_category_mobile_uis">モバイルUI</string>
     <string name="template_category_productivity">生産性</string>
     <string name="template_category_visual_animation">ビジュアル / アニメーション</string>
+
+    <!-- Added 2026-11-17: machine translated, needs native review -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">すべて</string>
+    <string name="browse_filter_games">ゲーム</string>
+    <string name="browse_filter_tools">ツール</string>
+    <string name="browse_filter_sites">サイト</string>
+    <string name="browse_filter_trackers">トラッカー</string>
+    <string name="browse_sort_newest">新着順</string>
+    <string name="browse_sort_popular">人気順</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">その他のアプリ</string>
+    <string name="promo_tagline_clearvoice">AIでクリアな音声メモ</string>
+    <string name="promo_tagline_audexa">あなた専用のAIラジオ</string>
+    <string name="promo_tagline_readaloud">記事を音声で聴く</string>
+    <string name="promo_tagline_scribeai">文字起こしと要約</string>
+    <string name="promo_tagline_meetingmind">会議の自動メモ</string>
+    <string name="promo_tagline_riddleverse">毎日AIが作るパズル</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">アプリ生成</string>
+    <string name="notif_channel_generation_desc">アプリの生成完了を通知します</string>
+    <string name="notif_generation_ready_title">アプリが完成しました</string>
+    <string name="notif_generation_ready_body">タップしてアプリで開く</string>
+    <string name="notif_project_ready_title">「%1$s」が完成しました</string>
+    <string name="notif_project_ready_body">タップしてアプリを開く</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">VibeBuild Team</string>
+    <string name="sample_todo_title">Todoリストアプリ</string>
+    <string name="sample_todo_desc">カテゴリと期限付きのシンプルなタスク管理</string>
+    <string name="sample_pomodoro_title">Pomodoroタイマー</string>
+    <string name="sample_pomodoro_desc">作業と休憩を繰り返す集中タイマー</string>
+    <string name="sample_weather_title">天気ダッシュボード</string>
+    <string name="sample_weather_desc">現在の天気と5日間の予報を表示</string>
+    <string name="sample_recipes_title">レシピ検索</string>
+    <string name="sample_recipes_desc">家にある材料からレシピを探す</string>
+    <string name="sample_budget_title">予算管理</string>
+    <string name="sample_budget_desc">支出を記録してお金の使い道を可視化</string>
+    <string name="sample_quiz_title">トリビアクイズゲーム</string>
+    <string name="sample_quiz_desc">複数カテゴリのクイズとスコア記録</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">複製に失敗しました: %1$s</string>
+    <string name="err_load_plans">プランを読み込めませんでした: %1$s</string>
+    <string name="err_purchase_failed">購入に失敗しました: %1$s</string>
+    <string name="err_restore_failed">復元に失敗しました: %1$s</string>
+    <string name="err_delete_failed">削除に失敗しました: %1$s</string>
+    <string name="err_preview_create">プレビューを作成できませんでした</string>
+    <string name="err_preview_failed">プレビューに失敗しました: %1$s</string>
+    <string name="err_deploy_retry">デプロイに失敗しました。もう一度お試しください。</string>
+    <string name="err_deploy_failed">デプロイに失敗しました: %1$s</string>
+    <string name="err_sign_in_changes">変更するにはログインしてください</string>
+    <string name="err_failed_reason">失敗しました: %1$s</string>
+    <string name="err_versions_load">バージョン履歴を読み込めませんでした</string>
+    <string name="err_version_restore">バージョンを復元できませんでした</string>
+    <string name="err_ads_update">広告の更新に失敗しました: %1$s</string>
+    <string name="err_sign_in_export">APKをエクスポートするにはログインしてください</string>
+    <string name="err_export_failed">エクスポートに失敗しました: %1$s</string>
+    <string name="err_apk_installer">APKは保存されましたが、インストーラーを開けませんでした。ダウンロードフォルダをご確認ください。</string>
+    <string name="err_sign_in_generate">プロジェクトを生成するにはログインしてください</string>
+    <string name="err_sign_in_tweak">プロジェクトを調整するにはログインしてください</string>
+    <string name="err_no_project_tweak">調整するプロジェクトがありません</string>
+    <string name="err_save_before_tweak">調整前の保存に失敗しました: %1$s</string>
+    <string name="err_save_project">プロジェクトの保存に失敗しました</string>
+    <string name="err_tweak_failed">調整に失敗しました: %1$s</string>
+    <string name="err_build_start">ビルドを開始できませんでした。もう一度お試しください。</string>
+    <string name="err_build_failed">ビルドに失敗しました。もう一度お試しください。</string>
+    <string name="err_build_maybe_running">アプリはまだビルド中の可能性があります。しばらくしてからアプリをご確認ください。</string>
+    <string name="err_prompt_looks_like_code">コードではなく、アプリの説明を入力してください。作りたいアプリを自然な文章で説明してください。</string>
+    <string name="err_prompt_no_code">コードではなく、アプリのアイデアを自然な文章で説明してください。</string>
+    <string name="err_prompt_no_urls">URLを貼り付けるのではなく、自分の言葉でアプリのアイデアを説明してください。</string>
+    <string name="progress_checking_app">アプリを確認しています...</string>
+    <string name="progress_may_still_build">アプリはまだビルド中の可能性があります</string>
+    <string name="progress_starting_build">ビルドを開始しています...</string>
+    <string name="progress_applying_changes">変更を適用しています...</string>
+    <string name="progress_building_android">Androidアプリをビルドしています...</string>
+    <string name="progress_saving_apk">APKを保存しています...</string>
+    <string name="stt_prompt">アプリのアイデアを説明してください...</string>
+    <string name="err_rate_limit">制限に達しました。しばらくしてからもう一度お試しください。</string>
+    <string name="err_stream_empty">レスポンスが空です</string>
+    <string name="err_stream_error">ストリームエラー</string>
+    <string name="err_unknown">不明なエラー</string>
 </resources>

@@ -467,7 +467,7 @@ fun ProjectDetailScreen(
                             border = androidx.compose.foundation.BorderStroke(1.dp, VibePurple),
                             contentPadding = PaddingValues(vertical = 16.dp)
                         ) {
-                            Text("\uD83C\uDF4E", style = MaterialTheme.typography.titleMedium)
+                            Text("\uD83C\uDF4E", style = MaterialTheme.typography.titleMedium) // i18n-ok: emoji
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(stringResource(R.string.project_detail_preview_iphone), color = VibePurple, fontWeight = FontWeight.SemiBold)
                         }

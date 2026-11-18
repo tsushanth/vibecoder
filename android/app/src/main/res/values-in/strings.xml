@@ -438,4 +438,84 @@
     <string name="template_category_mobile_uis">UI Seluler</string>
     <string name="template_category_productivity">Produktivitas</string>
     <string name="template_category_visual_animation">Visual / Animasi</string>
+
+    <!-- Added 2026-11-17: machine translated, needs native review -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">Semua</string>
+    <string name="browse_filter_games">Game</string>
+    <string name="browse_filter_tools">Alat</string>
+    <string name="browse_filter_sites">Situs</string>
+    <string name="browse_filter_trackers">Pelacak</string>
+    <string name="browse_sort_newest">Terbaru</string>
+    <string name="browse_sort_popular">Populer</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">Lainnya dari kami</string>
+    <string name="promo_tagline_clearvoice">Memo suara jernih dengan pembersihan AI</string>
+    <string name="promo_tagline_audexa">Radio AI pribadi Anda</string>
+    <string name="promo_tagline_readaloud">Dengarkan artikel apa pun saat bepergian</string>
+    <string name="promo_tagline_scribeai">Transkripsi dan rangkum apa saja</string>
+    <string name="promo_tagline_meetingmind">Catatan otomatis untuk setiap rapat</string>
+    <string name="promo_tagline_riddleverse">Teka-teki harian buatan AI</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">Pembuatan Aplikasi</string>
+    <string name="notif_channel_generation_desc">Memberi tahu saat aplikasi Anda selesai dibuat</string>
+    <string name="notif_generation_ready_title">Aplikasi Anda siap!</string>
+    <string name="notif_generation_ready_body">Ketuk untuk membuka proyek di Aplikasi</string>
+    <string name="notif_project_ready_title">\"%1$s\" siap!</string>
+    <string name="notif_project_ready_body">Ketuk untuk membuka aplikasi Anda</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">Tim VibeBuild</string>
+    <string name="sample_todo_title">Aplikasi Daftar Tugas</string>
+    <string name="sample_todo_desc">Pelacak tugas sederhana dengan kategori dan tanggal jatuh tempo.</string>
+    <string name="sample_pomodoro_title">Timer Pomodoro</string>
+    <string name="sample_pomodoro_desc">Timer fokus dengan interval kerja dan istirahat.</string>
+    <string name="sample_weather_title">Dasbor Cuaca</string>
+    <string name="sample_weather_desc">Cuaca terkini dan prakiraan 5 hari untuk kota mana pun.</string>
+    <string name="sample_recipes_title">Pencari Resep</string>
+    <string name="sample_recipes_desc">Temukan resep berdasarkan bahan yang Anda miliki di rumah.</string>
+    <string name="sample_budget_title">Pelacak Anggaran</string>
+    <string name="sample_budget_desc">Lacak pengeluaran dan visualisasikan ke mana uang Anda pergi.</string>
+    <string name="sample_quiz_title">Game Kuis Trivia</string>
+    <string name="sample_quiz_desc">Kuis multi-kategori dengan pelacakan skor.</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">Fork gagal: %1$s</string>
+    <string name="err_load_plans">Tidak dapat memuat paket: %1$s</string>
+    <string name="err_purchase_failed">Pembelian gagal: %1$s</string>
+    <string name="err_restore_failed">Pemulihan gagal: %1$s</string>
+    <string name="err_delete_failed">Gagal menghapus: %1$s</string>
+    <string name="err_preview_create">Tidak dapat membuat pratinjau</string>
+    <string name="err_preview_failed">Pratinjau gagal: %1$s</string>
+    <string name="err_deploy_retry">Penerapan gagal. Silakan coba lagi.</string>
+    <string name="err_deploy_failed">Penerapan gagal: %1$s</string>
+    <string name="err_sign_in_changes">Silakan masuk untuk membuat perubahan</string>
+    <string name="err_failed_reason">Gagal: %1$s</string>
+    <string name="err_versions_load">Tidak dapat memuat riwayat versi</string>
+    <string name="err_version_restore">Tidak dapat memulihkan versi</string>
+    <string name="err_ads_update">Gagal memperbarui iklan: %1$s</string>
+    <string name="err_sign_in_export">Silakan masuk untuk mengekspor APK</string>
+    <string name="err_export_failed">Ekspor gagal: %1$s</string>
+    <string name="err_apk_installer">APK tersimpan tetapi tidak dapat membuka penginstal. Periksa folder Unduhan Anda.</string>
+    <string name="err_sign_in_generate">Silakan masuk untuk membuat proyek</string>
+    <string name="err_sign_in_tweak">Silakan masuk untuk mengubah proyek</string>
+    <string name="err_no_project_tweak">Tidak ada proyek untuk diubah</string>
+    <string name="err_save_before_tweak">Gagal menyimpan sebelum mengubah: %1$s</string>
+    <string name="err_save_project">Gagal menyimpan proyek</string>
+    <string name="err_tweak_failed">Perubahan gagal: %1$s</string>
+    <string name="err_build_start">Tidak dapat memulai build Anda. Silakan coba lagi.</string>
+    <string name="err_build_failed">Build gagal. Silakan coba lagi.</string>
+    <string name="err_build_maybe_running">Aplikasi Anda mungkin masih dalam proses build. Periksa Aplikasi dalam beberapa saat.</string>
+    <string name="err_prompt_looks_like_code">Prompt Anda terlihat seperti kode, bukan deskripsi aplikasi. Jelaskan aplikasi yang ingin Anda buat dengan bahasa sederhana.</string>
+    <string name="err_prompt_no_code">Jelaskan ide aplikasi Anda dengan bahasa sederhana, bukan kode.</string>
+    <string name="err_prompt_no_urls">Jelaskan ide aplikasi Anda dengan kata-kata sendiri, jangan tempel URL.</string>
+    <string name="progress_checking_app">Memeriksa aplikasi Anda...</string>
+    <string name="progress_may_still_build">Aplikasi Anda mungkin masih dalam proses build</string>
+    <string name="progress_starting_build">Memulai build Anda...</string>
+    <string name="progress_applying_changes">Menerapkan perubahan...</string>
+    <string name="progress_building_android">Membangun aplikasi Android...</string>
+    <string name="progress_saving_apk">Menyimpan APK...</string>
+    <string name="stt_prompt">Jelaskan ide aplikasi Anda...</string>
+    <string name="err_rate_limit">Anda telah mencapai batas untuk saat ini. Silakan coba lagi nanti.</string>
+    <string name="err_stream_empty">Isi respons kosong</string>
+    <string name="err_stream_error">Kesalahan stream</string>
+    <string name="err_unknown">Kesalahan tidak diketahui</string>
 </resources>

@@ -438,4 +438,84 @@
     <string name="template_category_mobile_uis">واجهات الجوال</string>
     <string name="template_category_productivity">الإنتاجية</string>
     <string name="template_category_visual_animation">مرئي / رسوم متحركة</string>
+
+    <!-- Added 2026-11-17: machine translated, needs native review -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">الكل</string>
+    <string name="browse_filter_games">ألعاب</string>
+    <string name="browse_filter_tools">أدوات</string>
+    <string name="browse_filter_sites">مواقع</string>
+    <string name="browse_filter_trackers">متتبعات</string>
+    <string name="browse_sort_newest">الأحدث</string>
+    <string name="browse_sort_popular">الأكثر شعبية</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">المزيد منا</string>
+    <string name="promo_tagline_clearvoice">مذكرات صوتية واضحة مع تنظيف AI</string>
+    <string name="promo_tagline_audexa">راديو AI الشخصي الخاص بك</string>
+    <string name="promo_tagline_readaloud">استمع إلى أي مقال أثناء التنقل</string>
+    <string name="promo_tagline_scribeai">نسخ وتلخيص أي شيء</string>
+    <string name="promo_tagline_meetingmind">ملاحظات تلقائية لكل اجتماع</string>
+    <string name="promo_tagline_riddleverse">ألغاز يومية من صنع AI</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">إنشاء التطبيق</string>
+    <string name="notif_channel_generation_desc">يُعلمك عند الانتهاء من إنشاء تطبيقك</string>
+    <string name="notif_generation_ready_title">تطبيقك جاهز!</string>
+    <string name="notif_generation_ready_body">اضغط لفتح مشروعك في التطبيقات</string>
+    <string name="notif_project_ready_title">\"%1$s\" جاهز!</string>
+    <string name="notif_project_ready_body">اضغط لفتح تطبيقك</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">فريق VibeBuild</string>
+    <string name="sample_todo_title">تطبيق قائمة المهام</string>
+    <string name="sample_todo_desc">متتبع مهام بسيط مع فئات وتواريخ استحقاق.</string>
+    <string name="sample_pomodoro_title">مؤقت Pomodoro</string>
+    <string name="sample_pomodoro_desc">مؤقت تركيز مع فترات عمل واستراحة.</string>
+    <string name="sample_weather_title">لوحة الطقس</string>
+    <string name="sample_weather_desc">الطقس الحالي وتوقعات 5 أيام لأي مدينة.</string>
+    <string name="sample_recipes_title">مكتشف الوصفات</string>
+    <string name="sample_recipes_desc">اعثر على وصفات بالمكونات المتوفرة لديك.</string>
+    <string name="sample_budget_title">متتبع الميزانية</string>
+    <string name="sample_budget_desc">تتبع النفقات وشاهد أين تذهب أموالك.</string>
+    <string name="sample_quiz_title">لعبة اختبار الثقافة</string>
+    <string name="sample_quiz_desc">اختبار متعدد الفئات مع تتبع النقاط.</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">فشل النسخ: %1$s</string>
+    <string name="err_load_plans">تعذر تحميل الخطط: %1$s</string>
+    <string name="err_purchase_failed">فشل الشراء: %1$s</string>
+    <string name="err_restore_failed">فشلت الاستعادة: %1$s</string>
+    <string name="err_delete_failed">فشل الحذف: %1$s</string>
+    <string name="err_preview_create">تعذر إنشاء المعاينة</string>
+    <string name="err_preview_failed">فشلت المعاينة: %1$s</string>
+    <string name="err_deploy_retry">فشل النشر. حاول مرة أخرى.</string>
+    <string name="err_deploy_failed">فشل النشر: %1$s</string>
+    <string name="err_sign_in_changes">يرجى تسجيل الدخول لإجراء التغييرات</string>
+    <string name="err_failed_reason">فشل: %1$s</string>
+    <string name="err_versions_load">تعذر تحميل سجل الإصدارات</string>
+    <string name="err_version_restore">تعذرت استعادة الإصدار</string>
+    <string name="err_ads_update">فشل تحديث الإعلانات: %1$s</string>
+    <string name="err_sign_in_export">يرجى تسجيل الدخول لتصدير APK</string>
+    <string name="err_export_failed">فشل التصدير: %1$s</string>
+    <string name="err_apk_installer">تم حفظ APK لكن تعذر فتح المثبت. تحقق من مجلد التنزيلات.</string>
+    <string name="err_sign_in_generate">يرجى تسجيل الدخول لإنشاء المشاريع</string>
+    <string name="err_sign_in_tweak">يرجى تسجيل الدخول لتعديل المشاريع</string>
+    <string name="err_no_project_tweak">لا يوجد مشروع للتعديل</string>
+    <string name="err_save_before_tweak">فشل الحفظ قبل التعديل: %1$s</string>
+    <string name="err_save_project">فشل حفظ المشروع</string>
+    <string name="err_tweak_failed">فشل التعديل: %1$s</string>
+    <string name="err_build_start">تعذر بدء البناء. حاول مرة أخرى.</string>
+    <string name="err_build_failed">فشل البناء. حاول مرة أخرى.</string>
+    <string name="err_build_maybe_running">قد يكون تطبيقك لا يزال قيد البناء. تحقق من التطبيقات بعد دقيقة.</string>
+    <string name="err_prompt_looks_like_code">يبدو طلبك كأنه كود وليس وصفًا للتطبيق. يرجى وصف التطبيق الذي تريد بنائه بلغة بسيطة.</string>
+    <string name="err_prompt_no_code">يرجى وصف فكرة تطبيقك بلغة بسيطة بدلاً من الكود.</string>
+    <string name="err_prompt_no_urls">يرجى وصف فكرة تطبيقك بكلماتك الخاصة بدلاً من لصق الروابط.</string>
+    <string name="progress_checking_app">يتم التحقق من تطبيقك...</string>
+    <string name="progress_may_still_build">قد يكون تطبيقك لا يزال قيد البناء</string>
+    <string name="progress_starting_build">يتم بدء البناء...</string>
+    <string name="progress_applying_changes">يتم تطبيق التغييرات...</string>
+    <string name="progress_building_android">يتم بناء تطبيق Android...</string>
+    <string name="progress_saving_apk">يتم حفظ APK...</string>
+    <string name="stt_prompt">صِف فكرة تطبيقك...</string>
+    <string name="err_rate_limit">لقد وصلت إلى الحد المسموح به حاليًا. حاول مرة أخرى بعد قليل.</string>
+    <string name="err_stream_empty">استجابة فارغة</string>
+    <string name="err_stream_error">خطأ في البث</string>
+    <string name="err_unknown">خطأ غير معروف</string>
 </resources>
