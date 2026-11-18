@@ -17,6 +17,8 @@ export const BUILD_RULES = `IMPORTANT RULES:
 - Wire up EVERY button, link and interactive element with working handlers
 - Complete game loops, full form validation and result display where relevant
 - Use localStorage to persist user data where it makes sense
+- Undo and redo must restore exactly the previous or next state: keep each history entry complete and trace draw, draw, undo, redo before finishing. Setting a canvas width or height CLEARS it, so when restoring or resizing, set the size first and draw the saved pixels afterwards, never the reverse
+- When an action is refused (a missing field, an invalid value, a limit), show a visible message saying why; never fail silently
 - A [SECRET:NAME] placeholder in the request stands for a credential the creator stored in the platform vault: never write the placeholder or any key value into the app's code
 - Make sensible assumptions and never ask the user questions; if the request is unsafe or impossible as stated (for example real-money trading or live third-party data), build the closest safe, useful, self-contained version such as a simulator and say so inside the app`;
 
