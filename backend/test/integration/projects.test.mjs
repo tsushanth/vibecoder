@@ -423,8 +423,10 @@ test('llm accounting: a failing or hanging report never reaches the request; flu
 const getJson = async (p) => (await realFetch(url(p))).json();
 const echoTranslate = (calls) => (u, opts) => {
     const body = JSON.parse(opts.body); calls.push(body);
-    const input = JSON.parse(body.messages[0].content.match(/Input JSON:\n(\[.*\])\n/s)?.[1] || 'null');
-    const text = input ? JSON.stringify(input.map((o) => ({ i: o.i, label: `DE ${o.label}`, prompt: `DE ${o.prompt}` }))) : JSON.stringify([{ label: 'Ein Wort', prompt: 'Baue etwas' }]);
+    const items = [...body.messages[0].content.matchAll(/^===ITEM (\d+)===\nlabel: (.*)\nprompt: (.*)$/gm)];
+    const text = items.length
+        ? items.map((m) => `===ITEM ${m[1]}===\nlabel: DE ${m[2]}\nprompt: DE ${m[3]}`).join('\n') + '\n===END==='
+        : JSON.stringify([{ label: 'Ein Wort', prompt: 'Baue etwas' }]);
     return new Response(JSON.stringify({ content: [{ type: 'text', text }] }), { status: 200 });
 };
 
