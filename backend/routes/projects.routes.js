@@ -29,7 +29,7 @@ import { appEvents, buildEvents, sourceFromRequest } from '../lib/appEventsInsta
 import { promptLengthBucket } from '../lib/appEvents.js';
 import { buildFailureRate } from '../lib/buildFailureRateInstance.js';
 import { recordLlm } from '../lib/llmUsageInstance.js';
-import { normalizeLang, languageName, suggestionTranslator } from '../lib/suggestionI18n.js';
+import { normalizeLang, languageName, suggestionTranslator, parseIdeaList } from '../lib/suggestionI18n.js';
 import { registerDeployedApp } from '../services/appRegistry.js';
 import { captureChatSecrets, redactForLog } from '../services/chatSecrets.js';
 import { denyUnlessActor } from '../lib/actAs.js';
@@ -1630,17 +1630,8 @@ Output ONLY a JSON array of 6 objects with "label" and "prompt" keys. No markdow
         recordLlm({ model: data.model || 'claude-haiku-4-5', usage: data.usage, feature: 'plan_ideas' });
         const text = data.content?.[0]?.text || '';
 
-        // Parse JSON from response
-        const jsonMatch = text.match(/\[[\s\S]*\]/);
-        if (!jsonMatch) throw new Error('No JSON array in response');
-
-        const suggestions = JSON.parse(jsonMatch[0]);
-        if (!Array.isArray(suggestions) || suggestions.length === 0) throw new Error('Empty suggestions');
-
-        // Validate each suggestion has label and prompt
-        const valid = suggestions
-            .filter(s => s.label && s.prompt)
-            .slice(0, 6);
+        // Tolerant parse: code fences, unescaped quotes inside strings and a truncated tail no longer lose the whole batch.
+        const valid = parseIdeaList(text, 6);
 
         if (valid.length === 0) throw new Error('No valid suggestions');
 
