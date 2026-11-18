@@ -11,6 +11,11 @@
 - Fly app `vibecoder-api`: release v64 from origin/main 48089cd (PRs #117 and #118), image deployment-01M7NWTRS7CBMFG1DRAX1DRQXG (v63 = #117 alone, deployment-01M7NWQ0QTS2H9GGXSN0SQ7FXR). `npm test` 765/765. /api/health healthy; GET /api/projects/suggestions?lang=de|ja|es|hi|ar|zh returns translated items, no lang returns English as before.
 - Rollback: `flyctl releases rollback 62 -a vibecoder-api` (v62 image from the earlier entry below). Old app versions send no lang and are unaffected either way.
 
+## Backend (2026-11-17, malformed model output in idea-chip translation)
+- Fly app `vibecoder-api`: release v65 from origin/main 4e8571a (PR #122), image deployment-01M7PCWF6PRH01E5C1AQG7V29E. `npm test` 778/778. /api/health healthy; GET /api/projects/suggestions?lang=th|de|ja&count=6 returns translated items (Thai 10/10 translated at count=10).
+- Fixes the Thai/German batches that logged `Expected ',' or '}' after property value in JSON`: delimiter-format prompt, tolerant parser (fences, unescaped quotes, truncation), one retry for missing items, per-item English fallback. /suggest-ideas uses the same parser.
+- Rollback: `flyctl releases rollback 64 -a vibecoder-api`.
+
 ## 2.6.0 (versionCode 75): production, 20% staged rollout, 2026-11-16
 - Release commit (built from): 27ddee9 (tag `play/2.6.0-75`). origin/main at upload time had one later commit that only touches Play listing metadata (1410825); the Android app paths are identical (git diff 27ddee9 origin/main -- android/app is empty).
 - AAB sha256: 8496f01a9767d599d2468275d59f2815803fb3a1eeb38af24cefc9916c9b8b8f
