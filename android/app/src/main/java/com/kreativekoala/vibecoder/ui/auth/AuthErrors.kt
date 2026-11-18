@@ -54,20 +54,21 @@ object AuthErrors {
     }
 
     /** The text for the screen, or null when nothing should be shown (the person cancelled). */
+    // English log/test text only: the screen shows messageRes in the app language (literals below are marked i18n-ok).
     fun message(failure: AuthFailure, signUp: Boolean = false): String? = when (failure) {
-        AuthFailure.WrongCredentials -> "Wrong email or password"
-        AuthFailure.EmailNotConfirmed -> "Please confirm your email first. Check your inbox for the confirmation link."
-        AuthFailure.ConfirmEmailToFinish -> "Check your email to confirm your account, then sign in."
-        AuthFailure.RateLimited -> "Too many attempts. Please wait a minute and try again."
-        AuthFailure.Network -> "Can't reach the server. Check your internet connection and try again."
-        AuthFailure.WeakPassword -> "That password is too weak. Use at least 6 characters with a mix of letters and numbers."
-        AuthFailure.InvalidEmail -> "Please enter a valid email address."
-        AuthFailure.AlreadyRegistered -> "An account with this email already exists. Try signing in instead."
+        AuthFailure.WrongCredentials -> "Wrong email or password" // i18n-ok
+        AuthFailure.EmailNotConfirmed -> "Please confirm your email first. Check your inbox for the confirmation link." // i18n-ok
+        AuthFailure.ConfirmEmailToFinish -> "Check your email to confirm your account, then sign in." // i18n-ok
+        AuthFailure.RateLimited -> "Too many attempts. Please wait a minute and try again." // i18n-ok
+        AuthFailure.Network -> "Can't reach the server. Check your internet connection and try again." // i18n-ok
+        AuthFailure.WeakPassword -> "That password is too weak. Use at least 6 characters with a mix of letters and numbers." // i18n-ok
+        AuthFailure.InvalidEmail -> "Please enter a valid email address." // i18n-ok
+        AuthFailure.AlreadyRegistered -> "An account with this email already exists. Try signing in instead." // i18n-ok
         AuthFailure.GoogleCancelled -> null
-        AuthFailure.GoogleNoAccount -> "No Google account found on this device. Add one in Settings and try again."
-        AuthFailure.GoogleFailed -> "Google sign-in didn't work. Please try again."
-        AuthFailure.Server -> "Something went wrong on our side. Please try again in a moment."
-        AuthFailure.Unknown -> if (signUp) "Sign up failed. Please try again." else "Sign in failed. Please try again."
+        AuthFailure.GoogleNoAccount -> "No Google account found on this device. Add one in Settings and try again." // i18n-ok
+        AuthFailure.GoogleFailed -> "Google sign-in didn't work. Please try again." // i18n-ok
+        AuthFailure.Server -> "Something went wrong on our side. Please try again in a moment." // i18n-ok
+        AuthFailure.Unknown -> if (signUp) "Sign up failed. Please try again." else "Sign in failed. Please try again." // i18n-ok
     }
 
     fun message(e: Throwable, signUp: Boolean = false): String? = message(classify(e, signUp), signUp)

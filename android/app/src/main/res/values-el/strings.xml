@@ -389,4 +389,84 @@
     <string name="template_category_mobile_uis">Διεπαφές για κινητά</string>
     <string name="template_category_productivity">Παραγωγικότητα</string>
     <string name="template_category_visual_animation">Οπτικά / Κινούμενα σχέδια</string>
+
+    <!-- Added 2026-11-17: machine translated, needs native review -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">Όλα</string>
+    <string name="browse_filter_games">Παιχνίδια</string>
+    <string name="browse_filter_tools">Εργαλεία</string>
+    <string name="browse_filter_sites">Ιστότοποι</string>
+    <string name="browse_filter_trackers">Παρακολούθηση</string>
+    <string name="browse_sort_newest">Νεότερα</string>
+    <string name="browse_sort_popular">Δημοφιλή</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">Περισσότερα από εμάς</string>
+    <string name="promo_tagline_clearvoice">Καθαρά φωνητικά μηνύματα με καθαρισμό AI</string>
+    <string name="promo_tagline_audexa">Το προσωπικό σας ραδιόφωνο AI</string>
+    <string name="promo_tagline_readaloud">Ακούστε οποιοδήποτε άρθρο εν κινήσει</string>
+    <string name="promo_tagline_scribeai">Μεταγραφή και περίληψη οτιδήποτε</string>
+    <string name="promo_tagline_meetingmind">Αυτόματες σημειώσεις για κάθε συνάντηση</string>
+    <string name="promo_tagline_riddleverse">Καθημερινά παζλ από AI</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">Δημιουργία Εφαρμογής</string>
+    <string name="notif_channel_generation_desc">Ειδοποίηση όταν ολοκληρωθεί η δημιουργία της εφαρμογής σας</string>
+    <string name="notif_generation_ready_title">Η εφαρμογή σας είναι έτοιμη!</string>
+    <string name="notif_generation_ready_body">Πατήστε για να ανοίξετε το έργο σας στις Εφαρμογές</string>
+    <string name="notif_project_ready_title">Η «%1$s» είναι έτοιμη!</string>
+    <string name="notif_project_ready_body">Πατήστε για να ανοίξετε την εφαρμογή σας</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">Ομάδα VibeBuild</string>
+    <string name="sample_todo_title">Εφαρμογή Λίστας Εργασιών</string>
+    <string name="sample_todo_desc">Ένας απλός διαχειριστής εργασιών με κατηγορίες και προθεσμίες.</string>
+    <string name="sample_pomodoro_title">Χρονόμετρο Pomodoro</string>
+    <string name="sample_pomodoro_desc">Χρονόμετρο εστίασης με διαστήματα εργασίας και διαλείμματος.</string>
+    <string name="sample_weather_title">Πίνακας Καιρού</string>
+    <string name="sample_weather_desc">Τρέχων καιρός και πρόγνωση 5 ημερών για οποιαδήποτε πόλη.</string>
+    <string name="sample_recipes_title">Εύρεση Συνταγών</string>
+    <string name="sample_recipes_desc">Βρείτε συνταγές με υλικά που έχετε στο σπίτι.</string>
+    <string name="sample_budget_title">Παρακολούθηση Προϋπολογισμού</string>
+    <string name="sample_budget_desc">Παρακολουθήστε έξοδα και οπτικοποιήστε πού πηγαίνουν τα χρήματά σας.</string>
+    <string name="sample_quiz_title">Παιχνίδι Κουίζ</string>
+    <string name="sample_quiz_desc">Κουίζ πολλών κατηγοριών με παρακολούθηση βαθμολογίας.</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">Αποτυχία αντιγραφής: %1$s</string>
+    <string name="err_load_plans">Αδυναμία φόρτωσης πακέτων: %1$s</string>
+    <string name="err_purchase_failed">Αποτυχία αγοράς: %1$s</string>
+    <string name="err_restore_failed">Αποτυχία επαναφοράς: %1$s</string>
+    <string name="err_delete_failed">Αποτυχία διαγραφής: %1$s</string>
+    <string name="err_preview_create">Αδυναμία δημιουργίας προεπισκόπησης</string>
+    <string name="err_preview_failed">Αποτυχία προεπισκόπησης: %1$s</string>
+    <string name="err_deploy_retry">Αποτυχία δημοσίευσης. Δοκιμάστε ξανά.</string>
+    <string name="err_deploy_failed">Αποτυχία δημοσίευσης: %1$s</string>
+    <string name="err_sign_in_changes">Συνδεθείτε για να κάνετε αλλαγές</string>
+    <string name="err_failed_reason">Αποτυχία: %1$s</string>
+    <string name="err_versions_load">Αδυναμία φόρτωσης ιστορικού εκδόσεων</string>
+    <string name="err_version_restore">Αδυναμία επαναφοράς έκδοσης</string>
+    <string name="err_ads_update">Αποτυχία ενημέρωσης διαφημίσεων: %1$s</string>
+    <string name="err_sign_in_export">Συνδεθείτε για εξαγωγή APK</string>
+    <string name="err_export_failed">Αποτυχία εξαγωγής: %1$s</string>
+    <string name="err_apk_installer">Το APK αποθηκεύτηκε αλλά δεν ήταν δυνατό το άνοιγμα του προγράμματος εγκατάστασης. Ελέγξτε τον φάκελο Λήψεις.</string>
+    <string name="err_sign_in_generate">Συνδεθείτε για να δημιουργήσετε έργα</string>
+    <string name="err_sign_in_tweak">Συνδεθείτε για να τροποποιήσετε έργα</string>
+    <string name="err_no_project_tweak">Δεν υπάρχει έργο προς τροποποίηση</string>
+    <string name="err_save_before_tweak">Αποτυχία αποθήκευσης πριν την τροποποίηση: %1$s</string>
+    <string name="err_save_project">Αποτυχία αποθήκευσης έργου</string>
+    <string name="err_tweak_failed">Αποτυχία τροποποίησης: %1$s</string>
+    <string name="err_build_start">Αδυναμία έναρξης κατασκευής. Δοκιμάστε ξανά.</string>
+    <string name="err_build_failed">Η κατασκευή απέτυχε. Δοκιμάστε ξανά.</string>
+    <string name="err_build_maybe_running">Η εφαρμογή σας μπορεί ακόμα να κατασκευάζεται. Ελέγξτε τις Εφαρμογές σε λίγο.</string>
+    <string name="err_prompt_looks_like_code">Η περιγραφή σας μοιάζει με κώδικα, όχι περιγραφή εφαρμογής. Περιγράψτε την εφαρμογή που θέλετε να δημιουργήσετε με απλά λόγια.</string>
+    <string name="err_prompt_no_code">Περιγράψτε την ιδέα της εφαρμογής σας με απλά λόγια αντί για κώδικα.</string>
+    <string name="err_prompt_no_urls">Περιγράψτε την ιδέα της εφαρμογής σας με δικά σας λόγια αντί να επικολλάτε URLs.</string>
+    <string name="progress_checking_app">Έλεγχος για την εφαρμογή σας...</string>
+    <string name="progress_may_still_build">Η εφαρμογή σας μπορεί ακόμα να κατασκευάζεται</string>
+    <string name="progress_starting_build">Έναρξη κατασκευής...</string>
+    <string name="progress_applying_changes">Εφαρμογή αλλαγών...</string>
+    <string name="progress_building_android">Κατασκευή εφαρμογής Android...</string>
+    <string name="progress_saving_apk">Αποθήκευση APK...</string>
+    <string name="stt_prompt">Περιγράψτε την ιδέα της εφαρμογής σας...</string>
+    <string name="err_rate_limit">Φτάσατε το όριο για τώρα. Δοκιμάστε ξανά λίγο αργότερα.</string>
+    <string name="err_stream_empty">Κενό σώμα απάντησης</string>
+    <string name="err_stream_error">Σφάλμα ροής</string>
+    <string name="err_unknown">Άγνωστο σφάλμα</string>
 </resources>

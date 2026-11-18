@@ -14,7 +14,7 @@ class FailureReporterInterceptor : Interceptor {
             val url = chain.request().url
             FailureReporter.backendError(
                 flow = "${chain.request().method} ${url.encodedPath}",
-                message = "HTTP ${response.code} from ${url.host}",
+                message = "HTTP ${response.code} from ${url.host}", // i18n-ok: crash-report text, never shown
             )
         }
         return response

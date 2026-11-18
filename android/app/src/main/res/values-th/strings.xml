@@ -436,4 +436,84 @@
     <string name="template_category_mobile_uis">UI มือถือ</string>
     <string name="template_category_productivity">ประสิทธิภาพการทำงาน</string>
     <string name="template_category_visual_animation">ภาพ / แอนิเมชัน</string>
+
+    <!-- Added 2026-11-17: machine translated, needs native review -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">ทั้งหมด</string>
+    <string name="browse_filter_games">เกม</string>
+    <string name="browse_filter_tools">เครื่องมือ</string>
+    <string name="browse_filter_sites">เว็บไซต์</string>
+    <string name="browse_filter_trackers">ติดตาม</string>
+    <string name="browse_sort_newest">ใหม่สุด</string>
+    <string name="browse_sort_popular">ยอดนิยม</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">แอปอื่นๆ จากเรา</string>
+    <string name="promo_tagline_clearvoice">บันทึกเสียงคมชัดด้วย AI</string>
+    <string name="promo_tagline_audexa">วิทยุ AI ส่วนตัวของคุณ</string>
+    <string name="promo_tagline_readaloud">ฟังบทความใดก็ได้ระหว่างเดินทาง</string>
+    <string name="promo_tagline_scribeai">ถอดเสียงและสรุปทุกอย่าง</string>
+    <string name="promo_tagline_meetingmind">บันทึกอัตโนมัติสำหรับทุกการประชุม</string>
+    <string name="promo_tagline_riddleverse">ปริศนาใหม่จาก AI ทุกวัน</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">การสร้างแอป</string>
+    <string name="notif_channel_generation_desc">แจ้งเตือนเมื่อแอปของคุณสร้างเสร็จแล้ว</string>
+    <string name="notif_generation_ready_title">แอปของคุณพร้อมแล้ว!</string>
+    <string name="notif_generation_ready_body">แตะเพื่อเปิดโปรเจ็กต์ของคุณในแอป</string>
+    <string name="notif_project_ready_title">\"%1$s\" พร้อมแล้ว!</string>
+    <string name="notif_project_ready_body">แตะเพื่อเปิดแอปของคุณ</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">ทีม VibeBuild</string>
+    <string name="sample_todo_title">แอปรายการสิ่งที่ต้องทำ</string>
+    <string name="sample_todo_desc">ติดตามงานแบบเรียบง่าย มีหมวดหมู่และกำหนดเวลา</string>
+    <string name="sample_pomodoro_title">ตัวจับเวลา Pomodoro</string>
+    <string name="sample_pomodoro_desc">ตั้งเวลาโฟกัส มีช่วงทำงานและพักผ่อน</string>
+    <string name="sample_weather_title">แดชบอร์ดสภาพอากาศ</string>
+    <string name="sample_weather_desc">อากาศปัจจุบันและพยากรณ์ 5 วันสำหรับทุกเมือง</string>
+    <string name="sample_recipes_title">ค้นหาสูตรอาหาร</string>
+    <string name="sample_recipes_desc">หาสูตรอาหารจากวัตถุดิบที่คุณมีอยู่บ้าน</string>
+    <string name="sample_budget_title">ติดตามงบประมาณ</string>
+    <string name="sample_budget_desc">บันทึกค่าใช้จ่ายและดูว่าเงินไปอยู่ที่ไหน</string>
+    <string name="sample_quiz_title">เกมตอบคำถาม</string>
+    <string name="sample_quiz_desc">คำถามหลายหมวดหมู่ พร้อมติดตามคะแนน</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">ฟอร์กล้มเหลว: %1$s</string>
+    <string name="err_load_plans">ไม่สามารถโหลดแผนได้: %1$s</string>
+    <string name="err_purchase_failed">การซื้อล้มเหลว: %1$s</string>
+    <string name="err_restore_failed">การกู้คืนล้มเหลว: %1$s</string>
+    <string name="err_delete_failed">ไม่สามารถลบได้: %1$s</string>
+    <string name="err_preview_create">ไม่สามารถสร้างตัวอย่างได้</string>
+    <string name="err_preview_failed">ตัวอย่างล้มเหลว: %1$s</string>
+    <string name="err_deploy_retry">การเผยแพร่ล้มเหลว กรุณาลองอีกครั้ง</string>
+    <string name="err_deploy_failed">การเผยแพร่ล้มเหลว: %1$s</string>
+    <string name="err_sign_in_changes">กรุณาลงชื่อเข้าใช้เพื่อแก้ไข</string>
+    <string name="err_failed_reason">ล้มเหลว: %1$s</string>
+    <string name="err_versions_load">ไม่สามารถโหลดประวัติเวอร์ชันได้</string>
+    <string name="err_version_restore">ไม่สามารถกู้คืนเวอร์ชันได้</string>
+    <string name="err_ads_update">ไม่สามารถอัปเดตโฆษณาได้: %1$s</string>
+    <string name="err_sign_in_export">กรุณาลงชื่อเข้าใช้เพื่อส่งออก APK</string>
+    <string name="err_export_failed">การส่งออกล้มเหลว: %1$s</string>
+    <string name="err_apk_installer">บันทึก APK แล้วแต่ไม่สามารถเปิดตัวติดตั้งได้ ตรวจสอบโฟลเดอร์ดาวน์โหลดของคุณ</string>
+    <string name="err_sign_in_generate">กรุณาลงชื่อเข้าใช้เพื่อสร้างโปรเจ็กต์</string>
+    <string name="err_sign_in_tweak">กรุณาลงชื่อเข้าใช้เพื่อปรับแต่งโปรเจ็กต์</string>
+    <string name="err_no_project_tweak">ไม่มีโปรเจ็กต์ให้ปรับแต่ง</string>
+    <string name="err_save_before_tweak">ไม่สามารถบันทึกก่อนปรับแต่งได้: %1$s</string>
+    <string name="err_save_project">ไม่สามารถบันทึกโปรเจ็กต์ได้</string>
+    <string name="err_tweak_failed">การปรับแต่งล้มเหลว: %1$s</string>
+    <string name="err_build_start">ไม่สามารถเริ่มสร้างได้ กรุณาลองอีกครั้ง</string>
+    <string name="err_build_failed">การสร้างล้มเหลว กรุณาลองอีกครั้ง</string>
+    <string name="err_build_maybe_running">แอปของคุณอาจกำลังสร้างอยู่ ตรวจสอบแอปอีกครั้งในอีกสักครู่</string>
+    <string name="err_prompt_looks_like_code">คำสั่งของคุณดูเหมือนโค้ด ไม่ใช่คำอธิบายแอป กรุณาอธิบายแอปที่คุณต้องการสร้างด้วยภาษาธรรมดา</string>
+    <string name="err_prompt_no_code">กรุณาอธิบายไอเดียแอปของคุณด้วยภาษาธรรมดาแทนการใช้โค้ด</string>
+    <string name="err_prompt_no_urls">กรุณาอธิบายไอเดียแอปของคุณด้วยคำพูดของคุณเองแทนการวาง URL</string>
+    <string name="progress_checking_app">กำลังตรวจสอบแอปของคุณ...</string>
+    <string name="progress_may_still_build">แอปของคุณอาจกำลังสร้างอยู่</string>
+    <string name="progress_starting_build">กำลังเริ่มสร้าง...</string>
+    <string name="progress_applying_changes">กำลังใช้การเปลี่ยนแปลง...</string>
+    <string name="progress_building_android">กำลังสร้างแอป Android...</string>
+    <string name="progress_saving_apk">กำลังบันทึก APK...</string>
+    <string name="stt_prompt">อธิบายไอเดียแอปของคุณ...</string>
+    <string name="err_rate_limit">คุณถึงขอบเขตแล้ว กรุณาลองอีกครั้งในภายหลัง</string>
+    <string name="err_stream_empty">ไม่มีข้อมูลตอบกลับ</string>
+    <string name="err_stream_error">ข้อผิดพลาดของสตรีม</string>
+    <string name="err_unknown">ข้อผิดพลาดที่ไม่ทราบสาเหตุ</string>
 </resources>

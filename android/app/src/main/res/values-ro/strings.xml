@@ -389,4 +389,84 @@
     <string name="template_category_mobile_uis">Interfețe mobile</string>
     <string name="template_category_productivity">Productivitate</string>
     <string name="template_category_visual_animation">Vizual / Animație</string>
+
+    <!-- Added 2026-11-17: machine translated, needs native review -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">Toate</string>
+    <string name="browse_filter_games">Jocuri</string>
+    <string name="browse_filter_tools">Unelte</string>
+    <string name="browse_filter_sites">Site-uri</string>
+    <string name="browse_filter_trackers">Trackere</string>
+    <string name="browse_sort_newest">Cele mai noi</string>
+    <string name="browse_sort_popular">Populare</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">Mai multe de la noi</string>
+    <string name="promo_tagline_clearvoice">Memo-uri vocale clare cu curățare AI</string>
+    <string name="promo_tagline_audexa">Radioul tău personal AI</string>
+    <string name="promo_tagline_readaloud">Ascultă orice articol din mers</string>
+    <string name="promo_tagline_scribeai">Transcrie și rezumă orice</string>
+    <string name="promo_tagline_meetingmind">Notițe automate pentru fiecare întâlnire</string>
+    <string name="promo_tagline_riddleverse">Puzzle-uri zilnice create de AI</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">Generare aplicații</string>
+    <string name="notif_channel_generation_desc">Notifică când aplicația ta este gata</string>
+    <string name="notif_generation_ready_title">Aplicația ta este gata!</string>
+    <string name="notif_generation_ready_body">Apasă pentru a deschide proiectul în Aplicații</string>
+    <string name="notif_project_ready_title">„%1$s\" este gata!</string>
+    <string name="notif_project_ready_body">Apasă pentru a deschide aplicația</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">Echipa VibeBuild</string>
+    <string name="sample_todo_title">Aplicație listă de sarcini</string>
+    <string name="sample_todo_desc">Un tracker curat de sarcini cu categorii și termene.</string>
+    <string name="sample_pomodoro_title">Cronometru Pomodoro</string>
+    <string name="sample_pomodoro_desc">Cronometru de focalizare cu intervale de lucru și pauză.</string>
+    <string name="sample_weather_title">Panou meteo</string>
+    <string name="sample_weather_desc">Vremea curentă și prognoza pe 5 zile pentru orice oraș.</string>
+    <string name="sample_recipes_title">Căutător de rețete</string>
+    <string name="sample_recipes_desc">Găsește rețete după ingredientele pe care le ai acasă.</string>
+    <string name="sample_budget_title">Tracker de buget</string>
+    <string name="sample_budget_desc">Urmărește cheltuielile și vizualizează unde se duc banii tăi.</string>
+    <string name="sample_quiz_title">Joc trivia quiz</string>
+    <string name="sample_quiz_desc">Quiz cu mai multe categorii și urmărire scor.</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">Fork eșuat: %1$s</string>
+    <string name="err_load_plans">Nu s-au putut încărca planurile: %1$s</string>
+    <string name="err_purchase_failed">Achiziție eșuată: %1$s</string>
+    <string name="err_restore_failed">Restaurare eșuată: %1$s</string>
+    <string name="err_delete_failed">Ștergere eșuată: %1$s</string>
+    <string name="err_preview_create">Nu s-a putut crea previzualizarea</string>
+    <string name="err_preview_failed">Previzualizare eșuată: %1$s</string>
+    <string name="err_deploy_retry">Implementare eșuată. Încearcă din nou.</string>
+    <string name="err_deploy_failed">Implementare eșuată: %1$s</string>
+    <string name="err_sign_in_changes">Autentifică-te pentru a face modificări</string>
+    <string name="err_failed_reason">Eșuat: %1$s</string>
+    <string name="err_versions_load">Nu s-a putut încărca istoricul versiunilor</string>
+    <string name="err_version_restore">Nu s-a putut restaura versiunea</string>
+    <string name="err_ads_update">Actualizare anunțuri eșuată: %1$s</string>
+    <string name="err_sign_in_export">Autentifică-te pentru a exporta APK</string>
+    <string name="err_export_failed">Export eșuat: %1$s</string>
+    <string name="err_apk_installer">APK salvat, dar nu s-a putut deschide instalatorul. Verifică folderul Descărcări.</string>
+    <string name="err_sign_in_generate">Autentifică-te pentru a genera proiecte</string>
+    <string name="err_sign_in_tweak">Autentifică-te pentru a ajusta proiecte</string>
+    <string name="err_no_project_tweak">Niciun proiect de ajustat</string>
+    <string name="err_save_before_tweak">Salvare înainte de ajustare eșuată: %1$s</string>
+    <string name="err_save_project">Salvare proiect eșuată</string>
+    <string name="err_tweak_failed">Ajustare eșuată: %1$s</string>
+    <string name="err_build_start">Nu s-a putut porni construirea. Încearcă din nou.</string>
+    <string name="err_build_failed">Construirea a eșuat. Încearcă din nou.</string>
+    <string name="err_build_maybe_running">Aplicația ta se poate construi încă. Verifică Aplicații peste un minut.</string>
+    <string name="err_prompt_looks_like_code">Promptul tău arată ca și cod, nu o descriere de aplicație. Descrie aplicația pe care vrei să o construiești în limbaj simplu.</string>
+    <string name="err_prompt_no_code">Descrie ideea aplicației tale în limbaj simplu în loc de cod.</string>
+    <string name="err_prompt_no_urls">Descrie ideea aplicației tale cu propriile cuvinte în loc să lipești URL-uri.</string>
+    <string name="progress_checking_app">Se verifică aplicația ta...</string>
+    <string name="progress_may_still_build">Aplicația ta se poate construi încă</string>
+    <string name="progress_starting_build">Se pornește construirea...</string>
+    <string name="progress_applying_changes">Se aplică modificările...</string>
+    <string name="progress_building_android">Se construiește aplicația Android...</string>
+    <string name="progress_saving_apk">Se salvează APK...</string>
+    <string name="stt_prompt">Descrie ideea aplicației tale...</string>
+    <string name="err_rate_limit">Ai atins limita pentru moment. Încearcă din nou peste puțin timp.</string>
+    <string name="err_stream_empty">Corp de răspuns gol</string>
+    <string name="err_stream_error">Eroare de stream</string>
+    <string name="err_unknown">Eroare necunoscută</string>
 </resources>

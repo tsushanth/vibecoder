@@ -1,5 +1,10 @@
 package com.kreativekoala.vibecoder.ui.browse
 
+import dagger.hilt.android.qualifiers.ApplicationContext
+import android.content.Context
+import androidx.annotation.StringRes
+import com.kreativekoala.vibecoder.R
+import com.kreativekoala.vibecoder.util.appString
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kreativekoala.vibecoder.data.model.Project
@@ -13,9 +18,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class SortOption(val value: String, val label: String) {
-    NEWEST("newest", "Newest"),
-    POPULAR("popular", "Popular")
+enum class SortOption(val value: String, @StringRes val labelRes: Int) {
+    NEWEST("newest", R.string.browse_sort_newest),
+    POPULAR("popular", R.string.browse_sort_popular)
 }
 
 data class BrowseUiState(
@@ -34,6 +39,7 @@ data class BrowseUiState(
 
 @HiltViewModel
 class BrowseViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val projectRepository: ProjectRepository,
     private val authRepository: AuthRepository
 ) : ViewModel() {
@@ -61,7 +67,7 @@ class BrowseViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         // Fall back to seed content when the server returns nothing
-                        projects = projects.ifEmpty { sampleProjects },
+                        projects = projects.ifEmpty { sampleProjects() },
                         isLoading = false,
                         isRefreshing = false
                     )
@@ -70,7 +76,7 @@ class BrowseViewModel @Inject constructor(
                 // On network/auth failure, still show seed content so the page is never empty.
                 _uiState.update {
                     it.copy(
-                        projects = sampleProjects,
+                        projects = sampleProjects(),
                         isLoading = false,
                         isRefreshing = false,
                         errorMessage = null
@@ -80,27 +86,21 @@ class BrowseViewModel @Inject constructor(
         }
     }
 
-    /// Seed projects shown when the discover API returns no results.
-    private val sampleProjects: List<Project> = listOf(
-        Project(id = "sample-todo", title = "Todo List App",
-                description = "A clean task tracker with categories and due dates.",
-                creatorName = "VibeBuild Team", playCount = 1240, forkCount = 87),
-        Project(id = "sample-pomodoro", title = "Pomodoro Timer",
-                description = "Focus timer with work and break intervals.",
-                creatorName = "VibeBuild Team", playCount = 980, forkCount = 64),
-        Project(id = "sample-weather", title = "Weather Dashboard",
-                description = "Current weather and 5-day forecast for any city.",
-                creatorName = "VibeBuild Team", playCount = 870, forkCount = 52),
-        Project(id = "sample-recipes", title = "Recipe Finder",
-                description = "Find recipes by ingredients you have at home.",
-                creatorName = "VibeBuild Team", playCount = 740, forkCount = 41),
-        Project(id = "sample-budget", title = "Budget Tracker",
-                description = "Track expenses and visualize where your money goes.",
-                creatorName = "VibeBuild Team", playCount = 690, forkCount = 38),
-        Project(id = "sample-quiz", title = "Trivia Quiz Game",
-                description = "Multi-category quiz with score tracking.",
-                creatorName = "VibeBuild Team", playCount = 610, forkCount = 33)
-    )
+    /// Seed projects shown when the discover API returns no results (built per call so they follow the app language).
+    private fun sampleProjects(): List<Project> {
+        fun sample(id: String, @StringRes title: Int, @StringRes desc: Int, plays: Int, forks: Int) = Project(
+            id = id, title = appContext.appString(title), description = appContext.appString(desc),
+            creatorName = appContext.appString(R.string.sample_creator_team), playCount = plays, forkCount = forks
+        )
+        return listOf(
+            sample("sample-todo", R.string.sample_todo_title, R.string.sample_todo_desc, 1240, 87),
+            sample("sample-pomodoro", R.string.sample_pomodoro_title, R.string.sample_pomodoro_desc, 980, 64),
+            sample("sample-weather", R.string.sample_weather_title, R.string.sample_weather_desc, 870, 52),
+            sample("sample-recipes", R.string.sample_recipes_title, R.string.sample_recipes_desc, 740, 41),
+            sample("sample-budget", R.string.sample_budget_title, R.string.sample_budget_desc, 690, 38),
+            sample("sample-quiz", R.string.sample_quiz_title, R.string.sample_quiz_desc, 610, 33)
+        )
+    }
 
     fun changeSortOption(option: SortOption) {
         _uiState.update { it.copy(sortOption = option) }
@@ -130,7 +130,7 @@ class BrowseViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isForkingId = null,
-                        errorMessage = "Fork failed: ${e.message}"
+                        errorMessage = appContext.appString(R.string.err_fork_failed, e.message ?: "")
                     )
                 }
             }

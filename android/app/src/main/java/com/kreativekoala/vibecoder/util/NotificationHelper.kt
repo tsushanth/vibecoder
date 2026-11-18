@@ -15,16 +15,20 @@ object NotificationHelper {
     fun createChannel(context: Context) {
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "App Generation",
+            context.appString(R.string.notif_channel_generation_name),
             NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
-            description = "Notifies when your app is done generating"
+            description = context.appString(R.string.notif_channel_generation_desc)
         }
         val manager = context.getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(channel)
     }
 
-    fun showGenerationComplete(context: Context, title: String = "Your app is ready!", body: String = "Tap to open your project in My Apps") {
+    fun showGenerationComplete(
+        context: Context,
+        title: String = context.appString(R.string.notif_generation_ready_title),
+        body: String = context.appString(R.string.notif_generation_ready_body)
+    ) {
         val manager = context.getSystemService(NotificationManager::class.java)
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)

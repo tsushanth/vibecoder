@@ -389,4 +389,84 @@
     <string name="template_category_mobile_uis">Mobil felületek</string>
     <string name="template_category_productivity">Termelékenység</string>
     <string name="template_category_visual_animation">Vizuális / Animáció</string>
+
+    <!-- Added 2026-11-17: machine translated, needs native review -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">Összes</string>
+    <string name="browse_filter_games">Játékok</string>
+    <string name="browse_filter_tools">Eszközök</string>
+    <string name="browse_filter_sites">Oldalak</string>
+    <string name="browse_filter_trackers">Követők</string>
+    <string name="browse_sort_newest">Legújabb</string>
+    <string name="browse_sort_popular">Népszerű</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">Továbbiak tőlünk</string>
+    <string name="promo_tagline_clearvoice">Kristálytiszta hangjegyzetek AI-tisztítással</string>
+    <string name="promo_tagline_audexa">Személyes AI rádiód</string>
+    <string name="promo_tagline_readaloud">Hallgass meg bármely cikket útközben</string>
+    <string name="promo_tagline_scribeai">Írj át és foglalj össze bármit</string>
+    <string name="promo_tagline_meetingmind">Automata jegyzetek minden meetinghez</string>
+    <string name="promo_tagline_riddleverse">Napi AI-készítette rejtvények</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">App generálás</string>
+    <string name="notif_channel_generation_desc">Értesítés, amikor az apped elkészült</string>
+    <string name="notif_generation_ready_title">Az apped kész!</string>
+    <string name="notif_generation_ready_body">Koppints a projekt megnyitásához az Appok fülön</string>
+    <string name="notif_project_ready_title">„%1$s\" kész!</string>
+    <string name="notif_project_ready_body">Koppints az apped megnyitásához</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">VibeBuild Csapat</string>
+    <string name="sample_todo_title">Teendőlista app</string>
+    <string name="sample_todo_desc">Letisztult feladatkövető kategóriákkal és határidőkkel.</string>
+    <string name="sample_pomodoro_title">Pomodoro időzítő</string>
+    <string name="sample_pomodoro_desc">Fókusz időzítő munka- és szünetintervallumokkal.</string>
+    <string name="sample_weather_title">Időjárás műszerfal</string>
+    <string name="sample_weather_desc">Aktuális időjárás és 5 napos előrejelzés bármely városhoz.</string>
+    <string name="sample_recipes_title">Receptkereső</string>
+    <string name="sample_recipes_desc">Keress recepteket az otthon lévő hozzávalók alapján.</string>
+    <string name="sample_budget_title">Költségvetéskövető</string>
+    <string name="sample_budget_desc">Kövesd a kiadásokat és lásd, hova megy a pénzed.</string>
+    <string name="sample_quiz_title">Trivia kvízjáték</string>
+    <string name="sample_quiz_desc">Többkategóriás kvíz pontszámkövetéssel.</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">Elágaztatás sikertelen: %1$s</string>
+    <string name="err_load_plans">Csomagok betöltése sikertelen: %1$s</string>
+    <string name="err_purchase_failed">Vásárlás sikertelen: %1$s</string>
+    <string name="err_restore_failed">Visszaállítás sikertelen: %1$s</string>
+    <string name="err_delete_failed">Törlés sikertelen: %1$s</string>
+    <string name="err_preview_create">Előnézet létrehozása sikertelen</string>
+    <string name="err_preview_failed">Előnézet sikertelen: %1$s</string>
+    <string name="err_deploy_retry">Telepítés sikertelen. Próbáld újra.</string>
+    <string name="err_deploy_failed">Telepítés sikertelen: %1$s</string>
+    <string name="err_sign_in_changes">Jelentkezz be a módosításokhoz</string>
+    <string name="err_failed_reason">Sikertelen: %1$s</string>
+    <string name="err_versions_load">Verziótörténet betöltése sikertelen</string>
+    <string name="err_version_restore">Verzió visszaállítása sikertelen</string>
+    <string name="err_ads_update">Hirdetések frissítése sikertelen: %1$s</string>
+    <string name="err_sign_in_export">Jelentkezz be az APK exportálásához</string>
+    <string name="err_export_failed">Exportálás sikertelen: %1$s</string>
+    <string name="err_apk_installer">APK mentve, de a telepítő nem nyitható. Ellenőrizd a Letöltések mappát.</string>
+    <string name="err_sign_in_generate">Jelentkezz be projektek generálásához</string>
+    <string name="err_sign_in_tweak">Jelentkezz be projektek finomításához</string>
+    <string name="err_no_project_tweak">Nincs finomítható projekt</string>
+    <string name="err_save_before_tweak">Mentés sikertelen finomítás előtt: %1$s</string>
+    <string name="err_save_project">Projekt mentése sikertelen</string>
+    <string name="err_tweak_failed">Finomítás sikertelen: %1$s</string>
+    <string name="err_build_start">Buildelés nem indítható. Próbáld újra.</string>
+    <string name="err_build_failed">Build sikertelen. Próbáld újra.</string>
+    <string name="err_build_maybe_running">Az apped még épülhet. Nézd meg az Appok fület egy perc múlva.</string>
+    <string name="err_prompt_looks_like_code">A szöveg kódnak tűnik, nem appírásnak. Írd le az appot egyszerű nyelven.</string>
+    <string name="err_prompt_no_code">Írd le az appötleted egyszerű nyelven, kód nélkül.</string>
+    <string name="err_prompt_no_urls">Írd le az appötleted saját szavaiddal, URL-ek beillesztése nélkül.</string>
+    <string name="progress_checking_app">Apped keresése...</string>
+    <string name="progress_may_still_build">Az apped még épülhet</string>
+    <string name="progress_starting_build">Build indítása...</string>
+    <string name="progress_applying_changes">Változtatások alkalmazása...</string>
+    <string name="progress_building_android">Android app építése...</string>
+    <string name="progress_saving_apk">APK mentése...</string>
+    <string name="stt_prompt">Írd le az appötleted...</string>
+    <string name="err_rate_limit">Elérted a jelenlegi limitet. Próbáld újra később.</string>
+    <string name="err_stream_empty">Üres válasz</string>
+    <string name="err_stream_error">Stream hiba</string>
+    <string name="err_unknown">Ismeretlen hiba</string>
 </resources>

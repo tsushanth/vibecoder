@@ -436,4 +436,84 @@
     <string name="template_category_mobile_uis">Giao diện di động</string>
     <string name="template_category_productivity">Năng suất</string>
     <string name="template_category_visual_animation">Hình ảnh / Hoạt ảnh</string>
+
+    <!-- Added 2026-11-17: machine translated, needs native review -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">Tất cả</string>
+    <string name="browse_filter_games">Trò chơi</string>
+    <string name="browse_filter_tools">Công cụ</string>
+    <string name="browse_filter_sites">Trang web</string>
+    <string name="browse_filter_trackers">Theo dõi</string>
+    <string name="browse_sort_newest">Mới nhất</string>
+    <string name="browse_sort_popular">Phổ biến</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">Thêm từ chúng tôi</string>
+    <string name="promo_tagline_clearvoice">Ghi âm giọng nói rõ ràng với AI</string>
+    <string name="promo_tagline_audexa">Đài phát thanh AI cá nhân của bạn</string>
+    <string name="promo_tagline_readaloud">Nghe bất kỳ bài viết nào khi di chuyển</string>
+    <string name="promo_tagline_scribeai">Phiên âm và tóm tắt mọi thứ</string>
+    <string name="promo_tagline_meetingmind">Ghi chú tự động cho mọi cuộc họp</string>
+    <string name="promo_tagline_riddleverse">Câu đố hàng ngày do AI tạo</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">Tạo ứng dụng</string>
+    <string name="notif_channel_generation_desc">Thông báo khi ứng dụng của bạn được tạo xong</string>
+    <string name="notif_generation_ready_title">Ứng dụng của bạn đã sẵn sàng!</string>
+    <string name="notif_generation_ready_body">Nhấn để mở dự án trong Ứng dụng</string>
+    <string name="notif_project_ready_title">\"%1$s\" đã sẵn sàng!</string>
+    <string name="notif_project_ready_body">Nhấn để mở ứng dụng</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">VibeBuild Team</string>
+    <string name="sample_todo_title">Ứng dụng danh sách việc cần làm</string>
+    <string name="sample_todo_desc">Trình theo dõi nhiệm vụ gọn gàng với danh mục và hạn chót.</string>
+    <string name="sample_pomodoro_title">Bộ đếm thời gian Pomodoro</string>
+    <string name="sample_pomodoro_desc">Bộ hẹn giờ tập trung với khoảng thời gian làm việc và nghỉ.</string>
+    <string name="sample_weather_title">Bảng thời tiết</string>
+    <string name="sample_weather_desc">Thời tiết hiện tại và dự báo 5 ngày cho bất kỳ thành phố nào.</string>
+    <string name="sample_recipes_title">Tìm công thức nấu ăn</string>
+    <string name="sample_recipes_desc">Tìm công thức theo nguyên liệu bạn có ở nhà.</string>
+    <string name="sample_budget_title">Theo dõi ngân sách</string>
+    <string name="sample_budget_desc">Theo dõi chi tiêu và hình dung tiền của bạn đi đâu.</string>
+    <string name="sample_quiz_title">Trò chơi đố vui</string>
+    <string name="sample_quiz_desc">Câu đố nhiều danh mục với theo dõi điểm số.</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">Sao chép thất bại: %1$s</string>
+    <string name="err_load_plans">Không thể tải gói: %1$s</string>
+    <string name="err_purchase_failed">Mua hàng thất bại: %1$s</string>
+    <string name="err_restore_failed">Khôi phục thất bại: %1$s</string>
+    <string name="err_delete_failed">Xóa thất bại: %1$s</string>
+    <string name="err_preview_create">Không thể tạo bản xem trước</string>
+    <string name="err_preview_failed">Xem trước thất bại: %1$s</string>
+    <string name="err_deploy_retry">Triển khai thất bại. Vui lòng thử lại.</string>
+    <string name="err_deploy_failed">Triển khai thất bại: %1$s</string>
+    <string name="err_sign_in_changes">Vui lòng đăng nhập để thực hiện thay đổi</string>
+    <string name="err_failed_reason">Thất bại: %1$s</string>
+    <string name="err_versions_load">Không thể tải lịch sử phiên bản</string>
+    <string name="err_version_restore">Không thể khôi phục phiên bản</string>
+    <string name="err_ads_update">Cập nhật quảng cáo thất bại: %1$s</string>
+    <string name="err_sign_in_export">Vui lòng đăng nhập để xuất APK</string>
+    <string name="err_export_failed">Xuất thất bại: %1$s</string>
+    <string name="err_apk_installer">APK đã lưu nhưng không thể mở trình cài đặt. Kiểm tra thư mục Tải xuống.</string>
+    <string name="err_sign_in_generate">Vui lòng đăng nhập để tạo dự án</string>
+    <string name="err_sign_in_tweak">Vui lòng đăng nhập để điều chỉnh dự án</string>
+    <string name="err_no_project_tweak">Không có dự án để điều chỉnh</string>
+    <string name="err_save_before_tweak">Lưu trước khi điều chỉnh thất bại: %1$s</string>
+    <string name="err_save_project">Lưu dự án thất bại</string>
+    <string name="err_tweak_failed">Điều chỉnh thất bại: %1$s</string>
+    <string name="err_build_start">Không thể bắt đầu xây dựng. Vui lòng thử lại.</string>
+    <string name="err_build_failed">Xây dựng thất bại. Vui lòng thử lại.</string>
+    <string name="err_build_maybe_running">Ứng dụng của bạn có thể vẫn đang được xây dựng. Kiểm tra Ứng dụng sau một phút.</string>
+    <string name="err_prompt_looks_like_code">Nội dung của bạn giống mã code, không phải mô tả ứng dụng. Vui lòng mô tả ứng dụng bạn muốn xây dựng bằng ngôn ngữ thông thường.</string>
+    <string name="err_prompt_no_code">Vui lòng mô tả ý tưởng ứng dụng bằng ngôn ngữ thông thường thay vì code.</string>
+    <string name="err_prompt_no_urls">Vui lòng mô tả ý tưởng ứng dụng bằng lời của bạn thay vì dán URL.</string>
+    <string name="progress_checking_app">Đang kiểm tra ứng dụng...</string>
+    <string name="progress_may_still_build">Ứng dụng của bạn có thể vẫn đang được xây dựng</string>
+    <string name="progress_starting_build">Đang bắt đầu xây dựng...</string>
+    <string name="progress_applying_changes">Đang áp dụng thay đổi...</string>
+    <string name="progress_building_android">Đang xây dựng ứng dụng Android...</string>
+    <string name="progress_saving_apk">Đang lưu APK...</string>
+    <string name="stt_prompt">Mô tả ý tưởng ứng dụng của bạn...</string>
+    <string name="err_rate_limit">Bạn đã đạt giới hạn. Vui lòng thử lại sau.</string>
+    <string name="err_stream_empty">Nội dung phản hồi trống</string>
+    <string name="err_stream_error">Lỗi luồng dữ liệu</string>
+    <string name="err_unknown">Lỗi không xác định</string>
 </resources>

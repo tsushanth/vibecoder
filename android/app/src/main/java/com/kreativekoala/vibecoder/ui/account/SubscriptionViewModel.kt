@@ -1,5 +1,9 @@
 package com.kreativekoala.vibecoder.ui.account
 
+import dagger.hilt.android.qualifiers.ApplicationContext
+import android.content.Context
+import com.kreativekoala.vibecoder.R
+import com.kreativekoala.vibecoder.util.appString
 import android.app.Activity
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -37,6 +41,7 @@ data class SubscriptionUiState(
 
 @HiltViewModel
 class SubscriptionViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val authRepository: AuthRepository,
     private val subscriptionRepository: SubscriptionRepository
 ) : ViewModel() {
@@ -65,7 +70,7 @@ class SubscriptionViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = "Could not load plans: ${error.message}"
+                        errorMessage = appContext.appString(R.string.err_load_plans, error.message ?: "")
                     )
                 }
             },
@@ -125,7 +130,7 @@ class SubscriptionViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isPurchasing = false,
-                        errorMessage = if (userCancelled) null else "Purchase failed: ${error.message}"
+                        errorMessage = if (userCancelled) null else appContext.appString(R.string.err_purchase_failed, error.message ?: "")
                     )
                 }
             },
@@ -172,7 +177,7 @@ class SubscriptionViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = "Restore failed: ${error.message}"
+                        errorMessage = appContext.appString(R.string.err_restore_failed, error.message ?: "")
                     )
                 }
             },

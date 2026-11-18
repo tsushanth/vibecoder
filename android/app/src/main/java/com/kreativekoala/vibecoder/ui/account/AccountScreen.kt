@@ -38,7 +38,6 @@ import com.kreativekoala.vibecoder.ui.theme.*
 import com.kreativekoala.vibecoder.util.Monetization
 import com.kreativekoala.vibecoder.util.PlayStoreLinks
 import com.kreativekoala.crosspromokit.models.AppId
-import com.kreativekoala.crosspromokit.view.CrossPromoSection
 
 @Composable
 fun AccountScreen(
@@ -426,7 +425,7 @@ fun AccountScreen(
             Text(stringResource(R.string.account_delete_account), color = ErrorRed)
         }
 
-        CrossPromoSection(currentApp = AppId.VIBEBUILD)
+        MoreFromUsSection(currentApp = AppId.VIBEBUILD)
 
         Spacer(modifier = Modifier.height(32.dp))
     }

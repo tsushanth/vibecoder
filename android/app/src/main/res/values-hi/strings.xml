@@ -438,4 +438,84 @@
     <string name="template_category_mobile_uis">मोबाइल UI</string>
     <string name="template_category_productivity">उत्पादकता</string>
     <string name="template_category_visual_animation">विज़ुअल / एनिमेशन</string>
+
+    <!-- Added 2026-11-17: machine translated, needs native review -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">सभी</string>
+    <string name="browse_filter_games">गेम्स</string>
+    <string name="browse_filter_tools">टूल्स</string>
+    <string name="browse_filter_sites">साइट्स</string>
+    <string name="browse_filter_trackers">ट्रैकर्स</string>
+    <string name="browse_sort_newest">नवीनतम</string>
+    <string name="browse_sort_popular">लोकप्रिय</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">हमारे अन्य ऐप्स</string>
+    <string name="promo_tagline_clearvoice">AI क्लीनअप के साथ स्पष्ट वॉइस मेमो</string>
+    <string name="promo_tagline_audexa">आपका पर्सनल AI रेडियो</string>
+    <string name="promo_tagline_readaloud">चलते-फिरते किसी भी आर्टिकल को सुनें</string>
+    <string name="promo_tagline_scribeai">कुछ भी ट्रांसक्राइब और सारांशित करें</string>
+    <string name="promo_tagline_meetingmind">हर मीटिंग के लिए ऑटो-नोट्स</string>
+    <string name="promo_tagline_riddleverse">रोज़ाना AI-निर्मित पहेलियाँ</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">ऐप जनरेशन</string>
+    <string name="notif_channel_generation_desc">जब आपका ऐप बनकर तैयार हो तो सूचना देता है</string>
+    <string name="notif_generation_ready_title">आपका ऐप तैयार है!</string>
+    <string name="notif_generation_ready_body">ऐप्स में अपना प्रोजेक्ट खोलने के लिए टैप करें</string>
+    <string name="notif_project_ready_title">\"%1$s\" तैयार है!</string>
+    <string name="notif_project_ready_body">अपना ऐप खोलने के लिए टैप करें</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">VibeBuild टीम</string>
+    <string name="sample_todo_title">कार्य सूची ऐप</string>
+    <string name="sample_todo_desc">श्रेणियों और समय सीमा के साथ एक सरल टास्क ट्रैकर।</string>
+    <string name="sample_pomodoro_title">Pomodoro टाइमर</string>
+    <string name="sample_pomodoro_desc">काम और ब्रेक अंतराल के साथ फोकस टाइमर।</string>
+    <string name="sample_weather_title">मौसम डैशबोर्ड</string>
+    <string name="sample_weather_desc">किसी भी शहर के लिए वर्तमान मौसम और 5-दिन का पूर्वानुमान।</string>
+    <string name="sample_recipes_title">रेसिपी फाइंडर</string>
+    <string name="sample_recipes_desc">घर पर मौजूद सामग्री से रेसिपी खोजें।</string>
+    <string name="sample_budget_title">बजट ट्रैकर</string>
+    <string name="sample_budget_desc">खर्चों को ट्रैक करें और देखें कि आपका पैसा कहाँ जाता है।</string>
+    <string name="sample_quiz_title">ट्रिविया क्विज़ गेम</string>
+    <string name="sample_quiz_desc">स्कोर ट्रैकिंग के साथ मल्टी-कैटेगरी क्विज़।</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">फोर्क विफल: %1$s</string>
+    <string name="err_load_plans">प्लान लोड नहीं हो सके: %1$s</string>
+    <string name="err_purchase_failed">खरीदारी विफल: %1$s</string>
+    <string name="err_restore_failed">रिस्टोर विफल: %1$s</string>
+    <string name="err_delete_failed">डिलीट विफल: %1$s</string>
+    <string name="err_preview_create">प्रीव्यू नहीं बन सका</string>
+    <string name="err_preview_failed">प्रीव्यू विफल: %1$s</string>
+    <string name="err_deploy_retry">डिप्लॉय विफल। कृपया फिर कोशिश करें।</string>
+    <string name="err_deploy_failed">डिप्लॉय विफल: %1$s</string>
+    <string name="err_sign_in_changes">बदलाव करने के लिए कृपया साइन इन करें</string>
+    <string name="err_failed_reason">विफल: %1$s</string>
+    <string name="err_versions_load">वर्ज़न हिस्ट्री लोड नहीं हो सकी</string>
+    <string name="err_version_restore">वर्ज़न रिस्टोर नहीं हो सका</string>
+    <string name="err_ads_update">विज्ञापन अपडेट विफल: %1$s</string>
+    <string name="err_sign_in_export">APK एक्सपोर्ट करने के लिए कृपया साइन इन करें</string>
+    <string name="err_export_failed">एक्सपोर्ट विफल: %1$s</string>
+    <string name="err_apk_installer">APK सेव हो गया लेकिन इंस्टॉलर नहीं खुल सका। अपना डाउनलोड्स फोल्डर चेक करें।</string>
+    <string name="err_sign_in_generate">प्रोजेक्ट बनाने के लिए कृपया साइन इन करें</string>
+    <string name="err_sign_in_tweak">प्रोजेक्ट में बदलाव करने के लिए कृपया साइन इन करें</string>
+    <string name="err_no_project_tweak">बदलाव करने के लिए कोई प्रोजेक्ट नहीं</string>
+    <string name="err_save_before_tweak">बदलाव से पहले सेव विफल: %1$s</string>
+    <string name="err_save_project">प्रोजेक्ट सेव विफल</string>
+    <string name="err_tweak_failed">बदलाव विफल: %1$s</string>
+    <string name="err_build_start">आपका बिल्ड शुरू नहीं हो सका। कृपया फिर कोशिश करें।</string>
+    <string name="err_build_failed">बिल्ड विफल हो गया। कृपया फिर कोशिश करें।</string>
+    <string name="err_build_maybe_running">आपका ऐप अभी भी बन रहा हो सकता है। एक मिनट में ऐप्स चेक करें।</string>
+    <string name="err_prompt_looks_like_code">आपका प्रॉम्प्ट कोड जैसा लग रहा है, ऐप विवरण जैसा नहीं। कृपया सरल भाषा में ऐप का वर्णन करें।</string>
+    <string name="err_prompt_no_code">कृपया कोड की जगह सरल भाषा में अपना ऐप आइडिया बताएँ।</string>
+    <string name="err_prompt_no_urls">कृपया URL पेस्ट करने की जगह अपने शब्दों में ऐप आइडिया बताएँ।</string>
+    <string name="progress_checking_app">आपके ऐप की जाँच हो रही है...</string>
+    <string name="progress_may_still_build">आपका ऐप अभी भी बन रहा हो सकता है</string>
+    <string name="progress_starting_build">आपका बिल्ड शुरू हो रहा है...</string>
+    <string name="progress_applying_changes">बदलाव लागू हो रहे हैं...</string>
+    <string name="progress_building_android">Android ऐप बन रहा है...</string>
+    <string name="progress_saving_apk">APK सेव हो रहा है...</string>
+    <string name="stt_prompt">अपने ऐप का आइडिया बताएँ...</string>
+    <string name="err_rate_limit">आप अभी की सीमा तक पहुँच गए हैं। कृपया थोड़ी देर बाद फिर कोशिश करें।</string>
+    <string name="err_stream_empty">रिस्पॉन्स बॉडी खाली है</string>
+    <string name="err_stream_error">स्ट्रीम त्रुटि</string>
+    <string name="err_unknown">अज्ञात त्रुटि</string>
 </resources>

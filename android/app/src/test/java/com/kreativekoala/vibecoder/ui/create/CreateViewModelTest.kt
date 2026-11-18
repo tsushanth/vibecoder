@@ -85,6 +85,9 @@ class CreateViewModelTest {
         mockkObject(NotificationHelper)
         every { NotificationHelper.showGenerationComplete(any(), any(), any()) } just Runs
         every { context.getSharedPreferences(any(), any()) } answers { prefs(firstArg()) }
+        // user-visible text comes from string resources; the fake returns the resource id so tests can tell which one was used
+        every { context.getString(any<Int>()) } answers { "res:${firstArg<Int>()}" }
+        every { context.getString(any<Int>(), *anyVararg()) } answers { "res:${firstArg<Int>()}" }
         every { auth.currentUser } returns AuthUser("u1", "a@b.c", "Ann", null)
         every { templates.all() } returns emptyList()
         every { userPrefs.pendingGenerationPrompt } returns flowOf(null)
@@ -260,7 +263,7 @@ class CreateViewModelTest {
         every { auth.currentUser } returns null
         val vm = vm(); startBuild(vm)
         assertEquals(ChatStage.Idle, vm.uiState.value.chatStage)
-        assertEquals("Please sign in to generate projects", vm.uiState.value.errorMessage)
+        assertEquals("res:${com.kreativekoala.vibecoder.R.string.err_sign_in_generate}", vm.uiState.value.errorMessage)
     }
 
     // ---------- progress polling ----------

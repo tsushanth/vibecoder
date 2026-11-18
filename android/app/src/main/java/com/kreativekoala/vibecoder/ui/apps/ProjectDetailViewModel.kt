@@ -1,5 +1,7 @@
 package com.kreativekoala.vibecoder.ui.apps
 
+import com.kreativekoala.vibecoder.R
+import com.kreativekoala.vibecoder.util.appString
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -126,13 +128,13 @@ class ProjectDetailViewModel @Inject constructor(
                     }
                 } else {
                     _uiState.update {
-                        it.copy(isLoadingPreview = false, errorMessage = "Could not create preview")
+                        it.copy(isLoadingPreview = false, errorMessage = appContext.appString(R.string.err_preview_create))
                     }
                 }
             } catch (e: Exception) {
                 Log.e("ProjectDetail", "Auto-deploy preview failed: ${e.message}", e)
                 _uiState.update {
-                    it.copy(isLoadingPreview = false, errorMessage = "Preview failed: ${e.message}")
+                    it.copy(isLoadingPreview = false, errorMessage = appContext.appString(R.string.err_preview_failed, e.message ?: ""))
                 }
             }
         }
@@ -176,16 +178,16 @@ class ProjectDetailViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isDeploying = false,
-                            errorMessage = "Deploy failed. Please try again."
+                            errorMessage = appContext.appString(R.string.err_deploy_retry)
                         )
                     }
                 }
             } catch (e: Exception) {
-                Log.e("ProjectDetail", "Deploy failed: ${e.message}", e)
+                Log.e("ProjectDetail", appContext.appString(R.string.err_deploy_failed, e.message ?: ""), e)
                 _uiState.update {
                     it.copy(
                         isDeploying = false,
-                        errorMessage = "Deploy failed: ${e.message}"
+                        errorMessage = appContext.appString(R.string.err_deploy_failed, e.message ?: "")
                     )
                 }
             }
@@ -219,12 +221,12 @@ class ProjectDetailViewModel @Inject constructor(
 
         val projectId = _uiState.value.project?.id ?: return
         val userId = authRepository.currentUser?.uid ?: run {
-            _uiState.update { it.copy(errorMessage = "Please sign in to make changes") }
+            _uiState.update { it.copy(errorMessage = appContext.appString(R.string.err_sign_in_changes)) }
             return
         }
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isTweaking = true, tweakPhase = "Applying changes...") }
+            _uiState.update { it.copy(isTweaking = true, tweakPhase = appContext.appString(R.string.progress_applying_changes)) }
 
             try {
                 projectRepository.tweak(
@@ -261,7 +263,7 @@ class ProjectDetailViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(isTweaking = false, tweakPhase = "", errorMessage = "Failed: ${e.message}")
+                    it.copy(isTweaking = false, tweakPhase = "", errorMessage = appContext.appString(R.string.err_failed_reason, e.message ?: ""))
                 }
             }
         }
@@ -314,7 +316,7 @@ class ProjectDetailViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoadingVersions = false,
-                        errorMessage = "Could not load version history"
+                        errorMessage = appContext.appString(R.string.err_versions_load)
                     )
                 }
             }
@@ -351,12 +353,12 @@ class ProjectDetailViewModel @Inject constructor(
                     }
                 } else {
                     _uiState.update {
-                        it.copy(isReverting = false, errorMessage = "Could not restore version")
+                        it.copy(isReverting = false, errorMessage = appContext.appString(R.string.err_version_restore))
                     }
                 }
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(isReverting = false, errorMessage = "Restore failed: ${e.message}")
+                    it.copy(isReverting = false, errorMessage = appContext.appString(R.string.err_restore_failed, e.message ?: ""))
                 }
             }
         }
@@ -374,7 +376,7 @@ class ProjectDetailViewModel @Inject constructor(
                 _uiState.update { it.copy(adsEnabled = response.adsEnabled) }
             } catch (e: Exception) {
                 Log.e("ProjectDetail", "Toggle ads failed: ${e.message}")
-                _uiState.update { it.copy(errorMessage = "Failed to update ads: ${e.message}") }
+                _uiState.update { it.copy(errorMessage = appContext.appString(R.string.err_ads_update, e.message ?: "")) }
             }
         }
     }
@@ -384,21 +386,22 @@ class ProjectDetailViewModel @Inject constructor(
     fun exportApk() {
         val project = _uiState.value.project ?: return
         val userId = authRepository.currentUser?.uid ?: run {
-            _uiState.update { it.copy(errorMessage = "Please sign in to export APK") }
+            _uiState.update { it.copy(errorMessage = appContext.appString(R.string.err_sign_in_export)) }
             return
         }
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isExportingApk = true, apkExportProgress = "Building Android app...") }
+            _uiState.update { it.copy(isExportingApk = true, apkExportProgress = appContext.appString(R.string.progress_building_android)) }
 
             try {
                 val response = projectRepository.exportApk(project.id, userId, project.bundle)
                 if (response.success && response.apk != null) {
-                    _uiState.update { it.copy(apkExportProgress = "Saving APK...") }
+                    _uiState.update { it.copy(apkExportProgress = appContext.appString(R.string.progress_saving_apk)) }
 
                     // Save APK to Downloads
                     val bytes = android.util.Base64.decode(response.apk, android.util.Base64.DEFAULT)
-                    val fileName = "${project.title.replace(Regex("[^a-zA-Z0-9 ]"), "").trim().replace(" ", "_")}.apk"
+                    // Latin letters and digits only; a title in another script (Thai, Arabic, CJK) would otherwise give a nameless ".apk"
+                    val fileName = "${project.title.replace(Regex("[^a-zA-Z0-9 ]"), "").trim().replace(" ", "_").ifBlank { "app" }}.apk" // i18n-ok: file name
                     val downloadsDir = appContext.getExternalFilesDir(android.os.Environment.DIRECTORY_DOWNLOADS)
                     val apkFile = java.io.File(downloadsDir, fileName)
                     apkFile.writeBytes(bytes)
@@ -430,7 +433,7 @@ class ProjectDetailViewModel @Inject constructor(
                     it.copy(
                         isExportingApk = false,
                         apkExportProgress = "",
-                        errorMessage = "Export failed: ${e.message}"
+                        errorMessage = appContext.appString(R.string.err_export_failed, e.message ?: "")
                     )
                 }
             }
@@ -452,7 +455,7 @@ class ProjectDetailViewModel @Inject constructor(
             appContext.startActivity(intent)
         } catch (e: Exception) {
             Log.e("ProjectDetail", "Install APK failed: ${e.message}", e)
-            _uiState.update { it.copy(errorMessage = "APK saved but could not open installer. Check your Downloads folder.") }
+            _uiState.update { it.copy(errorMessage = appContext.appString(R.string.err_apk_installer)) }
         }
     }
 }

@@ -1,14 +1,16 @@
 package com.kreativekoala.vibecoder.ui.browse
 
+import com.kreativekoala.vibecoder.R
+import androidx.annotation.StringRes
 import com.kreativekoala.vibecoder.data.model.Project
 
 /** Client-side Browse categories. ALL is a filter only; classify() never returns it. */
-enum class ProjectCategory(val label: String) {
-    ALL("All"),
-    GAMES("Games"),
-    TOOLS("Tools"),
-    SITES("Sites"),
-    TRACKERS("Trackers")
+enum class ProjectCategory(@StringRes val labelRes: Int) {
+    ALL(R.string.browse_filter_all),
+    GAMES(R.string.browse_filter_games),
+    TOOLS(R.string.browse_filter_tools),
+    SITES(R.string.browse_filter_sites),
+    TRACKERS(R.string.browse_filter_trackers)
 }
 
 private val gameKeywords = listOf(

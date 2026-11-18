@@ -436,4 +436,84 @@
     <string name="template_category_mobile_uis">Mobiele interfaces</string>
     <string name="template_category_productivity">Productiviteit</string>
     <string name="template_category_visual_animation">Visueel / animatie</string>
+
+    <!-- Added 2026-11-17: machine translated, needs native review -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">Alles</string>
+    <string name="browse_filter_games">Spelletjes</string>
+    <string name="browse_filter_tools">Hulpmiddelen</string>
+    <string name="browse_filter_sites">Sites</string>
+    <string name="browse_filter_trackers">Trackers</string>
+    <string name="browse_sort_newest">Nieuwste</string>
+    <string name="browse_sort_popular">Populair</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">Meer van ons</string>
+    <string name="promo_tagline_clearvoice">Heldere spraaknotities met AI-opschoning</string>
+    <string name="promo_tagline_audexa">Uw persoonlijke AI-radio</string>
+    <string name="promo_tagline_readaloud">Luister onderweg naar elk artikel</string>
+    <string name="promo_tagline_scribeai">Transcribeer en vat alles samen</string>
+    <string name="promo_tagline_meetingmind">Auto-notities voor elke vergadering</string>
+    <string name="promo_tagline_riddleverse">Dagelijkse AI-puzzels</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">App-generatie</string>
+    <string name="notif_channel_generation_desc">Meldt wanneer uw app klaar is</string>
+    <string name="notif_generation_ready_title">Uw app is klaar!</string>
+    <string name="notif_generation_ready_body">Tik om uw project te openen in Apps</string>
+    <string name="notif_project_ready_title">\"%1$s\" is klaar!</string>
+    <string name="notif_project_ready_body">Tik om uw app te openen</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">VibeBuild-team</string>
+    <string name="sample_todo_title">Takenlijst-app</string>
+    <string name="sample_todo_desc">Een overzichtelijke takentracker met categorieën en deadlines.</string>
+    <string name="sample_pomodoro_title">Pomodoro-timer</string>
+    <string name="sample_pomodoro_desc">Focustimer met werk- en pauze-intervallen.</string>
+    <string name="sample_weather_title">Weerdashboard</string>
+    <string name="sample_weather_desc">Actueel weer en 5-daagse voorspelling voor elke stad.</string>
+    <string name="sample_recipes_title">Receptenzoeker</string>
+    <string name="sample_recipes_desc">Vind recepten op basis van ingrediënten die u thuis hebt.</string>
+    <string name="sample_budget_title">Budgettracker</string>
+    <string name="sample_budget_desc">Houd uitgaven bij en visualiseer waar uw geld naartoe gaat.</string>
+    <string name="sample_quiz_title">Trivia-quizspel</string>
+    <string name="sample_quiz_desc">Quiz met meerdere categorieën en scorebijhouden.</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">Fork mislukt: %1$s</string>
+    <string name="err_load_plans">Kan abonnementen niet laden: %1$s</string>
+    <string name="err_purchase_failed">Aankoop mislukt: %1$s</string>
+    <string name="err_restore_failed">Herstel mislukt: %1$s</string>
+    <string name="err_delete_failed">Verwijderen mislukt: %1$s</string>
+    <string name="err_preview_create">Kan voorvertoning niet maken</string>
+    <string name="err_preview_failed">Voorvertoning mislukt: %1$s</string>
+    <string name="err_deploy_retry">Implementatie mislukt. Probeer het opnieuw.</string>
+    <string name="err_deploy_failed">Implementatie mislukt: %1$s</string>
+    <string name="err_sign_in_changes">Meld u aan om wijzigingen aan te brengen</string>
+    <string name="err_failed_reason">Mislukt: %1$s</string>
+    <string name="err_versions_load">Kan versiegeschiedenis niet laden</string>
+    <string name="err_version_restore">Kan versie niet herstellen</string>
+    <string name="err_ads_update">Advertenties bijwerken mislukt: %1$s</string>
+    <string name="err_sign_in_export">Meld u aan om APK te exporteren</string>
+    <string name="err_export_failed">Export mislukt: %1$s</string>
+    <string name="err_apk_installer">APK opgeslagen maar installatieprogramma kan niet worden geopend. Controleer uw map Downloads.</string>
+    <string name="err_sign_in_generate">Meld u aan om projecten te genereren</string>
+    <string name="err_sign_in_tweak">Meld u aan om projecten aan te passen</string>
+    <string name="err_no_project_tweak">Geen project om aan te passen</string>
+    <string name="err_save_before_tweak">Opslaan voor aanpassing mislukt: %1$s</string>
+    <string name="err_save_project">Project opslaan mislukt</string>
+    <string name="err_tweak_failed">Aanpassing mislukt: %1$s</string>
+    <string name="err_build_start">Kan uw build niet starten. Probeer het opnieuw.</string>
+    <string name="err_build_failed">De build is mislukt. Probeer het opnieuw.</string>
+    <string name="err_build_maybe_running">Uw app wordt mogelijk nog gebouwd. Controleer Apps over een minuut.</string>
+    <string name="err_prompt_looks_like_code">Uw invoer lijkt op code, niet op een app-beschrijving. Beschrijf de app die u wilt bouwen in gewone taal.</string>
+    <string name="err_prompt_no_code">Beschrijf uw app-idee in gewone taal in plaats van code.</string>
+    <string name="err_prompt_no_urls">Beschrijf uw app-idee in uw eigen woorden in plaats van URL\'s te plakken.</string>
+    <string name="progress_checking_app">Controleren op uw app...</string>
+    <string name="progress_may_still_build">Uw app wordt mogelijk nog gebouwd</string>
+    <string name="progress_starting_build">Uw build starten...</string>
+    <string name="progress_applying_changes">Wijzigingen toepassen...</string>
+    <string name="progress_building_android">Android-app bouwen...</string>
+    <string name="progress_saving_apk">APK opslaan...</string>
+    <string name="stt_prompt">Beschrijf uw app-idee...</string>
+    <string name="err_rate_limit">U hebt de limiet voor nu bereikt. Probeer het later opnieuw.</string>
+    <string name="err_stream_empty">Lege responsbody</string>
+    <string name="err_stream_error">Streamfout</string>
+    <string name="err_unknown">Onbekende fout</string>
 </resources>

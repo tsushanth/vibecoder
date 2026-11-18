@@ -1,5 +1,7 @@
 package com.kreativekoala.vibecoder.ui.browse
 
+import com.kreativekoala.vibecoder.R
+import com.kreativekoala.vibecoder.util.appString
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -87,7 +89,7 @@ class ProjectPreviewViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isForkingProject = false,
-                        errorMessage = "Fork failed: ${e.message}"
+                        errorMessage = appContext.appString(R.string.err_fork_failed, e.message ?: "")
                     )
                 }
             }

@@ -436,4 +436,84 @@
     <string name="template_category_mobile_uis">Mobil Arayüzler</string>
     <string name="template_category_productivity">Üretkenlik</string>
     <string name="template_category_visual_animation">Görsel / Animasyon</string>
+
+    <!-- Added 2026-11-17: machine translated, needs native review -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">Tümü</string>
+    <string name="browse_filter_games">Oyunlar</string>
+    <string name="browse_filter_tools">Araçlar</string>
+    <string name="browse_filter_sites">Siteler</string>
+    <string name="browse_filter_trackers">Takipçiler</string>
+    <string name="browse_sort_newest">En Yeni</string>
+    <string name="browse_sort_popular">Popüler</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">Bizden daha fazlası</string>
+    <string name="promo_tagline_clearvoice">AI temizliği ile net sesli notlar</string>
+    <string name="promo_tagline_audexa">Kişisel AI radyonuz</string>
+    <string name="promo_tagline_readaloud">Hareket halindeyken herhangi bir makaleyi dinleyin</string>
+    <string name="promo_tagline_scribeai">Her şeyi yazıya dökün ve özetleyin</string>
+    <string name="promo_tagline_meetingmind">Her toplantı için otomatik notlar</string>
+    <string name="promo_tagline_riddleverse">Günlük AI yapımı bulmacalar</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">Uygulama Oluşturma</string>
+    <string name="notif_channel_generation_desc">Uygulamanız oluşturulduğunda bildirir</string>
+    <string name="notif_generation_ready_title">Uygulamanız hazır!</string>
+    <string name="notif_generation_ready_body">Uygulamalar\'da projenizi açmak için dokunun</string>
+    <string name="notif_project_ready_title">\"%1$s\" hazır!</string>
+    <string name="notif_project_ready_body">Uygulamanızı açmak için dokunun</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">VibeBuild Ekibi</string>
+    <string name="sample_todo_title">Yapılacaklar Listesi Uygulaması</string>
+    <string name="sample_todo_desc">Kategoriler ve son tarihlerle temiz görev takipçisi.</string>
+    <string name="sample_pomodoro_title">Pomodoro Zamanlayıcı</string>
+    <string name="sample_pomodoro_desc">Çalışma ve mola aralıklarıyla odaklanma zamanlayıcısı.</string>
+    <string name="sample_weather_title">Hava Durumu Panosu</string>
+    <string name="sample_weather_desc">Herhangi bir şehir için güncel hava durumu ve 5 günlük tahmin.</string>
+    <string name="sample_recipes_title">Tarif Bulucu</string>
+    <string name="sample_recipes_desc">Evdeki malzemelerinizle tarif bulun.</string>
+    <string name="sample_budget_title">Bütçe Takipçisi</string>
+    <string name="sample_budget_desc">Harcamaları takip edin ve paranızın nereye gittiğini görselleştirin.</string>
+    <string name="sample_quiz_title">Bilgi Yarışması Oyunu</string>
+    <string name="sample_quiz_desc">Puan takibi ile çok kategorili yarışma.</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">Çatallanma başarısız: %1$s</string>
+    <string name="err_load_plans">Planlar yüklenemedi: %1$s</string>
+    <string name="err_purchase_failed">Satın alma başarısız: %1$s</string>
+    <string name="err_restore_failed">Geri yükleme başarısız: %1$s</string>
+    <string name="err_delete_failed">Silme başarısız: %1$s</string>
+    <string name="err_preview_create">Önizleme oluşturulamadı</string>
+    <string name="err_preview_failed">Önizleme başarısız: %1$s</string>
+    <string name="err_deploy_retry">Dağıtım başarısız. Lütfen tekrar deneyin.</string>
+    <string name="err_deploy_failed">Dağıtım başarısız: %1$s</string>
+    <string name="err_sign_in_changes">Değişiklik yapmak için lütfen giriş yapın</string>
+    <string name="err_failed_reason">Başarısız: %1$s</string>
+    <string name="err_versions_load">Sürüm geçmişi yüklenemedi</string>
+    <string name="err_version_restore">Sürüm geri yüklenemedi</string>
+    <string name="err_ads_update">Reklamlar güncellenemedi: %1$s</string>
+    <string name="err_sign_in_export">APK dışa aktarmak için lütfen giriş yapın</string>
+    <string name="err_export_failed">Dışa aktarma başarısız: %1$s</string>
+    <string name="err_apk_installer">APK kaydedildi ancak yükleyici açılamadı. İndirilenler klasörünüzü kontrol edin.</string>
+    <string name="err_sign_in_generate">Proje oluşturmak için lütfen giriş yapın</string>
+    <string name="err_sign_in_tweak">Projeleri ayarlamak için lütfen giriş yapın</string>
+    <string name="err_no_project_tweak">Ayarlanacak proje yok</string>
+    <string name="err_save_before_tweak">Ayarlamadan önce kaydetme başarısız: %1$s</string>
+    <string name="err_save_project">Proje kaydedilemedi</string>
+    <string name="err_tweak_failed">Ayarlama başarısız: %1$s</string>
+    <string name="err_build_start">Derleme başlatılamadı. Lütfen tekrar deneyin.</string>
+    <string name="err_build_failed">Derleme başarısız. Lütfen tekrar deneyin.</string>
+    <string name="err_build_maybe_running">Uygulamanız hâlâ derlenmeye devam ediyor olabilir. Bir dakika içinde Uygulamalar\'ı kontrol edin.</string>
+    <string name="err_prompt_looks_like_code">İsteğiniz bir uygulama açıklaması değil, kod gibi görünüyor. Lütfen oluşturmak istediğiniz uygulamayı sade dille açıklayın.</string>
+    <string name="err_prompt_no_code">Lütfen uygulama fikrinizi kod yerine sade dille açıklayın.</string>
+    <string name="err_prompt_no_urls">Lütfen URL yapıştırmak yerine uygulama fikrinizi kendi sözlerinizle açıklayın.</string>
+    <string name="progress_checking_app">Uygulamanız kontrol ediliyor...</string>
+    <string name="progress_may_still_build">Uygulamanız hâlâ derleniyor olabilir</string>
+    <string name="progress_starting_build">Derleme başlatılıyor...</string>
+    <string name="progress_applying_changes">Değişiklikler uygulanıyor...</string>
+    <string name="progress_building_android">Android uygulaması derleniyor...</string>
+    <string name="progress_saving_apk">APK kaydediliyor...</string>
+    <string name="stt_prompt">Uygulama fikrinizi açıklayın...</string>
+    <string name="err_rate_limit">Şimdilik sınıra ulaştınız. Lütfen biraz sonra tekrar deneyin.</string>
+    <string name="err_stream_empty">Boş yanıt gövdesi</string>
+    <string name="err_stream_error">Akış hatası</string>
+    <string name="err_unknown">Bilinmeyen hata</string>
 </resources>

@@ -438,4 +438,84 @@
     <string name="template_category_mobile_uis">Mobile UIs</string>
     <string name="template_category_productivity">Produktivität</string>
     <string name="template_category_visual_animation">Visuelles / Animation</string>
+
+    <!-- Added 2026-11-17: machine translated, needs native review -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">Alle</string>
+    <string name="browse_filter_games">Spiele</string>
+    <string name="browse_filter_tools">Tools</string>
+    <string name="browse_filter_sites">Websites</string>
+    <string name="browse_filter_trackers">Tracker</string>
+    <string name="browse_sort_newest">Neueste</string>
+    <string name="browse_sort_popular">Beliebt</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">Mehr von uns</string>
+    <string name="promo_tagline_clearvoice">Klare Sprachmemos mit KI-Bereinigung</string>
+    <string name="promo_tagline_audexa">Dein persönliches KI-Radio</string>
+    <string name="promo_tagline_readaloud">Artikel unterwegs anhören</string>
+    <string name="promo_tagline_scribeai">Alles transkribieren und zusammenfassen</string>
+    <string name="promo_tagline_meetingmind">Auto-Notizen für jedes Meeting</string>
+    <string name="promo_tagline_riddleverse">Täglich neue KI-Rätsel</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">App-Erstellung</string>
+    <string name="notif_channel_generation_desc">Benachrichtigt, wenn deine App fertig ist</string>
+    <string name="notif_generation_ready_title">Deine App ist fertig!</string>
+    <string name="notif_generation_ready_body">Tippen, um dein Projekt in Apps zu öffnen</string>
+    <string name="notif_project_ready_title">„%1$s“ ist fertig!</string>
+    <string name="notif_project_ready_body">Tippen, um deine App zu öffnen</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">VibeBuild-Team</string>
+    <string name="sample_todo_title">Aufgabenliste</string>
+    <string name="sample_todo_desc">Ein übersichtlicher Aufgaben-Tracker mit Kategorien und Fälligkeitsdaten.</string>
+    <string name="sample_pomodoro_title">Pomodoro-Timer</string>
+    <string name="sample_pomodoro_desc">Fokus-Timer mit Arbeits- und Pausenintervallen.</string>
+    <string name="sample_weather_title">Wetter-Dashboard</string>
+    <string name="sample_weather_desc">Aktuelles Wetter und 5-Tage-Vorhersage für jede Stadt.</string>
+    <string name="sample_recipes_title">Rezeptfinder</string>
+    <string name="sample_recipes_desc">Finde Rezepte mit Zutaten, die du zu Hause hast.</string>
+    <string name="sample_budget_title">Budget-Tracker</string>
+    <string name="sample_budget_desc">Verfolge Ausgaben und visualisiere, wohin dein Geld geht.</string>
+    <string name="sample_quiz_title">Trivia-Quiz</string>
+    <string name="sample_quiz_desc">Quiz mit mehreren Kategorien und Punktestand.</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">Fork fehlgeschlagen: %1$s</string>
+    <string name="err_load_plans">Pläne konnten nicht geladen werden: %1$s</string>
+    <string name="err_purchase_failed">Kauf fehlgeschlagen: %1$s</string>
+    <string name="err_restore_failed">Wiederherstellung fehlgeschlagen: %1$s</string>
+    <string name="err_delete_failed">Löschen fehlgeschlagen: %1$s</string>
+    <string name="err_preview_create">Vorschau konnte nicht erstellt werden</string>
+    <string name="err_preview_failed">Vorschau fehlgeschlagen: %1$s</string>
+    <string name="err_deploy_retry">Bereitstellung fehlgeschlagen. Bitte erneut versuchen.</string>
+    <string name="err_deploy_failed">Bereitstellung fehlgeschlagen: %1$s</string>
+    <string name="err_sign_in_changes">Bitte anmelden, um Änderungen vorzunehmen</string>
+    <string name="err_failed_reason">Fehlgeschlagen: %1$s</string>
+    <string name="err_versions_load">Versionsverlauf konnte nicht geladen werden</string>
+    <string name="err_version_restore">Version konnte nicht wiederhergestellt werden</string>
+    <string name="err_ads_update">Anzeigen-Update fehlgeschlagen: %1$s</string>
+    <string name="err_sign_in_export">Bitte anmelden, um APK zu exportieren</string>
+    <string name="err_export_failed">Export fehlgeschlagen: %1$s</string>
+    <string name="err_apk_installer">APK gespeichert, aber Installer konnte nicht geöffnet werden. Prüfe deinen Downloads-Ordner.</string>
+    <string name="err_sign_in_generate">Bitte anmelden, um Projekte zu erstellen</string>
+    <string name="err_sign_in_tweak">Bitte anmelden, um Projekte anzupassen</string>
+    <string name="err_no_project_tweak">Kein Projekt zum Anpassen</string>
+    <string name="err_save_before_tweak">Speichern vor Anpassung fehlgeschlagen: %1$s</string>
+    <string name="err_save_project">Projekt konnte nicht gespeichert werden</string>
+    <string name="err_tweak_failed">Anpassung fehlgeschlagen: %1$s</string>
+    <string name="err_build_start">Build konnte nicht gestartet werden. Bitte erneut versuchen.</string>
+    <string name="err_build_failed">Build fehlgeschlagen. Bitte erneut versuchen.</string>
+    <string name="err_build_maybe_running">Deine App wird möglicherweise noch erstellt. Prüfe Apps in einer Minute.</string>
+    <string name="err_prompt_looks_like_code">Deine Eingabe sieht wie Code aus, nicht wie eine App-Beschreibung. Bitte beschreibe die App, die du erstellen möchtest, in normaler Sprache.</string>
+    <string name="err_prompt_no_code">Bitte beschreibe deine App-Idee in normaler Sprache statt in Code.</string>
+    <string name="err_prompt_no_urls">Bitte beschreibe deine App-Idee in eigenen Worten statt URLs einzufügen.</string>
+    <string name="progress_checking_app">Suche nach deiner App...</string>
+    <string name="progress_may_still_build">Deine App wird möglicherweise noch erstellt</string>
+    <string name="progress_starting_build">Starte Build...</string>
+    <string name="progress_applying_changes">Wende Änderungen an...</string>
+    <string name="progress_building_android">Erstelle Android-App...</string>
+    <string name="progress_saving_apk">Speichere APK...</string>
+    <string name="stt_prompt">Beschreibe deine App-Idee...</string>
+    <string name="err_rate_limit">Du hast das Limit vorerst erreicht. Bitte versuche es etwas später erneut.</string>
+    <string name="err_stream_empty">Leere Antwort</string>
+    <string name="err_stream_error">Stream-Fehler</string>
+    <string name="err_unknown">Unbekannter Fehler</string>
 </resources>
