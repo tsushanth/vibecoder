@@ -1,5 +1,9 @@
 # Deployed releases (Play)
 
+## 2026-11-21 Web (vibebuild.cc, Fly `vibebuild-web`): Gaugemint visit counter on public marketing pages (#125)
+- Release v33 (previous v32, 2026-11-10), built from `origin/main` at `bba9478` (squash merge of #125) with `flyctl deploy --remote-only` from `web/` of a clean detached worktree. The previous image had no commit label, so the web tree it was built from is inferred (the live `/privacy` still had the pre-#106 text): this deploy therefore also shipped #106's `privacy/page.tsx` and `delete-account/page.tsx` copy (account deletion and AI providers; its backend and worker parts were live since 2026-11-17). The only other `web/` change in the range was none.
+- Verified live in a real browser: the home page injects `<script data-domain="vibebuild.cc" src="https://guagemint.com/js/script.js">` (absent from server HTML by design: next/script afterInteractive); `/login` and `/signup` load none; the privacy page carries the new sentence about Gaugemint (own visit counter, no cookies, no IP stored). Checked before merge: 12 app and auth routes do not load it. The site is registered in the Gaugemint ops account. The script honours Do Not Track and Global Privacy Control.
+
 ## 2.7.0 (versionCode 76): production, 20% staged rollout, 2026-11-17
 - Built from origin/main c5c5ace (tag `play/2.7.0-76`), clean tree. AAB sha256: 59c071bf2314daacc8a4639b923a3471197374be454cdab0417db7887572f8cb
 - Play production track read back after commit: 2.7.0 (76) inProgress userFraction 0.2; 2.6.0 (75) completed.
