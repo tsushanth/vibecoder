@@ -1,7 +1,12 @@
 import Link from 'next/link';
+import Script from 'next/script';
 import { ALL_FREE } from '@/lib/pricing';
 
 // Header and footer of the public pages (landing, about, faq, blog, browse, legal). Same palette and logo as the app.
+//
+// The footer also carries the Gaugemint tag (our own cookieless visit counter). Keep it here and nowhere else: this
+// component is rendered only by public marketing pages, so signed-in app screens and auth pages never load it on a
+// direct visit. Do not move it into the root layout.
 
 export function MarketingHeader() {
   return (
@@ -28,6 +33,7 @@ export function MarketingHeader() {
 export function MarketingFooter() {
   return (
     <footer className="border-t border-border px-5 pb-28 pt-10 sm:px-6 md:pb-10">
+      <Script id="gaugemint" defer data-domain="vibebuild.cc" src="https://guagemint.com/js/script.js" strategy="afterInteractive" />
       <div className="mx-auto flex max-w-6xl flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <Link href="/" className="flex items-center gap-2 font-display text-base font-semibold text-foreground">
           <img src="/favicon-32x32.png" alt="" className="h-5 w-5 rounded" />
