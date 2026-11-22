@@ -3,6 +3,7 @@
 // Internal health/issues/usage view. Data comes from this site's own /api/admin/overview
 // (which authenticates the user, then calls the central reporter Worker with a server-side secret).
 import { useCallback, useEffect, useState } from 'react';
+import AdminGaugemint from './AdminGaugemint';
 
 type Row = Record<string, any>;
 interface Overview { health: Row[]; latest: Row[]; groups: Row[]; recent: Row[]; byKind: Row[]; usage: Row[] }
@@ -112,6 +113,9 @@ export default function AdminDashboard({ token, scopes }: { token?: string | nul
           </table></div>
         )}
       </>)}
+
+      {/* Own route and own error handling: Gaugemint failing or not being configured only affects this section. */}
+      <AdminGaugemint token={token} />
     </div>
   );
 }
