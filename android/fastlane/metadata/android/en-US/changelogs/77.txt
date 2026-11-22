@@ -1,0 +1,1 @@
+Build progress now shows in your language. More screens translated.
