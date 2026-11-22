@@ -31,6 +31,14 @@ export function normalizeLang(raw) {
 
 export function languageName(tag) { return LANG_NAMES[tag] || 'English'; }
 
+// A reply can come back with a translated label but the prompt returned unchanged in English (seen live for zh: a Chinese
+// chip that fills an English prompt, so the app it builds is English). Such an item counts as not translated: it is retried
+// once, and if it stays English the whole item (label and prompt) is shown in English, never a mix.
+export function looksTranslated(english, translated) {
+    if (!translated || typeof translated.prompt !== 'string') return false;
+    return translated.prompt.trim() !== String(english?.prompt ?? '').trim();
+}
+
 const hashOf = (s) => createHash('sha1').update(`${s.label}\u0000${s.prompt}`).digest('hex').slice(0, 16);
 const BATCH_SIZE = 3;
 const clean = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
@@ -174,11 +182,13 @@ export function createSuggestionTranslator({
     // One upstream call, plus ONE retry for just the items the reply did not yield (bad format, dropped or truncated items).
     // Transport errors throw (cooldown); an unusable reply never throws: those items stay null and fall back to English.
     async function translateBatch(lang, items) {
-        let out = await callModel(lang, items);
+        const keepTranslated = (out, src) => out.map((t, i) => (t && looksTranslated(src[i], t) ? t : null));
+        let out = keepTranslated(await callModel(lang, items), items);
         const missing = out.flatMap((t, i) => (t ? [] : [i]));
         if (missing.length) {
             try {
-                const again = await callModel(lang, missing.map((i) => items[i]));
+                const retryItems = missing.map((i) => items[i]);
+                const again = keepTranslated(await callModel(lang, retryItems), retryItems);
                 missing.forEach((i, j) => { if (again[j]) out[i] = again[j]; });
             } catch (e) {
                 log(`[suggestions-i18n] ${lang} retry failed: ${e.message}`);

@@ -229,3 +229,23 @@ test('cache is per (lang, item): a Thai failure does not poison de, and a repair
     await t.localize(TH.slice(0, 1), 'th');
     assert.equal(api.calls.length, before);
 });
+
+// ---------------- a prompt returned in English ----------------
+test('a reply with a translated label but the prompt still English is retried, then the item stays fully English (no mixed chip)', async () => {
+    const api = fakeApi({ text: (input, n) => delimited(input.map((o) => ({
+        i: o.i, label: `T:${o.label}`, prompt: o.label === 'Quiz Game' ? o.prompt : `T:${o.prompt}`,
+    }))) });
+    const t = make(api);
+    const out = await t.localize(ITEMS, 'zh');
+    assert.deepEqual(out, [{ label: 'T:Task Manager', prompt: `T:${ITEMS[0].prompt}` }, ITEMS[1]]);
+    assert.equal(api.calls.length, 2); // one try plus one retry for the English-prompt item only
+    assert.deepEqual(inputOf(api.calls[1]).map((o) => o.label), ['Quiz Game']);
+    await t.localize(ITEMS, 'zh');
+    assert.equal(api.calls.length, 2); // not hammered again right away
+});
+
+test('a prompt that is English on the first try and translated on the retry is used', async () => {
+    const api = fakeApi({ text: (input, n) => delimited(input.map((o) => ({ i: o.i, label: `T:${o.label}`, prompt: n === 0 ? o.prompt : `T:${o.prompt}` }))) });
+    const out = await make(api).localize(ITEMS, 'zh');
+    assert.deepEqual(out, ITEMS.map((s) => ({ label: `T:${s.label}`, prompt: `T:${s.prompt}` })));
+});
