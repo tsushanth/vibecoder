@@ -1,5 +1,6 @@
 package com.kreativekoala.vibecoder.ui.create
 
+import com.kreativekoala.vibecoder.util.ServerProgressText
 import com.kreativekoala.vibecoder.util.appString
 import android.content.Context
 import android.util.Log
@@ -601,12 +602,12 @@ class CreateViewModel @Inject constructor(
 
     private fun applySseStatus(event: SseEvent.Status) {
         _uiState.update {
-            val msg = event.message.ifEmpty { event.detail }
+            val msg = ServerProgressText.localize(appContext, event.phase, event.message.ifEmpty { event.detail })
             val events = if (msg.isNotEmpty() && it.buildEvents.lastOrNull()?.message != msg)
                 it.buildEvents + ProgressEvent(phase = event.phase, message = msg) else it.buildEvents
             it.copy(
                 buildPhase = event.phase.ifEmpty { it.buildPhase },
-                buildDetail = event.detail.ifEmpty { event.message },
+                buildDetail = ServerProgressText.localize(appContext, event.phase, event.detail.ifEmpty { event.message }),
                 progressPercent = maxOf(it.progressPercent, event.resolvedProgress()),
                 buildEvents = events
             )
@@ -639,9 +640,9 @@ class CreateViewModel @Inject constructor(
                         _uiState.update {
                             it.copy(
                                 buildPhase = p.phase.ifEmpty { it.buildPhase },
-                                buildDetail = p.detail.ifEmpty { it.buildDetail },
+                                buildDetail = ServerProgressText.localize(appContext, p.phase, p.detail).ifEmpty { it.buildDetail },
                                 progressPercent = maxOf(it.progressPercent, p.percent),
-                                buildEvents = p.events?.takeIf { e -> e.isNotEmpty() } ?: it.buildEvents
+                                buildEvents = p.events?.takeIf { e -> e.isNotEmpty() }?.let { e -> ServerProgressText.localizeEvents(appContext, e) } ?: it.buildEvents
                             )
                         }
                         when (p.status.lowercase()) {
@@ -967,7 +968,7 @@ class CreateViewModel @Inject constructor(
                         is SseEvent.Queued -> { /* not used for tweaks */ }
                         is SseEvent.Status -> {
                             _uiState.update {
-                                it.copy(tweakPhase = event.detail.ifEmpty { event.message })
+                                it.copy(tweakPhase = ServerProgressText.localize(appContext, event.phase, event.detail.ifEmpty { event.message }, tweak = true))
                             }
                         }
                         is SseEvent.Result -> {

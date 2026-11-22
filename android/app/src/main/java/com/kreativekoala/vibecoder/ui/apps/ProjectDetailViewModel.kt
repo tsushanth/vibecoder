@@ -238,7 +238,7 @@ class ProjectDetailViewModel @Inject constructor(
                         is SseEvent.Queued -> { /* not used for tweaks */ }
                         is SseEvent.Status -> {
                             _uiState.update {
-                                it.copy(tweakPhase = event.detail.ifEmpty { event.message })
+                                it.copy(tweakPhase = com.kreativekoala.vibecoder.util.ServerProgressText.localize(appContext, event.phase, event.detail.ifEmpty { event.message }, tweak = true))
                             }
                         }
                         is SseEvent.Result -> {
