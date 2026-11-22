@@ -1,5 +1,17 @@
 # Deployed releases (Play)
 
+## 2.7.1 (versionCode 77): production, 20% staged rollout, 2026-11-22
+- Built from origin/main da1f860 (tag `play/2.7.1-77`), clean tree; the built `android/` tree equals `origin/main`. Signed with the upload key. AAB sha256: 8479311603ec3b2e95f3dcc9c2505bd40e1f766bd946ff280bde7bf8bac7b286
+- Play production track read back after commit: 2.7.1 (77) inProgress userFraction 0.2; 2.7.0 (76) completed.
+- Contents: #124 (remaining hard-coded English moved to strings.xml, merged earlier but not in 2.7.0) and #129 (build progress text shown in the app language instead of the worker's English; ServerProgressText). Triggered by a 1-star review "Not in Chinese" (zh-CN, 2.7.0, 2026-11-21): the build screen printed the worker's English progress lines.
+- Tests: ServerProgressTextTest, parity, hard-coded-string and language tests passed on the #129 branch (run by the investigating agent, not re-run on the release tree). No device test. Not fixed: the language of the generated app itself (the deployed worker has no language instruction); zh strings still need native review.
+- Rollback: halt the rollout in Play Console (2.7.0 (76) stays completed), or re-upload 2.7.0 content as a new versionCode.
+
+## Backend (2026-11-22, no half-translated idea chips)
+- Fly app `vibecoder-api`: release v66 from origin/main b3c5f45 (PR #129), image deployment-01M821TRH47E55ZA43VDVGXXDW. `npm test` 780/780 (node --test, concurrency 2). /api/health healthy; GET /api/projects/suggestions?lang=zh|ja|th&count=6 returns 6 fully translated items each (label and prompt).
+- A translated label with the prompt left in English is now retried once, and if it stays English the whole item stays English (it used to build an English app from a Chinese chip).
+- Rollback: `flyctl releases rollback 65 -a vibecoder-api`.
+
 ## 2026-11-21 Web (vibebuild.cc, Fly `vibebuild-web`): admin section with Gaugemint website visits (#127)
 - Release v34, built from `origin/main` at `34806a4` (squash merge of #127; `web/` tree `c5cdfc0a6b6957aa53ffbbd2487c812ae9e5e8b6` identical to main), image `registry.fly.io/vibebuild-web:deployment-01M80NEB223JKMYT3AWWT9C8KY` (sha256:4121918c2d14...), `flyctl deploy --remote-only` from `web/` of a clean detached worktree. Adds a "Website visits (Gaugemint)" section to /admin: server-side read-only key, new Fly secret `GAUGEMINT_READ_KEY` (copy in Keychain `GAUGEMINT_READ_KEY_vibebuild.cc`), admin-gated route `/api/admin/gaugemint` separate from the overview route.
 - Verified live: home 200, `/api/admin/gaugemint` 404 for anonymous callers. NOT verified: the section rendering for the admin account (needs a login); check once and note it here.
