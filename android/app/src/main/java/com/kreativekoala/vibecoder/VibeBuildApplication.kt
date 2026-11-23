@@ -25,6 +25,7 @@ import javax.inject.Inject
 @HiltAndroidApp
 class VibeBuildApplication : Application() {
     @Inject lateinit var authRepository: AuthRepository
+    @Inject lateinit var api: com.kreativekoala.vibecoder.data.remote.VibeBuildApi
 
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -32,6 +33,7 @@ class VibeBuildApplication : Application() {
         super.onCreate()
         FailureReporter.init(this, "vibebuild", "afr_271ab956be760e9f9b82ef912577ed22", BuildConfig.VERSION_NAME)
         NotificationHelper.createChannel(this)
+        com.kreativekoala.vibecoder.ui.telegram.PromoEvents.init(api) // Telegram promotion usage counts
 
         // Initialize Facebook SDK for Meta Ads attribution
         AppEventsLogger.activateApp(this)

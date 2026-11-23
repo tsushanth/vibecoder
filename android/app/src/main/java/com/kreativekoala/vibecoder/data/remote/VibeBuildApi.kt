@@ -182,6 +182,10 @@ interface VibeBuildApi {
     @POST("api/auth/push-token")
     suspend fun registerPushToken(@Body body: PushTokenRequest): SuccessResponse
 
+    /** Usage count for the Telegram promotion (impression / tap / dismiss on one surface). Fire and forget, see PromoEvents. */
+    @POST("api/events/promo")
+    suspend fun promoEvent(@Body body: PromoEventRequest): SuccessResponse
+
     // System status (for maintenance banner)
     @GET("api/status")
     suspend fun getSystemStatus(): SystemStatusResponse

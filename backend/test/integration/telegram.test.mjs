@@ -213,3 +213,29 @@ test('verify detaches the chat id from any other account before attaching it', a
     assert.ok(seen[0].filters.includes('neq'), 'the detach never touches the account being linked');
     assert.equal(seen.at(-1).payload.telegram_id, '777');
 });
+
+let statsRows = {};
+test('stats: channel funnel plus the in-app promotion funnel, worker secret required, promotion left out when app_events is missing', async () => {
+    const now = new Date(t).toISOString();
+    statsRows = {
+        channel_events: [
+            { event: 'start', language: 'de', chat_ref: 'c1', props: { start_payload: 'app', new_chat: true }, created_at: now },
+            { event: 'build_queued', language: 'de', chat_ref: 'c1', props: {}, created_at: now },
+            { event: 'start', language: 'en', chat_ref: 'c2', props: { start_payload: 'web_home', new_chat: true }, created_at: now },
+        ],
+        app_events: [
+            { event: 'promo_impression', user_id: 'u1', props: { surface: 'banner', lang: 'de' }, created_at: now },
+            { event: 'promo_tap', user_id: 'u1', props: { surface: 'banner', lang: 'de' }, created_at: now },
+        ],
+    };
+    stubSupabase(supabase, (q) => { const rows = statsRows[q.table]; return rows ? { data: rows, error: null } : { data: null, error: { code: '42P01' } }; }); // later tests in this file stub again themselves
+    const s = await mount();
+    assert.equal((await req(s, 'GET', '/stats')).status, 401);
+    const j = await (await req(s, 'GET', '/stats?days=7', { headers: { 'x-worker-secret': SECRET } })).json();
+    assert.equal(j.startsByPayload?.web_home, 1, JSON.stringify(j));
+    assert.deepEqual(j.promotion.surfaces.banner, { impressions: 1, impressionUsers: 1, taps: 1, tapUsers: 1, dismissals: 0, starts: 1, chats: 1, newChats: 1, built: 1, finished: 0, linked: 0 });
+    assert.equal(j.promotion.surfaces.web_home.chats, 1);
+    statsRows.app_events = null;
+    const k = await (await req(s, 'GET', '/stats', { headers: { 'x-worker-secret': SECRET } })).json();
+    assert.equal(k.promotion, null); assert.equal(k.totals.start, 2);
+});

@@ -20,6 +20,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,6 +51,7 @@ object TelegramBot {
 
     /** Opens the bot (the Telegram app when installed, else the browser) and remembers that the person has been shown the way. */
     fun open(context: Context, payload: String) {
+        PromoEvents.surfaceForPayload(payload)?.let { PromoEvents.tap(it) }
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putBoolean(PREF_OPENED, true).apply()
         try {
             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url(payload))))
@@ -88,6 +90,7 @@ object TelegramBannerPolicy {
 @Composable
 fun TelegramPromoCard(modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    LaunchedEffect(Unit) { PromoEvents.impression(PromoEvents.Surface.CREATE_CARD) }
     Column(
         modifier = modifier
             .fillMaxWidth()

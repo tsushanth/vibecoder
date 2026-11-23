@@ -10,13 +10,16 @@ export const CHANNELS = Object.freeze(['telegram', 'sms', 'whatsapp']);
 export const CHANNEL_EVENTS = Object.freeze([
     'update_received', 'start', 'build_queued', 'build_finished', 'build_failed', 'build_stopped', 'link_started', 'link_done', 'link_failed',
     'language_changed', 'idea_picked', 'apps_listed', 'rate_limited', 'help', 'unsupported_message',
+    // The person blocked / unblocked the bot (Telegram my_chat_member update; needs it in the webhook's allowed_updates), and a
+    // handler error (props.error_code = HANDLER). Chat-level health, not message content.
+    'bot_blocked', 'bot_unblocked', 'bot_error',
 ]);
 const EVENT_SET = new Set(CHANNEL_EVENTS);
 
-export const START_PAYLOADS = Object.freeze(['app', 'app_card', 'app_build', 'app_settings', 'web', 'link', 'none', 'other']);
+export const START_PAYLOADS = Object.freeze(['app', 'app_card', 'app_build', 'app_settings', 'web', 'web_home', 'web_connect', 'link', 'none', 'other']);
 export const COMMANDS = Object.freeze(['start', 'apps', 'language', 'link', 'stop', 'help', 'text', 'callback', 'unknown']);
 export const CAPS = Object.freeze(['chat_flood', 'anon_daily', 'anon_global_daily', 'hourly_chat', 'active_build', 'global_active', 'server_429']);
-export const ERROR_CODES = Object.freeze(['DISPATCH', 'REJECTED', 'BUSY', 'LIMIT', 'WORKER', 'TIMEOUT', 'UNKNOWN']);
+export const ERROR_CODES = Object.freeze(['DISPATCH', 'REJECTED', 'BUSY', 'LIMIT', 'WORKER', 'TIMEOUT', 'HANDLER', 'UNKNOWN']);
 
 const oneOf = (list) => { const s = new Set(list); return (v) => (typeof v === 'string' && s.has(v) ? v : undefined); };
 const PROP_VALIDATORS = Object.freeze({

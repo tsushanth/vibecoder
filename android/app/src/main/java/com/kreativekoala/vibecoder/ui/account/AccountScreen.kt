@@ -382,6 +382,8 @@ fun AccountScreen(
                     onClick = { showLanguageDialog = true }
                 )
                 HorizontalDivider(color = DarkBorder)
+                // Usage count: the Telegram row is on screen (once per app launch)
+                LaunchedEffect(Unit) { com.kreativekoala.vibecoder.ui.telegram.PromoEvents.impression(com.kreativekoala.vibecoder.ui.telegram.PromoEvents.Surface.ACCOUNT_ROW) }
                 SettingsRow(
                     icon = Icons.AutoMirrored.Filled.Send,
                     title = stringResource(R.string.telegram_settings_title),

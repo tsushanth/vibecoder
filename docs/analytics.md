@@ -21,6 +21,7 @@ One row per event: `id`, `user_id` (the existing user id, nullable), `anon_id` (
 | `paywall_or_cap_shown` | a plan-tier refusal (HTTP 403 with a required tier) on tweak, private save or fork. While everything is free this should be rare. | `cap` (`tweak_tier`, `private_tier`, `fork_tier`), `status`, `source` |
 | `account_deleted` | an account was deleted. Written without `user_id`. | `source` |
 | `first_build_survey` | the one-question prompt after a person's first ready build (web) | `choice` (`game_or_fun`, `personal_tool`, `work_or_business`, `learning`, `just_trying`, `something_else`, `dismissed`), `source` |
+| `promo_impression`, `promo_tap`, `promo_dismiss` | the Android app showed / the person tapped / dismissed a Telegram promotion (`POST /api/events/promo`, signed-in only; needs the app release after 2.7.2). See `docs/channels-metrics.md` | `surface` (`banner`, `create_card`, `post_build`, `account_row`), `lang` (two letters), `source` |
 
 `source` is `web`, `android`, `ios` or `api` (anything else). It comes from the request's user agent or `X-Client-Platform` header.
 

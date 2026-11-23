@@ -206,3 +206,37 @@ test('survey: eligibility needs a token, an own project and no other ready build
     surveyRows = 0; tableMissing = true; assert.deepEqual(await (await get()).json(), { eligible: false }, 'not asked when the answer could not be stored');
     assert.equal((await call('POST', '/api/events/first-build-survey', { choice: 'dismissed' })).status, 503);
 });
+
+test('promo events: a signed-in app records impression / tap / dismiss with only surface, lang and source', async () => {
+    const post = (body, headers = { 'user-agent': 'okhttp/4.12.0' }) => call('POST', '/api/events/promo', body, headers);
+    for (const [action, event] of [['impression', 'promo_impression'], ['tap', 'promo_tap'], ['dismiss', 'promo_dismiss']]) {
+        const r = await post({ action, surface: 'banner', lang: 'de', text: SECRET, prompt: SECRET });
+        assert.equal(r.status, 200); assert.deepEqual(await r.json(), { success: true });
+        await until(() => of(event).length);
+        assert.deepEqual(of(event)[0], { user_id: USER, anon_id: null, event, props: { surface: 'banner', lang: 'de', source: 'android' } });
+    }
+    nothingPrivate();
+    events = [];
+    assert.equal((await post({ action: 'tap', surface: 'post_build', lang: 'xx1' })).status, 200);
+    await until(() => of('promo_tap').length);
+    assert.deepEqual(of('promo_tap')[0].props, { surface: 'post_build', source: 'android' }, 'a bad lang is dropped, not stored');
+});
+
+test('promo events: signed-out callers, unknown actions or surfaces and the web surfaces record nothing', async () => {
+    verified = null;
+    assert.equal((await call('POST', '/api/events/promo', { action: 'tap', surface: 'banner' })).status, 401);
+    verified = USER;
+    for (const body of [{ action: 'click', surface: 'banner' }, { action: 'tap', surface: 'sidebar' }, { action: 'tap', surface: 'web_home' }, { action: 'tap' }, {}, { action: 'tap', surface: { $ne: 1 } }]) {
+        assert.equal((await call('POST', '/api/events/promo', body)).status, 400, JSON.stringify(body));
+    }
+    await until(() => false);
+    assert.equal(events.length, 0);
+});
+
+test('promo events: one person is limited per minute, and a missing table never errors the caller', async () => {
+    const codes = []; verified = 'limit-user';
+    for (let i = 0; i < 32; i++) codes.push((await call('POST', '/api/events/promo', { action: 'impression', surface: 'create_card' })).status);
+    assert.equal(codes.filter((c) => c === 200).length, 30); assert.equal(codes.at(-1), 429);
+    verified = 'another-user'; tableMissing = true;
+    assert.equal((await call('POST', '/api/events/promo', { action: 'tap', surface: 'account_row' })).status, 200);
+});

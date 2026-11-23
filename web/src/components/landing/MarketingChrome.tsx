@@ -6,7 +6,8 @@ import { ALL_FREE } from '@/lib/pricing';
 //
 // The footer also carries the Gaugemint tag (our own cookieless visit counter). Keep it here and nowhere else: this
 // component is rendered only by public marketing pages, so signed-in app screens and auth pages never load it on a
-// direct visit. Do not move it into the root layout.
+// direct visit. Do not move it into the root layout. The one other place that loads it is the bare /connect page (no account state, no
+// Telegram id in the address), see app/connect/page.tsx.
 
 export function MarketingHeader() {
   return (

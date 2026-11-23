@@ -34,6 +34,7 @@ import com.kreativekoala.vibecoder.ui.apps.AppsScreen
 import com.kreativekoala.vibecoder.ui.browse.BrowseScreen
 import com.kreativekoala.vibecoder.ui.create.CreateScreen
 import com.kreativekoala.vibecoder.ui.telegram.TelegramBannerPolicy
+import com.kreativekoala.vibecoder.ui.telegram.PromoEvents
 import com.kreativekoala.vibecoder.ui.telegram.TelegramBot
 import com.kreativekoala.vibecoder.ui.theme.DarkBackground
 import com.kreativekoala.vibecoder.ui.theme.DarkBorder
@@ -84,6 +85,11 @@ fun MainScreen(
             prefs.edit().putLong(PREF_TELEGRAM_BANNER_DISMISSED_AT, dismissedAt).apply()
         }
         mutableStateOf(TelegramBannerPolicy.shouldShow(now, dismissedAt, TelegramBot.hasOpened(context)))
+    }
+
+    // Usage count: the banner is on screen (not when the maintenance bar replaces it). Once per app launch, see PromoEvents.
+    LaunchedEffect(showTelegramBanner, isSystemDown) {
+        if (showTelegramBanner && !isSystemDown) PromoEvents.impression(PromoEvents.Surface.BANNER)
     }
 
     Scaffold(
@@ -170,6 +176,7 @@ fun MainScreen(
                     IconButton(
                         onClick = {
                             showTelegramBanner = false
+                            PromoEvents.dismiss(PromoEvents.Surface.BANNER)
                             prefs.edit().putLong(PREF_TELEGRAM_BANNER_DISMISSED_AT, System.currentTimeMillis()).apply()
                         },
                         modifier = Modifier.size(24.dp)
