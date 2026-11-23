@@ -4,18 +4,39 @@ primary_region = "iad"
 [build]
   dockerfile = "Dockerfile"
 
+# State (language per number, opt-outs, dedupe ids, builds in flight) lives in one JSON file on this volume.
+# A volume belongs to ONE machine, so this app runs exactly one machine:
+#   flyctl volumes create sms_data --region iad --size 1 -a vibebuild-sms-bot
+[mounts]
+  source = "sms_data"
+  destination = "/data"
+
+[env]
+  DATA_DIR = "/data"
+  PUBLIC_BASE_URL = "https://vibebuild-sms-bot.fly.dev"   # must equal the host Twilio calls: it is part of the signature check
+  WEB_URL = "https://vibebuild.cc"
+  SMS_ALLOWED_PREFIXES = "+1"                              # SMS replies only to US/Canada numbers; use "*" to allow every country (WhatsApp is not limited)
+
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = "stop"
+  # Builds are polled by this process after the webhook has answered, so the machine must never be stopped while idle.
+  auto_stop_machines = "off"
   auto_start_machines = true
   min_machines_running = 1
   processes = ["app"]
 
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    path = "/health"
+    timeout = "5s"
+
 [[vm]]
   cpu_kind = "shared"
   cpus = 1
-  memory_mb = 512
+  memory_mb = 256
 
 [deploy]
-  strategy = "rolling"
+  strategy = "immediate"
