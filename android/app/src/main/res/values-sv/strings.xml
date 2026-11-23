@@ -265,7 +265,6 @@
     <string name="explore_listing_failed">Inställningen sparades inte. Försök igen.</string>
     <string name="tab_browse_nav">Bläddra</string>
     <string name="main_builds_unavailable">Bygget är tillfälligt otillgängligt. Titta in igen snart!</string>
-    <string name="main_telegram_banner">✨ Bygg appar via Telegram! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">Spara din app?</string>
     <string name="create_save_prompt_body">Din app har inte sparats än. Vill du spara den innan du stänger?</string>
     <string name="create_discard">Förkasta</string>

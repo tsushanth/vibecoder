@@ -265,7 +265,6 @@
     <string name="explore_listing_failed">A beállítás nem lett mentve. Próbáld újra.</string>
     <string name="tab_browse_nav">Böngészés</string>
     <string name="main_builds_unavailable">Az építés átmenetileg nem elérhető. Nézz vissza hamarosan!</string>
-    <string name="main_telegram_banner">✨ Építs appokat Telegramon keresztül! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">Mented az appodat?</string>
     <string name="create_save_prompt_body">Az appod még nincs elmentve. Szeretnéd menteni bezárás előtt?</string>
     <string name="create_discard">Elvetés</string>

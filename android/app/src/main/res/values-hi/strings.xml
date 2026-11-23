@@ -314,7 +314,6 @@
     <!-- needs native review (machine translation) -->
     <string name="tab_browse_nav">एक्सप्लोर</string>
     <string name="main_builds_unavailable">बिल्ड अभी कुछ समय के लिए उपलब्ध नहीं हैं। जल्द ही फिर देखें!</string>
-    <string name="main_telegram_banner">✨ Telegram से ऐप बनाएं! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">अपना ऐप सेव करें?</string>
     <string name="create_save_prompt_body">आपका ऐप अभी सेव नहीं हुआ है। क्या आप बंद करने से पहले इसे सेव करना चाहेंगे?</string>
     <string name="create_discard">छोड़ दें</string>

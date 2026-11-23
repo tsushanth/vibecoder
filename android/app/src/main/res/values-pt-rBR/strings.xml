@@ -312,7 +312,6 @@
     <string name="version_empty">Ainda não há histórico de versões. Faça algumas alterações para começar a registrar versões!</string>
     <string name="tab_browse_nav">Explorar</string>
     <string name="main_builds_unavailable">Criações temporariamente indisponíveis. Volte em breve!</string>
-    <string name="main_telegram_banner">✨ Crie apps pelo Telegram! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">Salvar seu app?</string>
     <string name="create_save_prompt_body">Seu app ainda não foi salvo. Quer salvá-lo antes de fechar?</string>
     <string name="create_discard">Descartar</string>

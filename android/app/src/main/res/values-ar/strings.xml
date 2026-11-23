@@ -314,7 +314,6 @@
     <!-- needs native review (machine translation) -->
     <string name="tab_browse_nav">استكشاف</string>
     <string name="main_builds_unavailable">عمليات البناء غير متاحة مؤقتًا. عد قريبًا!</string>
-    <string name="main_telegram_banner">✨ أنشئ التطبيقات عبر Telegram! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">هل تريد حفظ تطبيقك؟</string>
     <string name="create_save_prompt_body">لم يتم حفظ تطبيقك بعد. هل تريد حفظه قبل الإغلاق؟</string>
     <string name="create_discard">تجاهل</string>

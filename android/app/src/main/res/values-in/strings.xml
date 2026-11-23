@@ -314,7 +314,6 @@
     <!-- needs native review (machine translation) -->
     <string name="tab_browse_nav">Jelajahi</string>
     <string name="main_builds_unavailable">Pembuatan aplikasi sedang tidak tersedia sementara. Coba lagi nanti!</string>
-    <string name="main_telegram_banner">✨ Buat aplikasi lewat Telegram! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">Simpan aplikasi Anda?</string>
     <string name="create_save_prompt_body">Aplikasi Anda belum disimpan. Ingin menyimpannya sebelum menutup?</string>
     <string name="create_discard">Buang</string>

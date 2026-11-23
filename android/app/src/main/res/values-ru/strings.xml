@@ -312,7 +312,6 @@
     <string name="explore_listing_failed">Настройка не сохранена. Повторите попытку.</string>
     <string name="tab_browse_nav">Обзор</string>
     <string name="main_builds_unavailable">Сборка временно недоступна. Загляните позже!</string>
-    <string name="main_telegram_banner">✨ Создавайте приложения через Telegram! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">Сохранить приложение?</string>
     <string name="create_save_prompt_body">Ваше приложение ещё не сохранено. Сохранить его перед закрытием?</string>
     <string name="create_discard">Не сохранять</string>

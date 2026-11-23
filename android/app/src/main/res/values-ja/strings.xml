@@ -312,7 +312,6 @@
     <string name="explore_listing_failed">設定を保存できませんでした。もう一度お試しください。</string>
     <string name="tab_browse_nav">探索</string>
     <string name="main_builds_unavailable">ビルドは一時的に利用できません。しばらくしてからもう一度ご確認ください。</string>
-    <string name="main_telegram_banner">✨ Telegramでアプリを作れます！ @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">アプリを保存しますか？</string>
     <string name="create_save_prompt_body">アプリはまだ保存されていません。閉じる前に保存しますか？</string>
     <string name="create_discard">破棄</string>

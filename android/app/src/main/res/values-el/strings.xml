@@ -265,7 +265,6 @@
     <string name="explore_listing_failed">Η ρύθμιση δεν αποθηκεύτηκε. Δοκιμάστε ξανά.</string>
     <string name="tab_browse_nav">Περιήγηση</string>
     <string name="main_builds_unavailable">Οι δημιουργίες δεν είναι προσωρινά διαθέσιμες. Ελέγξτε ξανά σύντομα!</string>
-    <string name="main_telegram_banner">✨ Φτιάξτε εφαρμογές μέσω Telegram! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">Αποθήκευση της εφαρμογής σας;</string>
     <string name="create_save_prompt_body">Η εφαρμογή σας δεν έχει αποθηκευτεί ακόμα. Θέλετε να την αποθηκεύσετε πριν κλείσετε;</string>
     <string name="create_discard">Απόρριψη</string>

@@ -265,7 +265,6 @@
     <string name="explore_listing_failed">Налаштування не збережено. Спробуйте ще раз.</string>
     <string name="tab_browse_nav">Огляд</string>
     <string name="main_builds_unavailable">Створення застосунків тимчасово недоступне. Зазирніть пізніше!</string>
-    <string name="main_telegram_banner">✨ Створюйте застосунки через Telegram! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">Зберегти застосунок?</string>
     <string name="create_save_prompt_body">Ваш застосунок ще не збережено. Зберегти його перед закриттям?</string>
     <string name="create_discard">Відхилити</string>

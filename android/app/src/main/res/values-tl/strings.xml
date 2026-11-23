@@ -312,7 +312,6 @@
     <string name="explore_listing_failed">Hindi na-save ang setting. Subukan muli.</string>
     <string name="tab_browse_nav">Mag-explore</string>
     <string name="main_builds_unavailable">Pansamantalang hindi available ang mga build. Bumalik mamaya!</string>
-    <string name="main_telegram_banner">✨ Gumawa ng mga app sa Telegram! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">I-save ang iyong app?</string>
     <string name="create_save_prompt_body">Hindi pa na-save ang iyong app. Gusto mo bang i-save ito bago isara?</string>
     <string name="create_discard">Itapon</string>

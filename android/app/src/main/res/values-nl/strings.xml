@@ -312,7 +312,6 @@
     <string name="explore_listing_failed">De instelling is niet opgeslagen. Probeer het opnieuw.</string>
     <string name="tab_browse_nav">Ontdekken</string>
     <string name="main_builds_unavailable">Bouwen is tijdelijk niet beschikbaar. Kom binnenkort terug!</string>
-    <string name="main_telegram_banner">✨ Bouw apps via Telegram! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">Uw app opslaan?</string>
     <string name="create_save_prompt_body">Uw app is nog niet opgeslagen. Wilt u hem opslaan voordat u sluit?</string>
     <string name="create_discard">Verwerpen</string>

@@ -312,7 +312,6 @@
     <string name="explore_listing_failed">Ustawienie nie zostało zapisane. Spróbuj ponownie.</string>
     <string name="tab_browse_nav">Przeglądaj</string>
     <string name="main_builds_unavailable">Budowanie aplikacji jest chwilowo niedostępne. Wróć wkrótce!</string>
-    <string name="main_telegram_banner">✨ Buduj aplikacje przez Telegram! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">Zapisać aplikację?</string>
     <string name="create_save_prompt_body">Twoja aplikacja nie została jeszcze zapisana. Czy chcesz ją zapisać przed zamknięciem?</string>
     <string name="create_discard">Odrzuć</string>

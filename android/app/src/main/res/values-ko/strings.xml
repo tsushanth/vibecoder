@@ -312,7 +312,6 @@
     <string name="explore_listing_failed">설정이 저장되지 않았어요. 다시 시도해 주세요.</string>
     <string name="tab_browse_nav">둘러보기</string>
     <string name="main_builds_unavailable">빌드를 일시적으로 사용할 수 없어요. 잠시 후 다시 확인해 주세요!</string>
-    <string name="main_telegram_banner">✨ Telegram으로 앱을 만들어 보세요! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">앱을 저장할까요?</string>
     <string name="create_save_prompt_body">앱이 아직 저장되지 않았어요. 닫기 전에 저장할까요?</string>
     <string name="create_discard">버리기</string>

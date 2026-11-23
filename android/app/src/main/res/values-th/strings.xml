@@ -312,7 +312,6 @@
     <string name="explore_listing_failed">บันทึกการตั้งค่าไม่สำเร็จ ลองอีกครั้ง</string>
     <string name="tab_browse_nav">สำรวจ</string>
     <string name="main_builds_unavailable">ไม่สามารถสร้างแอปได้ชั่วคราว โปรดกลับมาตรวจสอบเร็ว ๆ นี้!</string>
-    <string name="main_telegram_banner">✨ สร้างแอปผ่าน Telegram! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">บันทึกแอปของคุณไหม?</string>
     <string name="create_save_prompt_body">แอปของคุณยังไม่ได้บันทึก ต้องการบันทึกก่อนปิดไหม?</string>
     <string name="create_discard">ทิ้ง</string>

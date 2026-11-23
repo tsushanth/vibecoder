@@ -312,7 +312,6 @@
     <string name="explore_listing_failed">设置未保存。请重试。</string>
     <string name="tab_browse_nav">探索</string>
     <string name="main_builds_unavailable">构建功能暂时不可用。请稍后再来！</string>
-    <string name="main_telegram_banner">✨ 通过 Telegram 构建应用！@Vibebuilder_bot</string>
     <string name="create_save_prompt_title">保存你的应用？</string>
     <string name="create_save_prompt_body">你的应用尚未保存。要在关闭前保存吗？</string>
     <string name="create_discard">放弃</string>

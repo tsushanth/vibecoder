@@ -311,7 +311,6 @@
     <!-- Build chat, sign-in errors, main tabs and create dialogs (extracted from hard-coded English for localization) -->
     <string name="tab_browse_nav">Browse</string>
     <string name="main_builds_unavailable">Builds temporarily unavailable. Check back soon!</string>
-    <string name="main_telegram_banner">✨ Build apps via Telegram! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">Save your app?</string>
     <string name="create_save_prompt_body">Your app hasn\'t been saved yet. Would you like to save it before closing?</string>
     <string name="create_discard">Discard</string>

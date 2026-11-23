@@ -265,7 +265,6 @@
     <string name="explore_listing_failed">Setarea nu a fost salvată. Încearcă din nou.</string>
     <string name="tab_browse_nav">Răsfoiește</string>
     <string name="main_builds_unavailable">Construirea este temporar indisponibilă. Revino în curând!</string>
-    <string name="main_telegram_banner">✨ Construiește aplicații prin Telegram! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">Salvezi aplicația?</string>
     <string name="create_save_prompt_body">Aplicația ta nu a fost salvată încă. Vrei să o salvezi înainte de a închide?</string>
     <string name="create_discard">Renunță</string>

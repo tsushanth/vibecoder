@@ -312,7 +312,6 @@
     <string name="explore_listing_failed">Chưa lưu được cài đặt. Hãy thử lại.</string>
     <string name="tab_browse_nav">Khám phá</string>
     <string name="main_builds_unavailable">Tính năng tạo ứng dụng tạm thời không khả dụng. Hãy quay lại sau nhé!</string>
-    <string name="main_telegram_banner">✨ Tạo ứng dụng qua Telegram! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">Lưu ứng dụng của bạn?</string>
     <string name="create_save_prompt_body">Ứng dụng của bạn chưa được lưu. Bạn có muốn lưu trước khi đóng không?</string>
     <string name="create_discard">Bỏ</string>

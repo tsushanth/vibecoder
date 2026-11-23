@@ -265,7 +265,6 @@
     <string name="explore_listing_failed">Asetusta ei tallennettu. Yritä uudelleen.</string>
     <string name="tab_browse_nav">Selaa</string>
     <string name="main_builds_unavailable">Rakennus ei ole tilapäisesti käytettävissä. Palaa pian takaisin!</string>
-    <string name="main_telegram_banner">✨ Rakenna sovelluksia Telegramissa! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">Tallennetaanko sovelluksesi?</string>
     <string name="create_save_prompt_body">Sovellustasi ei ole vielä tallennettu. Haluatko tallentaa sen ennen sulkemista?</string>
     <string name="create_discard">Hylkää</string>

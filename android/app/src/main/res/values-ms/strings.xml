@@ -312,7 +312,6 @@
     <string name="explore_listing_failed">Tetapan tidak disimpan. Cuba lagi.</string>
     <string name="tab_browse_nav">Layari</string>
     <string name="main_builds_unavailable">Pembinaan tidak tersedia buat sementara waktu. Sila semak semula tidak lama lagi!</string>
-    <string name="main_telegram_banner">✨ Bina apl melalui Telegram! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">Simpan apl anda?</string>
     <string name="create_save_prompt_body">Apl anda belum disimpan. Adakah anda mahu menyimpannya sebelum menutup?</string>
     <string name="create_discard">Buang</string>

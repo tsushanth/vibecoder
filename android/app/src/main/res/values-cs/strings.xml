@@ -265,7 +265,6 @@
     <string name="explore_listing_failed">Nastavení nebylo uloženo. Zkuste to znovu.</string>
     <string name="tab_browse_nav">Procházet</string>
     <string name="main_builds_unavailable">Vytváření je dočasně nedostupné. Zkuste to brzy znovu!</string>
-    <string name="main_telegram_banner">✨ Vytvářejte aplikace přes Telegram! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">Uložit aplikaci?</string>
     <string name="create_save_prompt_body">Vaše aplikace ještě nebyla uložena. Chcete ji před zavřením uložit?</string>
     <string name="create_discard">Zahodit</string>

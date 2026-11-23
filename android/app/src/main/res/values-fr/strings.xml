@@ -314,7 +314,6 @@
     <!-- needs native review (machine translation) -->
     <string name="tab_browse_nav">Explorer</string>
     <string name="main_builds_unavailable">Créations temporairement indisponibles. Revenez bientôt !</string>
-    <string name="main_telegram_banner">✨ Créez des apps via Telegram ! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">Enregistrer votre app ?</string>
     <string name="create_save_prompt_body">Votre app n\'a pas encore été enregistrée. Voulez-vous l\'enregistrer avant de fermer ?</string>
     <string name="create_discard">Abandonner</string>

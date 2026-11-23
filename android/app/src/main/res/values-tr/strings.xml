@@ -312,7 +312,6 @@
     <string name="explore_listing_failed">Ayar kaydedilmedi. Tekrar deneyin.</string>
     <string name="tab_browse_nav">Göz At</string>
     <string name="main_builds_unavailable">Uygulama oluşturma geçici olarak kullanılamıyor. Yakında tekrar kontrol edin!</string>
-    <string name="main_telegram_banner">✨ Telegram üzerinden uygulama oluşturun! @Vibebuilder_bot</string>
     <string name="create_save_prompt_title">Uygulamanız kaydedilsin mi?</string>
     <string name="create_save_prompt_body">Uygulamanız henüz kaydedilmedi. Kapatmadan önce kaydetmek ister misiniz?</string>
     <string name="create_discard">Vazgeç</string>
