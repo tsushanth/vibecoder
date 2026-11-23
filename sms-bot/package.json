@@ -1,9 +1,11 @@
 {
   "name": "vibebuild-sms-bot",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
+  "engines": { "node": ">=22" },
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test --test-concurrency=2 --test-force-exit"
   },
   "dependencies": {
     "express": "^4.21.2",
