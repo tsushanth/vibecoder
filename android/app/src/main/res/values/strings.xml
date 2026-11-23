@@ -515,4 +515,12 @@
     <string name="err_stream_empty">Empty response body</string>
     <string name="err_stream_error">Stream error</string>
     <string name="err_unknown">Unknown error</string>
+
+    <!-- Telegram channel -->
+    <string name="telegram_card_title">Build apps from Telegram</string>
+    <string name="telegram_card_body">Chat your idea to our bot in your own language. It builds the app and sends you the link.</string>
+    <string name="telegram_card_cta">Open Telegram</string>
+    <string name="telegram_continue">Continue on Telegram</string>
+    <string name="telegram_settings_title">Telegram bot</string>
+    <string name="telegram_settings_subtitle">Build and get your apps by chatting with @Vibebuilder_bot</string>
 </resources>

@@ -516,4 +516,12 @@
     <string name="err_stream_empty">レスポンスが空です</string>
     <string name="err_stream_error">ストリームエラー</string>
     <string name="err_unknown">不明なエラー</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">Telegramでアプリを作ろう</string>
+    <string name="telegram_card_body">あなたの言語でボットにアイデアを送るだけ。アプリを作ってリンクを送ります。</string>
+    <string name="telegram_card_cta">Telegramを開く</string>
+    <string name="telegram_continue">Telegramで続ける</string>
+    <string name="telegram_settings_title">Telegramボット</string>
+    <string name="telegram_settings_subtitle">@Vibebuilder_bot とチャットしてアプリを作成・受け取り</string>
 </resources>

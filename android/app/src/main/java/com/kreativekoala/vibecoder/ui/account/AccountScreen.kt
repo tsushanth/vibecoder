@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -379,6 +380,13 @@ fun AccountScreen(
                     title = stringResource(R.string.account_settings_language),
                     subtitle = languageEndonym(supportedLanguages.firstOrNull { currentLocale.startsWith(it.split("-")[0]) } ?: "en"),
                     onClick = { showLanguageDialog = true }
+                )
+                HorizontalDivider(color = DarkBorder)
+                SettingsRow(
+                    icon = Icons.AutoMirrored.Filled.Send,
+                    title = stringResource(R.string.telegram_settings_title),
+                    subtitle = stringResource(R.string.telegram_settings_subtitle),
+                    onClick = { com.kreativekoala.vibecoder.ui.telegram.TelegramBot.open(context, com.kreativekoala.vibecoder.ui.telegram.TelegramBot.PAYLOAD_SETTINGS) }
                 )
                 HorizontalDivider(color = DarkBorder)
                 SettingsRow(

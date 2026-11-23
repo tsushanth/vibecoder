@@ -1,0 +1,26 @@
+# VibeBuild
+
+> VibeBuild (https://vibebuild.cc) is an AI app builder. You describe an app in plain language and it generates a working web app, shows a live preview, lets you iterate with follow-up requests, and publishes it to a vibebuild.cc subdomain or your own domain.
+
+## What it does
+
+- Describe: write what you want in any language, in the app, on the web, or by messaging the Telegram bot.
+- Generate: the app is built as a self-contained web app (HTML, CSS, JavaScript).
+- Preview: every build gets a live preview link.
+- Iterate: ask for changes and review earlier versions.
+- Publish: deploy to a vibebuild.cc subdomain, attach a custom domain, or export to GitHub or an Android APK.
+
+## Where to use it
+
+- Web app: https://vibebuild.cc
+- Android app: https://play.google.com/store/apps/details?id=com.kreativekoala.vibecoder
+- Telegram bot (describe an app in any of 26 languages and get a live link back in the chat): https://t.me/Vibebuilder_bot
+
+## Pages
+
+- Browse community apps: https://vibebuild.cc/browse
+- Frequently asked questions: https://vibebuild.cc/faq
+- About: https://vibebuild.cc/about
+- Blog: https://vibebuild.cc/blog
+- Privacy: https://vibebuild.cc/privacy
+- Terms: https://vibebuild.cc/terms

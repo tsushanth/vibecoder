@@ -469,4 +469,12 @@
     <string name="err_stream_empty">Tyhjä vastaus</string>
     <string name="err_stream_error">Suoratoistovirhe</string>
     <string name="err_unknown">Tuntematon virhe</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">Rakenna sovelluksia Telegramista</string>
+    <string name="telegram_card_body">Kirjoita ideasi botillemme omalla kielelläsi. Se rakentaa sovelluksen ja lähettää sinulle linkin.</string>
+    <string name="telegram_card_cta">Avaa Telegram</string>
+    <string name="telegram_continue">Jatka Telegramissa</string>
+    <string name="telegram_settings_title">Telegram-botti</string>
+    <string name="telegram_settings_subtitle">Rakenna ja hae sovelluksesi keskustelemalla @Vibebuilder_bot:n kanssa</string>
 </resources>

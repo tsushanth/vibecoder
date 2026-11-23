@@ -27,7 +27,7 @@ export const EVENTS = Object.freeze([
 ]);
 const EVENT_SET = new Set(EVENTS);
 
-export const SOURCES = Object.freeze(['web', 'android', 'ios', 'api']);
+export const SOURCES = Object.freeze(['web', 'android', 'ios', 'api', 'telegram', 'sms', 'whatsapp']);
 export const PROMPT_LENGTH_BUCKETS = Object.freeze(['lt40', '40_99', '100_249', '250_799', '800plus']);
 export const BUILD_KINDS = Object.freeze(['new', 'retry']);
 // Which limit was hit (rate_limited) or which plan gate was shown (paywall_or_cap_shown).
@@ -87,6 +87,19 @@ export function sourceFromRequest(req) {
     if (/cfnetwork|darwin/i.test(ua)) return 'ios';
     if (/^mozilla\//i.test(ua)) return 'web';
     return 'api';
+}
+
+const CHAT_CHANNELS = new Set(['telegram', 'sms', 'whatsapp']);
+/**
+ * Where a NEW build came from, for projects.source_channel and the build events: a chat channel named in the body (the bots set
+ * it; analytics only, never used for any decision), else the app's own `x-platform` header (android/ios/web), else sourceFromRequest.
+ */
+export function channelFromRequest(req) {
+    const body = typeof req?.body?.source === 'string' ? req.body.source.trim().toLowerCase() : '';
+    if (CHAT_CHANNELS.has(body)) return body;
+    const header = String(req?.headers?.['x-platform'] ?? '').trim().toLowerCase();
+    if (header === 'web' || header === 'android' || header === 'ios') return header;
+    return sourceFromRequest(req);
 }
 
 /** Copies only allow-listed keys whose values pass their validator. Never throws. */

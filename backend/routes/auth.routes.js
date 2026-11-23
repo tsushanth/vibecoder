@@ -4,6 +4,7 @@ import { verifiedUserId } from '../lib/verifiedUser.js';
 import { recordSignupSource } from '../lib/signupSource.js';
 import { removeSites, disableSiteApps, projectSiteSubdomains } from '../lib/siteRemoval.js';
 import { appEvents, buildEvents, sourceFromRequest } from '../lib/appEventsInstance.js';
+import { channelEvents } from '../lib/channelEventsInstance.js';
 import { deleteAccountExternalData } from '../lib/accountCleanup.js';
 
 // `externalCleanup` removes what lives outside the main database (GitHub repos, screenshots, stored keys); injectable for tests.
@@ -57,6 +58,7 @@ router.delete('/account', async (req, res) => {
         await run('users', (q) => q.delete().eq('user_id', userId));
         // The person's usage events go with the account (best effort: the table may not exist yet, which must never block a deletion).
         await appEvents.deleteForUser(userId);
+        await channelEvents.deleteForUser(userId); // chat-channel (Telegram) events, same rule
         // Only remove the login once the data is gone, so a failed attempt can be retried.
         if (failed.length) return res.status(500).json({ error: 'Could not delete all account data. Please try again.', failed });
 

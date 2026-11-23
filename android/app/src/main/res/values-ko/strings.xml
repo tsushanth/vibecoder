@@ -516,4 +516,12 @@
     <string name="err_stream_empty">응답 본문이 비어 있습니다</string>
     <string name="err_stream_error">스트림 오류</string>
     <string name="err_unknown">알 수 없는 오류</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">Telegram으로 앱 만들기</string>
+    <string name="telegram_card_body">내 언어로 봇에게 아이디어를 보내세요. 앱을 만들어 링크를 보내 드려요.</string>
+    <string name="telegram_card_cta">Telegram 열기</string>
+    <string name="telegram_continue">Telegram에서 계속하기</string>
+    <string name="telegram_settings_title">Telegram 봇</string>
+    <string name="telegram_settings_subtitle">@Vibebuilder_bot 과 채팅하며 앱을 만들고 받아 보세요</string>
 </resources>

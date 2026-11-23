@@ -469,4 +469,12 @@
     <string name="err_stream_empty">Üres válasz</string>
     <string name="err_stream_error">Stream hiba</string>
     <string name="err_unknown">Ismeretlen hiba</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">Építs appokat Telegramról</string>
+    <string name="telegram_card_body">Írd le az ötletedet a botunknak a saját nyelveden. Megépíti az appot, és elküldi a linket.</string>
+    <string name="telegram_card_cta">Telegram megnyitása</string>
+    <string name="telegram_continue">Folytatás Telegramon</string>
+    <string name="telegram_settings_title">Telegram-bot</string>
+    <string name="telegram_settings_subtitle">Építsd és kapd meg az appjaidat a @Vibebuilder_bot-tal csevegve</string>
 </resources>

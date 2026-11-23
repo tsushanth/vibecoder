@@ -469,4 +469,12 @@
     <string name="err_stream_empty">Prázdná odpověď</string>
     <string name="err_stream_error">Chyba streamu</string>
     <string name="err_unknown">Neznámá chyba</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">Vytvářej aplikace z Telegramu</string>
+    <string name="telegram_card_body">Napiš svůj nápad našemu botovi ve svém jazyce. Aplikaci vytvoří a pošle ti odkaz.</string>
+    <string name="telegram_card_cta">Otevřít Telegram</string>
+    <string name="telegram_continue">Pokračovat v Telegramu</string>
+    <string name="telegram_settings_title">Telegram bot</string>
+    <string name="telegram_settings_subtitle">Vytvářej a získávej své aplikace chatem s @Vibebuilder_bot</string>
 </resources>

@@ -12,6 +12,7 @@ const { supabase } = await import('../../config/database.js');
 const SECRET = 'Build a diary app for secretuser@example.com codeword zanzibar';
 const USER = '11111111-2222-3333-4444-555555555555';
 const PID = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
+let projectWrites = [], columnMissing = false;
 let events = [], tableMissing = false, surveyRows = 0, otherReady = false, projectOwner = USER, usersRow = null;
 stubSupabase(supabase, (q) => {
     if (q.table === 'app_events') {
@@ -23,6 +24,7 @@ stubSupabase(supabase, (q) => {
         if (q.op === 'delete') { events.push({ deleted_for: eqOf(q, 'user_id') }); return { data: null, error: null }; }
         if (q.op === 'select') return { data: null, error: null, count: surveyRows };
     }
+    if (q.table === 'projects' && q.op === 'update') { projectWrites.push(q.payload); return { data: null, error: columnMissing ? { code: '42703', message: 'column source_channel does not exist' } : null }; }
     if (q.table === 'users' && q.op === 'select') return { data: usersRow, error: null };
     if (q.table === 'users' && q.op === 'upsert') return { data: { user_id: q.payload.user_id }, error: null };
     if (q.table === 'projects' && q.op === 'insert') return { data: { id: q.payload.id }, error: null };
@@ -54,7 +56,7 @@ before(async () => {
     await new Promise((r) => setTimeout(r, 100));
 });
 after(async () => { globalThis.fetch = realFetch; await srv.close(); });
-beforeEach(() => { appEvents._resetForTests(); events = []; tableMissing = false; surveyRows = 0; otherReady = false; projectOwner = USER; usersRow = null; verified = USER; worker = () => new Response('{}', { status: 200 }); });
+beforeEach(() => { appEvents._resetForTests(); events = []; projectWrites = []; columnMissing = false; tableMissing = false; surveyRows = 0; otherReady = false; projectOwner = USER; usersRow = null; verified = USER; worker = () => new Response('{}', { status: 200 }); });
 const quiet = async (fn) => { const e = console.error, l = console.log, w = console.warn; console.error = console.log = console.warn = () => {}; try { return await fn(); } finally { console.error = e; console.log = l; console.warn = w; } };
 const call = (m, p, body, headers = {}) => quiet(() => realFetch(`${srv.base}${p}`, { method: m, headers: { 'content-type': 'application/json', 'user-agent': 'Mozilla/5.0 test', ...headers }, body: body && JSON.stringify(body) }));
 const until = async (fn) => { for (let i = 0; i < 100 && !fn(); i++) await new Promise((r) => setTimeout(r, 20)); await new Promise((r) => setTimeout(r, 30)); };
@@ -70,6 +72,24 @@ test('generate (web stream) -> build_started then build_ready with a duration; n
     assert.deepEqual(of('build_started')[0], { user_id: USER, anon_id: null, event: 'build_started', props: { source: 'web', build_kind: 'new', prompt_length_bucket: '40_99', plan_step_skipped: true } });
     const ready = of('build_ready')[0]; assert.equal(ready.user_id, USER); assert.equal(ready.props.source, 'web'); assert.ok(ready.props.duration_ms >= 0 && ready.props.duration_ms < 10_000);
     nothingPrivate();
+});
+
+test('new builds record their channel: chat bots name it, the app sends x-platform, web falls back to the user agent', async () => {
+    const channels = [];
+    for (const [body, headers] of [[{ source: 'telegram' }, {}], [{}, { 'x-platform': 'android', 'user-agent': 'okhttp/4.12' }], [{}, {}]]) {
+        projectWrites = [];
+        await (await call('POST', '/api/projects/generate', { prompt: SECRET, userId: USER, ...body }, headers)).text();
+        await until(() => projectWrites.some((w) => 'source_channel' in w));
+        channels.push([projectWrites.find((w) => 'source_channel' in w).source_channel, of('build_started').at(-1).props.source]);
+    }
+    assert.deepEqual(channels, [['telegram', 'telegram'], ['android', 'android'], ['web', 'web']]);
+});
+
+test('a database without the source_channel column does not affect the build', async () => {
+    columnMissing = true;
+    const r = await call('POST', '/api/projects/generate', { prompt: SECRET, userId: USER, source: 'telegram' }); await r.text();
+    await until(() => of('build_started').length);
+    assert.equal(r.status, 200); assert.deepEqual(names(), ['build_started']);
 });
 
 test('plan_step_skipped is false when the person asked for a plan first', async () => {

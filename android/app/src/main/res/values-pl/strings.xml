@@ -516,4 +516,12 @@
     <string name="err_stream_empty">Pusta treść odpowiedzi</string>
     <string name="err_stream_error">Błąd strumienia</string>
     <string name="err_unknown">Nieznany błąd</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">Twórz aplikacje z Telegrama</string>
+    <string name="telegram_card_body">Napisz pomysł do naszego bota w swoim języku. Zbuduje aplikację i wyśle Ci link.</string>
+    <string name="telegram_card_cta">Otwórz Telegram</string>
+    <string name="telegram_continue">Kontynuuj w Telegramie</string>
+    <string name="telegram_settings_title">Bot Telegram</string>
+    <string name="telegram_settings_subtitle">Twórz i odbieraj aplikacje, czatując z @Vibebuilder_bot</string>
 </resources>

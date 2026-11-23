@@ -518,4 +518,12 @@
     <string name="err_stream_empty">Respuesta vacía</string>
     <string name="err_stream_error">Error de transmisión</string>
     <string name="err_unknown">Error desconocido</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">Crea apps desde Telegram</string>
+    <string name="telegram_card_body">Escribe tu idea a nuestro bot en tu idioma. Crea la app y te envía el enlace.</string>
+    <string name="telegram_card_cta">Abrir Telegram</string>
+    <string name="telegram_continue">Continuar en Telegram</string>
+    <string name="telegram_settings_title">Bot de Telegram</string>
+    <string name="telegram_settings_subtitle">Crea y recibe tus apps chateando con @Vibebuilder_bot</string>
 </resources>

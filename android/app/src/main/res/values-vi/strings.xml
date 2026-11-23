@@ -516,4 +516,12 @@
     <string name="err_stream_empty">Nội dung phản hồi trống</string>
     <string name="err_stream_error">Lỗi luồng dữ liệu</string>
     <string name="err_unknown">Lỗi không xác định</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">Tạo ứng dụng từ Telegram</string>
+    <string name="telegram_card_body">Nhắn ý tưởng cho bot của chúng tôi bằng ngôn ngữ của bạn. Bot tạo ứng dụng và gửi liên kết cho bạn.</string>
+    <string name="telegram_card_cta">Mở Telegram</string>
+    <string name="telegram_continue">Tiếp tục trên Telegram</string>
+    <string name="telegram_settings_title">Bot Telegram</string>
+    <string name="telegram_settings_subtitle">Tạo và nhận ứng dụng của bạn bằng cách trò chuyện với @Vibebuilder_bot</string>
 </resources>

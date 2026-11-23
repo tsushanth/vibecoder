@@ -469,4 +469,12 @@
     <string name="err_stream_empty">Порожнє тіло відповіді</string>
     <string name="err_stream_error">Помилка потоку</string>
     <string name="err_unknown">Невідома помилка</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">Створюйте застосунки в Telegram</string>
+    <string name="telegram_card_body">Напишіть нашому боту свою ідею своєю мовою. Він створить застосунок і надішле посилання.</string>
+    <string name="telegram_card_cta">Відкрити Telegram</string>
+    <string name="telegram_continue">Продовжити в Telegram</string>
+    <string name="telegram_settings_title">Бот у Telegram</string>
+    <string name="telegram_settings_subtitle">Створюйте й отримуйте застосунки в чаті з @Vibebuilder_bot</string>
 </resources>

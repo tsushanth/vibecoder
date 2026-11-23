@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase';
 import { api } from '@/lib/api';
 import { getSignupSource } from '@/lib/signupSource';
+import { safeRedirect } from '@/lib/safeRedirect';
 import { ForgotPasswordPanel } from './ForgotPasswordPanel';
 
 interface AuthFormProps {
@@ -54,8 +55,9 @@ export function AuthForm({ mode }: AuthFormProps) {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;
       }
-      // the welcome screen sends people who have already seen it straight on to Create
-      router.push('/welcome');
+      // a same-site ?redirect= (for example the Telegram connect page) wins; otherwise the welcome screen sends people who have
+      // already seen it straight on to Create
+      router.push(safeRedirect(new URLSearchParams(window.location.search).get('redirect')) ?? '/welcome');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'We could not sign you in. Check your details and try again.');
     } finally {
@@ -65,9 +67,10 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   async function handleGoogleAuth() {
     setError(null);
+    const back = safeRedirect(new URLSearchParams(window.location.search).get('redirect'));
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/callback` },
+      options: { redirectTo: `${window.location.origin}/callback${back ? `?redirect=${encodeURIComponent(back)}` : ''}` },
     });
     if (oauthError) setError(oauthError.message);
   }

@@ -516,4 +516,12 @@
     <string name="err_stream_empty">Badan respons kosong</string>
     <string name="err_stream_error">Ralat stream</string>
     <string name="err_unknown">Ralat tidak diketahui</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">Bina apl daripada Telegram</string>
+    <string name="telegram_card_body">Taip idea anda kepada bot kami dalam bahasa anda. Ia membina apl dan menghantar pautan kepada anda.</string>
+    <string name="telegram_card_cta">Buka Telegram</string>
+    <string name="telegram_continue">Teruskan di Telegram</string>
+    <string name="telegram_settings_title">Bot Telegram</string>
+    <string name="telegram_settings_subtitle">Bina dan dapatkan apl anda dengan berbual bersama @Vibebuilder_bot</string>
 </resources>
