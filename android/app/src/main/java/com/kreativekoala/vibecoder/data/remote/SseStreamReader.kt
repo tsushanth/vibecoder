@@ -5,6 +5,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.kreativekoala.vibecoder.data.model.SseEvent
+import com.kreativekoala.vibecoder.BuildConfig
 import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.util.Constants
 import com.kreativekoala.vibecoder.util.appString
@@ -71,6 +72,7 @@ class SseStreamReader @Inject constructor(
             .post(requestBody)
             .addHeader("Accept", "text/event-stream")
             .addHeader("x-platform", "android")
+            .addHeader("x-app-version", BuildConfig.VERSION_NAME)
 
         if (authToken != null) {
             requestBuilder.addHeader("Authorization", "Bearer $authToken")

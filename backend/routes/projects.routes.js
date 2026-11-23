@@ -33,6 +33,7 @@ import { normalizeLang, languageName, suggestionTranslator, parseIdeaList } from
 import { registerDeployedApp } from '../services/appRegistry.js';
 import { captureChatSecrets, redactForLog } from '../services/chatSecrets.js';
 import { denyUnlessActor } from '../lib/actAs.js';
+import { guardGenerate } from '../lib/generateAuth.js';
 import { removeSites, disableSiteApps, projectSiteSubdomains } from '../lib/siteRemoval.js';
 import { looksLikePastedCode } from '../lib/promptGuard.js';
 import { deriveTitle } from '../lib/projectTitle.js';
@@ -586,6 +587,9 @@ router.post('/generate', async (req, res) => {
     try {
         let { userName, framework, referenceImage, deviceToken, source } = req.body;
         ({ prompt, userId } = req.body);
+
+        // Who may build as this userId (GENERATE_AUTH_MODE off|report|enforce; default report = count only). Answers 401 itself when it blocks.
+        if (await guardGenerate(req, res, userId)) return;
 
         if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
             return res.status(400).json({ error: 'Project description is required' });
