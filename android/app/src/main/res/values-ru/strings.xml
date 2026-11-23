@@ -516,4 +516,12 @@
     <string name="err_stream_empty">Пустой ответ</string>
     <string name="err_stream_error">Ошибка потока</string>
     <string name="err_unknown">Неизвестная ошибка</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">Создавайте приложения в Telegram</string>
+    <string name="telegram_card_body">Напишите нашему боту свою идею на своём языке. Он создаст приложение и пришлёт ссылку.</string>
+    <string name="telegram_card_cta">Открыть Telegram</string>
+    <string name="telegram_continue">Продолжить в Telegram</string>
+    <string name="telegram_settings_title">Бот в Telegram</string>
+    <string name="telegram_settings_subtitle">Создавайте и получайте приложения в чате с @Vibebuilder_bot</string>
 </resources>

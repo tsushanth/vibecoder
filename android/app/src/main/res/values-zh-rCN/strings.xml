@@ -516,4 +516,12 @@
     <string name="err_stream_empty">响应内容为空</string>
     <string name="err_stream_error">流错误</string>
     <string name="err_unknown">未知错误</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">用 Telegram 制作应用</string>
+    <string name="telegram_card_body">用你自己的语言把创意发给我们的机器人。它会制作应用并把链接发给你。</string>
+    <string name="telegram_card_cta">打开 Telegram</string>
+    <string name="telegram_continue">在 Telegram 中继续</string>
+    <string name="telegram_settings_title">Telegram 机器人</string>
+    <string name="telegram_settings_subtitle">与 @Vibebuilder_bot 聊天，制作并获取你的应用</string>
 </resources>

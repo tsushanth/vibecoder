@@ -1,16 +1,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
-import { API_URL } from '@/lib/constants';
+import { api } from '@/lib/api';
+import { telegramBotUrl, telegramLinkUrl } from '@/lib/telegramBot';
 
-type Step = 'loading' | 'sign-in' | 'generating' | 'done' | 'error';
+type Step = 'loading' | 'sign-in' | 'generating' | 'done' | 'error' | 'start';
 
-export default function TelegramConnectPage() {
+// Links a chat identity (Telegram, or a phone number for the SMS/WhatsApp bot) to the signed-in VibeBuild account.
+//   /connect?tg_id=<id>&src=tg  comes from the Telegram bot's /link button: the code is shown AND a button opens Telegram with it
+//   /connect?tg_id=<phone>      comes from the SMS/WhatsApp bot: the code is shown to be texted back
+//   /connect                    no id: send the person to the bot, whose /link command brings them back here
+export default function ConnectPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const tgId = searchParams.get('tg_id');
+  const fromTelegram = searchParams.get('src') === 'tg';
 
   const [step, setStep] = useState<Step>('loading');
   const [code, setCode] = useState('');
@@ -19,118 +26,113 @@ export default function TelegramConnectPage() {
 
   useEffect(() => {
     if (!tgId) {
-      setError('Missing Telegram ID. Please use the link sent by the bot.');
-      setStep('error');
+      setStep('start');
       return;
     }
-    checkSession();
+    void checkSession();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tgId]);
 
   async function checkSession() {
-    const supabase = createClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      await generateCode(session.user.id);
-    } else {
-      setStep('sign-in');
-    }
+    const { data: { session } } = await createClient().auth.getSession();
+    if (session?.user) await generateCode(session.user.id);
+    else setStep('sign-in');
   }
 
   async function generateCode(userId: string) {
     setStep('generating');
     try {
-      const res = await fetch(`${API_URL}/api/telegram/connect?tg_id=${tgId}&user_id=${userId}`);
-      const data = await res.json();
-      if (data.success) {
-        setCode(data.code);
-        setStep('done');
-      } else {
-        throw new Error(data.error || 'Failed to generate code');
-      }
-    } catch (e: any) {
-      setError(e.message);
+      const data = await api.get<{ success: boolean; code?: string; error?: string }>(
+        `/api/telegram/connect?tg_id=${encodeURIComponent(tgId!)}&user_id=${encodeURIComponent(userId)}`,
+      );
+      if (!data.success || !data.code) throw new Error(data.error || 'Could not create a code. Please try again.');
+      setCode(data.code);
+      setStep('done');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not create a code. Please try again.');
       setStep('error');
     }
   }
 
   function handleCopy() {
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    void navigator.clipboard.writeText(code).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {});
   }
 
   function handleSignIn() {
-    // Save tg_id so we can resume after OAuth redirect
-    sessionStorage.setItem('tg_connect_id', tgId!);
-    router.push(`/login?redirect=/connect/callback?tg_id=${tgId}`);
+    const back = `/connect?tg_id=${encodeURIComponent(tgId!)}${fromTelegram ? '&src=tg' : ''}`;
+    router.push(`/login?redirect=${encodeURIComponent(back)}`);
   }
 
-  if (step === 'loading') return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="text-4xl mb-4">⚡</div>
-        <p className="text-gray-400">Loading...</p>
-      </div>
+  const shell = (children: React.ReactNode) => (
+    <div className="flex min-h-dvh items-center justify-center bg-background p-5 text-foreground">
+      <div className="w-full max-w-sm text-center">{children}</div>
     </div>
   );
+  const primary = 'block w-full rounded-lg bg-accent px-6 py-3 text-center font-semibold text-white transition hover:bg-accent-hover';
 
-  if (step === 'error') return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="text-center max-w-sm">
-        <div className="text-4xl mb-4">❌</div>
-        <p className="text-red-400 mb-4">{error}</p>
-        <a href="/" className="text-purple-400 underline">Go to VibeBuild</a>
-      </div>
-    </div>
-  );
+  if (step === 'loading' || step === 'generating') {
+    return shell(
+      <>
+        <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+        <p className="text-muted">{step === 'loading' ? 'Loading…' : 'Creating your code…'}</p>
+      </>,
+    );
+  }
 
-  if (step === 'sign-in') return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="text-center max-w-sm">
-        <div className="text-5xl mb-4">⚡</div>
-        <h1 className="text-2xl font-bold mb-2">Connect Telegram</h1>
-        <p className="text-gray-400 mb-6">
-          Sign in to VibeBuild to link your Telegram account and start building apps from the bot.
+  if (step === 'start') {
+    return shell(
+      <>
+        <h1 className="font-display text-2xl font-bold">Build apps from Telegram</h1>
+        <p className="mb-6 mt-2 text-muted">
+          Message the VibeBuild bot an idea in your own language. It builds the app and sends you the link. To keep those apps in your VibeBuild account, send /link to the bot.
         </p>
-        <button
-          onClick={handleSignIn}
-          className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition"
-        >
-          Sign in to VibeBuild
+        <a href={telegramBotUrl('web_connect')} target="_blank" rel="noopener" className={primary}>Open the Telegram bot</a>
+        <Link href="/" className="mt-4 block text-sm text-muted underline">Back to VibeBuild</Link>
+      </>,
+    );
+  }
+
+  if (step === 'error') {
+    return shell(
+      <>
+        <p className="mb-4 text-red-400">{error}</p>
+        <Link href="/" className="text-sm text-muted underline">Go to VibeBuild</Link>
+      </>,
+    );
+  }
+
+  if (step === 'sign-in') {
+    return shell(
+      <>
+        <h1 className="font-display text-2xl font-bold">Connect your chat</h1>
+        <p className="mb-6 mt-2 text-muted">Sign in to VibeBuild to link this chat to your account, so apps you build there also show up in the app.</p>
+        <button onClick={handleSignIn} className={primary}>Sign in to VibeBuild</button>
+      </>,
+    );
+  }
+
+  return shell(
+    <>
+      <h1 className="font-display text-2xl font-bold">Almost there</h1>
+      {fromTelegram ? (
+        <>
+          <p className="mb-6 mt-2 text-muted">Tap the button to finish in Telegram. The link works once and expires in 10 minutes.</p>
+          <a href={telegramLinkUrl(code)} className={primary}>Open Telegram to finish</a>
+          <p className="mb-2 mt-6 text-sm text-muted">Or send this code to the bot:</p>
+        </>
+      ) : (
+        <p className="mb-6 mt-2 text-muted">Send this code back in the chat to finish linking your account.</p>
+      )}
+      <div className="rounded-2xl border border-border bg-surface p-6">
+        <div className="mb-4 font-mono text-4xl font-bold tracking-widest text-accent-hover">{code}</div>
+        <button onClick={handleCopy} className="w-full rounded-lg border border-border px-6 py-2.5 text-sm font-semibold transition hover:border-accent">
+          {copied ? 'Copied' : 'Copy code'}
         </button>
       </div>
-    </div>
-  );
-
-  if (step === 'generating') return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="text-4xl mb-4">🔗</div>
-        <p className="text-gray-400">Generating your code...</p>
-      </div>
-    </div>
-  );
-
-  // done
-  return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="text-center max-w-sm">
-        <div className="text-5xl mb-4">✅</div>
-        <h1 className="text-2xl font-bold mb-2">Almost there!</h1>
-        <p className="text-gray-400 mb-6">
-          Copy this code and paste it in the Telegram bot to complete linking your account.
-        </p>
-        <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 mb-4">
-          <div className="text-4xl font-mono font-bold tracking-widest text-purple-400 mb-4">{code}</div>
-          <button
-            onClick={handleCopy}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition"
-          >
-            {copied ? '✅ Copied!' : 'Copy Code'}
-          </button>
-        </div>
-        <p className="text-xs text-gray-500">This code expires in 10 minutes</p>
-      </div>
-    </div>
+      <p className="mt-4 text-xs text-subtle">This code expires in 10 minutes.</p>
+    </>,
   );
 }

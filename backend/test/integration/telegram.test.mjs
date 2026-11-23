@@ -23,9 +23,11 @@ stubSupabase(supabase, (q) => {
 let t = 1_000_000;
 const clock = { now: () => t, advance: (ms) => { t += ms; } };
 const servers = [];
-async function mount(limits = {}) {
+// Stands in for the bearer-token check: the caller is whoever the request says it is (the auth rules have their own tests below).
+const claimedUser = async (r) => r.headers['x-test-user'] || r.body?.userId || r.query?.user_id || null;
+async function mount(limits = {}, extra = {}) {
     const app = express(); app.set('trust proxy', true); app.use(express.json());
-    app.use('/api/telegram', createTelegramRouter({ supabase, workerSecret: SECRET, now: clock.now, limits }));
+    app.use('/api/telegram', createTelegramRouter({ supabase, workerSecret: SECRET, now: clock.now, limits, verifyUser: claimedUser, ...extra }));
     const s = await listen(app); servers.push(s); return s;
 }
 after(async () => { for (const s of servers) await s.close(); });
@@ -158,7 +160,7 @@ async function mountSelected(env) {
     const queries = [];
     stubSupabase(supabase, (q) => { queries.push(q.table); return { data: null, error: { code: 'PGRST116' } }; });
     const app = express(); app.set('trust proxy', true); app.use(express.json());
-    app.use('/api/telegram', selectTelegramRouter(env, { supabase, workerSecret: SECRET, now: clock.now }));
+    app.use('/api/telegram', selectTelegramRouter(env, { supabase, workerSecret: SECRET, now: clock.now, verifyUser: claimedUser }));
     const s = await listen(app); servers.push(s);
     return { s, queries };
 }
@@ -188,4 +190,26 @@ test('the module default export is the disabled router when the flag is unset', 
     const s = await listen(app); servers.push(s);
     const r = await req(s, 'POST', '/link', { body: { userId: 'u1' } });
     assert.equal(r.status, process.env.TELEGRAM_ROUTES_ENABLED === 'true' ? 200 : 503);
+});
+
+// ---- link codes are only minted for the signed-in caller's own account (a user id is not a secret)
+test('link and connect refuse callers without a verified token, or with someone else\'s id', async () => {
+    const s = await mount({}, { verifyUser: async (r) => (r.headers.authorization === 'Bearer good' ? 'u1' : null) });
+    assert.equal((await req(s, 'POST', '/link', { body: { userId: 'u1' } })).status, 401);
+    assert.equal((await req(s, 'GET', '/connect?tg_id=1&user_id=u1')).status, 401);
+    assert.equal((await req(s, 'POST', '/link', { body: { userId: 'victim' }, headers: { authorization: 'Bearer good' } })).status, 403);
+    assert.equal((await req(s, 'GET', '/connect?tg_id=1&user_id=victim', { headers: { authorization: 'Bearer good' } })).status, 403);
+    const ok = await req(s, 'POST', '/link', { body: { userId: 'u1' }, headers: { authorization: 'Bearer good' } });
+    assert.equal(ok.status, 200); assert.ok((await ok.json()).botUrl.startsWith('https://t.me/Vibebuilder_bot?start=link_'));
+});
+
+test('verify detaches the chat id from any other account before attaching it', async () => {
+    const s = await mount();
+    const seen = [];
+    stubSupabase(supabase, (q) => { if (q.table === 'users' && q.op === 'update') seen.push({ payload: q.payload, filters: q.filters.map((f) => f[0]) }); return q.table === 'users' && q.op === 'select' ? { data: users.u1, error: null } : { data: null, error: null }; });
+    const code = await mint(s, 'u1', '18.0.0.1');
+    assert.equal((await req(s, 'POST', '/verify', { body: { code, telegramId: 777 }, ip: '18.0.0.2' })).status, 200);
+    assert.deepEqual(seen[0].payload, { telegram_id: null, telegram_username: null });
+    assert.ok(seen[0].filters.includes('neq'), 'the detach never touches the account being linked');
+    assert.equal(seen.at(-1).payload.telegram_id, '777');
 });

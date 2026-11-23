@@ -518,4 +518,12 @@
     <string name="err_stream_empty">रिस्पॉन्स बॉडी खाली है</string>
     <string name="err_stream_error">स्ट्रीम त्रुटि</string>
     <string name="err_unknown">अज्ञात त्रुटि</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">Telegram से ऐप बनाएँ</string>
+    <string name="telegram_card_body">अपनी भाषा में हमारे बॉट को अपना आइडिया लिखें। वह ऐप बनाकर आपको लिंक भेजेगा।</string>
+    <string name="telegram_card_cta">Telegram खोलें</string>
+    <string name="telegram_continue">Telegram पर जारी रखें</string>
+    <string name="telegram_settings_title">Telegram बॉट</string>
+    <string name="telegram_settings_subtitle">@Vibebuilder_bot से चैट करके अपने ऐप बनाएँ और पाएँ</string>
 </resources>

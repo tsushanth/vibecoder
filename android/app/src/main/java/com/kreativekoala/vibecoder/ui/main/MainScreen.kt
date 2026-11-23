@@ -2,8 +2,6 @@ package com.kreativekoala.vibecoder.ui.main
 
 import com.kreativekoala.vibecoder.R
 import androidx.compose.ui.res.stringResource
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -35,6 +33,8 @@ import com.kreativekoala.vibecoder.ui.account.AccountScreen
 import com.kreativekoala.vibecoder.ui.apps.AppsScreen
 import com.kreativekoala.vibecoder.ui.browse.BrowseScreen
 import com.kreativekoala.vibecoder.ui.create.CreateScreen
+import com.kreativekoala.vibecoder.ui.telegram.TelegramBannerPolicy
+import com.kreativekoala.vibecoder.ui.telegram.TelegramBot
 import com.kreativekoala.vibecoder.ui.theme.DarkBackground
 import com.kreativekoala.vibecoder.ui.theme.DarkBorder
 import com.kreativekoala.vibecoder.ui.theme.TextSecondary
@@ -46,7 +46,8 @@ data class TabItem(
     val unselectedIcon: ImageVector
 )
 
-private const val PREF_TELEGRAM_BANNER_DISMISSED = "telegram_banner_dismissed"
+private const val PREF_TELEGRAM_BANNER_DISMISSED = "telegram_banner_dismissed" // legacy one-time flag
+private const val PREF_TELEGRAM_BANNER_DISMISSED_AT = "telegram_banner_dismissed_at"
 
 @Composable
 fun MainScreen(
@@ -70,10 +71,19 @@ fun MainScreen(
     val isSystemDown by viewModel.isSystemDown.collectAsState()
     val systemMessage by viewModel.systemMessage.collectAsState()
 
-    // Telegram banner - persisted dismiss state
+    // Telegram banner: dismissing hides it for TelegramBannerPolicy.RESHOW_AFTER_DAYS days, opening the bot hides it for good
     val prefs = remember { context.getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE) }
     var showTelegramBanner by remember {
-        mutableStateOf(!prefs.getBoolean(PREF_TELEGRAM_BANNER_DISMISSED, false))
+        val now = System.currentTimeMillis()
+        val dismissedAt = TelegramBannerPolicy.effectiveDismissedAt(
+            legacyDismissed = prefs.getBoolean(PREF_TELEGRAM_BANNER_DISMISSED, false),
+            storedDismissedAt = prefs.getLong(PREF_TELEGRAM_BANNER_DISMISSED_AT, 0L),
+            nowMs = now
+        )
+        if (dismissedAt > 0L && prefs.getLong(PREF_TELEGRAM_BANNER_DISMISSED_AT, 0L) == 0L) {
+            prefs.edit().putLong(PREF_TELEGRAM_BANNER_DISMISSED_AT, dismissedAt).apply()
+        }
+        mutableStateOf(TelegramBannerPolicy.shouldShow(now, dismissedAt, TelegramBot.hasOpened(context)))
     }
 
     Scaffold(
@@ -133,7 +143,7 @@ fun MainScreen(
                 }
             }
 
-            // Telegram banner (dismissible, one-time)
+            // Telegram banner (dismissible; comes back after a week until the bot has been opened)
             AnimatedVisibility(
                 visible = showTelegramBanner && !isSystemDown,
                 enter = slideInVertically(initialOffsetY = { -it }),
@@ -144,8 +154,8 @@ fun MainScreen(
                         .fillMaxWidth()
                         .background(Color(0xFF1D4ED8))
                         .clickable {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/Vibebuilder_bot"))
-                            context.startActivity(intent)
+                            showTelegramBanner = false
+                            TelegramBot.open(context, TelegramBot.PAYLOAD_BANNER)
                         }
                         .padding(horizontal = 16.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -160,7 +170,7 @@ fun MainScreen(
                     IconButton(
                         onClick = {
                             showTelegramBanner = false
-                            prefs.edit().putBoolean(PREF_TELEGRAM_BANNER_DISMISSED, true).apply()
+                            prefs.edit().putLong(PREF_TELEGRAM_BANNER_DISMISSED_AT, System.currentTimeMillis()).apply()
                         },
                         modifier = Modifier.size(24.dp)
                     ) {

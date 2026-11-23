@@ -518,4 +518,12 @@
     <string name="err_stream_empty">استجابة فارغة</string>
     <string name="err_stream_error">خطأ في البث</string>
     <string name="err_unknown">خطأ غير معروف</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">ابنِ تطبيقات من Telegram</string>
+    <string name="telegram_card_body">اكتب فكرتك لروبوتنا بلغتك. يبني التطبيق ويرسل لك الرابط.</string>
+    <string name="telegram_card_cta">افتح Telegram</string>
+    <string name="telegram_continue">تابع على Telegram</string>
+    <string name="telegram_settings_title">روبوت Telegram</string>
+    <string name="telegram_settings_subtitle">ابنِ تطبيقاتك واحصل عليها عبر الدردشة مع @Vibebuilder_bot</string>
 </resources>

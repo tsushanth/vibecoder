@@ -516,4 +516,12 @@
     <string name="err_stream_empty">Lege responsbody</string>
     <string name="err_stream_error">Streamfout</string>
     <string name="err_unknown">Onbekende fout</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">Bouw apps vanuit Telegram</string>
+    <string name="telegram_card_body">Stuur je idee in je eigen taal naar onze bot. Hij bouwt de app en stuurt je de link.</string>
+    <string name="telegram_card_cta">Telegram openen</string>
+    <string name="telegram_continue">Verdergaan op Telegram</string>
+    <string name="telegram_settings_title">Telegram-bot</string>
+    <string name="telegram_settings_subtitle">Bouw en ontvang je apps door te chatten met @Vibebuilder_bot</string>
 </resources>

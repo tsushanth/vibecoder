@@ -25,7 +25,7 @@ import { withHttpsThumbnail } from '../lib/thumbnailService.js';
 import { filterBrowseProjects } from '../services/browseFilter.js';
 import { reportFailure } from '../lib/failureReporter.js';
 import { markProjectFailed, FAIL_CLASS, _deps as failureDeps } from '../lib/buildFailure.js';
-import { appEvents, buildEvents, sourceFromRequest } from '../lib/appEventsInstance.js';
+import { appEvents, buildEvents, sourceFromRequest, channelFromRequest } from '../lib/appEventsInstance.js';
 import { promptLengthBucket } from '../lib/appEvents.js';
 import { buildFailureRate } from '../lib/buildFailureRateInstance.js';
 import { recordLlm } from '../lib/llmUsageInstance.js';
@@ -563,6 +563,15 @@ function setupSSE(res) {
     res.on('close', () => clearInterval(heartbeatInterval));
 }
 
+// Which channel created the project (android | ios | web | telegram | sms | whatsapp | api). Best effort in a separate update, so a
+// database without the source_channel column (migration not applied yet) never affects a build. Descriptive analytics only.
+function recordSourceChannel(projectId, channel) {
+    if (!projectId || !channel) return;
+    Promise.resolve(supabase.from('projects').update({ source_channel: channel }).eq('id', projectId))
+        .then((r) => { if (r?.error && r.error.code !== '42703' && r.error.code !== 'PGRST204') console.warn(`[generate] source_channel not recorded code=${r.error.code || 'none'}`); })
+        .catch(() => {});
+}
+
 // ============================================
 // POST /api/projects/generate
 // Streaming endpoint — proxies SSE status events from the worker to the client
@@ -651,6 +660,7 @@ router.post('/generate', async (req, res) => {
             if (!phErr && placeholder) {
                 placeholderProjectId = placeholder.id;
                 progressStart(placeholderProjectId);
+                recordSourceChannel(placeholderProjectId, channelFromRequest(req));
                 // Activation funnel: logs only when this is the account's first build (lib/funnel.js). Never blocks the build.
                 logFirstBuildStarted(supabase, {
                     userId,
@@ -674,7 +684,7 @@ router.post('/generate', async (req, res) => {
         }
 
         // Usage event: the build was accepted (rate limits passed and a project row, or the stream path, to carry it). Only the length bucket of the prompt is kept, never the text.
-        buildEvents.buildStarted({ projectId: placeholderProjectId, userId, source: sourceFromRequest(req), prompt, kind: 'new' });
+        buildEvents.buildStarted({ projectId: placeholderProjectId, userId, source: channelFromRequest(req), prompt, kind: 'new' });
 
         // Set up SSE
         setupSSE(res);

@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
 import { api } from '@/lib/api';
+import { safeRedirect } from '@/lib/safeRedirect';
 
 export default function CallbackPage() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function CallbackPage() {
         } catch {
           // User may already exist
         }
-        router.push('/welcome');
+        router.push(safeRedirect(new URLSearchParams(window.location.search).get('redirect')) ?? '/welcome');
       } else {
         router.push('/login');
       }

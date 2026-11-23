@@ -469,4 +469,12 @@
     <string name="err_stream_empty">Corp de răspuns gol</string>
     <string name="err_stream_error">Eroare de stream</string>
     <string name="err_unknown">Eroare necunoscută</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">Construiește aplicații din Telegram</string>
+    <string name="telegram_card_body">Scrie ideea ta botului nostru în limba ta. Construiește aplicația și îți trimite linkul.</string>
+    <string name="telegram_card_cta">Deschide Telegram</string>
+    <string name="telegram_continue">Continuă pe Telegram</string>
+    <string name="telegram_settings_title">Bot Telegram</string>
+    <string name="telegram_settings_subtitle">Construiește și primește aplicațiile discutând cu @Vibebuilder_bot</string>
 </resources>

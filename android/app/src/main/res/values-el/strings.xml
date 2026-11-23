@@ -469,4 +469,12 @@
     <string name="err_stream_empty">Κενό σώμα απάντησης</string>
     <string name="err_stream_error">Σφάλμα ροής</string>
     <string name="err_unknown">Άγνωστο σφάλμα</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">Φτιάξε εφαρμογές από το Telegram</string>
+    <string name="telegram_card_body">Γράψε την ιδέα σου στο bot μας στη δική σου γλώσσα. Φτιάχνει την εφαρμογή και σου στέλνει τον σύνδεσμο.</string>
+    <string name="telegram_card_cta">Άνοιγμα Telegram</string>
+    <string name="telegram_continue">Συνέχεια στο Telegram</string>
+    <string name="telegram_settings_title">Bot Telegram</string>
+    <string name="telegram_settings_subtitle">Φτιάξε και πάρε τις εφαρμογές σου συνομιλώντας με το @Vibebuilder_bot</string>
 </resources>

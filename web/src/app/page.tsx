@@ -5,6 +5,7 @@ import { PricingCTA } from '@/components/landing/PricingCTA';
 import { HeroComposer } from '@/components/landing/HeroComposer';
 import { LiveBuild } from '@/components/landing/LiveBuild';
 import { StoreBadges } from '@/components/landing/StoreBadges';
+import { TelegramSection } from '@/components/landing/TelegramSection';
 import { MobileCtaBar } from '@/components/landing/MobileCtaBar';
 import { MarketingHeader, MarketingFooter } from '@/components/landing/MarketingChrome';
 import { SUBSCRIPTION_TIERS } from '@/lib/constants';
@@ -56,6 +57,8 @@ export default function LandingPage() {
             </ol>
           </div>
         </section>
+
+        <TelegramSection />
 
         <section id="pricing" className="scroll-mt-16 border-t border-border px-5 py-20 sm:px-6">
           <div className="mx-auto max-w-6xl">

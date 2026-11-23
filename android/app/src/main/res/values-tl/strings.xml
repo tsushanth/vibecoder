@@ -516,4 +516,12 @@
     <string name="err_stream_empty">Walang laman ang response</string>
     <string name="err_stream_error">Stream error</string>
     <string name="err_unknown">Hindi alam na error</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">Gumawa ng apps mula sa Telegram</string>
+    <string name="telegram_card_body">I-chat ang idea mo sa aming bot sa sarili mong wika. Gagawin nito ang app at ipapadala ang link.</string>
+    <string name="telegram_card_cta">Buksan ang Telegram</string>
+    <string name="telegram_continue">Ipagpatuloy sa Telegram</string>
+    <string name="telegram_settings_title">Telegram bot</string>
+    <string name="telegram_settings_subtitle">Gumawa at kunin ang apps mo sa pakikipag-chat kay @Vibebuilder_bot</string>
 </resources>

@@ -8,4 +8,4 @@ const enabled = () => process.env.APP_EVENTS_ENABLED !== 'false' && (process.env
 
 export const appEvents = createAppEvents({ getClient: () => supabase, enabled });
 export const buildEvents = createBuildEvents({ emit: appEvents.emit, getClient: () => supabase });
-export { sourceFromRequest } from './appEvents.js';
+export { sourceFromRequest, channelFromRequest } from './appEvents.js';

@@ -518,4 +518,12 @@
     <string name="err_stream_empty">Isi respons kosong</string>
     <string name="err_stream_error">Kesalahan stream</string>
     <string name="err_unknown">Kesalahan tidak diketahui</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">Buat aplikasi dari Telegram</string>
+    <string name="telegram_card_body">Tulis ide Anda ke bot kami dalam bahasa Anda. Bot membuat aplikasinya dan mengirimkan tautannya.</string>
+    <string name="telegram_card_cta">Buka Telegram</string>
+    <string name="telegram_continue">Lanjutkan di Telegram</string>
+    <string name="telegram_settings_title">Bot Telegram</string>
+    <string name="telegram_settings_subtitle">Buat dan terima aplikasi Anda dengan mengobrol bersama @Vibebuilder_bot</string>
 </resources>

@@ -516,4 +516,12 @@
     <string name="err_stream_empty">ไม่มีข้อมูลตอบกลับ</string>
     <string name="err_stream_error">ข้อผิดพลาดของสตรีม</string>
     <string name="err_unknown">ข้อผิดพลาดที่ไม่ทราบสาเหตุ</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">สร้างแอปจาก Telegram</string>
+    <string name="telegram_card_body">พิมพ์ไอเดียถึงบอทของเราเป็นภาษาของคุณ บอทจะสร้างแอปและส่งลิงก์ให้</string>
+    <string name="telegram_card_cta">เปิด Telegram</string>
+    <string name="telegram_continue">ทำต่อบน Telegram</string>
+    <string name="telegram_settings_title">บอท Telegram</string>
+    <string name="telegram_settings_subtitle">สร้างและรับแอปของคุณด้วยการแชตกับ @Vibebuilder_bot</string>
 </resources>

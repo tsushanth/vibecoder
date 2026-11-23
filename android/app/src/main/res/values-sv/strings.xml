@@ -469,4 +469,12 @@
     <string name="err_stream_empty">Tom svarstext</string>
     <string name="err_stream_error">Strömfel</string>
     <string name="err_unknown">Okänt fel</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">Bygg appar från Telegram</string>
+    <string name="telegram_card_body">Skriv din idé till vår bot på ditt eget språk. Den bygger appen och skickar länken till dig.</string>
+    <string name="telegram_card_cta">Öppna Telegram</string>
+    <string name="telegram_continue">Fortsätt i Telegram</string>
+    <string name="telegram_settings_title">Telegram-bot</string>
+    <string name="telegram_settings_subtitle">Bygg och få dina appar genom att chatta med @Vibebuilder_bot</string>
 </resources>

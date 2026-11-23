@@ -151,6 +151,12 @@ fun BuildChatThread(
                         OutlinedButton(onClick = onPublish, enabled = hasPreview) { Text(stringResource(R.string.publish), color = VibePurple) }
                         OutlinedButton(onClick = { focus.requestFocus() }) { Text(stringResource(R.string.build_chat_tweak), color = VibePurple) }
                     }
+                    Spacer(Modifier.height(8.dp))
+                    val telegramContext = androidx.compose.ui.platform.LocalContext.current
+                    OutlinedButton(
+                        onClick = { com.kreativekoala.vibecoder.ui.telegram.TelegramBot.open(telegramContext, com.kreativekoala.vibecoder.ui.telegram.TelegramBot.PAYLOAD_BUILD) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text(stringResource(R.string.telegram_continue), color = VibePurple) }
                     Spacer(Modifier.height(6.dp))
                     TextButton(onClick = onNewApp) { Text(stringResource(R.string.build_chat_start_new), color = TextSecondary) }
                 }

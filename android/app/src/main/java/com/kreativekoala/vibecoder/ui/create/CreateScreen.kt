@@ -38,6 +38,7 @@ import com.kreativekoala.vibecoder.ui.paywall.GenerationLimit
 import com.kreativekoala.vibecoder.util.Monetization
 import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.preview.LivePreviewScreen
+import com.kreativekoala.vibecoder.ui.telegram.TelegramPromoCard
 import com.kreativekoala.vibecoder.ui.theme.*
 
 @Composable
@@ -378,6 +379,11 @@ fun CreateScreen(
                         }
                     }
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Build from Telegram: shown right under the prompt box on every visit
+                TelegramPromoCard()
 
                 Spacer(modifier = Modifier.height(24.dp))
 

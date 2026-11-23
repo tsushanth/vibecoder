@@ -518,4 +518,12 @@
     <string name="err_stream_empty">Corps de réponse vide</string>
     <string name="err_stream_error">Erreur de flux</string>
     <string name="err_unknown">Erreur inconnue</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">Crée des applis depuis Telegram</string>
+    <string name="telegram_card_body">Écris ton idée à notre bot dans ta langue. Il crée l\'appli et t\'envoie le lien.</string>
+    <string name="telegram_card_cta">Ouvrir Telegram</string>
+    <string name="telegram_continue">Continuer sur Telegram</string>
+    <string name="telegram_settings_title">Bot Telegram</string>
+    <string name="telegram_settings_subtitle">Crée et récupère tes applis en discutant avec @Vibebuilder_bot</string>
 </resources>
