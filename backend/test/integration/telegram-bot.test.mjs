@@ -267,3 +267,31 @@ test('after a restart, resumeActive() follows the build again and still delivers
     assert.equal(await t.bot.resumeActive(), 1); await settle();
     assert.equal(t.api.last().chatId, '42'); assert.match(t.api.last().text, /La tua app è pronta/);
 });
+
+// ---------------------------------------------------------------- metrics coverage
+test('start payloads from the website keep their own bucket (web_home, web_connect), not "other"', async () => {
+    const t = setup();
+    for (const [id, payload] of [[1, 'web_home'], [2, 'web_connect'], [3, 'web'], [4, 'app_settings'], [5, 'whatever']]) await t.bot.handleUpdate(msg(`/start ${payload}`, { id }));
+    assert.deepEqual(t.events.list.filter((e) => e.event === 'start').map((e) => e.props.start_payload), ['web_home', 'web_connect', 'web', 'app_settings', 'other']);
+});
+
+test('blocking and unblocking the bot are recorded (private chats only, no chat row created)', async () => {
+    const t = setup(); await t.bot.handleUpdate(msg('/start', { id: 7, lang: 'de' }));
+    let n = 9000; const mcm = (id, type, oldStatus, newStatus) => ({ update_id: ++n, my_chat_member: { chat: { id, type }, from: { id }, old_chat_member: { status: oldStatus }, new_chat_member: { status: newStatus } } });
+    assert.deepEqual(await t.bot.handleUpdate(mcm(7, 'private', 'member', 'kicked')), { handled: true });
+    await t.bot.handleUpdate(mcm(7, 'private', 'kicked', 'member'));
+    await t.bot.handleUpdate(mcm(8, 'private', 'member', 'kicked'));
+    await t.bot.handleUpdate(mcm(9, 'group', 'member', 'kicked'));
+    await t.bot.handleUpdate(mcm(10, 'private', 'member', 'member'));
+    const got = t.events.list.filter((e) => e.event === 'bot_blocked' || e.event === 'bot_unblocked');
+    assert.deepEqual(got.map((e) => [e.event, e.chatId, e.language ?? null]), [['bot_blocked', 7, 'de'], ['bot_unblocked', 7, 'de'], ['bot_blocked', 8, null]]);
+    assert.equal(t.db.tables.telegram_chats.has('8'), false);
+});
+
+test('a handler error is recorded as bot_error with a code only', async () => {
+    const t = setup();
+    const u = msg('hello', { id: 11 }); Object.defineProperty(u.message, 'text', { get() { throw new Error('boom with secret text'); } });
+    assert.deepEqual(await t.bot.handleUpdate(u), { handled: false, reason: 'error' });
+    const e = t.events.list.find((x) => x.event === 'bot_error');
+    assert.ok(e); assert.deepEqual(e.props, { error_code: 'HANDLER' }); assert.equal(JSON.stringify(e).includes('secret'), false);
+});

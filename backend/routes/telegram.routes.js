@@ -8,6 +8,7 @@ import { verifiedUserId } from '../lib/verifiedUser.js';
 import { channelEvents } from '../lib/channelEventsInstance.js';
 import { createTelegramApi } from '../lib/telegram/api.js';
 import { createBot } from '../lib/telegram/bot.js';
+import { summarizePromotion, PROMO_EVENTS } from '../lib/telegram/promoStats.js';
 import { createLoopbackBuilds, createLoopbackSuggestions } from '../lib/telegram/pipeline.js';
 
 const digest = (v) => crypto.createHash('sha256').update(String(v)).digest();
@@ -75,7 +76,19 @@ export function createTelegramRouter({ supabase = defaultSupabase, workerSecret 
                 byLanguage[lang] ||= {}; byLanguage[lang][r.event] = (byLanguage[lang][r.event] || 0) + 1;
                 if (r.event === 'start') { const s = r.props?.start_payload || 'none'; bySource[s] = (bySource[s] || 0) + 1; }
             }
-            res.json({ success: true, days, events: rows.length, distinctChats: chats.size, totals, byLanguage, startsByPayload: bySource, truncated: rows.length >= 50_000 });
+            // The in-app promotion side (impressions, taps, dismissals: app_events). A missing table or a query error only leaves this block out.
+            let promotion = null;
+            try {
+                const promoRows = [];
+                for (let page = 0; page < 50; page++) {
+                    const { data, error } = await supabase.from('app_events').select('event, user_id, props, created_at').in('event', [...PROMO_EVENTS]).gte('created_at', since).order('created_at', { ascending: true }).range(page * 1000, page * 1000 + 999);
+                    if (error) { promoRows.length = 0; throw new Error('app_events'); }
+                    promoRows.push(...(data || []));
+                    if (!data || data.length < 1000) break;
+                }
+                promotion = { ...summarizePromotion(promoRows, rows), events: promoRows.length, note: 'web_home and web_connect have no in-app events: their impressions and clicks are in Gaugemint (Telegram Section View, Telegram Click); only their bot starts and later steps are counted here.' };
+            } catch { promotion = null; }
+            res.json({ success: true, days, events: rows.length, distinctChats: chats.size, totals, byLanguage, startsByPayload: bySource, promotion, truncated: rows.length >= 50_000 });
         } catch (error) {
             console.error('[telegram/stats] Error:', error.message);
             res.status(500).json({ error: 'Failed to read stats' });

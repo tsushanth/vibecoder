@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Script from 'next/script';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
 import { api } from '@/lib/api';
-import { telegramBotUrl, telegramLinkUrl } from '@/lib/telegramBot';
+import { telegramBotUrl, telegramLinkUrl, trackTelegram, TELEGRAM_CLICK_EVENT } from '@/lib/telegramBot';
 
 type Step = 'loading' | 'sign-in' | 'generating' | 'done' | 'error' | 'start';
 
@@ -89,8 +90,11 @@ export default function ConnectPage() {
         <p className="mb-6 mt-2 text-muted">
           Message the VibeBuild bot an idea in your own language. It builds the app and sends you the link. To keep those apps in your VibeBuild account, send /link to the bot.
         </p>
-        <a href={telegramBotUrl('web_connect')} target="_blank" rel="noopener" className={primary}>Open the Telegram bot</a>
+        <a href={telegramBotUrl('web_connect')} target="_blank" rel="noopener" onClick={() => trackTelegram(TELEGRAM_CLICK_EVENT, 'web_connect')} className={primary}>Open the Telegram bot</a>
         <Link href="/" className="mt-4 block text-sm text-muted underline">Back to VibeBuild</Link>
+        {/* Visit counter for this one state only: no account, chat id or code is on screen or in the address (the page has no query here), so the
+            counter sees a bare /connect. The other states put a Telegram id in the address and never load it. Same tag as MarketingChrome. */}
+        <Script id="gaugemint" defer data-domain="vibebuild.cc" src="https://guagemint.com/js/script.js" strategy="afterInteractive" />
       </>,
     );
   }

@@ -62,5 +62,5 @@ for (const l of LANGUAGES) {
 if (webhookBase) {
     const secret = process.env.TELEGRAM_WEBHOOK_SECRET;
     if (apply && !secret) { console.error('TELEGRAM_WEBHOOK_SECRET is not set'); process.exit(1); }
-    await call('setWebhook', { url: `${webhookBase.replace(/\/$/, '')}/api/telegram/webhook/${secret || '<TELEGRAM_WEBHOOK_SECRET>'}`, secret_token: apply ? secret : '<TELEGRAM_WEBHOOK_SECRET>', allowed_updates: ['message', 'callback_query'], drop_pending_updates: true, max_connections: 20 });
+    await call('setWebhook', { url: `${webhookBase.replace(/\/$/, '')}/api/telegram/webhook/${secret || '<TELEGRAM_WEBHOOK_SECRET>'}`, secret_token: apply ? secret : '<TELEGRAM_WEBHOOK_SECRET>', allowed_updates: ['message', 'callback_query', 'my_chat_member'], drop_pending_updates: true, max_connections: 20 });
 }

@@ -1,5 +1,8 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { telegramBotUrl } from '@/lib/telegramBot';
+import { telegramBotUrl, trackTelegram, TELEGRAM_CLICK_EVENT, TELEGRAM_VIEW_EVENT } from '@/lib/telegramBot';
 
 const POINTS = [
   { title: 'Any language', detail: 'Write your idea the way you speak. The bot answers in your language (26 are supported).' },
@@ -9,8 +12,24 @@ const POINTS = [
 
 /** "Build from Telegram" block of the landing page: what it is, and a button that opens the bot with a start payload for attribution. */
 export function TelegramSection() {
+  const ref = useRef<HTMLElement>(null);
+
+  // One "Telegram Section View" per page view, when about half of the block is on screen.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const seen = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        trackTelegram(TELEGRAM_VIEW_EVENT, 'web_home');
+        seen.disconnect();
+      }
+    }, { threshold: 0.5 });
+    seen.observe(el);
+    return () => seen.disconnect();
+  }, []);
+
   return (
-    <section id="telegram" className="scroll-mt-16 border-t border-border px-5 py-20 sm:px-6">
+    <section ref={ref} id="telegram" className="scroll-mt-16 border-t border-border px-5 py-20 sm:px-6">
       <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1fr_1fr]">
         <div>
           <h2 className="font-display text-3xl font-bold sm:text-4xl">Build from Telegram</h2>
@@ -22,6 +41,7 @@ export function TelegramSection() {
               href={telegramBotUrl('web_home')}
               target="_blank"
               rel="noopener"
+              onClick={() => trackTelegram(TELEGRAM_CLICK_EVENT, 'web_home')}
               className="rounded-lg bg-accent px-7 py-3.5 text-base font-semibold text-white transition hover:bg-accent-hover"
             >
               Open in Telegram

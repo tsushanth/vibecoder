@@ -153,6 +153,13 @@ fun BuildChatThread(
                     }
                     Spacer(Modifier.height(8.dp))
                     val telegramContext = androidx.compose.ui.platform.LocalContext.current
+                    // Usage count: the "Continue on Telegram" button is shown once per finished build
+                    LaunchedEffect(state.buildProjectId, state.savedProjectId) {
+                        com.kreativekoala.vibecoder.ui.telegram.PromoEvents.impression(
+                            com.kreativekoala.vibecoder.ui.telegram.PromoEvents.Surface.POST_BUILD,
+                            key = state.buildProjectId ?: state.savedProjectId ?: "",
+                        )
+                    }
                     OutlinedButton(
                         onClick = { com.kreativekoala.vibecoder.ui.telegram.TelegramBot.open(telegramContext, com.kreativekoala.vibecoder.ui.telegram.TelegramBot.PAYLOAD_BUILD) },
                         modifier = Modifier.fillMaxWidth()

@@ -160,3 +160,12 @@ test('buildEvents: bookkeeping stays bounded', () => {
     for (let i = 0; i < 12_000; i++) { be.buildStarted({ projectId: `p${i}`, userId: 'u', source: 'web', prompt: 'x' }); be.planRequested(`u${i}`); be.loginDue(`u${i}`); }
     const s = be._sizes(); assert.ok(s.starts <= 5000 && s.plans <= 5000 && s.logins <= 5000, JSON.stringify(s));
 });
+
+test('promotion events: names and props are allow-listed (surface from a closed list, lang two letters, nothing else)', () => {
+    for (const event of ['promo_impression', 'promo_tap', 'promo_dismiss']) assert.ok(EVENTS.includes(event));
+    assert.ok(PROP_KEYS.includes('surface') && PROP_KEYS.includes('lang'));
+    assert.deepEqual(cleanProps({ surface: 'banner', lang: 'de', source: 'android' }), { surface: 'banner', lang: 'de', source: 'android' });
+    assert.deepEqual(cleanProps({ surface: 'a secret surface', lang: 'Deutsch', extra: 'x' }), {});
+    assert.deepEqual(cleanProps({ surface: 'create_card', lang: 'de-DE' }), { surface: 'create_card' });
+    assert.equal(buildRow({ event: 'promo_tap', userId: 'u1', props: { surface: 'post_build', prompt: 'my diary app' } }).props.prompt, undefined);
+});

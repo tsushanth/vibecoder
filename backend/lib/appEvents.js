@@ -24,6 +24,11 @@ export const EVENTS = Object.freeze([
     'project_deleted',
     'account_deleted',
     'first_build_survey',
+    // Chat-channel promotion inside the app (Telegram banner, Create card, post-build button, Account row). One row per
+    // impression / tap / dismissal, with props.surface and props.lang. Written by POST /api/events/promo.
+    'promo_impression',
+    'promo_tap',
+    'promo_dismiss',
 ]);
 const EVENT_SET = new Set(EVENTS);
 
@@ -35,6 +40,9 @@ export const CAPS = Object.freeze([
     'hourly_generation', 'daily_generations', 'tweaks_per_project', 'plan_hourly', 'worker_busy', 'worker_quota',
     'tweak_tier', 'private_tier', 'fork_tier',
 ]);
+// Where a channel promotion was shown. The start payloads the bot sees for the same surfaces: banner=app, create_card=app_card,
+// post_build=app_build, account_row=app_settings, web_home=web_home, web_connect=web_connect (the two web ones are measured in Gaugemint).
+export const PROMO_SURFACES = Object.freeze(['banner', 'create_card', 'post_build', 'account_row', 'web_home', 'web_connect']);
 export const SURVEY_CHOICES = Object.freeze(['game_or_fun', 'personal_tool', 'work_or_business', 'learning', 'just_trying', 'something_else', 'dismissed']);
 // Short machine codes only: the build-failure classes (lib/buildFailure.js FAIL_CLASS) plus a few transport outcomes.
 export const ERROR_CODES = Object.freeze([
@@ -62,6 +70,8 @@ const PROP_VALIDATORS = Object.freeze({
     build_kind: oneOf(BUILD_KINDS),
     cap: oneOf(CAPS),
     choice: oneOf(SURVEY_CHOICES),
+    surface: oneOf(PROMO_SURFACES),
+    lang: (v) => (typeof v === 'string' && /^[a-z]{2}$/.test(v) ? v : undefined), // the UI language the person saw, two letters
 });
 export const PROP_KEYS = Object.freeze(Object.keys(PROP_VALIDATORS));
 

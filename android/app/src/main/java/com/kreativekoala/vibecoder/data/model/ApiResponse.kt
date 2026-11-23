@@ -81,6 +81,9 @@ data class ForkResponse(
 
 data class SuccessResponse(val success: Boolean)
 
+/** One promotion event: action = impression | tap | dismiss, surface = banner | create_card | post_build | account_row, lang = app language. */
+data class PromoEventRequest(val action: String, val surface: String, val lang: String)
+
 // --- Subscriptions ---
 data class SubscriptionStatusResponse(
     val success: Boolean,

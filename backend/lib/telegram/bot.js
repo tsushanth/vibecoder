@@ -19,7 +19,7 @@ const MAX_PROMPT = 2000;
 const DAY = 24 * 60 * 60 * 1000;
 const START_PAYLOAD = (p) => {
     if (!p) return 'none';
-    if (p === 'app' || p === 'app_card' || p === 'app_build' || p === 'app_settings' || p === 'web') return p;
+    if (p === 'app' || p === 'app_card' || p === 'app_build' || p === 'app_settings' || p === 'web' || p === 'web_home' || p === 'web_connect') return p;
     if (/^link_/i.test(p)) return 'link';
     return 'other';
 };
@@ -129,14 +129,29 @@ export function createBot({ api, db, link, builds, suggestions, events, config =
             if (seen.size > 5000) for (const k of [...seen.keys()].slice(0, 1000)) seen.delete(k);
             if (!(await firstDelivery(id))) return { handled: false, reason: 'duplicate' };
 
+            if (update.my_chat_member) { onMyChatMember(update.my_chat_member); return { handled: true }; }
             if (update.callback_query) { await onCallback(update.callback_query); return { handled: true }; }
             const m = update.message;
             if (m && m.from && !m.from.is_bot && m.chat) { await onMessage(m); return { handled: true }; }
             return { handled: false, reason: 'ignored' };
         } catch (e) {
             log.warn?.(`[telegram-bot] update failed: ${e?.name || 'error'}`);
+            try {
+                const ref = update?.message?.chat?.id ?? update?.callback_query?.from?.id;
+                if (ref !== undefined && ref !== null) events.emit('bot_error', { channel: 'telegram', chatId: ref, language: chats.get(String(ref))?.row?.language, props: { error_code: 'HANDLER' } });
+            } catch { /* metrics only */ }
             return { handled: false, reason: 'error' };
         }
+    }
+
+    /** The person blocked or unblocked the bot (private chats only). Metrics only: no chat row is created or changed. */
+    function onMyChatMember(u) {
+        try {
+            if (u?.chat?.type !== 'private' || !u.new_chat_member) return;
+            const status = u.new_chat_member.status;
+            const event = status === 'kicked' ? 'bot_blocked' : (status === 'member' && u.old_chat_member?.status === 'kicked') ? 'bot_unblocked' : null;
+            if (event) events.emit(event, { channel: 'telegram', chatId: u.chat.id, language: chats.get(String(u.chat.id))?.row?.language });
+        } catch { /* metrics only */ }
     }
 
     async function firstDelivery(id) {

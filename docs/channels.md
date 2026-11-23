@@ -86,7 +86,7 @@ Bot strings: `backend/lib/telegram/strings.js`, English plus the app's 26 langua
    curl -sS "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook" \
      --data-urlencode "url=https://vibecoder-api.fly.dev/api/telegram/webhook/${TELEGRAM_WEBHOOK_SECRET}" \
      --data-urlencode "secret_token=${TELEGRAM_WEBHOOK_SECRET}" \
-     --data-urlencode 'allowed_updates=["message","callback_query"]' \
+     --data-urlencode 'allowed_updates=["message","callback_query","my_chat_member"]' \
      --data-urlencode "drop_pending_updates=true"
    curl -sS "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getWebhookInfo"   # url set, last_error_message empty
    ```
