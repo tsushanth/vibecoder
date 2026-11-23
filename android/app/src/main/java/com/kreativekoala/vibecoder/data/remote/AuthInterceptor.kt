@@ -1,5 +1,6 @@
 package com.kreativekoala.vibecoder.data.remote
 
+import com.kreativekoala.vibecoder.BuildConfig
 import okhttp3.Interceptor
 import okhttp3.Response
 import javax.inject.Inject
@@ -13,6 +14,7 @@ class AuthInterceptor @Inject constructor(
         val original = chain.request()
         val builder = original.newBuilder()
             .addHeader("x-platform", "android")
+            .addHeader("x-app-version", BuildConfig.VERSION_NAME)
             .addHeader("Content-Type", "application/json")
         // A caller that set its own Authorization keeps it. A lookup failure behaves like being signed out.
         if (original.header("Authorization") == null) {

@@ -7,6 +7,7 @@ import cors from 'cors';
 import subscriptionsRoutes from './routes/subscriptions.routes.js';
 import revenuecatWebhookRoutes from './routes/revenuecat.routes.js';
 import projectsRoutes from './routes/projects.routes.js';
+import generateAuthRoutes from './routes/generateAuth.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import eventsRoutes from './routes/events.routes.js';
 import deployRoutes from './routes/deploy.routes.js';
@@ -127,6 +128,7 @@ app.get('/api/status', async (req, res) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventsRoutes);
+app.use('/api/generate-auth', generateAuthRoutes);
 app.use('/api/projects', projectsRoutes);
 app.use('/api/subscriptions', subscriptionsRoutes);
 app.use('/api/webhooks/revenuecat', revenuecatWebhookRoutes);
