@@ -63,7 +63,7 @@
     <!-- Sign In Screen -->
     <string name="sign_in_subtitle">用AI構建應用</string>
     <string name="sign_in_label_display_name">顯示名稱</string>
-    <string name="sign_in_label_email">郵箱</string>
+    <string name="sign_in_label_email">信箱</string>
     <string name="sign_in_label_password">密碼</string>
     <string name="sign_in_cd_hide_password">隱藏密碼</string>
     <string name="sign_in_cd_show_password">顯示密碼</string>
@@ -318,7 +318,7 @@
     <string name="create_discard">放棄</string>
     <string name="create_busy_title">🔥 當前需求火爆</string>
     <string name="create_busy_body_free">我們的構建器目前已滿負荷執行。請幾分鐘後再試。</string>
-    <string name="create_busy_body_pro">我們的構建器已滿負荷執行。Pro 使用者享有優先許可權，可即時構建。</string>
+    <string name="create_busy_body_pro">我們的構建器已滿負荷執行。Pro 使用者享有優先權限，可即時構建。</string>
     <string name="create_busy_upgrade">⚡ 升級到 Pro</string>
     <string name="build_phase_generate">生成</string>
     <string name="build_phase_validate">驗證</string>
@@ -354,14 +354,14 @@
     <string name="build_chat_stage_failed">構建失敗</string>
     <string name="build_chat_stage_building">正在構建你的應用</string>
     <string name="build_chat_working">處理中</string>
-    <string name="auth_error_wrong_credentials">郵箱或密碼錯誤</string>
-    <string name="auth_error_email_not_confirmed">請先確認你的郵箱。請在收件箱中查詢確認連結。</string>
+    <string name="auth_error_wrong_credentials">信箱或密碼錯誤</string>
+    <string name="auth_error_email_not_confirmed">請先確認你的信箱。請在收件箱中查詢確認連結。</string>
     <string name="auth_error_confirm_email_to_finish">請查收郵件確認你的帳戶，然後登入。</string>
     <string name="auth_error_rate_limited">嘗試次數過多。請等待一分鐘後重試。</string>
     <string name="auth_error_network">無法連線到伺服器。請檢查網路連線後重試。</string>
     <string name="auth_error_weak_password">該密碼太弱。請使用至少 6 個字元，並混合字母和數字。</string>
-    <string name="auth_error_invalid_email">請輸入有效的郵箱地址。</string>
-    <string name="auth_error_already_registered">此郵箱已註冊帳戶。請嘗試直接登入。</string>
+    <string name="auth_error_invalid_email">請輸入有效的信箱地址。</string>
+    <string name="auth_error_already_registered">此信箱已註冊帳戶。請嘗試直接登入。</string>
     <string name="auth_error_google_no_account">此裝置上未找到 Google 帳戶。請在“設定”中新增後重試。</string>
     <string name="auth_error_google_failed">Google 登入未成功。請重試。</string>
     <string name="auth_error_server">我們這邊出了點問題。請稍後重試。</string>
@@ -369,9 +369,9 @@
     <string name="auth_error_sign_in_failed">登入失敗。請重試。</string>
 
     <!-- Create-screen/domain/preview strings added 2026-11-17 (machine translated, needs native review) -->
-    <string name="custom_domain_title">自定義域名</string>
+    <string name="custom_domain_title">自訂域名</string>
     <string name="custom_domain_remove_title">移除 %1$s？</string>
-    <string name="custom_domain_remove_body">訪客將無法再透過此地址訪問你的應用。你的 vibebuild.cc 連結仍可繼續使用。</string>
+    <string name="custom_domain_remove_body">訪客將無法再透過此地址存取你的應用。你的 vibebuild.cc 連結仍可繼續使用。</string>
     <string name="custom_domain_pro_only">連線自己的域名是 Pro 功能。</string>
     <string name="custom_domain_hint">使用你自己的地址，例如 www.yourbrand.com。</string>
     <string name="custom_domain_add">新增域名</string>
@@ -397,11 +397,11 @@
     <string name="domain_invalid_characters">只能使用字母、數字和連字元</string>
     <string name="domain_invalid_generic">這看起來不是有效的域名</string>
     <string name="domain_invalid_own_address">請使用你自己的域名，而不是 vibebuild.cc 地址</string>
-    <string name="custom_domain_unavailable">自定義域名暫時不可用，請稍後再試。</string>
-    <string name="custom_domain_pro_feature">自定義域名是 Pro 功能</string>
+    <string name="custom_domain_unavailable">自訂域名暫時不可用，請稍後再試。</string>
+    <string name="custom_domain_pro_feature">自訂域名是 Pro 功能</string>
     <string name="live_preview_monetize_soon">變現（即將推出）</string>
     <string name="live_preview_change_hint">你想修改什麼？</string>
-    <string name="live_preview_feedback_thanks">感謝你的反饋！</string>
+    <string name="live_preview_feedback_thanks">感謝你的回饋！</string>
     <string name="live_preview_feedback_ask">覺得怎麼樣？</string>
     <string name="cd_thumbs_up">點贊</string>
     <string name="cd_thumbs_down">點踩</string>
