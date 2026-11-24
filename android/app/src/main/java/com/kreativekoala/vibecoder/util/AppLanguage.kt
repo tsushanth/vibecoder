@@ -36,8 +36,8 @@ object AppLanguage {
     /** Simplified ("zh") for no region, CN, SG or the Hans script; Traditional ("zh-TW" / "zh-HK") for TW, HK, MO or the Hant script; other regions are not shipped. */
     private fun chineseTag(script: String, country: String): String? = when {
         script.equals("Hans", ignoreCase = true) -> "zh"
-        country == "HK" -> "zh-HK"
-        script.equals("Hant", ignoreCase = true) || country == "TW" || country == "MO" -> "zh-TW"
+        country == "HK" -> "zh-HK" // i18n-ok: wire value
+        script.equals("Hant", ignoreCase = true) || country == "TW" || country == "MO" -> "zh-TW" // i18n-ok: wire value
         country.isEmpty() || country == "CN" || country == "SG" -> "zh"
         else -> null
     }
