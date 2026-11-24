@@ -512,5 +512,43 @@
  "text_only": "我只能读文字，请用文字描述应用。",
  "too_fast": "消息太多，请稍等一分钟。",
  "help": "VibeBuild：发来应用创意，我来构建。STATUS 查看进度，LANG es 切换语言，STOP 退订。可能产生短信费用。support@vibebuild.cc"
+},
+"zh-TW": {
+ "link_needed": "VibeBuild：請先綁定帳號。開啟 {url}，登入後把6位驗證碼發給我，隨後開始構建。",
+ "linked_ok": "已綁定！告訴我你想做什麼應用。",
+ "linked_start": "已綁定！開始構建。",
+ "code_invalid": "驗證碼錯誤或已過期。獲取新碼：{url}",
+ "ack": "正在構建你的應用，完成後發連結給你（1-3分鐘）。",
+ "still_building": "上一個應用還在構建。傳送 STATUS 檢視。",
+ "status": "{stage}... {pct}%",
+ "idle": "當前沒有構建任務。告訴我你想做什麼應用。",
+ "done_more": "更多應用：vibebuild.cc",
+ "start_again": "已重新訂閱。告訴我你想做什麼應用。",
+ "unsubscribed": "已退訂，不再傳送訊息。傳送 START 可恢復。",
+ "lang_set": "語言：{name}",
+ "lang_hint": "更改語言請發 LANG 加程式碼，如 LANG es。",
+ "try_again": "出錯了，請一分鐘後重試。",
+ "text_only": "我只能讀文字，請用文字描述應用。",
+ "too_fast": "訊息太多，請稍等一分鐘。",
+ "help": "VibeBuild：發來應用創意，我來構建。STATUS 檢視進度，LANG es 切換語言，STOP 退訂。可能產生簡訊費用。support@vibebuild.cc"
+},
+"zh-HK": {
+ "link_needed": "VibeBuild：請先綁定賬號。打開 {url}，登錄後把6位驗證碼發給我，隨後開始構建。",
+ "linked_ok": "已綁定！告訴我你想做什麼應用。",
+ "linked_start": "已綁定！開始構建。",
+ "code_invalid": "驗證碼錯誤或已過期。獲取新碼：{url}",
+ "ack": "正在構建你的應用，完成後發鏈接給你（1-3分鐘）。",
+ "still_building": "上一個應用還在構建。發送 STATUS 查看。",
+ "status": "{stage}... {pct}%",
+ "idle": "當前沒有構建任務。告訴我你想做什麼應用。",
+ "done_more": "更多應用：vibebuild.cc",
+ "start_again": "已重新訂閱。告訴我你想做什麼應用。",
+ "unsubscribed": "已退訂，不再發送消息。發送 START 可恢復。",
+ "lang_set": "語言：{name}",
+ "lang_hint": "更改語言請發 LANG 加代碼，如 LANG es。",
+ "try_again": "出錯了，請一分鐘後重試。",
+ "text_only": "我只能讀文字，請用文字描述應用。",
+ "too_fast": "消息太多，請稍等一分鐘。",
+ "help": "VibeBuild：發來應用創意，我來構建。STATUS 查看進度，LANG es 切換語言，STOP 退訂。可能產生短信費用。support@vibebuild.cc"
 }
 }

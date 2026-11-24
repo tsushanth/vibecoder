@@ -1,5 +1,6 @@
 // Pure text helpers for the Telegram bot: HTML escaping (parse_mode HTML), length limits, progress bar.
 import { STRINGS } from './strings.js';
+import { chineseTag } from '../langTag.js';
 
 export const TELEGRAM_MAX_TEXT = 4096;
 
@@ -55,7 +56,8 @@ const SUPPORTED = new Set(Object.keys(STRINGS));
 /** Maps Telegram's IETF language_code (e.g. "pt-br", "zh-hans", "uk") to one of our languages; English when unknown. */
 export function languageFromCode(code) {
     if (typeof code !== 'string' || !code) return 'en';
-    const primary = code.trim().toLowerCase().split(/[-_]/)[0];
-    const tag = CODE_ALIASES[primary] || primary;
+    const [primary, ...rest] = code.trim().toLowerCase().split(/[-_]/);
+    // zh-hans/zh-cn/zh-sg => Simplified "zh"; zh-hant/zh-tw/zh-mo => "zh-TW"; zh-hk => "zh-HK"
+    const tag = primary === 'zh' ? chineseTag(rest) : (Object.hasOwn(CODE_ALIASES, primary) ? CODE_ALIASES[primary] : primary);
     return SUPPORTED.has(tag) ? tag : 'en';
 }

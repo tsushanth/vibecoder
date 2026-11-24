@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createSuggestionTranslator, normalizeLang, parseTranslations, parseIdeaList, SUPPORTED_LANGS } from '../../lib/suggestionI18n.js';
+import { createSuggestionTranslator, normalizeLang, languageName, parseTranslations, parseIdeaList, SUPPORTED_LANGS } from '../../lib/suggestionI18n.js';
 
 const ITEMS = [
     { label: 'Task Manager', prompt: 'Build a Kanban-style task manager with drag and drop columns' },
@@ -27,11 +27,19 @@ function fakeApi({ status = 200, text, throwErr } = {}) {
 const make = (api, extra = {}) => createSuggestionTranslator({ getApiKey: () => 'k', fetchImpl: api.fetchImpl, recordLlm: () => {}, log: () => {}, ...extra });
 
 test('whitelist: the 26 app languages, aliases for Android codes, everything else is English', () => {
-    assert.equal(SUPPORTED_LANGS.length, 26);
+    assert.equal(SUPPORTED_LANGS.length, 28);
     for (const t of SUPPORTED_LANGS) assert.equal(normalizeLang(t), t);
     assert.equal(normalizeLang('in'), 'id');
     assert.equal(normalizeLang('pt-BR'), 'pt');
     assert.equal(normalizeLang('zh-CN'), 'zh');
+    assert.equal(normalizeLang('zh'), 'zh'); // old clients
+    for (const sc of ['zh-SG', 'zh-Hans', 'zh-Hans-CN', 'zh_cn', 'zh-Hans-HK']) assert.equal(normalizeLang(sc), 'zh', sc);
+    for (const tw of ['zh-TW', 'zh_tw', 'zh-Hant', 'zh-Hant-TW', 'zh-MO', 'zh-Hant-MO']) assert.equal(normalizeLang(tw), 'zh-TW', tw);
+    for (const hk of ['zh-HK', 'zh-hk', 'zh-Hant-HK']) assert.equal(normalizeLang(hk), 'zh-HK', hk);
+    assert.equal(languageName('zh'), 'Simplified Chinese');
+    assert.equal(languageName('zh-TW'), 'Traditional Chinese (Taiwan)');
+    assert.equal(languageName('zh-HK'), 'Traditional Chinese (Hong Kong)');
+    for (const proto of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) { assert.equal(normalizeLang(proto), 'en', proto); assert.equal(languageName(proto), 'English', proto); }
     assert.equal(normalizeLang('FR'), 'fr');
     for (const bad of ['', 'xx', 'en', 'en-US', 'klingon', '../etc', 'de;DROP', undefined, null, 42, {}, ['de']]) assert.equal(normalizeLang(bad), 'en', String(bad));
 });

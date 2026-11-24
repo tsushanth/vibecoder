@@ -1,0 +1,129 @@
+{
+  "create": {
+    "hero": {
+      "title": "你想做什麼？",
+      "help": "描述你的應用要做什麼。你可以試用、修改併發布它。"
+    },
+    "composer": {
+      "placeholder": "做一個顯示我所在城市天氣預報的天氣應用",
+      "build": "開始構建",
+      "attach": "附加參考圖片",
+      "removeImage": "移除圖片",
+      "imageAttached": "已附加參考圖片",
+      "imageHint": "用作設計的視覺參考",
+      "voice": "語音輸入",
+      "stopVoice": "停止語音輸入",
+      "count": "{count} / {max} 個字符",
+      "offTopic": "這看起來像一個問題或話題。請描述應用要做什麼，例如記錄交易並顯示勝率的追蹤器。"
+    },
+    "ideas": {
+      "title": "試試這些想法",
+      "more": "換一批想法",
+      "loading": "正在尋找想法"
+    },
+    "templates": {
+      "title": "從模板開始",
+      "use": "使用模板「{title}」"
+    },
+    "notify": {
+      "ask": "完成後通知我",
+      "armed": "完成後我們會在這裏通知你。請保持此標籤頁打開。",
+      "readyTitle": "你的應用已完成",
+      "readyBody": "打開 VibeBuild 即可預覽和發佈。",
+      "failedTitle": "構建已停止",
+      "failedBody": "打開 VibeBuild 查看發生了什麼並重試。",
+      "tabReady": "應用已完成",
+      "tabFailed": "構建已停止"
+    },
+    "thread": {
+      "label": "構建對話"
+    },
+    "plan": {
+      "thinking": "正在思考你的想法",
+      "title": "這是我的計劃",
+      "style": "風格：{style}",
+      "build": "按此構建",
+      "edit": "編輯描述"
+    },
+    "build": {
+      "building": "正在構建你的應用",
+      "complete": "構建完成",
+      "failed": "構建已停止",
+      "working": "處理中",
+      "phase": {
+        "generate": "生成",
+        "validate": "校驗",
+        "fix": "修復",
+        "polish": "潤色",
+        "verify": "驗證"
+      },
+      "cancel": "取消構建",
+      "endedEarly": "構建在完成前停止了。請編輯描述後重試。",
+      "failedGeneric": "構建未完成。請編輯描述後重試。",
+      "editRetry": "編輯並重試",
+      "newApp": "新應用",
+      "busyTitle": "構建服務器已滿負荷",
+      "busyBody": "請幾分鐘後再試。Pro 構建優先排隊。",
+      "tryAgain": "重試",
+      "seePro": "瞭解 Pro",
+      "busyBodyFree": "請幾分鐘後再試。"
+    },
+    "ready": {
+      "title": "你的應用已就緒",
+      "saving": "正在保存到你的應用",
+      "saved": "已保存到你的應用。打開實時預覽試用。",
+      "savedNoPreview": "已保存到你的應用。",
+      "saveFailed": "未保存：{error}。發佈和調整需要已保存的應用，請新建一個應用重試。",
+      "saveFailedGeneric": "保存失敗",
+      "published": "已發佈到",
+      "openPreview": "打開實時預覽",
+      "publish": "發佈",
+      "managePublish": "管理發佈",
+      "tweak": "調整",
+      "openApp": "打開應用頁面",
+      "newApp": "新建一個應用"
+    },
+    "feedback": {
+      "question": "效果如何？",
+      "good": "效果不錯",
+      "bad": "需要改進",
+      "thanks": "感謝你的反饋"
+    },
+    "tweak": {
+      "placeholder": "描述一個修改",
+      "waitForSave": "應用保存後即可調整",
+      "send": "發送修改",
+      "working": "正在應用修改",
+      "done": "完成。預覽已更新。",
+      "doneVersion": "完成。已保存為版本 {version}。",
+      "failed": "修改未成功：{error}",
+      "failedGeneric": "修改未成功。請換一種説法試試。",
+      "openPreview": "打開預覽"
+    },
+    "preview": {
+      "title": "實時預覽",
+      "close": "關閉預覽",
+      "reload": "重新加載預覽",
+      "device": "預覽尺寸",
+      "desktop": "桌面",
+      "tablet": "平板",
+      "phone": "手機",
+      "empty": "構建完成後應用會顯示在這裏"
+    },
+    "versions": {
+      "untitled": "版本"
+    },
+    "survey": {
+      "question": "你今天想做什麼？",
+      "hint": "可選。點一下即可，無需輸入。",
+      "game_or_fun": "一個遊戲或好玩的東西",
+      "personal_tool": "給自己用的工具或記錄器",
+      "work_or_business": "用於工作或生意的東西",
+      "learning": "用來學習或練習的東西",
+      "just_trying": "沒有特別的，只是試試看",
+      "something_else": "其他",
+      "skip": "跳過",
+      "thanks": "謝謝，這能幫助我們決定改進什麼。"
+    }
+  }
+}

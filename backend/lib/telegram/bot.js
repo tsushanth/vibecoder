@@ -299,7 +299,7 @@ export function createBot({ api, db, link, builds, suggestions, events, config =
         ev('update_received', chat, { props: { command: 'callback', new_chat: isNew } });
         const data = String(cq.data || '');
         let mm;
-        if ((mm = /^l:([a-z]{2})$/.exec(data)) && LANGUAGES.includes(mm[1])) {
+        if ((mm = /^l:([A-Za-z]{2}(?:-[A-Za-z]{2})?)$/.exec(data)) && LANGUAGES.includes(mm[1])) {
             const from_language = chat.language;
             await patchChat(chat, { language: mm[1], language_chosen: true });
             ev('language_changed', chat, { props: { from_language } });

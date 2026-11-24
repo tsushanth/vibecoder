@@ -73,7 +73,7 @@ const dir = new URL('../i18n/messages/', import.meta.url);
 const load = (l: string) => JSON.parse(readFileSync(new URL(`${l}.json`, dir), 'utf8'));
 const flat = (o: Record<string, unknown>, p = ''): Record<string, string> => Object.entries(o).reduce((a, [k, v]) => v && typeof v === 'object' ? { ...a, ...flat(v as Record<string, unknown>, `${p}${k}.`) } : { ...a, [`${p}${k}`]: String(v) }, {});
 const vars = (s: string) => [...s.matchAll(/\{[^}]+\}/g)].map((m) => m[0]).sort();
-const LOCALES = ['de', 'en', 'es', 'fr', 'hi', 'it', 'ja', 'ko', 'pt', 'zh'];
+const LOCALES = ['de', 'en', 'es', 'fr', 'hi', 'it', 'ja', 'ko', 'pt', 'zh', 'zh-TW', 'zh-HK'];
 
 test('every key the helpers can return exists in all 10 locales with the same placeholders', () => {
   const keys = new Set<string>([

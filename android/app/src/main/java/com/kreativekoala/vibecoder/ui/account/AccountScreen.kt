@@ -36,6 +36,7 @@ import com.kreativekoala.vibecoder.R
 import com.kreativekoala.vibecoder.ui.components.SettingsRow
 import com.kreativekoala.vibecoder.BuildConfig
 import com.kreativekoala.vibecoder.ui.theme.*
+import com.kreativekoala.vibecoder.util.AppLanguage
 import com.kreativekoala.vibecoder.util.Monetization
 import com.kreativekoala.vibecoder.util.PlayStoreLinks
 import com.kreativekoala.crosspromokit.models.AppId
@@ -61,7 +62,7 @@ fun AccountScreen(
 
     // Exactly the languages that have a values-XX folder and an entry in res/xml/locales_config.xml.
     val supportedLanguages = listOf(
-        "en", "es", "fr", "de", "ja", "zh-CN", "ko", "pt-BR", "it", "hi",
+        "en", "es", "fr", "de", "ja", "zh-CN", "zh-TW", "zh-HK", "ko", "pt-BR", "it", "hi",
         "ar", "id", "ms", "nl", "pl", "ru", "th", "tl", "tr", "vi",
         "cs", "el", "fi", "hu", "ro", "sv", "uk",
     )
@@ -76,7 +77,7 @@ fun AccountScreen(
             text = {
                 Column {
                     supportedLanguages.forEach { code ->
-                        val isSelected = currentLocale.startsWith(code.split("-")[0])
+                        val isSelected = sameLanguage(currentLocale, code)
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -378,7 +379,7 @@ fun AccountScreen(
                 SettingsRow(
                     icon = Icons.Default.Language,
                     title = stringResource(R.string.account_settings_language),
-                    subtitle = languageEndonym(supportedLanguages.firstOrNull { currentLocale.startsWith(it.split("-")[0]) } ?: "en"),
+                    subtitle = languageEndonym(supportedLanguages.firstOrNull { sameLanguage(currentLocale, it) } ?: "en"),
                     onClick = { showLanguageDialog = true }
                 )
                 HorizontalDivider(color = DarkBorder)
@@ -474,6 +475,17 @@ internal fun todaysGenerationsText(uiState: AccountUiState, allFree: Boolean = M
 
 /** A language's own name ("Español", "العربية", "हिन्दी"), so people find their language whatever the app is currently showing. */
 private fun languageEndonym(code: String): String {
+    when (code) { // the three Chinese variants need the script and region in the name; the platform name is just "中文"
+        "zh-CN" -> return "简体中文"
+        "zh-TW" -> return "繁體中文（台灣）"
+        "zh-HK" -> return "繁體中文（香港）"
+    }
     val locale = java.util.Locale.forLanguageTag(code)
     return locale.getDisplayLanguage(locale).replaceFirstChar { it.titlecase(locale) }
+}
+
+/** True when the language tags [a] (first one of a list) and [b] are the same shipped language; zh-CN, zh-TW and zh-HK are three different ones. */
+private fun sameLanguage(a: String, b: String): Boolean {
+    val x = AppLanguage.tagFor(java.util.Locale.forLanguageTag(a.substringBefore(',')))
+    return x != null && x == AppLanguage.tagFor(java.util.Locale.forLanguageTag(b))
 }

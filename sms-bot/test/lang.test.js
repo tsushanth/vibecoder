@@ -34,13 +34,16 @@ const SAMPLES = {
   uk: 'Хочу застосунок для нотаток із темною темою',
   vi: 'Tôi muốn một ứng dụng theo dõi chi tiêu hằng ngày',
   'zh-CN': '我想要一个带深色模式的待办事项应用',
+  'zh-TW': '我想要一個帶深色模式的待辦事項應用程式',
+  'zh-HK': '我想要一個帶深色模式的待辦事項應用程式', // written Hong Kong Chinese is not told apart from Taiwan's: LANG zh-hk picks it
 };
 
-test('language detection: all 27 locales', () => {
+test('language detection: all 29 locales', () => {
   assert.deepEqual(Object.keys(SAMPLES).sort(), [...LANGS].sort());
   const wrong = [];
   for (const [lang, text] of Object.entries(SAMPLES)) {
     const d = detectLanguage(text);
+    if (lang === 'zh-HK') { if (d.lang !== 'zh-TW') wrong.push(`zh-HK text: got ${d.lang}`); continue; }
     if (d.lang !== lang || d.confidence !== 'high') wrong.push(`${lang}: got ${d.lang}/${d.confidence}`);
   }
   assert.deepEqual(wrong, []);
@@ -50,12 +53,24 @@ test('language detection: unsure input defaults to English with low confidence',
   for (const s of ['hi', 'todo', '12345', '', 'ok']) assert.deepEqual(detectLanguage(s), { lang: 'en', confidence: 'low' }, s);
 });
 
+test('Han text: Simplified stays zh-CN, Traditional is zh-TW, mixed text goes by the majority', () => {
+  assert.equal(detectLanguage('我想要一个带深色模式的待办事项应用').lang, 'zh-CN');
+  assert.equal(detectLanguage('我想要一個帶深色模式的待辦事項應用程式').lang, 'zh-TW');
+  assert.equal(detectLanguage('幫我做一個記帳的應用，要有圖表和提醒').lang, 'zh-TW');
+  assert.equal(detectLanguage('帮我做一个记账的应用，要有图表和提醒').lang, 'zh-CN');
+  assert.equal(detectLanguage('做个app').lang, 'zh-CN'); // no signal: Simplified, as before
+});
+
 test('language codes for the LANG command', () => {
   assert.equal(normalizeLangCode('PT'), 'pt-BR');
   assert.equal(normalizeLangCode('zh'), 'zh-CN');
   assert.equal(normalizeLangCode('in'), 'id');
   assert.equal(normalizeLangCode('fil'), 'tl');
   assert.equal(normalizeLangCode('xx'), null);
+  for (const c of ['zh-tw', 'ZH_TW', 'zh-Hant', 'zh-mo']) assert.equal(normalizeLangCode(c), 'zh-TW', c);
+  for (const c of ['zh-hk', 'ZH-HK', 'zh_hant_hk']) assert.equal(normalizeLangCode(c), 'zh-HK', c);
+  for (const c of ['zh-sg', 'zh-Hans']) assert.equal(normalizeLangCode(c), 'zh-CN', c);
+  for (const c of ['constructor', '__proto__', 'toString']) assert.equal(normalizeLangCode(c), null, c);
 });
 
 test('every language has every string; placeholders survive; app phrases come from the Android resources', () => {

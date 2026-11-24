@@ -32,7 +32,7 @@ test('handled flag: false at first, true after marking, and a blocked store neve
 
 test('every language has the question, every choice, skip and thanks', () => {
   const dir = new URL('../i18n/messages/parts/', import.meta.url);
-  for (const l of ['en', 'de', 'es', 'fr', 'hi', 'it', 'ja', 'ko', 'pt', 'zh']) {
+  for (const l of ['en', 'de', 'es', 'fr', 'hi', 'it', 'ja', 'ko', 'pt', 'zh', 'zh-TW', 'zh-HK']) {
     const survey = JSON.parse(readFileSync(new URL(`create.${l}.json`, dir), 'utf8')).create.survey;
     for (const k of ['question', 'hint', 'skip', 'thanks', ...SURVEY_CHOICES]) assert.ok(typeof survey[k] === 'string' && survey[k].length > 0, `${l} ${k}`);
   }
