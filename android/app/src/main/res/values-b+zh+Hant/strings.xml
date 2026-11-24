@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VibeBuild</string>
+
+    <!-- Common -->
+    <string name="cancel">取消</string>
+    <string name="ok">確定</string>
+    <string name="back">返回</string>
+    <string name="refresh">重新整理</string>
+    <string name="share">分享</string>
+    <string name="copy">複製</string>
+    <string name="open">開啟</string>
+    <string name="error">錯誤</string>
+    <string name="live">已上線</string>
+    <string name="publish">釋出</string>
+    <string name="deploy">部署</string>
+    <string name="close">關閉</string>
+    <string name="reload">重新載入</string>
+    <string name="save">儲存</string>
+    <string name="saved">已儲存</string>
+    <string name="delete_label">刪除</string>
+    <string name="public_label">公開</string>
+    <string name="private_label">私密</string>
+    <string name="sign_out">退出登入</string>
+
+    <!-- Tabs -->
+    <string name="tab_apps">應用</string>
+    <string name="tab_create">建立</string>
+    <string name="tab_account">帳戶</string>
+    <string name="tab_browse">探索</string>
+
+    <!-- Landing Screen -->
+    <string name="landing_hero_subtitle">描述你的想法，AI來構建。\n你的應用，幾秒內上線。</string>
+    <string name="landing_prompt_example">"幫我做一個深色介面的天氣應用"</string>
+    <string name="landing_how_it_works_title">使用方法</string>
+    <string name="landing_step_describe_title">描述</string>
+    <string name="landing_step_describe_desc">用簡單的語言告訴AI你想要什麼</string>
+    <string name="landing_step_generate_title">生成</string>
+    <string name="landing_step_generate_desc">AI在幾秒內編寫程式碼</string>
+    <string name="landing_step_preview_title">預覽</string>
+    <string name="landing_step_preview_desc">即時檢視你的應用執行效果</string>
+    <string name="landing_step_deploy_title">部署</string>
+    <string name="landing_step_deploy_desc">一鍵釋出到網路</string>
+    <string name="landing_examples_title">大家都在做什麼</string>
+    <string name="landing_example_weather_title">天氣儀表盤</string>
+    <string name="landing_example_weather_desc">精美圖表的實時天氣</string>
+    <string name="landing_example_memory_title">記憶翻牌遊戲</string>
+    <string name="landing_example_memory_desc">帶動畫的卡片配對遊戲</string>
+    <string name="landing_example_budget_title">預算追蹤器</string>
+    <string name="landing_example_budget_desc">按類別追蹤支出</string>
+    <string name="landing_example_pomodoro_title">番茄鍾</string>
+    <string name="landing_example_pomodoro_desc">帶任務管理的專注計時器</string>
+    <string name="landing_example_quiz_title">答題應用</string>
+    <string name="landing_example_quiz_desc">帶分數記錄的互動問答</string>
+    <string name="landing_example_workout_title">健身記錄</string>
+    <string name="landing_example_workout_desc">記錄運動並追蹤進度</string>
+    <string name="landing_cta_get_started">立即開始 — 免費使用</string>
+    <string name="landing_cta_sign_in">已有帳戶？登入</string>
+    <string name="landing_trust_badge_instant">即時</string>
+    <string name="landing_trust_badge_secure">安全</string>
+    <string name="landing_trust_badge_no_card">無需銀行卡</string>
+
+    <!-- Sign In Screen -->
+    <string name="sign_in_subtitle">用AI構建應用</string>
+    <string name="sign_in_label_display_name">顯示名稱</string>
+    <string name="sign_in_label_email">郵箱</string>
+    <string name="sign_in_label_password">密碼</string>
+    <string name="sign_in_cd_hide_password">隱藏密碼</string>
+    <string name="sign_in_cd_show_password">顯示密碼</string>
+    <string name="sign_in_btn_creating_account">正在建立帳戶…</string>
+    <string name="sign_in_btn_signing_in">正在登入…</string>
+    <string name="sign_in_btn_create_account">建立帳戶</string>
+    <string name="sign_in_btn_sign_in">登入</string>
+    <string name="sign_in_toggle_have_account">已有帳戶？ </string>
+    <string name="sign_in_toggle_no_account">還沒有帳戶？ </string>
+    <string name="sign_in_toggle_link_sign_in">登入</string>
+    <string name="sign_in_toggle_link_sign_up">註冊</string>
+    <string name="sign_in_divider_or">" 或 "</string>
+    <string name="sign_in_with_google">使用Google登入</string>
+    <string name="sign_in_terms_notice">登入即表示您同意我們的服務條款</string>
+
+    <!-- Onboarding Screen -->
+    <string name="onboarding_btn_skip">跳過</string>
+    <string name="onboarding_page1_title">描述你的應用</string>
+    <string name="onboarding_page1_desc">用簡單的語言告訴AI你想構建什麼。無需程式設計經驗。</string>
+    <string name="onboarding_page2_title">AI來構建</string>
+    <string name="onboarding_page2_desc">看AI如何在幾秒內用真實程式碼生成一個完整的應用。</string>
+    <string name="onboarding_page3_title">調整 &amp; 最佳化</string>
+    <string name="onboarding_page3_desc">與AI反覆迭代，完善你的應用。即時更改顏色、功能和佈局。</string>
+    <string name="onboarding_page4_title">部署 &amp; 分享</string>
+    <string name="onboarding_page4_desc">一鍵將應用釋出到網路。與全世界分享你的作品。</string>
+    <string name="onboarding_btn_next">下一步</string>
+    <string name="onboarding_btn_get_started">開始使用</string>
+
+    <!-- Create Screen -->
+    <string name="create_title">你想做什麼？</string>
+    <string name="create_subtitle">描述你的應用創意，AI會幫你構建</string>
+    <string name="create_prompt_placeholder">例如：做一個顯示我所在城市天氣預報的天氣應用…</string>
+    <string name="create_cd_attach_image">新增圖片</string>
+    <string name="create_cd_voice_input">語音輸入</string>
+    <string name="create_cd_remove_image">移除圖片</string>
+    <string name="create_cd_reference_image">參考圖片</string>
+    <string name="create_default_project_title">我的專案</string>
+    <string name="create_error_generation_failed">生成失敗</string>
+    <string name="create_error_extract_failed">專案提取失敗: %s</string>
+    <string name="create_error_save_failed">儲存失敗: %s</string>
+    <string name="create_error_publish_failed">釋出失敗: %s</string>
+    <string name="create_save_dialog_title">已儲存！</string>
+    <string name="create_save_dialog_message">你的專案已儲存。點選發布按鈕即可上線！</string>
+
+    <!-- Generation Progress -->
+    <string name="generation_time_remaining">剩餘約%d秒</string>
+    <string name="generation_btn_notify">完成時通知我</string>
+    <string name="generation_notify_confirmation">準備好後會通知你</string>
+    <string name="generation_notify_leave_hint">你可以離開此頁面</string>
+    <string name="generation_btn_cancel">取消</string>
+    <string name="generation_phase_connecting">連線中…</string>
+    <string name="generation_phase_complete">完成！</string>
+    <string name="generation_limit_reached">已達到每日生成次數上限</string>
+    <string name="upgrade_to_pro">升級到Pro</string>
+    <string name="start_generating">開始</string>
+
+    <!-- Suggestion Chips -->
+    <string name="suggestions_header">試試這些</string>
+    <string name="suggestions_btn_generating">正在生成創意…</string>
+    <string name="suggestions_btn_suggest_new">推薦新創意</string>
+    <string name="suggestion_label_todo_app">待辦事項</string>
+    <string name="suggestion_label_weather_app">天氣應用</string>
+    <string name="suggestion_label_calculator">計算器</string>
+    <string name="suggestion_label_pomodoro_timer">番茄鍾</string>
+    <string name="suggestion_label_markdown_editor">Markdown編輯器</string>
+    <string name="suggestion_label_color_palette">調色盤</string>
+
+    <!-- Account Screen -->
+    <string name="account_dialog_sign_out_title">退出登入</string>
+    <string name="account_dialog_sign_out_message">確定要退出登入嗎？</string>
+    <string name="account_cd_profile_photo">頭像</string>
+    <string name="account_default_display_name">使用者</string>
+    <string name="account_section_usage">使用情況</string>
+    <string name="account_stat_projects">專案</string>
+    <string name="account_stat_todays_gens">今日生成數</string>
+    <string name="account_section_settings">設定</string>
+    <string name="account_settings_subscription">訂閱</string>
+    <string name="account_settings_theme">主題</string>
+    <string name="account_settings_theme_value">深色</string>
+    <string name="account_settings_about">關於</string>
+    <string name="account_settings_rate">為 VibeBuild 評分</string>
+    <string name="account_settings_version">版本 %1$s</string>
+    <string name="account_settings_language">語言</string>
+
+    <!-- Apps Screen -->
+    <string name="apps_screen_title">我的應用</string>
+    <string name="apps_empty_title">還沒有應用</string>
+    <string name="apps_empty_subtitle">用AI建立你的第一個應用\n或探索其他人的作品</string>
+    <string name="apps_cd_sort">排序</string>
+
+    <!-- Browse Screen -->
+    <string name="browse_screen_title">探索</string>
+
+    <!-- Preview Screen -->
+    <string name="preview_screen_title">預覽</string>
+    <string name="preview_deploy_dialog_title">釋出應用</string>
+    <string name="preview_deploy_dialog_message">為你的應用選擇一個子域名：</string>
+    <string name="preview_deploy_placeholder">my-awesome-app</string>
+    <string name="preview_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="preview_share_text">看看我做的應用: %s</string>
+
+    <!-- Project Preview Screen -->
+    <string name="project_preview_btn_forked">已復刻！</string>
+    <string name="project_preview_btn_fork">復刻</string>
+    <string name="project_preview_error_title">預覽載入失敗</string>
+
+    <!-- Project Detail Screen -->
+    <string name="project_detail_deploy_dialog_title">部署應用</string>
+    <string name="project_detail_deploy_dialog_message">為你的應用選擇一個子域名：</string>
+    <string name="project_detail_deploy_label_subdomain">子域名</string>
+    <string name="project_detail_deploy_domain_suffix">.vibebuild.cc</string>
+    <string name="project_detail_screen_title_fallback">專案</string>
+    <string name="project_detail_created_at">建立於 %s</string>
+    <string name="project_detail_btn_preview">預覽應用</string>
+    <string name="project_detail_badge_deployed">已部署</string>
+    <string name="project_detail_btn_deploying">部署中…</string>
+    <string name="project_detail_btn_deploy_to_web">部署到網路</string>
+    <string name="project_detail_stat_views">瀏覽量</string>
+    <string name="project_detail_stat_forks">復刻數</string>
+    <string name="project_detail_stat_tweaks">調整數</string>
+    <string name="project_detail_section_original_prompt">原始提示詞</string>
+    <string name="project_detail_share_text">看看我做的應用: %s</string>
+
+    <!-- Project Card -->
+    <string name="project_card_delete_dialog_title">刪除專案</string>
+    <string name="project_card_delete_dialog_message">確定要刪除「%s」嗎？此操作無法撤消。</string>
+
+    <!-- Language Picker -->
+    <string name="language_picker_title">選擇語言</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese">中文(簡體)</string>
+    <string name="language_korean">한국어</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_hindi">हिन्दी</string>
+
+    <!-- Project Card -->
+    <string name="project_card_views">%d 次檢視</string>
+
+    <!-- Post-Publish Sheet -->
+    <string name="publish_sheet_title">您的應用已上線！</string>
+    <string name="publish_sheet_subtitle">與世界分享，開始透過應用內廣告獲利。</string>
+    <string name="publish_sheet_open_browser">在瀏覽器中開啟</string>
+    <string name="publish_sheet_share">分享應用</string>
+    <string name="publish_sheet_monetize">啟用廣告變現 →</string>
+    <string name="publish_sheet_done">完成</string>
+    <string name="publish_sheet_share_text">看看我用VibeBuild做的應用！ %s</string>
+
+    <!-- Monetization -->
+    <string name="monetize_section_title">變現</string>
+    <string name="monetize_revenue_label">本月收益</string>
+    <string name="monetize_revenue_value">$0.00</string>
+    <string name="monetize_enable_btn">啟用廣告變現 →</string>
+    <string name="monetize_description">當使用者使用您的應用時賺錢。我們投放廣告並每月付款給您。</string>
+
+    <!-- Facebook SDK Configuration -->
+    <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
+    <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+
+    <!-- App keys (creator keys for generated apps) -->
+    <string name="app_keys_title">應用金鑰</string>
+    <string name="app_keys_summary">已設定 %1$d/%2$d 個金鑰</string>
+    <string name="app_keys_summary_all_set">已設定全部 %1$d 個金鑰</string>
+    <string name="app_keys_manage">管理</string>
+    <string name="app_keys_hide">隱藏</string>
+    <string name="app_keys_hint">你的應用使用這些金鑰與其他服務連線。金鑰會被安全儲存,無法再次檢視,只能替換或刪除。</string>
+    <string name="app_keys_used_by">使用方: %1$s</string>
+    <string name="app_keys_set">已設定</string>
+    <string name="app_keys_not_set">未設定</string>
+    <string name="app_keys_input_label">貼上 %1$s 的值</string>
+    <string name="app_keys_save">儲存</string>
+    <string name="app_keys_saving">正在儲存…</string>
+    <string name="app_keys_replace">替換</string>
+    <string name="app_keys_remove">刪除</string>
+    <string name="app_keys_removing">正在刪除…</string>
+    <string name="app_keys_saved">已儲存</string>
+    <string name="app_keys_removed">已刪除</string>
+    <string name="app_keys_remove_title">刪除 %1$s?</string>
+    <string name="app_keys_remove_message">在你重新新增金鑰之前,你的應用將無法使用此服務。</string>
+    <string name="app_keys_retry">重試</string>
+    <string name="app_keys_error_unauthorized">請重新登入以管理金鑰。</string>
+    <string name="app_keys_error_rate_limited">嘗試次數過多。請等待一分鐘後重試。</string>
+    <string name="app_keys_error_store_down">金鑰儲存暫時不可用。請稍後重試。</string>
+    <string name="app_keys_error_invalid_value">該金鑰為空或過長。</string>
+    <string name="app_keys_error_network">無網路連線。請檢查網路後重試。</string>
+    <string name="app_keys_error_other">出了點問題。請重試。</string>
+    <string name="app_keys_pay_test_first">請先使用你的 Stripe 測試金鑰(以 sk_test_ 開頭)。</string>
+    <string name="app_keys_pay_webhook_label">要新增到 Stripe 的 Webhook URL</string>
+    <string name="app_keys_pay_webhook_pending">釋出應用後即可獲取其 Webhook URL。</string>
+    <string name="app_keys_copy_url">複製 URL</string>
+    <string name="app_keys_copied">已複製</string>
+
+    <!-- Paywall -->
+    <string name="paywall_title">無限創作</string>
+    <string name="paywall_subtitle">解鎖 VibeBuild 的全部功能</string>
+    <string name="paywall_feature_projects">無限專案</string>
+    <string name="paywall_feature_ai">AI 助手</string>
+    <string name="paywall_feature_deploy">一鍵雲端部署</string>
+    <string name="paywall_feature_templates">全部模板</string>
+    <string name="paywall_feature_storage">雲端儲存</string>
+    <string name="paywall_plan_yearly">年付</string>
+    <string name="paywall_plan_monthly">月付</string>
+    <string name="paywall_plan_weekly">周付</string>
+    <string name="paywall_plan_lifetime">終身</string>
+    <string name="paywall_price_per_year">%1$s / 年</string>
+    <string name="paywall_price_per_month">%1$s / 月</string>
+    <string name="paywall_price_per_week">%1$s / 周</string>
+    <string name="paywall_price_once">%1$s 一次性</string>
+    <string name="paywall_badge_best_value">最超值</string>
+    <string name="paywall_trial_days">%1$d 天免費試用</string>
+    <string name="paywall_cta_continue">繼續</string>
+    <string name="paywall_cta_trial">開始免費試用</string>
+    <string name="paywall_renewal">訂閱將自動續訂，直至取消。可隨時在 Google Play 中取消。</string>
+    <string name="paywall_restore">恢復購買</string>
+    <string name="paywall_redeem">有兌換碼？</string>
+    <string name="paywall_terms">條款</string>
+    <string name="paywall_privacy">隱私</string>
+    <string name="paywall_close">關閉</string>
+    <string name="paywall_unavailable">無法載入套餐。請檢查網路連線後重試。</string>
+    <string name="paywall_retry">重試</string>
+    <string name="paywall_error_purchase">購買未能完成，請重試。</string>
+    <string name="paywall_restore_none">未找到此 Google 帳號的有效訂閱。</string>
+
+    <!-- needs native review (machine translation) -->
+    <string name="account_delete_account">刪除帳戶</string>
+    <string name="account_dialog_delete_title">刪除你的帳戶？</string>
+    <string name="account_dialog_delete_message">此操作將永久刪除你的帳戶、你的應用及其所有版本，且無法撤銷。</string>
+    <string name="account_deleting">正在刪除…</string>
+    <string name="account_delete_error">你的帳戶未被刪除。請檢查網路連線後重試。</string>
+    <string name="account_delete_sign_in_again">為了你的帳戶安全，請先退出登入並重新登入，然後再刪除帳戶。</string>
+    <string name="version_history">版本歷史</string>
+    <string name="version_history_subtitle">你所做的每次更改都會儲存為一個新版本</string>
+    <string name="version_current">當前</string>
+    <string name="version_use_this">使用此版本</string>
+    <string name="version_use_title">恢復此版本？</string>
+    <string name="version_use_message">這將替換你當前的版本。別擔心，你隨時可以從歷史記錄中切換回任何版本。</string>
+    <string name="version_use_confirm">使用此版本</string>
+    <string name="version_restoring">正在恢復版本…</string>
+    <string name="version_empty">還沒有版本歷史。做些更改，開始記錄版本吧！</string>
+    <string name="explore_listing_title">在“探索”中展示</string>
+    <string name="explore_listing_hint">讓其他人在公開的“探索”頁面找到此應用，他們可以開啟並改編它。你的名字將顯示為名字加姓氏首字母。預設關閉。</string>
+    <string name="explore_listing_failed">設定未儲存。請重試。</string>
+    <string name="tab_browse_nav">探索</string>
+    <string name="main_builds_unavailable">構建功能暫時不可用。請稍後再來！</string>
+    <string name="main_telegram_banner">✨ 透過 Telegram 構建應用！@Vibebuilder_bot</string>
+    <string name="create_save_prompt_title">儲存你的應用？</string>
+    <string name="create_save_prompt_body">你的應用尚未儲存。要在關閉前儲存嗎？</string>
+    <string name="create_discard">放棄</string>
+    <string name="create_busy_title">🔥 當前需求火爆</string>
+    <string name="create_busy_body_free">我們的構建器目前已滿負荷執行。請幾分鐘後再試。</string>
+    <string name="create_busy_body_pro">我們的構建器已滿負荷執行。Pro 使用者享有優先許可權，可即時構建。</string>
+    <string name="create_busy_upgrade">⚡ 升級到 Pro</string>
+    <string name="build_phase_generate">生成</string>
+    <string name="build_phase_validate">驗證</string>
+    <string name="build_phase_fix">修復</string>
+    <string name="build_phase_polish">最佳化</string>
+    <string name="build_phase_verify">核查</string>
+    <string name="build_chat_plan_title">這是我的方案</string>
+    <string name="build_chat_build_this">開始構建</string>
+    <string name="build_chat_edit_prompt">編輯描述</string>
+    <string name="build_chat_thinking">正在思考你的創意</string>
+    <string name="build_chat_failed_default">出了點問題。</string>
+    <string name="build_chat_edit_retry">編輯並重試</string>
+    <string name="build_chat_new_app">新建應用</string>
+    <string name="build_chat_upsell_title">這是你最後一次免費構建</string>
+    <string name="build_chat_upsell_body">升級到 Pro，即可無限構建應用、享受優先構建，無需等待。</string>
+    <string name="build_chat_ready_title">你的應用已就緒</string>
+    <string name="build_chat_saved_with_preview">已儲存到“我的專案”。開啟實時預覽來試用吧。</string>
+    <string name="build_chat_saved">已儲存到“我的專案”。</string>
+    <string name="build_chat_published">已釋出：%1$s</string>
+    <string name="build_chat_open_live_preview">開啟實時預覽</string>
+    <string name="build_chat_saved_button">已儲存</string>
+    <string name="build_chat_tweak">調整</string>
+    <string name="build_chat_start_new">開始新應用</string>
+    <string name="build_chat_tweak_applying">正在應用更改</string>
+    <string name="build_chat_tweak_done">完成。預覽已更新。</string>
+    <string name="build_chat_tweak_done_version">完成。預覽已更新（v%1$d）。</string>
+    <string name="build_chat_tweak_failed">這次調整未能完成。</string>
+    <string name="build_chat_open_preview">開啟預覽</string>
+    <string name="build_chat_tweak_hint">描述你想做的更改...</string>
+    <string name="build_chat_send_tweak">傳送調整</string>
+    <string name="build_chat_cancel">取消構建</string>
+    <string name="build_chat_stage_complete">構建完成</string>
+    <string name="build_chat_stage_failed">構建失敗</string>
+    <string name="build_chat_stage_building">正在構建你的應用</string>
+    <string name="build_chat_working">處理中</string>
+    <string name="auth_error_wrong_credentials">郵箱或密碼錯誤</string>
+    <string name="auth_error_email_not_confirmed">請先確認你的郵箱。請在收件箱中查詢確認連結。</string>
+    <string name="auth_error_confirm_email_to_finish">請查收郵件確認你的帳戶，然後登入。</string>
+    <string name="auth_error_rate_limited">嘗試次數過多。請等待一分鐘後重試。</string>
+    <string name="auth_error_network">無法連線到伺服器。請檢查網路連線後重試。</string>
+    <string name="auth_error_weak_password">該密碼太弱。請使用至少 6 個字元，並混合字母和數字。</string>
+    <string name="auth_error_invalid_email">請輸入有效的郵箱地址。</string>
+    <string name="auth_error_already_registered">此郵箱已註冊帳戶。請嘗試直接登入。</string>
+    <string name="auth_error_google_no_account">此裝置上未找到 Google 帳戶。請在“設定”中新增後重試。</string>
+    <string name="auth_error_google_failed">Google 登入未成功。請重試。</string>
+    <string name="auth_error_server">我們這邊出了點問題。請稍後重試。</string>
+    <string name="auth_error_sign_up_failed">註冊失敗。請重試。</string>
+    <string name="auth_error_sign_in_failed">登入失敗。請重試。</string>
+
+    <!-- Create-screen/domain/preview strings added 2026-11-17 (machine translated, needs native review) -->
+    <string name="custom_domain_title">自定義域名</string>
+    <string name="custom_domain_remove_title">移除 %1$s？</string>
+    <string name="custom_domain_remove_body">訪客將無法再透過此地址訪問你的應用。你的 vibebuild.cc 連結仍可繼續使用。</string>
+    <string name="custom_domain_pro_only">連線自己的域名是 Pro 功能。</string>
+    <string name="custom_domain_hint">使用你自己的地址，例如 www.yourbrand.com。</string>
+    <string name="custom_domain_add">新增域名</string>
+    <string name="custom_domain_status_issuing">正在簽發證書（可能需要一兩分鐘）...</string>
+    <string name="custom_domain_status_waiting">等待 DNS 生效</string>
+    <string name="custom_domain_checking">檢查中...</string>
+    <string name="custom_domain_dns_instructions">請在你的域名服務商處新增以下記錄（GoDaddy、Namecheap、Cloudflare 等）。DNS 更改可能需要幾分鐘才能生效。</string>
+    <string name="custom_domain_root_records">根域名記錄</string>
+    <string name="custom_domain_apex_warning">這是根域名。許多服務商無法用 CNAME 指向根域名；請改用 www.%1$s，或使用服務商的 ALIAS/ANAME 記錄指向下方的目標地址。</string>
+    <string name="custom_domain_txt_alt">或者，改用 TXT 記錄驗證所有權</string>
+    <string name="custom_domain_record_label">%1$s  ·  名稱：%2$s</string>
+    <string name="custom_domain_copy_value">複製 %1$s 值</string>
+    <string name="custom_domain_err_already">該域名已連線到另一個應用。請先在那裡移除它，或使用其他域名。</string>
+    <string name="custom_domain_err_network">無法連線到 VibeBuild。請檢查網路連線後重試。</string>
+    <string name="custom_domain_err_dns">暫時還看不到你的 DNS 記錄。更改最長可能需要幾個小時；請稍後再試。</string>
+    <string name="custom_domain_dns_expect_a">預期結果：上方的 A 記錄。</string>
+    <string name="custom_domain_dns_expect_cname">預期結果：指向 %1$s 的 CNAME。</string>
+    <string name="custom_domain_dns_expect_txt">值為 %1$s 的 TXT 記錄同樣有效。</string>
+    <string name="custom_domain_err_poll_timeout">證書仍在簽發中，可能需要幾分鐘。點按“驗證”再次檢查。</string>
+    <string name="domain_invalid_empty">請輸入域名，例如 www.example.com</string>
+    <string name="domain_invalid_too_long">該域名太長</string>
+    <string name="domain_invalid_extension">請包含字尾，例如 example.com</string>
+    <string name="domain_invalid_characters">只能使用字母、數字和連字元</string>
+    <string name="domain_invalid_generic">這看起來不是有效的域名</string>
+    <string name="domain_invalid_own_address">請使用你自己的域名，而不是 vibebuild.cc 地址</string>
+    <string name="custom_domain_unavailable">自定義域名暫時不可用，請稍後再試。</string>
+    <string name="custom_domain_pro_feature">自定義域名是 Pro 功能</string>
+    <string name="live_preview_monetize_soon">變現（即將推出）</string>
+    <string name="live_preview_change_hint">你想修改什麼？</string>
+    <string name="live_preview_feedback_thanks">感謝你的反饋！</string>
+    <string name="live_preview_feedback_ask">覺得怎麼樣？</string>
+    <string name="cd_thumbs_up">點贊</string>
+    <string name="cd_thumbs_down">點踩</string>
+    <string name="cd_improve_app">改進此應用</string>
+    <string name="cd_dismiss">關閉</string>
+    <string name="project_detail_export_android">匯出 Android 應用</string>
+    <string name="project_detail_preview_iphone">在 iPhone 上預覽 (Expo Go)</string>
+    <string name="project_detail_ads_review">透過已部署應用中展示的廣告獲得收益。廣告變現目前正在稽核中，即將推出。</string>
+    <string name="project_detail_coming_soon">即將推出</string>
+    <string name="project_detail_building_apk">正在構建 APK...</string>
+    <string name="apps_pro_never_wait">Pro 使用者無需等待</string>
+    <string name="apps_pro_never_wait_body">免費構建資源為共享使用。Pro 為你提供優先佇列、更快的構建速度，並杜絕失敗。</string>
+    <string name="retry">重試</string>
+    <string name="project_card_building">正在構建你的應用...</string>
+    <string name="project_card_takes_5_min">大約需要 5 分鐘</string>
+    <string name="browse_empty_category">此分類下暫無應用</string>
+    <string name="browse_remix">復刻</string>
+    <string name="browse_remix_count">復刻 %1$d</string>
+    <string name="build_chat_style">風格：%1$s</string>
+    <string name="templates_row_title">模板 · 點按開始</string>
+    <string name="template_by">作者：%1$s</string>
+    <string name="project_preview_unavailable">無法預覽</string>
+    <string name="project_preview_unavailable_body">無法載入此應用的預覽。</string>
+    <string name="version_initial">初始版本</string>
+    <string name="template_difficulty_beginner">入門</string>
+    <string name="template_difficulty_intermediate">中級</string>
+    <string name="template_difficulty_advanced">高階</string>
+    <string name="template_category_finance">財務</string>
+    <string name="template_category_forms_input">表單與輸入</string>
+    <string name="template_category_games_canvas">遊戲與畫布</string>
+    <string name="template_category_layouts">佈局</string>
+    <string name="template_category_mobile_uis">移動端介面</string>
+    <string name="template_category_productivity">效率</string>
+    <string name="template_category_visual_animation">視覺 / 動畫</string>
+
+    <!-- Added 2026-11-17: machine translated, needs native review -->
+    <!-- Browse category filters -->
+    <string name="browse_filter_all">全部</string>
+    <string name="browse_filter_games">遊戲</string>
+    <string name="browse_filter_tools">工具</string>
+    <string name="browse_filter_sites">網站</string>
+    <string name="browse_filter_trackers">追蹤器</string>
+    <string name="browse_sort_newest">最新</string>
+    <string name="browse_sort_popular">熱門</string>
+    <!-- More from us (Account) -->
+    <string name="promo_more_from_us">更多應用</string>
+    <string name="promo_tagline_clearvoice">AI 清理語音備忘錄</string>
+    <string name="promo_tagline_audexa">你的個人 AI 電臺</string>
+    <string name="promo_tagline_readaloud">隨時收聽任何文章</string>
+    <string name="promo_tagline_scribeai">轉錄和總結任何內容</string>
+    <string name="promo_tagline_meetingmind">會議自動記錄</string>
+    <string name="promo_tagline_riddleverse">每日 AI 生成謎題</string>
+    <!-- Notifications -->
+    <string name="notif_channel_generation_name">應用生成</string>
+    <string name="notif_channel_generation_desc">應用生成完成時通知你</string>
+    <string name="notif_generation_ready_title">你的應用已就緒！</string>
+    <string name="notif_generation_ready_body">點選在應用中開啟你的專案</string>
+    <string name="notif_project_ready_title">\"%1$s\"已就緒！</string>
+    <string name="notif_project_ready_body">點選開啟你的應用</string>
+    <!-- Sample projects shown on Explore when the list is empty -->
+    <string name="sample_creator_team">VibeBuild 團隊</string>
+    <string name="sample_todo_title">待辦事項應用</string>
+    <string name="sample_todo_desc">簡潔的任務追蹤器，帶分類和截止日期。</string>
+    <string name="sample_pomodoro_title">番茄鍾</string>
+    <string name="sample_pomodoro_desc">工作和休息間隔的專注計時器。</string>
+    <string name="sample_weather_title">天氣儀表盤</string>
+    <string name="sample_weather_desc">任何城市的當前天氣和5天預報。</string>
+    <string name="sample_recipes_title">食譜查詢器</string>
+    <string name="sample_recipes_desc">根據家中現有食材查詢食譜。</string>
+    <string name="sample_budget_title">預算追蹤器</string>
+    <string name="sample_budget_desc">追蹤支出並視覺化資金流向。</string>
+    <string name="sample_quiz_title">趣味問答遊戲</string>
+    <string name="sample_quiz_desc">多類別問答，帶分數追蹤。</string>
+    <!-- Errors and progress text from view models -->
+    <string name="err_fork_failed">複製失敗：%1$s</string>
+    <string name="err_load_plans">無法載入方案：%1$s</string>
+    <string name="err_purchase_failed">購買失敗：%1$s</string>
+    <string name="err_restore_failed">恢復失敗：%1$s</string>
+    <string name="err_delete_failed">刪除失敗：%1$s</string>
+    <string name="err_preview_create">無法建立預覽</string>
+    <string name="err_preview_failed">預覽失敗：%1$s</string>
+    <string name="err_deploy_retry">部署失敗，請重試。</string>
+    <string name="err_deploy_failed">部署失敗：%1$s</string>
+    <string name="err_sign_in_changes">請登入以進行更改</string>
+    <string name="err_failed_reason">失敗：%1$s</string>
+    <string name="err_versions_load">無法載入版本歷史</string>
+    <string name="err_version_restore">無法恢復版本</string>
+    <string name="err_ads_update">更新廣告失敗：%1$s</string>
+    <string name="err_sign_in_export">請登入以匯出 APK</string>
+    <string name="err_export_failed">匯出失敗：%1$s</string>
+    <string name="err_apk_installer">APK 已儲存但無法開啟安裝程式。請檢查下載資料夾。</string>
+    <string name="err_sign_in_generate">請登入以生成專案</string>
+    <string name="err_sign_in_tweak">請登入以調整專案</string>
+    <string name="err_no_project_tweak">沒有可調整的專案</string>
+    <string name="err_save_before_tweak">調整前儲存失敗：%1$s</string>
+    <string name="err_save_project">儲存專案失敗</string>
+    <string name="err_tweak_failed">調整失敗：%1$s</string>
+    <string name="err_build_start">無法開始構建，請重試。</string>
+    <string name="err_build_failed">構建失敗，請重試。</string>
+    <string name="err_build_maybe_running">你的應用可能仍在構建中。請稍後檢視應用。</string>
+    <string name="err_prompt_looks_like_code">你的提示看起來像程式碼而非應用描述。請用自然語言描述你想構建的應用。</string>
+    <string name="err_prompt_no_code">請用自然語言描述你的應用創意，而不是程式碼。</string>
+    <string name="err_prompt_no_urls">請用你自己的話描述你的應用創意，而不是貼上網址。</string>
+    <string name="progress_checking_app">正在檢查你的應用...</string>
+    <string name="progress_may_still_build">你的應用可能仍在構建中</string>
+    <string name="progress_starting_build">正在開始構建...</string>
+    <string name="progress_applying_changes">正在應用更改...</string>
+    <string name="progress_building_android">正在構建 Android 應用...</string>
+    <string name="progress_saving_apk">正在儲存 APK...</string>
+    <string name="stt_prompt">描述你的應用創意...</string>
+    <string name="err_rate_limit">你已達到當前限制，請稍後再試。</string>
+    <string name="err_stream_empty">響應內容為空</string>
+    <string name="err_stream_error">流錯誤</string>
+    <string name="err_unknown">未知錯誤</string>
+
+    <!-- Telegram channel (machine-translated, needs native review) -->
+    <string name="telegram_card_title">用 Telegram 製作應用</string>
+    <string name="telegram_card_body">用你自己的語言把創意發給我們的機器人。它會製作應用並把連結發給你。</string>
+    <string name="telegram_card_cta">開啟 Telegram</string>
+    <string name="telegram_continue">在 Telegram 中繼續</string>
+    <string name="telegram_settings_title">Telegram 機器人</string>
+    <string name="telegram_settings_subtitle">與 @Vibebuilder_bot 聊天，製作並獲取你的應用</string>
+</resources>

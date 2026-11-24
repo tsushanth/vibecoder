@@ -14,7 +14,7 @@ function flat(o: Record<string, unknown>, p = ''): Record<string, string> {
   }
   return out;
 }
-const LOCALES = ['de', 'es', 'fr', 'hi', 'it', 'ja', 'ko', 'pt', 'zh'];
+const LOCALES = ['de', 'es', 'fr', 'hi', 'it', 'ja', 'ko', 'pt', 'zh', 'zh-TW', 'zh-HK'];
 const en = flat((load('en').usage ?? {}) as Record<string, unknown>);
 const vars = (s: string) => [...s.matchAll(/\{[^}]+\}/g)].map((m) => m[0]).sort();
 

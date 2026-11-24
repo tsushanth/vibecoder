@@ -11,7 +11,7 @@ import java.io.File
 class TemplateTranslationsTest {
     private val assets: File = listOf("src/main/assets", "android/app/src/main/assets").map { File(it) }.first { it.isDirectory }
     private val gson = Gson()
-    private val shipped = listOf("ar", "cs", "de", "el", "es", "fi", "fr", "hi", "hu", "id", "it", "ja", "ko", "ms", "nl", "pl", "pt", "ro", "ru", "sv", "th", "tl", "tr", "uk", "vi", "zh")
+    private val shipped = listOf("ar", "cs", "de", "el", "es", "fi", "fr", "hi", "hu", "id", "it", "ja", "ko", "ms", "nl", "pl", "pt", "ro", "ru", "sv", "th", "tl", "tr", "uk", "vi", "zh", "zh-TW", "zh-HK")
 
     private data class Text(val title: String? = null, val description: String? = null)
 

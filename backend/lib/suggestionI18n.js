@@ -5,18 +5,19 @@
 // translated at most once per process. Any failure returns the English item: this never errors and never blocks a build.
 import { createHash } from 'node:crypto';
 import { recordLlm as defaultRecordLlm } from './llmUsageInstance.js';
+import { chineseTag } from './langTag.js';
 
-// The 26 UI languages the Android app ships. `id` is Indonesian (Android's legacy resource code is `in`), `zh` is
-// Simplified Chinese, `pt` is Brazilian Portuguese.
+// The UI languages the Android app ships. `id` is Indonesian (Android's legacy resource code is `in`), `zh` is
+// Simplified Chinese, `zh-TW` and `zh-HK` are Traditional Chinese (Taiwan, Hong Kong), `pt` is Brazilian Portuguese.
 export const SUPPORTED_LANGS = Object.freeze([
-    'ar', 'cs', 'de', 'el', 'es', 'fi', 'fr', 'hi', 'hu', 'id', 'it', 'ja', 'ko', 'ms', 'nl', 'pl', 'pt', 'ro', 'ru', 'sv', 'th', 'tl', 'tr', 'uk', 'vi', 'zh',
+    'ar', 'cs', 'de', 'el', 'es', 'fi', 'fr', 'hi', 'hu', 'id', 'it', 'ja', 'ko', 'ms', 'nl', 'pl', 'pt', 'ro', 'ru', 'sv', 'th', 'tl', 'tr', 'uk', 'vi', 'zh', 'zh-TW', 'zh-HK',
 ]);
 
 const LANG_NAMES = Object.freeze({
     ar: 'Arabic', cs: 'Czech', de: 'German', el: 'Greek', es: 'Spanish', fi: 'Finnish', fr: 'French', hi: 'Hindi', hu: 'Hungarian',
     id: 'Indonesian', it: 'Italian', ja: 'Japanese', ko: 'Korean', ms: 'Malay', nl: 'Dutch', pl: 'Polish', pt: 'Brazilian Portuguese',
     ro: 'Romanian', ru: 'Russian', sv: 'Swedish', th: 'Thai', tl: 'Filipino (Tagalog)', tr: 'Turkish', uk: 'Ukrainian', vi: 'Vietnamese',
-    zh: 'Simplified Chinese',
+    zh: 'Simplified Chinese', 'zh-TW': 'Traditional Chinese (Taiwan)', 'zh-HK': 'Traditional Chinese (Hong Kong)',
 });
 
 const ALIASES = { in: 'id', fil: 'tl' };
@@ -24,12 +25,12 @@ const ALIASES = { in: 'id', fil: 'tl' };
 /** Maps whatever the client sent to a whitelisted primary tag, or 'en' (the default, also for anything unknown). */
 export function normalizeLang(raw) {
     if (typeof raw !== 'string') return 'en';
-    const primary = raw.trim().toLowerCase().split(/[-_]/)[0];
-    const tag = ALIASES[primary] || primary;
+    const [primary, ...rest] = raw.trim().toLowerCase().split(/[-_]/);
+    const tag = primary === 'zh' ? chineseTag(rest) : (Object.hasOwn(ALIASES, primary) ? ALIASES[primary] : primary);
     return SUPPORTED_LANGS.includes(tag) ? tag : 'en';
 }
 
-export function languageName(tag) { return LANG_NAMES[tag] || 'English'; }
+export function languageName(tag) { return Object.hasOwn(LANG_NAMES, tag) ? LANG_NAMES[tag] : 'English'; }
 
 // A reply can come back with a translated label but the prompt returned unchanged in English (seen live for zh: a Chinese
 // chip that fills an English prompt, so the app it builds is English). Such an item counts as not translated: it is retried

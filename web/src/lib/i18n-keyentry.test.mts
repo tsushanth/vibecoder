@@ -14,7 +14,7 @@ function flat(o: Record<string, unknown>, p = ''): Record<string, string> {
   return out;
 }
 
-const LOCALES = ['de', 'es', 'fr', 'hi', 'it', 'ja', 'ko', 'pt', 'zh'];
+const LOCALES = ['de', 'es', 'fr', 'hi', 'it', 'ja', 'ko', 'pt', 'zh', 'zh-TW', 'zh-HK'];
 // Key-entry copy lives under the `secrets` namespace.
 const en = flat((load('en').secrets ?? {}) as Record<string, unknown>);
 const keys = Object.keys(en);

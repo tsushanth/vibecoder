@@ -10,7 +10,7 @@ const { channelFromRequest } = await import('../../lib/appEvents.js');
 const { SUPPORTED_LANGS } = await import('../../lib/suggestionI18n.js');
 
 test('strings: English plus every app language, every key, placeholders preserved', () => {
-    assert.equal(LANGUAGES.length, 27);
+    assert.equal(LANGUAGES.length, 29);
     const appLangs = new Set(['en', ...SUPPORTED_LANGS]);
     assert.deepEqual([...LANGUAGES].sort(), [...appLangs].sort(), 'same languages as the suggestions i18n (and so as the app)');
     for (const l of LANGUAGES) {
@@ -38,7 +38,7 @@ test('format: escaping, truncation by code point, clamping never ends mid-entity
 });
 
 test('format: Telegram language codes map to ours', () => {
-    for (const [code, want] of [['pt-br', 'pt'], ['zh-hans', 'zh'], ['id', 'id'], ['in', 'id'], ['fil', 'tl'], ['uk', 'uk'], ['en-GB', 'en'], ['he', 'en'], ['iw', 'en'], ['', 'en'], [undefined, 'en'], ['ja', 'ja']]) assert.equal(languageFromCode(code), want, String(code));
+    for (const [code, want] of [['pt-br', 'pt'], ['zh-hans', 'zh'], ['zh', 'zh'], ['zh-cn', 'zh'], ['zh-sg', 'zh'], ['zh-hant', 'zh-TW'], ['zh-TW', 'zh-TW'], ['zh-mo', 'zh-TW'], ['zh-hk', 'zh-HK'], ['zh-HK', 'zh-HK'], ['constructor', 'en'], ['__proto__', 'en'], ['id', 'id'], ['in', 'id'], ['fil', 'tl'], ['uk', 'uk'], ['en-GB', 'en'], ['he', 'en'], ['iw', 'en'], ['', 'en'], [undefined, 'en'], ['ja', 'ja']]) assert.equal(languageFromCode(code), want, String(code));
 });
 
 const res = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });

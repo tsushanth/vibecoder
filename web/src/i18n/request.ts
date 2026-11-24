@@ -1,23 +1,7 @@
 import { getRequestConfig } from 'next-intl/server';
 import { cookies, headers } from 'next/headers';
 import { SUPPORTED_LOCALES, type SupportedLocale } from './locales';
-
-function parseAcceptLanguage(header: string): string | null {
-  const langs = header
-    .split(',')
-    .map((part) => {
-      const [lang, q] = part.trim().split(';q=');
-      return { lang: lang.split('-')[0].toLowerCase(), q: q ? parseFloat(q) : 1 };
-    })
-    .sort((a, b) => b.q - a.q);
-
-  for (const { lang } of langs) {
-    if (SUPPORTED_LOCALES.includes(lang as SupportedLocale)) {
-      return lang;
-    }
-  }
-  return null;
-}
+import { localeFromAcceptLanguage } from './match';
 
 export default getRequestConfig(async () => {
   const cookieStore = await cookies();
@@ -28,7 +12,7 @@ export default getRequestConfig(async () => {
   if (!locale || !SUPPORTED_LOCALES.includes(locale as SupportedLocale)) {
     const acceptLang = headerStore.get('accept-language');
     if (acceptLang) {
-      locale = parseAcceptLanguage(acceptLang) ?? 'en';
+      locale = localeFromAcceptLanguage(acceptLang) ?? 'en';
     } else {
       locale = 'en';
     }

@@ -89,9 +89,16 @@ test('language comes from Telegram language_code, falls back to English, and /la
     assert.match(t.api.last().text, /your apps/);
     await t.bot.handleUpdate(msg('/help', { id: 3, lang: 'zh-hans' }));
     assert.match(t.api.last().text, /你的应用/);
+    await t.bot.handleUpdate(msg('/help', { id: 4, lang: 'zh-hant' }));
+    assert.match(t.api.last().text, /你的應用/);
+    assert.equal(t.db.tables.telegram_chats.get('4').language, 'zh-TW');
+    await t.bot.handleUpdate(msg('/help', { id: 5, lang: 'zh-HK' }));
+    assert.equal(t.db.tables.telegram_chats.get('5').language, 'zh-HK');
+    await t.bot.handleUpdate(msg('/help', { id: 6, lang: 'zh-TW' }));
+    assert.equal(t.db.tables.telegram_chats.get('6').language, 'zh-TW');
     await t.bot.handleUpdate(msg('/language', { id: 1, lang: 'pt-BR' }));
     const kb = t.api.last().extra.reply_markup.inline_keyboard.flat();
-    assert.equal(kb.length, 27); assert.ok(kb.some((b) => b.callback_data === 'l:ja' && b.text === '日本語'));
+    assert.equal(kb.length, 29); assert.ok(kb.some((b) => b.callback_data === 'l:zh-TW' && b.text === '繁體中文（台灣）') && kb.some((b) => b.callback_data === 'l:zh-HK' && b.text === '繁體中文（香港）') && kb.some((b) => b.callback_data === 'l:zh' && b.text === '简体中文')); assert.ok(kb.some((b) => b.callback_data === 'l:ja' && b.text === '日本語'));
     await t.bot.handleUpdate(cb('l:ja', { id: 1, lang: 'pt-BR' }));
     assert.equal(t.db.tables.telegram_chats.get('1').language, 'ja'); assert.equal(t.db.tables.telegram_chats.get('1').language_chosen, true);
     assert.equal(t.api.edits().at(-1).text, STRINGS.ja.langSet);
@@ -100,6 +107,10 @@ test('language comes from Telegram language_code, falls back to English, and /la
     assert.ok(t.events.names().includes('language_changed'));
     await t.bot.handleUpdate(cb('l:zz', { id: 1 })); // not a language: ignored
     assert.equal(t.db.tables.telegram_chats.get('1').language, 'ja');
+    await t.bot.handleUpdate(cb('l:zz-XX', { id: 1 })); // looks like a region tag but is not shipped: ignored
+    assert.equal(t.db.tables.telegram_chats.get('1').language, 'ja');
+    await t.bot.handleUpdate(cb('l:zh-HK', { id: 1 }));
+    assert.equal(t.db.tables.telegram_chats.get('1').language, 'zh-HK');
 });
 
 test('/start greets in the language, offers localized idea buttons, and a tap builds that idea', async () => {

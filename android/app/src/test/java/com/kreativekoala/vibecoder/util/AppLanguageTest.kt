@@ -6,10 +6,10 @@ import org.junit.Test
 import java.util.Locale
 
 class AppLanguageTest {
-    private val shipped = listOf("ar", "cs", "de", "el", "es", "fi", "fr", "hi", "hu", "in", "it", "ja", "ko", "ms", "nl", "pl", "pt-BR", "ro", "ru", "sv", "th", "tl", "tr", "uk", "vi", "zh-CN")
+    private val shipped = listOf("ar", "cs", "de", "el", "es", "fi", "fr", "hi", "hu", "in", "it", "ja", "ko", "ms", "nl", "pl", "pt-BR", "ro", "ru", "sv", "th", "tl", "tr", "uk", "vi", "zh-CN", "zh-TW", "zh-HK")
 
     @Test fun everyShippedLanguageMapsToItsApiTag() {
-        val expected = mapOf("in" to "id", "pt-BR" to "pt", "zh-CN" to "zh")
+        val expected = mapOf("in" to "id", "pt-BR" to "pt", "zh-CN" to "zh", "zh-TW" to "zh-TW", "zh-HK" to "zh-HK")
         for (tag in shipped) {
             val locale = Locale.forLanguageTag(tag)
             assertEquals(tag, expected[tag] ?: tag, AppLanguage.tagFor(locale))
@@ -24,11 +24,17 @@ class AppLanguageTest {
 
     @Test fun regionsTheAppDoesNotShipShowEnglish() {
         assertNull(AppLanguage.tagFor(Locale.forLanguageTag("pt-PT")))
-        assertNull(AppLanguage.tagFor(Locale.forLanguageTag("zh-TW")))
-        assertNull(AppLanguage.tagFor(Locale.forLanguageTag("zh-Hant")))
+        assertNull(AppLanguage.tagFor(Locale.forLanguageTag("zh-MY")))
         assertEquals("zh", AppLanguage.tagFor(Locale.forLanguageTag("zh-Hans")))
         assertEquals("pt", AppLanguage.tagFor(Locale.forLanguageTag("pt")))
         assertEquals("es", AppLanguage.tagFor(Locale.forLanguageTag("es-MX")))
+    }
+
+    @Test fun chineseVariantsAreDistinct() {
+        for (t in listOf("zh", "zh-CN", "zh-SG", "zh-Hans", "zh-Hans-CN", "zh-Hans-SG")) assertEquals(t, "zh", AppLanguage.tagFor(Locale.forLanguageTag(t)))
+        for (t in listOf("zh-TW", "zh-Hant", "zh-Hant-TW", "zh-MO", "zh-Hant-MO")) assertEquals(t, "zh-TW", AppLanguage.tagFor(Locale.forLanguageTag(t)))
+        for (t in listOf("zh-HK", "zh-Hant-HK")) assertEquals(t, "zh-HK", AppLanguage.tagFor(Locale.forLanguageTag(t)))
+        assertEquals("zh-TW", AppLanguage.forLocales(listOf(Locale.forLanguageTag("zh-Hant-TW"), Locale.GERMANY)))
     }
 
     @Test fun englishAndUnknownLanguagesAreEnglish() {

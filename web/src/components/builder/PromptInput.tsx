@@ -8,7 +8,7 @@ import { STARTER_TEMPLATES, templatePrompt, type StarterTemplate } from '@/lib/s
 
 const LOCALE_BCP47: Record<string, string> = {
   en: 'en-US', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', ja: 'ja-JP',
-  zh: 'zh-CN', ko: 'ko-KR', pt: 'pt-BR', it: 'it-IT', hi: 'hi-IN',
+  zh: 'zh-CN', 'zh-TW': 'zh-TW', 'zh-HK': 'zh-HK', ko: 'ko-KR', pt: 'pt-BR', it: 'it-IT', hi: 'hi-IN',
 };
 
 const MAX_CHARS = 2000;

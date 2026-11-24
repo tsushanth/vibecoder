@@ -161,11 +161,14 @@ test('buildEvents: bookkeeping stays bounded', () => {
     const s = be._sizes(); assert.ok(s.starts <= 5000 && s.plans <= 5000 && s.logins <= 5000, JSON.stringify(s));
 });
 
-test('promotion events: names and props are allow-listed (surface from a closed list, lang two letters, nothing else)', () => {
+test('promotion events: names and props are allow-listed (surface from a closed list, lang two letters or zh-TW/zh-HK, nothing else)', () => {
     for (const event of ['promo_impression', 'promo_tap', 'promo_dismiss']) assert.ok(EVENTS.includes(event));
     assert.ok(PROP_KEYS.includes('surface') && PROP_KEYS.includes('lang'));
     assert.deepEqual(cleanProps({ surface: 'banner', lang: 'de', source: 'android' }), { surface: 'banner', lang: 'de', source: 'android' });
     assert.deepEqual(cleanProps({ surface: 'a secret surface', lang: 'Deutsch', extra: 'x' }), {});
     assert.deepEqual(cleanProps({ surface: 'create_card', lang: 'de-DE' }), { surface: 'create_card' });
+    assert.deepEqual(cleanProps({ surface: 'banner', lang: 'zh-TW' }), { surface: 'banner', lang: 'zh-TW' });
+    assert.deepEqual(cleanProps({ surface: 'banner', lang: 'zh-HK' }), { surface: 'banner', lang: 'zh-HK' });
+    assert.deepEqual(cleanProps({ surface: 'banner', lang: 'zh-XX' }), { surface: 'banner' });
     assert.equal(buildRow({ event: 'promo_tap', userId: 'u1', props: { surface: 'post_build', prompt: 'my diary app' } }).props.prompt, undefined);
 });

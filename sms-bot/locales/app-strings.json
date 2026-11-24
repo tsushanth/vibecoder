@@ -511,5 +511,43 @@
   "generation_limit_reached": "已达到每日生成次数上限",
   "create_busy_body_free": "我们的构建器目前已满负荷运行。请几分钟后再试。",
   "err_build_start": "无法开始构建，请重试。"
+ },
+ "zh-TW": {
+  "build_phase_generate": "生成",
+  "build_phase_validate": "驗證",
+  "build_phase_fix": "修復",
+  "build_phase_polish": "最佳化",
+  "build_phase_verify": "核查",
+  "generation_phase_complete": "完成！",
+  "build_chat_stage_building": "正在構建你的應用",
+  "build_chat_stage_complete": "構建完成",
+  "build_chat_stage_failed": "構建失敗",
+  "build_chat_working": "處理中",
+  "err_build_failed": "構建失敗，請重試。",
+  "err_build_maybe_running": "你的應用可能仍在構建中。請稍後檢視應用。",
+  "err_prompt_no_urls": "請用你自己的話描述你的應用創意，而不是貼上網址。",
+  "err_prompt_no_code": "請用自然語言描述你的應用創意，而不是程式碼。",
+  "generation_limit_reached": "已達到每日生成次數上限",
+  "create_busy_body_free": "我們的構建器目前已滿負荷執行。請幾分鐘後再試。",
+  "err_build_start": "無法開始構建，請重試。"
+ },
+ "zh-HK": {
+  "build_phase_generate": "生成",
+  "build_phase_validate": "驗證",
+  "build_phase_fix": "修復",
+  "build_phase_polish": "優化",
+  "build_phase_verify": "核查",
+  "generation_phase_complete": "完成！",
+  "build_chat_stage_building": "正在構建你的應用",
+  "build_chat_stage_complete": "構建完成",
+  "build_chat_stage_failed": "構建失敗",
+  "build_chat_working": "處理中",
+  "err_build_failed": "構建失敗，請重試。",
+  "err_build_maybe_running": "你的應用可能仍在構建中。請稍後查看應用。",
+  "err_prompt_no_urls": "請用你自己的話描述你的應用創意，而不是粘貼網址。",
+  "err_prompt_no_code": "請用自然語言描述你的應用創意，而不是代碼。",
+  "generation_limit_reached": "已達到每日生成次數上限",
+  "create_busy_body_free": "我們的構建器目前已滿負荷運行。請幾分鐘後再試。",
+  "err_build_start": "無法開始構建，請重試。"
  }
 }

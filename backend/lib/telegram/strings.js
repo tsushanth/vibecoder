@@ -1,4 +1,4 @@
-// Bot strings for English plus the 26 translated app languages (Indonesian is `id`, Brazilian Portuguese `pt`, Simplified Chinese `zh`).
+// Bot strings for English plus the translated app languages (Indonesian is `id`, Brazilian Portuguese `pt`, Simplified Chinese `zh`, Traditional Chinese `zh-TW` / `zh-HK`, converted from `zh` with OpenCC s2twp / s2hk).
 //
 // PROVENANCE: the phase names (generate, validate, fix, polish, verify), working, ready, preview and capacity strings are
 // copied from android/app/src/main/res/values*/strings.xml (build_phase_*, build_chat_working, build_chat_ready_title,
@@ -9,7 +9,7 @@
 // Generated once from the Android resources; edit by hand from here on and keep the test in
 // test/unit/telegramStrings.test.mjs green (every language has every key, placeholders survive).
 
-export const LANGUAGES = Object.freeze(["en","ar","cs","de","el","es","fi","fr","hi","hu","id","it","ja","ko","ms","nl","pl","pt","ro","ru","sv","th","tl","tr","uk","vi","zh"]);
+export const LANGUAGES = Object.freeze(["en","ar","cs","de","el","es","fi","fr","hi","hu","id","it","ja","ko","ms","nl","pl","pt","ro","ru","sv","th","tl","tr","uk","vi","zh","zh-TW","zh-HK"]);
 
 // Native names, shown on the /language keyboard.
 export const NATIVE_NAMES = Object.freeze({
@@ -39,7 +39,9 @@ export const NATIVE_NAMES = Object.freeze({
   "tr": "Türkçe",
   "uk": "Українська",
   "vi": "Tiếng Việt",
-  "zh": "简体中文"
+  "zh": "简体中文",
+  "zh-TW": "繁體中文（台灣）",
+  "zh-HK": "繁體中文（香港）"
 });
 
 export const KEYS = Object.freeze(["generate","validate","fix","polish","verify","working","ready","preview","capacity","welcome","confirm","pkg","failed","busy","limit","rejected","appsTitle","appsEmpty","langPrompt","langSet","help","linkIntro","linkButton","linkOk","linkBad","stopped","nothingToStop","textOnly","tooLong","slow","slowBuild","ideasExpired","openApp","anonCap","alreadyLinked","privateOnly","about","aboutShort"]);
@@ -1124,5 +1126,87 @@ export const STRINGS = Object.freeze({
     privateOnly: "请在私聊中给我发消息。",
     about: "用 Telegram 制作应用\n\n用你自己的语言把创意发给我们的机器人。它会制作应用并把链接发给你。",
     aboutShort: "用你自己的语言把创意发给我们的机器人。它会制作应用并把链接发给你。",
+  }),
+
+  "zh-TW": Object.freeze({
+    generate: "生成",
+    validate: "驗證",
+    fix: "修復",
+    polish: "最佳化",
+    verify: "核查",
+    working: "處理中",
+    ready: "你的應用已就緒",
+    preview: "開啟實時預覽",
+    capacity: "我們的構建器目前已滿負荷執行。請幾分鐘後再試。",
+    welcome: "你好，{name}！我可以根據一段簡短描述製作真正的應用。\n\n1. 用任何語言告訴我你想要的應用。\n2. 我大約 2 分鐘內完成。\n3. 你會收到可開啟和分享的線上連結。\n\n從下方選擇一個創意，或直接輸入你自己的。",
+    confirm: "馬上開始！正在製作：{prompt}\n大約需要 2 分鐘。",
+    pkg: "打包",
+    failed: "抱歉，這次構建沒有成功。請換一個更簡單的描述再試一次。",
+    busy: "你已有一個構建正在進行。請等它完成，或傳送 /stop。",
+    limit: "你暫時達到了上限。請稍後再試。",
+    rejected: "我無法使用這個描述。請用你自己的話描述應用（不要包含連結或程式碼）。",
+    appsTitle: "你的應用",
+    appsEmpty: "你還沒有應用。描述一個來開始吧！",
+    langPrompt: "請選擇語言：",
+    langSet: "語言已儲存。",
+    help: "把應用的描述發給我，我來製作。\n\n/start - 開始\n/apps - 你的應用\n/language - 更改語言\n/link - 關聯你的 VibeBuild 帳號\n/stop - 停止跟蹤當前構建\n/help - 本訊息",
+    linkIntro: "關聯你的 VibeBuild 帳號，讓在這裡製作的應用也顯示在 VibeBuild 應用中。點按按鈕並登入，然後在該頁面點按“開啟 Telegram”（或把驗證碼發給我）。",
+    linkButton: "關聯帳號",
+    linkOk: "已關聯！歡迎，{name}。你在這裡製作的應用現在會顯示在 VibeBuild 應用中。",
+    linkBad: "該驗證碼無效或已過期。傳送 /link 獲取新的驗證碼。",
+    stopped: "好的，我已停止更新該構建的進度。它仍可能完成。請檢視 /apps。",
+    nothingToStop: "當前沒有正在進行的構建。",
+    textOnly: "請以文字訊息傳送你的應用創意。",
+    tooLong: "描述太長了。請控制在 2000 個字元以內。",
+    slow: "你傳送訊息太快了。請稍等片刻。",
+    slowBuild: "這次比平時慢一些。完成後會顯示在 /apps 中。",
+    ideasExpired: "這些創意已過期。傳送 /start 獲取新的創意。",
+    openApp: "在 VibeBuild 中開啟",
+    anonCap: "你已用完今天在這裡的免費構建次數。用 /link 關聯帳號即可繼續。",
+    alreadyLinked: "你的帳號已關聯：{name}。",
+    privateOnly: "請在私聊中給我發訊息。",
+    about: "用 Telegram 製作應用\n\n用你自己的語言把創意發給我們的機器人。它會製作應用並把連結發給你。",
+    aboutShort: "用你自己的語言把創意發給我們的機器人。它會製作應用並把連結發給你。",
+  }),
+
+  "zh-HK": Object.freeze({
+    generate: "生成",
+    validate: "驗證",
+    fix: "修復",
+    polish: "優化",
+    verify: "核查",
+    working: "處理中",
+    ready: "你的應用已就緒",
+    preview: "打開實時預覽",
+    capacity: "我們的構建器目前已滿負荷運行。請幾分鐘後再試。",
+    welcome: "你好，{name}！我可以根據一段簡短描述製作真正的應用。\n\n1. 用任何語言告訴我你想要的應用。\n2. 我大約 2 分鐘內完成。\n3. 你會收到可打開和分享的在線鏈接。\n\n從下方選擇一個創意，或直接輸入你自己的。",
+    confirm: "馬上開始！正在製作：{prompt}\n大約需要 2 分鐘。",
+    pkg: "打包",
+    failed: "抱歉，這次構建沒有成功。請換一個更簡單的描述再試一次。",
+    busy: "你已有一個構建正在進行。請等它完成，或發送 /stop。",
+    limit: "你暫時達到了上限。請稍後再試。",
+    rejected: "我無法使用這個描述。請用你自己的話描述應用（不要包含鏈接或代碼）。",
+    appsTitle: "你的應用",
+    appsEmpty: "你還沒有應用。描述一個來開始吧！",
+    langPrompt: "請選擇語言：",
+    langSet: "語言已保存。",
+    help: "把應用的描述發給我，我來製作。\n\n/start - 開始\n/apps - 你的應用\n/language - 更改語言\n/link - 關聯你的 VibeBuild 賬號\n/stop - 停止跟蹤當前構建\n/help - 本消息",
+    linkIntro: "關聯你的 VibeBuild 賬號，讓在這裏製作的應用也顯示在 VibeBuild 應用中。點按按鈕並登錄，然後在該頁面點按“打開 Telegram”（或把驗證碼發給我）。",
+    linkButton: "關聯賬號",
+    linkOk: "已關聯！歡迎，{name}。你在這裏製作的應用現在會顯示在 VibeBuild 應用中。",
+    linkBad: "該驗證碼無效或已過期。發送 /link 獲取新的驗證碼。",
+    stopped: "好的，我已停止更新該構建的進度。它仍可能完成。請查看 /apps。",
+    nothingToStop: "當前沒有正在進行的構建。",
+    textOnly: "請以文字消息發送你的應用創意。",
+    tooLong: "描述太長了。請控制在 2000 個字符以內。",
+    slow: "你發送消息太快了。請稍等片刻。",
+    slowBuild: "這次比平時慢一些。完成後會顯示在 /apps 中。",
+    ideasExpired: "這些創意已過期。發送 /start 獲取新的創意。",
+    openApp: "在 VibeBuild 中打開",
+    anonCap: "你已用完今天在這裏的免費構建次數。用 /link 關聯賬號即可繼續。",
+    alreadyLinked: "你的賬號已關聯：{name}。",
+    privateOnly: "請在私聊中給我發消息。",
+    about: "用 Telegram 製作應用\n\n用你自己的語言把創意發給我們的機器人。它會製作應用並把鏈接發給你。",
+    aboutShort: "用你自己的語言把創意發給我們的機器人。它會製作應用並把鏈接發給你。",
   }),
 });

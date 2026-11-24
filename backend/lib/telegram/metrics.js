@@ -30,7 +30,7 @@ const PROP_VALIDATORS = Object.freeze({
     duration_ms: (v) => (Number.isFinite(v) && v >= 0 ? Math.min(Math.round(v), 86_400_000) : undefined),
     prompt_length_bucket: (v) => (typeof v === 'string' && /^(lt40|40_99|100_249|250_799|800plus)$/.test(v) ? v : undefined),
     linked: (v) => (typeof v === 'boolean' ? v : undefined),
-    from_language: (v) => (typeof v === 'string' && /^[a-z]{2}$/.test(v) ? v : undefined),
+    from_language: (v) => (typeof v === 'string' && /^(?:[a-z]{2}|zh-(?:TW|HK))$/.test(v) ? v : undefined),
     new_chat: (v) => (typeof v === 'boolean' ? v : undefined),
     idea_index: (v) => (Number.isInteger(v) && v >= 0 && v < 10 ? v : undefined),
 });
@@ -55,7 +55,7 @@ export function buildRow({ channel = 'telegram', event, language, chatRef: ref, 
     if (!CHANNELS.includes(channel) || !EVENT_SET.has(event)) return null;
     return {
         channel, event,
-        language: typeof language === 'string' && /^[a-z]{2}$/.test(language) ? language : null,
+        language: typeof language === 'string' && /^(?:[a-z]{2}|zh-(?:TW|HK))$/.test(language) ? language : null,
         chat_ref: typeof ref === 'string' && /^[0-9a-f]{16}$/.test(ref) ? ref : null,
         user_id: typeof userId === 'string' && ID.test(userId) ? userId : null,
         project_id: typeof projectId === 'string' && UUID.test(projectId) ? projectId : null,

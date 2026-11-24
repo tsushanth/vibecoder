@@ -12,7 +12,7 @@ const KEYS = [
   'build_chat_working', 'err_build_failed', 'err_build_maybe_running', 'err_prompt_no_urls', 'err_prompt_no_code',
   'generation_limit_reached', 'create_busy_body_free', 'err_build_start',
 ];
-const DIRS = { en: 'values', ar: 'values-ar', cs: 'values-cs', de: 'values-de', el: 'values-el', es: 'values-es', fi: 'values-fi', fr: 'values-fr', hi: 'values-hi', hu: 'values-hu', id: 'values-in', it: 'values-it', ja: 'values-ja', ko: 'values-ko', ms: 'values-ms', nl: 'values-nl', pl: 'values-pl', 'pt-BR': 'values-pt-rBR', ro: 'values-ro', ru: 'values-ru', sv: 'values-sv', th: 'values-th', tl: 'values-tl', tr: 'values-tr', uk: 'values-uk', vi: 'values-vi', 'zh-CN': 'values-zh-rCN' };
+const DIRS = { en: 'values', ar: 'values-ar', cs: 'values-cs', de: 'values-de', el: 'values-el', es: 'values-es', fi: 'values-fi', fr: 'values-fr', hi: 'values-hi', hu: 'values-hu', id: 'values-in', it: 'values-it', ja: 'values-ja', ko: 'values-ko', ms: 'values-ms', nl: 'values-nl', pl: 'values-pl', 'pt-BR': 'values-pt-rBR', ro: 'values-ro', ru: 'values-ru', sv: 'values-sv', th: 'values-th', tl: 'values-tl', tr: 'values-tr', uk: 'values-uk', vi: 'values-vi', 'zh-CN': 'values-zh-rCN', 'zh-TW': 'values-zh-rTW', 'zh-HK': 'values-zh-rHK' };
 
 const unescapeXml = (s) => s.replace(/\\'/g, "'").replace(/\\"/g, '"').replace(/\\n/g, '\n').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/\\u([0-9a-fA-F]{4})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
 const parse = (file) => {

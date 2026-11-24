@@ -71,7 +71,7 @@ const PROP_VALIDATORS = Object.freeze({
     cap: oneOf(CAPS),
     choice: oneOf(SURVEY_CHOICES),
     surface: oneOf(PROMO_SURFACES),
-    lang: (v) => (typeof v === 'string' && /^[a-z]{2}$/.test(v) ? v : undefined), // the UI language the person saw, two letters
+    lang: (v) => (typeof v === 'string' && /^(?:[a-z]{2}|zh-(?:TW|HK))$/.test(v) ? v : undefined), // the UI language the person saw, two letters
 });
 export const PROP_KEYS = Object.freeze(Object.keys(PROP_VALIDATORS));
 

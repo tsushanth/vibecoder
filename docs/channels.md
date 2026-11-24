@@ -57,7 +57,7 @@ Private chats only. Non-text messages get a hint. Commands addressed to another 
 
 ## Translation status
 
-Bot strings: `backend/lib/telegram/strings.js`, English plus the app's 26 languages (ar cs de el es fi fr hi hu id it ja ko ms nl pl pt ro ru sv th tl tr uk vi zh).
+Bot strings: `backend/lib/telegram/strings.js`, English plus the app's languages (ar cs de el es fi fr hi hu id it ja ko ms nl pl pt ro ru sv th tl tr uk vi zh zh-TW zh-HK; zh is Simplified, zh-TW and zh-HK are Traditional, converted from zh with OpenCC s2twp and s2hk plus a Taiwan fix of 賬 to 帳). Telegram language_code zh-hans, zh-cn, zh-sg map to zh; zh-hant, zh-tw, zh-mo to zh-TW; zh-hk to zh-HK.
 
 * The phase names, "working", "ready", "open live preview" and "at capacity" texts are **copied from the Android string resources** (`build_phase_*`, `build_chat_working`, `build_chat_ready_title`, `build_chat_open_live_preview`, `create_busy_body_free`).
 * Every other string, and the new Android strings (`telegram_*`), are **machine-translated and need native-speaker review** before a market is promoted. Formality is not consistent across languages (informal in es, de, fr, it, cs; formal in nl, id, ms). Please review ar, hi, th, ja, ko, zh and tl first (highest chance of awkward phrasing).
