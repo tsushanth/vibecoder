@@ -1149,7 +1149,7 @@ export const STRINGS = Object.freeze({
     appsEmpty: "你還沒有應用。描述一個來開始吧！",
     langPrompt: "請選擇語言：",
     langSet: "語言已儲存。",
-    help: "把應用的描述發給我，我來製作。\n\n/start - 開始\n/apps - 你的應用\n/language - 更改語言\n/link - 關聯你的 VibeBuild 帳號\n/stop - 停止跟蹤當前構建\n/help - 本訊息",
+    help: "把應用的描述發給我，我來製作。\n\n/start - 開始\n/apps - 你的應用\n/language - 更改語言\n/link - 關聯你的 VibeBuild 帳號\n/stop - 停止追蹤當前構建\n/help - 本訊息",
     linkIntro: "關聯你的 VibeBuild 帳號，讓在這裡製作的應用也顯示在 VibeBuild 應用中。點按按鈕並登入，然後在該頁面點按“開啟 Telegram”（或把驗證碼發給我）。",
     linkButton: "關聯帳號",
     linkOk: "已關聯！歡迎，{name}。你在這裡製作的應用現在會顯示在 VibeBuild 應用中。",
