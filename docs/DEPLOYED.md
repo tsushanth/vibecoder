@@ -1,5 +1,14 @@
 # Deployed releases (Play)
 
+## Android 2.7.4 (80) 2026-11-23: Traditional Chinese (zh-TW, zh-HK), production 20% staged (PRs #147, #148)
+- Built from origin/main 4ce8284 (tag `play/2.7.4-80`; the built `android/` tree equals origin/main), upload-key signature, `jarsigner -verify` ok, manifest 2.7.4 (80). AAB sha256: 0fc3c31c3155ae6dfaa8d3c72e121896f387c35d0d08dcf7d6c1f5039ddb44ff
+- Play production track read back after commit: 2.7.4 (80) inProgress userFraction 0.2; 2.7.3 (79) completed.
+- Contents: `values-zh-rTW`, `values-zh-rHK`, `values-b+zh+Hant` (467 keys each, OpenCC s2twp / s2hk from zh-rCN, plus 賬 to 帳 for Taiwan), template i18n zh-TW/zh-HK, locales_config zh-TW and zh-HK, picker rows 简体中文 / 繁體中文（台灣）/ 繁體中文（香港）. The app now sends `lang=zh-TW` or `zh-HK` (Simplified stays `zh`). Machine translated, no native review.
+- Same PR (#147), NOT deployed yet, deploy in this order: `vibecoder-api` (Fly, backend/), `vibebuild-web` (Fly, web/), `vibebuild-sms-bot` (Fly, sms-bot/); optional `node backend/scripts/telegram-setup-bot.mjs --apply` for Traditional command lists. Until the API is deployed, an app on zh-TW/zh-HK gets Simplified idea chips (the old API reads zh-TW as zh); everything else in the app is already Traditional.
+- Tests: Android `testDebugUnitTest` 238/238 on the PR branch; backend 841/841; sms-bot 30/30; web 213/213 and `tsc --noEmit` clean.
+- Device test (Pixel 9 Pro, release APK of this exact build installed in place over 2.7.3, per-app language via `cmd locale set-app-locales`): zh-TW, zh-HK and zh-Hant-MO show Traditional text (HK and Macau use Hong Kong wording, TW uses Taiwan wording), zh-CN still Simplified, en unchanged; settings row shows the chosen language; no FATAL or ANR in logcat.
+- Rollback: halt the rollout in Play Console (2.7.3 (79) stays completed), or re-upload 2.7.3 content as a new versionCode.
+
 ## SMS bot deploy and /sms program page 2026-11-23 (PRs #134, #144, #145, main 5dcdfa8): sms-bot v3, web v37 and v38
 - Fly `vibebuild-sms-bot` release v3 from origin/main (image deployment-01M83K78XA3S0JR3RH882YHE75): PR #134 code, one machine with a 1 GB volume `sms_data` (about $2.15/month), health `persistent:true`. Twilio toll-free number +18559186924 inbound webhook points at https://vibebuild-sms-bot.fly.dev/sms/inbound.
 - Fly `vibebuild-web` v37 (image deployment-01M83KBQY7GH3ZP1HW5J9XJGK6, PR #144: /sms program page and privacy policy section 9) and v38 (image deployment-01M83KF6GS2ANRVSYD19XGCKT4, PR #145: /sms-opt-in.png screenshot). Both URLs return 200.
