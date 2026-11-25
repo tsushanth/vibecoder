@@ -10,11 +10,12 @@ One row per event: `id`, `user_id` (the existing user id, nullable), `anon_id` (
 
 | event | written when | props |
 |---|---|---|
-| `signup_completed` | a new account row is created (`POST /api/auth/register`) | `source` |
+| `signup_completed` | a new account row is created (`POST /api/auth/register`, or the first signed-in write request of an account that has none, `backend/lib/ensureUserRow.js`) | `source` |
 | `login` | a signed-in person registers again, at most once per 30 minutes per person. The web app registers on every page load with a session, so this is the closest server-side signal to "opened the app". The Android app is not known to register on every open, so Android opens are mostly invisible. | `source` |
 | `build_started` | a build was accepted (rate limits passed) | `source`, `build_kind` (`new`, `retry`), `prompt_length_bucket`, `plan_step_skipped` (true when no plan was requested in the last 30 minutes; `new` builds only) |
 | `build_ready` | the worker returned a finished build | `duration_ms` (start to ready), `source`, `build_kind` |
 | `build_failed` | any path that marks a build failed, including the stuck-build sweep | `error_code` (`DISPATCH_ERROR`, `WORKER_ERROR`, `NO_RESULT`, `TIMEOUT_STUCK`, `RETRY_EXHAUSTED`, `UNKNOWN`), `status` (worker HTTP status when there is one), `duration_ms`, `source`, `build_kind` |
+| `build_refused` | the API answered 4xx or 5xx to a build, retry, tweak or fork that named a user, so nothing was built (`backend/lib/buildRefusal.js`). Each one also sends a `build_refused` report to the failure reporter. | `reason` (list in `backend/lib/refusalReasons.js`), `build_kind` (`new`, `retry`, `tweak`, `fork`), `status`, `source` |
 | `tweak_started`, `tweak_ready`, `tweak_failed` | a change request to an existing app | `duration_ms`, `error_code` (`WORKER_ERROR`, `WORKER_HTTP`, `NO_RESULT`, `TIMEOUT`, `UNKNOWN`), `status`, `source`, `prompt_length_bucket` (started only) |
 | `publish`, `unpublish`, `project_deleted` | the matching action succeeded | `source` |
 | `rate_limited` | HTTP 429 | `cap` (`hourly_generation`, `daily_generations`, `tweaks_per_project`, `plan_hourly`, `worker_busy`, `worker_quota`), `status`, `source` |
@@ -36,6 +37,50 @@ Limits to keep in mind when reading numbers:
 - Writes are fire and forget with a 2 second timeout and a cap on pending inserts. Under a database outage events are dropped, not retried, so counts are a slight under-estimate.
 - `build_started` has no project id, so a build's outcome is matched to a start by order per person (see query 2), not by id. Two builds running at once for one person can swap outcomes.
 - Test and owner accounts are excluded in the queries by an email pattern, as in the retention report. Adjust the pattern if you add more.
+
+## Outcome checks (for the scheduled failure reporter)
+
+Builds and tweaks in the last 24 hours, refusals included. `alert` is true on any refusal caused by us, any build stuck for more
+than 30 minutes, 3 or more attempts with no success, or under 60% success with 5 or more attempts. Forks are counted only as
+refusals (a successful fork writes no build event).
+
+```sql
+with ev as (
+  select e.event, e.props->>'reason' as reason, e.props->>'build_kind' as kind
+  from app_events e
+  where e.created_at > now() - interval '24 hours'
+    and e.event in ('build_started','build_ready','build_failed','build_refused','tweak_started','tweak_ready','tweak_failed')
+    and not exists (select 1 from auth.users a where a.id::text = e.user_id and a.email ilike any (array['%sushanth%','%puzzleverse%','%kreativekoala%','%sendsmiles%','%test%']))
+), n as (
+  select
+    count(*) filter (where event in ('build_started','tweak_started') or (event = 'build_refused' and kind is distinct from 'fork')) as attempts,
+    count(*) filter (where event in ('build_ready','tweak_ready')) as succeeded,
+    count(*) filter (where event in ('build_failed','tweak_failed')) as failed,
+    count(*) filter (where event = 'build_refused') as refused,
+    count(*) filter (where event = 'build_refused' and reason in ('no_account_row','save_failed','server_error','worker_timeout','repo_init_failed','no_bundle')) as refused_by_fault,
+    coalesce(string_agg(distinct kind || ':' || reason, ', ') filter (where event = 'build_refused'), '') as refusal_reasons
+  from ev
+), s as (
+  select count(*) as stuck from projects
+  where status = 'building' and creation_method in ('ai_generated','telegram')
+    and created_at between now() - interval '24 hours' and now() - interval '30 minutes'
+)
+select n.*, s.stuck,
+  (n.refused_by_fault >= 1 or s.stuck >= 1 or (n.attempts >= 3 and n.succeeded = 0) or (n.attempts >= 5 and n.succeeded < 0.6 * n.attempts)) as alert
+from n, s;
+```
+
+Accounts that use VibeBuild but have no `users` row (every build would be refused until a write request or a register creates it).
+The Supabase project is shared with another product, so only accounts with VibeBuild events are counted.
+
+```sql
+select count(*) as accounts_without_row, count(*) >= 1 as alert
+from auth.users a
+where a.created_at between now() - interval '7 days' and now() - interval '30 minutes'
+  and a.email not ilike all (array['%sushanth%','%puzzleverse%','%kreativekoala%','%sendsmiles%','%test%'])
+  and exists (select 1 from app_events e where e.user_id = a.id::text)
+  and not exists (select 1 from public.users u where u.user_id = a.id::text);
+```
 
 ## 0. Funnel by signup week (signed up, started a build, got a ready build, published)
 

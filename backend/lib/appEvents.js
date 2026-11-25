@@ -8,12 +8,15 @@
 //   - emit() never throws and never makes the caller wait: it validates, hands the insert to the background with a timeout,
 //     drops the event when too many inserts are already pending, and backs off when the table is missing (migration not applied).
 
+import { REFUSAL_REASONS } from './refusalReasons.js';
+
 export const EVENTS = Object.freeze([
     'signup_completed',
     'login',
     'build_started',
     'build_ready',
     'build_failed',
+    'build_refused', // a build, retry, tweak or fork the API refused before doing it (lib/buildRefusal.js), with props.reason
     'tweak_started',
     'tweak_ready',
     'tweak_failed',
@@ -34,7 +37,7 @@ const EVENT_SET = new Set(EVENTS);
 
 export const SOURCES = Object.freeze(['web', 'android', 'ios', 'api', 'telegram', 'sms', 'whatsapp']);
 export const PROMPT_LENGTH_BUCKETS = Object.freeze(['lt40', '40_99', '100_249', '250_799', '800plus']);
-export const BUILD_KINDS = Object.freeze(['new', 'retry']);
+export const BUILD_KINDS = Object.freeze(['new', 'retry', 'tweak', 'fork']);
 // Which limit was hit (rate_limited) or which plan gate was shown (paywall_or_cap_shown).
 export const CAPS = Object.freeze([
     'hourly_generation', 'daily_generations', 'tweaks_per_project', 'plan_hourly', 'worker_busy', 'worker_quota',
@@ -68,6 +71,7 @@ const PROP_VALIDATORS = Object.freeze({
     plan_step_skipped: bool,
     prompt_length_bucket: oneOf(PROMPT_LENGTH_BUCKETS),
     build_kind: oneOf(BUILD_KINDS),
+    reason: oneOf(Object.keys(REFUSAL_REASONS)),
     cap: oneOf(CAPS),
     choice: oneOf(SURVEY_CHOICES),
     surface: oneOf(PROMO_SURFACES),

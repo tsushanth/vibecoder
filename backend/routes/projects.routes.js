@@ -42,6 +42,7 @@ import { parsePatchBody } from '../lib/projectPatch.js';
 import { logFirstBuildStarted } from '../lib/funnel.js';
 import { recordSignupSource } from '../lib/signupSource.js';
 import { noteProjectCreated } from '../lib/outreachEventsInstance.js';
+import { watchBuild, refuse, insertRefusal, reportRefusal } from '../lib/buildRefusal.js';
 
 const router = express.Router();
 
@@ -90,6 +91,14 @@ async function fetchWorkerWithRetry(url, options, { attempts = 3, timeoutMs = 15
         }
     }
     throw lastError;
+}
+
+// A build that finished but could not be stored, or whose live preview could not be published: the person has no app to open.
+function reportUnsavedBuild(path, code) {
+    reportFailure('build_unsaved', new Error('BUILD_UNSAVED: a finished build could not be saved'), { path, error_name: String(code || 'none') });
+}
+function reportPreviewFailure(path, why) {
+    reportFailure('preview_deploy_failed', new Error('PREVIEW_DEPLOY_FAILED: a finished app has no live preview'), { path, error_name: String(why || 'none') });
 }
 
 // ============================================
@@ -578,7 +587,7 @@ function recordSourceChannel(projectId, channel) {
 // POST /api/projects/generate
 // Streaming endpoint — proxies SSE status events from the worker to the client
 // ============================================
-router.post('/generate', async (req, res) => {
+router.post('/generate', watchBuild('new'), async (req, res) => {
     // Declared outside the try block so the catch handler can reference it.
     // `let` inside the try is scoped to the try only, which caused a
     // ReferenceError → process crash whenever the outer catch fired.
@@ -607,17 +616,20 @@ router.post('/generate', async (req, res) => {
         // Block code injection and malicious prompts
         if (looksLikePastedCode(prompt)) {
             console.warn(`[generate] BLOCKED malicious prompt from ${userId}: "${promptForLog.substring(0, 100)}"`);
+            refuse(res, 'prompt_code');
             return res.status(400).json({ error: 'Please describe your app idea in plain language instead of pasting code.' });
         }
 
         // Block prompts with URLs
         if (/https?:\/\/\S+/i.test(prompt)) {
             console.warn(`[generate] BLOCKED URL prompt from ${userId}: "${promptForLog.substring(0, 100)}"`);
+            refuse(res, 'prompt_url');
             return res.status(400).json({ error: 'Please describe your app idea in your own words instead of pasting URLs.' });
         }
 
         if (!checkRateLimit(userId)) {
             appEvents.emit('rate_limited', { userId, props: { cap: 'hourly_generation', status: 429, source: sourceFromRequest(req) } });
+            refuse(res, 'hourly_limit');
             return res.status(429).json({ error: 'Rate limit exceeded. Try again in an hour.' });
         }
 
@@ -628,6 +640,7 @@ router.post('/generate', async (req, res) => {
             if (!fair.allowed && fair.fairUse) {
                 console.log(`[generate] Fair-use daily limit reached: used=${fair.used} limit=${fair.limit}`);
                 appEvents.emit('rate_limited', { userId, props: { cap: 'daily_generations', status: 429, source: sourceFromRequest(req) } });
+                refuse(res, 'daily_limit');
                 return res.status(429).json(fairUseBody(fair));
             }
         }
@@ -642,6 +655,7 @@ router.post('/generate', async (req, res) => {
         console.log(`[generate] User ${userId}: "${prompt.substring(0, 80)}"${referenceImage ? ' (with reference image)' : ''}`);
 
         // Create placeholder project in "building" state so it shows in My Projects immediately
+        let placeholderError = null;
         try {
             const title = deriveTitle(prompt);
 
@@ -677,15 +691,18 @@ router.post('/generate', async (req, res) => {
                 });
                 console.log(`[generate] Placeholder project created: ${placeholderProjectId}`);
             } else {
+                placeholderError = phErr;
                 console.error(`[generate] Placeholder creation failed code=${phErr?.code || 'none'}`);
             }
         } catch (e) {
+            placeholderError = e;
             console.error(`[generate] Placeholder creation failed: ${e.message}`);
         }
 
         // The async path (new apps) hands the result back through the project row, so without one the build would finish
         // and be lost. Say so instead of silently building. Streaming clients (old apps) get the result on the stream.
         if (!placeholderProjectId && req.body.stream !== true) {
+            refuse(res, insertRefusal(placeholderError), placeholderError?.code || placeholderError?.name);
             return res.status(500).json({ error: 'Could not start your build. Please try again.' });
         }
 
@@ -755,6 +772,7 @@ router.post('/generate', async (req, res) => {
                     }
                 }
             } catch {}
+            if (systemBusy) reportRefusal('new', 'worker_busy', { status: workerResponse.status }); // answered on the open stream, so watchBuild sees a 200
             if (placeholderProjectId && !systemBusy) {
                 markProjectFailed(supabase, placeholderProjectId, FAIL_CLASS.DISPATCH_ERROR, { phase: 'dispatch_http', httpStatus: workerResponse.status, path: clientWantsStream ? 'generate_stream' : 'generate_async' }).catch(() => {});
                 const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
@@ -812,18 +830,20 @@ router.post('/generate', async (req, res) => {
 
                         finalProjectId = savedProjectId;
                         if (finalProjectId) {
-                            await supabase.from('projects').update({ bundle: parsed.bundle, status: 'ready' }).eq('id', finalProjectId);
+                            const { error: readyErr } = await supabase.from('projects').update({ bundle: parsed.bundle, status: 'ready' }).eq('id', finalProjectId);
+                            if (readyErr) reportUnsavedBuild('generate_stream', readyErr.code);
                             console.log(`[generate] Updated project ${finalProjectId} with bundle`);
                         } else {
                             // Fallback: create new project if placeholder wasn't created
                             const title = deriveTitle(prompt);
-                            const { data: saved } = await supabase.from('projects').insert({
+                            const { data: saved, error: saveErr } = await supabase.from('projects').insert({
                                 title, description: prompt, bundle: parsed.bundle,
                                 creator_id: userId, creator_name: userName || 'VibeBuild User',
                                 initial_prompt: prompt, is_public: false,
                                 project_type: 'web_app', creation_method: 'ai_generated', status: 'ready'
                             }).select('id').single();
                             if (saved) { finalProjectId = saved.id; noteProjectCreated(userId, saved.id); }
+                            else reportUnsavedBuild('generate_stream', saveErr?.code);
                         }
 
                         if (finalProjectId) {
@@ -838,6 +858,7 @@ router.post('/generate', async (req, res) => {
                                     body: JSON.stringify({ subdomain: previewSubdomain, bundle: parsed.bundle }),
                                     signal: AbortSignal.timeout(30000)
                                 });
+                                if (!deployRes.ok) reportPreviewFailure('generate_stream', deployRes.status);
                                 if (deployRes.ok) {
                                     const previewUrl = `https://${previewSubdomain}.${process.env.BASE_DOMAIN || 'vibebuild.cc'}`;
                                     await supabase.from('projects').update({ preview_url: previewUrl }).eq('id', finalProjectId);
@@ -867,6 +888,7 @@ router.post('/generate', async (req, res) => {
                                         .catch(e => console.error(`[generate] Thumbnail capture failed: ${e.message}`));
                                 }
                             } catch (e) {
+                                reportPreviewFailure('generate_stream', e?.name);
                                 console.error(`[generate] Preview deploy failed: ${e.message}`);
                             }
 
@@ -886,6 +908,7 @@ router.post('/generate', async (req, res) => {
                             }).catch(e => console.error(`[generate] Init repo failed: ${e.message}`));
                         }
                     } catch (e) {
+                        reportUnsavedBuild('generate_stream', e?.name);
                         console.error(`[generate] Auto-save failed: ${e.message}`);
                     }
 
@@ -921,6 +944,7 @@ router.post('/generate', async (req, res) => {
         if (res.headersSent) {
             try { res.write(`data: ${JSON.stringify({ type: 'error', error: 'Server error. Please try again.' })}\n\n`); res.end(); } catch {}
         } else {
+            refuse(res, error.name === 'TimeoutError' ? 'worker_timeout' : 'server_error', error.name);
             if (error.name === 'TimeoutError') {
                 return res.status(504).json({ error: 'Project generation timed out. Try a simpler idea.' });
             }
@@ -1101,7 +1125,7 @@ router.get('/browse', (req, res) => {
 // ============================================
 // POST /api/projects/:id/retry
 // Re-dispatches a failed build without creating a new project
-router.post('/:id/retry', async (req, res) => {
+router.post('/:id/retry', watchBuild('retry'), async (req, res) => {
     try {
         const { id } = req.params;
         const { userId } = req.body;
@@ -1141,6 +1165,7 @@ router.post('/:id/retry', async (req, res) => {
             if (!workerRes.ok) {
                 const errText = await workerRes.text().catch(() => '');
                 if (workerRes.status === 429) {
+                    reportRefusal('retry', 'worker_busy', { status: 429 });
                     console.log(`[retry] Worker busy for ${id} — build stays in building state, will poll`);
                     // Leave as building — cleanup cron will reset if it gets stuck
                     return;
@@ -1198,7 +1223,12 @@ router.post('/:id/build-complete', async (req, res) => {
         if (!id) return res.status(400).json({ error: 'Missing id' });
 
         if (bundle && status === 'ready') {
-            await supabase.from('projects').update({ bundle, status: 'ready' }).eq('id', id);
+            const { error: readyErr } = await supabase.from('projects').update({ bundle, status: 'ready' }).eq('id', id);
+            if (readyErr) {
+                reportUnsavedBuild('callback', readyErr.code);
+                res.locals.failureReported = true;
+                return res.status(500).json({ error: 'Could not save the build' });
+            }
             console.log(`[build-complete] Project ${id} ready`);
             buildEvents.buildReady(id, { userId: typeof userId === 'string' ? userId : undefined });
 
@@ -1213,6 +1243,7 @@ router.post('/:id/build-complete', async (req, res) => {
                 });
                 if (!deployRes.ok) {
                     const body = await deployRes.text().catch(() => '');
+                    reportPreviewFailure('callback', deployRes.status);
                     console.error(`[build-complete] Deploy failed for ${id}: HTTP ${deployRes.status} ${body.substring(0, 200)}`);
                 }
                 if (deployRes.ok) {
@@ -1242,6 +1273,7 @@ router.post('/:id/build-complete', async (req, res) => {
                         .catch(e => console.error(`[build-complete] Thumbnail failed: ${e.message}`));
                 }
             } catch (e) {
+                reportPreviewFailure('callback', e?.name);
                 console.error(`[build-complete] Preview/thumbnail error: ${e.message}`);
             }
 
@@ -1977,7 +2009,7 @@ router.get('/:id/files', async (req, res) => {
 // Creator applies a tweak to their project.
 // Checks subscription limits, proxies to worker with SSE.
 // ============================================
-router.post('/:id/tweak', async (req, res) => {
+router.post('/:id/tweak', watchBuild('tweak'), async (req, res) => {
     let tweakOutcome = null;     // 'tweak_ready' | 'tweak_failed' once recorded, so the usage event is written once
     let tweakDoneRef = null;     // set once the tweak has started; the catch below uses it
     try {
@@ -2017,11 +2049,13 @@ router.post('/:id/tweak', async (req, res) => {
         if (!limitCheck.allowed && limitCheck.fairUse) {
             console.log(`[tweak] Fair-use limit reached: used=${limitCheck.used} limit=${limitCheck.limit}`);
             appEvents.emit('rate_limited', { userId, props: { cap: 'tweaks_per_project', status: 429, source: sourceFromRequest(req) } });
+            refuse(res, 'daily_limit');
             return res.status(429).json(fairUseBody(limitCheck));
         }
         if (!limitCheck.allowed) {
             console.log(`[tweak] Usage limit exceeded: ${limitCheck.error}`);
             appEvents.emit('paywall_or_cap_shown', { userId, props: { cap: 'tweak_tier', status: 403, source: sourceFromRequest(req) } });
+            refuse(res, 'plan_limit');
             return res.status(403).json({
                 error: limitCheck.error,
                 used: limitCheck.used,
@@ -2062,6 +2096,7 @@ router.post('/:id/tweak', async (req, res) => {
                 if (!initResponse.ok) {
                     const err = await initResponse.json().catch(() => ({}));
                     console.error(`[tweak] Repo init failed: ${err.error || initResponse.status}`);
+                    refuse(res, 'repo_init_failed', initResponse.status);
                     return res.status(500).json({ error: 'Failed to initialize project repository' });
                 }
 
@@ -2077,6 +2112,7 @@ router.post('/:id/tweak', async (req, res) => {
                 console.log(`[tweak] Repo initialized: ${repoName}`);
             } catch (initErr) {
                 console.error(`[tweak] Repo init exception:`, initErr.message);
+                refuse(res, 'repo_init_failed', initErr?.name);
                 return res.status(500).json({ error: 'Failed to initialize project repository' });
             }
         }
@@ -2091,6 +2127,7 @@ router.post('/:id/tweak', async (req, res) => {
         const tweakDone = (event, code, status) => {
             if (tweakOutcome) return;
             tweakOutcome = event;
+            if (event === 'tweak_failed') reportFailure('tweak_failed', new Error(`TWEAK_FAILED ${code || 'UNKNOWN'}: a change to an app did not complete`), { ...(status && { http_status: String(status) }) });
             appEvents.emit(event, { userId, props: { duration_ms: Date.now() - tweakStartedAt, source: tweakSource, error_code: code, status } });
         };
         tweakDoneRef = tweakDone;
@@ -2454,7 +2491,7 @@ router.patch('/:id', async (req, res) => {
 // POST /api/projects/:id/fork
 // Fork a project — costs FORK_COST coins, CREATOR_SHARE_PCT goes to original creator
 // ============================================
-router.post('/:id/fork', async (req, res) => {
+router.post('/:id/fork', watchBuild('fork'), async (req, res) => {
     try {
         const { id } = req.params;
         const { userId, userName, newTitle } = req.body;
@@ -2476,6 +2513,7 @@ router.post('/:id/fork', async (req, res) => {
         }
 
         if (!original.bundle) {
+            refuse(res, 'no_bundle');
             return res.status(400).json({ error: 'Project has no bundle to fork' });
         }
 
@@ -2489,6 +2527,7 @@ router.post('/:id/fork', async (req, res) => {
         if (!limitCheck.allowed) {
             console.log(`[fork] Usage limit exceeded: ${limitCheck.error}`);
             appEvents.emit('paywall_or_cap_shown', { userId, props: { cap: 'fork_tier', status: 403, source: sourceFromRequest(req) } });
+            refuse(res, 'plan_limit');
             return res.status(403).json({
                 error: limitCheck.error,
                 requiresTier: limitCheck.requiresTier,
@@ -2520,7 +2559,10 @@ router.post('/:id/fork', async (req, res) => {
                 free_tweaks_remaining: FREE_TWEAKS_DEFAULT
             });
 
-        if (insertError) throw insertError;
+        if (insertError) {
+            refuse(res, insertRefusal(insertError), insertError.code);
+            throw insertError;
+        }
 
         // 6. Increment fork count on original
         await supabase
