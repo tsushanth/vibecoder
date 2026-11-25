@@ -1,5 +1,15 @@
 # Deployed releases (Play)
 
+## Android 2.7.5 (81) 2026-11-25: register on every launch (PR #156), production 20% staged
+- Tag `play/2.7.5-81` = origin/main `cfcf770` (#158, version bump only on top of dc578a1). Built from exactly this commit in a clean detached worktree. The `ratingkit` and `crosspromokit` library modules come from their local checkouts, as before.
+- Play read back after commit: production 2.7.5 (81) `inProgress` userFraction 0.2, 2.7.4 (80) `completed`; beta, alpha and internal moved to 81 `completed`. Uploaded with the Play edit API.
+- targetSdk 36 / minSdk 26, Play Billing 8.0.0, upload-key signature (`jarsigner -verify` ok), AAB sha256 `95df40908efd27c364855ffd6e68fa1691ecdba68a0e54675b2c65a5a5bf0e69`. No permission added compared with the Play-generated APK of 80.
+- Release note (en-US): "Fixes a sign-up problem that could stop some new accounts from building apps."
+- Contents: the app registers the signed-in account at every launch and sign-in, with retries, then uploads this device's push token.
+- Checks: `testDebugUnitTest` 245 tests, 0 failures; `lintDebug` 0 errors (492 warnings).
+- NOT verified: any device run, the Play-signed build. "App ready" notifications still cannot be sent by the server (see below).
+- Rollback: halt the rollout in Play Console; 2.7.4 (80) stays completed. Promotion to 100% needs a 24-48 h crash and ANR review first. Not promoted beyond 20%.
+
 ## Missing account rows and refused builds 2026-11-25 (PRs #155 main eb8464c, #156 main 239ac57): backend v74, Android not released
 - Cause: `projects.creator_id` references `users(user_id)`; an Android account whose register call never arrived was refused every build and fork with HTTP 500. Postgres logs 11-14..11-24: 66 refusals, 16 ids. Since 11-14, 14 of 47 outside sign-ups had no row before this fix, 2 after (neither appears in the refusal logs).
 - Fly `vibecoder-api` v73 (same image as v72) -> v74, image deployment-01M8A01D7YXFCEV21W0M9S096R. `flyctl deploy --remote-only` from a clean detached worktree of origin/main eb8464c; backend tree 73d1bac4abb92436582b22a9ca8035f44700a7ab identical to main (#156 touches only android/). Delta from v72 in backend/: #155, plus the local mailer scripts of #154. No migration, no secret touched.
