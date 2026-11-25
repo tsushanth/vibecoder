@@ -13,13 +13,14 @@ export function injectFooter(html, footer) {
 }
 
 /** The Resend payload for one promo email: footer in the HTML, List-Unsubscribe + List-Unsubscribe-Post headers. */
-export function buildPromoMessage({ from, to, subject, html }) {
+export function buildPromoMessage({ from, to, subject, html, tags }) {
   return {
     from,
     to,
     subject,
     html: injectFooter(html, footerHtml(APP_NAME, to, LIST)),
     headers: resendHeaders(to, LIST),
+    ...(tags ? { tags } : {}), // Resend tags (campaign_id, product) for the outreach metrics layer
   };
 }
 

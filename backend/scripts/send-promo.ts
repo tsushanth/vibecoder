@@ -18,6 +18,12 @@
  * Everyone in outreach_suppressions and Apple private-relay addresses are skipped; if the suppression table cannot be
  * read, nothing is sent. The run aborts without UNSUB_SECRET (no unsigned sends).
  *
+ * Outreach metrics (scripts/lib/promo-metrics.mjs): every send is tagged campaign_id=vibebuild-promoN-<yyyymm01> + product=vibebuild, every
+ * accepted send is written to a local ledger (~/.outreach-ledger/vibebuild.jsonl, hashes only), and touch 1 skips anyone already mailed by this
+ * product in the last 90 days. With OUTREACH_METRICS=1 (default OFF) it also registers the campaign, asks the Calldesk layer to dedupe, stops on
+ * its circuit breaker (bounce rate over 2%) and posts `sent` events; every layer call is fail-open with a 3 s timeout. Links are never
+ * rewritten here. CRON_SECRET and OUTREACH_EVENT_SECRET are needed only when the flag is on.
+ *
  * Optional:
  *   DRY_RUN=true   — log without sending
  *   STEP=1|2|3     — only run a specific touch
@@ -33,6 +39,8 @@ import { Resend } from "resend";
 import * as dotenv from "dotenv";
 import { buildPromoMessage, filterRecipients } from "./lib/promo-mail.mjs";
 import { loadSuppressions } from "./lib/unsubscribe.mjs";
+import { OutreachMetrics } from "./lib/outreach-metrics.mjs";
+import { dripTags, screenDrip, breakerHalt } from "./lib/promo-metrics.mjs";
 
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
@@ -45,6 +53,8 @@ const SUPABASE_URL = process.env.SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const RESEND_API_KEY = process.env.RESEND_API_KEY!;
 let suppressed: Set<string> = new Set();
+const METRICS_PRODUCT = "vibebuild";
+const om = new OutreachMetrics({ log: (m: string) => console.log(`[${new Date().toISOString()}] ${m}`) });
 
 const TOUCH2_DELAY_DAYS = 3;
 const TOUCH3_DELAY_DAYS = 7;
@@ -278,21 +288,37 @@ async function sendBatch(
   log(`${template}: ${filtered.counts.candidates} candidates, ${filtered.counts.suppressed} suppressed, ${filtered.counts.relay} Apple relay, ${filtered.counts.no_email} without email`);
   if (!users.length) { log(`No sendable users for ${template}. Skipping.`); return; }
 
+  // Outreach metrics: local ledger dedupe (touch 1) and, with OUTREACH_METRICS=1, the layer's dedupe + breaker. Fail-open.
+  const screened = await screenDrip({ om, product: METRICS_PRODUCT, template, users });
+  users = screened.allowed as User[];
+  log(`${template}: outreach dedupe skipped ${screened.skippedLedger} (ledger) + ${screened.skippedLayer} (layer), campaign ${screened.campaign}`);
+  if (screened.halt) { log(`HALT ${template}: ${screened.halt.reason} (bounce ${screened.halt.bounce_pct}% over ${screened.halt.window_size})`); return; }
+  if (!users.length) { log(`Nothing left to send for ${template} after dedupe. Skipping.`); return; }
+  const tags = dripTags(METRICS_PRODUCT, template);
+  if (!DRY_RUN) await om.registerCampaign({ id: screened.campaign, product: METRICS_PRODUCT, senderDomain: SENDING_DOMAIN, audienceSource: `vibebuild ${template}`, plannedSize: users.length, notes: "send-promo.ts drip" });
+
   log(`Sending ${template} to ${users.length} users${DRY_RUN ? " (DRY RUN)" : ""}…`);
 
   const resend = getResend();
   let sent = 0, failed = 0;
 
+  let handled = 0;
   for (const user of users) {
     if (!user.email) continue;
+    if (!DRY_RUN && handled > 0 && handled % 50 === 0) {
+      const halt = await breakerHalt({ om, product: METRICS_PRODUCT, template });
+      if (halt) { log(`HALT ${template} after ${handled}: ${halt}`); break; }
+    }
+    handled++;
     // Footer + List-Unsubscribe headers. Throws if UNSUB_SECRET is missing, so nothing goes out unsigned.
-    const message = buildPromoMessage({ from: FROM, to: user.email, subject, html: buildHtml(user.display_name) });
+    const message = buildPromoMessage({ from: FROM, to: user.email, subject, html: buildHtml(user.display_name), tags });
     if (DRY_RUN) { log(`[DRY RUN] Would send ${template} (unsubscribe link + headers attached)`); sent++; continue; }
 
     try {
       const { error } = await resend.emails.send(message);
       if (error) throw new Error(error.message);
       await recordSend(user.user_id, user.email, template);
+      om.recordSent({ product: METRICS_PRODUCT, campaign: screened.campaign, email: user.email });
       sent++;
       log(`Sent ${template}`);
     } catch (err: any) {
@@ -302,6 +328,7 @@ async function sendBatch(
     await new Promise((r) => setTimeout(r, 600));
   }
 
+  await om.flushEvents();
   log(`${template} done. Sent: ${sent} | Failed: ${failed}`);
 }
 
