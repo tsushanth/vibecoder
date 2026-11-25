@@ -23,6 +23,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -52,6 +56,9 @@ class AuthRepository @Inject constructor(
     private val api: VibeBuildApi,
     private val supabase: SupabaseClient
 ) {
+
+    // The sign-in screen and RegistrationSync both register a new session; one at a time, so the server counts one new account.
+    private val registration = Mutex()
 
     /**
      * Observe Supabase session changes, emitting an AuthUser when
@@ -142,6 +149,8 @@ class AuthRepository @Inject constructor(
         supabase.auth.signUpWith(Email) {
             this.email = email
             this.password = password
+            // Kept with the login, so a registration that happens later still knows the name.
+            if (!displayName.isNullOrBlank()) data = buildJsonObject { put("full_name", displayName) }
         }
         // No session after a successful sign-up means the project wants the email confirmed before the first sign-in.
         val authUser = currentUser ?: throw AuthFailureException(AuthFailure.ConfirmEmailToFinish)
@@ -159,7 +168,12 @@ class AuthRepository @Inject constructor(
         return registerWithBackend(authUser)
     }
 
-    private suspend fun registerWithBackend(authUser: AuthUser): User {
+    /** Creates or refreshes the account on the server. Safe to repeat; throws when the server could not be reached or refused. */
+    suspend fun register(authUser: AuthUser) {
+        registerWithBackend(authUser)
+    }
+
+    private suspend fun registerWithBackend(authUser: AuthUser): User = registration.withLock {
         val request = RegisterRequest(
             userId = authUser.uid,
             email = authUser.email,
@@ -168,7 +182,7 @@ class AuthRepository @Inject constructor(
         )
 
         val response = api.register(request)
-        return response.user ?: authUser.toLocalUser()
+        response.user ?: authUser.toLocalUser()
     }
 
     suspend fun signOut() {

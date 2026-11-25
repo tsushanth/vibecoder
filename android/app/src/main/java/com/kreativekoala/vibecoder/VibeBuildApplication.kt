@@ -5,6 +5,8 @@ import com.facebook.appevents.AppEventsLogger
 import com.kreativekoala.vibecoder.service.FacebookSDKHelper
 import com.kreativekoala.vibecoder.service.FirebaseAnalyticsHelper
 import com.kreativekoala.vibecoder.data.repository.AuthRepository
+import com.kreativekoala.vibecoder.service.FCMTokenManager
+import com.kreativekoala.vibecoder.service.RegistrationSync
 import com.kreativekoala.vibecoder.service.RealPurchasesGateway
 import com.kreativekoala.vibecoder.service.RevenueCatIdentitySync
 import com.kreativekoala.vibecoder.service.TikTokHelper
@@ -20,12 +22,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltAndroidApp
 class VibeBuildApplication : Application() {
     @Inject lateinit var authRepository: AuthRepository
     @Inject lateinit var api: com.kreativekoala.vibecoder.data.remote.VibeBuildApi
+    @Inject lateinit var fcmTokenManager: FCMTokenManager
 
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -54,6 +58,15 @@ class VibeBuildApplication : Application() {
             PurchasesConfiguration.Builder(this, "goog_ukOquwcrZdyypGtQDKkJDEeoBuY")
                 .build()
         )
+
+        // Register the signed-in account on the server at every launch and sign-in, then give it this device's push token.
+        val registration = RegistrationSync(
+            register = authRepository::register,
+            onRegistered = fcmTokenManager::registerTokenForUser,
+            // No signal is not an app failure (the next launch tries again); anything else is reported.
+            onGaveUp = { if (it !is IOException) FailureReporter.failure("Account registration", it) }
+        )
+        appScope.launch { registration.run(authRepository.observeAuthState()) }
 
         // Identify RevenueCat as the signed-in Supabase user (covers email, Google and a restored session), and reset on sign-out.
         val identity = RevenueCatIdentitySync(RealPurchasesGateway())
