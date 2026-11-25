@@ -21,8 +21,8 @@ android {
         applicationId = "com.kreativekoala.vibecoder"
         minSdk = 26
         targetSdk = 36
-        versionCode = 80
-        versionName = "2.7.4"
+        versionCode = 81
+        versionName = "2.7.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
