@@ -102,3 +102,32 @@ test('register: signup still succeeds when the source columns do not exist yet',
         assert.equal(r.status, 200); assert.ok(rows.get('anon-3'));
     } finally { sb.from = was; }
 });
+
+// ---- outreach metrics: a new verified account that arrived through an outreach link is reported (off unless OUTREACH_EVENTS_URL is set)
+test('register: outreach signup is reported only when the layer is configured, the account is new and verified', async () => {
+    const realFetch = globalThis.fetch; const sent = [];
+    const withLayer = async (fn) => {
+        process.env.OUTREACH_EVENTS_URL = 'https://calldesk.example/api/outreach/event'; process.env.OUTREACH_EVENT_SECRET = 's'.repeat(32);
+        globalThis.fetch = async (url, init) => { if (String(url).startsWith('https://calldesk.example')) { sent.push(JSON.parse(init.body)); return new Response('{}', { status: 200 }); } return realFetch(url, init); };
+        try { await fn(); await new Promise((r) => setTimeout(r, 20)); } finally { globalThis.fetch = realFetch; delete process.env.OUTREACH_EVENTS_URL; delete process.env.OUTREACH_EVENT_SECRET; }
+    };
+    const src = { utm_source: 'outreach', utm_medium: 'email', utm_campaign: 'vb-2026-12-a', utm_content: 'abc123' };
+
+    reset(); verified = 'o1'; // layer not configured: nothing sent
+    assert.equal((await postWithUa({ userId: 'o1', email: 'o1@x.com', signup_source: src }, 'Mozilla/5.0')).status, 200);
+    await new Promise((r) => setTimeout(r, 20)); assert.equal(sent.length, 0);
+
+    reset(); verified = 'o2';
+    await withLayer(async () => { assert.equal((await postWithUa({ userId: 'o2', email: 'o2@x.com', signup_source: src }, 'Mozilla/5.0')).status, 200); });
+    assert.equal(sent.length, 1);
+    assert.deepEqual({ p: sent[0].product, c: sent[0].campaign, e: sent[0].event, l: sent[0].link_code, m: sent[0].email }, { p: 'vibebuild', c: 'vb-2026-12-a', e: 'signup', l: 'abc123', m: 'o2@x.com' });
+
+    sent.length = 0; // not outreach, existing row, anonymous device id: nothing
+    reset(); verified = 'o3';
+    await withLayer(async () => { await postWithUa({ userId: 'o3', email: 'o3@x.com', signup_source: { utm_source: 'hn', utm_campaign: 'x' } }, 'Mozilla/5.0'); });
+    reset(); verified = 'o4'; rows.set('o4', { user_id: 'o4', email: 'o4@x.com' });
+    await withLayer(async () => { await postWithUa({ userId: 'o4', email: 'o4@x.com', signup_source: src }, 'Mozilla/5.0'); });
+    reset();
+    await withLayer(async () => { await postWithUa({ userId: 'anon-9', email: 'x@x.com', signup_source: src }, 'okhttp/4'); });
+    assert.equal(sent.length, 0);
+});

@@ -41,6 +41,7 @@ import { publicCreatorName, withPublicCreator } from '../lib/creatorHandle.js';
 import { parsePatchBody } from '../lib/projectPatch.js';
 import { logFirstBuildStarted } from '../lib/funnel.js';
 import { recordSignupSource } from '../lib/signupSource.js';
+import { noteProjectCreated } from '../lib/outreachEventsInstance.js';
 
 const router = express.Router();
 
@@ -665,6 +666,7 @@ router.post('/generate', async (req, res) => {
                 placeholderProjectId = placeholder.id;
                 progressStart(placeholderProjectId);
                 recordSourceChannel(placeholderProjectId, channelFromRequest(req));
+                noteProjectCreated(userId, placeholderProjectId); // outreach metrics: first project, fire and forget, off by default
                 // Activation funnel: logs only when this is the account's first build (lib/funnel.js). Never blocks the build.
                 logFirstBuildStarted(supabase, {
                     userId,
@@ -821,7 +823,7 @@ router.post('/generate', async (req, res) => {
                                 initial_prompt: prompt, is_public: false,
                                 project_type: 'web_app', creation_method: 'ai_generated', status: 'ready'
                             }).select('id').single();
-                            if (saved) finalProjectId = saved.id;
+                            if (saved) { finalProjectId = saved.id; noteProjectCreated(userId, saved.id); }
                         }
 
                         if (finalProjectId) {
@@ -1031,6 +1033,7 @@ router.post('/save', async (req, res) => {
         if (dbError) throw dbError;
 
         console.log(`[save] Project saved: ${projectId} "${safeTitle}" (${bundleSizeKB}KB) repo=${githubRepo}`);
+        noteProjectCreated(creatorId, projectId); // outreach metrics: first project, fire and forget, off by default
 
         refreshBrowseCache();
 

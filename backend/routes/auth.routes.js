@@ -6,6 +6,7 @@ import { removeSites, disableSiteApps, projectSiteSubdomains } from '../lib/site
 import { appEvents, buildEvents, sourceFromRequest } from '../lib/appEventsInstance.js';
 import { channelEvents } from '../lib/channelEventsInstance.js';
 import { deleteAccountExternalData } from '../lib/accountCleanup.js';
+import { noteSignup } from '../lib/outreachEventsInstance.js';
 
 // `externalCleanup` removes what lives outside the main database (GitHub repos, screenshots, stored keys); injectable for tests.
 const defaultExternalCleanup = (args) => deleteAccountExternalData({ ...args, storage: (supabaseAdmin || supabase).storage });
@@ -114,6 +115,7 @@ router.post('/register', async (req, res) => {
             if (error) throw error;
             if (!before && !beforeError) {
                 await recordSignupSource(supabase, userId, req, signupSource);
+                noteSignup(data?.email, signupSource); // outreach metrics: fire and forget, off unless OUTREACH_EVENTS_URL is set
                 appEvents.emit('signup_completed', { userId, props: { source: sourceFromRequest(req) } });
             } else if (before && buildEvents.loginDue(userId)) {
                 // The web app registers on every page load with a session, so this is the closest server-side signal to "opened the app".
