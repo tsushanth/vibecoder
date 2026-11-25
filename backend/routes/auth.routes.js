@@ -100,16 +100,16 @@ router.post('/register', async (req, res) => {
         if (verified) {
             // First-touch attribution is recorded only when this call creates the row, never on later sign-ins.
             const { data: before, error: beforeError } = await supabase.from('users').select('user_id').eq('user_id', userId).maybeSingle();
-            // A verified sign-in may create or update its own row, including the email.
+            // A verified sign-in may create or update its own row, including the email. Apps register on every launch, so an
+            // update only writes what the call actually carries: a blank never replaces a stored name, picture or email.
+            const row = { user_id: userId, updated_at: new Date().toISOString() };
+            const isNew = !before && !beforeError;
+            if (email || isNew) row.email = email || null;
+            if (displayName || isNew) row.display_name = displayName || 'Anonymous';
+            if (avatarUrl || isNew) row.avatar_url = avatarUrl || null;
             const { data, error } = await supabase
                 .from('users')
-                .upsert({
-                    user_id: userId,
-                    email: email || null,
-                    display_name: displayName || 'Anonymous',
-                    avatar_url: avatarUrl || null,
-                    updated_at: new Date().toISOString()
-                }, { onConflict: 'user_id' })
+                .upsert(row, { onConflict: 'user_id' })
                 .select()
                 .single();
             if (error) throw error;

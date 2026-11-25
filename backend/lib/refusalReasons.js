@@ -1,0 +1,20 @@
+// The closed list of reasons a build can be refused: the value stored on build_refused events and the words in the alert.
+export const REFUSAL_REASONS = Object.freeze({
+    no_account_row: 'the signed-in account has no users row (projects.creator_id foreign key)',
+    save_failed: 'the database refused the new project row',
+    server_error: 'the server failed while handling the request',
+    worker_timeout: 'the build server did not answer in time',
+    worker_busy: 'the build server had no free capacity',
+    repo_init_failed: 'the project repository could not be created',
+    no_bundle: 'the app to copy has no stored code',
+    auth_required: 'the sign-in token was missing or not valid',
+    forbidden: 'the caller does not own this account or project',
+    not_found: 'the project does not exist',
+    limit: 'a usage limit was reached',
+    hourly_limit: 'the hourly build limit was reached',
+    daily_limit: 'the daily usage limit was reached',
+    plan_limit: 'a plan limit refused it',
+    prompt_code: 'the prompt looked like pasted code',
+    prompt_url: 'the prompt contained a link',
+    invalid_request: 'the request was missing or had invalid fields',
+});

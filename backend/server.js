@@ -29,6 +29,7 @@ import { startTierSweep } from './services/tierSync.js';
 import { getSubscriptionStatus } from './services/subscriptionService.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { serverErrorReport } from './middleware/serverErrorReport.js';
+import { userRowMiddleware } from './lib/ensureUserRow.js';
 import { buildInvariants } from './lib/buildInvariantsInstance.js';
 import { startInvariantSweep } from './lib/buildInvariants.js';
 import { buildFailureRate } from './lib/buildFailureRateInstance.js';
@@ -75,6 +76,9 @@ app.use((req, res, next) => {
         express.json({ limit: '50mb' })(req, res, next);
     }
 });
+
+// A signed-in write request creates the account's missing users row before the route needs it (every build references it).
+app.use(userRowMiddleware());
 
 // Health
 app.get('/api/health', (req, res) => {
