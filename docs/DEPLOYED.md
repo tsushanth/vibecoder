@@ -1,5 +1,29 @@
 # Deployed releases (Play)
 
+## Missing account rows and refused builds 2026-11-25 (PRs #155 main eb8464c, #156 main 239ac57): backend v74, Android not released
+- Cause: `projects.creator_id` references `users(user_id)`; an Android account whose register call never arrived was refused every build and fork with HTTP 500. Postgres logs 11-14..11-24: 66 refusals, 16 ids. Since 11-14, 14 of 47 outside sign-ups had no row before this fix, 2 after (neither appears in the refusal logs).
+- Fly `vibecoder-api` v73 (same image as v72) -> v74, image deployment-01M8A01D7YXFCEV21W0M9S096R. `flyctl deploy --remote-only` from a clean detached worktree of origin/main eb8464c; backend tree 73d1bac4abb92436582b22a9ca8035f44700a7ab identical to main (#156 touches only android/). Delta from v72 in backend/: #155, plus the local mailer scripts of #154. No migration, no secret touched.
+- Contents: a signed-in write request creates the missing row from the verified token; register no longer overwrites a stored name with a blank; refused builds, retries, tweaks and forks write `build_refused` and send one report naming the cause; unsaved builds, failed previews and failed tweaks are reported. Outcome checks: `docs/analytics.md`.
+- Quiet moment checked first (API activeBuildCount 0, worker activeGenerations 0, no recent `building` row or build start). `npm test` 869/869.
+- Verified on production with a temporary account, removed afterwards through `DELETE /api/auth/account` (nothing left behind): no row before; a refused build (link in the prompt) created the row, wrote `signup_completed` and `build_refused` (`prompt_url`), and the failure reporter emailed one `build_refused` alert at 18:39 UTC (from this check, not a user). Health and deep health 200. Not run: a successful build on production.
+- Rollback: `flyctl releases rollback 73 -a vibecoder-api` (brings the refusals back for accounts without a row).
+- Android #156 (register on every launch with retries, push token after it): on main only. 2.7.4 (80) does not have it; it needs the next release (2.7.5, versionCode 81; version not bumped yet, nothing uploaded). `testDebugUnitTest` 245/245. Not device-tested.
+- "App ready" notifications still cannot send: `FCM_SERVICE_ACCOUNT_JSON` and `ALERT_EMAIL_PASS` are not set on `vibecoder-api`. Note `sendPushToUser` skips the email fallback for a person with a push token even when FCM is not configured.
+
+### Backfill of users rows, 2026-11-25 18:40:53 UTC (Replitor project, table `public.users`)
+14 rows inserted (13 outside accounts, 1 internal): the accounts the refusal logs name that still existed and had no row. Of the other 2 ids in the logs, one had a row by then and one account no longer exists. No row was created for anyone else (the project is shared). `user_id`, `email`, `display_name`, `avatar_url` come from `auth.users`; `created_at` is the sign-up time; platform and attribution columns are null.
+
+Ids, first 8 characters (public repo; each prefix matched exactly one row): 0b90f17c, 1067fee6, 11b2c963, 11ee718b, 1b5a1bd0, 2f376d02, 3b4e9e9c, 70bd10be, 7a1470bc, a40a81af, c816615e, ca914505, e6663cff, eb11ecff
+
+Reversal (only backfilled rows have `created_at` equal to the sign-up time; rows that now own a project are kept):
+
+```sql
+delete from public.users u using auth.users a
+where a.id::text = u.user_id and u.created_at = a.created_at
+  and left(u.user_id, 8) in ('0b90f17c', '1067fee6', '11b2c963', '11ee718b', '1b5a1bd0', '2f376d02', '3b4e9e9c', '70bd10be', '7a1470bc', 'a40a81af', 'c816615e', 'ca914505', 'e6663cff', 'eb11ecff')
+  and not exists (select 1 from projects p where p.creator_id = u.user_id);
+```
+
 ## Outreach attribution reporting 2026-11-24 (PR #152, main a3966ad): backend v72, flag OFF
 - Fly `vibecoder-api` v71 -> v72, image deployment-01M8887EY0HW46F6G6QVMYH6D4. `flyctl deploy --remote-only` from a clean detached worktree of origin/main a3966ad; backend tree 5d2573ffe32fb32a6d750bab06c35b78b2e62d9a identical to main. Delta from v71 (6e61287): only #152 in backend/.
 - Adds signup (`POST /api/auth/register`, new verified row, signup_source utm_source=outreach) and activated (first project created) reporting to the Calldesk outreach metrics layer. Does nothing unless `OUTREACH_EVENTS_URL` and an event secret are set; neither is, no secret touched, no migration. Enable steps and the 14-day baseline SQL: `docs/OUTREACH-ATTRIBUTION.md`, `docs/outreach-baseline.sql`.
