@@ -39,6 +39,8 @@ import com.kreativekoala.vibecoder.ui.apps.explore.ExploreListingSection
 import com.kreativekoala.vibecoder.ui.apps.keys.AppKeysSection
 import com.kreativekoala.vibecoder.ui.theme.*
 import com.kreativekoala.vibecoder.util.DateUtil
+import com.kreativekoala.vibecoder.util.VisitDates
+import com.kreativekoala.vibecoder.data.model.OwnerLink
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -161,7 +163,8 @@ fun ProjectDetailScreen(
             onFeedback = { rating -> viewModel.sendFeedback(rating) },
             feedbackSent = uiState.feedbackSent,
             versionNumber = uiState.versionNumber,
-            onVersionHistoryClick = { viewModel.showVersionHistory() }
+            onVersionHistoryClick = { viewModel.showVersionHistory() },
+            openUrl = (uiState.deployedUrl ?: uiState.project?.publishedUrl)?.let { OwnerLink.forUrl(it, uiState.visits) }
         )
         return
     }
@@ -321,6 +324,23 @@ fun ProjectDetailScreen(
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = VibePurple
                                 )
+                                uiState.visits?.let { v ->
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = stringResource(R.string.visits_summary, v.today ?: 0, v.last7Days ?: 0, v.total ?: 0),
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = TextPrimary,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                    VisitDates.display(uiState.countingSince)?.let { since ->
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        Text(
+                                            text = stringResource(R.string.visits_hint, since),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = TextTertiary
+                                        )
+                                    }
+                                }
                                 Spacer(modifier = Modifier.height(12.dp))
                                 val shareText = stringResource(R.string.project_detail_share_text, liveUrl)
                                 val shareTitle = stringResource(R.string.share)
@@ -331,7 +351,7 @@ fun ProjectDetailScreen(
                                     OutlinedButton(
                                         onClick = {
                                             context.startActivity(
-                                                Intent(Intent.ACTION_VIEW, Uri.parse(liveUrl))
+                                                Intent(Intent.ACTION_VIEW, Uri.parse(OwnerLink.forUrl(liveUrl, uiState.visits)))
                                             )
                                         },
                                         modifier = Modifier.weight(1f),

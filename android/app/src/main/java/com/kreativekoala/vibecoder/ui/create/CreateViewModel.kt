@@ -22,6 +22,7 @@ import com.kreativekoala.vibecoder.data.repository.ProjectRepository
 import com.kreativekoala.vibecoder.data.repository.SubscriptionRepository
 import com.kreativekoala.vibecoder.service.FirebaseAnalyticsHelper
 import com.kreativekoala.vibecoder.util.NotificationHelper
+import com.kreativekoala.vibecoder.data.model.OwnerLink
 import kotlinx.coroutines.flow.first
 import com.kreativekoala.vibecoder.util.ZipExtractor
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -51,7 +52,6 @@ data class CreateUiState(
     val buildDetail: String = "",
     val progressPercent: Double = 0.0,
     val simulatedProgress: Double = 0.0,
-    val notifyEnabled: Boolean = false,
     val estimatedSecondsRemaining: Int = 0,
     val errorMessage: String? = null,
     val bundleDir: File? = null,
@@ -64,6 +64,8 @@ data class CreateUiState(
     val referenceImageBase64: String? = null,
     val isDeploying: Boolean = false,
     val deployedUrl: String? = null,
+    /** [deployedUrl] as the creator should open it (not counted as a visit). */
+    val ownerOpenUrl: String? = null,
     val showDeployDialog: Boolean = false,
     val isLoadingSuggestions: Boolean = false,
     val isTweaking: Boolean = false,
@@ -739,7 +741,7 @@ class CreateViewModel @Inject constructor(
             }
         }
         userPreferences.clearPendingGeneration()
-        NotificationHelper.showGenerationComplete(appContext)
+        NotificationHelper.showGenerationComplete(appContext, projectId = projectId)
         _uiState.update {
             it.copy(
                 chatStage = ChatStage.Ready,
@@ -887,9 +889,6 @@ class CreateViewModel @Inject constructor(
         }
     }
 
-    fun setNotifyEnabled(enabled: Boolean) {
-        _uiState.update { it.copy(notifyEnabled = enabled) }
-    }
 
     fun updateSimulatedProgress(progress: Double) {
         _uiState.update { it.copy(simulatedProgress = progress) }
@@ -1094,6 +1093,12 @@ class CreateViewModel @Inject constructor(
                         isDeploying = false,
                         deployedUrl = response.url
                     )
+                }
+                // The link that opens the app without counting its creator as a visitor.
+                val live = response.url
+                if (live != null) {
+                    val mine = runCatching { projectRepository.getVisits().byProject()[projectId] }.getOrNull()
+                    _uiState.update { it.copy(ownerOpenUrl = OwnerLink.forUrl(live, mine)) }
                 }
             } catch (e: Exception) {
                 _uiState.update {

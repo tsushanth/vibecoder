@@ -35,6 +35,11 @@
     "byCreator": "Di {name}",
     "createdAt": "Creata {time}",
     "views": "{count, plural, one {# visualizzazione} other {# visualizzazioni}}",
+    "visits": {
+      "row": "{week, plural, one {# visita} other {# visite}} in 7 giorni",
+      "summary": "Visite: {today} oggi, {week} negli ultimi 7 giorni, {total} in totale",
+      "hint": "Conteggiate dal {date}. Sono esclusi i bot e le tue visite da un browser in cui hai aperto l’app da qui."
+    },
     "remixes": "{count, plural, one {# remix} other {# remix}}",
     "notPublished": "Non pubblicata",
     "previewAndChange": "Anteprima e modifica",

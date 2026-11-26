@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.kreativekoala.vibecoder.R
+import com.kreativekoala.vibecoder.data.model.AppVisits
 import com.kreativekoala.vibecoder.data.model.Project
 import com.kreativekoala.vibecoder.ui.theme.*
 import com.kreativekoala.vibecoder.util.DateUtil
@@ -33,7 +34,8 @@ fun ProjectCardItem(
     onClick: () -> Unit,
     onDelete: () -> Unit,
     onRetry: (() -> Unit)? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    visits: AppVisits? = null
 ) {
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
@@ -220,6 +222,17 @@ fun ProjectCardItem(
                             modifier = Modifier.size(18.dp)
                         )
                     }
+                }
+
+                val weekVisits = visits?.last7Days
+                if (weekVisits != null && !project.publishedUrl.isNullOrBlank()) {
+                    Text(
+                        text = stringResource(R.string.visits_card_week, weekVisits),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = VibePurple,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
                 }
 
                 Row(

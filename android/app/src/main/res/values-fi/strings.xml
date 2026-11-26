@@ -477,4 +477,7 @@
     <string name="telegram_continue">Jatka Telegramissa</string>
     <string name="telegram_settings_title">Telegram-botti</string>
     <string name="telegram_settings_subtitle">Rakenna ja hae sovelluksesi keskustelemalla @Vibebuilder_bot:n kanssa</string>
+    <string name="visits_card_week">Käynnit 7 päivässä: %1$d</string>
+    <string name="visits_summary">Käynnit: %1$d tänään, %2$d 7 päivässä, %3$d yhteensä</string>
+    <string name="visits_hint">Laskettu alkaen %1$s. Botteja ei lasketa, eikä omia käyntejäsi, kun avaat sovelluksesi täältä.</string>
 </resources>

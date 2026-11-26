@@ -524,4 +524,7 @@
     <string name="telegram_continue">Ipagpatuloy sa Telegram</string>
     <string name="telegram_settings_title">Telegram bot</string>
     <string name="telegram_settings_subtitle">Gumawa at kunin ang apps mo sa pakikipag-chat kay @Vibebuilder_bot</string>
+    <string name="visits_card_week">Mga pagbisita sa 7 araw: %1$d</string>
+    <string name="visits_summary">Mga pagbisita: %1$d ngayon, %2$d sa 7 araw, %3$d lahat</string>
+    <string name="visits_hint">Binibilang mula %1$s. Hindi kasama ang mga bot, at pati ang sarili mong pagbisita kapag binuksan mo ang app mula rito.</string>
 </resources>

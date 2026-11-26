@@ -3,7 +3,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import {
   Panel,
   Group,
@@ -27,6 +27,9 @@ import { SecretsPanel } from '@/components/project/SecretsPanel';
 import { UsagePanel } from '@/components/project/UsagePanel';
 import { VersionsPopover } from '@/components/builder/VersionsPopover';
 import { shortAddress, useRelativeTime } from '@/components/project/ProjectCard';
+import { OwnerAppLink } from '@/components/project/OwnerAppLink';
+import { useCreatorVisits } from '@/lib/useCreatorVisits';
+import { ownerHref } from '@/lib/visits';
 import type {
   DomainStatusResponse,
   ForkResponse,
@@ -344,6 +347,8 @@ export default function ProjectBuilderPage() {
   const [remixError, setRemixError] = useState<string | null>(null);
 
   const isOwner = store.project?.creatorId === user?.id;
+  const locale = useLocale();
+  const visits = useCreatorVisits(isOwner ? user?.id : null, `${publishOpenCount}:${store.project?.publishedUrl ?? ''}`);
 
   // Surface a one-time nudge right after a successful generation finishes,
   // if the project isn't published yet. Most successful builds never get
@@ -436,6 +441,10 @@ export default function ProjectBuilderPage() {
 
   const project = store.project;
   const liveUrl = project.publishedUrl;
+  const appVisits = isOwner && liveUrl ? visits.apps[id] : undefined;
+  const countedSince = visits.countingSince
+    ? new Date(`${visits.countingSince}T00:00:00Z`).toLocaleDateString(locale, { timeZone: 'UTC', day: 'numeric', month: 'short', year: 'numeric' })
+    : null;
   const panelsReloadKey = `${genStore.isGenerating ? 'generating' : 'idle'}:${project.publishedUrl ?? ''}`;
 
   const publishNudge = showPublishNudge && isOwner && !liveUrl && (
@@ -538,14 +547,13 @@ export default function ProjectBuilderPage() {
               onLoad={handleLoadVersion}
             />
             {liveUrl && (
-              <a
-                href={liveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <OwnerAppLink
+                url={liveUrl}
+                openUrl={ownerHref(liveUrl, appVisits)}
                 className="hidden h-9 items-center rounded-lg px-3 text-sm text-accent-hover transition hover:bg-surface sm:flex"
               >
                 {ta('openLive')}
-              </a>
+              </OwnerAppLink>
             )}
             {isOwner && (
               <button
@@ -628,9 +636,9 @@ export default function ProjectBuilderPage() {
                   <span className="h-2 w-2 rounded-full bg-success" />
                   {ta('status.published')}
                 </span>
-                <a href={liveUrl} target="_blank" rel="noopener noreferrer" className="min-w-0 truncate text-accent-hover hover:underline">
+                <OwnerAppLink url={liveUrl} openUrl={ownerHref(liveUrl, appVisits)} className="min-w-0 truncate text-accent-hover hover:underline">
                   {shortAddress(liveUrl)}
-                </a>
+                </OwnerAppLink>
               </>
             ) : (
               <span className="flex items-center gap-2 text-muted">
@@ -639,6 +647,13 @@ export default function ProjectBuilderPage() {
               </span>
             )}
           </div>
+
+          {appVisits && (
+            <div className="mt-3">
+              <p className="font-medium text-foreground">{ta('visits.summary', { today: appVisits.today, week: appVisits.last7Days, total: appVisits.total })}</p>
+              {countedSince && <p className="mt-0.5 max-w-[62ch] text-xs text-subtle">{ta('visits.hint', { date: countedSince })}</p>}
+            </div>
+          )}
 
           <div className="mt-6 flex flex-wrap gap-2">
             <button

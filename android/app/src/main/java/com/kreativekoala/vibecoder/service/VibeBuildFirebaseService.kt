@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.kreativekoala.vibecoder.util.NotificationHelper
+import com.kreativekoala.vibecoder.util.PushOpen
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -24,6 +25,10 @@ class VibeBuildFirebaseService : FirebaseMessagingService() {
         val title = message.notification?.title ?: return
         val body = message.notification?.body ?: return
         Log.d("FCM", "Message received: $title")
-        NotificationHelper.showGenerationComplete(applicationContext, title, body)
+        NotificationHelper.showGenerationComplete(
+            applicationContext, title, body,
+            projectId = message.data[PushOpen.EXTRA_PROJECT_ID],
+            kind = message.data[PushOpen.EXTRA_KIND] ?: "other"
+        )
     }
 }

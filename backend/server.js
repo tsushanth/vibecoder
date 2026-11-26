@@ -22,6 +22,8 @@ import { createUsageRouter } from './routes/usage.routes.js';
 import { createSchemaPlanRouter } from './routes/schemaPlan.routes.js';
 import { createBillingPortalRouter } from './routes/billingPortal.routes.js';
 import { createThumbnailRouter } from './routes/thumbnail.routes.js';
+import visitsRoutes from './routes/visits.routes.js';
+import { createActivityRecorder } from './lib/activity.js';
 import Stripe from 'stripe';
 import { createProxyAdmin } from './services/proxyAdmin.js';
 import { supabase } from './config/database.js';
@@ -42,6 +44,8 @@ app.set('trust proxy', 1);
 app.use(serverErrorReport());
 // Mounted BEFORE global cors(): appdata does its own per-app CORS (generated-app origins).
 app.use('/api/appdata', appdataRoutes);
+// One app_open usage event per signed-in person per day (lib/activity.js). Never delays a request. Before the early routers so all count.
+app.use(createActivityRecorder().middleware);
 // Key entry for generated apps. Mounted BEFORE the global json parser (50 MB) so its own 8 KB limit applies, and with its own CORS
 // (the VibeBuild web origins only). Identity is the verified Supabase token, never a client-supplied userId. Returns 503 until
 // PROXY_ADMIN_URL (https) and PROXY_ADMIN_TOKEN (32+ characters) are set.
@@ -132,6 +136,7 @@ app.get('/api/status', async (req, res) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventsRoutes);
+app.use('/api/visits', visitsRoutes);
 app.use('/api/generate-auth', generateAuthRoutes);
 app.use('/api/projects', projectsRoutes);
 app.use('/api/subscriptions', subscriptionsRoutes);

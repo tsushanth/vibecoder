@@ -35,6 +35,11 @@
     "byCreator": "Von {name}",
     "createdAt": "Erstellt {time}",
     "views": "{count, plural, one {# Aufruf} other {# Aufrufe}}",
+    "visits": {
+      "row": "{week, plural, one {# Besuch} other {# Besuche}} in 7 Tagen",
+      "summary": "Besuche: {today} heute, {week} in den letzten 7 Tagen, {total} insgesamt",
+      "hint": "Gezählt seit {date}. Bots zählen nicht, ebenso deine eigenen Besuche aus einem Browser, in dem du die App von hier aus geöffnet hast."
+    },
     "remixes": "{count, plural, one {# Remix} other {# Remixe}}",
     "notPublished": "Nicht veröffentlicht",
     "previewAndChange": "Vorschau und ändern",

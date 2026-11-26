@@ -8,6 +8,7 @@ import path from "path";
 import { createClient } from "@supabase/supabase-js";
 import { requireSecret } from "./requireSecret.js";
 import { requireInternal } from "./internalAuth.js";
+import { BEACON_PATH, createVisitCounter, injectBeacon } from "./visits.js";
 import { reportFailure, installCrashHandlers, createStreakGate } from "./failureReporter.js";
 
 installCrashHandlers();
@@ -67,6 +68,18 @@ async function syncDomainMap() {
 
 syncDomainMap();
 setInterval(syncDomainMap, 60_000);
+
+// ---------------------------------------------------------------------------
+// Visit counts for published apps (visits.js)
+// ---------------------------------------------------------------------------
+
+// Five failed writes in a row mean the counts creators see are standing still.
+const visitGate = createStreakGate(5, (why) => reportFailure('deploy:visit_count', new Error('Visit counts are not being saved'), { reason: why }));
+const visits = createVisitCounter({
+  secret: INTERNAL_SECRET,
+  record: (subdomain) => supabase.rpc("vibebuild_record_app_visit", { p_subdomain: subdomain }),
+  onResult: (error) => (error ? visitGate.fail(String(error.code || error.name || "error").slice(0, 20)) : visitGate.ok()),
+});
 
 // ---------------------------------------------------------------------------
 // MIME type map
@@ -377,7 +390,7 @@ async function serveFromStorage(subdomain, reqPath, res, { presetAppId = false }
     if (ext === ".html" || ext === ".htm") {
       let html = injectAds(body.toString("utf-8"), "promo", subdomain);
       if (presetAppId) html = injectAppId(html, subdomain);
-      body = Buffer.from(html);
+      body = Buffer.from(injectBeacon(html));
     }
 
     res.send(body);
@@ -407,7 +420,7 @@ async function serveFromStorage(subdomain, reqPath, res, { presetAppId = false }
       res.setHeader("Content-Type", "text/html; charset=utf-8");
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("X-Content-Type-Options", "nosniff");
-      res.send(Buffer.from(await data.arrayBuffer()));
+      res.send(Buffer.from(injectBeacon(Buffer.from(await data.arrayBuffer()).toString("utf-8"))));
       return;
     }
   }
@@ -618,6 +631,16 @@ app.get("/p/:subdomain", (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// Visit beacon from a published page
+// ---------------------------------------------------------------------------
+
+app.post(BEACON_PATH, (req, res) => {
+  const rawHost = req.headers["x-forwarded-host"] || req.headers.host || "";
+  const host = rawHost.split(":")[0].toLowerCase();
+  visits.handleBeacon(req, res, domainMap.get(host) || subdomainFromHost(rawHost), host);
+});
+
+// ---------------------------------------------------------------------------
 // Subdomain / custom domain serving (catch-all)
 // ---------------------------------------------------------------------------
 
@@ -629,6 +652,7 @@ app.get("*", async (req, res) => {
 
   const customSubdomain = domainMap.get(host);
   if (customSubdomain) {
+    if (visits.handleOwnerLink(req, res, customSubdomain)) return;
     // Track play on HTML page loads
     if (!req.path || req.path === "/" || req.path.endsWith(".html")) {
       trackPlay(customSubdomain, ip);
@@ -638,6 +662,7 @@ app.get("*", async (req, res) => {
 
   const subdomain = subdomainFromHost(rawHost);
   if (!subdomain) return res.status(404).type("html").send(notFoundPage(null));
+  if (visits.handleOwnerLink(req, res, subdomain)) return;
 
   // Track play on HTML page loads
   if (!req.path || req.path === "/" || req.path.endsWith(".html")) {

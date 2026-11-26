@@ -35,6 +35,11 @@
     "byCreator": "作者：{name}",
     "createdAt": "{time}建立",
     "views": "{count, plural, other {# 次瀏覽}}",
+    "visits": {
+      "row": "7 天內造訪 {week} 次",
+      "summary": "造訪次數：今天 {today}，近 7 天 {week}，累計 {total}",
+      "hint": "自 {date} 起統計。不含機器人造訪，也不含您從這裡開啟過應用程式的瀏覽器中的造訪。"
+    },
     "remixes": "{count, plural, other {# 次改編}}",
     "notPublished": "未釋出",
     "previewAndChange": "預覽並修改",

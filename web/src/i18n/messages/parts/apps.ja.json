@@ -35,6 +35,11 @@
     "byCreator": "作成者: {name}",
     "createdAt": "{time}に作成",
     "views": "{count, plural, other {# 回表示}}",
+    "visits": {
+      "row": "7日間の訪問数: {week}",
+      "summary": "訪問数: 今日 {today}、過去7日間 {week}、合計 {total}",
+      "hint": "{date}から集計しています。ボットと、ここからアプリを開いたブラウザでのご自身の訪問は含まれません。"
+    },
     "remixes": "{count, plural, other {# 件のリミックス}}",
     "notPublished": "未公開",
     "previewAndChange": "プレビューして変更",

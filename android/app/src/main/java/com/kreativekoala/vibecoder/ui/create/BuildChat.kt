@@ -53,7 +53,9 @@ fun BuildChatThread(
     onNewApp: () -> Unit,
     onTweak: (String) -> Unit,
     onUpgrade: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** Shown under the progress card while a build runs (the "notify me" prompt). */
+    whileBuilding: @Composable () -> Unit = {}
 ) {
     val scroll = rememberScrollState()
     val focus = remember { FocusRequester() }
@@ -101,6 +103,8 @@ fun BuildChatThread(
             if (stage == ChatStage.Building || stage == ChatStage.Ready || stage == ChatStage.Failed) {
                 ProgressCard(state)
             }
+
+            if (stage == ChatStage.Building) whileBuilding()
 
             if (stage == ChatStage.Failed) {
                 AssistantCard {

@@ -9,6 +9,7 @@ import { api, ApiError } from '@/lib/api';
 import { ProjectRow, appStatus, type OwnedProject } from '@/components/project/ProjectCard';
 import type { MyProjectsResponse } from '@/types/api';
 import { canRetry, retryErrorKey, withStatus } from '@/lib/retryBuild';
+import { useCreatorVisits } from '@/lib/useCreatorVisits';
 
 const REFRESH_WHILE_BUILDING_MS = 15_000; // as on Android: look again while any app is still building
 
@@ -17,6 +18,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const t = useTranslations('apps');
   const [projects, setProjects] = useState<OwnedProject[]>([]);
+  const visits = useCreatorVisits(user?.id);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<OwnedProject | null>(null);
@@ -132,6 +134,7 @@ export default function DashboardPage() {
             <ProjectRow
               key={p.id}
               project={p}
+              visits={visits.apps[p.id]}
               onOpen={() => router.push(`/project/${p.id}`)}
               onDelete={() => { setDeleteError(null); setPendingDelete(p); }}
               onRetry={() => void retryBuild(p)}

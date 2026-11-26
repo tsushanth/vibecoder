@@ -65,7 +65,9 @@ fun LivePreviewScreen(
     onFeedback: (String) -> Unit = {},
     feedbackSent: String? = null,
     versionNumber: Int = 0,
-    onVersionHistoryClick: () -> Unit = {}
+    onVersionHistoryClick: () -> Unit = {},
+    /** [deployedUrl] as its creator should open it, so the visit is not counted. The plain address is what is shown and shared. */
+    openUrl: String? = null
 ) {
     var reloadTrigger by remember { mutableIntStateOf(0) }
     var subdomain by remember { mutableStateOf("") }
@@ -158,7 +160,7 @@ fun LivePreviewScreen(
                 // Open in Browser
                 Button(
                     onClick = {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(deployedUrl)))
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(openUrl ?: deployedUrl)))
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
@@ -421,7 +423,7 @@ fun LivePreviewScreen(
                         }
                         IconButton(
                             onClick = {
-                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(deployedUrl)))
+                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(openUrl ?: deployedUrl)))
                             },
                             modifier = Modifier.size(32.dp)
                         ) {

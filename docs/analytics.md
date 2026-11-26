@@ -11,7 +11,7 @@ One row per event: `id`, `user_id` (the existing user id, nullable), `anon_id` (
 | event | written when | props |
 |---|---|---|
 | `signup_completed` | a new account row is created (`POST /api/auth/register`, or the first signed-in write request of an account that has none, `backend/lib/ensureUserRow.js`) | `source` |
-| `login` | a signed-in person registers again, at most once per 30 minutes per person. The web app registers on every page load with a session, so this is the closest server-side signal to "opened the app". The Android app is not known to register on every open, so Android opens are mostly invisible. | `source` |
+| `login` | a signed-in person registers again, at most once per 30 minutes per person. The web app registers on every page load with a session, so this is the closest server-side signal to "opened the app". Android registers at every start only from app 2.7.5. Use `app_open` (below) for opens on both. | `source` |
 | `build_started` | a build was accepted (rate limits passed) | `source`, `build_kind` (`new`, `retry`), `prompt_length_bucket`, `plan_step_skipped` (true when no plan was requested in the last 30 minutes; `new` builds only) |
 | `build_ready` | the worker returned a finished build | `duration_ms` (start to ready), `source`, `build_kind` |
 | `build_failed` | any path that marks a build failed, including the stuck-build sweep | `error_code` (`DISPATCH_ERROR`, `WORKER_ERROR`, `NO_RESULT`, `TIMEOUT_STUCK`, `RETRY_EXHAUSTED`, `UNKNOWN`), `status` (worker HTTP status when there is one), `duration_ms`, `source`, `build_kind` |
@@ -20,6 +20,10 @@ One row per event: `id`, `user_id` (the existing user id, nullable), `anon_id` (
 | `publish`, `unpublish`, `project_deleted` | the matching action succeeded | `source` |
 | `rate_limited` | HTTP 429 | `cap` (`hourly_generation`, `daily_generations`, `tweaks_per_project`, `plan_hourly`, `worker_busy`, `worker_quota`), `status`, `source` |
 | `paywall_or_cap_shown` | a plan-tier refusal (HTTP 403 with a required tier) on tweak, private save or fork. While everything is free this should be rare. | `cap` (`tweak_tier`, `private_tier`, `fork_tier`), `status`, `source` |
+| `app_open` | a signed-in person's first API request of a UTC day, from the verified token (`backend/lib/activity.js`; at most one row per person per day, from 2026-11-26). Polls, webhooks, the token upload and account deletion do not count. | `source`, `app_version` (Android only) |
+| `push_token_registered` | the Android app stored its device token (once per person, day and permission state) | `source`, `notifications_enabled` (from the next Android release), `app_version` |
+| `push_result` | one "ready" or "did not finish" notice for a person without an iPhone token: what happened | `push_kind` (`build_ready`, `build_failed`, `other`), `push_outcome` (`sent` = accepted by FCM, `no_token`, `not_configured`, `unregistered`, `failed`), `source` = the platform they signed up on |
+| `push_opened` | a notification was tapped (`POST /api/events/push-open`, from the next Android release) | `push_kind`, `source` |
 | `account_deleted` | an account was deleted. Written without `user_id`. | `source` |
 | `first_build_survey` | the one-question prompt after a person's first ready build (web) | `choice` (`game_or_fun`, `personal_tool`, `work_or_business`, `learning`, `just_trying`, `something_else`, `dismissed`), `source` |
 | `promo_impression`, `promo_tap`, `promo_dismiss` | the Android app showed / the person tapped / dismissed a Telegram promotion (`POST /api/events/promo`, signed-in only; needs the app release after 2.7.2). See `docs/channels-metrics.md` | `surface` (`banner`, `create_card`, `post_build`, `account_row`), `lang` (two letters), `source` |
@@ -37,6 +41,96 @@ Limits to keep in mind when reading numbers:
 - Writes are fire and forget with a 2 second timeout and a cap on pending inserts. Under a database outage events are dropped, not retried, so counts are a slight under-estimate.
 - `build_started` has no project id, so a build's outcome is matched to a start by order per person (see query 2), not by id. Two builds running at once for one person can swap outcomes.
 - Test and owner accounts are excluded in the queries by an email pattern, as in the retention report. Adjust the pattern if you add more.
+
+## Do new creators come back (the measure for return work)
+
+A new creator is a new real account that built, changed or published something on its signup day (UTC).
+Came back the next day: activity on signup day + 1. After a week: activity on any of days 7 to 13 (comparable between cohorts);
+`d7plus` (any day from 7 on) is also shown but grows with cohort age. A day is only counted once it is over.
+
+Two series. **acted** (build, change, publish) has history since 2026-11-10 and is the one to compare with the baseline.
+**opened or acted** adds `app_open` and `login`: complete only for people who signed up from 2026-11-26, when opens started
+to be recorded for both web and Android, so a rise in it against older cohorts is partly better counting.
+
+```sql
+with params as (select date '2026-11-10' as events_start, date '2026-11-26' as opens_start),
+cohort as (  -- real accounts with a VibeBuild row, signed up since usage events began
+    select u.user_id, (u.created_at at time zone 'utc')::date as d0
+    from public.users u
+    join auth.users a on a.id::text = u.user_id, params p
+    where (u.created_at at time zone 'utc')::date >= p.events_start
+      and coalesce(a.email, '') !~* '(sushanth|puzzleverse|kreativekoala|supravoice|sendsmiles|calldesk\.tech|example\.com|vbtest|(^|[^a-z])test([^a-z]|$)|\.[0-9]{5}@gmail|cloudtestlabaccounts)'
+      and lower(coalesce(a.email, '')) not in (select lower(email) from public.simplyapply_admins)
+),
+act as (
+    select user_id, (created_at at time zone 'utc')::date as day,
+           event in ('build_started','tweak_started','publish') as acted
+    from public.app_events
+    where user_id is not null and event in ('build_started','tweak_started','publish','login','app_open')
+),
+per as (
+    select c.user_id, c.d0, c.d0 > p.opens_start - 1 as opens_measured,
+        exists (select 1 from act a where a.user_id = c.user_id and a.acted and a.day = c.d0) as creator,
+        exists (select 1 from act a where a.user_id = c.user_id and a.acted and a.day = c.d0 + 1) as d1_acted,
+        exists (select 1 from act a where a.user_id = c.user_id and a.day = c.d0 + 1) as d1_any,
+        exists (select 1 from act a where a.user_id = c.user_id and a.acted and a.day between c.d0 + 7 and c.d0 + 13) as w2_acted,
+        exists (select 1 from act a where a.user_id = c.user_id and a.day between c.d0 + 7 and c.d0 + 13) as w2_any,
+        exists (select 1 from act a where a.user_id = c.user_id and a.acted and a.day >= c.d0 + 7) as later_acted
+    from cohort c, params p
+),
+today as (select (now() at time zone 'utc')::date as d)
+select g.grp,
+    count(*) filter (where creator)                                         as creators,
+    count(*) filter (where creator and d0 + 1 < t.d)                        as d1_eligible,
+    count(*) filter (where creator and d0 + 1 < t.d and d1_acted)           as d1_back_acted,
+    count(*) filter (where creator and d0 + 1 < t.d and d1_any)             as d1_back_opened_or_acted,
+    count(*) filter (where creator and d0 + 7 < t.d)                        as d7_eligible,
+    count(*) filter (where creator and d0 + 7 < t.d and later_acted)        as d7plus_back_acted,
+    count(*) filter (where creator and d0 + 13 < t.d)                       as week2_eligible,
+    count(*) filter (where creator and d0 + 13 < t.d and w2_acted)          as week2_back_acted,
+    count(*) filter (where creator and d0 + 13 < t.d and w2_any)            as week2_back_opened_or_acted
+from per
+cross join today t
+cross join lateral (values ('all since 2026-11-10'), (case when opens_measured then 'signed up since opens are counted' else 'signed up before' end)) g(grp)
+group by g.grp
+order by g.grp;
+```
+
+Baseline on 2026-11-26, before any change shipped (all since 2026-11-10: 38 new creators):
+
+| | back / eligible |
+|---|---|
+| next day, acted | 9 / 35 (26%) |
+| next day, opened or acted (Android opens mostly not recorded) | 10 / 35 (29%) |
+| any day from 7 on, acted | 0 / 21 |
+| days 7 to 13, acted | 0 / 3 |
+
+Weekly cohorts are tens of people, so a change of a few points is noise.
+
+## Visits to published apps
+
+Table `vibebuild_app_visits` (`project_id`, `day`, `visits`), one number per published app per UTC day, from 2026-11-26.
+Written by the deploy server when a published page runs in a visible browser tab (`deploy-server/visits.js`): bots, framed
+thumbnails, views inside the VibeBuild app and the creator's own browser (after opening the app from VibeBuild) are left out,
+and the same browser counts once per 30 minutes. A creator on another device, or who types the address without ever opening
+the app from VibeBuild, is counted. No visitor data is stored. `projects.play_count` is unrelated and still mixes all of these.
+
+```sql
+select v.day, count(*) as apps_visited, sum(v.visits) as visits, count(distinct p.creator_id) as creators
+from vibebuild_app_visits v join projects p on p.id = v.project_id
+group by 1 order by 1 desc limit 30;
+```
+
+## Notices
+
+```sql
+select (created_at at time zone 'utc')::date as day, props->>'source' as platform, props->>'push_kind' as kind,
+       props->>'push_outcome' as outcome, count(*) as notices, count(distinct user_id) as people
+from app_events where event = 'push_result' group by 1,2,3,4 order by 1 desc, 2,3,4;
+```
+
+`sent` means FCM accepted it, not that the phone showed it: Android 13 and later shows nothing without the notification
+permission (`push_token_registered.notifications_enabled`). Taps are `push_opened`.
 
 ## Outcome checks (for the scheduled failure reporter)
 

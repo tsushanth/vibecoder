@@ -477,4 +477,7 @@
     <string name="telegram_continue">Folytatás Telegramon</string>
     <string name="telegram_settings_title">Telegram-bot</string>
     <string name="telegram_settings_subtitle">Építsd és kapd meg az appjaidat a @Vibebuilder_bot-tal csevegve</string>
+    <string name="visits_card_week">Látogatások 7 nap alatt: %1$d</string>
+    <string name="visits_summary">Látogatások: ma %1$d, 7 nap alatt %2$d, összesen %3$d</string>
+    <string name="visits_hint">Számolás kezdete: %1$s. A botok nem számítanak bele, és a saját látogatásaid sem, ha innen nyitod meg az alkalmazásodat.</string>
 </resources>

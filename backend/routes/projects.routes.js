@@ -776,7 +776,7 @@ router.post('/generate', watchBuild('new'), async (req, res) => {
             if (placeholderProjectId && !systemBusy) {
                 markProjectFailed(supabase, placeholderProjectId, FAIL_CLASS.DISPATCH_ERROR, { phase: 'dispatch_http', httpStatus: workerResponse.status, path: clientWantsStream ? 'generate_stream' : 'generate_async' }).catch(() => {});
                 const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
-                if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', whenAllFree(`"${shortPrompt}..." is queued. Please try again in a few minutes.`, `"${shortPrompt}..." is queued. Pro users skip the line — upgrade for priority builds.`)).catch(() => {});
+                if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', whenAllFree(`"${shortPrompt}..." is queued. Please try again in a few minutes.`, `"${shortPrompt}..." is queued. Pro users skip the line — upgrade for priority builds.`), { kind: 'build_failed' }).catch(() => {});
             }
             // safeWrite is local to proxyWorkerSSE; calling it here threw a ReferenceError that fell into the outer catch (double failure write, and a process crash via the catch's own ReferenceError).
             try { res.write(`data: ${JSON.stringify({ type: 'error', error: errorMsg, systemBusy, projectId: placeholderProjectId })}\n\n`); } catch {}
@@ -914,7 +914,7 @@ router.post('/generate', watchBuild('new'), async (req, res) => {
 
                     // Push notification
                     const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
-                    if (userId) sendPushToUser(userId, 'Project Ready!', `"${shortPrompt}" has been built. Tap to view!`, { projectId: finalProjectId }).catch(() => {});
+                    if (userId) sendPushToUser(userId, 'Project Ready!', `"${shortPrompt}" has been built. Tap to view!`, { projectId: finalProjectId, kind: 'build_ready' }).catch(() => {});
                     else if (deviceToken) sendAPNsPush(deviceToken, 'Project Ready!', `"${shortPrompt}" has been built. Tap to view!`, { projectId: finalProjectId }).catch(() => {});
                 })();
             }
@@ -927,7 +927,7 @@ router.post('/generate', watchBuild('new'), async (req, res) => {
                 console.log(`[generate] Marked ${placeholderProjectId} as failed (no result received)`);
             }).catch(() => {});
             const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
-            if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', whenAllFree(`"${shortPrompt}..." hit a snag. Please try again in a few minutes.`, `"${shortPrompt}..." hit a snag. Pro users get priority — upgrade to skip the queue.`)).catch(() => {});
+            if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', whenAllFree(`"${shortPrompt}..." hit a snag. Please try again in a few minutes.`, `"${shortPrompt}..." hit a snag. Pro users get priority — upgrade to skip the queue.`), { kind: 'build_failed' }).catch(() => {});
         }
         try { res.end(); } catch {}
 
@@ -938,7 +938,7 @@ router.post('/generate', watchBuild('new'), async (req, res) => {
         if (placeholderProjectId) {
             markProjectFailed(supabase, placeholderProjectId, genPhase === 'dispatch' ? FAIL_CLASS.DISPATCH_ERROR : FAIL_CLASS.UNKNOWN, { phase: genPhase, attempt: genPhase === 'dispatch' && req.body?.stream !== true ? 3 : undefined, errorName: error?.name, message: error?.name === 'TimeoutError' ? 'timeout' : (genPhase === 'dispatch' ? 'dispatch failed' : undefined), path: req.body?.stream === true ? 'generate_stream' : 'generate_async' }).catch(() => {});
             const shortPrompt = prompt.length > 40 ? prompt.substring(0, 40) + '...' : prompt;
-            if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', whenAllFree(`"${shortPrompt}..." hit a snag. Please try again in a few minutes.`, `"${shortPrompt}..." hit a snag. Pro users get priority — upgrade to skip the queue.`)).catch(() => {});
+            if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', whenAllFree(`"${shortPrompt}..." hit a snag. Please try again in a few minutes.`, `"${shortPrompt}..." hit a snag. Pro users get priority — upgrade to skip the queue.`), { kind: 'build_failed' }).catch(() => {});
         }
 
         if (res.headersSent) {
@@ -1280,13 +1280,13 @@ router.post('/:id/build-complete', async (req, res) => {
             if (userId) {
                 const { data: proj } = await supabase.from('projects').select('initial_prompt').eq('id', id).single();
                 const shortPrompt = (proj?.initial_prompt || '').substring(0, 40);
-                sendPushToUser(userId, `"${shortPrompt}" is ready!`, 'Tap to open your app', { projectId: id }).catch(() => {});
+                sendPushToUser(userId, `"${shortPrompt}" is ready!`, 'Tap to open your app', { projectId: id, kind: 'build_ready' }).catch(() => {});
             }
         } else {
             // The worker's own message goes to the database only (sanitized), never to the reporter.
             await markProjectFailed(supabase, id, typeof error === 'string' && error ? FAIL_CLASS.WORKER_ERROR : FAIL_CLASS.NO_RESULT, { phase: 'build_complete', path: 'callback', message: typeof error === 'string' ? error : undefined });
             console.log(`[build-complete] Project ${id} failed: ${error}`);
-            if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', whenAllFree('Retry failed. Please try again in a few minutes.', 'Retry failed. Pro users get priority — upgrade to skip the queue.')).catch(() => {});
+            if (userId) sendPushToUser(userId, 'Builders are overloaded 🔥', whenAllFree('Retry failed. Please try again in a few minutes.', 'Retry failed. Pro users get priority — upgrade to skip the queue.'), { kind: 'build_failed' }).catch(() => {});
         }
         res.json({ success: true });
     } catch (err) {
@@ -2697,7 +2697,7 @@ router.post('/api/admin/cleanup-stuck-builds', async (req, res) => {
         for (const project of stuckProjects) {
             if (project.creator_id) {
                 const shortPrompt = (project.initial_prompt || 'Your app').substring(0, 40);
-                sendPushToUser(project.creator_id, 'Builders are overloaded 🔥', whenAllFree(`"${shortPrompt}..." is in queue. Please try again in a few minutes.`, `"${shortPrompt}..." is in queue. Upgrade to Pro for priority builds that skip the line.`)).catch(() => {});
+                sendPushToUser(project.creator_id, 'Builders are overloaded 🔥', whenAllFree(`"${shortPrompt}..." is in queue. Please try again in a few minutes.`, `"${shortPrompt}..." is in queue. Upgrade to Pro for priority builds that skip the line.`), { kind: 'build_failed' }).catch(() => {});
             }
         }
 

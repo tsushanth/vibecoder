@@ -54,6 +54,11 @@
             </intent-filter>
         </service>
 
+        <!-- Notices that arrive while the app is closed go to the app's own channel -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="generation_complete" />
+
         <!-- Facebook SDK Configuration -->
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"

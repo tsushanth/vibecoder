@@ -35,6 +35,11 @@
     "byCreator": "{name} द्वारा",
     "createdAt": "{time} बनाया",
     "views": "{count, plural, one {# व्यू} other {# व्यू}}",
+    "visits": {
+      "row": "7 दिनों में {week} विज़िट",
+      "summary": "विज़िट: आज {today}, पिछले 7 दिनों में {week}, कुल {total}",
+      "hint": "{date} से गिनती। बॉट और उस ब्राउज़र से आपकी अपनी विज़िट शामिल नहीं हैं जिसमें आपने ऐप यहाँ से खोला था।"
+    },
     "remixes": "{count, plural, one {# रीमिक्स} other {# रीमिक्स}}",
     "notPublished": "प्रकाशित नहीं",
     "previewAndChange": "देखें और बदलें",

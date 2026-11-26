@@ -174,7 +174,8 @@ fun AppsScreen(
                             project = project,
                             onClick = { onProjectClick(project.id) },
                             onDelete = { viewModel.deleteProject(project.id) },
-                            onRetry = null
+                            onRetry = null,
+                            visits = uiState.visits[project.id]
                         )
                     }
 

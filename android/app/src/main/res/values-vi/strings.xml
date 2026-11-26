@@ -524,4 +524,7 @@
     <string name="telegram_continue">Tiếp tục trên Telegram</string>
     <string name="telegram_settings_title">Bot Telegram</string>
     <string name="telegram_settings_subtitle">Tạo và nhận ứng dụng của bạn bằng cách trò chuyện với @Vibebuilder_bot</string>
+    <string name="visits_card_week">Lượt truy cập trong 7 ngày: %1$d</string>
+    <string name="visits_summary">Lượt truy cập: hôm nay %1$d, 7 ngày %2$d, tổng %3$d</string>
+    <string name="visits_hint">Đếm từ %1$s. Không tính bot, cũng không tính lượt truy cập của chính bạn khi mở ứng dụng từ đây.</string>
 </resources>

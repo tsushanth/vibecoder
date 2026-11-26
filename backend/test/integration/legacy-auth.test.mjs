@@ -9,19 +9,24 @@ const { supabase } = await import('../../config/database.js');
 // The legacy register and push-token routes trusted a userId in the body, so anyone who knew a user id could overwrite that
 // account's email or redirect its notifications. Real accounts now need the owner's token; anonymous device ids (iOS) still work.
 const rows = new Map(); const ops = [];
+let failTokenWrite = false; const events = [];
 stubSupabase(supabase, (q) => {
     const id = q.filters.find((f) => f[0] === 'eq' && f[1] === 'user_id')?.[2];
     ops.push({ table: q.table, op: q.op, payload: q.payload });
     if (q.table === 'users' && q.op === 'select') return { data: rows.get(id) ?? null, error: null };
     if (q.table === 'users' && q.op === 'insert') { rows.set(q.payload.user_id, q.payload); return { data: q.payload, error: null }; }
     if (q.table === 'users' && q.op === 'upsert') { rows.set(q.payload.user_id, q.payload); return { data: q.payload, error: null }; }
+    if (q.table === 'users' && q.op === 'update' && 'fcm_token' in (q.payload || {})) {
+        if (failTokenWrite) return { data: null, error: { code: '57P01', message: 'down' } };
+        return { data: rows.has(id) ? [{ user_id: id }] : [], error: null };
+    }
     return { data: null, error: null };
 });
 const { createAuthRouter } = await import('../../routes/auth.routes.js');
 let verified = null;
 let srv;
 before(async () => {
-    const app = express(); app.use(express.json()); app.use('/api/auth', createAuthRouter({ verifyUser: async () => verified })); srv = await listen(app);
+    const app = express(); app.use(express.json()); app.use('/api/auth', createAuthRouter({ verifyUser: async () => verified, events: { emit: (event, o) => events.push([event, o]) } })); srv = await listen(app);
 });
 after(async () => { await srv.close(); });
 const post = async (p, body) => { const e = console.error; console.error = () => {}; try { return await fetch(`${srv.base}${p}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }); } finally { console.error = e; } };
@@ -65,6 +70,19 @@ test('push-token: an anonymous device id (no email on its row) still registers w
     reset(); rows.set('anon-1', { user_id: 'anon-1', email: null });
     assert.equal((await post('/api/auth/push-token', { userId: 'anon-1', token: 't', platform: 'ios' })).status, 200);
     reset(); assert.equal((await post('/api/auth/push-token', { userId: 'never-seen', token: 't', platform: 'ios' })).status, 200);
+});
+
+test('push-token (Android): stored, counted once per day and permission state, and a write that stored nothing says so', async () => {
+    reset(); events.length = 0; verified = 'u9'; rows.set('u9', { user_id: 'u9', email: 'u9@x.com' });
+    const send = (extra = {}) => post('/api/auth/push-token', { userId: 'u9', token: 't', platform: 'android', ...extra });
+    assert.equal((await send({ notificationsEnabled: false })).status, 200);
+    assert.equal((await send({ notificationsEnabled: false })).status, 200);
+    assert.equal((await send({ notificationsEnabled: true })).status, 200);
+    assert.deepEqual(events.map(([e, o]) => [e, o.props.notifications_enabled]), [['push_token_registered', false], ['push_token_registered', true]]);
+    rows.delete('u9');
+    assert.equal((await send()).status, 409, 'no account row: the app must try again');
+    rows.set('u9', { user_id: 'u9', email: 'u9@x.com' }); failTokenWrite = true;
+    try { assert.equal((await send()).status, 500); } finally { failTokenWrite = false; }
 });
 
 // ---- first-touch signup source (migration 20261101000000): recorded on creation only, and never able to break signup

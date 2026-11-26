@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kreativekoala.vibecoder.data.model.AppVersion
+import com.kreativekoala.vibecoder.data.model.AppVisits
 import com.kreativekoala.vibecoder.data.model.Project
 import com.kreativekoala.vibecoder.data.model.SseEvent
 import com.kreativekoala.vibecoder.data.repository.AuthRepository
@@ -47,7 +48,9 @@ data class ProjectDetailUiState(
     val apkExportProgress: String = "",
     val adsEnabled: Boolean = false,
     val deploymentId: String? = null,
-    val previewUrl: String? = null
+    val previewUrl: String? = null,
+    val visits: AppVisits? = null,
+    val countingSince: String? = null
 )
 
 @HiltViewModel
@@ -82,6 +85,8 @@ class ProjectDetailViewModel @Inject constructor(
                     }
                 }
 
+                if (project != null) loadVisits(project.id)
+
                 // Load version count after project is available
                 try {
                     val versions = projectRepository.getVersions(projectId)
@@ -95,6 +100,13 @@ class ProjectDetailViewModel @Inject constructor(
                     it.copy(isLoading = false, errorMessage = e.message)
                 }
             }
+        }
+    }
+
+    /** Visit counts are extra: without them the screen is as before. */
+    private suspend fun loadVisits(projectId: String) {
+        runCatching { projectRepository.getVisits() }.onSuccess { response ->
+            _uiState.update { it.copy(visits = response.byProject()[projectId], countingSince = response.countingSince) }
         }
     }
 
