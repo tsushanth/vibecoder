@@ -1,5 +1,10 @@
 # Deployed releases (Play)
 
+## Worker (Hetzner) 2026-11-26: browser check isolation
+- The build-time browser check now serves the app from memory on its own made-up origin and makes no outside requests. One file changed: `worker/lib/browsercheck.js` (live file identical to this branch).
+- Checks: worker tests 379/379 (APK tests not run); isolation, own-script and error-detection checks run with the box's browser; restart at activeGenerations 0; one probe build ok with no check warnings.
+- Rollback: restore `lib/browsercheck.js.bak.before-checkiso.1795705213` in `/home/vibecoder/worker`, restart pm2 `vibecoder-worker`.
+
 ## Worker (Hetzner) 2026-11-26: command-line builder defaults
 - The command-line builder is now off unless `CLAUDE_CLI_BUILDS_ENABLED=true` (not set). The direct generator, which serves every build at `DIRECT_PERCENT=100`, is unchanged. Setting `DIRECT_PERCENT=0` alone now makes builds fail: that path also needs the flag and a reachable broker.
 - New `worker/lib/cli.js`; edits to `server.js` and `brokerReady.js` (default broker address is now loopback). Applied to the box as a minimal patch because the deployed `server.js` differs from `worker/server.js` and must not be overwritten.
