@@ -7,6 +7,7 @@ import type { ProjectSummary, BrowseResponse } from '@/types/api';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { thumbSrc } from '@/lib/thumbProxy';
+import { canRemix } from '@/lib/remix';
 
 // List pieces shared by Apps (/dashboard) and Explore (/community, /browse): a small phone-shaped preview, a row per app,
 // and the Explore list with search, categories and sort as on Android.
@@ -458,7 +459,7 @@ export function ExploreList({
         ) : (
           <ul className="grid grid-cols-1 gap-x-10 xl:grid-cols-2">
             {visible.map((p) => (
-              <ExploreRow key={p.id} project={p} userId={userId} onOpen={() => open(p)} onRemix={() => onRemix(p.id)} />
+              <ExploreRow key={p.id} project={p} userId={userId} onOpen={() => open(p)} onRemix={canRemix(p.creator_id, userId) ? () => onRemix(p.id) : undefined} />
             ))}
           </ul>
         )}

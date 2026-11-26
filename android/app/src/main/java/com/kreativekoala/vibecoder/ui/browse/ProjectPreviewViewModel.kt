@@ -6,6 +6,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kreativekoala.vibecoder.data.model.Project
+import com.kreativekoala.vibecoder.data.remote.SseHttpErrors
 import com.kreativekoala.vibecoder.data.repository.AuthRepository
 import com.kreativekoala.vibecoder.data.repository.ProjectRepository
 import com.kreativekoala.vibecoder.util.ZipExtractor
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.HttpException
 import java.io.File
 import javax.inject.Inject
 
@@ -28,6 +30,7 @@ data class ProjectPreviewUiState(
     val showPreview: Boolean = false,
     val isForkingProject: Boolean = false,
     val forkedProjectId: String? = null,
+    val canRemix: Boolean = false, // false for your own app: the server refuses to fork it
     val errorMessage: String? = null
 )
 
@@ -47,7 +50,8 @@ class ProjectPreviewViewModel @Inject constructor(
 
             try {
                 val project = projectRepository.getProject(projectId)
-                _uiState.update { it.copy(project = project, isLoading = false) }
+                val canRemix = project != null && project.creatorId != authRepository.currentUser?.uid
+                _uiState.update { it.copy(project = project, isLoading = false, canRemix = canRemix) }
 
                 // Auto-extract bundle for preview
                 if (project?.bundle != null) {
@@ -65,12 +69,13 @@ class ProjectPreviewViewModel @Inject constructor(
     }
 
     fun forkProject() {
+        if (!_uiState.value.canRemix) return
         val project = _uiState.value.project ?: return
         val userId = authRepository.currentUser?.uid ?: return
         val userName = authRepository.currentUser?.displayName
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isForkingProject = true) }
+            _uiState.update { it.copy(isForkingProject = true, errorMessage = null) }
 
             try {
                 val forkedId = projectRepository.forkProject(
@@ -86,10 +91,12 @@ class ProjectPreviewViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
+                // Prefer the server's own sentence over "HTTP 400".
+                val serverSays = (e as? HttpException)?.response()?.errorBody()?.string()?.let(SseHttpErrors::serverMessage)
                 _uiState.update {
                     it.copy(
                         isForkingProject = false,
-                        errorMessage = appContext.appString(R.string.err_fork_failed, e.message ?: "")
+                        errorMessage = appContext.appString(R.string.err_fork_failed, serverSays ?: e.message ?: "")
                     )
                 }
             }

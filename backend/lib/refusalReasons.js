@@ -7,6 +7,7 @@ export const REFUSAL_REASONS = Object.freeze({
     worker_busy: 'the build server had no free capacity',
     repo_init_failed: 'the project repository could not be created',
     no_bundle: 'the app to copy has no stored code',
+    own_project: 'the person tried to remix their own app (the client should not offer it)',
     auth_required: 'the sign-in token was missing or not valid',
     forbidden: 'the caller does not own this account or project',
     not_found: 'the project does not exist',

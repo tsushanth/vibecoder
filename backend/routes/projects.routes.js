@@ -2519,6 +2519,7 @@ router.post('/:id/fork', watchBuild('fork'), async (req, res) => {
 
         // 2. Cannot fork your own project
         if (original.creator_id === userId) {
+            refuse(res, 'own_project');
             return res.status(400).json({ error: 'Cannot fork your own project. Use tweak instead.' });
         }
 

@@ -32,8 +32,17 @@ fun ProjectPreviewScreen(
         viewModel.loadProject(projectId)
     }
 
+    // A failed remix must be visible while the preview fills the screen (the full-screen error below only shows without one).
+    val snackbar = remember { SnackbarHostState() }
+    val hasPreview = uiState.bundleDir != null || uiState.project?.publishedUrl != null
+    LaunchedEffect(uiState.errorMessage, hasPreview) {
+        val message = uiState.errorMessage
+        if (hasPreview && message != null) snackbar.showSnackbar(message)
+    }
+
     Scaffold(
         containerColor = DarkBackground,
+        snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
                 title = { Text(uiState.project?.title ?: stringResource(R.string.preview_screen_title)) },
@@ -48,7 +57,7 @@ fun ProjectPreviewScreen(
                 },
                 actions = {
                     // Fork button
-                    if (uiState.project != null) {
+                    if (uiState.canRemix) {
                         Button(
                             onClick = { viewModel.forkProject() },
                             enabled = !uiState.isForkingProject && uiState.forkedProjectId == null,
