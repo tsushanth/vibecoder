@@ -4,7 +4,7 @@
 // the wrapper does and reports only whether it got one (the token itself is never returned or logged).
 import * as fs from 'fs';
 
-const DEFAULT_BROKER_URL = 'http://178.156.192.31:3460';
+const DEFAULT_BROKER_URL = 'http://127.0.0.1:3460';
 const SECRET_FILE = '/etc/claude-broker-secret';
 
 /**

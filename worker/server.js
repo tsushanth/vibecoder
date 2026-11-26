@@ -16,6 +16,7 @@ import * as os from 'os';
 import crypto from 'crypto';
 import zlib from 'zlib';
 import { checkBuildPathReady } from './brokerReady.js';
+import { cliBuildsEnabled, cliSpawnOptions, CLI_DISABLED_ERROR } from './lib/cli.js';
 import { OpenRouterClient } from './lib/llm.js';
 import { generateApp } from './lib/generate.js';
 import { fullChecks } from './lib/browsercheck.js';
@@ -379,21 +380,18 @@ function listProjectFiles(projectDir) {
 // ============================================
 
 function runClaudeCommand(claudePath, prompt, cwd, requestId, maxTurns = 20) {
+    if (!cliBuildsEnabled()) {
+        console.error(`[${requestId}] ${CLI_DISABLED_ERROR}: no CLI process started`);
+        return Promise.resolve({ success: false, output: '', error: CLI_DISABLED_ERROR, quotaError: false });
+    }
     return new Promise((resolve) => {
-        const args = [
-            '-p', prompt,
-            '--dangerously-skip-permissions',
-            '--output-format', 'stream-json',
-            '--max-turns', String(maxTurns),
-            '--verbose',
-            '--model', 'claude-sonnet-4-5'
-        ];
+        const { args, env } = cliSpawnOptions({ prompt, maxTurns, home: os.homedir() });
 
         console.log(`[${requestId}] Claude CLI starting (maxTurns: ${maxTurns})...`);
 
         const proc = spawn(claudePath, args, {
             cwd,
-            env: (() => { const { ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN, ...rest } = process.env; return { ...rest, PATH: `${process.env.PATH || ''}:/usr/bin:/usr/local/bin`, HOME: os.homedir() }; })(),
+            env,
             stdio: ['ignore', 'pipe', 'pipe']
         });
 
@@ -461,7 +459,8 @@ function authMiddleware(req, res, next) {
 
 // Readiness of the build path. Builds routed to the direct generator do not need the Claude broker; the rest do. Authenticated (reveals broker state).
 app.get('/ready', authMiddleware, async (req, res) => {
-    const out = await checkBuildPathReady({ directPercent: DIRECT_PERCENT, directLlm });
+    const off = async () => ({ ready: false, mode: 'broker', reason: CLI_DISABLED_ERROR });
+    const out = await checkBuildPathReady({ directPercent: DIRECT_PERCENT, directLlm, ...(cliBuildsEnabled() ? {} : { checkBroker: off }) });
     res.status(out.ready ? 200 : 503).json(out);
 });
 

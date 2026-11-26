@@ -1,5 +1,11 @@
 # Deployed releases (Play)
 
+## Worker (Hetzner) 2026-11-26: command-line builder defaults
+- The command-line builder is now off unless `CLAUDE_CLI_BUILDS_ENABLED=true` (not set). The direct generator, which serves every build at `DIRECT_PERCENT=100`, is unchanged. Setting `DIRECT_PERCENT=0` alone now makes builds fail: that path also needs the flag and a reachable broker.
+- New `worker/lib/cli.js`; edits to `server.js` and `brokerReady.js` (default broker address is now loopback). Applied to the box as a minimal patch because the deployed `server.js` differs from `worker/server.js` and must not be overwritten.
+- Checks: worker tests 376/376 on this branch (APK tests not run); the 5 new tests also pass on a copy of the deployed files; restart at activeGenerations 0 with no open connections; after it `/health` and `/ready` 200 and one probe build succeeded.
+- Rollback: restore `server.js.bak.before-clilock.1795704313` and `brokerReady.js.bak.before-clilock.1795704313` in `/home/vibecoder/worker`, delete `lib/cli.js`, restart pm2 `vibecoder-worker`.
+
 ## Remix on your own app 2026-11-26 (PR #160, main b7b986b): backend v75, web v40, Android not released
 - Cause of the two `build_refused fork invalid_request` alerts (2026-11-25 23:40 UTC, an internal account on Android): Remix was offered on the person's own app, which the API refuses with 400. Over a loaded preview Android showed nothing. The refusal is now named `own_project`; Android and the web Explore list no longer offer the button on your own app.
 - Fly `vibecoder-api` v74 -> v75, image deployment-01M8ARQJGXHYHN4HD75YRGDQYF; `vibebuild-web` v39 -> v40, image deployment-01M8ARRATGYW63PXVB0JG3Z4QD. `flyctl deploy --remote-only` from a clean detached worktree of origin/main b7b986b (backend tree 7985d7cb, web tree 155a9807). Delta from the previous releases: only #160. No migration, no secret touched.
