@@ -1,32 +1,51 @@
 // Runtime check: load the app in a headless browser, fill inputs, click every control, and report uncaught page errors.
 // Fails open: if no browser is configured or the harness itself breaks, the build is not blocked.
-import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
-import { writeFiles } from './files.js';
 import { staticChecks } from './checks.js';
 import { injectSdk, loadVibeSdk, usesBackendSdk, usesDeviceSdk } from './vibe.js';
 import { DEVICE_FAKE_SCRIPT, FAKE_SCRIPT } from './vibeFake.js';
 
 const CONTROLS = 'button,[role=button],input[type=submit],a[href^="#"],[onclick]';
 
+// The app under check is untrusted code. It is served from memory on a made-up web origin, so the browser gives it no access
+// to local files, and nothing it requests leaves the browser.
+export const CHECK_ORIGIN = 'https://app.check.invalid';
+const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.svg': 'image/svg+xml' };
+// All traffic, loopback included, goes to a proxy that does not exist. This also covers what request interception does not
+// see (WebSockets, pop-ups, workers).
+const LAUNCH_ARGS = ['--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--proxy-server=http://127.0.0.1:9', '--proxy-bypass-list=<-loopback>', '--force-webrtc-ip-handling-policy=disable_non_proxied_udp'];
+
+async function serveFromMemory(page, files) {
+    await page.setRequestInterception(true);
+    page.on('request', (req) => {
+        const answer = () => {
+            const url = new URL(req.url());
+            if (url.protocol === 'data:' || url.protocol === 'blob:') return req.continue();
+            if (url.origin !== CHECK_ORIGIN) return req.abort('blockedbyclient');
+            const name = decodeURIComponent(url.pathname.slice(1)) || 'index.html';
+            if (!Object.hasOwn(files, name)) return req.respond({ status: 404, contentType: 'text/plain', body: 'not found' });
+            return req.respond({ status: 200, contentType: `${TYPES[path.extname(name).toLowerCase()] || 'text/plain'}; charset=utf-8`, body: files[name] });
+        };
+        Promise.resolve().then(answer).catch(() => req.abort().catch(() => {}));
+    });
+}
+
 export async function runtimeProblems(files, { chrome = process.env.CHROME_PATH, timeoutMs = 25000, maxClicks = 40 } = {}) {
     if (!chrome) return [];
     let puppeteer;
     try { puppeteer = (await import('puppeteer-core')).default; } catch { console.warn('[browsercheck] puppeteer-core missing, build not checked'); return []; }
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vb-rt-'));
     let browser;
     const errs = [];
     try {
-        writeFiles(dir, files);
-        browser = await puppeteer.launch({ executablePath: chrome, headless: true, args: ['--allow-file-access-from-files', '--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu'] });
+        browser = await puppeteer.launch({ executablePath: chrome, headless: true, args: LAUNCH_ARGS });
         const page = await browser.newPage();
+        await serveFromMemory(page, files);
         page.on('pageerror', (e) => errs.push(String(e.message).slice(0, 120)));
         // unhandled promise rejections from the vibe SDK (e.g. an unguarded vibe.ai.ask) are real bugs; other rejections (audio.play and friends) are not reported
         await page.evaluateOnNewDocument(() => { window.__vbRej = []; window.addEventListener('unhandledrejection', (e) => { window.__vbRej.push(String((e.reason && e.reason.message) || e.reason).slice(0, 120)); }); });
         page.on('dialog', (d) => d.dismiss().catch(() => {}));
         const work = (async () => {
-            await page.goto('file://' + path.join(dir, 'index.html'), { waitUntil: 'load', timeout: 12000 });
+            await page.goto(`${CHECK_ORIGIN}/index.html`, { waitUntil: 'load', timeout: 12000 });
             await new Promise((r) => setTimeout(r, 400));
             await page.evaluate(() => {
                 document.querySelectorAll('input:not([type=checkbox]):not([type=radio]):not([type=file]),textarea').forEach((i) => {
@@ -56,7 +75,6 @@ export async function runtimeProblems(files, { chrome = process.env.CHROME_PATH,
         if (!errs.length) { console.warn(`[browsercheck] unavailable, build not checked: ${String(e.message).slice(0, 120)}`); return []; } // harness trouble, not an app bug
     } finally {
         try { await browser?.close(); } catch { /* ignore */ }
-        fs.rmSync(dir, { recursive: true, force: true });
     }
     return [...new Set(errs)].slice(0, 3).map((m) => `runtime error when the page loads or a control is clicked: ${m}`);
 }
