@@ -9,9 +9,13 @@ import nodemailer from 'nodemailer';
 
 const ALERT_EMAIL = 'sushanthtiruvaipati@gmail.com';
 const FROM_EMAIL = 'puzzleverseai@gmail.com';
-const EMAIL_PASS = 'duoo ukes bjkx nanj';
+const EMAIL_PASS = process.env.HEALTHCHECK_EMAIL_PASS;
 
 async function sendAlert(subject, body) {
+    if (!EMAIL_PASS) {
+        console.error('[healthcheck] HEALTHCHECK_EMAIL_PASS is not set: alert not mailed');
+        return;
+    }
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: { user: FROM_EMAIL, pass: EMAIL_PASS }
