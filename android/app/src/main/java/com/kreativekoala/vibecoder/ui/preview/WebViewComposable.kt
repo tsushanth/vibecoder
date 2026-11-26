@@ -93,6 +93,8 @@ fun UrlWebViewComposable(
                         // its disk cache after redirects/reloads. NO_CACHE
                         // forces a network fetch every load.
                         cacheMode = android.webkit.WebSettings.LOAD_NO_CACHE
+                        // Views inside this app are not visits to a published app (the server leaves this marker out).
+                        userAgentString = "$userAgentString VibeBuildApp"
                     }
 
                     webViewClient = WebViewClient()

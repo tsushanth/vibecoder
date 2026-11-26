@@ -477,4 +477,7 @@
     <string name="telegram_continue">Continuă pe Telegram</string>
     <string name="telegram_settings_title">Bot Telegram</string>
     <string name="telegram_settings_subtitle">Construiește și primește aplicațiile discutând cu @Vibebuilder_bot</string>
+    <string name="visits_card_week">Vizite în 7 zile: %1$d</string>
+    <string name="visits_summary">Vizite: %1$d azi, %2$d în 7 zile, %3$d în total</string>
+    <string name="visits_hint">Numărate din %1$s. Boții nu sunt numărați și nici vizitele tale când îți deschizi aplicația de aici.</string>
 </resources>

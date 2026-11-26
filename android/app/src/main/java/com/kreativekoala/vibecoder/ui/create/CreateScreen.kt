@@ -46,7 +46,8 @@ fun CreateScreen(
     modifier: Modifier = Modifier,
     onNavigateToSubscriptions: () -> Unit = {},
     onNavigateToHardPaywall: () -> Unit = {},
-    viewModel: CreateViewModel = hiltViewModel()
+    viewModel: CreateViewModel = hiltViewModel(),
+    pushViewModel: PushViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     // The view model outlives a language change; reload the idea chips and templates in the new language.
@@ -127,6 +128,7 @@ fun CreateScreen(
                 isSaved = uiState.savedProjectId != null,
                 isDeploying = uiState.isDeploying,
                 deployedUrl = uiState.deployedUrl,
+                openUrl = uiState.ownerOpenUrl,
                 showDeployDialog = uiState.showDeployDialog,
                 onDeployConfirm = { subdomain -> viewModel.publishProject(subdomain) },
                 onDeployDismiss = { viewModel.dismissDeployDialog() },
@@ -245,7 +247,8 @@ fun CreateScreen(
                 onNewApp = { viewModel.newChat() },
                 onTweak = { viewModel.tweakProject(it) },
                 onUpgrade = onNavigateToSubscriptions,
-                modifier = Modifier
+                modifier = Modifier,
+                whileBuilding = { NotifyWhenReady(onAllowed = pushViewModel::onNotificationsAllowed) }
             )
         } else {
         // Input mode

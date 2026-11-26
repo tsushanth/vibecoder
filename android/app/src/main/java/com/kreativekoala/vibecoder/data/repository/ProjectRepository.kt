@@ -29,6 +29,9 @@ class ProjectRepository @Inject constructor(
         return response.projects
     }
 
+    /** Visit counts per published project. Throws when they could not be read. */
+    suspend fun getVisits(): VisitsResponse = api.getVisits()
+
     /** Real total for the user, paging /my (max 100 per page) until exhausted. */
     suspend fun countMyProjects(userId: String): Int {
         val pageSize = 100

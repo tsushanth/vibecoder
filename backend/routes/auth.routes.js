@@ -11,7 +11,7 @@ import { noteSignup } from '../lib/outreachEventsInstance.js';
 // `externalCleanup` removes what lives outside the main database (GitHub repos, screenshots, stored keys); injectable for tests.
 const defaultExternalCleanup = (args) => deleteAccountExternalData({ ...args, storage: (supabaseAdmin || supabase).storage });
 
-export function createAuthRouter({ verifyUser = verifiedUserId, externalCleanup = defaultExternalCleanup, admin = supabaseAdmin } = {}) {
+export function createAuthRouter({ verifyUser = verifiedUserId, externalCleanup = defaultExternalCleanup, admin = supabaseAdmin, events = appEvents } = {}) {
 const router = express.Router();
 
 // DELETE /api/auth/account - Delete user account and all associated data
@@ -144,9 +144,10 @@ router.post('/register', async (req, res) => {
 });
 
 // POST /api/auth/push-token - Register or update FCM/APNs device token
+const tokenReports = new Set(); // one usage event per person, day and permission state (apps send the token at every start)
 router.post('/push-token', async (req, res) => {
     try {
-        const { userId, token, platform } = req.body;
+        const { userId, token, platform, notificationsEnabled } = req.body;
         if (!userId || !token) {
             return res.status(400).json({ error: 'userId and token are required' });
         }
@@ -154,12 +155,22 @@ router.post('/push-token', async (req, res) => {
         if (await mayActAs(req, userId, verifyUser) !== 'ok') return res.status(403).json({ error: 'Sign in as this user to register a device.' });
 
         if (platform === 'android') {
-            // Store FCM token in users table fcm_token column (may not exist yet - soft fail)
-            const { error } = await supabase
+            const { data, error } = await supabase
                 .from('users')
                 .update({ fcm_token: token, updated_at: new Date().toISOString() })
-                .eq('user_id', userId);
-            if (error) console.warn('[push-token] FCM token store failed (column may not exist yet):', error.message);
+                .eq('user_id', userId)
+                .select('user_id');
+            // Say so when nothing was stored, so the app tries again.
+            if (error) throw error;
+            if (!data?.length) return res.status(409).json({ error: 'No account to attach this device to yet.' });
+            const enabled = typeof notificationsEnabled === 'boolean' ? notificationsEnabled : undefined;
+            const key = `${userId}|${new Date().toISOString().slice(0, 10)}|${enabled}`;
+            if (!tokenReports.has(key)) {
+                tokenReports.add(key);
+                if (tokenReports.size > 10_000) tokenReports.delete(tokenReports.values().next().value);
+                const version = req.headers['x-app-version'];
+                events.emit('push_token_registered', { userId, props: { source: 'android', ...(enabled !== undefined && { notifications_enabled: enabled }), ...(version && { app_version: version }) } });
+            }
         } else {
             // iOS APNs token - use existing push_tokens table schema
             const { error } = await supabase
@@ -171,7 +182,7 @@ router.post('/push-token', async (req, res) => {
 
         res.json({ success: true });
     } catch (error) {
-        console.error('Push token error:', error);
+        console.error('Push token error:', error.message);
         res.status(500).json({ error: 'Failed to register push token' });
     }
 });

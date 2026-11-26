@@ -35,6 +35,11 @@
     "byCreator": "作者：{name}",
     "createdAt": "{time}创建",
     "views": "{count, plural, other {# 次浏览}}",
+    "visits": {
+      "row": "7 天内访问 {week} 次",
+      "summary": "访问次数：今天 {today}，近 7 天 {week}，累计 {total}",
+      "hint": "自 {date} 起统计。不含机器人访问，也不含您在本页打开过应用的浏览器中的访问。"
+    },
     "remixes": "{count, plural, other {# 次改编}}",
     "notPublished": "未发布",
     "previewAndChange": "预览并修改",

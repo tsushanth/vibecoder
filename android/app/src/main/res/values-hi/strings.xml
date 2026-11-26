@@ -526,4 +526,7 @@
     <string name="telegram_continue">Telegram पर जारी रखें</string>
     <string name="telegram_settings_title">Telegram बॉट</string>
     <string name="telegram_settings_subtitle">@Vibebuilder_bot से चैट करके अपने ऐप बनाएँ और पाएँ</string>
+    <string name="visits_card_week">7 दिनों में विज़िट: %1$d</string>
+    <string name="visits_summary">विज़िट: आज %1$d, 7 दिनों में %2$d, कुल %3$d</string>
+    <string name="visits_hint">%1$s से गिनती। बॉट नहीं गिने जाते, और यहाँ से अपना ऐप खोलने पर आपकी अपनी विज़िट भी नहीं।</string>
 </resources>

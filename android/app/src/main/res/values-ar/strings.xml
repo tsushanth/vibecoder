@@ -526,4 +526,7 @@
     <string name="telegram_continue">تابع على Telegram</string>
     <string name="telegram_settings_title">روبوت Telegram</string>
     <string name="telegram_settings_subtitle">ابنِ تطبيقاتك واحصل عليها عبر الدردشة مع @Vibebuilder_bot</string>
+    <string name="visits_card_week">الزيارات خلال 7 أيام: %1$d</string>
+    <string name="visits_summary">الزيارات: %1$d اليوم، %2$d خلال 7 أيام، %3$d إجمالاً</string>
+    <string name="visits_hint">العدّ منذ %1$s. لا تُحتسب الروبوتات ولا زياراتك أنت عند فتح تطبيقك من هنا.</string>
 </resources>

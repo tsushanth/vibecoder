@@ -477,4 +477,7 @@
     <string name="telegram_continue">Pokračovat v Telegramu</string>
     <string name="telegram_settings_title">Telegram bot</string>
     <string name="telegram_settings_subtitle">Vytvářej a získávej své aplikace chatem s @Vibebuilder_bot</string>
+    <string name="visits_card_week">Návštěvy za 7 dní: %1$d</string>
+    <string name="visits_summary">Návštěvy: %1$d dnes, %2$d za 7 dní, %3$d celkem</string>
+    <string name="visits_hint">Počítá se od %1$s. Nezapočítávají se boti ani vaše vlastní návštěvy, když aplikaci otevřete odsud.</string>
 </resources>

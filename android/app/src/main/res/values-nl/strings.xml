@@ -524,4 +524,7 @@
     <string name="telegram_continue">Verdergaan op Telegram</string>
     <string name="telegram_settings_title">Telegram-bot</string>
     <string name="telegram_settings_subtitle">Bouw en ontvang je apps door te chatten met @Vibebuilder_bot</string>
+    <string name="visits_card_week">Bezoeken in 7 dagen: %1$d</string>
+    <string name="visits_summary">Bezoeken: %1$d vandaag, %2$d in 7 dagen, %3$d totaal</string>
+    <string name="visits_hint">Geteld vanaf %1$s. Bots tellen niet mee, en je eigen bezoeken ook niet als je je app vanaf hier opent.</string>
 </resources>

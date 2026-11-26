@@ -524,4 +524,7 @@
     <string name="telegram_continue">Kontynuuj w Telegramie</string>
     <string name="telegram_settings_title">Bot Telegram</string>
     <string name="telegram_settings_subtitle">Twórz i odbieraj aplikacje, czatując z @Vibebuilder_bot</string>
+    <string name="visits_card_week">Odwiedziny w 7 dni: %1$d</string>
+    <string name="visits_summary">Odwiedziny: dziś %1$d, w 7 dni %2$d, łącznie %3$d</string>
+    <string name="visits_hint">Liczone od %1$s. Nie liczymy botów ani Twoich własnych odwiedzin, gdy otwierasz aplikację stąd.</string>
 </resources>

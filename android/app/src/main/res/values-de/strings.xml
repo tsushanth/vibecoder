@@ -526,4 +526,7 @@
     <string name="telegram_continue">In Telegram fortfahren</string>
     <string name="telegram_settings_title">Telegram-Bot</string>
     <string name="telegram_settings_subtitle">Baue und erhalte deine Apps im Chat mit @Vibebuilder_bot</string>
+    <string name="visits_card_week">Besuche in 7 Tagen: %1$d</string>
+    <string name="visits_summary">Besuche: %1$d heute, %2$d in 7 Tagen, %3$d insgesamt</string>
+    <string name="visits_hint">Gezählt seit %1$s. Bots zählen nicht, ebenso deine eigenen Besuche, wenn du deine App von hier aus öffnest.</string>
 </resources>

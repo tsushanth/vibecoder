@@ -83,7 +83,7 @@ class CreateViewModelTest {
     @Before fun setUp() {
         Dispatchers.setMain(StandardTestDispatcher())
         mockkObject(NotificationHelper)
-        every { NotificationHelper.showGenerationComplete(any(), any(), any()) } just Runs
+        every { NotificationHelper.showGenerationComplete(any(), any(), any(), any(), any()) } just Runs
         every { context.getSharedPreferences(any(), any()) } answers { prefs(firstArg()) }
         // user-visible text comes from string resources; the fake returns the resource id so tests can tell which one was used
         every { context.getString(any<Int>()) } answers { "res:${firstArg<Int>()}" }
@@ -165,7 +165,7 @@ class CreateViewModelTest {
         assertEquals("p1", s.savedProjectId)
         assertEquals(100.0, s.progressPercent, 0.0)
         assertEquals("https://preview/x", s.previewUrl)
-        verify { NotificationHelper.showGenerationComplete(any(), any(), any()) }
+        verify { NotificationHelper.showGenerationComplete(any(), any(), any(), "p1", any()) }
         coVerify { userPrefs.clearPendingGeneration() }
     }
 

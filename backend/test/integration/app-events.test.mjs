@@ -67,8 +67,9 @@ const nothingPrivate = () => { const all = JSON.stringify(events); for (const ba
 test('generate (web stream) -> build_started then build_ready with a duration; no prompt text anywhere', async () => {
     worker = () => sse({ type: 'result', bundle: 'QUJD', bundleSize: 3, files: [], generationTime: 5 });
     const r = await call('POST', '/api/projects/generate', { prompt: SECRET, userId: USER, stream: true, userName: 'Jane secretuser@example.com' }); await r.text();
-    await until(() => of('build_ready').length);
-    assert.deepEqual(names(), ['build_started', 'build_ready']);
+    await until(() => of('build_ready').length && of('push_result').length);
+    assert.deepEqual(names(), ['build_started', 'build_ready', 'push_result']);
+    assert.deepEqual(of('push_result')[0].props, { push_kind: 'build_ready', push_outcome: 'no_token' });
     assert.deepEqual(of('build_started')[0], { user_id: USER, anon_id: null, event: 'build_started', props: { source: 'web', build_kind: 'new', prompt_length_bucket: '40_99', plan_step_skipped: true } });
     const ready = of('build_ready')[0]; assert.equal(ready.user_id, USER); assert.equal(ready.props.source, 'web'); assert.ok(ready.props.duration_ms >= 0 && ready.props.duration_ms < 10_000);
     nothingPrivate();
@@ -102,8 +103,9 @@ test('plan_step_skipped is false when the person asked for a plan first', async 
 
 test('generate: worker error / no result -> build_failed with the class code only', async () => {
     worker = () => sse({ type: 'error', error: `could not build "${SECRET}" see https://x.test/a` });
-    await (await call('POST', '/api/projects/generate', { prompt: SECRET, userId: USER, stream: true })).text(); await until(() => of('build_failed').length);
-    assert.deepEqual(names(), ['build_started', 'build_failed']);
+    await (await call('POST', '/api/projects/generate', { prompt: SECRET, userId: USER, stream: true })).text(); await until(() => of('build_failed').length && of('push_result').length);
+    assert.deepEqual(names().filter((n) => n !== 'push_result'), ['build_started', 'build_failed']);
+    assert.equal(of('push_result')[0].props.push_kind, 'build_failed');
     assert.equal(of('build_failed')[0].props.error_code, 'WORKER_ERROR'); assert.equal(of('build_failed')[0].user_id, USER); assert.ok(of('build_failed')[0].props.duration_ms >= 0);
     nothingPrivate();
     events = []; worker = () => new Response('boom', { status: 500 });
@@ -205,6 +207,19 @@ test('survey: eligibility needs a token, an own project and no other ready build
     assert.deepEqual(await (await get()).json(), { eligible: false }, 'never asked twice');
     surveyRows = 0; tableMissing = true; assert.deepEqual(await (await get()).json(), { eligible: false }, 'not asked when the answer could not be stored');
     assert.equal((await call('POST', '/api/events/first-build-survey', { choice: 'dismissed' })).status, 503);
+});
+
+test('push-open: a signed-in app records a tapped notification; signed-out callers and unknown kinds record nothing', async () => {
+    const post = (body, headers = { 'user-agent': 'okhttp/4.12.0' }) => call('POST', '/api/events/push-open', body, headers);
+    verified = null;
+    assert.equal((await call('POST', '/api/events/push-open', { kind: 'build_ready' })).status, 401);
+    assert.equal(of('push_opened').length, 0);
+    verified = USER;
+    for (const body of [{ kind: SECRET }, {}, { kind: 'promo' }]) assert.equal((await post(body)).status, 400);
+    assert.equal((await post({ kind: 'build_ready', projectId: PID, title: SECRET })).status, 200);
+    await until(() => of('push_opened').length);
+    assert.deepEqual(of('push_opened'), [{ user_id: USER, anon_id: null, event: 'push_opened', props: { push_kind: 'build_ready', source: 'android' } }]);
+    nothingPrivate();
 });
 
 test('promo events: a signed-in app records impression / tap / dismiss with only surface, lang and source', async () => {

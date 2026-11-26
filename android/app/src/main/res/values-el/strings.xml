@@ -477,4 +477,7 @@
     <string name="telegram_continue">Συνέχεια στο Telegram</string>
     <string name="telegram_settings_title">Bot Telegram</string>
     <string name="telegram_settings_subtitle">Φτιάξε και πάρε τις εφαρμογές σου συνομιλώντας με το @Vibebuilder_bot</string>
+    <string name="visits_card_week">Επισκέψεις σε 7 ημέρες: %1$d</string>
+    <string name="visits_summary">Επισκέψεις: %1$d σήμερα, %2$d σε 7 ημέρες, %3$d συνολικά</string>
+    <string name="visits_hint">Μέτρηση από %1$s. Δεν μετρώνται τα bot ούτε οι δικές σας επισκέψεις όταν ανοίγετε την εφαρμογή σας από εδώ.</string>
 </resources>

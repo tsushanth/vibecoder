@@ -524,4 +524,7 @@
     <string name="telegram_continue">Teruskan di Telegram</string>
     <string name="telegram_settings_title">Bot Telegram</string>
     <string name="telegram_settings_subtitle">Bina dan dapatkan apl anda dengan berbual bersama @Vibebuilder_bot</string>
+    <string name="visits_card_week">Lawatan dalam 7 hari: %1$d</string>
+    <string name="visits_summary">Lawatan: %1$d hari ini, %2$d dalam 7 hari, jumlah %3$d</string>
+    <string name="visits_hint">Dikira sejak %1$s. Bot tidak dikira, begitu juga lawatan anda sendiri apabila membuka aplikasi dari sini.</string>
 </resources>

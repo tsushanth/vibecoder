@@ -35,6 +35,11 @@
     "byCreator": "Par {name}",
     "createdAt": "Créée {time}",
     "views": "{count, plural, one {# vue} other {# vues}}",
+    "visits": {
+      "row": "{week, plural, one {# visite} other {# visites}} en 7 jours",
+      "summary": "Visites : {today} aujourd’hui, {week} sur les 7 derniers jours, {total} au total",
+      "hint": "Comptées depuis le {date}. Les robots sont exclus, ainsi que vos propres visites depuis un navigateur où vous avez ouvert l’appli depuis cette page."
+    },
     "remixes": "{count, plural, one {# remix} other {# remix}}",
     "notPublished": "Non publiée",
     "previewAndChange": "Prévisualiser et modifier",

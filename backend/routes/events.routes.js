@@ -3,6 +3,7 @@
 //   GET  /api/events/first-build-survey?projectId=...   -> { eligible: boolean }
 //   POST /api/events/first-build-survey { choice }       -> { success: true, recorded: boolean }
 //   POST /api/events/promo { action, surface, lang }     -> { success: true }   (app promotion of the chat channels, see below)
+//   POST /api/events/push-open { kind }                  -> { success: true }   (an app notification was tapped)
 //
 // Identity is the verified access token only. The answer is one of a fixed list of choices (lib/appEvents.js SURVEY_CHOICES),
 // stored as the usage event first_build_survey with props.choice. There is no free text. A person is asked once: eligibility
@@ -11,7 +12,7 @@ import express from 'express';
 import { supabase as defaultClient } from '../config/database.js';
 import { verifiedUserId } from '../lib/verifiedUser.js';
 import { appEvents as defaultEvents, sourceFromRequest } from '../lib/appEventsInstance.js';
-import { SURVEY_CHOICES, PROMO_SURFACES } from '../lib/appEvents.js';
+import { SURVEY_CHOICES, PROMO_SURFACES, PUSH_KINDS } from '../lib/appEvents.js';
 import { createWindowLimiter } from '../lib/rateWindow.js';
 
 // Chat-channel promotion events from the app: one of impression | tap | dismiss on one of the closed list of surfaces (banner,
@@ -64,6 +65,15 @@ export function createEventsRouter({ verifyUser = verifiedUserId, client = defau
         } catch {
             res.status(500).json({ error: 'Could not save that right now.' });
         }
+    });
+
+    router.post('/push-open', async (req, res) => {
+        const userId = await verifyUser(req).catch(() => null);
+        if (!userId) return res.status(401).json({ error: 'Sign in again.' });
+        const kind = req.body?.kind;
+        if (typeof kind !== 'string' || !PUSH_KINDS.includes(kind)) return res.status(400).json({ error: 'Unknown kind.' });
+        if (promoLimit.hit(`open:${userId}`)) events.emit('push_opened', { userId, props: { push_kind: kind, source: sourceFromRequest(req) } });
+        res.json({ success: true });
     });
 
     router.post('/promo', async (req, res) => {

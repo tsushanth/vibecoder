@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -14,6 +15,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.kreativekoala.vibecoder.MainActivity
@@ -25,6 +27,8 @@ import com.kreativekoala.vibecoder.ui.auth.AuthViewModel
 import com.kreativekoala.vibecoder.ui.auth.SignInScreen
 import com.kreativekoala.vibecoder.ui.browse.BrowseScreen
 import com.kreativekoala.vibecoder.ui.browse.ProjectPreviewScreen
+import com.kreativekoala.vibecoder.ui.create.PushViewModel
+import com.kreativekoala.vibecoder.util.PushOpen
 import com.kreativekoala.vibecoder.ui.landing.LandingScreen
 import com.kreativekoala.vibecoder.ui.main.MainScreen
 import com.kreativekoala.vibecoder.ui.onboarding.OnboardingScreen
@@ -32,6 +36,10 @@ import com.kreativekoala.vibecoder.ui.theme.DarkBackground
 
 private const val PREFS_NAME = "vibebuild_prefs"
 private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
+
+private val beforeTheApp = setOf(
+    Screen.Landing.route, Screen.SignIn.route, Screen.Onboarding.route, Screen.Paywall.route, Screen.HardPaywall.route
+)
 
 @Composable
 fun VibeBuildNavGraph() {
@@ -57,6 +65,19 @@ fun VibeBuildNavGraph() {
             !isAuthenticated -> Screen.Landing.route
             !hasCompletedOnboarding -> Screen.Onboarding.route
             else -> Screen.Main.route
+        }
+    }
+
+    // A tapped notification opens the app it is about, once the person is signed in and past the first-run screens.
+    val pushViewModel: PushViewModel = hiltViewModel()
+    val pushTap by PushOpen.pending.collectAsState()
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    LaunchedEffect(pushTap, currentRoute, isAuthenticated) {
+        if (pushTap == null || !isAuthenticated || currentRoute == null || currentRoute in beforeTheApp) return@LaunchedEffect
+        val tap = PushOpen.take() ?: return@LaunchedEffect
+        pushViewModel.onOpened(tap.kind)
+        tap.projectId?.let { id ->
+            navController.navigate(Screen.ProjectDetail.createRoute(id)) { launchSingleTop = true }
         }
     }
 

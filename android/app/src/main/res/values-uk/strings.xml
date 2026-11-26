@@ -477,4 +477,7 @@
     <string name="telegram_continue">Продовжити в Telegram</string>
     <string name="telegram_settings_title">Бот у Telegram</string>
     <string name="telegram_settings_subtitle">Створюйте й отримуйте застосунки в чаті з @Vibebuilder_bot</string>
+    <string name="visits_card_week">Відвідування за 7 днів: %1$d</string>
+    <string name="visits_summary">Відвідування: сьогодні %1$d, за 7 днів %2$d, усього %3$d</string>
+    <string name="visits_hint">Підрахунок з %1$s. Боти не враховуються, як і ваші власні відвідування, коли ви відкриваєте застосунок звідси.</string>
 </resources>

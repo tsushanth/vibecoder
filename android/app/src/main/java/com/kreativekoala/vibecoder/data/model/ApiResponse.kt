@@ -216,8 +216,12 @@ data class RevertResponse(
 data class PushTokenRequest(
     @SerializedName("userId") val userId: String,
     @SerializedName("token") val token: String,
-    @SerializedName("platform") val platform: String = "android"
+    @SerializedName("platform") val platform: String = "android",
+    /** Whether this phone will actually show a notice (Android 13+ needs the permission). Counted, nothing else. */
+    @SerializedName("notificationsEnabled") val notificationsEnabled: Boolean? = null
 )
+
+data class PushOpenRequest(@SerializedName("kind") val kind: String)
 
 data class SystemStatusResponse(
     val operational: Boolean,

@@ -35,6 +35,11 @@
     "byCreator": "만든 사람: {name}",
     "createdAt": "{time} 생성",
     "views": "{count, plural, other {조회 #회}}",
+    "visits": {
+      "row": "7일간 방문 {week}회",
+      "summary": "방문: 오늘 {today}, 최근 7일 {week}, 전체 {total}",
+      "hint": "{date}부터 집계합니다. 봇과, 여기에서 앱을 연 브라우저에서의 본인 방문은 제외됩니다."
+    },
     "remixes": "{count, plural, other {리믹스 #개}}",
     "notPublished": "게시 안 됨",
     "previewAndChange": "미리 보고 수정",

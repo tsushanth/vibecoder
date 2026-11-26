@@ -477,4 +477,7 @@
     <string name="telegram_continue">Fortsätt i Telegram</string>
     <string name="telegram_settings_title">Telegram-bot</string>
     <string name="telegram_settings_subtitle">Bygg och få dina appar genom att chatta med @Vibebuilder_bot</string>
+    <string name="visits_card_week">Besök på 7 dagar: %1$d</string>
+    <string name="visits_summary">Besök: %1$d i dag, %2$d på 7 dagar, %3$d totalt</string>
+    <string name="visits_hint">Räknas från %1$s. Botar räknas inte, och inte heller dina egna besök när du öppnar appen härifrån.</string>
 </resources>

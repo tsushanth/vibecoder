@@ -524,4 +524,7 @@
     <string name="telegram_continue">在 Telegram 中繼續</string>
     <string name="telegram_settings_title">Telegram 機器人</string>
     <string name="telegram_settings_subtitle">與 @Vibebuilder_bot 聊天，製作並獲取你的應用</string>
+    <string name="visits_card_week">7 天內瀏覽次數：%1$d</string>
+    <string name="visits_summary">瀏覽次數：今天 %1$d，7 天內 %2$d，累計 %3$d</string>
+    <string name="visits_hint">自 %1$s 起統計。不包括機械人瀏覽，亦不包括你在此開啟自己應用程式的瀏覽。</string>
 </resources>

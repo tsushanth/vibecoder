@@ -32,6 +32,12 @@ export const EVENTS = Object.freeze([
     'promo_impression',
     'promo_tap',
     'promo_dismiss',
+    // Return and reach. app_open: a signed-in person's first request of a UTC day (lib/activity.js). push_token_registered:
+    // an app uploaded its device token. push_result: what happened to one notice (services/pushService.js). push_opened: a notice was tapped.
+    'app_open',
+    'push_token_registered',
+    'push_result',
+    'push_opened',
 ]);
 const EVENT_SET = new Set(EVENTS);
 
@@ -52,6 +58,9 @@ export const ERROR_CODES = Object.freeze([
     'DISPATCH_ERROR', 'WORKER_ERROR', 'NO_RESULT', 'PLAN_LLM', 'TIMEOUT_STUCK', 'RETRY_EXHAUSTED', 'UNKNOWN',
     'TIMEOUT', 'WORKER_HTTP', 'SAVE_FAILED',
 ]);
+
+export const PUSH_KINDS = Object.freeze(['build_ready', 'build_failed', 'other']);
+export const PUSH_OUTCOMES = Object.freeze(['sent', 'failed', 'unregistered', 'not_configured', 'no_token']);
 
 const oneOf = (list) => { const s = new Set(list); return (v) => (typeof v === 'string' && s.has(v) ? v : undefined); };
 const intIn = (lo, hi) => (v) => {
@@ -75,6 +84,10 @@ const PROP_VALIDATORS = Object.freeze({
     cap: oneOf(CAPS),
     choice: oneOf(SURVEY_CHOICES),
     surface: oneOf(PROMO_SURFACES),
+    push_kind: oneOf(PUSH_KINDS),
+    push_outcome: oneOf(PUSH_OUTCOMES),
+    notifications_enabled: bool,
+    app_version: (v) => (typeof v === 'string' && /^\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(v) ? v : undefined),
     lang: (v) => (typeof v === 'string' && /^(?:[a-z]{2}|zh-(?:TW|HK))$/.test(v) ? v : undefined), // the UI language the person saw, two letters
 });
 export const PROP_KEYS = Object.freeze(Object.keys(PROP_VALIDATORS));

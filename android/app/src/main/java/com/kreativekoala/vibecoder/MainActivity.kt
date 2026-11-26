@@ -31,6 +31,7 @@ import com.kreativekoala.vibecoder.navigation.VibeBuildNavGraph
 import com.kreativekoala.vibecoder.ui.paywall.GenerationLimit
 import com.kreativekoala.vibecoder.ui.paywall.PaywallHost
 import com.kreativekoala.vibecoder.util.Monetization
+import com.kreativekoala.vibecoder.util.PushOpen
 import com.kreativekoala.vibecoder.data.repository.AuthRepository
 import com.kreativekoala.vibecoder.data.repository.ProjectRepository
 import javax.inject.Inject
@@ -104,11 +105,26 @@ class MainActivity : AppCompatActivity() {
 
         RatingKit.trackAppOpen(this)
 
+        // Only on a real start: a recreated activity still carries the notification's intent.
+        if (savedInstanceState == null) noteNotificationTap(intent)
+
         setContent {
             VibeBuildTheme {
                 AppContentWithPaywallGate()
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        noteNotificationTap(intent)
+    }
+
+    private fun noteNotificationTap(intent: Intent?) {
+        // Reopened from the recent-apps list: the old notification's extras are still on the intent.
+        if (intent != null && intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0) return
+        PushOpen.offer(PushOpen.parse(intent?.getStringExtra(PushOpen.EXTRA_PROJECT_ID), intent?.getStringExtra(PushOpen.EXTRA_KIND)))
     }
 
     @Composable

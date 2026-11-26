@@ -4,6 +4,9 @@ import { useRef, useCallback, useEffect, useState, useSyncExternalStore, type Re
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/stores/authStore';
+import { useCreatorVisits } from '@/lib/useCreatorVisits';
+import { ownerHref } from '@/lib/visits';
+import { OwnerAppLink } from '@/components/project/OwnerAppLink';
 import { useGenerationStore } from '@/stores/generationStore';
 import { useProjectStore } from '@/stores/projectStore';
 import { PromptInput } from '@/components/builder/PromptInput';
@@ -107,6 +110,7 @@ export default function NewProjectPage() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [showPublish, setShowPublish] = useState(false);
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
+  const visits = useCreatorVisits(publishedUrl ? user?.id : null, publishedUrl ?? '');
 
   // A prompt typed on the landing page before sign-up: the person already pressed "Build it" there, so the build starts as soon as
   // they arrive (no second Build press, no plan step). The prompt shows in the thread with a Cancel button, and Cancel puts the
@@ -623,9 +627,9 @@ export default function NewProjectPage() {
                   {publishedUrl && (
                     <p className="mt-2 text-sm">
                       <span className="text-success">{t('create.ready.published')}</span>{' '}
-                      <a href={publishedUrl} target="_blank" rel="noopener noreferrer" className="break-all text-accent-hover underline-offset-2 hover:underline">
+                      <OwnerAppLink url={publishedUrl} openUrl={ownerHref(publishedUrl, savedProjectId ? visits.apps[savedProjectId] : undefined)} className="break-all text-accent-hover underline-offset-2 hover:underline">
                         {publishedUrl.replace(/^https?:\/\//, '')}
-                      </a>
+                      </OwnerAppLink>
                     </p>
                   )}
 

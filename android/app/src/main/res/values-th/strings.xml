@@ -524,4 +524,7 @@
     <string name="telegram_continue">ทำต่อบน Telegram</string>
     <string name="telegram_settings_title">บอท Telegram</string>
     <string name="telegram_settings_subtitle">สร้างและรับแอปของคุณด้วยการแชตกับ @Vibebuilder_bot</string>
+    <string name="visits_card_week">การเข้าชมใน 7 วัน: %1$d</string>
+    <string name="visits_summary">การเข้าชม: วันนี้ %1$d, ใน 7 วัน %2$d, ทั้งหมด %3$d</string>
+    <string name="visits_hint">นับตั้งแต่ %1$s ไม่นับบอต และไม่นับการเข้าชมของคุณเองเมื่อเปิดแอปจากที่นี่</string>
 </resources>

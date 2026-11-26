@@ -8,6 +8,9 @@ import { isValidSubdomain } from '@/lib/utils';
 import { deployBody, deployOutcome, describeDestructive, isConfirmationTyped, confirmPhrases, planDestructive, type DeployOutcome, type DestructiveItem, type Tone } from '@/lib/schemaDeploy';
 import type { DeployResponse, DeploymentInfoResponse, DomainStatusResponse, AddDomainResponse, VerifyDomainResponse } from '@/types/api';
 import { effectiveTier } from '@/lib/pricing';
+import { useCreatorVisits } from '@/lib/useCreatorVisits';
+import { ownerHref } from '@/lib/visits';
+import { OwnerAppLink } from '@/components/project/OwnerAppLink';
 
 interface Props {
   projectId: string;
@@ -35,6 +38,7 @@ export function PublishDialog({ projectId, userId, subscriptionTier, suggestedSu
   const [isUndeploying, setIsUndeploying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const visits = useCreatorVisits(liveUrl ? userId : null, liveUrl ?? '');
 
   // Whether the app is shown on the public Explore page. Off by default; changing it saves straight away.
   const [listed, setListed] = useState(isListed);
@@ -319,12 +323,12 @@ export function PublishDialog({ projectId, userId, subscriptionTier, suggestedSu
                 {ta('published')}
                 {deployedAt && <span className="text-sm text-muted">{ta('publishedOn', { date: new Date(deployedAt).toLocaleDateString() })}</span>}
               </p>
-              <a href={liveUrl} target="_blank" rel="noopener noreferrer" className="mt-1 block truncate text-accent-hover hover:underline">
+              <OwnerAppLink url={liveUrl} openUrl={ownerHref(liveUrl, visits.apps[projectId])} className="mt-1 block truncate text-accent-hover hover:underline">
                 {liveUrl.replace(/^https?:\/\//, '')}
-              </a>
+              </OwnerAppLink>
 
               <div className="mt-4 flex gap-2">
-                <button onClick={() => window.open(liveUrl, '_blank', 'noopener')} className={quietBtn}>{ta('open')}</button>
+                <button onClick={() => window.open(ownerHref(liveUrl, visits.apps[projectId]), '_blank', 'noopener')} className={quietBtn}>{ta('open')}</button>
                 <button onClick={handleCopy} className={quietBtn}>{copied ? ta('copied') : ta('copy')}</button>
                 <button
                   onClick={() => {

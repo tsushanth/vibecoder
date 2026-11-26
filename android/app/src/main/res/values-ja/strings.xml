@@ -524,4 +524,7 @@
     <string name="telegram_continue">Telegramで続ける</string>
     <string name="telegram_settings_title">Telegramボット</string>
     <string name="telegram_settings_subtitle">@Vibebuilder_bot とチャットしてアプリを作成・受け取り</string>
+    <string name="visits_card_week">7日間の訪問数: %1$d</string>
+    <string name="visits_summary">訪問数: 今日 %1$d、7日間 %2$d、合計 %3$d</string>
+    <string name="visits_hint">%1$sから集計しています。ボットと、ここから自分のアプリを開いた訪問は含まれません。</string>
 </resources>

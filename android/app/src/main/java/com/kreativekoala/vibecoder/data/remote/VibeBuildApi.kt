@@ -182,6 +182,14 @@ interface VibeBuildApi {
     @POST("api/auth/push-token")
     suspend fun registerPushToken(@Body body: PushTokenRequest): SuccessResponse
 
+    /** A notification was tapped (a count only). */
+    @POST("api/events/push-open")
+    suspend fun pushOpened(@Body body: PushOpenRequest): SuccessResponse
+
+    /** Visit counts for the signed-in creator's published apps. */
+    @GET("api/visits")
+    suspend fun getVisits(): VisitsResponse
+
     /** Usage count for the Telegram promotion (impression / tap / dismiss on one surface). Fire and forget, see PromoEvents. */
     @POST("api/events/promo")
     suspend fun promoEvent(@Body body: PromoEventRequest): SuccessResponse

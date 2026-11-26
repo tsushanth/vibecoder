@@ -8,6 +8,8 @@ import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { thumbSrc } from '@/lib/thumbProxy';
 import { canRemix } from '@/lib/remix';
+import { ownerHref, type AppVisits } from '@/lib/visits';
+import { OwnerAppLink } from './OwnerAppLink';
 
 // List pieces shared by Apps (/dashboard) and Explore (/community, /browse): a small phone-shaped preview, a row per app,
 // and the Explore list with search, categories and sort as on Android.
@@ -106,7 +108,7 @@ export function appStatus(p: OwnedProject): AppStatus {
   return 'ready';
 }
 
-export function StatusLine({ project }: { project: OwnedProject }) {
+export function StatusLine({ project, visits }: { project: OwnedProject; visits?: AppVisits }) {
   const t = useTranslations('apps');
   const s = appStatus(project);
   if (s === 'building') {
@@ -131,15 +133,10 @@ export function StatusLine({ project }: { project: OwnedProject }) {
       <p className="flex min-w-0 items-center gap-2 text-sm">
         <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
         <span className="shrink-0 text-success">{t('status.published')}</span>
-        <a
-          href={project.published_url!}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="truncate text-accent-hover hover:underline"
-        >
+        <OwnerAppLink url={project.published_url!} openUrl={ownerHref(project.published_url!, visits)} className="truncate text-accent-hover hover:underline">
           {shortAddress(project.published_url!)}
-        </a>
+        </OwnerAppLink>
+        {visits && <span className="shrink-0 text-muted">{t('visits.row', { week: visits.last7Days })}</span>}
       </p>
     );
   }
@@ -159,7 +156,9 @@ export function ProjectRow({
   onDelete,
   onRetry,
   retryError,
+  visits,
 }: {
+  visits?: AppVisits;
   project: OwnedProject;
   onOpen: () => void;
   onDelete: () => void;
@@ -183,7 +182,7 @@ export function ProjectRow({
         {project.description && <p className="truncate text-sm text-muted">{project.description}</p>}
         <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5">
           <div className="relative z-10 flex min-w-0 max-w-full items-center gap-3">
-            <StatusLine project={project} />
+            <StatusLine project={project} visits={visits} />
             {onRetry && canRetry(project) && (
               <button
                 type="button"

@@ -524,4 +524,7 @@
     <string name="telegram_continue">Telegram\'da devam et</string>
     <string name="telegram_settings_title">Telegram botu</string>
     <string name="telegram_settings_subtitle">@Vibebuilder_bot ile sohbet ederek uygulamalarını oluştur ve al</string>
+    <string name="visits_card_week">7 günde ziyaret: %1$d</string>
+    <string name="visits_summary">Ziyaretler: bugün %1$d, 7 günde %2$d, toplam %3$d</string>
+    <string name="visits_hint">%1$s tarihinden itibaren sayılır. Botlar ve uygulamanızı buradan açtığınızdaki kendi ziyaretleriniz sayılmaz.</string>
 </resources>

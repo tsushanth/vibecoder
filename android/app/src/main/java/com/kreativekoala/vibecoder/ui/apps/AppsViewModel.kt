@@ -5,6 +5,7 @@ import com.kreativekoala.vibecoder.util.appString
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kreativekoala.vibecoder.data.model.AppVisits
 import com.kreativekoala.vibecoder.data.model.Project
 import com.kreativekoala.vibecoder.data.repository.AuthRepository
 import com.kreativekoala.vibecoder.data.repository.ProjectRepository
@@ -23,7 +24,8 @@ data class AppsUiState(
     val projects: List<Project> = emptyList(),
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val visits: Map<String, AppVisits> = emptyMap()
 )
 
 @HiltViewModel
@@ -58,7 +60,8 @@ class AppsViewModel @Inject constructor(
                     NotificationHelper.showGenerationComplete(
                         appContext,
                         title = appContext.appString(R.string.notif_project_ready_title, newlyReady.first().title),
-                        body = appContext.appString(R.string.notif_project_ready_body)
+                        body = appContext.appString(R.string.notif_project_ready_body),
+                        projectId = newlyReady.first().id
                     )
                 }
 
@@ -69,6 +72,13 @@ class AppsViewModel @Inject constructor(
                         isRefreshing = false,
                         errorMessage = null
                     )
+                }
+
+                // Visit counts are extra: without them the list is simply shown as before.
+                if (projects.any { !it.publishedUrl.isNullOrBlank() }) {
+                    runCatching { projectRepository.getVisits().byProject() }.onSuccess { visits ->
+                        _uiState.update { it.copy(visits = visits) }
+                    }
                 }
             } catch (e: Exception) {
                 _uiState.update {
@@ -111,7 +121,8 @@ class AppsViewModel @Inject constructor(
                             NotificationHelper.showGenerationComplete(
                                 appContext,
                                 title = appContext.appString(R.string.notif_project_ready_title, project.title),
-                                body = appContext.appString(R.string.notif_project_ready_body)
+                                body = appContext.appString(R.string.notif_project_ready_body),
+                                projectId = projectId
                             )
                         }
                         return@launch
