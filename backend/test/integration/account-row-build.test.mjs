@@ -13,6 +13,7 @@ const { _setSink } = await import('../../lib/failureReporter.js');
 
 const users = new Map(); // user_id -> row
 let events = [], reports = [], userWrites = 0, failUserInsert = false;
+let sourceCreator = 'someone-else';
 stubSupabase(supabase, (q) => {
     if (q.table === 'users') {
         if (q.op === 'upsert') {
@@ -33,7 +34,7 @@ stubSupabase(supabase, (q) => {
             if (!users.has(q.payload.creator_id)) return { data: null, error: { code: '23503', message: 'insert or update on table "projects" violates foreign key constraint "projects_creator_id_fkey"' } };
             return { data: { id: q.payload.id }, error: null };
         }
-        if (q.op === 'select' && q.single) return { data: { id: eqOf(q, 'id'), title: 'Source', bundle: 'UEs=', creator_id: 'someone-else', fork_count: 0 }, error: null };
+        if (q.op === 'select' && q.single) return { data: { id: eqOf(q, 'id'), title: 'Source', bundle: 'UEs=', creator_id: sourceCreator, fork_count: 0 }, error: null };
         return { data: [], error: null };
     }
     if (q.table === 'app_events' && q.op === 'insert') { events.push(q.payload); return { data: null, error: null }; }
@@ -66,7 +67,7 @@ before(async () => {
     await new Promise((r) => setTimeout(r, 100));
 });
 after(async () => { _setSink(null); globalThis.fetch = realFetch; await srv.close(); });
-beforeEach(() => { users.clear(); events = []; reports = []; userWrites = 0; failUserInsert = false; });
+beforeEach(() => { users.clear(); events = []; reports = []; userWrites = 0; failUserInsert = false; sourceCreator = 'someone-else'; });
 
 const quiet = async (fn) => { const o = [console.log, console.warn, console.error]; console.log = console.warn = console.error = () => {}; try { return await fn(); } finally { [console.log, console.warn, console.error] = o; } };
 const post = (path, body, headers = {}) => quiet(async () => {
@@ -132,6 +133,16 @@ test('refused fork is reported the same way', async () => {
     assert.equal(r.status, 500);
     assert.equal(reports.length, 1);
     assert.match(reports[0].message, /fork no_account_row/);
+});
+
+test('remixing your own app is refused under its own reason, not "invalid request"', async () => {
+    const u = uid();
+    sourceCreator = u;
+    const r = await post('/api/projects/11111111-2222-3333-4444-555555555555/fork', { userId: u }, bearer(u));
+    assert.equal(r.status, 400);
+    assert.match(r.text, /Cannot fork your own project/);
+    assert.equal(named('build_refused')[0].props.reason, 'own_project');
+    assert.match(reports[0].message, /fork own_project/);
 });
 
 test('a refusal for the prompt is counted with its reason', async () => {
