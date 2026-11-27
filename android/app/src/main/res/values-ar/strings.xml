@@ -96,6 +96,7 @@
     <string name="create_title">ماذا تريد أن تصنع؟</string>
     <string name="create_subtitle">صِف فكرة تطبيقك والذكاء الاصطناعي سيبنيه</string>
     <string name="create_prompt_placeholder">مثال: أنشئ تطبيق طقس يعرض التوقعات لمدينتي…</string>
+    <string name="create_prompt_limit">يمكن أن يصل الوصف إلى %1$d حرفًا. لم تتم إضافة ما زاد على ذلك.</string>
     <string name="create_cd_attach_image">إرفاق صورة</string>
     <string name="create_cd_voice_input">إدخال صوتي</string>
     <string name="create_cd_remove_image">إزالة الصورة</string>

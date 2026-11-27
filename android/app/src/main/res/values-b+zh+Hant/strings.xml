@@ -96,6 +96,7 @@
     <string name="create_title">你想做什麼？</string>
     <string name="create_subtitle">描述你的應用創意，AI會幫你構建</string>
     <string name="create_prompt_placeholder">例如：做一個顯示我所在城市天氣預報的天氣應用…</string>
+    <string name="create_prompt_limit">描述最多 %1$d 個字元。超出的部分未加入。</string>
     <string name="create_cd_attach_image">新增圖片</string>
     <string name="create_cd_voice_input">語音輸入</string>
     <string name="create_cd_remove_image">移除圖片</string>

@@ -96,6 +96,8 @@
     <string name="create_title">What do you want to build?</string>
     <string name="create_subtitle">Describe your app idea and AI will build it</string>
     <string name="create_prompt_placeholder">e.g., Build a weather app that shows the forecast for my city…</string>
+    <string name="create_prompt_counter" translatable="false">%1$d / %2$d</string>
+    <string name="create_prompt_limit">The description can be up to %1$d characters. Anything longer was not added.</string>
     <string name="create_cd_attach_image">Attach image</string>
     <string name="create_cd_voice_input">Voice input</string>
     <string name="create_cd_remove_image">Remove image</string>

@@ -96,6 +96,7 @@
     <string name="create_title">คุณต้องการสร้างอะไร?</string>
     <string name="create_subtitle">อธิบายไอเดียแอปของคุณแล้ว AI จะสร้างให้</string>
     <string name="create_prompt_placeholder">เช่น สร้างแอปพยากรณ์อากาศที่แสดงพยากรณ์สำหรับเมืองของฉัน…</string>
+    <string name="create_prompt_limit">คำอธิบายยาวได้ไม่เกิน %1$d อักขระ ส่วนที่เกินไม่ได้ถูกเพิ่ม</string>
     <string name="create_cd_attach_image">แนบรูปภาพ</string>
     <string name="create_cd_voice_input">อินพุตเสียง</string>
     <string name="create_cd_remove_image">ลบรูปภาพ</string>

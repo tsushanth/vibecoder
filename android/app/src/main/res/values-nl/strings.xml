@@ -96,6 +96,7 @@
     <string name="create_title">Wat wilt u maken?</string>
     <string name="create_subtitle">Beschrijf uw app-idee en AI bouwt het</string>
     <string name="create_prompt_placeholder">bijv., Bouw een weer-app die het weerbericht voor mijn stad toont…</string>
+    <string name="create_prompt_limit">De beschrijving mag maximaal %1$d tekens zijn. De rest is niet toegevoegd.</string>
     <string name="create_cd_attach_image">Afbeelding bijvoegen</string>
     <string name="create_cd_voice_input">Spraakinvoer</string>
     <string name="create_cd_remove_image">Afbeelding verwijderen</string>

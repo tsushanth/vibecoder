@@ -85,6 +85,7 @@
     <string name="create_title">Mitä haluat rakentaa?</string>
     <string name="create_subtitle">Kuvaile sovellusideasi, niin tekoäly rakentaa sen</string>
     <string name="create_prompt_placeholder">esim. Tee sääsovellus, joka näyttää kotikaupunkini ennusteen…</string>
+    <string name="create_prompt_limit">Kuvaus voi olla enintään %1$d merkkiä. Ylimenevää osaa ei lisätty.</string>
     <string name="create_cd_attach_image">Liitä kuva</string>
     <string name="create_cd_voice_input">Äänisyöte</string>
     <string name="create_cd_remove_image">Poista kuva</string>

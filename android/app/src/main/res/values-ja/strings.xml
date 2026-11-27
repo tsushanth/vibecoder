@@ -96,6 +96,7 @@
     <string name="create_title">何を作りたいですか？</string>
     <string name="create_subtitle">アプリのアイデアを説明すると、AIが作ります</string>
     <string name="create_prompt_placeholder">例：自分の街の天気予報を表示する天気アプリを作って…</string>
+    <string name="create_prompt_limit">説明は%1$d文字までです。超えた分は追加されませんでした。</string>
     <string name="create_cd_attach_image">画像を添付</string>
     <string name="create_cd_voice_input">音声入力</string>
     <string name="create_cd_remove_image">画像を削除</string>

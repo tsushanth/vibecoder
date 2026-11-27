@@ -96,6 +96,7 @@
     <string name="create_title">Bạn muốn tạo gì?</string>
     <string name="create_subtitle">Mô tả ý tưởng ứng dụng và AI sẽ xây dựng nó</string>
     <string name="create_prompt_placeholder">VD: Tạo ứng dụng thời tiết hiển thị dự báo cho thành phố của tôi…</string>
+    <string name="create_prompt_limit">Mô tả dài tối đa %1$d ký tự. Phần vượt quá không được thêm vào.</string>
     <string name="create_cd_attach_image">Đính kèm hình ảnh</string>
     <string name="create_cd_voice_input">Nhập bằng giọng nói</string>
     <string name="create_cd_remove_image">Xóa hình ảnh</string>

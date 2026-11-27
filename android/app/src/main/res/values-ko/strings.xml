@@ -96,6 +96,7 @@
     <string name="create_title">무엇을 만들고 싶으세요?</string>
     <string name="create_subtitle">앱 아이디어를 설명하면 AI가 만들어 드립니다</string>
     <string name="create_prompt_placeholder">예: 내 도시의 날씨 예보를 보여주는 날씨 앱을 만들어줘…</string>
+    <string name="create_prompt_limit">설명은 최대 %1$d자까지 입력할 수 있어요. 넘는 부분은 추가되지 않았어요.</string>
     <string name="create_cd_attach_image">이미지 첨부</string>
     <string name="create_cd_voice_input">음성 입력</string>
     <string name="create_cd_remove_image">이미지 제거</string>

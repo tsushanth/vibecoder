@@ -96,6 +96,7 @@
     <string name="create_title">Что вы хотите создать?</string>
     <string name="create_subtitle">Опишите идею приложения, и ИИ его создаст</string>
     <string name="create_prompt_placeholder">Например: Создай приложение погоды, показывающее прогноз для моего города…</string>
+    <string name="create_prompt_limit">Описание может содержать до %1$d символов. Лишнее не было добавлено.</string>
     <string name="create_cd_attach_image">Прикрепить изображение</string>
     <string name="create_cd_voice_input">Голосовой ввод</string>
     <string name="create_cd_remove_image">Удалить изображение</string>

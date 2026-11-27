@@ -96,6 +96,7 @@
     <string name="create_title">Co chcesz stworzyć?</string>
     <string name="create_subtitle">Opisz swój pomysł na aplikację, a AI ją zbuduje</string>
     <string name="create_prompt_placeholder">np., Zbuduj aplikację pogodową z prognozą dla mojego miasta…</string>
+    <string name="create_prompt_limit">Opis może mieć maksymalnie %1$d znaków. Nadmiar nie został dodany.</string>
     <string name="create_cd_attach_image">Dołącz obraz</string>
     <string name="create_cd_voice_input">Wprowadzanie głosowe</string>
     <string name="create_cd_remove_image">Usuń obraz</string>

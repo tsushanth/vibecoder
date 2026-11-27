@@ -85,6 +85,7 @@
     <string name="create_title">Mit szeretnél építeni?</string>
     <string name="create_subtitle">Írd le az appötleted, és az AI megépíti</string>
     <string name="create_prompt_placeholder">pl. Készíts egy időjárás-appot, amely a városom előrejelzését mutatja…</string>
+    <string name="create_prompt_limit">A leírás legfeljebb %1$d karakter lehet. Az ezen felüli rész nem került be.</string>
     <string name="create_cd_attach_image">Kép csatolása</string>
     <string name="create_cd_voice_input">Hangbevitel</string>
     <string name="create_cd_remove_image">Kép eltávolítása</string>
