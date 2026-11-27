@@ -96,6 +96,7 @@
     <string name="create_title">Apa yang ingin Anda buat?</string>
     <string name="create_subtitle">Jelaskan ide aplikasi Anda dan AI akan membuatnya</string>
     <string name="create_prompt_placeholder">Contoh: Buat aplikasi cuaca yang menampilkan prakiraan untuk kota saya…</string>
+    <string name="create_prompt_limit">Deskripsi maksimal %1$d karakter. Selebihnya tidak ditambahkan.</string>
     <string name="create_cd_attach_image">Lampirkan gambar</string>
     <string name="create_cd_voice_input">Input suara</string>
     <string name="create_cd_remove_image">Hapus gambar</string>

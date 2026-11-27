@@ -85,6 +85,7 @@
     <string name="create_title">Що ви хочете створити?</string>
     <string name="create_subtitle">Опишіть свою ідею застосунку, і ШІ його створить</string>
     <string name="create_prompt_placeholder">напр., Створи застосунок погоди, що показує прогноз для мого міста…</string>
+    <string name="create_prompt_limit">Опис може містити до %1$d символів. Зайве не було додано.</string>
     <string name="create_cd_attach_image">Додати зображення</string>
     <string name="create_cd_voice_input">Голосовий ввід</string>
     <string name="create_cd_remove_image">Видалити зображення</string>

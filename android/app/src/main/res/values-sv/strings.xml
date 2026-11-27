@@ -85,6 +85,7 @@
     <string name="create_title">Vad vill du bygga?</string>
     <string name="create_subtitle">Beskriv din appidé så bygger AI den</string>
     <string name="create_prompt_placeholder">t.ex. Bygg en väderapp som visar prognosen för min stad…</string>
+    <string name="create_prompt_limit">Beskrivningen får vara högst %1$d tecken. Det som inte fick plats lades inte till.</string>
     <string name="create_cd_attach_image">Bifoga bild</string>
     <string name="create_cd_voice_input">Röstinmatning</string>
     <string name="create_cd_remove_image">Ta bort bild</string>

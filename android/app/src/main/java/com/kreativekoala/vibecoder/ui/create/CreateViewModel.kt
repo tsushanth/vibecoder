@@ -61,6 +61,8 @@ data class CreateUiState(
     val savedProjectId: String? = null,
     val suggestions: List<Suggestion> = emptyList(),
     val prompt: String = "",
+    /** The last edit did not fit the box ([PromptLimit]): say so. */
+    val promptCut: Boolean = false,
     val referenceImageBase64: String? = null,
     val isDeploying: Boolean = false,
     val deployedUrl: String? = null,
@@ -114,7 +116,7 @@ class CreateViewModel @Inject constructor(
      *  tweak before tapping Generate. We deliberately don't auto-start
      *  generation — the template is an idea seed, not a one-tap action. */
     fun selectTemplate(template: com.kreativekoala.vibecoder.data.model.Template) {
-        _uiState.update { it.copy(prompt = template.description) }
+        updatePrompt(template.description)
     }
 
     private var generationJob: Job? = null
@@ -364,7 +366,12 @@ class CreateViewModel @Inject constructor(
     }
 
     fun updatePrompt(prompt: String) {
-        _uiState.update { it.copy(prompt = prompt) }
+        _uiState.update {
+            val limited = PromptLimit.apply(it.prompt, prompt)
+            // The note stays while the box is full, and goes once there is room again.
+            val cut = limited.cut || (it.promptCut && limited.text.length >= PromptLimit.MAX_CHARS)
+            it.copy(prompt = limited.text, promptCut = cut)
+        }
     }
 
     fun setReferenceImage(base64: String?) {
@@ -414,6 +421,12 @@ class CreateViewModel @Inject constructor(
         val currentState = _uiState.value
         val prompt = currentState.prompt.trim()
         if (prompt.isEmpty()) return
+
+        // The box cannot hold more than the server takes; text that got in another way is not sent to be refused.
+        if (prompt.length > PromptLimit.MAX_CHARS) {
+            _uiState.update { it.copy(errorMessage = appContext.appString(R.string.create_prompt_limit, PromptLimit.MAX_CHARS)) }
+            return
+        }
 
         // Validate prompt for malicious content
         val validationError = validatePrompt(prompt)

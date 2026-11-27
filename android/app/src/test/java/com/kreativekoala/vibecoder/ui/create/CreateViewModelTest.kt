@@ -169,6 +169,23 @@ class CreateViewModelTest {
         coVerify { userPrefs.clearPendingGeneration() }
     }
 
+    @Test fun the_description_box_holds_no_more_than_the_server_takes() = runTest {
+        generateEmits(SseEvent.Queued("p1"), thenHang = true)
+        val vm = vm(); advanceUntilIdle()
+        vm.updatePrompt("a".repeat(PromptLimit.MAX_CHARS + 500))
+        assertEquals(PromptLimit.MAX_CHARS, vm.uiState.value.prompt.length)
+        assertTrue(vm.uiState.value.promptCut)
+        vm.updatePrompt(vm.uiState.value.prompt + "b") // still full: the note stays
+        assertTrue(vm.uiState.value.promptCut)
+        vm.updatePrompt("a".repeat(100))
+        assertFalse(vm.uiState.value.promptCut)
+        vm.updatePrompt("a".repeat(5000))
+        vm.startGeneration(); advanceTimeBy(15_000)
+        assertEquals(PromptLimit.MAX_CHARS, vm.uiState.value.chatPrompt.length)
+        verify { projects.generate(match { it.length == PromptLimit.MAX_CHARS }, any(), any(), any()) }
+        vm.cancelGeneration()
+    }
+
     @Test fun confirmPlan_ignored_unless_planReady() = runTest {
         val vm = vm(); advanceUntilIdle()
         vm.confirmPlan()

@@ -96,6 +96,7 @@
     <string name="create_title">Ano ang gusto mong gawin?</string>
     <string name="create_subtitle">Ilarawan ang iyong app idea at gagawin ito ng AI</string>
     <string name="create_prompt_placeholder">hal., Gumawa ng weather app na nagpapakita ng forecast para sa aking lungsod…</string>
+    <string name="create_prompt_limit">Hanggang %1$d character ang paglalarawan. Hindi naidagdag ang sobra.</string>
     <string name="create_cd_attach_image">Mag-attach ng larawan</string>
     <string name="create_cd_voice_input">Voice input</string>
     <string name="create_cd_remove_image">Alisin ang larawan</string>

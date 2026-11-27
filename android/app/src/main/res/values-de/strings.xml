@@ -96,6 +96,7 @@
     <string name="create_title">Was möchtest du erstellen?</string>
     <string name="create_subtitle">Beschreibe deine App-Idee und die KI baut sie</string>
     <string name="create_prompt_placeholder">Z.B., Erstelle eine Wetter-App, die die Vorhersage für meine Stadt anzeigt…</string>
+    <string name="create_prompt_limit">Die Beschreibung kann höchstens %1$d Zeichen lang sein. Alles darüber wurde nicht übernommen.</string>
     <string name="create_cd_attach_image">Bild anhängen</string>
     <string name="create_cd_voice_input">Spracheingabe</string>
     <string name="create_cd_remove_image">Bild entfernen</string>

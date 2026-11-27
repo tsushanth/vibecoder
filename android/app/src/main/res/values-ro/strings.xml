@@ -85,6 +85,7 @@
     <string name="create_title">Ce vrei să construiești?</string>
     <string name="create_subtitle">Descrie ideea aplicației tale și AI-ul o va construi</string>
     <string name="create_prompt_placeholder">ex.: Construiește o aplicație meteo care arată prognoza pentru orașul meu…</string>
+    <string name="create_prompt_limit">Descrierea poate avea cel mult %1$d de caractere. Ce depășea nu a fost adăugat.</string>
     <string name="create_cd_attach_image">Atașează imagine</string>
     <string name="create_cd_voice_input">Intrare vocală</string>
     <string name="create_cd_remove_image">Elimină imaginea</string>

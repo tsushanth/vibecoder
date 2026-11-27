@@ -96,6 +96,7 @@
     <string name="create_title">आप क्या बनाना चाहते हैं?</string>
     <string name="create_subtitle">अपने ऐप का आइडिया बताएँ और AI उसे बनाएगा</string>
     <string name="create_prompt_placeholder">उदा., एक मौसम ऐप बनाओ जो मेरे शहर का पूर्वानुमान दिखाए…</string>
+    <string name="create_prompt_limit">विवरण अधिकतम %1$d अक्षरों का हो सकता है। इससे ज़्यादा हिस्सा नहीं जोड़ा गया।</string>
     <string name="create_cd_attach_image">इमेज जोड़ें</string>
     <string name="create_cd_voice_input">वॉइस इनपुट</string>
     <string name="create_cd_remove_image">इमेज हटाएँ</string>

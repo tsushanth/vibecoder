@@ -96,6 +96,7 @@
     <string name="create_title">Ne yapmak istiyorsunuz?</string>
     <string name="create_subtitle">Uygulama fikrinizi tanımlayın, yapay zeka oluştursun</string>
     <string name="create_prompt_placeholder">Örn: Şehrim için hava durumu gösteren bir uygulama yap…</string>
+    <string name="create_prompt_limit">Açıklama en fazla %1$d karakter olabilir. Fazlası eklenmedi.</string>
     <string name="create_cd_attach_image">Resim ekle</string>
     <string name="create_cd_voice_input">Sesli giriş</string>
     <string name="create_cd_remove_image">Resmi kaldır</string>

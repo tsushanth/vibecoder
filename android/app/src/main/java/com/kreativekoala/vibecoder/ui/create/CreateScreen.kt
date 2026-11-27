@@ -28,6 +28,9 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
@@ -310,6 +313,8 @@ fun CreateScreen(
                         )
                     )
 
+                    PromptCounter(uiState.prompt.length, uiState.promptCut)
+
                     // Reference image preview
                     if (uiState.referenceImageBase64 != null) {
                         Box(
@@ -415,3 +420,25 @@ fun CreateScreen(
         }
     }
 }
+
+/** How much of the description limit is used, and a plain note when something did not fit. */
+@Composable
+private fun PromptCounter(length: Int, cut: Boolean) {
+    val full = length >= PromptLimit.MAX_CHARS
+    Column(modifier = Modifier.fillMaxWidth().padding(end = 8.dp), horizontalAlignment = Alignment.End) {
+        Text(
+            text = stringResource(R.string.create_prompt_counter, length, PromptLimit.MAX_CHARS),
+            style = MaterialTheme.typography.bodySmall,
+            color = if (full) MaterialTheme.colorScheme.error else TextTertiary
+        )
+        if (cut) {
+            Text(
+                text = stringResource(R.string.create_prompt_limit, PromptLimit.MAX_CHARS),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite }
+            )
+        }
+    }
+}
+

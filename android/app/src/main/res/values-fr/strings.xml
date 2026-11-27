@@ -96,6 +96,7 @@
     <string name="create_title">Que voulez-vous créer ?</string>
     <string name="create_subtitle">Décrivez votre idée d\'app et l\'IA la construira</string>
     <string name="create_prompt_placeholder">Ex., Crée une app météo qui affiche les prévisions de ma ville…</string>
+    <string name="create_prompt_limit">La description peut contenir jusqu\'à %1$d caractères. Le surplus n\'a pas été ajouté.</string>
     <string name="create_cd_attach_image">Joindre une image</string>
     <string name="create_cd_voice_input">Saisie vocale</string>
     <string name="create_cd_remove_image">Supprimer l\'image</string>

@@ -85,6 +85,7 @@
     <string name="create_title">Co chcete vytvořit?</string>
     <string name="create_subtitle">Popište nápad na aplikaci a AI ji vytvoří</string>
     <string name="create_prompt_placeholder">např. Vytvoř aplikaci s počasím, která ukazuje předpověď pro moje město…</string>
+    <string name="create_prompt_limit">Popis může mít nejvýše %1$d znaků. Co se nevešlo, nebylo přidáno.</string>
     <string name="create_cd_attach_image">Připojit obrázek</string>
     <string name="create_cd_voice_input">Hlasový vstup</string>
     <string name="create_cd_remove_image">Odebrat obrázek</string>

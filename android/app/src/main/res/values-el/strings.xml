@@ -85,6 +85,7 @@
     <string name="create_title">Τι θέλετε να φτιάξετε;</string>
     <string name="create_subtitle">Περιγράψτε την ιδέα της εφαρμογής σας και η τεχνητή νοημοσύνη θα τη δημιουργήσει</string>
     <string name="create_prompt_placeholder">π.χ. Φτιάξε μια εφαρμογή καιρού που δείχνει την πρόγνωση για την πόλη μου…</string>
+    <string name="create_prompt_limit">Η περιγραφή μπορεί να έχει έως %1$d χαρακτήρες. Ό,τι περίσσευε δεν προστέθηκε.</string>
     <string name="create_cd_attach_image">Επισύναψη εικόνας</string>
     <string name="create_cd_voice_input">Φωνητική εισαγωγή</string>
     <string name="create_cd_remove_image">Αφαίρεση εικόνας</string>
